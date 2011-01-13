@@ -1,0 +1,26 @@
+<project name="sqldump">
+	
+	<property name="bin.dir"  value="bin"/>
+	<property name="dist.dir" value="dist"/>
+
+	<target name="prepare">
+		<mkdir dir="${dist.dir}"/>
+	</target>
+
+	<target name="jar"
+		depends="prepare">
+		<jar destfile="${dist.dir}/sqldump.jar"
+			basedir="${bin.dir}"
+			includes="**/*.class, *.properties">
+			<manifest>
+				<attribute name="Main-Class" value="tbrugz.sqldump.SQLDataDump"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="dist"
+		depends="jar">
+    	<copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/>
+	</target>
+	
+</project>

@@ -1,0 +1,4 @@
+
+oracle table types: SYNONYM | TABLE | VIEW
+
+access table types: SYSTEM TABLE | TABLE

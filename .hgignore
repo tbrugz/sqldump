@@ -1,0 +1,4 @@
+glob:bin/*
+glob:dist/*
+glob:tmp/*
+glob:output/*
