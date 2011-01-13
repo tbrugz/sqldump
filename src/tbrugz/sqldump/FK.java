@@ -10,4 +10,10 @@ public class FK {
 
 	Set<String> pkColumns = new HashSet<String>();
 	Set<String> fkColumns = new HashSet<String>();
+	
+	@Override
+	public String toString() {
+		return name+"["+fkTable+"<-"+pkTable+"]";
+		//return "fk:"+name+"["+fkTable+"<-"+pkTable+"]";
+	}
 }

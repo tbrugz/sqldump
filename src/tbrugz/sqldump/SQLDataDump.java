@@ -6,6 +6,10 @@ import java.io.*;
 
 import org.apache.log4j.Logger;
 
+/*
+ * TODO: DDL: grab contents from procedures, triggers and views 
+ *
+ */
 public class SQLDataDump {
 	
 	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
@@ -31,7 +35,7 @@ public class SQLDataDump {
 	static Logger log = Logger.getLogger(SQLDataDump.class);
 	
 	Connection conn;
-	List<String> tables = new Vector<String>();
+	List<String> tableNames = new Vector<String>();
 
 	Properties papp = new Properties();
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
@@ -73,18 +77,38 @@ public class SQLDataDump {
 		log.debug("schema pattern: "+schemaPattern);
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, null, null);
+		Set<Table> tables = new HashSet<Table>();
+		Set<FK> foreignKeys = new HashSet<FK>();
+		
 		while(rs.next()) {
-			String table = rs.getString("TABLE_NAME");
+			TableType ttype = null;
+			String tableName = rs.getString("TABLE_NAME");
 			//if(! rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
+			tableNames.add(tableName);
 			if(rs.getString("TABLE_TYPE").equals("TABLE")) {
-				tables.add(table);
+				ttype = TableType.TABLE;
+			}
+			else if(rs.getString("TABLE_TYPE").equals("SYNONYM")) {
+				ttype = TableType.SYNONYM;
+			}
+			else if(rs.getString("TABLE_TYPE").equals("VIEW")) {
+				ttype = TableType.VIEW;
+			}
+			else if(rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
+				ttype = TableType.SYSTEM_TABLE;
 			}
 			else {
-				log.debug("not a real table: "+table+" is a "+rs.getString("TABLE_TYPE"));
+				log.debug("table "+tableName+" of unknown type: "+rs.getString("TABLE_TYPE"));
 			}
 			
+			//defining model
+			Table table = new Table();
+			//Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
+			table.name = tableName;
+			table.type = ttype;
+			
 			/*
-			 * TODO: PKs/FKs
+			 * TODOne: PKs/FKs
 			 * getPrimaryKeys(String catalog, String schema, String table)
 			 * Retrieves a description of the given table's primary key columns.
 			 * 
@@ -96,7 +120,7 @@ public class SQLDataDump {
 			 * getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable)
 	         * Retrieves a description of the foreign key columns in the given foreign key table that reference the primary key or the columns representing a unique constraint of the parent table (could be the same or a different table).
 	         * 
-	         * TODO: grants
+	         * TODOne: grants
 	         * getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
 	         * Retrieves a description of the access rights for each table available in a catalog.
 	         * 
@@ -106,20 +130,25 @@ public class SQLDataDump {
 	         * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php
 			 */
 			try {
-				log.debug("getting info from "+(schemaPattern==null?"":schemaPattern+".")+table);
+				log.debug("getting info from "+(schemaPattern==null?"":schemaPattern+".")+tableName);
 
-				ResultSet cols = dbmd.getColumns(null, schemaPattern, table, null);
 				StringBuffer sb = new StringBuffer();
-				sb.append("create table "+table+" (\n");
+				sb.append("create table "+tableName+" ( -- type="+ttype+"\n");
 	
 				//columns
+				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
 				while(cols.next()) {
-					sb.append("\t"+cols.getString("COLUMN_NAME")+" "+cols.getString("TYPE_NAME")+",\n");
+					Column c = new Column();
+					c.name = cols.getString("COLUMN_NAME");
+					c.type = cols.getString("TYPE_NAME");
+					c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
+					table.columns.add(c);
+					sb.append("\t"+cols.getString("COLUMN_NAME")+" "+cols.getString("TYPE_NAME")+(!c.nullable?" not null":"")+",\n");
 				}
 				
 				//PKs
 				Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
-				ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, table);
+				ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
 				int count=0;
 				while(pks.next()) {
 					String pkName = pks.getString("PK_NAME");
@@ -136,13 +165,14 @@ public class SQLDataDump {
 				}
 				for(String key: tablePK.keySet()) {
 					sb.append("\tconstraint "+key+" primary key ("+join(tablePK.get(key), ", ")+"),\n");
+					for(String colName: tablePK.get(key)) {
+						table.getColumn(colName).pk = true;
+					}
 				}
 
 				//FKs
-				//List<FK> fks = new ArrayList<FK>();
-				//Map<String, List<Set<String>>> tableFKs = new HashMap<String, List<Set<String>>>();
 				Map<String, FK> fks = new HashMap<String, FK>();
-				ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, table);
+				ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
 				count=0;
 				//dumpRS(fks);
 				while(fkrs.next()) {
@@ -154,16 +184,11 @@ public class SQLDataDump {
 					}
 					log.debug("FK!!! - "+fkName);
 					FK fk = fks.get(fkName);
-					//List<Set<String>> list = tableFKs.get(fkName);
 					if(fk==null) {
 						fk = new FK();
 						fk.name = fkName;
-						//list.add(new HashSet<String>()); //this table keys
-						//list.add(new HashSet<String>()); //foreign table keys
-						//fk = new HashSet<String>();
 						fks.put(fkName, fk);
 					}
-					//Set<String> fk = list.get(0);
 					if(fk.pkTable==null) {
 						fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
 						fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
@@ -173,20 +198,21 @@ public class SQLDataDump {
 				}
 				for(String key: fks.keySet()) {
 					sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
+					foreignKeys.add(fks.get(key));
 				}
 				
 				sb.append(");\n");
 				
 				//GRANTs
 				//map: grantee -> list<privileges>
-				Map<String, Set<String>> privilegeMap = new HashMap<String, Set<String>>();
-				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, table);
+				Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
+				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
 				while(grantrs.next()) {
 					String grantee = grantrs.getString("GRANTEE");
-					Set<String> privs = privilegeMap.get(grantee);
+					Set<String> privs = grantsMap.get(grantee);
 					if(privs==null) {
 						privs = new HashSet<String>();
-						privilegeMap.put(grantee, privs);
+						grantsMap.put(grantee, privs);
 					}
 					privs.add(grantrs.getString("PRIVILEGE"));
 					/*sb.append("GRANT "+grantrs.getString("PRIVILEGE")
@@ -195,9 +221,9 @@ public class SQLDataDump {
 							+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
 							+";\n");*/
 				}
-				for(String grantee: privilegeMap.keySet()) {
-					sb.append("grant "+join(privilegeMap.get(grantee),",")
-							+" on "+table
+				for(String grantee: grantsMap.keySet()) {
+					sb.append("grant "+join(grantsMap.get(grantee),",")
+							+" on "+tableName
 							+" to "+grantee
 							//+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
 							+";\n");
@@ -207,20 +233,24 @@ public class SQLDataDump {
 				cols.close();
 			}
 			catch(SQLException sqle) {
-				log.warn("exception in table: "+table+" ["+sqle+"]");
+				log.warn("exception in table: "+tableName+" ["+sqle+"]");
 				//sqle.printStackTrace();
-				tables.remove(table);
+				tableNames.remove(tableName);
 			}
 			
-			//System.gc();
-			//Thread.yield();
+			//XXXxx: add table to collection
+			//table, fks, grantsMap
+			tables.add(table);
 		}
 		
+		//dump tables, fks..
+		log.info("tables::["+tables.size()+"]\n"+tables+"\n");
+		log.info("FKs::["+foreignKeys.size()+"]\n"+foreignKeys+"\n");
 	}
 	
 	void dumpData() throws Exception {
 		log.info("fazendo dump de dados");
-		for(String table: tables) {
+		for(String table: tableNames) {
 			Statement st = conn.createStatement();
 			log.debug("fazendo dump dos dados de "+table);
 			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
@@ -239,23 +269,26 @@ public class SQLDataDump {
 	}
 	
 	void testes() throws Exception {
-		log.info("testes...");
+		log.info("some tests...");
 
 		DatabaseMetaData dbmd = conn.getMetaData();
 
-		log.info("testes: catalogs...");
-		dumpRS(dbmd.getCatalogs());
+		//log.info("test: catalogs...");
+		//dumpRS(dbmd.getCatalogs());
 
-		log.info("testes: table types...");
-		dumpRS(dbmd.getTableTypes());
+		//log.info("test: table types...");
+		//dumpRS(dbmd.getTableTypes());
 
-		//log.info("testes: tables...");
+		//log.info("test: tables...");
 		//dumpRS(dbmd.getTables(null, null, null, null));
 
-		log.info("testes: fks...");
+		//log.info("test: columns...");
+		//dumpRS(dbmd.getColumns(null, "schema", "table", null));
+		
+		//log.info("test: fks...");
 		//dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
 
-		//log.info("testes: grants...");
+		//log.info("test: grants...");
 		//dumpRS(dbmd.getTablePrivileges(null, "schema", "table"));
 	}
 
