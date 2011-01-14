@@ -8,7 +8,11 @@ import org.apache.log4j.Logger;
 
 /*
  * TODO: DDL: grab contents from procedures, triggers and views 
- *
+ * TODO: option of data dump with INSERT INTO
+ * TODO: generate graphml from schema structure
+ * TODO: column type mapping
+ * TODO: FK constraints at end of schema dump script?
+ * 
  */
 public class SQLDataDump {
 	
@@ -17,8 +21,12 @@ public class SQLDataDump {
 	static final String PROP_USER = "sqldump.user";
 	static final String PROP_PASSWD = "sqldump.password";
 
-	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
+	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
+	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
+	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
+	
+	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	
@@ -39,6 +47,7 @@ public class SQLDataDump {
 
 	Properties papp = new Properties();
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
+	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpGrants = false;   
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -58,8 +67,12 @@ public class SQLDataDump {
 		//	new FileOutputStream();
 		
 		//inicializa variaveis controle
-		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
+		doSchemaDumpPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		doSchemaDumpFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
+		doSchemaDumpGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
+		
+		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
 	}
 
@@ -85,21 +98,7 @@ public class SQLDataDump {
 			String tableName = rs.getString("TABLE_NAME");
 			//if(! rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
 			tableNames.add(tableName);
-			if(rs.getString("TABLE_TYPE").equals("TABLE")) {
-				ttype = TableType.TABLE;
-			}
-			else if(rs.getString("TABLE_TYPE").equals("SYNONYM")) {
-				ttype = TableType.SYNONYM;
-			}
-			else if(rs.getString("TABLE_TYPE").equals("VIEW")) {
-				ttype = TableType.VIEW;
-			}
-			else if(rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
-				ttype = TableType.SYSTEM_TABLE;
-			}
-			else {
-				log.debug("table "+tableName+" of unknown type: "+rs.getString("TABLE_TYPE"));
-			}
+			ttype = getTableType(rs.getString("TABLE_TYPE"), tableName);
 			
 			//defining model
 			Table table = new Table();
@@ -201,32 +200,36 @@ public class SQLDataDump {
 					foreignKeys.add(fks.get(key));
 				}
 				
-				sb.append(");\n");
+				sb.delete(sb.length()-2, sb.length());
+				sb.append("\n);\n");
 				
 				//GRANTs
-				//map: grantee -> list<privileges>
-				Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
-				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
-				while(grantrs.next()) {
-					String grantee = grantrs.getString("GRANTEE");
-					Set<String> privs = grantsMap.get(grantee);
-					if(privs==null) {
-						privs = new HashSet<String>();
-						grantsMap.put(grantee, privs);
-					}
-					privs.add(grantrs.getString("PRIVILEGE"));
-					/*sb.append("GRANT "+grantrs.getString("PRIVILEGE")
-							+" ON "+grantrs.getString("TABLE_NAME")
-							+" TO "+grantrs.getString("GRANTEE")
-							+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
-							+";\n");*/
-				}
-				for(String grantee: grantsMap.keySet()) {
-					sb.append("grant "+join(grantsMap.get(grantee),",")
-							+" on "+tableName
-							+" to "+grantee
-							//+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
-							+";\n");
+				if(doSchemaDumpGrants) {
+    				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
+					dumpSchemaGrants(grantrs, tableName, sb);
+    				//map: grantee -> list<privileges>
+    				/*Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
+    				while(grantrs.next()) {
+    					String grantee = grantrs.getString("GRANTEE");
+    					Set<String> privs = grantsMap.get(grantee);
+    					if(privs==null) {
+    						privs = new HashSet<String>();
+    						grantsMap.put(grantee, privs);
+    					}
+    					privs.add(grantrs.getString("PRIVILEGE"));
+    					//sb.append("GRANT "+grantrs.getString("PRIVILEGE")
+    					//		+" ON "+grantrs.getString("TABLE_NAME")
+    					//		+" TO "+grantrs.getString("GRANTEE")
+    					//		+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
+    					//		+";\n");
+    				}
+    				for(String grantee: grantsMap.keySet()) {
+    					sb.append("grant "+join(grantsMap.get(grantee),",")
+    							+" on "+tableName
+    							+" to "+grantee
+    							//+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
+    							+";\n");
+    				}*/
 				}
 				
 				out(sb.toString());
@@ -243,18 +246,45 @@ public class SQLDataDump {
 			tables.add(table);
 		}
 		
-		//dump tables, fks..
+		//XXX dump tables, fks..
 		log.info("tables::["+tables.size()+"]\n"+tables+"\n");
 		log.info("FKs::["+foreignKeys.size()+"]\n"+foreignKeys+"\n");
 	}
 	
+	void dumpSchemaGrants(ResultSet grantrs, String tableName, StringBuffer sb) throws SQLException {
+		//map: grantee -> list<privileges>
+		Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
+		//ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
+		while(grantrs.next()) {
+			String grantee = grantrs.getString("GRANTEE");
+			Set<String> privs = grantsMap.get(grantee);
+			if(privs==null) {
+				privs = new HashSet<String>();
+				grantsMap.put(grantee, privs);
+			}
+			privs.add(grantrs.getString("PRIVILEGE"));
+			/*sb.append("GRANT "+grantrs.getString("PRIVILEGE")
+					+" ON "+grantrs.getString("TABLE_NAME")
+					+" TO "+grantrs.getString("GRANTEE")
+					+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
+					+";\n");*/
+		}
+		for(String grantee: grantsMap.keySet()) {
+			sb.append("grant "+join(grantsMap.get(grantee),",")
+					+" on "+tableName
+					+" to "+grantee
+					//+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
+					+";\n");
+		}
+	}
+	
 	void dumpData() throws Exception {
-		log.info("fazendo dump de dados");
+		log.info("data dumping...");
 		for(String table: tableNames) {
 			Statement st = conn.createStatement();
-			log.debug("fazendo dump dos dados de "+table);
+			log.debug("dumping data from table: "+table);
 			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
-			out("\n[tabela "+table+"]\n");
+			out("\n[table "+table+"]\n");
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 			while(rs.next()) {
@@ -360,6 +390,24 @@ public class SQLDataDump {
 			}
 		}
 		return buffer.toString();
+	}
+	
+	static TableType getTableType(String tableType, String tableName) {
+		if(tableType.equals("TABLE")) {
+			return TableType.TABLE;
+		}
+		else if(tableType.equals("SYNONYM")) {
+			return TableType.SYNONYM;
+		}
+		else if(tableType.equals("VIEW")) {
+			return TableType.VIEW;
+		}
+		else if(tableType.equals("SYSTEM TABLE")) {
+			return TableType.SYSTEM_TABLE;
+		}
+
+		log.warn("table "+tableName+" of unknown type: "+tableType);
+		return null;
 	}
 
 }
