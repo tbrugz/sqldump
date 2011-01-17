@@ -11,7 +11,9 @@ import org.apache.log4j.Logger;
  * TODO: option of data dump with INSERT INTO
  * TODO: generate graphml from schema structure
  * TODO: column type mapping
- * TODO: FK constraints at end of schema dump script?
+ * TODOne: FK constraints at end of schema dump script?
+ * TODO: unique constraints?
+ * TODO: include Grants into SchemaModel?
  * 
  */
 public class SQLDataDump {
@@ -24,6 +26,7 @@ public class SQLDataDump {
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
+	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
@@ -43,11 +46,13 @@ public class SQLDataDump {
 	static Logger log = Logger.getLogger(SQLDataDump.class);
 	
 	Connection conn;
-	List<String> tableNames = new Vector<String>();
+	
+	//model
+	List<String> tableNamesForDump = new Vector<String>();
 
 	Properties papp = new Properties();
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
-	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpGrants = false;   
+	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpFKsAtEnd = false, doSchemaDumpGrants = false;   
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -70,6 +75,7 @@ public class SQLDataDump {
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
 		doSchemaDumpPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
 		doSchemaDumpFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
+		doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		doSchemaDumpGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		
 		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
@@ -90,14 +96,16 @@ public class SQLDataDump {
 		log.debug("schema pattern: "+schemaPattern);
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, null, null);
-		Set<Table> tables = new HashSet<Table>();
-		Set<FK> foreignKeys = new HashSet<FK>();
+		SchemaModel schemaModel = new SchemaModel();
+		
+		//Set<Table> tables = new HashSet<Table>();
+		//Set<FK> foreignKeys = new HashSet<FK>();
 		
 		while(rs.next()) {
 			TableType ttype = null;
 			String tableName = rs.getString("TABLE_NAME");
 			//if(! rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
-			tableNames.add(tableName);
+			tableNamesForDump.add(tableName);
 			ttype = getTableType(rs.getString("TABLE_TYPE"), tableName);
 			
 			//defining model
@@ -146,8 +154,11 @@ public class SQLDataDump {
 				}
 				
 				//PKs
-				Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
-				ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
+				if(doSchemaDumpPKs) {
+					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
+					dumpSchemaPKs(pks, table, sb);
+				}
+				/*Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
 				int count=0;
 				while(pks.next()) {
 					String pkName = pks.getString("PK_NAME");
@@ -167,12 +178,15 @@ public class SQLDataDump {
 					for(String colName: tablePK.get(key)) {
 						table.getColumn(colName).pk = true;
 					}
-				}
+				}*/
 
 				//FKs
-				Map<String, FK> fks = new HashMap<String, FK>();
-				ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
-				count=0;
+				if(doSchemaDumpFKs) {
+					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
+					dumpSchemaFKs(fkrs, table, schemaModel.foreignKeys, sb);
+				}
+				/*Map<String, FK> fks = new HashMap<String, FK>();
+				int count=0;
 				//dumpRS(fks);
 				while(fkrs.next()) {
 					//log.debug("FK!!!");
@@ -198,7 +212,7 @@ public class SQLDataDump {
 				for(String key: fks.keySet()) {
 					sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
 					foreignKeys.add(fks.get(key));
-				}
+				}*/
 				
 				sb.delete(sb.length()-2, sb.length());
 				sb.append("\n);\n");
@@ -207,29 +221,6 @@ public class SQLDataDump {
 				if(doSchemaDumpGrants) {
     				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
 					dumpSchemaGrants(grantrs, tableName, sb);
-    				//map: grantee -> list<privileges>
-    				/*Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
-    				while(grantrs.next()) {
-    					String grantee = grantrs.getString("GRANTEE");
-    					Set<String> privs = grantsMap.get(grantee);
-    					if(privs==null) {
-    						privs = new HashSet<String>();
-    						grantsMap.put(grantee, privs);
-    					}
-    					privs.add(grantrs.getString("PRIVILEGE"));
-    					//sb.append("GRANT "+grantrs.getString("PRIVILEGE")
-    					//		+" ON "+grantrs.getString("TABLE_NAME")
-    					//		+" TO "+grantrs.getString("GRANTEE")
-    					//		+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
-    					//		+";\n");
-    				}
-    				for(String grantee: grantsMap.keySet()) {
-    					sb.append("grant "+join(grantsMap.get(grantee),",")
-    							+" on "+tableName
-    							+" to "+grantee
-    							//+("YES".equals(grantrs.getString("IS_GRANTABLE"))?" WITH GRANT OPTION":"")
-    							+";\n");
-    				}*/
 				}
 				
 				out(sb.toString());
@@ -238,17 +229,25 @@ public class SQLDataDump {
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
 				//sqle.printStackTrace();
-				tableNames.remove(tableName);
+				tableNamesForDump.remove(tableName);
 			}
 			
 			//XXXxx: add table to collection
 			//table, fks, grantsMap
-			tables.add(table);
+			schemaModel.tables.add(table);
+		}
+		
+		if(doSchemaDumpFKsAtEnd) {
+			StringBuffer sb = new StringBuffer();
+			for(FK fk: schemaModel.foreignKeys) {
+				sb.append("alter table "+fk.fkTable+"\n\tadd constraint "+fk.name+" foreign key ("+join(fk.fkColumns, ", ")+")\n\treferences "+fk.pkTable+" ("+join(fk.pkColumns, ", ")+");\n\n");
+			}
+			out(sb.toString());
 		}
 		
 		//XXX dump tables, fks..
-		log.info("tables::["+tables.size()+"]\n"+tables+"\n");
-		log.info("FKs::["+foreignKeys.size()+"]\n"+foreignKeys+"\n");
+		log.info("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
+		log.info("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 	}
 	
 	void dumpSchemaGrants(ResultSet grantrs, String tableName, StringBuffer sb) throws SQLException {
@@ -277,10 +276,70 @@ public class SQLDataDump {
 					+";\n");
 		}
 	}
+
+	void dumpSchemaPKs(ResultSet pks, Table table, StringBuffer sb) throws SQLException {
+		//PKs
+		Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
+		//ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
+		int count=0;
+		while(pks.next()) {
+			String pkName = pks.getString("PK_NAME");
+			if(pkName==null) {
+				pkName = "PK_"+count;
+				count++;
+			}
+			Set<String> pk = tablePK.get(pkName);
+			if(pk==null) {
+				pk = new HashSet<String>();
+				tablePK.put(pkName, pk);
+			}
+			pk.add(pks.getString("COLUMN_NAME"));
+		}
+		for(String key: tablePK.keySet()) {
+			sb.append("\tconstraint "+key+" primary key ("+join(tablePK.get(key), ", ")+"),\n");
+			for(String colName: tablePK.get(key)) {
+				table.getColumn(colName).pk = true;
+			}
+		}
+		
+	}
+
+	void dumpSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys, StringBuffer sb) throws SQLException {
+		Map<String, FK> fks = new HashMap<String, FK>();
+		int count=0;
+		//dumpRS(fks);
+		while(fkrs.next()) {
+			//log.debug("FK!!!");
+			String fkName = fkrs.getString("FK_NAME");
+			if(fkName==null) {
+				fkName = "FK_"+count;
+				count++;
+			}
+			log.debug("FK!!! - "+fkName);
+			FK fk = fks.get(fkName);
+			if(fk==null) {
+				fk = new FK();
+				fk.name = fkName;
+				fks.put(fkName, fk);
+			}
+			if(fk.pkTable==null) {
+				fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
+				fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
+			}
+			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
+			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
+		}
+		for(String key: fks.keySet()) {
+			foreignKeys.add(fks.get(key));
+			if(!doSchemaDumpFKsAtEnd) {
+				sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
+			}
+		}
+	}
 	
 	void dumpData() throws Exception {
 		log.info("data dumping...");
-		for(String table: tableNames) {
+		for(String table: tableNamesForDump) {
 			Statement st = conn.createStatement();
 			log.debug("dumping data from table: "+table);
 			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
