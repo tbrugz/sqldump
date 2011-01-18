@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.util.*;
 import java.sql.*;
 import java.io.*;
+import java.math.BigDecimal;
 
 import org.apache.log4j.Logger;
 
@@ -18,16 +19,19 @@ import org.apache.log4j.Logger;
  */
 public class SQLDataDump {
 	
+	//connection properties
 	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
 	static final String PROP_URL = "sqldump.dburl";
 	static final String PROP_USER = "sqldump.user";
 	static final String PROP_PASSWD = "sqldump.password";
 
+	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
+	static final String PROP_COLUMN_TYPE_MAPPING_ID = "sqldump.columntypemappingid";
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
@@ -35,7 +39,10 @@ public class SQLDataDump {
 	
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
 	
+	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
+	static final String COLUMN_TYPE_MAPPING_RESOURCE = "column-type-mapping.properties";
+	
 	
 	/*static final String TABLE = "TABLE";
 	static final String TABLE_NAME = "TABLE_NAME";
@@ -98,6 +105,10 @@ public class SQLDataDump {
 		ResultSet rs = dbmd.getTables(null, schemaPattern, null, null);
 		SchemaModel schemaModel = new SchemaModel();
 		
+		Properties typeMapping = new Properties();
+		typeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
+		System.out.println("typeMapping: "+typeMapping);
+		
 		//Set<Table> tables = new HashSet<Table>();
 		//Set<FK> foreignKeys = new HashSet<FK>();
 		
@@ -140,17 +151,32 @@ public class SQLDataDump {
 				log.debug("getting info from "+(schemaPattern==null?"":schemaPattern+".")+tableName);
 
 				StringBuffer sb = new StringBuffer();
+				sb.append("--drop table "+tableName+";\n");
 				sb.append("create table "+tableName+" ( -- type="+ttype+"\n");
 	
 				//columns
 				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
+				
 				while(cols.next()) {
 					Column c = new Column();
 					c.name = cols.getString("COLUMN_NAME");
 					c.type = cols.getString("TYPE_NAME");
 					c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
+					c.columSize = cols.getInt("COLUMN_SIZE");
+					Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
+					if(decimalDigits!=null) {
+						int iDecimalDigits = ((BigDecimal) decimalDigits).intValue();
+						if(iDecimalDigits!=0) {
+							c.decimalDigits = iDecimalDigits;
+						} 
+					}
 					table.columns.add(c);
-					sb.append("\t"+cols.getString("COLUMN_NAME")+" "+cols.getString("TYPE_NAME")+(!c.nullable?" not null":"")+",\n");
+					String colType = c.type;
+					if(papp.getProperty(PROP_COLUMN_TYPE_MAPPING_ID)!=null) {
+						String newColType = typeMapping.getProperty(papp.getProperty(PROP_COLUMN_TYPE_MAPPING_ID)+"."+colType);
+						if(newColType!=null) { colType = newColType; }
+					}
+					sb.append("\t"+c.name+" "+colType+"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")"+(!c.nullable?" not null":"")+",\n");
 				}
 				
 				//PKs
