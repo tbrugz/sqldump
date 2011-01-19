@@ -33,6 +33,9 @@ public class SQLDataDump {
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_COLUMN_TYPE_MAPPING_ID = "sqldump.columntypemappingid";
 	
+	//column-type-mapping.properties
+	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.XXX.useprecision";
+	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
@@ -176,7 +179,10 @@ public class SQLDataDump {
 						String newColType = typeMapping.getProperty(papp.getProperty(PROP_COLUMN_TYPE_MAPPING_ID)+"."+colType);
 						if(newColType!=null) { colType = newColType; }
 					}
-					sb.append("\t"+c.name+" "+colType+"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")"+(!c.nullable?" not null":"")+",\n");
+					boolean usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
+					sb.append("\t"+c.name+" "+colType
+							+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
+							+(!c.nullable?" not null":"")+",\n");
 				}
 				
 				//PKs
