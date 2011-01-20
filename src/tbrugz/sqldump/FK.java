@@ -7,6 +7,8 @@ public class FK {
 	String name;
 	String pkTable;
 	String fkTable;
+	String pkTableSchemaName;
+	String fkTableSchemaName;
 
 	Set<String> pkColumns = new HashSet<String>();
 	Set<String> fkColumns = new HashSet<String>();

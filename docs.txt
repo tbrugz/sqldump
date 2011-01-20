@@ -1,4 +1,24 @@
 
 oracle table types: SYNONYM | TABLE | VIEW
 
-access table types: SYSTEM TABLE | TABLE
+ms access table types: SYSTEM TABLE | TABLE
+
+
+ * TODOne: PKs/FKs
+ * getPrimaryKeys(String catalog, String schema, String table)
+ * Retrieves a description of the given table's primary key columns.
+ * 
+ * getExportedKeys(String catalog, String schema, String table)
+ * 
+ * getImportedKeys(String catalog, String schema, String table)
+ * Retrieves a description of the primary key columns that are referenced by the given table's foreign key columns (the primary keys imported by a table).
+ * 
+ * getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable)
+ * Retrieves a description of the foreign key columns in the given foreign key table that reference the primary key or the columns representing a unique constraint of the parent table (could be the same or a different table).
+ * 
+ * TODOne: grants
+ * getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
+ * Retrieves a description of the access rights for each table available in a catalog.
+ * 
+ * Problem with getImportedKeys / getExportedKeys
+ * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php

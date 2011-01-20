@@ -32,9 +32,9 @@ public class SQLDataDump {
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
-	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "sqldump.columntypemappingid";
 	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	static final String PROP_TO_DB_ID = "sqldump.todbid";
+	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	
 	//column-type-mapping.properties
 	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.xxx.useprecision";
@@ -63,9 +63,13 @@ public class SQLDataDump {
 	//model
 	List<String> tableNamesForDump = new Vector<String>();
 
+	//dumper
+	SchemaModelScriptDumper schemaDumper;
+	
 	Properties papp = new Properties();
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpFKsAtEnd = false, doSchemaDumpGrants = false;   
+	boolean dumpWithSchemaName = false;
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -82,6 +86,7 @@ public class SQLDataDump {
 		
 		//inicializa arquivo de saida
 		fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE)); 
+		schemaDumper = new SchemaModelScriptDumper(fos);
 		
 		//inicializa variaveis controle
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
@@ -89,6 +94,9 @@ public class SQLDataDump {
 		doSchemaDumpFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
 		doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		doSchemaDumpGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
+		dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
+		
+		schemaDumper.setDumpWithSchemaName(dumpWithSchemaName);
 		
 		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
@@ -114,12 +122,11 @@ public class SQLDataDump {
 		typeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
 		System.out.println("typeMapping: "+typeMapping);
 		
-		//Set<Table> tables = new HashSet<Table>();
-		//Set<FK> foreignKeys = new HashSet<FK>();
-		
 		while(rs.next()) {
 			TableType ttype = null;
 			String tableName = rs.getString("TABLE_NAME");
+			String schemaName = rs.getString("TABLE_SCHEM");
+			
 			//if(! rs.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
 			tableNamesForDump.add(tableName);
 			ttype = getTableType(rs.getString("TABLE_TYPE"), tableName);
@@ -129,69 +136,21 @@ public class SQLDataDump {
 			//Map<String, Set<String>> grantsMap = new HashMap<String, Set<String>>();
 			table.name = tableName;
 			table.type = ttype;
+			table.schemaName = schemaName;
 			
-			/*
-			 * TODOne: PKs/FKs
-			 * getPrimaryKeys(String catalog, String schema, String table)
-			 * Retrieves a description of the given table's primary key columns.
-			 * 
-			 * getExportedKeys(String catalog, String schema, String table)
-			 * 
-			 * getImportedKeys(String catalog, String schema, String table)
-			 * Retrieves a description of the primary key columns that are referenced by the given table's foreign key columns (the primary keys imported by a table).
-			 * 
-			 * getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable)
-	         * Retrieves a description of the foreign key columns in the given foreign key table that reference the primary key or the columns representing a unique constraint of the parent table (could be the same or a different table).
-	         * 
-	         * TODOne: grants
-	         * getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
-	         * Retrieves a description of the access rights for each table available in a catalog.
-	         * 
-	         * Problem with getImportedKeys / getExportedKeys
-	         * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php
-			 */
 			try {
 				log.debug("getting info from "+(schemaPattern==null?"":schemaPattern+".")+tableName);
 
 				StringBuffer sb = new StringBuffer();
 				sb.append("--drop table "+tableName+";\n");
-				sb.append("create table "+tableName+" ( -- type="+ttype+"\n");
+				sb.append("create table "+(dumpWithSchemaName?schemaName+".":"")+tableName+" ( -- type="+ttype+"\n");
 	
 				//columns
 				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
-				
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
-					/*new Column();
-					c.name = cols.getString("COLUMN_NAME");
-					c.type = cols.getString("TYPE_NAME");
-					c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
-					c.columSize = cols.getInt("COLUMN_SIZE");
-					Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
-					if(decimalDigits!=null) {
-						int iDecimalDigits = ((BigDecimal) decimalDigits).intValue();
-						if(iDecimalDigits!=0) {
-							c.decimalDigits = iDecimalDigits;
-						} 
-					}*/
 					table.columns.add(c);
 					String colDesc = getColumnDesc(c, typeMapping);
-					/*
-					String colType = c.type;
-					if(papp.getProperty(PROP_FROM_DB_ID)!=null) {
-						String ansiColType = typeMapping.getProperty("from."+papp.getProperty(PROP_FROM_DB_ID)+"."+colType);
-						//String newColType = ansiColType; 
-						if(ansiColType!=null) { colType = ansiColType; }
-					}
-					if(papp.getProperty(PROP_TO_DB_ID)!=null) {	
-						String newColType = typeMapping.getProperty("to."+papp.getProperty(PROP_TO_DB_ID)+"."+colType);
-						if(newColType!=null) { colType = newColType; }
-					}
-					boolean usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
-					sb.append("\t"+c.name+" "+colType
-							+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
-							+(!c.nullable?" not null":"")+",\n");
-					*/
 					sb.append("\t"+colDesc+",\n");
 				}
 				
@@ -200,61 +159,12 @@ public class SQLDataDump {
 					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
 					dumpSchemaPKs(pks, table, sb);
 				}
-				/*Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
-				int count=0;
-				while(pks.next()) {
-					String pkName = pks.getString("PK_NAME");
-					if(pkName==null) {
-						pkName = "PK_"+count;
-						count++;
-					}
-					Set<String> pk = tablePK.get(pkName);
-					if(pk==null) {
-						pk = new HashSet<String>();
-						tablePK.put(pkName, pk);
-					}
-					pk.add(pks.getString("COLUMN_NAME"));
-				}
-				for(String key: tablePK.keySet()) {
-					sb.append("\tconstraint "+key+" primary key ("+join(tablePK.get(key), ", ")+"),\n");
-					for(String colName: tablePK.get(key)) {
-						table.getColumn(colName).pk = true;
-					}
-				}*/
 
 				//FKs
 				if(doSchemaDumpFKs) {
 					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
 					dumpSchemaFKs(fkrs, table, schemaModel.foreignKeys, sb);
 				}
-				/*Map<String, FK> fks = new HashMap<String, FK>();
-				int count=0;
-				//dumpRS(fks);
-				while(fkrs.next()) {
-					//log.debug("FK!!!");
-					String fkName = fkrs.getString("FK_NAME");
-					if(fkName==null) {
-						fkName = "FK_"+count;
-						count++;
-					}
-					log.debug("FK!!! - "+fkName);
-					FK fk = fks.get(fkName);
-					if(fk==null) {
-						fk = new FK();
-						fk.name = fkName;
-						fks.put(fkName, fk);
-					}
-					if(fk.pkTable==null) {
-						fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
-						fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
-					}
-					fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
-					fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
-				}
-				for(String key: fks.keySet()) {
-					sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
-					foreignKeys.add(fks.get(key));
-				}*/
 				
 				sb.delete(sb.length()-2, sb.length());
 				sb.append("\n);\n");
@@ -280,11 +190,12 @@ public class SQLDataDump {
 		}
 		
 		if(doSchemaDumpFKsAtEnd) {
-			StringBuffer sb = new StringBuffer();
+			schemaDumper.dumpFKsOutsideTable(schemaModel.foreignKeys);
+			/*StringBuffer sb = new StringBuffer();
 			for(FK fk: schemaModel.foreignKeys) {
 				sb.append("alter table "+fk.fkTable+"\n\tadd constraint "+fk.name+" foreign key ("+join(fk.fkColumns, ", ")+")\n\treferences "+fk.pkTable+" ("+join(fk.pkColumns, ", ")+");\n\n");
 			}
-			out(sb.toString());
+			out(sb.toString());*/
 		}
 		
 		//XXX dump tables, fks..
@@ -380,7 +291,7 @@ public class SQLDataDump {
 		
 	}
 
-	void dumpSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys, StringBuffer sb) throws SQLException {
+	void dumpSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys, StringBuffer sb) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		//dumpRS(fks);
@@ -399,17 +310,24 @@ public class SQLDataDump {
 				fks.put(fkName, fk);
 			}
 			if(fk.pkTable==null) {
-				fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
-				fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
+				fk.pkTable = fkrs.getString("PKTABLE_NAME");
+				fk.fkTable = fkrs.getString("FKTABLE_NAME");
+				//fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
+				//fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
+				fk.pkTableSchemaName = fkrs.getString("PKTABLE_SCHEM");
+				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
 			}
 			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
 			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
 		}
 		for(String key: fks.keySet()) {
 			foreignKeys.add(fks.get(key));
-			if(!doSchemaDumpFKsAtEnd) {
+			/*if(!doSchemaDumpFKsAtEnd) {
 				sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
-			}
+			}*/
+		}
+		if(!doSchemaDumpFKsAtEnd) {
+			schemaDumper.dumpFKsInsideTable(foreignKeys);
 		}
 	}
 	
@@ -515,9 +433,9 @@ public class SQLDataDump {
 	 * http://snippets.dzone.com/posts/show/91
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
 	 */
-	public static String join(Collection s, String delimiter) {
+	public static String join(Collection<String> s, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
-		Iterator iter = s.iterator();
+		Iterator<String> iter = s.iterator();
 		while (iter.hasNext()) {
 			buffer.append(iter.next());
 			if (iter.hasNext()) {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Table {
+	String schemaName;
 	String name;
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
