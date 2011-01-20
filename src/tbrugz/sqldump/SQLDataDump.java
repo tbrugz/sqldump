@@ -11,10 +11,11 @@ import org.apache.log4j.Logger;
  * TODO: DDL: grab contents from procedures, triggers and views 
  * TODO: option of data dump with INSERT INTO
  * TODO: generate graphml from schema structure
- * TODO: column type mapping
+ * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
  * TODO: unique constraints?
  * TODO: include Grants into SchemaModel?
+ * TODO: recursive dump based on FKs
  * 
  */
 public class SQLDataDump {
@@ -31,10 +32,12 @@ public class SQLDataDump {
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
-	static final String PROP_COLUMN_TYPE_MAPPING_ID = "sqldump.columntypemappingid";
+	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "sqldump.columntypemappingid";
+	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
+	static final String PROP_TO_DB_ID = "sqldump.todbid";
 	
 	//column-type-mapping.properties
-	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.XXX.useprecision";
+	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.xxx.useprecision";
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
@@ -79,7 +82,6 @@ public class SQLDataDump {
 		
 		//inicializa arquivo de saida
 		fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE)); 
-		//	new FileOutputStream();
 		
 		//inicializa variaveis controle
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
@@ -145,8 +147,6 @@ public class SQLDataDump {
 	         * getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
 	         * Retrieves a description of the access rights for each table available in a catalog.
 	         * 
-	         * TODO: recursive dump based on FKs
-	         * 
 	         * Problem with getImportedKeys / getExportedKeys
 	         * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php
 			 */
@@ -161,7 +161,8 @@ public class SQLDataDump {
 				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
 				
 				while(cols.next()) {
-					Column c = new Column();
+					Column c = retrieveColumn(cols);
+					/*new Column();
 					c.name = cols.getString("COLUMN_NAME");
 					c.type = cols.getString("TYPE_NAME");
 					c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
@@ -172,17 +173,26 @@ public class SQLDataDump {
 						if(iDecimalDigits!=0) {
 							c.decimalDigits = iDecimalDigits;
 						} 
-					}
+					}*/
 					table.columns.add(c);
+					String colDesc = getColumnDesc(c, typeMapping);
+					/*
 					String colType = c.type;
-					if(papp.getProperty(PROP_COLUMN_TYPE_MAPPING_ID)!=null) {
-						String newColType = typeMapping.getProperty(papp.getProperty(PROP_COLUMN_TYPE_MAPPING_ID)+"."+colType);
+					if(papp.getProperty(PROP_FROM_DB_ID)!=null) {
+						String ansiColType = typeMapping.getProperty("from."+papp.getProperty(PROP_FROM_DB_ID)+"."+colType);
+						//String newColType = ansiColType; 
+						if(ansiColType!=null) { colType = ansiColType; }
+					}
+					if(papp.getProperty(PROP_TO_DB_ID)!=null) {	
+						String newColType = typeMapping.getProperty("to."+papp.getProperty(PROP_TO_DB_ID)+"."+colType);
 						if(newColType!=null) { colType = newColType; }
 					}
 					boolean usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
 					sb.append("\t"+c.name+" "+colType
 							+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 							+(!c.nullable?" not null":"")+",\n");
+					*/
+					sb.append("\t"+colDesc+",\n");
 				}
 				
 				//PKs
@@ -280,6 +290,40 @@ public class SQLDataDump {
 		//XXX dump tables, fks..
 		log.info("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
 		log.info("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
+	}
+	
+	static Column retrieveColumn(ResultSet cols) throws SQLException {
+		Column c = new Column();
+		c.name = cols.getString("COLUMN_NAME");
+		c.type = cols.getString("TYPE_NAME");
+		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
+		c.columSize = cols.getInt("COLUMN_SIZE");
+		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
+		if(decimalDigits!=null) {
+			int iDecimalDigits = ((BigDecimal) decimalDigits).intValue();
+			if(iDecimalDigits!=0) {
+				c.decimalDigits = iDecimalDigits;
+			} 
+		}
+		return c;
+	}
+	
+	String getColumnDesc(Column c, Properties typeMapping) {
+		String colType = c.type;
+		if(papp.getProperty(PROP_FROM_DB_ID)!=null) {
+			String ansiColType = typeMapping.getProperty("from."+papp.getProperty(PROP_FROM_DB_ID)+"."+colType);
+			//String newColType = ansiColType; 
+			if(ansiColType!=null) { colType = ansiColType; }
+		}
+		if(papp.getProperty(PROP_TO_DB_ID)!=null) {	
+			String newColType = typeMapping.getProperty("to."+papp.getProperty(PROP_TO_DB_ID)+"."+colType);
+			if(newColType!=null) { colType = newColType; }
+		}
+		boolean usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
+		
+		return c.name+" "+colType
+			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
+			+(!c.nullable?" not null":"");
 	}
 	
 	void dumpSchemaGrants(ResultSet grantrs, String tableName, StringBuffer sb) throws SQLException {
