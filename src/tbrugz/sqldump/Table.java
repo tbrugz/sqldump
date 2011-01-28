@@ -8,6 +8,8 @@ public class Table {
 	String name;
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
+	List<Grant> grants = new ArrayList<Grant>();
+	String pkConstraintName;
 	
 	Column getColumn(String name) {
 		if(name==null) return null;
