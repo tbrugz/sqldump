@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_graphml"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="D:/java/apache-log4j-1.2.15/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="D:/proj/libs-jdbc/ojdbc14.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/kmlutils"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

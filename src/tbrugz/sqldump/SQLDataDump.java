@@ -7,6 +7,10 @@ import java.math.BigDecimal;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.graphml.model.Root;
+import tbrugz.graphml.DumpGraphMLModel;
+import tbrugz.sqldump.graph.Schema2GraphML;
+
 /*
  * XXX: DDL: grab contents from procedures, triggers and views 
  * TODO: option of data dump with INSERT INTO
@@ -313,6 +317,12 @@ public class SQLDataDump {
 		fos.write(s+"\n");
 	}
 	
+	void dumpGraph(SchemaModel sm) throws FileNotFoundException {
+		Root r = Schema2GraphML.getGraphMlModel(sm);
+		DumpGraphMLModel dg = new DumpGraphMLModel();
+		dg.dumpModel(r, new PrintStream("output/schema.graphml"));
+	}
+	
 	void tests() throws Exception {
 		log.info("some tests...");
 
@@ -351,6 +361,7 @@ public class SQLDataDump {
 		if(sdd.doSchemaDump) {
 			SchemaModel sm = sdd.grabSchema();
 			sdd.schemaDumper.dumpSchema(sm);
+			sdd.dumpGraph(sm);
 		}
 		if(sdd.doDataDump) {
 			sdd.dumpData();
