@@ -9,18 +9,21 @@ import org.apache.log4j.Logger;
 
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.DumpGraphMLModel;
+import tbrugz.sqldump.graph.DumpSchemaGraphMLModel;
 import tbrugz.sqldump.graph.Schema2GraphML;
 
 /*
  * XXX: DDL: grab contents from procedures, triggers and views 
  * TODO: option of data dump with INSERT INTO
- * TODO: generate graphml from schema structure
+ * TODOne: generate graphml from schema structure
  * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
  * TODO: unique constraints?
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables to dump
+ * XXX: usePrecision should be defined by java code (not .properties)
+ * XXX: generate "alter table" database script from graphML changes
  * 
  */
 public class SQLDataDump {
@@ -201,7 +204,7 @@ public class SQLDataDump {
 		return c;
 	}
 
-	static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
+	public static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
 		String colType = c.type;
 		if(fromDbId!=null) {
 			String ansiColType = typeMapping.getProperty("from."+fromDbId+"."+colType);
@@ -212,7 +215,11 @@ public class SQLDataDump {
 			String newColType = typeMapping.getProperty("to."+toDbId+"."+colType);
 			if(newColType!=null) { colType = newColType; }
 		}
-		boolean usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
+		
+		boolean usePrecision = true;
+		if(typeMapping!=null) {
+			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
+		}
 		
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
@@ -319,7 +326,7 @@ public class SQLDataDump {
 	
 	void dumpGraph(SchemaModel sm) throws FileNotFoundException {
 		Root r = Schema2GraphML.getGraphMlModel(sm);
-		DumpGraphMLModel dg = new DumpGraphMLModel();
+		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
 		dg.dumpModel(r, new PrintStream("output/schema.graphml"));
 	}
 	

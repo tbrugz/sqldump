@@ -7,8 +7,9 @@ import java.util.Set;
 
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Link;
-import tbrugz.graphml.model.Node;
+import tbrugz.sqldump.Column;
 import tbrugz.sqldump.FK;
+import tbrugz.sqldump.SQLDataDump;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Table;
 
@@ -30,10 +31,17 @@ public class Schema2GraphML {
 		}
 		
 		for(Table t: schemaModel.getTables()) {
-			Node n = new Node();
+			TableNode n = new TableNode();
 			String id = t.getSchemaName()+"."+t.getName();
 			n.setId(id);
 			n.setLabel(id); //XXX
+			StringBuffer sb = new StringBuffer();
+			for(Column c: t.getColumns()) {
+				sb.append(SQLDataDump.getColumnDesc(c, null, null, null)+"\n");
+			}
+			//System.out.println("coldesc: "+sb.toString());
+			n.setColumnsDesc(sb.toString());
+			
 			graphModel.elements.add(n);
 			Set<FK> fkSet = fkMap.get(id);
 			if(fkSet!=null) {
@@ -49,6 +57,7 @@ public class Schema2GraphML {
 	
 	static Link fkToLink(FK fk) {
 		Link l = new Link();
+		l.setNome(fk.getName());
 		l.setOrigem(fk.getSourceId());
 		l.setsDestino(fk.getTargetId());
 		return l;
