@@ -13,12 +13,12 @@ import tbrugz.sqldump.graph.DumpSchemaGraphMLModel;
 import tbrugz.sqldump.graph.Schema2GraphML;
 
 /*
- * XXX: DDL: grab contents from procedures, triggers and views 
+ * XXX~(database dependent): DDL: grab contents from procedures, triggers and views 
  * TODO: option of data dump with INSERT INTO
  * TODOne: generate graphml from schema structure
  * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
- * TODO: unique constraints?
+ * TODO: unique constraints? indexes...
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables to dump
@@ -43,6 +43,8 @@ public class SQLDataDump {
 	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
+	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
+	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	
 	//column-type-mapping.properties
 	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.xxx.useprecision";
@@ -74,6 +76,7 @@ public class SQLDataDump {
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpFKsAtEnd = false, doSchemaDumpGrants = false;   
 	boolean dumpWithSchemaName = false;
+	boolean dumpSynonymAsTable = false, dumpViewAsTable = false;
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -99,6 +102,8 @@ public class SQLDataDump {
 		doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		doSchemaDumpGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
+		dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 
 		columnTypeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
 		
@@ -108,6 +113,8 @@ public class SQLDataDump {
 		schemaDumper.toDbId = papp.getProperty(PROP_TO_DB_ID);
 		schemaDumper.columnTypeMapping = columnTypeMapping;
 		schemaDumper.dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
+		schemaDumper.dumpSynonymAsTable = dumpSynonymAsTable;
+		schemaDumper.dumpViewAsTable = dumpViewAsTable;
 		
 		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
@@ -158,34 +165,64 @@ public class SQLDataDump {
 				if(doSchemaDumpPKs) {
 					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
 					grabSchemaPKs(pks, table);
+					pks.close();
 				}
 
 				//FKs
 				if(doSchemaDumpFKs) {
 					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
+					fkrs.close();
 				}
 				
 				//GRANTs
 				if(doSchemaDumpGrants) {
-    				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
-    				table.grants = grabSchemaGrants(grantrs, tableName);
+					ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
+					table.grants = grabSchemaGrants(grantrs, tableName);
+					grantrs.close();
 				}
 				
 				cols.close();
 			}
+			catch(OutOfMemoryError oome) {
+				log.warn("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
+				throw oome;
+			}
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
-				//sqle.printStackTrace();
+				sqle.printStackTrace();
 				tableNamesForDataDump.remove(tableName);
 			}
 			
 			schemaModel.tables.add(table);
 		}
+		rs.close();
+
+		grabDbSpecific(schemaModel, schemaPattern);
 		
 		log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
 		log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 		return schemaModel;
+	}
+	
+	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
+		//schemaDumper.fromDbId
+		//TODO: test sqldump.usedbspeficicfeatures
+		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbmgr."+schemaDumper.fromDbId+".specificgrabclass");
+		if(dbSpecificFeaturesClass!=null) {
+			try {
+				Class<?> c = Class.forName(dbSpecificFeaturesClass);
+				DbmgrFeatures of = (DbmgrFeatures) c.newInstance();
+				//DbmgrFeatures of = new OracleFeatures();
+				of.grabDBObjects(model, schemaPattern, conn);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
@@ -229,13 +266,18 @@ public class SQLDataDump {
 	List<Grant> grabSchemaGrants(ResultSet grantrs, String tableName) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		while(grantrs.next()) {
-			Grant grant = new Grant();
-			
-			grant.grantee = grantrs.getString("GRANTEE");
-			grant.privilege = PrivilegeType.valueOf(grantrs.getString("PRIVILEGE"));
-			grant.table = grantrs.getString("TABLE_NAME");
-			grant.withGrantOption = "YES".equals(grantrs.getString("IS_GRANTABLE"));
-			grantsList.add(grant);
+			try {
+				Grant grant = new Grant();
+				
+				grant.grantee = grantrs.getString("GRANTEE");
+				grant.privilege = PrivilegeType.valueOf(grantrs.getString("PRIVILEGE"));
+				grant.table = grantrs.getString("TABLE_NAME");
+				grant.withGrantOption = "YES".equals(grantrs.getString("IS_GRANTABLE"));
+				grantsList.add(grant);
+			}
+			catch(IllegalArgumentException iae) {
+				log.warn(iae);
+			}
 		}
 		return grantsList;
 	}
@@ -316,6 +358,7 @@ public class SQLDataDump {
 			while(rs.next()) {
 				out(getRowFromRS(rs, numCol, table));
 			}
+			rs.close();
 		}
 	}
 	

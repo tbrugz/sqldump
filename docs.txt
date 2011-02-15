@@ -22,3 +22,117 @@ ms access table types: SYSTEM TABLE | TABLE
  * 
  * Problem with getImportedKeys / getExportedKeys
  * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php
+
+
+==============
+select distinct OBJECT_TYPE from all_objects order by object_type
+
+CLUSTER
+CONSUMER GROUP
+CONTEXT
+DIRECTORY
+EVALUATION CONTEXT
+FUNCTION
+INDEX
+INDEX PARTITION
+INDEX SUBPARTITION
+INDEXTYPE
+JAVA CLASS
+JAVA DATA
+JAVA RESOURCE
+JAVA SOURCE
+JOB CLASS
+LIBRARY
+LOB
+MATERIALIZED VIEW
+OPERATOR
+PACKAGE
+PACKAGE BODY
+PROCEDURE
+PROGRAM
+SCHEDULE
+SEQUENCE
+SYNONYM
+TABLE
+TABLE PARTITION
+TABLE SUBPARTITION
+TRIGGER
+TYPE
+TYPE BODY
+VIEW
+WINDOW
+WINDOW GROUP
+XML SCHEMA
+
+select * from user_source
+"name, type, line, text"
+
+select distinct type from all_source 
+
+FUNCTION
+JAVA SOURCE
+PACKAGE
+PACKAGE BODY
+PROCEDURE
+TRIGGER
+TYPE
+TYPE BODY
+
+
+-------------
+
+SYNONYM, SEQUENCE, TABLE, INDEX, VIEW, TRIGGER, LOB,
+
+from http://sourceforge.net/projects/vela/files/Vela/Vela1.1/
+
+String sqlDBObjects = " SELECT OBJECT_ID, OBJECT_TYPE, STATUS, OBJECT_NAME FROM USER_OBJECTS WHERE OBJECT_TYPE!='SYNONYM'";
+sqlDBObjects = sqlDBObjects+" UNION ";
+sqlDBObjects = sqlDBObjects+" SELECT OBJECT_ID, OBJECT_TYPE, STATUS, OBJECT_NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SYNONYM' AND OBJECT_NAME IN (SELECT OBJECT_NAME FROM USER_OBJECTS) ORDER BY 4";
+
+if(objectType!=null && objectType.equalsIgnoreCase("TRIGGER"))
+	sql="SELECT DESCRIPTION, TRIGGER_BODY FROM USER_TRIGGERS WHERE TRIGGER_NAME = '"+objectName+"'";
+else if(objectType!=null && objectType.equalsIgnoreCase("VIEW"))
+	sql="SELECT VIEW_NAME, TEXT FROM USER_VIEWS WHERE VIEW_NAME = '"+objectName+"'";
+else
+	sql="SELECT TEXT SOURCE FROM USER_SOURCE WHERE NAME = '"+objectName+"' AND TYPE='"+objectType+"'";
+
+-------------
+
+
+SELECT OBJECT_ID, OBJECT_TYPE, STATUS, OBJECT_NAME FROM USER_OBJECTS WHERE OBJECT_TYPE!='SYNONYM'
+
+SELECT OBJECT_ID, OBJECT_TYPE, STATUS, OBJECT_NAME FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SYNONYM' AND OBJECT_NAME IN (SELECT OBJECT_NAME FROM USER_OBJECTS) ORDER BY 4
+
+SELECT * FROM USER_OBJECTS WHERE OBJECT_TYPE!='SYNONYM'
+
+SELECT * FROM ALL_OBJECTS WHERE OBJECT_TYPE = 'SYNONYM' AND OBJECT_NAME IN (SELECT OBJECT_NAME FROM USER_OBJECTS) ORDER BY 4
+
+SEQUENCE, TABLE, INDEX, VIEW, TRIGGER, LOB
+
+select * from user_procedures
+
+
+user_triggers, user_procedures
+
+
+--------------
+
+
+desc user_source
+
+select distinct type from user_source
+
+select name, type, line, text from user_source
+where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE')
+order by type, name, line
+
+select distinct type, name from user_source
+order by type, name
+
+select * from user_source
+where type='TYPE'
+
+select * from user_source
+where type='JAVA SOURCE'
+
+	

@@ -2,3 +2,4 @@ glob:bin/*
 glob:dist/*
 glob:tmp/*
 glob:output/*
+glob:sqldump.properties
