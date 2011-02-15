@@ -3,6 +3,12 @@ package tbrugz.sqldump;
 import java.util.HashSet;
 import java.util.Set;
 
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.dbmodel.View;
+
 public class SchemaModel {
 	Set<Table> tables = new HashSet<Table>();
 	Set<FK> foreignKeys = new HashSet<FK>();

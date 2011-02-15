@@ -1,17 +1,18 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 import java.util.HashSet;
 import java.util.Set;
 
+//TODO: extends DBObject?
 public class FK {
 	String name;
-	String pkTable;
-	String fkTable;
-	String pkTableSchemaName;
-	String fkTableSchemaName;
+	public String pkTable;
+	public String fkTable;
+	public String pkTableSchemaName;
+	public String fkTableSchemaName;
 
-	Set<String> pkColumns = new HashSet<String>();
-	Set<String> fkColumns = new HashSet<String>();
+	public Set<String> pkColumns = new HashSet<String>();
+	public Set<String> fkColumns = new HashSet<String>();
 	
 	@Override
 	public String toString() {

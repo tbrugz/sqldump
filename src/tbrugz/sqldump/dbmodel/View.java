@@ -1,7 +1,7 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 public class View extends DBObject {
-	String query;
+	public String query;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

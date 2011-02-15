@@ -1,17 +1,16 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Table {
-	String schemaName;
-	String name;
-	TableType type;
-	List<Column> columns = new ArrayList<Column>();
-	List<Grant> grants = new ArrayList<Grant>();
-	String pkConstraintName;
+
+public class Table extends DBObject {
+	public TableType type;
+	public List<Column> columns = new ArrayList<Column>();
+	public List<Grant> grants = new ArrayList<Grant>();
+	public String pkConstraintName;
 	
-	Column getColumn(String name) {
+	public Column getColumn(String name) {
 		if(name==null) return null;
 		for(Column c: columns) {
 			if(name.equals(c.name)) return c;
@@ -26,24 +25,14 @@ public class Table {
 		//return "Table[name:"+name+"]";
 	}
 
+	@Override
+	public String getDefinition(boolean dumpSchemaName) {
+		// TODO Table: getDefinition
+		return null;
+	}
+
 	//---------
 	
-	public String getSchemaName() {
-		return schemaName;
-	}
-
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public TableType getType() {
 		return type;
 	}

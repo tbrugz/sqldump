@@ -1,23 +1,25 @@
 package tbrugz.sqldump.graph;
 
-import java.util.HashMap;
+import java.io.File;
+import java.io.PrintStream;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Link;
-import tbrugz.sqldump.Column;
-import tbrugz.sqldump.FK;
 import tbrugz.sqldump.SQLDataDump;
 import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.Table;
+import tbrugz.sqldump.SchemaModelDumper;
+import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.xml.AbstractDump;
 
-public class Schema2GraphML {
+public class Schema2GraphML extends SchemaModelDumper {
 	
 	static Log log = LogFactory.getLog(AbstractDump.class);
 
@@ -84,5 +86,19 @@ public class Schema2GraphML {
 		l.setSource(fk.getSourceId());
 		l.setTarget(fk.getTargetId());
 		return l;
+	}
+
+	@Override
+	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+		Root r = Schema2GraphML.getGraphMlModel(schemaModel);
+		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
+		dg.dumpModel(r, new PrintStream(output));
+	}
+	
+	File output;
+	
+	@Override
+	public void setOutput(File output) {
+		this.output = output;
 	}
 }

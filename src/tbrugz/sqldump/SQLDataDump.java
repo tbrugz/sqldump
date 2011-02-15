@@ -7,24 +7,29 @@ import java.math.BigDecimal;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.graphml.model.Root;
-import tbrugz.graphml.DumpGraphMLModel;
-import tbrugz.sqldump.graph.DumpSchemaGraphMLModel;
+import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.graph.Schema2GraphML;
 
 /*
- * XXX~(database dependent): DDL: grab contents from procedures, triggers and views 
+ * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
  * TODO: option of data dump with INSERT INTO
  * TODOne: generate graphml from schema structure
  * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
- * TODO: unique constraints? indexes...
+ * TODO: unique constraints? indexes?
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables to dump
  * XXX: usePrecision should be defined by java code (not .properties)
  * XXX: generate "alter table" database script from graphML changes
- * 
+ * XXX: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
+ * XXX: dump different objects to different files (using log4j?)
+ * XXX: compact grant syntax
  */
 public class SQLDataDump {
 	
@@ -212,7 +217,7 @@ public class SQLDataDump {
 		if(dbSpecificFeaturesClass!=null) {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				DbmgrFeatures of = (DbmgrFeatures) c.newInstance();
+				DBMSFeatures of = (DBMSFeatures) c.newInstance();
 				//DbmgrFeatures of = new OracleFeatures();
 				of.grabDBObjects(model, schemaPattern, conn);
 			} catch (ClassNotFoundException e) {
@@ -324,7 +329,7 @@ public class SQLDataDump {
 			FK fk = fks.get(fkName);
 			if(fk==null) {
 				fk = new FK();
-				fk.name = fkName;
+				fk.setName(fkName);
 				fks.put(fkName, fk);
 			}
 			if(fk.pkTable==null) {
@@ -367,12 +372,6 @@ public class SQLDataDump {
 		fos.write(s+"\n");
 	}
 	
-	void dumpGraph(SchemaModel sm) throws FileNotFoundException {
-		Root r = Schema2GraphML.getGraphMlModel(sm);
-		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
-		dg.dumpModel(r, new PrintStream("output/schema.graphml"));
-	}
-	
 	void tests() throws Exception {
 		log.info("some tests...");
 
@@ -410,8 +409,14 @@ public class SQLDataDump {
 		}
 		if(sdd.doSchemaDump) {
 			SchemaModel sm = sdd.grabSchema();
+			
+			//script dump
 			sdd.schemaDumper.dumpSchema(sm);
-			sdd.dumpGraph(sm);
+			
+			//graphml dump
+			SchemaModelDumper s2gml = new Schema2GraphML();
+			s2gml.setOutput(new File("output/schema.graphml"));
+			s2gml.dumpSchema(sm);
 		}
 		if(sdd.doDataDump) {
 			sdd.dumpData();

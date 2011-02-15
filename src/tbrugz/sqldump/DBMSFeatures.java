@@ -3,6 +3,6 @@ package tbrugz.sqldump;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public interface DbmgrFeatures {
+public interface DBMSFeatures {
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
 }

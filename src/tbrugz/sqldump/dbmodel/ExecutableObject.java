@@ -1,8 +1,8 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 public class ExecutableObject extends DBObject {
-	String type;
-	String body;
+	public String type;
+	public String body;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

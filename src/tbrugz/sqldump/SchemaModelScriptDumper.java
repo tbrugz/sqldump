@@ -7,11 +7,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.dbmodel.View;
+
 /*
  * TODO: compact Grant dump
  */
-public class SchemaModelScriptDumper {
+public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
+	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
+
 	FileWriter fos;
 	
 	boolean dumpWithSchemaName;
@@ -28,16 +40,29 @@ public class SchemaModelScriptDumper {
 		this.fos = fos;
 	}
 
+	/* (non-Javadoc)
+	 * @see tbrugz.sqldump.SchemaModelDumper#isDumpWithSchemaName()
+	 */
+	@Override
 	public boolean isDumpWithSchemaName() {
 		return dumpWithSchemaName;
 	}
 
+	/* (non-Javadoc)
+	 * @see tbrugz.sqldump.SchemaModelDumper#setDumpWithSchemaName(boolean)
+	 */
+	@Override
 	public void setDumpWithSchemaName(boolean dumpWithSchemaName) {
 		this.dumpWithSchemaName = dumpWithSchemaName;
 	}
 
-	void dumpSchema(SchemaModel schemaModel) throws Exception {
-		System.out.println("from: "+fromDbId+"; to: "+toDbId+"\n->"+columnTypeMapping);
+	/* (non-Javadoc)
+	 * @see tbrugz.sqldump.SchemaModelDumper#dumpSchema(tbrugz.sqldump.SchemaModel)
+	 */
+	@Override
+	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+		log.debug("from: "+fromDbId+"; to: "+toDbId);
+		log.debug("props->"+columnTypeMapping);
 		
 		StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
@@ -107,7 +132,7 @@ public class SchemaModelScriptDumper {
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
 		for(FK fk: foreignKeys) {
 			out("alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
-				+"\n\tadd constraint "+fk.name
+				+"\n\tadd constraint "+fk.getName()
 				+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
 				")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n");
 		}
@@ -117,7 +142,7 @@ public class SchemaModelScriptDumper {
 		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
-				sb.append("\tconstraint "+fk.name+" foreign key ("+Utils.join(fk.fkColumns, ", ")
+				sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
 					+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
 			}
 		}

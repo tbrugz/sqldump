@@ -1,8 +1,8 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 public class Trigger extends DBObject {
-	String description;
-	String body;
+	public String description;
+	public String body;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

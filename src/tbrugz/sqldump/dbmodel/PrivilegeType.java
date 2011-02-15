@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 public enum PrivilegeType {
 	SELECT, INSERT, UPDATE, DELETE, ALTER, REFERENCES, INDEX;

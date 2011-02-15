@@ -7,7 +7,11 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-public class OracleFeatures implements DbmgrFeatures {
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.dbmodel.View;
+
+public class OracleFeatures implements DBMSFeatures {
 	static Logger log = Logger.getLogger(OracleFeatures.class);
 
 	/* (non-Javadoc)
