@@ -66,7 +66,6 @@ public class SQLDataDump {
 	
 	static Logger log = Logger.getLogger(SQLDataDump.class);
 	
-	FileWriter fos;
 	Connection conn;
 	
 	//model
@@ -97,8 +96,9 @@ public class SQLDataDump {
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);
 		
 		//inicializa arquivo de saida
-		fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE)); 
-		schemaDumper = new SchemaModelScriptDumper(fos);
+		//fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE)); 
+		schemaDumper = new SchemaModelScriptDumper();
+		schemaDumper.setOutput(new File(papp.getProperty(PROP_OUTPUTFILE)));
 		
 		//inicializa variaveis controle
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
@@ -127,7 +127,7 @@ public class SQLDataDump {
 
 	void end() throws Exception {
 		log.info("...done");
-		fos.close();
+		//fos.close();
 		conn.close();
 	}
 
@@ -352,22 +352,26 @@ public class SQLDataDump {
 	}
 	
 	void dumpData() throws Exception {
+		FileWriter fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE));
 		log.info("data dumping...");
+		
 		for(String table: tableNamesForDataDump) {
 			Statement st = conn.createStatement();
 			log.debug("dumping data from table: "+table);
 			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
-			out("\n[table "+table+"]\n");
+			out("\n[table "+table+"]\n", fos);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 			while(rs.next()) {
-				out(getRowFromRS(rs, numCol, table));
+				out(getRowFromRS(rs, numCol, table), fos);
 			}
 			rs.close();
 		}
+		
+		fos.close();
 	}
 	
-	void out(String s) throws IOException {
+	void out(String s, FileWriter fos) throws IOException {
 		//logOutput.info(s);
 		fos.write(s+"\n");
 	}

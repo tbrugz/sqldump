@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
 
+	File fileOutput;
 	FileWriter fos;
 	
 	boolean dumpWithSchemaName;
@@ -36,8 +38,13 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	String fromDbId, toDbId;
 	
 	
-	public SchemaModelScriptDumper(FileWriter fos) {
+	/*public SchemaModelScriptDumper(FileWriter fos) {
 		this.fos = fos;
+	}*/
+	
+	@Override
+	public void setOutput(File output) {
+		this.fileOutput = output;
 	}
 
 	/* (non-Javadoc)
@@ -61,6 +68,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	 */
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+		fos = new FileWriter(fileOutput);
+		
 		log.debug("from: "+fromDbId+"; to: "+toDbId);
 		log.debug("props->"+columnTypeMapping);
 		
@@ -127,6 +136,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			out("-- "+eo.type+" "+eo.name+"\n");
 			out(eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
+		
+		fos.close();
 	}
 	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
