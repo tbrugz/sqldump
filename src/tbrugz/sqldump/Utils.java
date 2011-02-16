@@ -8,9 +8,9 @@ public class Utils {
 	 * http://snippets.dzone.com/posts/show/91
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
 	 */
-	public static String join(Collection<String> s, String delimiter) {
+	public static String join(Collection<?> s, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
-		Iterator<String> iter = s.iterator();
+		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
 			buffer.append(iter.next());
 			if (iter.hasNext()) {

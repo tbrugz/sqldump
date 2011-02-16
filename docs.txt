@@ -96,6 +96,10 @@ else if(objectType!=null && objectType.equalsIgnoreCase("VIEW"))
 else
 	sql="SELECT TEXT SOURCE FROM USER_SOURCE WHERE NAME = '"+objectName+"' AND TYPE='"+objectType+"'";
 
+SELECT MIN_VALUE, MAX_VALUE, INCREMENT_BY, LAST_NUMBER FROM USER_SEQUENCES WHERE SEQUENCE_NAME = '"+ sequenceName + "'
+
+SELECT TABLE_NAME, COLUMN_NAME, COLUMN_POSITION FROM USER_IND_COLUMNS WHERE INDEX_NAME = '"+ indxName + "'
+
 -------------
 
 
@@ -135,4 +139,10 @@ where type='TYPE'
 select * from user_source
 where type='JAVA SOURCE'
 
-	
+
+--------------
+
+
+select * from all_objects where object_name like 'USER_%'
+
+SELECT MIN_VALUE, MAX_VALUE, INCREMENT_BY, LAST_NUMBER FROM USER_SEQUENCES WHERE SEQUENCE_NAME = '"+ sequenceName + "'	

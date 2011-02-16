@@ -6,8 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -15,14 +19,12 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
-/*
- * TODO: compact Grant dump
- */
 public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
@@ -135,13 +137,15 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.append("\n);\n");
 			
 			//Grants
+			sb.append(compactGrantDump(table.grants,tableName));
+			/*
 			for(Grant grant: table.grants) {
 				sb.append("grant "+grant.privilege
 						+" on "+tableName
 						+" to "+grant.grantee
 						+(grant.withGrantOption?" WITH GRANT OPTION":"")
 						+";\n");
-			}
+			}*/
 			out(sb.toString());
 		}
 		
@@ -198,4 +202,61 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		fos.write(s+"\n");
 	}
 	
+	String compactGrantDump(List<Grant> grants, String tableName) {
+		Map<String, Set<PrivilegeType>> mapWithGrant = new HashMap<String, Set<PrivilegeType>>();
+		Map<String, Set<PrivilegeType>> mapWOGrant = new HashMap<String, Set<PrivilegeType>>();
+		
+		for(Grant g: grants) {
+			if(g.withGrantOption) {
+    			Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
+    			if(privs==null) {
+    				privs = new HashSet<PrivilegeType>();
+    				mapWithGrant.put(g.grantee, privs);
+    			}
+    			privs.add(g.privilege);
+			}
+			else {
+    			Set<PrivilegeType> privs = mapWOGrant.get(g.grantee);
+    			if(privs==null) {
+    				privs = new HashSet<PrivilegeType>();
+    				mapWOGrant.put(g.grantee, privs);
+    			}
+    			privs.add(g.privilege);
+			}
+		}
+		
+		StringBuffer sb = new StringBuffer();
+		
+		for(String grantee: mapWithGrant.keySet()) {
+			Set<PrivilegeType> privs = mapWithGrant.get(grantee);
+			String privsStr = Utils.join(privs, ", ");
+			sb.append("grant "+privsStr
+					+" on "+tableName
+					+" to "+grantee
+					+" WITH GRANT OPTION"+";\n");
+			/*for(PrivilegeType priv: privs) {
+    			sb.append("grant "+priv
+    					+" on "+tableName
+    					+" to "+grantee
+    					+" WITH GRANT OPTION"+";\n");
+			}*/
+		}
+
+		for(String grantee: mapWOGrant.keySet()) {
+			Set<PrivilegeType> privs = mapWOGrant.get(grantee);
+			String privsStr = Utils.join(privs, ", ");
+			sb.append("grant "+privsStr
+					+" on "+tableName
+					+" to "+grantee
+					+";\n");
+			/*for(PrivilegeType priv: privs) {
+    			sb.append("grant "+priv
+    					+" on "+tableName
+    					+" to "+grantee
+    					+";\n");
+			}*/
+		}
+		
+		return sb.toString();
+	}
 }
