@@ -28,7 +28,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXX: usePrecision should be defined by java code (not .properties)
  * XXX: generate "alter table" database script from graphML changes
  * XXX: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
- * XXX: dump different objects to different files (using log4j?)
+ * XXX: dump different objects to different files (using log4j - different loggers?)
  * XXX: compact grant syntax
  */
 public class SQLDataDump {
@@ -68,19 +68,15 @@ public class SQLDataDump {
 	
 	Connection conn;
 	
-	//model
+	//tables OK for data dump
 	List<String> tableNamesForDataDump = new Vector<String>();
 
-	//dumper
-	SchemaModelScriptDumper schemaDumper;
-	
 	Properties papp = new Properties();
 	Properties columnTypeMapping = new Properties();
 	
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
-	boolean doSchemaDumpPKs = false, doSchemaDumpFKs = false, doSchemaDumpFKsAtEnd = false, doSchemaDumpGrants = false;   
-	boolean dumpWithSchemaName = false;
-	boolean dumpSynonymAsTable = false, dumpViewAsTable = false;
+	//XXX: remove below?
+	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false;
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -95,31 +91,17 @@ public class SQLDataDump {
 
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);
 		
-		//inicializa arquivo de saida
-		//fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE)); 
-		schemaDumper = new SchemaModelScriptDumper();
-		schemaDumper.setOutput(new File(papp.getProperty(PROP_OUTPUTFILE)));
-		
 		//inicializa variaveis controle
 		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
-		doSchemaDumpPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
-		doSchemaDumpFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
-		doSchemaDumpGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		doSchemaGrabPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		doSchemaGrabFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
+		//doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		doSchemaGrabGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
+		//dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
+		//dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		//dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 
 		columnTypeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
-		
-		schemaDumper.setDumpWithSchemaName(dumpWithSchemaName);
-		schemaDumper.dumpPKs = doSchemaDumpPKs;
-		schemaDumper.fromDbId = papp.getProperty(PROP_FROM_DB_ID);
-		schemaDumper.toDbId = papp.getProperty(PROP_TO_DB_ID);
-		schemaDumper.columnTypeMapping = columnTypeMapping;
-		schemaDumper.dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
-		schemaDumper.dumpSynonymAsTable = dumpSynonymAsTable;
-		schemaDumper.dumpViewAsTable = dumpViewAsTable;
 		
 		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
@@ -127,7 +109,6 @@ public class SQLDataDump {
 
 	void end() throws Exception {
 		log.info("...done");
-		//fos.close();
 		conn.close();
 	}
 
@@ -167,21 +148,21 @@ public class SQLDataDump {
 				}
 				
 				//PKs
-				if(doSchemaDumpPKs) {
+				if(doSchemaGrabPKs) {
 					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
 					grabSchemaPKs(pks, table);
 					pks.close();
 				}
 
 				//FKs
-				if(doSchemaDumpFKs) {
+				if(doSchemaGrabFKs) {
 					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					fkrs.close();
 				}
 				
 				//GRANTs
-				if(doSchemaDumpGrants) {
+				if(doSchemaGrabGrants) {
 					ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
 					table.grants = grabSchemaGrants(grantrs, tableName);
 					grantrs.close();
@@ -211,14 +192,12 @@ public class SQLDataDump {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		//schemaDumper.fromDbId
-		//TODO: test sqldump.usedbspeficicfeatures
-		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbmgr."+schemaDumper.fromDbId+".specificgrabclass");
+		//TODO: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
+		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				//DbmgrFeatures of = new OracleFeatures();
 				of.grabDBObjects(model, schemaPattern, conn);
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -250,7 +229,6 @@ public class SQLDataDump {
 		String colType = c.type;
 		if(fromDbId!=null) {
 			String ansiColType = typeMapping.getProperty("from."+fromDbId+"."+colType);
-			//String newColType = ansiColType; 
 			if(ansiColType!=null) { colType = ansiColType; }
 		}
 		if(toDbId!=null) {	
@@ -317,7 +295,6 @@ public class SQLDataDump {
 	void grabSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
-		//dumpRS(fks);
 		while(fkrs.next()) {
 			//log.debug("FK!!!");
 			String fkName = fkrs.getString("FK_NAME");
@@ -335,8 +312,6 @@ public class SQLDataDump {
 			if(fk.pkTable==null) {
 				fk.pkTable = fkrs.getString("PKTABLE_NAME");
 				fk.fkTable = fkrs.getString("FKTABLE_NAME");
-				//fk.pkTable = fkrs.getString("PKTABLE_SCHEM")+"."+fkrs.getString("PKTABLE_NAME");
-				//fk.fkTable = fkrs.getString("FKTABLE_SCHEM")+"."+fkrs.getString("FKTABLE_NAME");
 				fk.pkTableSchemaName = fkrs.getString("PKTABLE_SCHEM");
 				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
 			}
@@ -345,9 +320,6 @@ public class SQLDataDump {
 		}
 		for(String key: fks.keySet()) {
 			foreignKeys.add(fks.get(key));
-			/*if(!doSchemaDumpFKsAtEnd) {
-				sb.append("\tconstraint "+key+" foreign key ("+join(fks.get(key).fkColumns, ", ")+") references "+fks.get(key).pkTable+" ("+join(fks.get(key).pkColumns, ", ")+"),\n");
-			}*/
 		}
 	}
 	
@@ -372,7 +344,6 @@ public class SQLDataDump {
 	}
 	
 	void out(String s, FileWriter fos) throws IOException {
-		//logOutput.info(s);
 		fos.write(s+"\n");
 	}
 	
@@ -415,11 +386,14 @@ public class SQLDataDump {
 			SchemaModel sm = sdd.grabSchema();
 			
 			//script dump
-			sdd.schemaDumper.dumpSchema(sm);
+			SchemaModelDumper schemaDumper = new SchemaModelScriptDumper();
+			schemaDumper.procProperties(sdd.papp);
+			schemaDumper.dumpSchema(sm);
 			
 			//graphml dump
 			SchemaModelDumper s2gml = new Schema2GraphML();
-			s2gml.setOutput(new File("output/schema.graphml"));
+			s2gml.procProperties(sdd.papp);
+			//s2gml.setOutput(new File("output/schema.graphml"));
 			s2gml.dumpSchema(sm);
 		}
 		if(sdd.doDataDump) {

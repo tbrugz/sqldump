@@ -8,6 +8,7 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
@@ -21,6 +22,7 @@ public class OracleFeatures implements DBMSFeatures {
 		grabDBViews(model, schemaPattern, conn);
 		grabDBTriggers(model, schemaPattern, conn);
 		grabDBExecutables(model, schemaPattern, conn);
+		grabDBSynonyms(model, schemaPattern, conn);
 	}
 	
 	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -63,7 +65,7 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.triggers.size()+" triggers grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		log.info(model.triggers.size()+" triggers grabbed");
 	}
 
 	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -96,7 +98,27 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.executables.size()+" executable objects grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		log.info(model.executables.size()+" executable objects grabbed");
+	}
+
+	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		String query = "select synonym_name, table_owner, table_name, db_link from user_synonyms";
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			Synonym s = new Synonym();
+			s.name = rs.getString(1);
+			s.schemaName = schemaPattern;
+			s.objectOwner = rs.getString(2);
+			s.referencedObject = rs.getString(3);
+			s.dbLink = rs.getString(4);
+			model.synonyms.add(s);
+			count++;
+		}
+		
+		log.info(model.synonyms.size()+" synonyms grabbed");
 	}
 	
 }

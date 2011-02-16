@@ -5,6 +5,7 @@ import java.util.Set;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -15,6 +16,7 @@ public class SchemaModel {
 	Set<View> views = new HashSet<View>();
 	Set<Trigger> triggers = new HashSet<Trigger>();
 	Set<ExecutableObject> executables = new HashSet<ExecutableObject>();
+	Set<Synonym> synonyms = new HashSet<Synonym>();
 
 	public Set<Table> getTables() {
 		return tables;

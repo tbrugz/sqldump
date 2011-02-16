@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +15,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -29,13 +31,42 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	FileWriter fos;
 	
 	boolean dumpWithSchemaName;
-	boolean dumpPKs;
+	boolean doSchemaDumpPKs;
 	boolean dumpFKsInsideTable;
 	boolean dumpSynonymAsTable;
 	boolean dumpViewAsTable;
 	
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
+	
+	@Override
+	public void procProperties(Properties prop) {
+		setOutput(new File(prop.getProperty(SQLDataDump.PROP_OUTPUTFILE)));
+		
+		//init control vars
+		doSchemaDumpPKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
+		boolean doSchemaDumpFKsAtEnd = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
+		dumpWithSchemaName = prop.getProperty(SQLDataDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
+		dumpSynonymAsTable = prop.getProperty(SQLDataDump.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		dumpViewAsTable = prop.getProperty(SQLDataDump.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+
+		//dumpPKs = doSchemaDumpPKs;
+		fromDbId = prop.getProperty(SQLDataDump.PROP_FROM_DB_ID);
+		toDbId = prop.getProperty(SQLDataDump.PROP_TO_DB_ID);
+		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
+		
+		columnTypeMapping = new Properties();
+		try {
+			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE);
+			if(is==null) throw new IOException("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+			columnTypeMapping.load(is);
+		}
+		catch(IOException ioe) {
+			log.warn("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+		}
+	}
 	
 	
 	/*public SchemaModelScriptDumper(FileWriter fos) {
@@ -50,7 +81,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.SchemaModelDumper#isDumpWithSchemaName()
 	 */
-	@Override
 	public boolean isDumpWithSchemaName() {
 		return dumpWithSchemaName;
 	}
@@ -58,7 +88,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.SchemaModelDumper#setDumpWithSchemaName(boolean)
 	 */
-	@Override
 	public void setDumpWithSchemaName(boolean dumpWithSchemaName) {
 		this.dumpWithSchemaName = dumpWithSchemaName;
 	}
@@ -70,8 +99,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		fos = new FileWriter(fileOutput);
 		
-		log.debug("from: "+fromDbId+"; to: "+toDbId);
-		log.debug("props->"+columnTypeMapping);
+		log.info("from: "+fromDbId+"; to: "+toDbId);
+		log.info("props->"+columnTypeMapping);
 		
 		StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
@@ -94,7 +123,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 				sb.append("\t"+colDesc+",\n");
 			}
 			//PKs
-			if(dumpPKs && pkCols.size()>0) {
+			if(doSchemaDumpPKs && pkCols.size()>0) {
 				sb.append("\tconstraint "+table.pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
 			}
 			//FKs?
@@ -135,6 +164,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		for(ExecutableObject eo: schemaModel.executables) {
 			out("-- "+eo.type+" "+eo.name+"\n");
 			out(eo.getDefinition(dumpWithSchemaName)+"\n");
+		}
+
+		//Synonyms
+		for(Synonym s: schemaModel.synonyms) {
+			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
 		
 		fos.close();

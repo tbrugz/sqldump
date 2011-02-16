@@ -3,6 +3,7 @@ package tbrugz.sqldump.graph;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -22,7 +23,11 @@ import tbrugz.xml.AbstractDump;
 public class Schema2GraphML extends SchemaModelDumper {
 	
 	static Log log = LogFactory.getLog(AbstractDump.class);
+	
+	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 
+	File output;
+	
 	public static Root getGraphMlModel(SchemaModel schemaModel) {
 		Root graphModel = new Root();
 		
@@ -95,10 +100,14 @@ public class Schema2GraphML extends SchemaModelDumper {
 		dg.dumpModel(r, new PrintStream(output));
 	}
 	
-	File output;
-	
 	@Override
 	public void setOutput(File output) {
 		this.output = output;
+	}
+	
+	@Override
+	public void procProperties(Properties prop) {
+		String s = prop.getProperty(PROP_OUTPUTFILE);
+		setOutput(new File(s));
 	}
 }
