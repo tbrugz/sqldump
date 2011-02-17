@@ -7,11 +7,11 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -222,7 +222,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			if(g.withGrantOption) {
     			Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
     			if(privs==null) {
-    				privs = new HashSet<PrivilegeType>();
+    				privs = new TreeSet<PrivilegeType>();
     				mapWithGrant.put(g.grantee, privs);
     			}
     			privs.add(g.privilege);
@@ -230,7 +230,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			else {
     			Set<PrivilegeType> privs = mapWOGrant.get(g.grantee);
     			if(privs==null) {
-    				privs = new HashSet<PrivilegeType>();
+    				privs = new TreeSet<PrivilegeType>();
     				mapWOGrant.put(g.grantee, privs);
     			}
     			privs.add(g.privilege);

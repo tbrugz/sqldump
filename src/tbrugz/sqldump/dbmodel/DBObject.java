@@ -1,6 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
-public abstract class DBObject {
+public abstract class DBObject implements Comparable<DBObject> {
 	public String schemaName;
 	public String name;
 
@@ -22,4 +22,9 @@ public abstract class DBObject {
 	
 	//XXX: sql dialect param?
 	public abstract String getDefinition(boolean dumpSchemaName);
+	
+	public int compareTo(DBObject o) {
+		return name.compareTo(o.name);
+	}
+	
 }

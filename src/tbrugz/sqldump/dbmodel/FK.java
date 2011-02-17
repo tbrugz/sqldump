@@ -3,8 +3,8 @@ package tbrugz.sqldump.dbmodel;
 import java.util.HashSet;
 import java.util.Set;
 
-//TODO: extends DBObject?
-public class FK {
+//XXX~: extends DBObject?
+public class FK implements Comparable<FK>{
 	String name;
 	public String pkTable;
 	public String fkTable;
@@ -36,4 +36,12 @@ public class FK {
 		return fkTableSchemaName+"."+fkTable;
 	}
 
+	public int compareTo(FK o) {
+		int fkCompare = fkTable.compareTo(o.fkTable);
+		if(fkCompare==0) { //if same FK Table, compare FK Name
+			return name.compareTo(o.name);
+		}
+		return fkCompare;
+		// return name.compareTo(o.name);
+	}
 }

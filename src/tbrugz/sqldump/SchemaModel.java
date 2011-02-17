@@ -1,9 +1,7 @@
 package tbrugz.sqldump;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
@@ -15,14 +13,14 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class SchemaModel {
-	Set<Table> tables = new HashSet<Table>();
-	Set<FK> foreignKeys = new HashSet<FK>();
-	Set<View> views = new HashSet<View>();
-	Set<Trigger> triggers = new HashSet<Trigger>();
-	Set<ExecutableObject> executables = new HashSet<ExecutableObject>();
-	Set<Synonym> synonyms = new HashSet<Synonym>();
-	Set<Index> indexes = new HashSet<Index>();
-	List<Sequence> sequences = new ArrayList<Sequence>();
+	Set<Table> tables = new TreeSet<Table>();
+	Set<FK> foreignKeys = new TreeSet<FK>();
+	Set<View> views = new TreeSet<View>();
+	Set<Trigger> triggers = new TreeSet<Trigger>();
+	Set<ExecutableObject> executables = new TreeSet<ExecutableObject>();
+	Set<Synonym> synonyms = new TreeSet<Synonym>();
+	Set<Index> indexes = new TreeSet<Index>();
+	Set<Sequence> sequences = new TreeSet<Sequence>();
 
 	public Set<Table> getTables() {
 		return tables;
@@ -54,6 +52,5 @@ public class SchemaModel {
 	public void setExecutables(Set<ExecutableObject> executables) {
 		this.executables = executables;
 	}
-	
 	
 }
