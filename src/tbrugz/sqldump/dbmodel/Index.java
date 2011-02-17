@@ -5,6 +5,9 @@ import java.util.List;
 
 import tbrugz.sqldump.Utils;
 
+/*
+ * see: http://download.oracle.com/docs/cd/B19306_01/server.102/b14200/statements_5010.htm
+ */
 public class Index extends DBObject {
 	
 	public boolean unique;

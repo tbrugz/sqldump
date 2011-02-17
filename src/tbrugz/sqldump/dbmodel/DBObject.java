@@ -20,5 +20,6 @@ public abstract class DBObject {
 		this.name = name;
 	}
 	
+	//XXX: sql dialect param?
 	public abstract String getDefinition(boolean dumpSchemaName);
 }

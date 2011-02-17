@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -25,6 +26,7 @@ public class OracleFeatures implements DBMSFeatures {
 		grabDBExecutables(model, schemaPattern, conn);
 		grabDBSynonyms(model, schemaPattern, conn);
 		grabDBIndexes(model, schemaPattern, conn);
+		grabDBSequences(model, schemaPattern, conn);
 	}
 	
 	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -171,6 +173,26 @@ public class OracleFeatures implements DBMSFeatures {
 		model.indexes.add(idx);
 		
 		log.info(model.indexes.size()+" indexes grabbed");
+	}
+
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		String query = "select sequence_name, min_value, increment_by, last_number from user_sequences order by sequence_name";
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			Sequence s = new Sequence();
+			s.name = rs.getString(1);
+			s.schemaName = schemaPattern;
+			s.minValue = rs.getLong(2);
+			s.incrementBy = rs.getLong(3);
+			s.lastNumber = rs.getLong(4);
+			model.sequences.add(s);
+			count++;
+		}
+		
+		log.info(model.sequences.size()+" sequences grabbed");
 	}
 	
 }

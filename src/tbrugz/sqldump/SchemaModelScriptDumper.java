@@ -21,6 +21,7 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
@@ -102,8 +103,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		fos = new FileWriter(fileOutput);
 		
-		log.info("from: "+fromDbId+"; to: "+toDbId);
-		log.info("props->"+columnTypeMapping);
+		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
+		log.debug("props->"+columnTypeMapping);
 		
 		StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
@@ -179,6 +180,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		//Indexes
 		for(Index idx: schemaModel.indexes) {
 			out(idx.getDefinition(dumpWithSchemaName)+"\n");
+		}
+
+		//Sequences
+		for(Sequence s: schemaModel.sequences) {
+			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
 		
 		fos.close();

@@ -1,11 +1,14 @@
 package tbrugz.sqldump;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
@@ -19,6 +22,7 @@ public class SchemaModel {
 	Set<ExecutableObject> executables = new HashSet<ExecutableObject>();
 	Set<Synonym> synonyms = new HashSet<Synonym>();
 	Set<Index> indexes = new HashSet<Index>();
+	List<Sequence> sequences = new ArrayList<Sequence>();
 
 	public Set<Table> getTables() {
 		return tables;
