@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
@@ -168,7 +168,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.executables) {
-			out("-- "+eo.type+" "+eo.name+"\n");
+			out("-- Executable: "+eo.type+" "+eo.name+"\n");
 			out(eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
@@ -215,8 +215,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	}
 	
 	String compactGrantDump(List<Grant> grants, String tableName) {
-		Map<String, Set<PrivilegeType>> mapWithGrant = new HashMap<String, Set<PrivilegeType>>();
-		Map<String, Set<PrivilegeType>> mapWOGrant = new HashMap<String, Set<PrivilegeType>>();
+		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
+		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
 		
 		for(Grant g: grants) {
 			if(g.withGrantOption) {

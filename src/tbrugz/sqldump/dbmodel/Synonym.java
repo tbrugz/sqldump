@@ -8,8 +8,8 @@ public class Synonym extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "CREATE "+(publik?"PUBLIC ":"")+"SYNONYM "+(dumpSchemaName?schemaName+".":"")+name
-			+" FOR "+objectOwner+"."+referencedObject
+		return "create "+(publik?"public ":"")+"synonym "+(dumpSchemaName?schemaName+".":"")+name
+			+" for "+objectOwner+"."+referencedObject
 			+(dbLink!=null?"@"+dbLink:"")+";";
 	}
 }

@@ -23,13 +23,13 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
  * TODOne: unique constraints? indexes? 
- * TODO: sequences?
+ * TODOne: sequences?
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables/objects to dump
- * XXX~: usePrecision should be defined by java code (not .properties)
- * XXX~: generate "alter table" database script from graphML changes
- * XXX: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
+ * XXX(later): usePrecision should be defined by java code (not .properties)
+ * XXX(later): generate "alter table" database script from graphML changes
+ * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
  * XXX: dump different objects to different files (using log4j - different loggers?)
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
