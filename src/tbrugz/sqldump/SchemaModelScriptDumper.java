@@ -19,6 +19,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
@@ -173,6 +174,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		//Synonyms
 		for(Synonym s: schemaModel.synonyms) {
 			out(s.getDefinition(dumpWithSchemaName)+"\n");
+		}
+
+		//Indexes
+		for(Index idx: schemaModel.indexes) {
+			out(idx.getDefinition(dumpWithSchemaName)+"\n");
 		}
 		
 		fos.close();

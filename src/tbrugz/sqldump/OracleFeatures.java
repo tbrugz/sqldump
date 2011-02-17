@@ -8,6 +8,7 @@ import java.sql.Statement;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -23,6 +24,7 @@ public class OracleFeatures implements DBMSFeatures {
 		grabDBTriggers(model, schemaPattern, conn);
 		grabDBExecutables(model, schemaPattern, conn);
 		grabDBSynonyms(model, schemaPattern, conn);
+		grabDBIndexes(model, schemaPattern, conn);
 	}
 	
 	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -97,6 +99,10 @@ public class OracleFeatures implements DBMSFeatures {
 			sb.append(rs.getString(4)); //+"\n"
 			count++;
 		}
+		if(sb!=null) {
+			eo.body = sb.toString();
+			model.executables.add(eo);
+		}
 		
 		log.info(model.executables.size()+" executable objects grabbed");
 	}
@@ -119,6 +125,52 @@ public class OracleFeatures implements DBMSFeatures {
 		}
 		
 		log.info(model.synonyms.size()+" synonyms grabbed");
+	}
+	
+	public void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		/*
+		select * from user_indexes   
+		select * from user_ind_columns
+		select * from user_ind_expressions
+		select * from user_join_ind_columns
+
+		select * from all_objects where object_name like 'USER_%'
+
+		or:
+		select dbms_metadata.get_ddl('INDEX',index_name) from user_indexes
+		see: http://www.dba-oracle.com/concepts/creating_indexes.htm
+		*/
+			
+		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.table_name, uic.column_name "
+			+"from user_indexes ui, user_ind_columns uic "
+			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
+			+"order by ui.table_owner, ui.index_name, uic.column_name";
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		Index idx = null;
+		
+		while(rs.next()) {
+			String idxName = rs.getString(2);
+			if(idx==null || !idxName.equals(idx.name)) {
+				//end last object
+				if(idx!=null) {
+					model.indexes.add(idx);
+				}
+				//new object
+				idx = new Index();
+				idx.name = idxName;
+				idx.unique = rs.getString(3).equals("UNIQUE");
+				idx.schemaName = rs.getString(1);
+				idx.tableName = rs.getString(4);
+			}
+			idx.columns.add(rs.getString(5));
+			count++;
+		}
+		model.indexes.add(idx);
+		
+		log.info(model.indexes.size()+" indexes grabbed");
 	}
 	
 }

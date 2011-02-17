@@ -26,7 +26,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables to dump
- * XXX: usePrecision should be defined by java code (not .properties)
+ * XXX~: usePrecision should be defined by java code (not .properties)
  * XXX~: generate "alter table" database script from graphML changes
  * XXX: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
  * XXX: dump different objects to different files (using log4j - different loggers?)
@@ -52,9 +52,6 @@ public class SQLDataDump {
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
-	
-	//column-type-mapping.properties
-	//static final String PROP_COLUMN_TYPE_MAPPING_ID = "type.xxx.useprecision";
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
@@ -395,7 +392,6 @@ public class SQLDataDump {
 			//graphml dump
 			SchemaModelDumper s2gml = new Schema2GraphML();
 			s2gml.procProperties(sdd.papp);
-			//s2gml.setOutput(new File("output/schema.graphml"));
 			s2gml.dumpSchema(sm);
 		}
 		if(sdd.doDataDump) {
