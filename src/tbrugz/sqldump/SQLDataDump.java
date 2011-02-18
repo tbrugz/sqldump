@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -33,6 +34,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXX: dump different objects to different files (using log4j - different loggers?)
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
+ * TODO: bitbucket project's wiki
  */
 public class SQLDataDump {
 	
@@ -48,6 +50,7 @@ public class SQLDataDump {
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
+	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
@@ -76,7 +79,7 @@ public class SQLDataDump {
 	
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	//XXX: remove below?
-	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false;
+	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
 	
 	void init() throws Exception {
 		log.info("init...");
@@ -100,6 +103,7 @@ public class SQLDataDump {
 		//dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
 		//dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
 		//dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		doSchemaGrabIndexes = papp.getProperty(PROP_DO_SCHEMADUMP_INDEXES, "").equals("true");
 
 		columnTypeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
 		
@@ -146,6 +150,7 @@ public class SQLDataDump {
 					table.columns.add(c);
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
+				cols.close();
 				
 				//PKs
 				if(doSchemaGrabPKs) {
@@ -168,7 +173,12 @@ public class SQLDataDump {
 					grantrs.close();
 				}
 				
-				cols.close();
+				//INDEXes
+				if(doSchemaGrabIndexes && !TableType.VIEW.equals(table.type)) {
+					ResultSet indexesrs = dbmd.getIndexInfo(null, schemaPattern, tableName, false, false);
+					grabSchemaIndexes(indexesrs, schemaModel.indexes);
+					indexesrs.close();
+				}
 			}
 			catch(OutOfMemoryError oome) {
 				log.warn("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
@@ -323,6 +333,31 @@ public class SQLDataDump {
 		}
 	}
 	
+	public void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
+		Index idx = null;
+		
+		while(indexesrs.next()) {
+			String idxName = indexesrs.getString("INDEX_NAME");
+			if(idxName==null) { continue; }
+			if(idx==null || !idxName.equals(idx.name)) {
+				//end last object
+				if(idx!=null) {
+					indexes.add(idx);
+				}
+				//new object
+				idx = new Index();
+				idx.name = idxName;
+				idx.unique = indexesrs.getInt("NON_UNIQUE")==0;
+				idx.schemaName = indexesrs.getString("TABLE_SCHEM");
+				idx.tableName = indexesrs.getString("TABLE_NAME");
+			}
+			idx.columns.add(indexesrs.getString("COLUMN_NAME"));
+		}
+		if(idx!=null) {
+			indexes.add(idx);
+		}
+	}
+	
 	void dumpData() throws Exception {
 		FileWriter fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE));
 		log.info("data dumping...");
@@ -369,6 +404,10 @@ public class SQLDataDump {
 
 		//log.info("test: grants...");
 		//dumpRS(dbmd.getTablePrivileges(null, "schema", "table"));
+		
+		//log.info("test: indexes...");
+		//dumpRS(dbmd.getIndexInfo(null, "schema", "table", false, false));
+		
 	}
 
 	/**

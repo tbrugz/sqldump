@@ -25,7 +25,7 @@ public class OracleFeatures implements DBMSFeatures {
 		grabDBTriggers(model, schemaPattern, conn);
 		grabDBExecutables(model, schemaPattern, conn);
 		grabDBSynonyms(model, schemaPattern, conn);
-		grabDBIndexes(model, schemaPattern, conn);
+		//grabDBIndexes(model, schemaPattern, conn);
 		grabDBSequences(model, schemaPattern, conn);
 	}
 	
@@ -128,7 +128,8 @@ public class OracleFeatures implements DBMSFeatures {
 		
 		log.info(model.synonyms.size()+" synonyms grabbed");
 	}
-	
+
+	@Deprecated
 	public void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		/*
 		select * from user_indexes   

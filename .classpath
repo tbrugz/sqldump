@@ -5,7 +5,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="D:/java/apache-log4j-1.2.15/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="D:/proj/libs-jdbc/ojdbc14.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/kmlutils"/>
 	<classpathentry kind="lib" path="D:/java/commons-logging-1.1.1/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
