@@ -147,7 +147,7 @@ public class OracleFeatures implements DBMSFeatures {
 		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.table_name, uic.column_name "
 			+"from user_indexes ui, user_ind_columns uic "
 			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
-			+"order by ui.table_owner, ui.index_name, uic.column_name";
+			+"order by ui.table_owner, ui.index_name, uic.column_position";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		

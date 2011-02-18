@@ -29,11 +29,12 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODO: recursive dump based on FKs
  * TODO: accept list of tables/objects to dump
  * XXX(later): usePrecision should be defined by java code (not .properties)
- * XXX(later): generate "alter table" database script from graphML changes
+ * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
  * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
  * XXX: dump different objects to different files (using log4j - different loggers?)
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
+ * XXX: derby/ansi specific features?
  * TODO: bitbucket project's wiki
  */
 public class SQLDataDump {
@@ -338,7 +339,7 @@ public class SQLDataDump {
 		
 		while(indexesrs.next()) {
 			String idxName = indexesrs.getString("INDEX_NAME");
-			if(idxName==null) { continue; }
+			if(idxName==null) { continue; } //each table appears to have a no-name index, maybe "oracle-only"...
 			if(idx==null || !idxName.equals(idx.name)) {
 				//end last object
 				if(idx!=null) {
