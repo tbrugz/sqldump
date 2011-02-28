@@ -27,16 +27,18 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: sequences?
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
- * TODO: accept list of tables/objects to dump
+ * TODO: accept list of schemas, tables/objects to dump
  * XXX(later): usePrecision should be defined by java code (not .properties)
  * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
  * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
  * XXXdone: dump different objects to different files (using log4j - different loggers? no!)
- * XXX: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
+ * XXXdone: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
+ * XXXdone: script output: option to group specific objects (fk, grants, index) with referencing table
+ * XXX: script output: option to output specific objects (eg FK or Grants) with specific pattern 
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
  * XXX: derby/ansi specific features?
- * TODO: bitbucket project's wiki
+ * TODOne: bitbucket project's wiki
  */
 public class SQLDataDump {
 	

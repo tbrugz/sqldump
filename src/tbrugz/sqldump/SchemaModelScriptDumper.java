@@ -32,13 +32,17 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
 
-	File fileOutput;
+	//File fileOutput;
 	
 	boolean dumpWithSchemaName;
 	boolean doSchemaDumpPKs;
 	boolean dumpFKsInsideTable;
 	boolean dumpSynonymAsTable;
 	boolean dumpViewAsTable;
+	
+	boolean dumpGrantsWithReferencingTable = false;
+	boolean dumpIndexesWithReferencingTable = false;
+	boolean dumpFKsWithReferencingTable = false;
 	
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
@@ -65,8 +69,27 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		toDbId = prop.getProperty(SQLDataDump.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
-		outputFilePattern = prop.getProperty("sqldump.outputfilepattern"); //XXX
+		outputFilePattern = prop.getProperty("sqldump.outputfilepattern"); //XXX define constant
 		if(outputFilePattern==null) { outputFilePattern = prop.getProperty(SQLDataDump.PROP_OUTPUTFILE); }
+		
+		String outputobjectswithtable = prop.getProperty("sqldump.outputobjectwithreferencingtable"); //XXX define constant
+		if(outputobjectswithtable!=null) {
+			String[] outputsWith = outputobjectswithtable.split(",");
+			for(String out: outputsWith) {
+				if("grant".equalsIgnoreCase(out.trim())) {
+					dumpGrantsWithReferencingTable = true;
+				}
+				else if("fk".equalsIgnoreCase(out.trim())) {
+					dumpFKsWithReferencingTable = true;
+				}
+				else if("index".equalsIgnoreCase(out.trim())) {
+					dumpIndexesWithReferencingTable = true;
+				}
+				else {
+					log.warn("unknown object type to output within referencing table: '"+out+"'");
+				}
+			}
+		}
 		
 		columnTypeMapping = new Properties();
 		try {
@@ -78,25 +101,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			log.warn("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
 		}
 	}
-	
-	
-	/*public SchemaModelScriptDumper(FileWriter fos) {
-		this.fos = fos;
-	}*/
-	
-	/* (non-Javadoc)
-	 * @see tbrugz.sqldump.SchemaModelDumper#isDumpWithSchemaName()
-	 */
-	public boolean isDumpWithSchemaName() {
-		return dumpWithSchemaName;
-	}
-
-	/* (non-Javadoc)
-	 * @see tbrugz.sqldump.SchemaModelDumper#setDumpWithSchemaName(boolean)
-	 */
-	public void setDumpWithSchemaName(boolean dumpWithSchemaName) {
-		this.dumpWithSchemaName = dumpWithSchemaName;
-	}
 
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.SchemaModelDumper#dumpSchema(tbrugz.sqldump.SchemaModel)
@@ -105,6 +109,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
 		log.debug("props->"+columnTypeMapping);
+		
+		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
 		StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
@@ -138,21 +144,39 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.delete(sb.length()-2, sb.length());
 			sb.append("\n);\n");
 			
-			//Grants
-			sb.append(compactGrantDump(table.grants,tableName));
-			/*
-			for(Grant grant: table.grants) {
-				sb.append("grant "+grant.privilege
-						+" on "+tableName
-						+" to "+grant.grantee
-						+(grant.withGrantOption?" WITH GRANT OPTION":"")
-						+";\n");
-			}*/
 			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
+
+			//FK outside table, with referencing table
+			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
+				for(FK fk: schemaModel.foreignKeys) {
+					if(fk.fkTable.equals(table.name)) {
+						String fkscript = fkScriptWithAlterTable(fk);
+						categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, fkscript);
+					}
+				}
+			}
+			
+			//Indexes
+			if(dumpIndexesWithReferencingTable) {
+				for(Index idx: schemaModel.indexes) {
+					//option for index output inside table
+					if(table.name.equals(idx.tableName)) {
+						categorizedOut(idx.schemaName, idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+"\n");
+					}
+				}
+			}
+
+			//Grants
+			if(dumpGrantsWithReferencingTable) {
+				String grantOutput = compactGrantDump(table.grants, tableName);
+				if(grantOutput!=null && !"".equals(grantOutput)) {
+					categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, grantOutput);
+				}
+			}
 		}
 		
 		//FKs
-		if(!dumpFKsInsideTable) {
+		if(!dumpFKsInsideTable && !dumpFKsWithReferencingTable) {
 			dumpFKsOutsideTable(schemaModel.foreignKeys);
 		}
 		
@@ -179,8 +203,21 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		}
 
 		//Indexes
-		for(Index idx: schemaModel.indexes) {
-			categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+"\n");
+		if(!dumpIndexesWithReferencingTable) {
+			for(Index idx: schemaModel.indexes) {
+				categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+"\n");
+			}
+		}
+		
+		//Grants
+		if(!dumpGrantsWithReferencingTable) {
+			for(Table table: schemaModel.tables) {
+				String tableName = (dumpWithSchemaName?table.schemaName+".":"")+table.name;
+				String grantOutput = compactGrantDump(table.grants, tableName);
+				if(grantOutput!=null && !"".equals(grantOutput)) {
+					categorizedOut(table.schemaName, table.name, DBObjectType.GRANT, grantOutput);
+				}
+			}
 		}
 
 		//Sequences
@@ -189,15 +226,33 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		}
 	}
 	
+	String fkScriptWithAlterTable(FK fk) {
+		return "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
+			+"\n\tadd "+fkSimpleScript(fk, "\n\t")+";\n";
+			
+			//"add constraint "+fk.getName()
+			//+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
+			//")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
+	}
+
+	String fkSimpleScript(FK fk, String whitespace) {
+		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
+		return "constraint "+fk.getName()
+			+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
+			")"+whitespace+"references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+")";
+	}
+	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
 		//StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
-			String fkscript = "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
-				+"\n\tadd constraint "+fk.getName()
-				+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
-				")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
+			String fkscript = fkScriptWithAlterTable(fk);
 			//sb.append(fkscript+"\n");
+			//if(dumpFKsWithReferencingTable) {
+			//	categorizedOut(fk.fkTableSchemaName, fk.fkTable, DBObjectType.TABLE, fkscript);
+			//}
+			//else {
 			categorizedOut(fk.fkTableSchemaName, fk.getName(), DBObjectType.FK, fkscript);
+			//}
 		}
 		//out(sb.toString());
 	}
@@ -206,8 +261,9 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
-				sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
-					+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
+				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
+				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
+				sb.append("\t"+fkSimpleScript(fk, " ")+",\n");
 			}
 		}
 		return sb.toString();
@@ -269,7 +325,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.append("grant "+privsStr
 					+" on "+tableName
 					+" to "+grantee
-					+" WITH GRANT OPTION"+";\n");
+					+" WITH GRANT OPTION"+";\n\n");
 			/*for(PrivilegeType priv: privs) {
     			sb.append("grant "+priv
     					+" on "+tableName
@@ -284,7 +340,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.append("grant "+privsStr
 					+" on "+tableName
 					+" to "+grantee
-					+";\n");
+					+";\n\n");
 			/*for(PrivilegeType priv: privs) {
     			sb.append("grant "+priv
     					+" on "+tableName
@@ -292,7 +348,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
     					+";\n");
 			}*/
 		}
-		
-		return sb.toString();
+
+		//return sb.toString();
+		if(sb.length()>2) {
+			return sb.substring(0, sb.length()-1);
+		}
+		return "";
 	}
 }
