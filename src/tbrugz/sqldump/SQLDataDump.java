@@ -31,7 +31,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXX(later): usePrecision should be defined by java code (not .properties)
  * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
  * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
- * XXX: dump different objects to different files (using log4j - different loggers?)
+ * XXXdone: dump different objects to different files (using log4j - different loggers? no!)
+ * XXX: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
  * XXX: derby/ansi specific features?

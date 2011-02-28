@@ -1,14 +1,16 @@
 <project name="sqldump">
 	
+	<property name="src.dir" value="src"/>
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
+	<property name="javadoc.dir" value="dist/javadoc"/>
 
 	<target name="prepare">
 		<mkdir dir="${dist.dir}"/>
+		<mkdir dir="${javadoc.dir}"/>
 	</target>
 
-	<target name="jar"
-		depends="prepare">
+	<target name="jar" depends="prepare">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties">
@@ -17,9 +19,12 @@
 			</manifest>
 		</jar>
 	</target>
+
+	<target name="javadoc" depends="prepare">
+		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
+	</target>
 	
-	<target name="dist"
-		depends="jar">
+	<target name="dist"	depends="jar">
     	<copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/>
 	</target>
 	

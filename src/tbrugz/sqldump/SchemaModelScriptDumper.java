@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
@@ -43,6 +44,12 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
 	
+	String outputFilePattern;
+	
+	static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
+	static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
+	static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
+	
 	@Override
 	public void procProperties(Properties prop) {
 		setOutput(new File(prop.getProperty(SQLDataDump.PROP_OUTPUTFILE)));
@@ -61,6 +68,9 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		toDbId = prop.getProperty(SQLDataDump.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
+		outputFilePattern = prop.getProperty("sqldump.outputfilepattern"); //XXX
+		if(outputFilePattern==null) { outputFilePattern = prop.getProperty(SQLDataDump.PROP_OUTPUTFILE); }
+		
 		columnTypeMapping = new Properties();
 		try {
 			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE);
@@ -78,6 +88,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	}*/
 	
 	@Override
+	@Deprecated
 	public void setOutput(File output) {
 		this.fileOutput = output;
 	}
@@ -148,6 +159,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 						+(grant.withGrantOption?" WITH GRANT OPTION":"")
 						+";\n");
 			}*/
+			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
 			out(sb.toString());
 		}
 		
@@ -158,32 +170,40 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		
 		//Views
 		for(View v: schemaModel.views) {
+			categorizedOut(v.schemaName, v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+"\n");
 			out(v.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Triggers
 		for(Trigger t: schemaModel.triggers) {
+			categorizedOut(t.schemaName, t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
 			out(t.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.executables) {
+			categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
+				"-- Executable: "+eo.type+" "+eo.name+"\n"
+				+eo.getDefinition(dumpWithSchemaName)+"\n");
 			out("-- Executable: "+eo.type+" "+eo.name+"\n");
 			out(eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Synonyms
 		for(Synonym s: schemaModel.synonyms) {
+			categorizedOut(s.schemaName, s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+"\n");
 			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Indexes
 		for(Index idx: schemaModel.indexes) {
+			categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+"\n");
 			out(idx.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Sequences
 		for(Sequence s: schemaModel.sequences) {
+			categorizedOut(s.schemaName, s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+"\n");
 			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
 		
@@ -191,12 +211,16 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	}
 	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
+		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
-			out("alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
+			String fkscript = "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
 				+"\n\tadd constraint "+fk.getName()
 				+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
-				")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n");
+				")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
+			sb.append(fkscript+"\n");
+			categorizedOut(fk.fkTableSchemaName, fk.getName(), DBObjectType.FK, fkscript);
 		}
+		out(sb.toString());
 	}
 	
 	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName) throws IOException {
@@ -210,8 +234,23 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		return sb.toString();
 	}
 	
+	@Deprecated
 	void out(String s) throws IOException {
 		fos.write(s+"\n");
+	}
+	
+	Set<String> filesOpened = new TreeSet<String>();
+	
+	void categorizedOut(String schemaName, String objectName, DBObjectType objectType, String message) throws IOException {
+		String outFile = outputFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
+			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
+			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);
+		boolean alreadyOpened = filesOpened.contains(outFile);
+		if(!alreadyOpened) { filesOpened.add(outFile); }
+		
+		FileWriter fos = new FileWriter(outFile, alreadyOpened);
+		fos.write(message+"\n");
+		fos.close();
 	}
 	
 	String compactGrantDump(List<Grant> grants, String tableName) {
