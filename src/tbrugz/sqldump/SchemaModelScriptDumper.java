@@ -33,7 +33,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
 
 	File fileOutput;
-	FileWriter fos;
 	
 	boolean dumpWithSchemaName;
 	boolean doSchemaDumpPKs;
@@ -52,8 +51,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		setOutput(new File(prop.getProperty(SQLDataDump.PROP_OUTPUTFILE)));
-		
 		//init control vars
 		doSchemaDumpPKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
@@ -87,12 +84,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		this.fos = fos;
 	}*/
 	
-	@Override
-	@Deprecated
-	public void setOutput(File output) {
-		this.fileOutput = output;
-	}
-
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.SchemaModelDumper#isDumpWithSchemaName()
 	 */
@@ -112,8 +103,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	 */
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
-		fos = new FileWriter(fileOutput);
-		
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
 		log.debug("props->"+columnTypeMapping);
 		
@@ -160,7 +149,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 						+";\n");
 			}*/
 			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
-			out(sb.toString());
 		}
 		
 		//FKs
@@ -171,13 +159,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		//Views
 		for(View v: schemaModel.views) {
 			categorizedOut(v.schemaName, v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+"\n");
-			out(v.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Triggers
 		for(Trigger t: schemaModel.triggers) {
 			categorizedOut(t.schemaName, t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
-			out(t.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//ExecutableObjects
@@ -185,42 +171,35 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
 				"-- Executable: "+eo.type+" "+eo.name+"\n"
 				+eo.getDefinition(dumpWithSchemaName)+"\n");
-			out("-- Executable: "+eo.type+" "+eo.name+"\n");
-			out(eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Synonyms
 		for(Synonym s: schemaModel.synonyms) {
 			categorizedOut(s.schemaName, s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+"\n");
-			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Indexes
 		for(Index idx: schemaModel.indexes) {
 			categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+"\n");
-			out(idx.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Sequences
 		for(Sequence s: schemaModel.sequences) {
 			categorizedOut(s.schemaName, s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+"\n");
-			out(s.getDefinition(dumpWithSchemaName)+"\n");
 		}
-		
-		fos.close();
 	}
 	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		//StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			String fkscript = "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
 				+"\n\tadd constraint "+fk.getName()
 				+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
 				")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
-			sb.append(fkscript+"\n");
+			//sb.append(fkscript+"\n");
 			categorizedOut(fk.fkTableSchemaName, fk.getName(), DBObjectType.FK, fkscript);
 		}
-		out(sb.toString());
+		//out(sb.toString());
 	}
 	
 	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName) throws IOException {
@@ -232,11 +211,6 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			}
 		}
 		return sb.toString();
-	}
-	
-	@Deprecated
-	void out(String s) throws IOException {
-		fos.write(s+"\n");
 	}
 	
 	Set<String> filesOpened = new TreeSet<String>();
