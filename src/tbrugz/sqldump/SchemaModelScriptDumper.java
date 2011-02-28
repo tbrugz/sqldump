@@ -222,6 +222,17 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		boolean alreadyOpened = filesOpened.contains(outFile);
 		if(!alreadyOpened) { filesOpened.add(outFile); }
 		
+		File f = new File(outFile);
+		//String dirStr = f.getParent();
+		File dir = new File(f.getParent());
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		else {
+			if(!dir.isDirectory()) {
+				throw new IOException(dir+" already exists and is not a directory");
+			}
+		}
 		FileWriter fos = new FileWriter(outFile, alreadyOpened);
 		fos.write(message+"\n");
 		fos.close();

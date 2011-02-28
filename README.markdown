@@ -1,0 +1,26 @@
+
+SQLDump
+=======
+
+Utility to dump schema and data from a RDBMS. Features:
+- Can be used with any JDBC-compliant databases. Uses (mainly) standard java API, by way of java.sql.DatabaseMetaData, for schema-dumping
+- Can do data-dumping
+- Generates Entity-Relationship diagrams based on Tables and FKs (graphML output)
+- Flexible schema output patterns (based on schema name, object type and object name)
+- Translation of features (column types, ...) between different RDBMS dialects/implementations (partial)
+
+Author: Telmo Brugnara <[tbrugz@gmail.com](tbrugz@gmail.com)>
+
+License: [AGPLv3](http://www.gnu.org/licenses/agpl.html)
+
+
+Dependencies
+------------
+- apache-commons-logging
+- log4j
+- [https://bitbucket.org/tbrugz/kmlutils](kmlutils.jar) (for graphML output)
+
+Usage
+-----
+- Edit `sqldump.properties`
+- Run `tbrugz.sqldump.SQLDataDump`
