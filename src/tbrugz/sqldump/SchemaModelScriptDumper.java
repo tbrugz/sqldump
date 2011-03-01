@@ -60,21 +60,21 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	@Override
 	public void procProperties(Properties prop) {
 		//init control vars
-		doSchemaDumpPKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		doSchemaDumpPKs = prop.getProperty(SQLDump.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		boolean doSchemaDumpFKsAtEnd = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		boolean doSchemaDumpFKsAtEnd = prop.getProperty(SQLDump.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		dumpWithSchemaName = prop.getProperty(SQLDataDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		dumpSynonymAsTable = prop.getProperty(SQLDataDump.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		dumpViewAsTable = prop.getProperty(SQLDataDump.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		dumpWithSchemaName = prop.getProperty(SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
+		dumpSynonymAsTable = prop.getProperty(SQLDump.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		dumpViewAsTable = prop.getProperty(SQLDump.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 
 		//dumpPKs = doSchemaDumpPKs;
-		fromDbId = prop.getProperty(SQLDataDump.PROP_FROM_DB_ID);
-		toDbId = prop.getProperty(SQLDataDump.PROP_TO_DB_ID);
+		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
+		toDbId = prop.getProperty(SQLDump.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
 		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
-		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(SQLDataDump.PROP_OUTPUTFILE); }
+		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(SQLDump.PROP_OUTPUTFILE); }
 		
 		String outputobjectswithtable = prop.getProperty(PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE);
 		if(outputobjectswithtable!=null) {
@@ -97,12 +97,12 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		
 		columnTypeMapping = new Properties();
 		try {
-			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE);
-			if(is==null) throw new IOException("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE);
+			if(is==null) throw new IOException("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
 			columnTypeMapping.load(is);
 		}
 		catch(IOException ioe) {
-			log.warn("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+			log.warn("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
 		}
 		this.prop = prop;
 	}
@@ -133,7 +133,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.append("create table "+tableName+" ( -- type="+table.type+"\n");
 			//Columns
 			for(Column c: table.columns) {
-				String colDesc = SQLDataDump.getColumnDesc(c, columnTypeMapping, fromDbId, toDbId);
+				String colDesc = SQLDump.getColumnDesc(c, columnTypeMapping, fromDbId, toDbId);
 				if(c.pk) { pkCols.add(c.name); }
 				sb.append("\t"+colDesc+",\n");
 			}
@@ -197,6 +197,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.executables) {
+			//TODO categorizedOut(eo.schemaName, eo.name, eo.type, 
 			categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
 				"-- Executable: "+eo.type+" "+eo.name+"\n"
 				+eo.getDefinition(dumpWithSchemaName)+"\n");
@@ -286,6 +287,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			outFilePattern = mainOutputFilePattern;
 		}
 		
+		objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
+		
 		String outFile = outFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
 			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
 			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);
@@ -303,7 +306,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 				throw new IOException(dir+" already exists and is not a directory");
 			}
 		}
-		FileWriter fos = new FileWriter(outFile, alreadyOpened);
+		FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
 		fos.write(message+"\n");
 		fos.close();
 	}

@@ -27,7 +27,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: sequences?
  * XXXdone: include Grants into SchemaModel?
  * TODO: recursive dump based on FKs
- * TODO: accept list of schemas, tables/objects to dump
+ * TODO: accept list of schemas, tables/objects to grab/dump, types of objects to grab/dump
  * XXX(later): usePrecision should be defined by java code (not .properties)
  * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
  * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
@@ -39,8 +39,10 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODO: postgresql specific features
  * XXX: derby/ansi specific features?
  * TODOne: bitbucket project's wiki
+ * TODO: main(): args: point to different .properties init files. 
+ * XXXdone: Use ${xxx} params inside Properties
  */
-public class SQLDataDump {
+public class SQLDump {
 	
 	//connection properties
 	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
@@ -71,23 +73,42 @@ public class SQLDataDump {
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
 	static final String COLUMN_TYPE_MAPPING_RESOURCE = "column-type-mapping.properties";
 	
-	static Logger log = Logger.getLogger(SQLDataDump.class);
+	static Logger log = Logger.getLogger(SQLDump.class);
 	
 	Connection conn;
 	
 	//tables OK for data dump
 	List<String> tableNamesForDataDump = new Vector<String>();
 
-	Properties papp = new Properties();
-	Properties columnTypeMapping = new Properties();
+	Properties papp = new ParametrizedProperties();
+	Properties columnTypeMapping = new ParametrizedProperties();
 	
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	//XXX: remove below?
 	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
 	
-	void init() throws Exception {
+	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
+	
+	void init(String[] args) throws Exception {
 		log.info("init...");
-		papp.load(new FileInputStream(PROPERTIES_FILENAME));
+		String propFilename = PROPERTIES_FILENAME;
+		for(String arg: args) {
+			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
+				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+			}
+			else {
+				log.warn("unrecognized param '"+arg+"'. ignoring...");
+			}
+		}
+		
+		papp.load(new FileInputStream(propFilename));
+		/*try {
+			papp.load(new FileInputStream(propFilename));
+		}
+		catch(FileNotFoundException e) {
+			log.warn("file "+propFilename+" not found. loading "+PROPERTIES_FILENAME);			
+			papp.load(new FileInputStream(PROPERTIES_FILENAME));
+		}*/
 		
 		//inicializa banco
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
@@ -109,7 +130,7 @@ public class SQLDataDump {
 		//dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 		doSchemaGrabIndexes = papp.getProperty(PROP_DO_SCHEMADUMP_INDEXES, "").equals("true");
 
-		columnTypeMapping.load(SQLDataDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
+		columnTypeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
 		
 		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
@@ -190,7 +211,7 @@ public class SQLDataDump {
 			}
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
-				sqle.printStackTrace();
+				//sqle.printStackTrace();
 				tableNamesForDataDump.remove(tableName);
 			}
 			
@@ -418,9 +439,9 @@ public class SQLDataDump {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
-		SQLDataDump sdd = new SQLDataDump();
+		SQLDump sdd = new SQLDump();
 
-		sdd.init();
+		sdd.init(args);
 		
 		if(sdd.doTests) {
 			sdd.tests();

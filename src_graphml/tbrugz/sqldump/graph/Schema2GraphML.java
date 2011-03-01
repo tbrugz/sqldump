@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Link;
-import tbrugz.sqldump.SQLDataDump;
+import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.dbmodel.Column;
@@ -51,7 +51,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 			n.setLabel(id);
 			StringBuffer sb = new StringBuffer();
 			for(Column c: t.getColumns()) {
-				sb.append(SQLDataDump.getColumnDesc(c, null, null, null)+"\n");
+				sb.append(SQLDump.getColumnDesc(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
 			

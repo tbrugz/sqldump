@@ -7,6 +7,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -95,7 +96,14 @@ public class OracleFeatures implements DBMSFeatures {
 				eo = new ExecutableObject();
 				sb = new StringBuffer();
 				eo.name = rs.getString(1);
-				eo.type = rs.getString(2);
+				try {
+					eo.type = DBObjectType.valueOf(rs.getString(2).replace(' ', '_'));
+				}
+				catch(IllegalArgumentException iae) {
+					log.warn("unknown object type: "+rs.getString(2));
+					eo.type = DBObjectType.EXECUTABLE;
+				}
+				
 				eo.schemaName = schemaPattern;
 			}
 			sb.append(rs.getString(4)); //+"\n"
