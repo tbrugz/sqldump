@@ -34,7 +34,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: dump different objects to different files (using log4j - different loggers? no!)
  * XXXdone: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
  * XXXdone: script output: option to group specific objects (fk, grants, index) with referencing table
- * XXX: script output: option to output specific objects (eg FK or Grants) with specific pattern 
+ * XXXdone: script output: option to output specific objects (eg FK or Grants) with specific pattern 
  * XXXdone: compact grant syntax
  * TODO: postgresql specific features
  * XXX: derby/ansi specific features?

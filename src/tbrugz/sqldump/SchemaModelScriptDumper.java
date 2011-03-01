@@ -47,11 +47,15 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
 	
-	String outputFilePattern;
+	String mainOutputFilePattern;
+	Properties prop;
 	
 	static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
 	static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
 	static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
+	
+	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
+	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -69,10 +73,10 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		toDbId = prop.getProperty(SQLDataDump.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
-		outputFilePattern = prop.getProperty("sqldump.outputfilepattern"); //XXX define constant
-		if(outputFilePattern==null) { outputFilePattern = prop.getProperty(SQLDataDump.PROP_OUTPUTFILE); }
+		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
+		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(SQLDataDump.PROP_OUTPUTFILE); }
 		
-		String outputobjectswithtable = prop.getProperty("sqldump.outputobjectwithreferencingtable"); //XXX define constant
+		String outputobjectswithtable = prop.getProperty(PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE);
 		if(outputobjectswithtable!=null) {
 			String[] outputsWith = outputobjectswithtable.split(",");
 			for(String out: outputsWith) {
@@ -100,6 +104,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		catch(IOException ioe) {
 			log.warn("resource "+SQLDataDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
 		}
+		this.prop = prop;
 	}
 
 	/* (non-Javadoc)
@@ -269,10 +274,19 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		return sb.toString();
 	}
 	
+	//XXXcc Map<String, FileWriter> ? not if "sqldump.outputfilepattern" contains ${objectname}
+	//Map<DBObjectType, String> outFilePatterns = new HashMap<DBObjectType, String>();
 	Set<String> filesOpened = new TreeSet<String>();
 	
 	void categorizedOut(String schemaName, String objectName, DBObjectType objectType, String message) throws IOException {
-		String outFile = outputFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
+		//String outFilePattern = outFilePatterns.get(objectType);
+		//if(outFilePatterns.containsKey(objectType)) {}
+		String outFilePattern = prop.getProperty("sqldump.outputfilepattern.bytype."+objectType.name());
+		if(outFilePattern==null) {
+			outFilePattern = mainOutputFilePattern;
+		}
+		
+		String outFile = outFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
 			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
 			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);
 		boolean alreadyOpened = filesOpened.contains(outFile);
