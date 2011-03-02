@@ -39,7 +39,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODO: postgresql specific features
  * XXX: derby/ansi specific features?
  * TODOne: bitbucket project's wiki
- * TODO: main(): args: point to different .properties init files. 
+ * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
  */
 public class SQLDump {
@@ -101,6 +101,7 @@ public class SQLDump {
 			}
 		}
 		
+		log.info("loading properties: "+propFilename);
 		papp.load(new FileInputStream(propFilename));
 		/*try {
 			papp.load(new FileInputStream(propFilename));

@@ -35,6 +35,7 @@ public class ParametrizedProperties extends Properties {
 			count = pos1+1;
 			String prop = sb.substring(pos1+2, pos2);
 			String propSuperValue = super.getProperty(prop);
+			//XXX use System.getProperty()?
 			if(propSuperValue==null) {
 				propSuperValue = System.getProperty(prop);
 			}

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -57,6 +58,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	
+	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
+	
 	@Override
 	public void procProperties(Properties prop) {
 		//init control vars
@@ -104,6 +107,21 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		catch(IOException ioe) {
 			log.warn("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
 		}
+		
+		for(DBObjectType dbtype: DBObjectType.values()) {
+			DBObjectType typeMappedTo = null;
+			String typeMappedToStr = prop.getProperty("sqldump.outputfilepattern.maptype."+dbtype.name());
+			if(typeMappedToStr==null) { continue; }
+			try {
+				typeMappedTo = DBObjectType.valueOf(typeMappedToStr);
+				mappingBetweenDBObjectTypes.put(dbtype, typeMappedTo);
+			}
+			catch(IllegalArgumentException e) {
+				log.warn("unknown object type on property file: '"+typeMappedToStr+"'");
+			}
+		}
+		//sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
+		
 		this.prop = prop;
 	}
 
@@ -197,8 +215,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.executables) {
-			//TODO categorizedOut(eo.schemaName, eo.name, eo.type, 
-			categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
+			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
+			categorizedOut(eo.schemaName, eo.name, eo.type, 
 				"-- Executable: "+eo.type+" "+eo.name+"\n"
 				+eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
@@ -282,6 +300,9 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	void categorizedOut(String schemaName, String objectName, DBObjectType objectType, String message) throws IOException {
 		//String outFilePattern = outFilePatterns.get(objectType);
 		//if(outFilePatterns.containsKey(objectType)) {}
+		DBObjectType mappedObjectType = mappingBetweenDBObjectTypes.get(objectType);
+		if(mappedObjectType!=null) { objectType = mappedObjectType; }
+		
 		String outFilePattern = prop.getProperty("sqldump.outputfilepattern.bytype."+objectType.name());
 		if(outFilePattern==null) {
 			outFilePattern = mainOutputFilePattern;
