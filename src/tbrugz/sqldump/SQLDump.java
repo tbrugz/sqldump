@@ -41,6 +41,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
+ * XXX: data dump: limit number of rows, tables to dump. define output patterns for data dump
  */
 public class SQLDump {
 	
@@ -62,6 +63,7 @@ public class SQLDump {
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
+	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
@@ -86,6 +88,7 @@ public class SQLDump {
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	//XXX: remove below?
 	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
+	boolean doSchemaGrabDbSpecific = false;
 	
 	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
 	
@@ -130,6 +133,7 @@ public class SQLDump {
 		//dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
 		//dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 		doSchemaGrabIndexes = papp.getProperty(PROP_DO_SCHEMADUMP_INDEXES, "").equals("true");
+		doSchemaGrabDbSpecific = papp.getProperty(PROP_DUMP_DBSPECIFIC, "").equals("true");
 
 		columnTypeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(COLUMN_TYPE_MAPPING_RESOURCE));
 		
@@ -167,7 +171,8 @@ public class SQLDump {
 			table.schemaName = schemaName;
 			
 			try {
-				log.debug("getting info from "+(schemaPattern==null?"":schemaPattern+".")+tableName);
+				String fullTablename = (schemaPattern==null?"":schemaPattern+".")+tableName;
+				log.debug("getting columns from "+fullTablename);
 
 				//columns
 				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
@@ -180,6 +185,7 @@ public class SQLDump {
 				
 				//PKs
 				if(doSchemaGrabPKs) {
+					log.debug("getting PKs from "+fullTablename);
 					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
 					grabSchemaPKs(pks, table);
 					pks.close();
@@ -187,6 +193,7 @@ public class SQLDump {
 
 				//FKs
 				if(doSchemaGrabFKs) {
+					log.debug("getting FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					fkrs.close();
@@ -194,13 +201,15 @@ public class SQLDump {
 				
 				//GRANTs
 				if(doSchemaGrabGrants) {
+					log.debug("getting grants from "+fullTablename);
 					ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
 					table.grants = grabSchemaGrants(grantrs, tableName);
 					grantrs.close();
 				}
 				
 				//INDEXes
-				if(doSchemaGrabIndexes && !TableType.VIEW.equals(table.type)) {
+				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.type)) {
+					log.debug("getting indexes from "+fullTablename);
 					ResultSet indexesrs = dbmd.getIndexInfo(null, schemaPattern, tableName, false, false);
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
 					indexesrs.close();
@@ -220,7 +229,9 @@ public class SQLDump {
 		}
 		rs.close();
 
-		grabDbSpecific(schemaModel, schemaPattern);
+		if(doSchemaGrabDbSpecific) {
+			grabDbSpecific(schemaModel, schemaPattern);
+		}
 		
 		log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
 		log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
@@ -228,12 +239,13 @@ public class SQLDump {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		//TODO: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
+		//TODOne: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
 		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
+				of.procProperties(papp);
 				of.grabDBObjects(model, schemaPattern, conn);
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -335,10 +347,11 @@ public class SQLDump {
 			//log.debug("FK!!!");
 			String fkName = fkrs.getString("FK_NAME");
 			if(fkName==null) {
+				log.warn("nameless FK: "+fkrs.getString("FKTABLE_NAME")+"->"+fkrs.getString("PKTABLE_NAME"));
 				fkName = "FK_"+count;
 				count++;
 			}
-			log.debug("FK!!! - "+fkName);
+			log.debug("fk: "+fkName);
 			FK fk = fks.get(fkName);
 			if(fk==null) {
 				fk = new FK();
@@ -364,7 +377,12 @@ public class SQLDump {
 		
 		while(indexesrs.next()) {
 			String idxName = indexesrs.getString("INDEX_NAME");
-			if(idxName==null) { continue; } //each table appears to have a no-name index, maybe "oracle-only"...
+			log.debug("index: "+idxName);
+			if(idxName==null) {
+				 //each table appears to have a no-name index, maybe "oracle-only"...
+				log.debug("nameless index: "+indexesrs.getString("TABLE_NAME"));
+				continue; 
+			}
 			if(idx==null || !idxName.equals(idx.name)) {
 				//end last object
 				if(idx!=null) {

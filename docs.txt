@@ -167,4 +167,17 @@ select
    dbms_metadata.get_ddl('INDEX',index_name)
 from
    user_indexes
-	
+
+--------------
+
+grabbing indexes takes too long. maybe use db specific feature for this...
+
+with "java" grab indexes:
+10:49:38,993  INFO init...
+(...)
+11:14:27,847  INFO ...done
+
+with oracle grab indexes:
+13:54:08,106  INFO init...
+(...)
+13:55:16,810  INFO ...done

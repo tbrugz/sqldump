@@ -8,6 +8,7 @@ import java.util.Properties;
 public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
+	boolean useSystemProperties = false;
 	
 	@Override
 	public String getProperty(String key, String defaultValue) {
@@ -35,10 +36,11 @@ public class ParametrizedProperties extends Properties {
 			count = pos1+1;
 			String prop = sb.substring(pos1+2, pos2);
 			String propSuperValue = super.getProperty(prop);
-			//XXX use System.getProperty()?
-			if(propSuperValue==null) {
+			
+			if(useSystemProperties && propSuperValue==null) {
 				propSuperValue = System.getProperty(prop);
 			}
+			
 			if(propSuperValue==null) { continue; }
 			
 			sb.replace(pos1, pos2+1, propSuperValue);
@@ -46,6 +48,14 @@ public class ParametrizedProperties extends Properties {
 		return sb.toString();
 	}
 	
+	public boolean isUseSystemProperties() {
+		return useSystemProperties;
+	}
+
+	public void setUseSystemProperties(boolean useSystemProperties) {
+		this.useSystemProperties = useSystemProperties;
+	}
+
 	@Deprecated
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		Properties prop = new ParametrizedProperties();
