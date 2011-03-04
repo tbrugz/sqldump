@@ -19,4 +19,14 @@ public class Utils {
 		}
 		return buffer.toString();
 	}
+	
+	public static String normalizeEnumStringConstant(String strEnumConstant) {
+		return strEnumConstant.replace(' ', '_');
+	}
+
+	/*
+	public static String denormalizeEnumStringConstant(String strEnumConstant) {
+		return strEnumConstant.replace('_', ' ');
+	}
+	*/
 }

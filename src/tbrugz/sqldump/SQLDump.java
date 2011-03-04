@@ -228,13 +228,18 @@ public class SQLDump {
 			schemaModel.tables.add(table);
 		}
 		rs.close();
+		log.info(schemaModel.tables.size()+" tables grabbed");
+		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
+		if(doSchemaGrabIndexes) {
+			log.info(schemaModel.indexes.size()+" indexes grabbed");
+		}
+		//log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
+		//log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 
 		if(doSchemaGrabDbSpecific) {
 			grabDbSpecific(schemaModel, schemaPattern);
 		}
 		
-		log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
-		log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 		return schemaModel;
 	}
 	
@@ -301,7 +306,7 @@ public class SQLDump {
 				Grant grant = new Grant();
 				
 				grant.grantee = grantrs.getString("GRANTEE");
-				grant.privilege = PrivilegeType.valueOf(grantrs.getString("PRIVILEGE"));
+				grant.privilege = PrivilegeType.valueOf(Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE")));
 				grant.table = grantrs.getString("TABLE_NAME");
 				grant.withGrantOption = "YES".equals(grantrs.getString("IS_GRANTABLE"));
 				grantsList.add(grant);

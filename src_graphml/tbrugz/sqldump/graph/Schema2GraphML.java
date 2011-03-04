@@ -20,6 +20,9 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.xml.AbstractDump;
 
+/*
+ * TODO: show PK columns, FK columns, constraints?
+ */
 public class Schema2GraphML extends SchemaModelDumper {
 	
 	static Log log = LogFactory.getLog(AbstractDump.class);
@@ -95,9 +98,12 @@ public class Schema2GraphML extends SchemaModelDumper {
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+		log.info("dumping graphML: translating model");
 		Root r = Schema2GraphML.getGraphMlModel(schemaModel);
+		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
 		dg.dumpModel(r, new PrintStream(output));
+		log.info("... graphML dumped");
 	}
 	
 	@Override

@@ -67,7 +67,7 @@ public class OracleFeatures implements DBMSFeatures {
 
 	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, DESCRIPTION, TRIGGER_BODY FROM USER_TRIGGERS";
+		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY FROM USER_TRIGGERS";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -76,8 +76,9 @@ public class OracleFeatures implements DBMSFeatures {
 			Trigger t = new Trigger();
 			t.name = rs.getString(1);
 			t.schemaName = rs.getString(2);
-			t.description = rs.getString(3);
-			t.body = rs.getString(4);
+			t.tableName = rs.getString(3);
+			t.description = rs.getString(4);
+			t.body = rs.getString(5);
 			model.triggers.add(t);
 			count++;
 		}
@@ -110,7 +111,7 @@ public class OracleFeatures implements DBMSFeatures {
 				sb = new StringBuffer();
 				eo.name = rs.getString(1);
 				try {
-					eo.type = DBObjectType.valueOf(rs.getString(2).replace(' ', '_'));
+					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));

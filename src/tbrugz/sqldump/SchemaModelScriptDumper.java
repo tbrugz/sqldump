@@ -44,6 +44,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	boolean dumpGrantsWithReferencingTable = false;
 	boolean dumpIndexesWithReferencingTable = false;
 	boolean dumpFKsWithReferencingTable = false;
+	boolean dumpTriggersWithReferencingTable = false;
 	
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
@@ -91,6 +92,9 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 				}
 				else if("index".equalsIgnoreCase(out.trim())) {
 					dumpIndexesWithReferencingTable = true;
+				}
+				else if("trigger".equalsIgnoreCase(out.trim())) {
+					dumpTriggersWithReferencingTable = true;
 				}
 				else {
 					log.warn("unknown object type to output within referencing table: '"+out+"'");
@@ -196,6 +200,16 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 					categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, grantOutput);
 				}
 			}
+			
+			//Triggers
+			if(dumpTriggersWithReferencingTable) {
+				for(Trigger tr: schemaModel.triggers) {
+					//option for trigger output inside table
+					if(table.name.equals(tr.tableName)) {
+						categorizedOut(tr.schemaName, tr.tableName, DBObjectType.TABLE, tr.getDefinition(dumpWithSchemaName)+"\n");
+					}
+				}
+			}
 		}
 		
 		//FKs
@@ -210,7 +224,9 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 
 		//Triggers
 		for(Trigger t: schemaModel.triggers) {
-			categorizedOut(t.schemaName, t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
+			if(!dumpTriggersWithReferencingTable || t.tableName==null) {
+				categorizedOut(t.schemaName, t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
+			}
 		}
 
 		//ExecutableObjects
@@ -248,6 +264,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		for(Sequence s: schemaModel.sequences) {
 			categorizedOut(s.schemaName, s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+"\n");
 		}
+
+		log.info("...schema dumped");
 	}
 	
 	String fkScriptWithAlterTable(FK fk) {
