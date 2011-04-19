@@ -20,10 +20,14 @@ public class OracleFeatures implements DBMSFeatures {
 	static Logger log = Logger.getLogger(OracleFeatures.class);
 
 	boolean grabIndexes = false;
+	boolean dumpSequenceStartWith = true;
 	
 	public void procProperties(Properties prop) {
-		String grabIndexesStr = prop.getProperty(PROP_GRAB_INDEXES);
-		grabIndexes = "true".equals(grabIndexesStr);
+		//String grabIndexesStr = prop.getProperty(PROP_GRAB_INDEXES);
+		//grabIndexes = "true".equals(grabIndexesStr);
+		grabIndexes = "true".equals(prop.getProperty(PROP_GRAB_INDEXES));
+		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
+		Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 	}
 	
 	/* (non-Javadoc)

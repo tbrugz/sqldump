@@ -7,13 +7,15 @@ public class Sequence extends DBObject {
 	
 	public long minValue;
 	public long incrementBy;
-	public long lastNumber; 
+	public long lastNumber;
+	
+	public static boolean dumpStartWith = false;
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
     	return "create sequence "+(dumpSchemaName?schemaName+".":"")+name
     		+" minvalue "+minValue
-    		+" start with "+lastNumber //XXX sequence.startwith changes with data, maybe should not be included in "schema"
+    		+(dumpStartWith?" start with "+lastNumber:"") //XXX sequence.startwith changes with data, maybe should not be included in "schema"
     		+" increment by "+incrementBy
     		+";";
 	}

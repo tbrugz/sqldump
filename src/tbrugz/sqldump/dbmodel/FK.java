@@ -1,7 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 //XXX~: extends DBObject?
 public class FK implements Comparable<FK>{
@@ -11,8 +11,8 @@ public class FK implements Comparable<FK>{
 	public String pkTableSchemaName;
 	public String fkTableSchemaName;
 
-	public Set<String> pkColumns = new HashSet<String>();
-	public Set<String> fkColumns = new HashSet<String>();
+	public Set<String> pkColumns = new TreeSet<String>();
+	public Set<String> fkColumns = new TreeSet<String>();
 	
 	@Override
 	public String toString() {
