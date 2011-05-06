@@ -162,7 +162,7 @@ public class SQLDump {
 			String schemaName = rs.getString("TABLE_SCHEM");
 			
 			tableNamesForDataDump.add(tableName);
-			ttype = getTableType(rs.getString("TABLE_TYPE"), tableName);
+			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			
 			//defining model
 			Table table = new Table();
@@ -278,27 +278,6 @@ public class SQLDump {
 		return c;
 	}
 
-	public static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
-		String colType = c.type;
-		if(fromDbId!=null) {
-			String ansiColType = typeMapping.getProperty("from."+fromDbId+"."+colType);
-			if(ansiColType!=null) { colType = ansiColType; }
-		}
-		if(toDbId!=null) {	
-			String newColType = typeMapping.getProperty("to."+toDbId+"."+colType);
-			if(newColType!=null) { colType = newColType; }
-		}
-		
-		boolean usePrecision = true;
-		if(typeMapping!=null) {
-			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
-		}
-		
-		return c.name+" "+colType
-			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
-			+(!c.nullable?" not null":"");
-	}
-
 	List<Grant> grabSchemaGrants(ResultSet grantrs, String tableName) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		while(grantrs.next()) {
@@ -332,7 +311,7 @@ public class SQLDump {
 			table.pkConstraintName = pkName;
 			Set<String> pk = tablePK.get(pkName);
 			if(pk==null) {
-				pk = new HashSet<String>();
+				pk = new HashSet<String>(); //XXXxx: TreeSet? no need...
 				tablePK.put(pkName, pk);
 			}
 			pk.add(pks.getString("COLUMN_NAME"));
@@ -377,7 +356,7 @@ public class SQLDump {
 		}
 	}
 	
-	public void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
+	void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
 		Index idx = null;
 		
 		while(indexesrs.next()) {
@@ -527,22 +506,4 @@ public class SQLDump {
 		return sbTmp.toString();
 	}
 	
-	static TableType getTableType(String tableType, String tableName) {
-		if(tableType.equals("TABLE")) {
-			return TableType.TABLE;
-		}
-		else if(tableType.equals("SYNONYM")) {
-			return TableType.SYNONYM;
-		}
-		else if(tableType.equals("VIEW")) {
-			return TableType.VIEW;
-		}
-		else if(tableType.equals("SYSTEM TABLE")) {
-			return TableType.SYSTEM_TABLE;
-		}
-
-		log.warn("table "+tableName+" of unknown type: "+tableType);
-		return null;
-	}
-
 }

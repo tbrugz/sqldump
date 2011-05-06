@@ -54,7 +54,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 			n.setLabel(id);
 			StringBuffer sb = new StringBuffer();
 			for(Column c: t.getColumns()) {
-				sb.append(SQLDump.getColumnDesc(c, null, null, null)+"\n");
+				sb.append(Column.getColumnDesc(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
 			

@@ -135,6 +135,15 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
+		if(fromDbId==null || toDbId==null) {
+			log.warn("fromDbId or toDbId null: no conversion");
+		}
+		else {
+			if(fromDbId.equals(toDbId)) {
+				//XXX: define global var for optimization?
+				log.info("equal origin and target DBMSs: no column type conversion");
+			}
+		}
 		log.debug("props->"+columnTypeMapping);
 		
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
@@ -155,7 +164,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			sb.append("create table "+tableName+" ( -- type="+table.type+"\n");
 			//Columns
 			for(Column c: table.columns) {
-				String colDesc = SQLDump.getColumnDesc(c, columnTypeMapping, fromDbId, toDbId);
+				String colDesc = Column.getColumnDesc(c, columnTypeMapping, fromDbId, toDbId);
 				if(c.pk) { pkCols.add(c.name); }
 				sb.append("\t"+colDesc+",\n");
 			}
