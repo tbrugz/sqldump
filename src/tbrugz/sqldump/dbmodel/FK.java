@@ -11,8 +11,8 @@ public class FK implements Comparable<FK>{
 	public String pkTableSchemaName;
 	public String fkTableSchemaName;
 
-	public Set<String> pkColumns = new TreeSet<String>();
-	public Set<String> fkColumns = new TreeSet<String>();
+	public Set<String> pkColumns = new TreeSet<String>(); //XXX: should be List<String>?
+	public Set<String> fkColumns = new TreeSet<String>(); //should be List<String>?
 	
 	@Override
 	public String toString() {
