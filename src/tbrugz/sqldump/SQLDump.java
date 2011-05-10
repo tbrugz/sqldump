@@ -163,6 +163,7 @@ public class SQLDump {
 			
 			tableNamesForDataDump.add(tableName);
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
+			if(ttype==null) { continue; }
 			
 			//defining model
 			Table table = new Table();
@@ -270,7 +271,7 @@ public class SQLDump {
 		c.columSize = cols.getInt("COLUMN_SIZE");
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
-			int iDecimalDigits = ((BigDecimal) decimalDigits).intValue();
+			int iDecimalDigits = ((Number) decimalDigits).intValue();
 			if(iDecimalDigits!=0) {
 				c.decimalDigits = iDecimalDigits;
 			} 

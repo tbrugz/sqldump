@@ -3,7 +3,9 @@ package tbrugz.sqldump.dbmodel;
 public enum PrivilegeType {
 	SELECT, INSERT, UPDATE, DELETE, ALTER, REFERENCES, INDEX,
 	DEBUG, FLASHBACK, ON_COMMIT_REFRESH, QUERY_REWRITE, //Oracle
+	RULE, TRIGGER, //Postgres
 	;
+	//TODO: filter privilegetype on output based on dbid...
 	
 	@Override
 	public String toString() {
