@@ -102,7 +102,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			}
 		}
 		
-		columnTypeMapping = new Properties();
+		columnTypeMapping = new ParametrizedProperties();
 		try {
 			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE);
 			if(is==null) throw new IOException("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
@@ -204,7 +204,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
-				String grantOutput = compactGrantDump(table.grants, tableName);
+				String grantOutput = compactGrantDump(table.grants, tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, grantOutput);
 				}
@@ -262,7 +262,7 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		if(!dumpGrantsWithReferencingTable) {
 			for(Table table: schemaModel.tables) {
 				String tableName = (dumpWithSchemaName?table.schemaName+".":"")+table.name;
-				String grantOutput = compactGrantDump(table.grants, tableName);
+				String grantOutput = compactGrantDump(table.grants, tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.schemaName, table.name, DBObjectType.GRANT, grantOutput);
 				}
@@ -359,11 +359,26 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		fos.close();
 	}
 	
-	String compactGrantDump(List<Grant> grants, String tableName) {
+	String compactGrantDump(List<Grant> grants, String tableName, String toDbId) {
 		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
 		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
 		
+		Set<String> privsToDump = new TreeSet<String>();
+		if(toDbId!=null && !toDbId.equals("")) {
+			String sPriv = columnTypeMapping.getProperty("privileges."+toDbId);
+			if(sPriv!=null) {
+				String[] privs = sPriv.split(",");
+				for(String priv: privs) {
+					String privOk = priv.trim();
+					privsToDump.add(privOk);
+				}
+			}
+		}
+		
 		for(Grant g: grants) {
+			//if privilege is not defined for target DB, do not dump
+			if(toDbId!=null && !privsToDump.contains(g.privilege.toString())) { continue; }
+			
 			if(g.withGrantOption) {
     			Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
     			if(privs==null) {
