@@ -29,10 +29,13 @@ public class Column {
 		if(typeMapping!=null) {
 			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
 		}
-		
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(!c.nullable?" not null":"");
+	}
+	
+	public static String getColumnDescFull(Column c, Properties typeMapping, String fromDbId, String toDbId) {
+		return getColumnDesc(c, typeMapping, fromDbId, toDbId)+(c.pk?" primary key":"");
 	}
 
 	//??

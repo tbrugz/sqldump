@@ -54,7 +54,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 			n.setLabel(id);
 			StringBuffer sb = new StringBuffer();
 			for(Column c: t.getColumns()) {
-				sb.append(Column.getColumnDesc(c, null, null, null)+"\n");
+				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
 			
@@ -90,9 +90,11 @@ public class Schema2GraphML extends SchemaModelDumper {
 	
 	static Link fkToLink(FK fk) {
 		Link l = new Link();
-		l.setName(fk.getName());
+		//l.setName(fk.getName()); //old fk label: just fk name
+		l.setName(fk.getName()+" ("+fk.fkColumns+" -> "+fk.pkColumns+")"); //fk label: fk name + columns involved
 		l.setSource(fk.getSourceId());
 		l.setTarget(fk.getTargetId());
+		
 		return l;
 	}
 
