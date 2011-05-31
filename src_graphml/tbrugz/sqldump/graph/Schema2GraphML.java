@@ -10,9 +10,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.graphml.DumpGraphMLModel;
+import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
-import tbrugz.graphml.model.Link;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.dbmodel.Column;
@@ -70,7 +69,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 		}
 		
 		for(FK fk: schemaModel.getForeignKeys()) {
-			Link l = fkToLink(fk);
+			Edge l = fkToLink(fk);
 			if(tableIds.contains(l.getSource())) {
 				if(tableIds.contains(l.getTarget())) {
 					graphModel.getChildren().add(l);
@@ -88,8 +87,8 @@ public class Schema2GraphML extends SchemaModelDumper {
 		return graphModel;
 	}
 	
-	static Link fkToLink(FK fk) {
-		Link l = new Link();
+	static Edge fkToLink(FK fk) {
+		Edge l = new Edge();
 		//l.setName(fk.getName()); //old fk label: just fk name
 		l.setName(fk.getName()+" ("+fk.fkColumns+" -> "+fk.pkColumns+")"); //fk label: fk name + columns involved
 		l.setSource(fk.getSourceId());

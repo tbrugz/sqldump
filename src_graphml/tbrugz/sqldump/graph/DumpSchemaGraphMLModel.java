@@ -1,7 +1,7 @@
 package tbrugz.sqldump.graph;
 
 import tbrugz.graphml.DumpGraphMLModel;
-import tbrugz.graphml.model.Link;
+import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Node;
 
 public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
@@ -19,7 +19,7 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 	}
 	
 	@Override
-	public void outEdgeContents(Link l, int level) {
+	public void outEdgeContents(Edge l, int level) {
 		outSnippet("edge", level, l.getName());
 	}
 }
