@@ -17,6 +17,9 @@
 		</if-->
 	</target>
 
+	<!-- compile -->
+	<!-- run -->
+	
 	<target name="jar" depends="prepare">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"
