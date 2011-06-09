@@ -8,6 +8,13 @@
 	<target name="prepare">
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${javadoc.dir}"/>
+		<!--if>
+			<available file="sqldump.properties"/>
+			<then></then>
+			<else>
+				<copy file="sqldump.properties.template" tofile="sqldump.properties" verbose="on"/>
+			</else>
+		</if-->
 	</target>
 
 	<target name="jar" depends="prepare">
@@ -24,8 +31,8 @@
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
 	</target>
 	
-	<target name="dist"	depends="jar">
-    	<copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/>
+	<target name="all" depends="javadoc, jar">
+		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
 	</target>
 	
 </project>

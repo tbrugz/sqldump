@@ -104,7 +104,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
 		dg.dumpModel(r, new PrintStream(output));
-		log.info("... graphML dumped");
+		log.info("...graphML dumped");
 	}
 	
 	@Override
