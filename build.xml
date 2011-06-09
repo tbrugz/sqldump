@@ -21,6 +21,7 @@
 	</path>
 
 	<target name="prepare">
+		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${javadoc.dir}"/>
 		<!--if>

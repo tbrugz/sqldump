@@ -21,10 +21,23 @@ Dependencies
 - apache-commons-logging
 - log4j
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) (for graphML output)
+- ant (recommended)
 
-Usage
------
+
+Usage (with ant)
+----------------
+- Run `ant compile`
 - Copy `sqldump.properties.template` to `sqldump.properties`
 - Edit `sqldump.properties`
-- Run `tbrugz.sqldump.SQLDump`
-  - you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
+- Copy `build.properties.template` to `build.properties`
+- Edit `build.properties`
+- Run `ant run`
+
+
+Usage (without ant)
+-------------------
+- Copy `sqldump.properties.template` to `sqldump.properties`
+- Edit `sqldump.properties`
+- Compile sources into `bin`
+- Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
+-- you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
