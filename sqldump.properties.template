@@ -46,7 +46,7 @@ sqldump.usedbspecificfeatures=true
 sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 
-sqldump.graphmldump.outputfile=${outputdir}/${schemaname}.graphml
+sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
 ############
 
@@ -67,3 +67,11 @@ sqldump.graphmldump.outputfile=${outputdir}/${schemaname}.graphml
 #sqldump.user=
 #sqldump.password=
 #sqldump.dumpschemapattern=public
+
+# Derby Embedded
+#sqldump.driverclass=org.apache.derby.jdbc.EmbeddedDriver
+#sqldump.dburl=jdbc:derby:<db-path>
+#sqldump.user=sa
+#sqldump.password=sa
+#sqldump.dumpschemapattern=SA
+
