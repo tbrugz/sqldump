@@ -3,6 +3,7 @@ SQLDump
 =======
 
 Utility to dump schema and data from a RDBMS. Features:
+
 - Can be used with any JDBC-compliant databases. Uses (mainly) standard java API, by way of java.sql.DatabaseMetaData, for schema-dumping
 - Can do data-dumping
 - Generates Entity-Relationship diagrams based on Tables and FKs (graphML output)

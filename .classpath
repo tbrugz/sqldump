@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="D:/java/apache-log4j-1.2.15/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="D:/java/commons-logging-1.1.1/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
-	<classpathentry kind="lib" path="D:/java/lib-jdbc/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="D:/java/lib-jdbc/postgresql-9.0-801.jdbc4.jar"/>
+	<classpathentry kind="lib" path="D:/java/libs-jdbc/ojdbc14.jar"/>
+	<classpathentry kind="lib" path="D:/java/libs-jdbc/postgresql-9.0-801.jdbc4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

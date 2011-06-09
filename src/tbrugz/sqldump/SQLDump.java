@@ -3,7 +3,6 @@ package tbrugz.sqldump;
 import java.util.*;
 import java.sql.*;
 import java.io.*;
-import java.math.BigDecimal;
 
 import org.apache.log4j.Logger;
 
