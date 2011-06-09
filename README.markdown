@@ -26,4 +26,5 @@ Usage
 -----
 - Copy `sqldump.properties.template` to `sqldump.properties`
 - Edit `sqldump.properties`
-- Run `tbrugz.sqldump.SQLDataDump`
+- Run `tbrugz.sqldump.SQLDump`
+  - you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 

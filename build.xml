@@ -1,9 +1,24 @@
 <project name="sqldump">
 	
 	<property name="src.dir" value="src"/>
+	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="javadoc.dir" value="dist/javadoc"/>
+	
+	<property file="build.properties"/>
+
+	<path id="classpath.compile">
+		<pathelement location="lib/commons-logging-1.1.1.jar"/>
+		<pathelement location="lib/log4j-1.2.15.jar"/>
+		<pathelement location="lib/kmlutils.jar"/>
+	</path>
+	
+	<path id="classpath.run">
+		<path refid="classpath.compile"/>
+		<pathelement location="${bin.dir}"/>
+		<pathelement location="${run.xtralib}"/>
+	</path>
 
 	<target name="prepare">
 		<mkdir dir="${dist.dir}"/>
@@ -17,8 +32,23 @@
 		</if-->
 	</target>
 
-	<!-- compile -->
-	<!-- run -->
+	<target name="compile" depends="prepare">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on">
+			<src path="${src.dir}"/>
+			<src path="${src.graphml.dir}"/>
+		</javac>
+		<copy todir="${bin.dir}" >
+			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="run">
+		<java classpathref="classpath.run" classname="tbrugz.sqldump.SQLDump">
+			<arg value="${run.arg}"/>
+		</java>
+	</target>
 	
 	<target name="jar" depends="prepare">
 		<jar destfile="${dist.dir}/sqldump.jar"

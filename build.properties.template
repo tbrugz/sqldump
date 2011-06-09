@@ -1,0 +1,2 @@
+run.arg=-propfile=sqldump.properties
+run.xtralib=D:/java/libs-jdbc/postgresql-9.0-801.jdbc4.jar
