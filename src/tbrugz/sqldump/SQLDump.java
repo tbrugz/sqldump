@@ -433,6 +433,7 @@ public class SQLDump {
 			schemaDumper.procProperties(sdd.papp);
 			schemaDumper.dumpSchema(sm);
 			
+			//XXX prop doGraphMLDump?
 			//graphml dump
 			SchemaModelDumper s2gml = new Schema2GraphML();
 			s2gml.procProperties(sdd.papp);
@@ -444,33 +445,6 @@ public class SQLDump {
 		}
 		
 		sdd.end();
-	}
-	
-	
-
-	//--------------- UTILS
-	
-	static void dumpRS(ResultSet rs) throws SQLException {
-		dumpRS(rs, rs.getMetaData());
-	}
-
-	static void dumpRS(ResultSet rs, ResultSetMetaData rsmd) throws SQLException {
-		int ncol = rsmd.getColumnCount();
-		StringBuffer sb = new StringBuffer();
-		//System.out.println(ncol);
-		//System.out.println();
-		for(int i=1;i<=ncol;i++) {
-			//System.out.println(rsmd.getColumnName(i)+" | ");
-			sb.append(rsmd.getColumnLabel(i)+" | ");
-		}
-		sb.append("\n");
-		while(rs.next()) {
-			for(int i=1; i<= rsmd.getColumnCount(); i++) {
-				sb.append(rs.getString(i) + " | ");
-			}
-			sb.append("\n");
-		}
-		System.out.println("\n"+sb.toString()+"\n");
 	}
 	
 }

@@ -11,6 +11,13 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+/*
+ * TODO: prop for selecting which tables to dump data
+ * TODO: column values escaping
+ * TODO: 'insert into' datadump syntax:
+ *   sqldump.datadump.useinsertintosyntax=false
+ *   sqldump.datadump.useinsertintosyntax.withcolumnnames=true
+ */
 public class DataDump {
 
 	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
