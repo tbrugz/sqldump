@@ -2,6 +2,7 @@ package tbrugz.sqldump;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -17,9 +18,11 @@ public class DataDump {
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.tablenameheader";
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.columndelimiter";
-	
+	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
+
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ";";
+	static final String CHARSET_DEFAULT = "UTF-8";
 	
 	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
 	
@@ -30,11 +33,24 @@ public class DataDump {
 		
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		String columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
+		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
+		
+		/*
+		 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
+		 *
+		 * US-ASCII 	Seven-bit ASCII, a.k.a. ISO646-US, a.k.a. the Basic Latin block of the Unicode character set
+		 * ISO-8859-1   	ISO Latin Alphabet No. 1, a.k.a. ISO-LATIN-1
+		 * UTF-8 	Eight-bit UCS Transformation Format
+		 * UTF-16BE 	Sixteen-bit UCS Transformation Format, big-endian byte order
+		 * UTF-16LE 	Sixteen-bit UCS Transformation Format, little-endian byte order
+		 * UTF-16 	Sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order mark
+		 * 
+		 */
 		
 		for(String table: tableNamesForDataDump) {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
-			FileWriter fos = new FileWriter(filename);
+			PrintWriter fos = new PrintWriter(filename, charset);
 			
 			Statement st = conn.createStatement();
 			log.info("dumping data from table: "+table);
@@ -54,8 +70,8 @@ public class DataDump {
 		
 	}
 	
-	void out(String s, FileWriter fos, String recordDelimiter) throws IOException {
-		fos.write(s+recordDelimiter);
+	void out(String s, PrintWriter pw, String recordDelimiter) throws IOException {
+		pw.write(s+recordDelimiter);
 	}
 	
 }
