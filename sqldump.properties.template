@@ -48,6 +48,8 @@ sqldump.dbspecificfeatures.sequencestartwithdump=false
 sqldump.dodatadump=false
 sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
 sqldump.datadump.tablenameheader=false
+sqldump.datadump.recorddelimiter=\r\n
+sqldump.datadump.columndelimiter=;
 
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
