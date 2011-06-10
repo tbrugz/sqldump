@@ -48,6 +48,7 @@ sqldump.dbspecificfeatures.sequencestartwithdump=false
 sqldump.dodatadump=false
 sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
 sqldump.datadump.tablenameheader=false
+sqldump.datadump.columnnamesheader=true
 sqldump.datadump.recorddelimiter=\r\n
 sqldump.datadump.columndelimiter=;
 # charset:: default: UTF-8; options: ISO-8859-1, UTF-16, US-ASCII, ...

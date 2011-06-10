@@ -1,6 +1,5 @@
 package tbrugz.sqldump;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -16,6 +15,7 @@ public class DataDump {
 
 	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.tablenameheader";
+	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.columnnamesheader";
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.columndelimiter";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
@@ -34,6 +34,8 @@ public class DataDump {
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		String columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
+		boolean doTableNameHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_TABLENAMEHEADER, "false"));
+		boolean doColumnNamesHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_COLUMNNAMESHEADER, "false"));
 		
 		/*
 		 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
@@ -44,7 +46,9 @@ public class DataDump {
 		 * UTF-16BE 	Sixteen-bit UCS Transformation Format, big-endian byte order
 		 * UTF-16LE 	Sixteen-bit UCS Transformation Format, little-endian byte order
 		 * UTF-16 	Sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order mark
-		 * 
+		 *
+		 * XXX: use java.nio.charset.Charset.availableCharsets() ?
+		 *  
 		 */
 		
 		for(String table: tableNamesForDataDump) {
@@ -52,14 +56,24 @@ public class DataDump {
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
 			PrintWriter fos = new PrintWriter(filename, charset);
 			
-			Statement st = conn.createStatement();
 			log.info("dumping data from table: "+table);
+			Statement st = conn.createStatement();
 			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
-			if("true".equals(prop.getProperty(PROP_DATADUMP_TABLENAMEHEADER, "false"))) {
-				out("[table "+table+"]", fos, recordDelimiter);
-			}
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
+
+			//headers
+			if(doTableNameHeaderDump) {
+				out("[table "+table+"]", fos, recordDelimiter);
+			}
+			if(doColumnNamesHeaderDump) {
+				StringBuffer sb = new StringBuffer();
+				for(int i=0;i<numCol;i++) {
+					sb.append(md.getColumnName(i+1)+columnDelimiter);
+				}
+				out(sb.toString(), fos, recordDelimiter);
+			}
+			
 			while(rs.next()) {
 				out(SQLUtils.getRowFromRS(rs, numCol, table, columnDelimiter), fos, recordDelimiter);
 			}
