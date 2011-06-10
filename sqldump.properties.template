@@ -46,7 +46,8 @@ sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 
 sqldump.dodatadump=false
-sqldump.datadump.filepattern=${outputdir}/datadump.sql
+sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
+sqldump.datadump.tablenameheader=false
 
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
