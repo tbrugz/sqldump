@@ -10,10 +10,21 @@ public class Utils {
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
 	 */
 	public static String join(Collection<?> s, String delimiter) {
+		return join(s, delimiter, null);
+	}
+	
+	public static String join(Collection<?> s, String delimiter, String enclosing) {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
-			buffer.append(iter.next());
+			Object elem = iter.next();
+			if(enclosing!=null && !"".equals(enclosing)) {
+				buffer.append(enclosing+elem+enclosing);
+			}
+			else {
+				buffer.append(elem);
+			}
+
 			if (iter.hasNext()) {
 				buffer.append(delimiter);
 			}

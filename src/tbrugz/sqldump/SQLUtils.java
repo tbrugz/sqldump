@@ -3,6 +3,8 @@ package tbrugz.sqldump;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLUtils {
 
@@ -25,6 +27,14 @@ public class SQLUtils {
 		return sbTmp.toString();
 	}
 
+	public static List<String> getRowListFromRS(ResultSet rs, int numCol) throws SQLException {
+		List<String> ls = new ArrayList<String>();
+		for(int i=1;i<=numCol;i++) {
+			ls.add(rs.getString(i));
+		}
+		return ls;
+	}
+	
 	static void dumpRS(ResultSet rs) throws SQLException {
 		dumpRS(rs, rs.getMetaData());
 	}
