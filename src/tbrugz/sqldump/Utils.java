@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -24,6 +25,18 @@ public class Utils {
 		return strEnumConstant.replace(' ', '_');
 	}
 
+	/*
+	 * creates dir for file if it doesn't already exists
+	 */
+	public static void prepareDir(File f) {
+		File parent = f.getParentFile();
+		if(parent!=null) {
+			if(!parent.exists()) {
+				parent.mkdirs();
+			}
+		}
+	}
+	
 	/*
 	public static String denormalizeEnumStringConstant(String strEnumConstant) {
 		return strEnumConstant.replace('_', ' ');

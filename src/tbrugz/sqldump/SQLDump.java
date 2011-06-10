@@ -67,7 +67,7 @@ public class SQLDump {
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
-	
+
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
 	
 	//properties files filenames
@@ -386,30 +386,6 @@ public class SQLDump {
 		}
 	}
 	
-	void dumpData() throws Exception {
-		FileWriter fos = new FileWriter(papp.getProperty(PROP_OUTPUTFILE));
-		log.info("data dumping...");
-		
-		for(String table: tableNamesForDataDump) {
-			Statement st = conn.createStatement();
-			log.debug("dumping data from table: "+table);
-			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
-			out("\n[table "+table+"]\n", fos);
-			ResultSetMetaData md = rs.getMetaData();
-			int numCol = md.getColumnCount();
-			while(rs.next()) {
-				out(getRowFromRS(rs, numCol, table), fos);
-			}
-			rs.close();
-		}
-		
-		fos.close();
-	}
-	
-	void out(String s, FileWriter fos) throws IOException {
-		fos.write(s+"\n");
-	}
-	
 	void tests() throws Exception {
 		log.info("some tests...");
 
@@ -463,7 +439,8 @@ public class SQLDump {
 			s2gml.dumpSchema(sm);
 		}
 		if(sdd.doDataDump) {
-			sdd.dumpData();
+			DataDump dd = new DataDump();
+			dd.dumpData(sdd.conn, sdd.tableNamesForDataDump, sdd.papp);
 		}
 		
 		sdd.end();
@@ -494,16 +471,6 @@ public class SQLDump {
 			sb.append("\n");
 		}
 		System.out.println("\n"+sb.toString()+"\n");
-	}
-	
-	static StringBuffer sbTmp = new StringBuffer();
-	static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
-		sbTmp.setLength(0);
-		for(int i=1;i<=numCol;i++) {
-			sbTmp.append(rs.getString(i));
-			sbTmp.append(";");
-		}
-		return sbTmp.toString();
 	}
 	
 }

@@ -14,6 +14,7 @@ import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
+import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
@@ -103,10 +104,11 @@ public class Schema2GraphML extends SchemaModelDumper {
 		Root r = Schema2GraphML.getGraphMlModel(schemaModel);
 		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
+		Utils.prepareDir(output);
 		dg.dumpModel(r, new PrintStream(output));
 		log.info("...graphML dumped");
 	}
-	
+
 	@Override
 	public void setOutput(File output) {
 		this.output = output;
