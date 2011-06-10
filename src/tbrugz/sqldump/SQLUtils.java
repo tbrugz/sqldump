@@ -21,7 +21,8 @@ public class SQLUtils {
 	public static String getRowFromRS(ResultSet rs, int numCol, String table, String delimiter, String enclosing) throws SQLException {
 		sbTmp.setLength(0);
 		for(int i=1;i<=numCol;i++) {
-			sbTmp.append(enclosing+rs.getString(i)+enclosing);
+			String value = rs.getString(i);
+			sbTmp.append(enclosing+value+enclosing);
 			sbTmp.append(delimiter);
 		}
 		return sbTmp.toString();
@@ -30,7 +31,8 @@ public class SQLUtils {
 	public static List<String> getRowListFromRS(ResultSet rs, int numCol) throws SQLException {
 		List<String> ls = new ArrayList<String>();
 		for(int i=1;i<=numCol;i++) {
-			ls.add(rs.getString(i));
+			String value = rs.getString(i);
+			ls.add(value);
 		}
 		return ls;
 	}

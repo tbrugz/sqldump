@@ -139,7 +139,7 @@ public class DataDump {
 				List<String> vals = SQLUtils.getRowListFromRS(rs, numCol);
 				out("insert into "+table+" "+
 					colNames+"values ("+
-					Utils.join(vals, ", ", "'")+");", fos, "\n");
+					Utils.join(vals, ", ", "'", true)+");", fos, "\n");
 			}
 			rs.close();
 			
