@@ -1,14 +1,18 @@
 package tbrugz.sqldump;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -55,6 +59,8 @@ public class DataDump {
 			dumpDataRawSyntax(conn, tableNamesForDataDump, prop);
 		}
 	}
+
+	Set<String> filesOpened = new HashSet<String>();
 	
 	void dumpDataRawSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
@@ -80,7 +86,12 @@ public class DataDump {
 		for(String table: tableNamesForDataDump) {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
-			PrintWriter fos = new PrintWriter(filename, charset);
+			
+			boolean alreadyOpened = filesOpened.contains(filename);
+			if(!alreadyOpened) { filesOpened.add(filename); }
+			//Writer fos = new PrintWriter(filename, charset);
+			//if already opened, append; if not, create
+			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
 			log.info("dumping data from table: "+table);
 			Statement st = conn.createStatement();
@@ -117,7 +128,12 @@ public class DataDump {
 		for(String table: tableNamesForDataDump) {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
-			PrintWriter fos = new PrintWriter(filename, charset);
+			
+			boolean alreadyOpened = filesOpened.contains(filename);
+			if(!alreadyOpened) { filesOpened.add(filename); }
+			//Writer fos = new PrintWriter(filename, charset);
+			//if already opened, append; if not, create
+			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
 			log.info("dumping data/inserts from table: "+table);
 			Statement st = conn.createStatement();
@@ -135,6 +151,7 @@ public class DataDump {
 				colNames = "("+Utils.join(ls, ", ")+") ";
 			}
 			
+			//XXX: integet/float vals without quotes?
 			while(rs.next()) {
 				List<String> vals = SQLUtils.getRowListFromRS(rs, numCol);
 				out("insert into "+table+" "+
@@ -148,7 +165,7 @@ public class DataDump {
 		
 	}
 	
-	void out(String s, PrintWriter pw, String recordDelimiter) throws IOException {
+	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
 	}
 	
