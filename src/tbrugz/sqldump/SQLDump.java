@@ -13,11 +13,11 @@ import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
 import tbrugz.sqldump.graph.Schema2GraphML;
 
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
- * TODO: option of data dump with INSERT INTO
  * XXX: detach main (SQLDataDump) from data dump
  * TODOne: generate graphml from schema structure
  * TODOne: column type mapping
@@ -57,6 +57,8 @@ public class SQLDump {
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
+	
 	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
@@ -66,7 +68,7 @@ public class SQLDump {
 	
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
-	static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
+	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
 	
@@ -146,14 +148,30 @@ public class SQLDump {
 	}
 
 	SchemaModel grabSchema() throws Exception {
-		log.info("schema dump...");
 		DatabaseMetaData dbmd = conn.getMetaData();
-		
-		String schemaPattern = papp.getProperty(PROP_DUMPSCHEMAPATTERN,null);
-		log.debug("schema pattern: "+schemaPattern);
-		
-		ResultSet rs = dbmd.getTables(null, schemaPattern, null, null);
 		SchemaModel schemaModel = new SchemaModel();
+		String schemaPattern = papp.getProperty(PROP_DUMPSCHEMAPATTERN, null);
+		
+		log.info("schema dump... schemapattern: "+schemaPattern);
+		grabSchema(schemaModel, dbmd, schemaPattern, null, false);
+		
+		log.info(schemaModel.tables.size()+" tables grabbed");
+		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
+		if(doSchemaGrabIndexes) {
+			log.info(schemaModel.indexes.size()+" indexes grabbed");
+		}
+
+		if(doSchemaGrabDbSpecific) {
+			grabDbSpecific(schemaModel, schemaPattern);
+		}
+		
+		return schemaModel;
+	}
+	
+	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception {
+		log.debug("schema dump... schemapattern: "+schemaPattern+", tablePattern: "+tablePattern);
+		
+		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 		
 		while(rs.next()) {
 			TableType ttype = null;
@@ -171,11 +189,11 @@ public class SQLDump {
 			table.schemaName = schemaName;
 			
 			try {
-				String fullTablename = (schemaPattern==null?"":schemaPattern+".")+tableName;
+				String fullTablename = (schemaPattern==null?"":table.schemaName+".")+tableName;
 				log.debug("getting columns from "+fullTablename);
 
 				//columns
-				ResultSet cols = dbmd.getColumns(null, schemaPattern, tableName, null);
+				ResultSet cols = dbmd.getColumns(null, table.schemaName, tableName, null);
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
 					table.columns.add(c);
@@ -186,15 +204,15 @@ public class SQLDump {
 				//PKs
 				if(doSchemaGrabPKs) {
 					log.debug("getting PKs from "+fullTablename);
-					ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
+					ResultSet pks = dbmd.getPrimaryKeys(null, table.schemaName, tableName);
 					grabSchemaPKs(pks, table);
 					pks.close();
 				}
 
 				//FKs
-				if(doSchemaGrabFKs) {
+				if(doSchemaGrabFKs && !tableOnly) {
 					log.debug("getting FKs from "+fullTablename);
-					ResultSet fkrs = dbmd.getImportedKeys(null, schemaPattern, tableName);
+					ResultSet fkrs = dbmd.getImportedKeys(null, table.schemaName, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					fkrs.close();
 				}
@@ -202,15 +220,15 @@ public class SQLDump {
 				//GRANTs
 				if(doSchemaGrabGrants) {
 					log.debug("getting grants from "+fullTablename);
-					ResultSet grantrs = dbmd.getTablePrivileges(null, schemaPattern, tableName);
+					ResultSet grantrs = dbmd.getTablePrivileges(null, table.schemaName, tableName);
 					table.grants = grabSchemaGrants(grantrs, tableName);
 					grantrs.close();
 				}
 				
 				//INDEXes
-				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.type)) {
+				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.type) && !tableOnly) {
 					log.debug("getting indexes from "+fullTablename);
-					ResultSet indexesrs = dbmd.getIndexInfo(null, schemaPattern, tableName, false, false);
+					ResultSet indexesrs = dbmd.getIndexInfo(null, table.schemaName, tableName, false, false);
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
 					indexesrs.close();
 				}
@@ -228,19 +246,49 @@ public class SQLDump {
 			schemaModel.tables.add(table);
 		}
 		rs.close();
-		log.info(schemaModel.tables.size()+" tables grabbed");
-		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
-		if(doSchemaGrabIndexes) {
-			log.info(schemaModel.indexes.size()+" indexes grabbed");
+
+		//PROP_DO_SCHEMADUMP_RECURSIVEDUMP
+		if("true".equals(papp.getProperty(SQLDump.PROP_DO_SCHEMADUMP_RECURSIVEDUMP)) && !tableOnly) {
+			grabTablesRecursivebasedOnFKs(dbmd, schemaModel, schemaPattern);
 		}
+		
 		//log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
 		//log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 
-		if(doSchemaGrabDbSpecific) {
+		/*
+		if(doSchemaGrabDbSpecific && !tableOnly) {
 			grabDbSpecific(schemaModel, schemaPattern);
-		}
+		}*/
 		
-		return schemaModel;
+		//return schemaModel;
+	}
+	
+	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, SchemaModel schemaModel, String schemaPattern) throws Exception {
+		log.info("recursivegrab: "+schemaPattern);
+		Set<DBObjectId> ids = new HashSet<DBObjectId>();
+		for(FK fk: schemaModel.foreignKeys) {
+			DBObjectId dbid = new DBObjectId();
+			dbid.name = fk.pkTable;
+			dbid.schemaName = fk.pkTableSchemaName;
+			ids.add(dbid);
+			/*if(!schemaPattern.equals(fk.pkTableSchemaName) && !containsTableWithSchemaAndName(schemaModel.tables, fk.pkTableSchemaName, fk.pkTable)) {
+				log.warn("recursivegrab-grabschema: "+fk.pkTableSchemaName+"."+fk.pkTable);
+				grabSchema(dbmd, fk.pkTableSchemaName, fk.pkTable, true);				
+			}*/
+		}
+		for(DBObjectId id: ids) {
+			if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
+				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
+				grabSchema(schemaModel, dbmd, id.schemaName, id.name, true);				
+			}
+		}
+	}
+	
+	static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
+		for(Table t: tables) {
+			if(t.name.equals(tableName) && t.schemaName.equals(schemaName)) return true;
+		}
+		return false;
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {

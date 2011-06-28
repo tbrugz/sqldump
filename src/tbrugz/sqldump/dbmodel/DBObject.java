@@ -1,6 +1,27 @@
 package tbrugz.sqldump.dbmodel;
 
 public abstract class DBObject implements Comparable<DBObject> {
+	
+	public static class DBObjectId implements Comparable<DBObjectId> {
+		public String schemaName;
+		public String name;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj instanceof DBObjectId) {
+				DBObjectId oid = (DBObjectId) obj;
+				return name.equals(oid.name) && schemaName.equals(oid.schemaName);
+			}
+			return false;
+		}
+
+		public int compareTo(DBObjectId o) {
+			int comp = schemaName.compareTo(o.schemaName);
+			if(comp!=0) return comp;
+			return name.compareTo(o.name);
+		}
+	}
+	
 	public String schemaName;
 	public String name;
 
@@ -24,6 +45,8 @@ public abstract class DBObject implements Comparable<DBObject> {
 	public abstract String getDefinition(boolean dumpSchemaName);
 	
 	public int compareTo(DBObject o) {
+		int comp = schemaName.compareTo(o.schemaName);
+		if(comp!=0) return comp;
 		return name.compareTo(o.name);
 	}
 	

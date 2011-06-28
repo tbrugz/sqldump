@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
+import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.Utils;
@@ -30,8 +31,9 @@ public class Schema2GraphML extends SchemaModelDumper {
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 
 	File output;
+	String defaultSchemaName;
 	
-	public static Root getGraphMlModel(SchemaModel schemaModel) {
+	public Root getGraphMlModel(SchemaModel schemaModel) {
 		Root graphModel = new Root();
 		
 		/*Set<FK> fks = schemaModel.getForeignKeys();
@@ -57,6 +59,12 @@ public class Schema2GraphML extends SchemaModelDumper {
 				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
+			if(t.schemaName.equals(defaultSchemaName)) {
+			}
+			else {
+				//log.debug("t: "+t.name+", "+t.schemaName+"; "+defaultSchemaName);
+				n.setStereotype("otherschema");
+			}
 			
 			tableIds.add(id);
 			graphModel.getChildren().add(n);
@@ -101,7 +109,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		log.info("dumping graphML: translating model");
-		Root r = Schema2GraphML.getGraphMlModel(schemaModel);
+		Root r = getGraphMlModel(schemaModel);
 		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
 		Utils.prepareDir(output);
@@ -117,6 +125,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 	@Override
 	public void procProperties(Properties prop) {
 		String s = prop.getProperty(PROP_OUTPUTFILE);
+		defaultSchemaName = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
 		setOutput(new File(s));
 	}
 }
