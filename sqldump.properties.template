@@ -37,10 +37,17 @@ sqldump.doschemadump.pks=true
 # sqldump.dbspecificfeatures.grabindexes may be used instead of sqldump.doschemadump.indexes (really better performance on oracle)
 sqldump.doschemadump.indexes=false
 sqldump.dumpwithschemaname=true
+
+# recursive dump of tables based on FKs
+sqldump.doschemadump.recursivedumpbasedonfks=true
+sqldump.doschemadump.recursivedumpbasedonfks.deep=true
+
 sqldump.fromdbid=oracle
 sqldump.todbid=pgsql
 sqldump.dumpsynonymastable=false
 sqldump.dumpviewastable=false
+
+# dbms specific features grab. currently only oracle
 sqldump.usedbspecificfeatures=true
 sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false

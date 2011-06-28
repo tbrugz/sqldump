@@ -25,7 +25,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: unique constraints? indexes? 
  * TODOne: sequences?
  * XXXdone: include Grants into SchemaModel?
- * TODO: recursive dump based on FKs
+ * TODOne: recursive dump based on FKs
  * TODO: accept list of schemas, tables/objects to grab/dump, types of objects to grab/dump
  * XXX(later): usePrecision should be defined by java code (not .properties)
  * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
@@ -58,6 +58,7 @@ public class SQLDump {
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	
 	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	static final String PROP_TO_DB_ID = "sqldump.todbid";
@@ -168,10 +169,15 @@ public class SQLDump {
 		return schemaModel;
 	}
 	
-	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception {
+	//private static String PADDING = "  ";
+	
+	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
 		log.debug("schema dump... schemapattern: "+schemaPattern+", tablePattern: "+tablePattern);
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
+
+		boolean recursivedump = "true".equals(papp.getProperty(SQLDump.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
+		boolean deeprecursivedump = "true".equals(papp.getProperty(SQLDump.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP));
 		
 		while(rs.next()) {
 			TableType ttype = null;
@@ -210,7 +216,7 @@ public class SQLDump {
 				}
 
 				//FKs
-				if(doSchemaGrabFKs && !tableOnly) {
+				if(doSchemaGrabFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getImportedKeys(null, table.schemaName, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
@@ -247,8 +253,7 @@ public class SQLDump {
 		}
 		rs.close();
 
-		//PROP_DO_SCHEMADUMP_RECURSIVEDUMP
-		if("true".equals(papp.getProperty(SQLDump.PROP_DO_SCHEMADUMP_RECURSIVEDUMP)) && !tableOnly) {
+		if(recursivedump && (!tableOnly || deeprecursivedump)) {
 			grabTablesRecursivebasedOnFKs(dbmd, schemaModel, schemaPattern);
 		}
 		
@@ -263,8 +268,8 @@ public class SQLDump {
 		//return schemaModel;
 	}
 	
-	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, SchemaModel schemaModel, String schemaPattern) throws Exception {
-		log.info("recursivegrab: "+schemaPattern);
+	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, SchemaModel schemaModel, String schemaPattern) throws Exception { //, String padding
+		log.debug("recursivegrab: "+schemaPattern);
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.foreignKeys) {
 			DBObjectId dbid = new DBObjectId();
@@ -277,7 +282,8 @@ public class SQLDump {
 			}*/
 		}
 		for(DBObjectId id: ids) {
-			if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
+			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
+			if(!containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
 				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
 				grabSchema(schemaModel, dbmd, id.schemaName, id.name, true);				
 			}
