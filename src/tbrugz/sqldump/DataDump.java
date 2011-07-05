@@ -17,7 +17,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 /*
- * TODO: prop for selecting which tables to dump data
+ * TODO: prop for selecting which tables to dump data from
  * TODO: column values escaping
  * TODOne: 'insert into' datadump syntax:
  *   sqldump.datadump.useinsertintosyntax=false

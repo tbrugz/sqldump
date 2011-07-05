@@ -18,7 +18,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
 
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
- * XXX: detach main (SQLDataDump) from data dump
+ * XXXxxx: detach main (SQLDataDump) from data dump
  * TODOne: generate graphml from schema structure
  * TODOne: column type mapping
  * TODOne: FK constraints at end of schema dump script?
@@ -41,6 +41,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
  * XXX: data dump: limit number of rows, tables to dump. define output patterns for data dump
+ * TODO: include demo schema and data
  */
 public class SQLDump {
 	
