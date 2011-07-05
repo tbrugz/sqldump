@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -16,7 +17,7 @@ public class SchemaModel {
 	Set<Table> tables = new TreeSet<Table>();
 	Set<FK> foreignKeys = new TreeSet<FK>();
 	Set<View> views = new TreeSet<View>();
-	Set<Trigger> triggers = new TreeSet<Trigger>();
+	Set<Trigger> triggers = new HashSet<Trigger>();
 	Set<ExecutableObject> executables = new TreeSet<ExecutableObject>();
 	Set<Synonym> synonyms = new TreeSet<Synonym>();
 	Set<Index> indexes = new TreeSet<Index>();
