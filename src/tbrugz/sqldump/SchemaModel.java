@@ -52,5 +52,23 @@ public class SchemaModel {
 	public void setExecutables(Set<ExecutableObject> executables) {
 		this.executables = executables;
 	}
+	public Set<Synonym> getSynonyms() {
+		return synonyms;
+	}
+	public void setSynonyms(Set<Synonym> synonyms) {
+		this.synonyms = synonyms;
+	}
+	public Set<Index> getIndexes() {
+		return indexes;
+	}
+	public void setIndexes(Set<Index> indexes) {
+		this.indexes = indexes;
+	}
+	public Set<Sequence> getSequences() {
+		return sequences;
+	}
+	public void setSequences(Set<Sequence> sequences) {
+		this.sequences = sequences;
+	}
 	
 }

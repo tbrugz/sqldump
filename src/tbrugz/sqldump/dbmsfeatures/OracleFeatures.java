@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -8,6 +8,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.DBMSFeatures;
+import tbrugz.sqldump.SchemaModel;
+import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
@@ -56,11 +59,11 @@ public class OracleFeatures implements DBMSFeatures {
 			v.name = rs.getString(1);
 			v.query = rs.getString(2);
 			v.schemaName = schemaPattern;
-			model.views.add(v);
+			model.getViews().add(v);
 			count++;
 		}
 		
-		log.info(model.views.size()+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		log.info(model.getViews().size()+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 		
 		//for(View v: model.views) {
 			//System.out.println(v);
@@ -83,11 +86,11 @@ public class OracleFeatures implements DBMSFeatures {
 			t.tableName = rs.getString(3);
 			t.description = rs.getString(4);
 			t.body = rs.getString(5);
-			model.triggers.add(t);
+			model.getTriggers().add(t);
 			count++;
 		}
 		
-		log.info(model.triggers.size()+" triggers grabbed");
+		log.info(model.getTriggers().size()+" triggers grabbed");
 	}
 
 	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -108,7 +111,7 @@ public class OracleFeatures implements DBMSFeatures {
 				//end last object
 				if(eo!=null) {
 					eo.body = sb.toString();
-					model.executables.add(eo);
+					model.getExecutables().add(eo);
 				}
 				//new object
 				eo = new ExecutableObject();
@@ -129,10 +132,10 @@ public class OracleFeatures implements DBMSFeatures {
 		}
 		if(sb!=null) {
 			eo.body = sb.toString();
-			model.executables.add(eo);
+			model.getExecutables().add(eo);
 		}
 		
-		log.info(model.executables.size()+" executable objects grabbed");
+		log.info(model.getExecutables().size()+" executable objects grabbed");
 	}
 
 	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -149,11 +152,11 @@ public class OracleFeatures implements DBMSFeatures {
 			s.objectOwner = rs.getString(2);
 			s.referencedObject = rs.getString(3);
 			s.dbLink = rs.getString(4);
-			model.synonyms.add(s);
+			model.getSynonyms().add(s);
 			count++;
 		}
 		
-		log.info(model.synonyms.size()+" synonyms grabbed");
+		log.info(model.getSynonyms().size()+" synonyms grabbed");
 	}
 
 	public void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -186,7 +189,7 @@ public class OracleFeatures implements DBMSFeatures {
 			if(idx==null || !idxName.equals(idx.name)) {
 				//end last object
 				if(idx!=null) {
-					model.indexes.add(idx);
+					model.getIndexes().add(idx);
 				}
 				//new object
 				idx = new Index();
@@ -198,9 +201,9 @@ public class OracleFeatures implements DBMSFeatures {
 			idx.columns.add(rs.getString(5));
 			count++;
 		}
-		model.indexes.add(idx);
+		model.getIndexes().add(idx);
 		
-		log.info(model.indexes.size()+" indexes grabbed");
+		log.info(model.getIndexes().size()+" indexes grabbed");
 	}
 
 	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -217,11 +220,11 @@ public class OracleFeatures implements DBMSFeatures {
 			s.minValue = rs.getLong(2);
 			s.incrementBy = rs.getLong(3);
 			s.lastNumber = rs.getLong(4);
-			model.sequences.add(s);
+			model.getSequences().add(s);
 			count++;
 		}
 		
-		log.info(model.sequences.size()+" sequences grabbed");
+		log.info(model.getSequences().size()+" sequences grabbed");
 	}
 	
 }
