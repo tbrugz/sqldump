@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -13,6 +14,7 @@ import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class InformationSchemaFeatures implements DBMSFeatures {
@@ -69,21 +71,31 @@ public class InformationSchemaFeatures implements DBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
-			InformationSchemaTrigger t = new InformationSchemaTrigger();
+			InformationSchemaTrigger t = (InformationSchemaTrigger) findTrigger(model.getTriggers(), rs.getString(3));
+			if(t==null) {
+				t = new InformationSchemaTrigger();
+				model.getTriggers().add(t);
+				count++;
+			}
 			t.schemaName = rs.getString(2);
 			t.name = rs.getString(3);
-			t.eventManipulation = rs.getString(4);
+			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
 			//t.description = rs.getString(4);
 			//t.body = rs.getString(7);
 			t.actionStatement = rs.getString(7);
 			t.actionOrientation = rs.getString(8);
 			t.conditionTiming = rs.getString(9);
-			model.getTriggers().add(t);
-			count++;
 		}
 		
 		log.info(count+" triggers grabbed");
+	}
+	
+	static Trigger findTrigger(Set<Trigger> triggers, String name) {
+		for(Trigger t: triggers) {
+			if(t.name.equals(name)) return t;
+		}
+		return null;
 	}
 
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
