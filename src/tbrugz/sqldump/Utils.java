@@ -37,6 +37,34 @@ public class Utils {
 		return buffer.toString();
 	}
 	
+	static String DEFAULT_ENCLOSING = "'";
+	
+	public static String join4sql(Collection<?> s, String delimiter) {
+		StringBuffer buffer = new StringBuffer();
+		Iterator<?> iter = s.iterator();
+		while (iter.hasNext()) {
+			Object elem = iter.next();
+			if(elem == null) {
+				buffer.append(elem);
+			}
+			else if(elem instanceof String) {
+				//TODO: String escaping? "\n, \r, ', ..."
+				buffer.append(DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING);
+			}
+			else if(elem instanceof Integer) {
+				buffer.append(elem);
+			}
+			else {
+				buffer.append(elem);
+			}
+
+			if (iter.hasNext()) {
+				buffer.append(delimiter);
+			}
+		}
+		return buffer.toString();
+	}
+	
 	public static String normalizeEnumStringConstant(String strEnumConstant) {
 		return strEnumConstant.replace(' ', '_');
 	}

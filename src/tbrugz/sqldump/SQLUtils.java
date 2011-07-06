@@ -36,6 +36,28 @@ public class SQLUtils {
 		}
 		return ls;
 	}
+
+	public static List getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
+		List ls = new ArrayList();
+		for(int i=1;i<=numCol;i++) {
+			Object value = null;
+			//TODO: what if Date value?
+			if(colTypes.get(i-1).equals(String.class)) {
+				value = rs.getString(i);
+			}
+			else if(colTypes.get(i-1).equals(Integer.class)) {
+				value = rs.getInt(i);
+			}
+			else if(colTypes.get(i-1).equals(Double.class)) {
+				value = rs.getDouble(i);
+			}
+			else {
+				value = rs.getString(i);
+			}
+			ls.add(value);
+		}
+		return ls;
+	}
 	
 	static void dumpRS(ResultSet rs) throws SQLException {
 		dumpRS(rs, rs.getMetaData());

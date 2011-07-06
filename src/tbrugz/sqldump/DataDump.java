@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -129,40 +130,79 @@ public class DataDump {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
 			
+			log.debug("dumping data/inserts from table: "+table);
+			Statement st = conn.createStatement();
+			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
+			ResultSetMetaData md = rs.getMetaData();
+			int numCol = md.getColumnCount();
+
+			boolean hasData = rs.next();
+			//so empty tables do not create empty dump files
+			if(!hasData) continue;
+
 			boolean alreadyOpened = filesOpened.contains(filename);
 			if(!alreadyOpened) { filesOpened.add(filename); }
 			//Writer fos = new PrintWriter(filename, charset);
 			//if already opened, append; if not, create
 			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
-			log.info("dumping data/inserts from table: "+table);
-			Statement st = conn.createStatement();
-			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
-			ResultSetMetaData md = rs.getMetaData();
-			int numCol = md.getColumnCount();
-
-			String colNames = "";
 			//headers
+			String colNames = "";
+			List<String> lsColNames = new ArrayList<String>();
+			List<Class> lsColTypes = new ArrayList<Class>();
+			for(int i=0;i<numCol;i++) {
+				lsColNames.add(md.getColumnName(i+1));
+			}
+			for(int i=0;i<numCol;i++) {
+				lsColTypes.add(getClassFromSqlType(md.getColumnType(i+1)));
+			}
 			if(doColumnNamesDump) {
-				List<String> ls = new ArrayList<String>();
-				for(int i=0;i<numCol;i++) {
-					ls.add(md.getColumnName(i+1));
-				}
-				colNames = "("+Utils.join(ls, ", ")+") ";
+				colNames = "("+Utils.join(lsColNames, ", ")+") ";
 			}
 			
-			//XXX: integet/float vals without quotes?
-			while(rs.next()) {
-				List<String> vals = SQLUtils.getRowListFromRS(rs, numCol);
+			log.debug("colnames: "+lsColNames);
+			log.debug("coltypes: "+lsColTypes);
+			
+			//TODOne: integet/float vals without quotes?
+			int count = 0;
+			do {
+				List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 				out("insert into "+table+" "+
 					colNames+"values ("+
-					Utils.join(vals, ", ", "'", true)+");", fos, "\n");
+					Utils.join4sql(vals, ", ")+");", fos, "\n");
+					//Utils.join4sql(vals, ", ", "'", true)+");", fos, "\n");
+				count++;
 			}
-			rs.close();
+			while(rs.next());
+			log.info("dumped "+count+" rows from table: "+table);
 			
+			rs.close();
 			fos.close();
 		}
 		
+	}
+
+	//TODO: Date class type for dump?
+	static Class getClassFromSqlType(int type) {
+		//log.debug("type: "+type);
+		switch(type) {
+			case Types.TINYINT: 
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			case Types.BIGINT:
+			case Types.DECIMAL: //??
+			case Types.NUMERIC: //??
+				return Integer.class;
+			case Types.REAL:
+			case Types.FLOAT:
+			case Types.DOUBLE:
+				return Double.class;
+			case Types.CHAR:
+			case Types.VARCHAR:
+				return String.class;
+			default:
+				return String.class;
+		}
 	}
 	
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
