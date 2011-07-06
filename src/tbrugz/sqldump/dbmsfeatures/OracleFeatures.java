@@ -63,13 +63,7 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.getViews().size()+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
-		
-		//for(View v: model.views) {
-			//System.out.println(v);
-			//System.out.println(v.getDefinition(true));
-		//}
-		//SQLDataDump.dumpRS(rs);
+		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
 	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -90,7 +84,7 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.getTriggers().size()+" triggers grabbed");
+		log.info(count+" triggers grabbed");
 	}
 
 	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -135,7 +129,7 @@ public class OracleFeatures implements DBMSFeatures {
 			model.getExecutables().add(eo);
 		}
 		
-		log.info(model.getExecutables().size()+" executable objects grabbed");
+		log.info(count+" executable objects grabbed");
 	}
 
 	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -156,7 +150,7 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.getSynonyms().size()+" synonyms grabbed");
+		log.info(count+" synonyms grabbed");
 	}
 
 	public void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -186,6 +180,7 @@ public class OracleFeatures implements DBMSFeatures {
 		
 		while(rs.next()) {
 			String idxName = rs.getString(2);
+			//if first (idx==null) or new index
 			if(idx==null || !idxName.equals(idx.name)) {
 				//end last object
 				if(idx!=null) {
@@ -203,7 +198,7 @@ public class OracleFeatures implements DBMSFeatures {
 		}
 		model.getIndexes().add(idx);
 		
-		log.info(model.getIndexes().size()+" indexes grabbed");
+		log.info(model.getIndexes().size()+" indexes grabbed [count="+count+"]");
 	}
 
 	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -224,7 +219,7 @@ public class OracleFeatures implements DBMSFeatures {
 			count++;
 		}
 		
-		log.info(model.getSequences().size()+" sequences grabbed");
+		log.info(count+" sequences grabbed");
 	}
 	
 }

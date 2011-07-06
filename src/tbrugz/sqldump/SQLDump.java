@@ -35,8 +35,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: script output: option to group specific objects (fk, grants, index) with referencing table
  * XXXdone: script output: option to output specific objects (eg FK or Grants) with specific pattern 
  * XXXdone: compact grant syntax
- * TODO: postgresql specific features
- * XXX: derby/ansi specific features?
+ * TODOne: postgresql/ansi specific features
+ * XXX: derby specific features?
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties

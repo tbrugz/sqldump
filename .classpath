@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
 	<classpathentry kind="lib" path="D:/java/libs-jdbc/ojdbc14.jar"/>
 	<classpathentry kind="lib" path="D:/java/libs-jdbc/postgresql-9.0-801.jdbc4.jar"/>
+	<classpathentry kind="lib" path="D:/java/db-derby-10.8.1.2-bin/lib/derby.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
