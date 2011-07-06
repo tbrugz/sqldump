@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 
 /*
  * TODO: prop for selecting which tables to dump data from
+ * TODO: limit number of rows to dump
+ * TODO: where clause for data dump 
  * TODO: column values escaping
  * TODOne: 'insert into' datadump syntax:
  *   sqldump.datadump.useinsertintosyntax=false

@@ -27,7 +27,7 @@ public class Table extends DBObject {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		// TODO Table: getDefinition
+		// XXX Table: getDefinition
 		return null;
 	}
 

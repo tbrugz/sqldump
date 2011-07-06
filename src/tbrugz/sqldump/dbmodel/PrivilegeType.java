@@ -5,7 +5,7 @@ public enum PrivilegeType {
 	DEBUG, FLASHBACK, ON_COMMIT_REFRESH, QUERY_REWRITE, //Oracle
 	RULE, TRIGGER, //Postgres
 	;
-	//TODO: filter privilegetype on output based on dbid...
+	//XXX: filter privilegetype on output based on dbid... see: column-type-mapping.properties
 	
 	@Override
 	public String toString() {
