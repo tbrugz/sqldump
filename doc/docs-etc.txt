@@ -181,3 +181,11 @@ with oracle grab indexes:
 13:54:08,106  INFO init...
 (...)
 13:55:16,810  INFO ...done
+
+================
+
+change default schema?
+
+oracle:
+ALTER SESSION SET CURRENT_SCHEMA=animals
+SET CURRENT SCHEMA

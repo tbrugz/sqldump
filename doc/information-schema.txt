@@ -1,0 +1,40 @@
+http://en.wikipedia.org/wiki/Information_schema
+
+select * from information_schema.check_constraints  
+
+select * from information_schema.tables
+
+select * from information_schema.column_privileges
+
+select * from information_schema.columns
+
+select * from information_schema.constraint_column_usage
+
+select * from information_schema.constraint_table_usage
+
+select * from information_schema.key_column_usage
+
+select * from information_schema.referential_constraints
+
+x select * from information_schema.routines !
+
+x select * from information_schema.sequences !
+
+select * from information_schema.sql_packages
+
+select * from information_schema.table_constraints
+
+select * from information_schema.table_privileges
+
+select * from information_schema.tables
+
+x select * from information_schema.triggers !
+
+select * from information_schema.triggered_update_columns
+
+x select * from information_schema.views !
+
+-------
+
+? synonyms? no synonyms on ISO/IEC 9075-11
+
