@@ -8,7 +8,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -156,7 +155,7 @@ public class DataDump {
 				lsColNames.add(md.getColumnName(i+1));
 			}
 			for(int i=0;i<numCol;i++) {
-				lsColTypes.add(getClassFromSqlType(md.getColumnType(i+1)));
+				lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1)));
 			}
 			if(doColumnNamesDump) {
 				colNames = "("+Utils.join(lsColNames, ", ")+") ";
@@ -184,29 +183,6 @@ public class DataDump {
 		
 	}
 
-	//TODO: Date class type for dump?
-	static Class getClassFromSqlType(int type) {
-		//log.debug("type: "+type);
-		switch(type) {
-			case Types.TINYINT: 
-			case Types.SMALLINT:
-			case Types.INTEGER:
-			case Types.BIGINT:
-			case Types.DECIMAL: //??
-			case Types.NUMERIC: //??
-				return Integer.class;
-			case Types.REAL:
-			case Types.FLOAT:
-			case Types.DOUBLE:
-				return Double.class;
-			case Types.CHAR:
-			case Types.VARCHAR:
-				return String.class;
-			default:
-				return String.class;
-		}
-	}
-	
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
 	}

@@ -3,7 +3,9 @@ package tbrugz.sqldump;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class SQLUtils {
@@ -41,15 +43,20 @@ public class SQLUtils {
 		List ls = new ArrayList();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
-			//TODO: what if Date value?
-			if(colTypes.get(i-1).equals(String.class)) {
+			Class coltype = colTypes.get(i-1);
+			if(coltype.equals(String.class)) {
 				value = rs.getString(i);
 			}
-			else if(colTypes.get(i-1).equals(Integer.class)) {
+			else if(coltype.equals(Integer.class)) {
 				value = rs.getInt(i);
 			}
-			else if(colTypes.get(i-1).equals(Double.class)) {
+			else if(coltype.equals(Double.class)) {
 				value = rs.getDouble(i);
+			}
+			else if(coltype.equals(Date.class)) {
+				//TODO: how to Date value?
+				value = rs.getString(i);
+				//value = rs.getDate(i);
 			}
 			else {
 				value = rs.getString(i);
@@ -57,6 +64,31 @@ public class SQLUtils {
 			ls.add(value);
 		}
 		return ls;
+	}
+
+	//TODO: Date class type for dump?
+	static Class getClassFromSqlType(int type) {
+		//log.debug("type: "+type);
+		switch(type) {
+			case Types.TINYINT: 
+			case Types.SMALLINT:
+			case Types.INTEGER:
+			case Types.BIGINT:
+			case Types.DECIMAL: //??
+			case Types.NUMERIC: //??
+				return Integer.class;
+			case Types.REAL:
+			case Types.FLOAT:
+			case Types.DOUBLE:
+				return Double.class;
+			case Types.DATE:
+			case Types.TIMESTAMP:
+				return Date.class;
+			case Types.CHAR:
+			case Types.VARCHAR:
+			default:
+				return String.class;
+		}
 	}
 	
 	static void dumpRS(ResultSet rs) throws SQLException {
