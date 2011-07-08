@@ -11,6 +11,7 @@ public class InformationSchemaTrigger extends Trigger {
 	String actionStatement; 
 	String actionOrientation; 
 	String conditionTiming;
+	static boolean addSplitter; //XXX: should be static? or belongs to model?
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
@@ -18,7 +19,8 @@ public class InformationSchemaTrigger extends Trigger {
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
 				+"\n  on "+tableName
 				+"\n  for each "+actionOrientation
-				+"\n  "+actionStatement;
+				+"\n  "+actionStatement
+				+(addSplitter?";":"");
 	}
 
 }
