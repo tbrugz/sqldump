@@ -6,6 +6,7 @@ import java.nio.CharBuffer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 import java.util.Properties;
 
@@ -13,6 +14,7 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.DBMSFeatures;
 import tbrugz.sqldump.SchemaModel;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.View;
 
 public class DerbyFeatures implements DBMSFeatures {
@@ -24,7 +26,16 @@ public class DerbyFeatures implements DBMSFeatures {
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		grabDBViews(model, schemaPattern, conn);
 		grabDBTriggers(model, schemaPattern, conn);
-		//XXX: sequences? procedures/functions? synonyms?
+		
+		try {
+			grabDBSequences(model, schemaPattern, conn);
+		}
+		catch(SQLSyntaxErrorException e) {
+			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current db version?
+			log.debug("nested exception: "+e);
+		}
+		
+		//XXX: add procedures/functions? synonyms?
 	}
 
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -92,7 +103,31 @@ public class DerbyFeatures implements DBMSFeatures {
 		}
 		
 		log.info(count+" triggers grabbed");
-	}	
+	}
+	
+	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing sequences");
+		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype "
+				+"from sys.syssequences "
+				+"order by sequencename ";
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			Sequence s = new Sequence();
+			s.schemaName = schemaPattern;
+			s.name = rs.getString(1);
+			s.minValue = rs.getLong(2);
+			s.maxValue = rs.getLong(3);
+			s.lastNumber = rs.getLong(4);
+			s.incrementBy = rs.getLong(5);
+			model.getSequences().add(s);
+			count++;
+		}
+		
+		log.info(count+" sequences grabbed");
+	}
 
 	//not used...
 	static String getStringFromReader(Reader r) {

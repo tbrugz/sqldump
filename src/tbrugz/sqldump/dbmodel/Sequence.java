@@ -6,6 +6,7 @@ package tbrugz.sqldump.dbmodel;
 public class Sequence extends DBObject {
 	
 	public long minValue;
+	public long maxValue; //XXX: not used yet
 	public long incrementBy;
 	public long lastNumber;
 	
