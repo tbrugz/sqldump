@@ -47,7 +47,7 @@ public class OracleFeatures implements DBMSFeatures {
 		grabDBSequences(model, schemaPattern, conn);
 	}
 	
-	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		String query = "SELECT VIEW_NAME, TEXT FROM USER_VIEWS ORDER BY VIEW_NAME";
 		Statement st = conn.createStatement();
@@ -66,7 +66,7 @@ public class OracleFeatures implements DBMSFeatures {
 		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY FROM USER_TRIGGERS";
 		Statement st = conn.createStatement();
@@ -87,7 +87,7 @@ public class OracleFeatures implements DBMSFeatures {
 		log.info(count+" triggers grabbed");
 	}
 
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = "select name, type, line, text from user_source "
 			+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
@@ -96,6 +96,7 @@ public class OracleFeatures implements DBMSFeatures {
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		int countExecutables = 0;
 		ExecutableObject eo = null;
 		StringBuffer sb = null;
 		
@@ -106,6 +107,7 @@ public class OracleFeatures implements DBMSFeatures {
 				if(eo!=null) {
 					eo.body = sb.toString();
 					model.getExecutables().add(eo);
+					countExecutables++;
 				}
 				//new object
 				eo = new ExecutableObject();
@@ -127,12 +129,13 @@ public class OracleFeatures implements DBMSFeatures {
 		if(sb!=null) {
 			eo.body = sb.toString();
 			model.getExecutables().add(eo);
+			countExecutables++;
 		}
 		
-		log.info(count+" executable objects grabbed");
+		log.info(countExecutables+" executable objects grabbed [linecount="+count+"]");
 	}
 
-	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
 		String query = "select synonym_name, table_owner, table_name, db_link from user_synonyms";
 		Statement st = conn.createStatement();
@@ -153,7 +156,7 @@ public class OracleFeatures implements DBMSFeatures {
 		log.info(count+" synonyms grabbed");
 	}
 
-	public void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing indexes");
 		/*
 		select * from user_indexes   
@@ -201,7 +204,7 @@ public class OracleFeatures implements DBMSFeatures {
 		log.info(model.getIndexes().size()+" indexes grabbed [count="+count+"]");
 	}
 
-	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = "select sequence_name, min_value, increment_by, last_number from user_sequences order by sequence_name";
 		Statement st = conn.createStatement();
