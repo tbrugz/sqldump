@@ -65,6 +65,7 @@ sqldump.datadump.columndelimiter=;
 
 sqldump.datadump.rowlimit=100
 sqldump.datadump.TABLE_X.rowlimit=500
+sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
 
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 

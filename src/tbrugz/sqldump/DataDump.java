@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 /*
  * TODO: prop for selecting which tables to dump data from
  * TODOne: limit number of rows to dump
- * TODO: where clause for data dump 
+ * TODOne: where clause for data dump 
  * TODO: column values escaping
  * TODOne: 'insert into' datadump syntax:
  *   sqldump.datadump.useinsertintosyntax=false
@@ -100,9 +100,13 @@ public class DataDump {
 			//if already opened, append; if not, create
 			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
+			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
+
 			log.info("dumping data from table: "+table);
 			Statement st = conn.createStatement();
-			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
+			String sql = "select * from \""+table+"\" "
+					+ (whereClause!=null?" where "+whereClause:"");
+			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 
@@ -142,10 +146,15 @@ public class DataDump {
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
-			
+
+			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
+
 			log.debug("dumping data/inserts from table: "+table);
 			Statement st = conn.createStatement();
-			ResultSet rs = st.executeQuery("select * from \""+table+"\"");
+			String sql = "select * from \""+table+"\""
+					+ (whereClause!=null?" where "+whereClause:"");
+			log.info("sql: "+sql);
+			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 
