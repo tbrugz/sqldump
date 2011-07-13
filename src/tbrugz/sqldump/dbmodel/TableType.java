@@ -3,7 +3,7 @@ package tbrugz.sqldump.dbmodel;
 import org.apache.log4j.Logger;
 
 public enum TableType {
-	TABLE, SYNONYM, VIEW, SYSTEM_TABLE; //XXX: temporary table, external table?
+	TABLE, SYNONYM, VIEW, SYSTEM_TABLE; //XXX: temporary table, external table, materialized view?
 	
 	static Logger log = Logger.getLogger(TableType.class);
 	

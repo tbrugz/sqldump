@@ -43,7 +43,9 @@ public class Table extends DBObject {
 		StringBuffer sb = new StringBuffer();
 		//Table
 		sb.append("--drop table "+tableName+";\n");
-		sb.append("create table "+tableName+" ( -- type="+type+"\n");
+		sb.append("create ");
+		sb.append(getTableType4sql());
+		sb.append("table "+tableName+" ( -- type="+type+"\n");
 		//Columns
 		for(Column c: columns) {
 			String colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
@@ -60,7 +62,10 @@ public class Table extends DBObject {
 		}
 		//Table end
 		sb.delete(sb.length()-2, sb.length());
-		sb.append("\n);\n");
+		//sb.append("\n);\n");
+		sb.append("\n)");
+		sb.append(getTableFooter4sql());
+		sb.append(";\n");
 		return sb.toString();
 	}
 
@@ -74,6 +79,14 @@ public class Table extends DBObject {
 			}
 		}
 		return sb.toString();
+	}
+	
+	public String getTableType4sql() {
+		return "";
+	}
+
+	public String getTableFooter4sql() {
+		return "";
 	}
 	
 	//---------
