@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Properties;
 
 public class Utils {
 	/*
@@ -86,4 +87,20 @@ public class Utils {
 		return strEnumConstant.replace('_', ' ');
 	}
 	*/
+	
+	public static boolean getPropBool(Properties prop, String key) {
+		return "true".equals(prop.getProperty(key));
+	}
+	
+	public static Long getPropLong(Properties prop, String key) {
+		String str = prop.getProperty(key);
+		try {
+			long l = Long.parseLong(str);
+			return l;
+		}
+		catch(Exception e) {
+			return null;
+		}
+	}
+	
 }

@@ -63,6 +63,9 @@ sqldump.datadump.columndelimiter=;
 # charset:: default: UTF-8; options: ISO-8859-1, UTF-16, US-ASCII, ...
 #sqldump.datadump.charset=UTF-8 
 
+sqldump.datadump.rowlimit=100
+sqldump.datadump.TABLE_X.rowlimit=500
+
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
 ############

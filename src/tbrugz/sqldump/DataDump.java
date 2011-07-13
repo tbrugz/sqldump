@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 /*
  * TODO: prop for selecting which tables to dump data from
- * TODO: limit number of rows to dump
+ * TODOne: limit number of rows to dump
  * TODO: where clause for data dump 
  * TODO: column values escaping
  * TODOne: 'insert into' datadump syntax:
@@ -31,6 +31,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
 	static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
+	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -52,19 +53,20 @@ public class DataDump {
 	
 	void dumpData(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
+		Long globalRowlimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
 		boolean doInsertIntoDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO, "false"));
 		if(doInsertIntoDump) {
-			dumpDataInsertIntoSyntax(conn, tableNamesForDataDump, prop);
+			dumpDataInsertIntoSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
 		}
 		else {
-			dumpDataRawSyntax(conn, tableNamesForDataDump, prop);
+			dumpDataRawSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
 		}
 	}
 
 	Set<String> filesOpened = new HashSet<String>();
 	
-	void dumpDataRawSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
+	void dumpDataRawSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		String columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
@@ -88,6 +90,9 @@ public class DataDump {
 		for(String table: tableNamesForDataDump) {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
+
+			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
+			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
 			boolean alreadyOpened = filesOpened.contains(filename);
 			if(!alreadyOpened) { filesOpened.add(filename); }
@@ -113,9 +118,14 @@ public class DataDump {
 				out(sb.toString(), fos, recordDelimiter);
 			}
 			
+			int count = 0;
 			while(rs.next()) {
 				out(SQLUtils.getRowFromRS(rs, numCol, table, columnDelimiter), fos, recordDelimiter);
+				count++;
+				if(rowlimit<=count) { break; }
 			}
+			log.info("dumped "+count+" rows from table: "+table);
+
 			rs.close();
 			
 			fos.close();
@@ -123,13 +133,15 @@ public class DataDump {
 		
 	}
 
-	void dumpDataInsertIntoSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
+	void dumpDataInsertIntoSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
 		
 		for(String table: tableNamesForDataDump) {
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
+			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
+			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
 			log.debug("dumping data/inserts from table: "+table);
 			Statement st = conn.createStatement();
@@ -173,6 +185,7 @@ public class DataDump {
 					Utils.join4sql(vals, ", ")+");", fos, "\n");
 					//Utils.join4sql(vals, ", ", "'", true)+");", fos, "\n");
 				count++;
+				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
 			log.info("dumped "+count+" rows from table: "+table);
