@@ -232,7 +232,6 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return new OracleDatabaseMetaData(metadata);
 	}
 	
-	@Override
 	public Table getTableObject() {
 		return new OracleTable();
 	}

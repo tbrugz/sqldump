@@ -1,7 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,7 +9,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.AbstractDBMSFeatures;
+import tbrugz.sqldump.DefaultDBMSFeatures;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -18,7 +17,7 @@ import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
-public class InformationSchemaFeatures extends AbstractDBMSFeatures {
+public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	static Logger log = Logger.getLogger(InformationSchemaFeatures.class);
 
 	//boolean grabIndexes = false;
