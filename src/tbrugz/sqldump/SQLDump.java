@@ -63,8 +63,8 @@ public class SQLDump {
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	
-	static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
-	static final String PROP_TO_DB_ID = "sqldump.todbid";
+	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
+	public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
@@ -156,14 +156,12 @@ public class SQLDump {
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(PROP_DUMPSCHEMAPATTERN, null);
 
-		//TODO: add grab specific...
+		//TODOne: add grab specific...
 		DBMSFeatures feats = grabDbSpecificFeaturesClass(schemaModel, schemaPattern);
-		if(feats!=null) {
-			dbmd = feats.getMetadataDecorator(dbmd);
-		}
+		dbmd = feats.getMetadataDecorator(dbmd);
 		
 		log.info("schema dump... schemapattern: "+schemaPattern);
-		grabSchema(schemaModel, dbmd, schemaPattern, null, false);
+		grabSchema(schemaModel, dbmd, feats, schemaPattern, null, false);
 		
 		log.info(schemaModel.tables.size()+" tables grabbed");
 		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
@@ -180,7 +178,7 @@ public class SQLDump {
 	
 	//private static String PADDING = "  ";
 	
-	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
+	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
 		log.debug("schema dump... schemapattern: "+schemaPattern+", tablePattern: "+tablePattern);
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
@@ -198,10 +196,11 @@ public class SQLDump {
 			if(ttype==null) { continue; }
 			
 			//defining model
-			Table table = new Table();
+			Table table = dbmsfeatures.getTableObject();
 			table.name = tableName;
 			table.type = ttype;
 			table.schemaName = schemaName;
+			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {
 				String fullTablename = (schemaPattern==null?"":table.schemaName+".")+tableName;
@@ -263,7 +262,7 @@ public class SQLDump {
 		rs.close();
 
 		if(recursivedump && (!tableOnly || deeprecursivedump)) {
-			grabTablesRecursivebasedOnFKs(dbmd, schemaModel, schemaPattern);
+			grabTablesRecursivebasedOnFKs(dbmd, dbmsfeatures, schemaModel, schemaPattern);
 		}
 		
 		//log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
@@ -277,7 +276,7 @@ public class SQLDump {
 		//return schemaModel;
 	}
 	
-	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, SchemaModel schemaModel, String schemaPattern) throws Exception { //, String padding
+	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern) throws Exception { //, String padding
 		log.debug("recursivegrab: "+schemaPattern);
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.foreignKeys) {
@@ -294,7 +293,7 @@ public class SQLDump {
 			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
 			if(!containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
 				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
-				grabSchema(schemaModel, dbmd, id.schemaName, id.name, true);				
+				grabSchema(schemaModel, dbmd, dbmsfeatures, id.schemaName, id.name, true);				
 			}
 		}
 	}
@@ -343,7 +342,7 @@ public class SQLDump {
 				e.printStackTrace();
 			}
 		}
-		return null;
+		return new DefaultDBMSFeatures();
 	}
 	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {

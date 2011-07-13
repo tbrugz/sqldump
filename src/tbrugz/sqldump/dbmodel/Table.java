@@ -1,8 +1,13 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
+import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.Utils;
 
 public class Table extends DBObject {
 	public TableType type;
@@ -30,7 +35,47 @@ public class Table extends DBObject {
 		// XXX Table: getDefinition
 		return null;
 	}
+	
+	public String getDefinition(boolean dumpWithSchemaName, boolean doSchemaDumpPKs, boolean dumpFKsInsideTable, Properties colTypeConversionProp, Set<FK> foreignKeys) {
+		List<String> pkCols = new ArrayList<String>();
+		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
+		
+		StringBuffer sb = new StringBuffer();
+		//Table
+		sb.append("--drop table "+tableName+";\n");
+		sb.append("create table "+tableName+" ( -- type="+type+"\n");
+		//Columns
+		for(Column c: columns) {
+			String colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+			if(c.pk) { pkCols.add(c.name); }
+			sb.append("\t"+colDesc+",\n");
+		}
+		//PKs
+		if(doSchemaDumpPKs && pkCols.size()>0) {
+			sb.append("\tconstraint "+pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
+		}
+		//FKs?
+		if(dumpFKsInsideTable) {
+			sb.append(dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
+		}
+		//Table end
+		sb.delete(sb.length()-2, sb.length());
+		sb.append("\n);\n");
+		return sb.toString();
+	}
 
+	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName, boolean dumpWithSchemaName) {
+		StringBuffer sb = new StringBuffer();
+		for(FK fk: foreignKeys) {
+			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
+				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
+				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
+				sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
+			}
+		}
+		return sb.toString();
+	}
+	
 	//---------
 	
 	public TableType getType() {

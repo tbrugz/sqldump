@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.AbstractDBMSFeatures;
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -17,6 +18,7 @@ import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
@@ -228,6 +230,34 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
 		return new OracleDatabaseMetaData(metadata);
+	}
+	
+	@Override
+	public Table getTableObject() {
+		return new OracleTable();
+	}
+	
+	@Override
+	public void addTableSpecificFeatures(Table t, ResultSet rs) {
+		if(t instanceof OracleTable) {
+			OracleTable ot = (OracleTable) t;
+			try {
+				ot.tableSpace = rs.getString("TABLESPACE_NAME");
+				ot.temporary = "YES".equals(rs.getString("TEMPORARY"));
+				ot.logging = "YES".equals(rs.getString("LOGGING"));
+			}
+			catch(SQLException e) {
+				try {
+					log.warn("OracleSpecific: "+e+"; col names: ("+SQLUtils.getColumnNames(rs.getMetaData())+")");
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+				//e.printStackTrace();
+			}
+		}
+		else {
+			log.warn("Table "+t+" should be instance of OracleTable");
+		}
 	}
 	
 }

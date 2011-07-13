@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
@@ -145,20 +143,22 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			}
 		}
 		log.debug("props->"+columnTypeMapping);
-		
+		Properties colTypeConversionProp = new ParametrizedProperties();
+		colTypeConversionProp.putAll(columnTypeMapping);
+		colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId);
+		colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId);
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
-		StringBuffer sb = new StringBuffer();
+		//StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
 			switch(table.type) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 			}
-			sb.setLength(0);
-			List<String> pkCols = new ArrayList<String>();
+			//sb.setLength(0);
+			//List<String> pkCols = new ArrayList<String>();
 			
-			String tableName = (dumpWithSchemaName?table.schemaName+".":"")+table.name;
-			
+			/*
 			//Table
 			sb.append("--drop table "+tableName+";\n");
 			sb.append("create table "+tableName+" ( -- type="+table.type+"\n");
@@ -179,8 +179,11 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 			//Table end
 			sb.delete(sb.length()-2, sb.length());
 			sb.append("\n);\n");
+			*/
 			
-			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
+			//sb.append(table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys));
+			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys));
+			//categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
 
 			//FK outside table, with referencing table
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
@@ -202,6 +205,8 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 				}
 			}
 
+			String tableName = (dumpWithSchemaName?table.schemaName+".":"")+table.name;
+			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
 				String grantOutput = compactGrantDump(table.grants, tableName, toDbId);
@@ -279,20 +284,13 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 	
 	String fkScriptWithAlterTable(FK fk) {
 		return "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
-			+"\n\tadd "+fkSimpleScript(fk, "\n\t")+";\n";
+			+"\n\tadd "+FK.fkSimpleScript(fk, "\n\t", dumpWithSchemaName)+";\n";
 			
 			//"add constraint "+fk.getName()
 			//+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
 			//")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
 	}
 
-	String fkSimpleScript(FK fk, String whitespace) {
-		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
-		return "constraint "+fk.getName()
-			+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
-			")"+whitespace+"references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+")";
-	}
-	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
 		//StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
@@ -308,17 +306,19 @@ public class SchemaModelScriptDumper extends SchemaModelDumper {
 		//out(sb.toString());
 	}
 	
+	/*
 	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName) throws IOException {
 		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
 				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
 				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
-				sb.append("\t"+fkSimpleScript(fk, " ")+",\n");
+				sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
 			}
 		}
 		return sb.toString();
 	}
+	*/
 	
 	//XXXcc Map<String, FileWriter> ? not if "sqldump.outputfilepattern" contains ${objectname}
 	//Map<DBObjectType, String> outFilePatterns = new HashMap<DBObjectType, String>();
