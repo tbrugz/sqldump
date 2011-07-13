@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -10,4 +11,5 @@ public interface DBMSFeatures {
 	
 	void procProperties(Properties prop);
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
+	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
 }

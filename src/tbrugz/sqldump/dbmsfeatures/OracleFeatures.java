@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -8,7 +9,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DBMSFeatures;
+import tbrugz.sqldump.AbstractDBMSFeatures;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -19,7 +20,7 @@ import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
-public class OracleFeatures implements DBMSFeatures {
+public class OracleFeatures extends AbstractDBMSFeatures {
 	static Logger log = Logger.getLogger(OracleFeatures.class);
 
 	boolean grabIndexes = false;
@@ -223,6 +224,10 @@ public class OracleFeatures implements DBMSFeatures {
 		}
 		
 		log.info(count+" sequences grabbed");
+	}
+	
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
+		return new OracleDatabaseMetaData(metadata);
 	}
 	
 }

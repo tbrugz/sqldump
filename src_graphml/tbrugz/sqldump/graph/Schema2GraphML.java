@@ -23,6 +23,7 @@ import tbrugz.xml.AbstractDump;
 
 /*
  * TODO: show PK columns, FK columns, constraints?
+ * TODO: stereotype may include 'otherschema' or object type (table, view, synonym, temporary table, external table)
  */
 public class Schema2GraphML extends SchemaModelDumper {
 	
@@ -55,6 +56,7 @@ public class Schema2GraphML extends SchemaModelDumper {
 			n.setId(id);
 			n.setLabel(id);
 			StringBuffer sb = new StringBuffer();
+			//sb.append("--type: "+t.type+"\n");
 			for(Column c: t.getColumns()) {
 				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}

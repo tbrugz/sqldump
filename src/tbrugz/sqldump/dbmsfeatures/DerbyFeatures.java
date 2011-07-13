@@ -12,12 +12,12 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DBMSFeatures;
+import tbrugz.sqldump.AbstractDBMSFeatures;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.View;
 
-public class DerbyFeatures implements DBMSFeatures {
+public class DerbyFeatures extends AbstractDBMSFeatures {
 	static Logger log = Logger.getLogger(DerbyFeatures.class);
 
 	public void procProperties(Properties prop) {

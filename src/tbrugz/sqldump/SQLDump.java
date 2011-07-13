@@ -36,7 +36,9 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: script output: option to output specific objects (eg FK or Grants) with specific pattern 
  * XXXdone: compact grant syntax
  * TODOne: postgresql/ansi specific features
- * XXX: derby specific features?
+ * XXXxx: derby specific features?
+ * TODO: grab specific table info (Oracle, Postgres, ...)
+ * TODO: grab constraints: UNIQUE, CHECK, DEFAULT, xPK, xFK, xNOT NULL
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
@@ -153,6 +155,12 @@ public class SQLDump {
 		DatabaseMetaData dbmd = conn.getMetaData();
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(PROP_DUMPSCHEMAPATTERN, null);
+
+		//TODO: add grab specific...
+		DBMSFeatures feats = grabDbSpecificFeaturesClass(schemaModel, schemaPattern);
+		if(feats!=null) {
+			dbmd = feats.getMetadataDecorator(dbmd);
+		}
 		
 		log.info("schema dump... schemapattern: "+schemaPattern);
 		grabSchema(schemaModel, dbmd, schemaPattern, null, false);
@@ -299,7 +307,9 @@ public class SQLDump {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		//TODOne: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
+		DBMSFeatures feats = grabDbSpecificFeaturesClass(model, schemaPattern);
+		if(feats!=null) feats.grabDBObjects(model, schemaPattern, conn);
+		/* //TODOne: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
 		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
 			try {
@@ -314,7 +324,26 @@ public class SQLDump {
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
 			}
+		}*/
+	}
+
+	DBMSFeatures grabDbSpecificFeaturesClass(SchemaModel model, String schemaPattern) {
+		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
+		if(dbSpecificFeaturesClass!=null) {
+			try {
+				Class<?> c = Class.forName(dbSpecificFeaturesClass);
+				DBMSFeatures of = (DBMSFeatures) c.newInstance();
+				of.procProperties(papp);
+				return of;
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
 		}
+		return null;
 	}
 	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
@@ -373,7 +402,12 @@ public class SQLDump {
 		}
 		for(String key: tablePK.keySet()) {
 			for(String colName: tablePK.get(key)) {
-				table.getColumn(colName).pk = true;
+				if(table.getColumn(colName)==null) {
+					log.warn("column belongs to PK but not to table? "+table+"."+colName+" ["+key+"]");
+				}
+				else {
+					table.getColumn(colName).pk = true;
+				}
 			}
 		}
 		
@@ -453,10 +487,10 @@ public class SQLDump {
 		//dumpRS(dbmd.getTableTypes());
 
 		//log.info("test: tables...");
-		//dumpRS(dbmd.getTables(null, null, null, null));
+		//SQLUtils.dumpRS(dbmd.getTables(null, null, null, null));
 
 		//log.info("test: columns...");
-		//dumpRS(dbmd.getColumns(null, "schema", "table", null));
+		//SQLUtils.dumpRS(dbmd.getColumns(null, "schema", "table", null));
 		
 		//log.info("test: fks...");
 		//dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
