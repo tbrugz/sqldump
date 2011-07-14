@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.util.Collection;
+
 public abstract class DBObject implements Comparable<DBObject> {
 	
 	public static class DBObjectId implements Comparable<DBObjectId> {
@@ -50,4 +52,10 @@ public abstract class DBObject implements Comparable<DBObject> {
 		return name.compareTo(o.name);
 	}
 	
+	public static DBObject findDBObjectByName(Collection<? extends DBObject> col, String name) {
+		for(DBObject obj: col) {
+			if(name.equals(obj.name)) return obj;
+		}
+		return null;
+	}
 }

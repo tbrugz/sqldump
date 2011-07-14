@@ -14,6 +14,7 @@ public class Table extends DBObject {
 	public List<Column> columns = new ArrayList<Column>();
 	public List<Grant> grants = new ArrayList<Grant>();
 	public String pkConstraintName;
+	public List<Constraint> constraints = new ArrayList<Constraint>();
 	
 	public Column getColumn(String name) {
 		if(name==null) return null;
@@ -46,20 +47,29 @@ public class Table extends DBObject {
 		sb.append("create ");
 		sb.append(getTableType4sql());
 		sb.append("table "+tableName+" ( -- type="+type+"\n");
+
 		//Columns
 		for(Column c: columns) {
 			String colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
 			if(c.pk) { pkCols.add(c.name); }
 			sb.append("\t"+colDesc+",\n");
 		}
+		
 		//PKs
 		if(doSchemaDumpPKs && pkCols.size()>0) {
 			sb.append("\tconstraint "+pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
 		}
+		
+		//Constraints (CHECK, UNIQUE)
+		for(Constraint cons: constraints) {
+			sb.append("\t"+cons.getDefinition(false)+";\n");
+		}
+		
 		//FKs?
 		if(dumpFKsInsideTable) {
 			sb.append(dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
 		}
+		
 		//Table end
 		sb.delete(sb.length()-2, sb.length());
 		//sb.append("\n);\n");

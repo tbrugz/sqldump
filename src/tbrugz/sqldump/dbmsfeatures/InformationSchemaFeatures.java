@@ -12,8 +12,11 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.DefaultDBMSFeatures;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
@@ -36,6 +39,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			//grabDBIndexes(model, schemaPattern, conn);
 		//}
 		grabDBSequences(model, schemaPattern, conn);
+		grabDBConstraints(model, schemaPattern, conn);
 	}
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -150,6 +154,35 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 		
 		log.info(count+" sequences grabbed");
+	}
+
+	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing constraints");
+		String query = "select table_name, cc.constraint_name, check_clause " 
+				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
+				+"where cc.constraint_name = ccu.constraint_name "
+				+"order by constraint_name ";
+		Statement st = conn.createStatement();
+		log.info("sql: "+query);
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			Constraint c = new Constraint();
+			c.type = Constraint.ConstraintType.CHECK;
+			c.name = rs.getString(2);
+			c.description = rs.getString(3);
+			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
+			if(t!=null) {
+				t.constraints.add(c);
+			}
+			else {
+				log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
+			}
+			count++;
+		}
+		
+		log.info(count+" constraints grabbed");
 	}
 	
 }
