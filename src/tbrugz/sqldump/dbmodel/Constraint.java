@@ -1,5 +1,10 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import tbrugz.sqldump.Utils;
+
 public class Constraint implements Comparable<Constraint> {
 	
 	public static enum ConstraintType {
@@ -9,10 +14,18 @@ public class Constraint implements Comparable<Constraint> {
 
 	public ConstraintType type;
 	public String name;
-	public String description;
+	public String checkDescription;
+	public List<String> uniqueColumns = new ArrayList<String>();
 	
 	public String getDefinition(boolean dumpSchemaName) {
-		return "constraint "+name+" "+type+" "+description;
+		switch (type) {
+			//XXX: use literal type (CHECK, UNIQUE) instead of variable 'type'?
+			case CHECK:
+				return "constraint "+name+" "+type+" "+checkDescription;
+			case UNIQUE:
+				return "constraint "+name+" "+type+" ("+Utils.join(uniqueColumns, ", ")+")";
+		}
+		throw new RuntimeException("unknown constraint type: "+type);
 	}
 	
 	public int compareTo(Constraint c) {

@@ -62,7 +62,7 @@ public class Table extends DBObject {
 		
 		//Constraints (CHECK, UNIQUE)
 		for(Constraint cons: constraints) {
-			sb.append("\t"+cons.getDefinition(false)+";\n");
+			sb.append("\t"+cons.getDefinition(false)+",\n");
 		}
 		
 		//FKs?

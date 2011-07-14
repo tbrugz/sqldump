@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -17,7 +16,6 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
@@ -75,7 +73,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
-			InformationSchemaTrigger t = (InformationSchemaTrigger) findTrigger(model.getTriggers(), rs.getString(3));
+			//InformationSchemaTrigger t = (InformationSchemaTrigger) findTrigger(model.getTriggers(), rs.getString(3));
+			InformationSchemaTrigger t = (InformationSchemaTrigger) DBObject.findDBObjectByName(model.getTriggers(), rs.getString(3));
+			
 			if(t==null) {
 				t = new InformationSchemaTrigger();
 				model.getTriggers().add(t);
@@ -95,12 +95,12 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" triggers grabbed");
 	}
 	
-	static Trigger findTrigger(Set<Trigger> triggers, String name) {
+	/*static Trigger findTrigger(Set<Trigger> triggers, String name) {
 		for(Trigger t: triggers) {
 			if(t.name.equals(name)) return t;
 		}
 		return null;
-	}
+	}*/
 
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
@@ -158,12 +158,14 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing constraints");
+		
+		//check constraints
 		String query = "select table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
 				+"order by constraint_name ";
 		Statement st = conn.createStatement();
-		log.info("sql: "+query);
+		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
@@ -171,7 +173,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			Constraint c = new Constraint();
 			c.type = Constraint.ConstraintType.CHECK;
 			c.name = rs.getString(2);
-			c.description = rs.getString(3);
+			c.checkDescription = rs.getString(3);
 			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
 			if(t!=null) {
 				t.constraints.add(c);
@@ -182,7 +184,43 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
-		log.info(count+" constraints grabbed");
+		log.info(count+" check constraints grabbed");
+
+		//unique constraints
+		query = "select tc.table_name, tc.constraint_name, column_name " 
+				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
+				+"where tc.constraint_name = ccu.constraint_name "
+				+"and constraint_type = 'UNIQUE' "
+				+"order by table_name, constraint_name ";
+		st = conn.createStatement();
+		log.debug("sql: "+query);
+		rs = st.executeQuery(query);
+		
+		count = 0;
+		int countUniqueConstraints = 0;
+		String previousConstraint = null;
+		Constraint c = null;
+		while(rs.next()) {
+			String constraintName = rs.getString(2);
+			if(!constraintName.equals(previousConstraint)) {
+				c = new Constraint();
+				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
+				if(t!=null) {
+					t.constraints.add(c);
+				}
+				else {
+					log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
+				}
+				c.type = Constraint.ConstraintType.UNIQUE;
+				c.name = constraintName;
+				countUniqueConstraints++;
+			}
+			c.uniqueColumns.add(rs.getString(3));
+			previousConstraint = constraintName;
+			count++;
+		}
+		
+		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
 	}
 	
 }

@@ -38,11 +38,11 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: postgresql/ansi specific features
  * XXXxx: derby specific features?
  * TODOne: grab specific table info (Oracle)
- * TODO: grab constraints: UNIQUE, ~CHECK, ?DEFAULT, xPK, xFK, xNOT NULL
+ * TODO: grab constraints: ~UNIQUE, ~CHECK, ?DEFAULT, xPK, xFK, xNOT NULL
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
- * XXX: data dump: limit number of rows, tables to dump. define output patterns for data dump
+ * XXX: data dump: limit tables to dump. define output patterns for data dump
  * TODO: include demo schema and data
  */
 public class SQLDump {
