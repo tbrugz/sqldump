@@ -13,6 +13,8 @@ import tbrugz.sqldump.AbstractDBMSFeatures;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
@@ -48,6 +50,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			grabDBIndexes(model, schemaPattern, conn);
 		}
 		grabDBSequences(model, schemaPattern, conn);
+		grabDBConstraints(model, schemaPattern, conn);
 	}
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -204,7 +207,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 		model.getIndexes().add(idx);
 		
-		log.info(model.getIndexes().size()+" indexes grabbed [count="+count+"]");
+		log.info(model.getIndexes().size()+" indexes grabbed [colcount="+count+"]");
 	}
 
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -257,6 +260,82 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		else {
 			log.warn("Table "+t+" should be instance of OracleTable");
 		}
+	}
+
+	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing constraints");
+		
+		//check constraints
+		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
+				+"from all_constraints "
+				+"where owner = '"+schemaPattern+"' "
+				+"and constraint_type = 'C' "
+				+"order by owner, table_name ";
+		Statement st = conn.createStatement();
+		log.debug("sql: "+query);
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			Constraint c = new Constraint();
+			String tableName = rs.getString(2);
+			c.type = Constraint.ConstraintType.CHECK;
+			c.name = rs.getString(3);
+			c.checkDescription = rs.getString(5);
+			
+			//ignore NOT NULL constraints
+			if(c.checkDescription.contains(" IS NOT NULL")) continue;
+			
+			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
+			if(t!=null) {
+				t.constraints.add(c);
+			}
+			else {
+				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
+			}
+			count++;
+		}
+		
+		log.info(count+" check constraints grabbed");
+
+		//unique constraints
+		query = "select distinct al.owner, al.table_name, al.constraint_name, column_name "
+				+"from all_constraints al, all_cons_columns acc "
+				+"where al.constraint_name = acc.constraint_name "
+				+"and al.owner = '"+schemaPattern+"' "
+				+"and constraint_type = 'U' "
+				+"order by owner, table_name, constraint_name ";
+		st = conn.createStatement();
+		log.debug("sql: "+query);
+		rs = st.executeQuery(query);
+		
+		count = 0;
+		int countUniqueConstraints = 0;
+		String previousConstraint = null;
+		Constraint c = null;
+		while(rs.next()) {
+			String constraintName = rs.getString(3);
+			if(!constraintName.equals(previousConstraint)) {
+				String tableName = rs.getString(2);
+				c = new Constraint();
+				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
+				if(t!=null) {
+					t.constraints.add(c);
+				}
+				else {
+					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
+				}
+				c.type = Constraint.ConstraintType.UNIQUE;
+				c.name = constraintName;
+				countUniqueConstraints++;
+			}
+			c.uniqueColumns.add(rs.getString(4));
+			previousConstraint = constraintName;
+			count++;
+		}
+		
+		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+		
 	}
 	
 }

@@ -34,4 +34,9 @@ public class Constraint implements Comparable<Constraint> {
 		}
 		return type.compareTo(c.type);
 	}
+	
+	@Override
+	public String toString() {
+		return "["+type+":"+name+"]";
+	}
 }
