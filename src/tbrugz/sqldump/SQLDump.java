@@ -37,8 +37,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: compact grant syntax
  * TODOne: postgresql/ansi specific features
  * XXXxx: derby specific features?
- * TODO: grab specific table info (Oracle, Postgres, ...)
- * TODO: grab constraints: UNIQUE, CHECK, DEFAULT, xPK, xFK, xNOT NULL
+ * TODOne: grab specific table info (Oracle)
+ * TODO: grab constraints: UNIQUE, ~CHECK, ?DEFAULT, xPK, xFK, xNOT NULL
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties

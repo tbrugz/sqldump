@@ -56,7 +56,7 @@ public class SQLUtils {
 				value = rs.getDouble(i);
 			}
 			else if(coltype.equals(Date.class)) {
-				//TODO: how to Date value?
+				//TODO: how to format Date value?
 				value = rs.getString(i);
 				//value = rs.getDate(i);
 			}

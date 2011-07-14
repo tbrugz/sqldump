@@ -6,7 +6,7 @@ import java.util.TreeSet;
 import tbrugz.sqldump.Utils;
 
 //XXX~: extends DBObject?
-public class FK implements Comparable<FK>{
+public class FK implements Comparable<FK> {
 	String name;
 	public String pkTable;
 	public String fkTable;
