@@ -43,7 +43,7 @@ public abstract class DBObject implements Comparable<DBObject> {
 		this.name = name;
 	}
 	
-	//XXX: sql dialect param?
+	//XXX: getDefinition() should have 'sql dialect' param?
 	public abstract String getDefinition(boolean dumpSchemaName);
 	
 	public int compareTo(DBObject o) {

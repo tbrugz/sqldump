@@ -38,12 +38,15 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: postgresql/ansi specific features
  * XXXxx: derby specific features?
  * TODOne: grab specific table info (Oracle)
- * TODO: grab constraints: ~UNIQUE, ~CHECK, ?DEFAULT, xPK, xFK, xNOT NULL
+ * TODOne: grab constraints: ~UNIQUE, ~CHECK, xPK, xFK, xNOT NULL ; UNIQUE & CHECK for Oracle!
+ * XXX: DEFAULT & COMMENT/REMARKS for columns (& tables?)
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
  * XXX: data dump: limit tables to dump. define output patterns for data dump
  * TODO: include demo schema and data
+ * XXX: option to delete initial output dir?
+ * XXX: compare 2 schema models?
  */
 public class SQLDump {
 	
@@ -152,14 +155,14 @@ public class SQLDump {
 	}
 
 	SchemaModel grabSchema() throws Exception {
-		DatabaseMetaData dbmd = conn.getMetaData();
+		DBMSFeatures feats = grabDbSpecificFeaturesClass();
+		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
+		
+		showDBInfo(dbmd);
+
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(PROP_DUMPSCHEMAPATTERN, null);
 
-		//TODOne: add grab specific...
-		DBMSFeatures feats = grabDbSpecificFeaturesClass(schemaModel, schemaPattern);
-		dbmd = feats.getMetadataDecorator(dbmd);
-		
 		log.info("schema dump... schemapattern: "+schemaPattern);
 		grabSchema(schemaModel, dbmd, feats, schemaPattern, null, false);
 		
@@ -174,6 +177,15 @@ public class SQLDump {
 		}
 		
 		return schemaModel;
+	}
+	
+	void showDBInfo(DatabaseMetaData dbmd) {
+		try {
+			log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
+			log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	//private static String PADDING = "  ";
@@ -306,27 +318,11 @@ public class SQLDump {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		DBMSFeatures feats = grabDbSpecificFeaturesClass(model, schemaPattern);
+		DBMSFeatures feats = grabDbSpecificFeaturesClass();
 		if(feats!=null) feats.grabDBObjects(model, schemaPattern, conn);
-		/* //TODOne: test sqldump.usedbspeficicfeatures // set specific class in sqldump.properties?
-		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
-		if(dbSpecificFeaturesClass!=null) {
-			try {
-				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				of.procProperties(papp);
-				of.grabDBObjects(model, schemaPattern, conn);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}*/
 	}
 
-	DBMSFeatures grabDbSpecificFeaturesClass(SchemaModel model, String schemaPattern) {
+	DBMSFeatures grabDbSpecificFeaturesClass() {
 		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
 			try {

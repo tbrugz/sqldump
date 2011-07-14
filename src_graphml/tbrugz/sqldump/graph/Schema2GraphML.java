@@ -22,7 +22,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.xml.AbstractDump;
 
 /*
- * TODO: show PK columns, FK columns, constraints?
+ * XXX: show PK columns, FK columns, constraints?
  * TODO: stereotype may include 'otherschema' or object type (table, view, synonym, temporary table, external table)
  */
 public class Schema2GraphML extends SchemaModelDumper {
