@@ -48,7 +48,7 @@ public class SQLUtils {
 				value = rs.getString(i);
 			}
 			else if(coltype.equals(Integer.class)) {
-				value = rs.getInt(i);
+				value = rs.getLong(i);
 			}
 			else if(coltype.equals(Double.class)) {
 				value = rs.getDouble(i);

@@ -17,4 +17,5 @@ public interface DBMSFeatures {
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
 	void addTableSpecificFeatures(Table t, ResultSet rs);
 	Table getTableObject();
+	//XXX: should DBMS's Features return getDefaultDateFormat?
 }

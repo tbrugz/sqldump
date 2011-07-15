@@ -56,7 +56,10 @@ public class Utils {
 				buffer.append(elem);
 			}
 			else if(elem instanceof String) {
-				//TODO: String escaping? "\n, \r, ', ..."
+				/* XXX?: String escaping? "\n, \r, ', ..."
+				 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
+				 */
+				elem = ((String) elem).replaceAll("'", "''");
 				buffer.append(DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING);
 			}
 			else if(elem instanceof Integer) {
