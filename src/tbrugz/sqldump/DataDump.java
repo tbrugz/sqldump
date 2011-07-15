@@ -17,13 +17,14 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 /*
- * TODO: prop for selecting which tables to dump data from
+ * TODOne: prop for selecting which tables to dump data from
  * TODOne: limit number of rows to dump
  * TODOne: where clause for data dump 
  * TODO: column values escaping
  * TODOne: 'insert into' datadump syntax:
  *   sqldump.datadump.useinsertintosyntax=false
  *   sqldump.datadump.useinsertintosyntax.withcolumnnames=true
+ * XXX: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
  */
 public class DataDump {
 
@@ -32,6 +33,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
+	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -72,6 +74,8 @@ public class DataDump {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		boolean doTableNameHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_TABLENAMEHEADER, "false"));
 		boolean doColumnNamesHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_COLUMNNAMESHEADER, "false"));
+
+		List<String> tables4dump = getTables4dump(prop);
 		
 		/*
 		 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
@@ -88,6 +92,9 @@ public class DataDump {
 		 */
 		
 		for(String table: tableNamesForDataDump) {
+			if(tables4dump!=null) {
+				if(!tables4dump.contains(table)) { continue; }
+			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
 
@@ -139,9 +146,14 @@ public class DataDump {
 
 	void dumpDataInsertIntoSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
+		List<String> tables4dump = getTables4dump(prop);
+		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
 		
 		for(String table: tableNamesForDataDump) {
+			if(tables4dump!=null) {
+				if(!tables4dump.contains(table)) { continue; }
+			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
@@ -207,6 +219,20 @@ public class DataDump {
 
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
+	}
+
+	static List<String> getTables4dump(Properties prop) {
+		String tables4dumpProp = prop.getProperty(PROP_DATADUMP_TABLES);
+		if(tables4dumpProp!=null) {
+			List<String> tables4dump = new ArrayList<String>();
+			String[] tables4dumpArr = tables4dumpProp.split(",");
+			for(String s: tables4dumpArr) {
+				tables4dump.add(s.trim());
+			}
+			log.debug("tables for dump filter: "+tables4dump);
+			return tables4dump;
+		}
+		return null;
 	}
 	
 }

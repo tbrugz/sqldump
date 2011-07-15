@@ -53,6 +53,7 @@ sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 
 sqldump.dodatadump=false
+sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
 sqldump.datadump.useinsertintosyntax=true
 sqldump.datadump.useinsertintosyntax.withcolumnnames=false
