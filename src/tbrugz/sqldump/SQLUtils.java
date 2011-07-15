@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import tbrugz.sqldump.dbmodel.FK;
-
 public class SQLUtils {
 
 	static StringBuffer sbTmp = new StringBuffer();
@@ -56,9 +54,8 @@ public class SQLUtils {
 				value = rs.getDouble(i);
 			}
 			else if(coltype.equals(Date.class)) {
-				//TODO: how to format Date value?
-				value = rs.getString(i);
-				//value = rs.getDate(i);
+				//TODOne: how to format Date value?
+				value = rs.getDate(i);
 			}
 			else {
 				value = rs.getString(i);
@@ -68,7 +65,7 @@ public class SQLUtils {
 		return ls;
 	}
 
-	//TODO: Date class type for dump?
+	//TODOne: Date class type for dump?
 	static Class getClassFromSqlType(int type) {
 		//log.debug("type: "+type);
 		switch(type) {

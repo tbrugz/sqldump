@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +35,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
+	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -56,6 +58,11 @@ public class DataDump {
 	void dumpData(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
 		Long globalRowlimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
+		
+		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
+		if(dateFormat!=null) {
+			Utils.dateFormatter = new SimpleDateFormat(dateFormat);
+		}
 		
 		boolean doInsertIntoDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO, "false"));
 		if(doInsertIntoDump) {
@@ -165,7 +172,7 @@ public class DataDump {
 			Statement st = conn.createStatement();
 			String sql = "select * from \""+table+"\""
 					+ (whereClause!=null?" where "+whereClause:"");
-			log.info("sql: "+sql);
+			log.debug("sql: "+sql);
 			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();

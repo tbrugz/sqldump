@@ -203,7 +203,6 @@ public class SQLDump {
 			String tableName = rs.getString("TABLE_NAME");
 			String schemaName = rs.getString("TABLE_SCHEM");
 			
-			tableNamesForDataDump.add(tableName);
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			if(ttype==null) { continue; }
 			
@@ -268,7 +267,8 @@ public class SQLDump {
 				//sqle.printStackTrace();
 				tableNamesForDataDump.remove(tableName);
 			}
-			
+
+			tableNamesForDataDump.add(tableName);
 			schemaModel.tables.add(table);
 		}
 		rs.close();

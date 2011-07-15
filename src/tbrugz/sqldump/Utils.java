@@ -1,11 +1,18 @@
 package tbrugz.sqldump;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
 public class Utils {
+	
+	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
+	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
+	
 	/*
 	 * http://snippets.dzone.com/posts/show/91
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
@@ -54,6 +61,9 @@ public class Utils {
 			}
 			else if(elem instanceof Integer) {
 				buffer.append(elem);
+			}
+			else if(elem instanceof Date) {
+				buffer.append(dateFormatter.format((Date)elem));
 			}
 			else {
 				buffer.append(elem);
