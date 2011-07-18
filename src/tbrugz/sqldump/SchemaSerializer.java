@@ -36,6 +36,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		oos.close();
 	}
 
+	@Override
 	public SchemaModel grabSchema() throws Exception {
 		if(fileInput==null) {
 			log.warn("serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined");

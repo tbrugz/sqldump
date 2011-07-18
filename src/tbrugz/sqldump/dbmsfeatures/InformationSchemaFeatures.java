@@ -176,7 +176,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			c.checkDescription = rs.getString(3);
 			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
 			if(t!=null) {
-				t.constraints.add(c);
+				t.getConstraints().add(c);
 			}
 			else {
 				log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
@@ -206,7 +206,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				c = new Constraint();
 				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
 				if(t!=null) {
-					t.constraints.add(c);
+					t.getConstraints().add(c);
 				}
 				else {
 					log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");

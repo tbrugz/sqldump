@@ -151,7 +151,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		//StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
-			switch(table.type) {
+			switch(table.getType()) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 			}
@@ -209,7 +209,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
-				String grantOutput = compactGrantDump(table.grants, tableName, toDbId);
+				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, grantOutput);
 				}
@@ -267,7 +267,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(!dumpGrantsWithReferencingTable) {
 			for(Table table: schemaModel.tables) {
 				String tableName = (dumpWithSchemaName?table.schemaName+".":"")+table.name;
-				String grantOutput = compactGrantDump(table.grants, tableName, toDbId);
+				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.schemaName, table.name, DBObjectType.GRANT, grantOutput);
 				}

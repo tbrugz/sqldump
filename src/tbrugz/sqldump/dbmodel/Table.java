@@ -10,11 +10,11 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.Utils;
 
 public class Table extends DBObject {
-	public TableType type;
-	public List<Column> columns = new ArrayList<Column>();
-	public List<Grant> grants = new ArrayList<Grant>();
-	public String pkConstraintName;
-	public List<Constraint> constraints = new ArrayList<Constraint>();
+	TableType type;
+	List<Column> columns = new ArrayList<Column>();
+	List<Grant> grants = new ArrayList<Grant>();
+	String pkConstraintName;
+	List<Constraint> constraints = new ArrayList<Constraint>();
 	
 	public Column getColumn(String name) {
 		if(name==null) return null;
@@ -131,6 +131,14 @@ public class Table extends DBObject {
 
 	public void setPkConstraintName(String pkConstraintName) {
 		this.pkConstraintName = pkConstraintName;
+	}
+
+	public List<Constraint> getConstraints() {
+		return constraints;
+	}
+
+	public void setConstraints(List<Constraint> constraints) {
+		this.constraints = constraints;
 	}
 	
 }

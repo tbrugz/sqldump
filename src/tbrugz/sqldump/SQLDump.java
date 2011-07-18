@@ -215,8 +215,8 @@ public class SQLDump implements SchemaModelGrabber {
 			//defining model
 			Table table = dbmsfeatures.getTableObject();
 			table.name = tableName;
-			table.type = ttype;
 			table.schemaName = schemaName;
+			table.setType(ttype);
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {
@@ -227,7 +227,7 @@ public class SQLDump implements SchemaModelGrabber {
 				ResultSet cols = dbmd.getColumns(null, table.schemaName, tableName, null);
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
-					table.columns.add(c);
+					table.getColumns().add(c);
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
 				cols.close();
@@ -252,12 +252,12 @@ public class SQLDump implements SchemaModelGrabber {
 				if(doSchemaGrabGrants) {
 					log.debug("getting grants from "+fullTablename);
 					ResultSet grantrs = dbmd.getTablePrivileges(null, table.schemaName, tableName);
-					table.grants = grabSchemaGrants(grantrs, tableName);
+					table.setGrants( grabSchemaGrants(grantrs, tableName) );
 					grantrs.close();
 				}
 				
 				//INDEXes
-				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.type) && !tableOnly) {
+				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.getType()) && !tableOnly) {
 					log.debug("getting indexes from "+fullTablename);
 					ResultSet indexesrs = dbmd.getIndexInfo(null, table.schemaName, tableName, false, false);
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
@@ -393,7 +393,7 @@ public class SQLDump implements SchemaModelGrabber {
 				pkName = "PK_"+count;
 				count++;
 			}
-			table.pkConstraintName = pkName;
+			table.setPkConstraintName(pkName);
 			Set<String> pk = tablePK.get(pkName);
 			if(pk==null) {
 				pk = new HashSet<String>(); //XXXxx: TreeSet? no need...
@@ -515,9 +515,9 @@ public class SQLDump implements SchemaModelGrabber {
 			schemaSerialDumper.dumpSchema(sm);
 			
 			//xml serializer (JAXB)
-			//SchemaModelDumper schemaXMLDumper = new JAXBSchemaXMLSerializer();
-			//schemaXMLDumper.procProperties(sdd.papp);
-			//schemaXMLDumper.dumpSchema(sm);
+			SchemaModelDumper schemaXMLDumper = new JAXBSchemaXMLSerializer();
+			schemaXMLDumper.procProperties(sdd.papp);
+			schemaXMLDumper.dumpSchema(sm);
 
 			//xml serializer (Castor)
 			SchemaModelDumper schemaCastorXMLDumper = new CastorSchemaXMLSerializer();

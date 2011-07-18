@@ -288,7 +288,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			
 			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
 			if(t!=null) {
-				t.constraints.add(c);
+				t.getConstraints().add(c);
 			}
 			else {
 				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
@@ -320,7 +320,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				c = new Constraint();
 				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
 				if(t!=null) {
-					t.constraints.add(c);
+					t.getConstraints().add(c);
 				}
 				else {
 					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");

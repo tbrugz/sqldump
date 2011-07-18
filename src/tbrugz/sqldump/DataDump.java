@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
  *   sqldump.datadump.useinsertintosyntax=false
  *   sqldump.datadump.useinsertintosyntax.withcolumnnames=true
  * XXX: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
+ * XXX: property for selecting which columns to dump
  */
 public class DataDump {
 
