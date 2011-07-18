@@ -7,10 +7,10 @@ import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Trigger;
 
 public class InformationSchemaTrigger extends Trigger {
-	Set<String> eventsManipulation = new TreeSet<String>();
-	String actionStatement; 
-	String actionOrientation; 
-	String conditionTiming;
+	public Set<String> eventsManipulation = new TreeSet<String>();
+	public String actionStatement; 
+	public String actionOrientation; 
+	public String conditionTiming;
 	static boolean addSplitter; //XXX: should be static? or belongs to model?
 	
 	@Override

@@ -4,9 +4,9 @@ import tbrugz.sqldump.dbmodel.Table;
 
 //TODO: property for selecting dump (true/false) of extra fields on script output?
 public class OracleTable extends Table {
-	String tableSpace;
-	boolean temporary;
-	boolean logging;
+	public String tableSpace;
+	public boolean temporary;
+	public boolean logging;
 	
 	@Override
 	public String getTableType4sql() {
