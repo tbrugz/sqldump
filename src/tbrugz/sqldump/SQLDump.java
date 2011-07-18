@@ -43,12 +43,15 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
- * XXX: data dump: limit tables to dump. define output patterns for data dump
+ * XXXdone: data dump: limit tables to dump 
+ * XXX?: define output patterns for data dump
  * TODO: include demo schema and data
  * XXX: option to delete initial output dir?
  * XXX: compare 2 schema models?
+ * XXXdone: serialize model (for later comparison)
+ * XXX: XML schema model grabber/dumper
  */
-public class SQLDump {
+public class SQLDump implements SchemaModelGrabber {
 	
 	//connection properties
 	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
@@ -154,7 +157,7 @@ public class SQLDump {
 		conn.close();
 	}
 
-	SchemaModel grabSchema() throws Exception {
+	public SchemaModel grabSchema() throws Exception {
 		DBMSFeatures feats = grabDbSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		
@@ -183,8 +186,9 @@ public class SQLDump {
 		try {
 			log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
 			log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.warn("error grabbing database/jdbc driver info: "+e);
+			//e.printStackTrace();
 		}
 	}
 	
@@ -470,33 +474,8 @@ public class SQLDump {
 		}
 	}
 	
-	void tests() throws Exception {
-		log.info("some tests...");
-
-		DatabaseMetaData dbmd = conn.getMetaData();
-
-		//log.info("test: catalogs...");
-		//dumpRS(dbmd.getCatalogs());
-
-		//log.info("test: table types...");
-		//dumpRS(dbmd.getTableTypes());
-
-		//log.info("test: tables...");
-		//SQLUtils.dumpRS(dbmd.getTables(null, null, null, null));
-
-		//log.info("test: columns...");
-		//SQLUtils.dumpRS(dbmd.getColumns(null, "schema", "table", null));
-		
-		//log.info("test: fks...");
-		//dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
-
-		//log.info("test: grants...");
-		//dumpRS(dbmd.getTablePrivileges(null, "schema", "table"));
-		
-		//log.info("test: indexes...");
-		//dumpRS(dbmd.getIndexInfo(null, "schema", "table", false, false));
-		
-	}
+	//for conformance with SchemaModelGrabber
+	public void procProperties(Properties prop) {}
 
 	/**
 	 * @param args
@@ -507,17 +486,31 @@ public class SQLDump {
 		sdd.init(args);
 		
 		if(sdd.doTests) {
-			sdd.tests();
+			SQLTests.tests(sdd.conn);
 		}
+		
+		//grabbing model
+		SchemaModel sm = sdd.grabSchema();
+
+		//serializer input
+		//SchemaModelGrabber schemaSerialGrabber = new SchemaSerializer();
+		//schemaSerialGrabber.procProperties(sdd.papp);
+		//SchemaModel sm = schemaSerialGrabber.grabSchema();
+
 		if(sdd.doSchemaDump) {
-			SchemaModel sm = sdd.grabSchema();
 			
 			//script dump
 			SchemaModelDumper schemaDumper = new SchemaModelScriptDumper();
 			schemaDumper.procProperties(sdd.papp);
 			schemaDumper.dumpSchema(sm);
 			
-			//XXX prop doGraphMLDump?
+			//TODO prop doSerializeDump? doGraphMLDump?
+
+			//serialize
+			SchemaModelDumper schemaSerialDumper = new SchemaSerializer();
+			schemaSerialDumper.procProperties(sdd.papp);
+			schemaSerialDumper.dumpSchema(sm);
+			
 			//graphml dump
 			SchemaModelDumper s2gml = new Schema2GraphML();
 			s2gml.procProperties(sdd.papp);
