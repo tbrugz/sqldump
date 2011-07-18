@@ -70,19 +70,24 @@ sqldump.datadump.rowlimit=100
 sqldump.datadump.TABLE_X.rowlimit=500
 sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
 
+
 # serialization & xml serialization
 sqldump.serialization.outfile=${outputdir}/schemaModel.ser
 sqldump.serialization.infile=${outputdir}/schemaModel.ser
 
+sqldump.xmlserialization.jaxb.outfile=${outputdir}/schemaModel.jaxb.xml
+sqldump.xmlserialization.jaxb.infile=${outputdir}/schemaModel.jaxb.xml
+
 sqldump.xmlserialization.castor.outfile=${outputdir}/schemaModel.castor.xml
 sqldump.xmlserialization.castor.infile=${outputdir}/schemaModel.castor.xml
+
 
 # graphML output
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
 ############
 
-# MS Access
+# MS Access - doesn't really work (yet)
 #sqldump.driverclass=sun.jdbc.odbc.JdbcOdbcDriver
 #sqldump.dburl=jdbc:odbc:Driver={MicroSoft Access Driver (*.mdb)};DBQ=Northwind.mdb
 

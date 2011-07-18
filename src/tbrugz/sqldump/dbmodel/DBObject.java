@@ -3,6 +3,8 @@ package tbrugz.sqldump.dbmodel;
 import java.io.Serializable;
 import java.util.Collection;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 public abstract class DBObject implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -26,7 +28,9 @@ public abstract class DBObject implements Comparable<DBObject>, Serializable {
 		}
 	}
 	
+	@XmlTransient
 	public String schemaName;
+	@XmlTransient
 	public String name;
 
 	public String getSchemaName() {

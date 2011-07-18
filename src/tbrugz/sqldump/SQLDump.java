@@ -500,6 +500,11 @@ public class SQLDump implements SchemaModelGrabber {
 		//schemaSerialGrabber.procProperties(sdd.papp);
 		//SchemaModel sm = schemaSerialGrabber.grabSchema();
 
+		//xml serializer input
+		//SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
+		//schemaSerialGrabber.procProperties(sdd.papp);
+		//SchemaModel sm = schemaSerialGrabber.grabSchema();
+		
 		if(sdd.doSchemaDump) {
 			
 			//script dump

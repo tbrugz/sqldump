@@ -1,0 +1,16 @@
+# package tbrugz.sqldump.dbmodel
+Column
+Constraint
+DBObject
+ExecutableObject
+FK
+Grant
+Index
+PrivilegeType
+Sequence
+Synonym
+Table
+TableType
+Trigger
+View
+

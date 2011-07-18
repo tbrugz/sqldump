@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
@@ -13,6 +15,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
+@XmlRootElement
 public class SchemaModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 
