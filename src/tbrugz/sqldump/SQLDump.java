@@ -28,7 +28,6 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: recursive dump based on FKs
  * TODO: accept list of schemas, tables/objects to grab/dump, types of objects to grab/dump
  * XXX(later): usePrecision should be defined by java code (not .properties)
- * XXX(later): generate "alter table" database script from graphML changes (XMLUnit?)
  * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
  * XXXdone: dump different objects to different files (using log4j - different loggers? no!)
  * XXXdone: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
@@ -47,10 +46,12 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXX?: define output patterns for data dump
  * TODO: include demo schema and data
  * XXX: option to delete initial output dir?
- * XXX: compare 2 schema models?
+ * ---
+ * XXX: compare 2 schema models? generate "alter table" database script...
+ * XXX(later): generate schema model from graphML file (XMLUnit?). may be used for model comparison 
  * XXXdone: serialize model (for later comparison)
- * XXX: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java
- *   - jaxb, xtream, xmlbeans, castor, jibx
+ * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
+ *   - x jaxb, xtream, xmlbeans, x castor, jibx
  */
 public class SQLDump implements SchemaModelGrabber {
 	
@@ -184,7 +185,7 @@ public class SQLDump implements SchemaModelGrabber {
 		return schemaModel;
 	}
 	
-	void showDBInfo(DatabaseMetaData dbmd) {
+	static void showDBInfo(DatabaseMetaData dbmd) {
 		try {
 			log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
 			log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");

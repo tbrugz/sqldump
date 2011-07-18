@@ -6,6 +6,6 @@ public interface SchemaModelGrabber {
 
 	public void procProperties(Properties prop);
 	
-	public abstract SchemaModel grabSchema() throws Exception;
+	public SchemaModel grabSchema() throws Exception;
 
 }

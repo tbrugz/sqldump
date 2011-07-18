@@ -31,11 +31,11 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			grabDBSequences(model, schemaPattern, conn);
 		}
 		catch(SQLSyntaxErrorException e) {
-			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current db version?
+			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current derby db version?
 			log.debug("nested exception: "+e);
 		}
 		
-		//XXX: add procedures/functions? synonyms?
+		//XXX: derby: add procedures/functions? synonyms?
 	}
 
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
