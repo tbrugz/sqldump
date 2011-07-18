@@ -5,6 +5,9 @@
 # just a variable for using ahead - name has no special meaning 
 outputdir=output
 
+#
+# output props
+#
 sqldump.mainoutputfilepattern=${outputdir}/${schemaname}_${objecttype}_dump.sql
 sqldump.outputobjectwithreferencingtable=grant,index
 sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
@@ -28,6 +31,9 @@ sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
 #sqldump.outputfilepattern.bytype.GRANT=output/GRANTS.sql
 #sqldump.outputfilepattern.bytype.FK=output/FK.sql
 
+#
+# schema grab props
+#
 sqldump.dotests=true
 sqldump.doschemadump=true
 sqldump.doschemadump.grants=true
@@ -47,11 +53,18 @@ sqldump.todbid=pgsql
 sqldump.dumpsynonymastable=false
 sqldump.dumpviewastable=false
 
-# dbms specific features grab. currently only oracle
+
+#
+# dbms specific features grab
+#
 sqldump.usedbspecificfeatures=true
 sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 
+
+#
+# data dump props
+#
 sqldump.dodatadump=false
 sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
@@ -65,13 +78,16 @@ sqldump.datadump.columndelimiter=;
 #sqldump.datadump.charset=UTF-8 
 # default date format: ''yyyy-MM-dd''
 sqldump.datadump.dateformat=''yyyy-MM-dd''
-
 sqldump.datadump.rowlimit=100
+
 sqldump.datadump.TABLE_X.rowlimit=500
 sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
+sqldump.datadump.TABLE_Y.columns=id, name
 
 
+#
 # serialization & xml serialization
+#
 sqldump.serialization.outfile=${outputdir}/schemaModel.ser
 sqldump.serialization.infile=${outputdir}/schemaModel.ser
 
@@ -82,10 +98,15 @@ sqldump.xmlserialization.castor.outfile=${outputdir}/schemaModel.castor.xml
 sqldump.xmlserialization.castor.infile=${outputdir}/schemaModel.castor.xml
 
 
+#
 # graphML output
+#
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
 ############
+#
+# connection/driver info 
+#
 
 # MS Access - doesn't really work (yet)
 #sqldump.driverclass=sun.jdbc.odbc.JdbcOdbcDriver

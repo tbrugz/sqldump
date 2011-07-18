@@ -54,7 +54,7 @@ public class DataDump {
 	
 	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
 	
-	static Logger log = Logger.getLogger(SQLDump.class);
+	static Logger log = Logger.getLogger(DataDump.class);
 	
 	void dumpData(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
@@ -116,10 +116,12 @@ public class DataDump {
 			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
 			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
+			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
+			if(selectColumns==null) { selectColumns = "*"; }
 
 			log.info("dumping data from table: "+table);
 			Statement st = conn.createStatement();
-			String sql = "select * from \""+table+"\" "
+			String sql = "select "+selectColumns+" from \""+table+"\""
 					+ (whereClause!=null?" where "+whereClause:"");
 			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
@@ -168,10 +170,13 @@ public class DataDump {
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
 			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
+			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
+			if(selectColumns==null) { selectColumns = "*"; }
 
 			log.debug("dumping data/inserts from table: "+table);
 			Statement st = conn.createStatement();
-			String sql = "select * from \""+table+"\""
+			//st.setFetchSize(20);
+			String sql = "select "+selectColumns+" from \""+table+"\""
 					+ (whereClause!=null?" where "+whereClause:"");
 			log.debug("sql: "+sql);
 			ResultSet rs = st.executeQuery(sql);
