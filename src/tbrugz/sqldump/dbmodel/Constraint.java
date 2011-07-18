@@ -7,7 +7,8 @@ import java.util.List;
 import tbrugz.sqldump.Utils;
 
 public class Constraint implements Comparable<Constraint>, Serializable {
-	
+	private static final long serialVersionUID = 1L;
+
 	public static enum ConstraintType {
 		CHECK,  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5); 
 		UNIQUE; //CONSTRAINT unique1 UNIQUE("MANAGER_NAME", "EMAIL");

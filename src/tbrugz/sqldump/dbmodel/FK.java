@@ -8,6 +8,7 @@ import tbrugz.sqldump.Utils;
 
 //XXX~: extends DBObject?
 public class FK implements Comparable<FK>, Serializable {
+	private static final long serialVersionUID = 1L;
 	String name;
 	public String pkTable;
 	public String fkTable;
