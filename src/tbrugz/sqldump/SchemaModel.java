@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -12,7 +13,9 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
-public class SchemaModel {
+public class SchemaModel implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	Set<Table> tables = new TreeSet<Table>();
 	Set<FK> foreignKeys = new TreeSet<FK>();
 	Set<View> views = new TreeSet<View>();

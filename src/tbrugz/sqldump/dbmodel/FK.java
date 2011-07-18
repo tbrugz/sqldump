@@ -1,12 +1,13 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.TreeSet;
 
 import tbrugz.sqldump.Utils;
 
 //XXX~: extends DBObject?
-public class FK implements Comparable<FK> {
+public class FK implements Comparable<FK>, Serializable {
 	String name;
 	public String pkTable;
 	public String fkTable;

@@ -1,8 +1,9 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.io.Serializable;
 import java.util.Properties;
 
-public class Column {
+public class Column implements Serializable {
 	public String name;
 	public String type;
 	public int columSize;

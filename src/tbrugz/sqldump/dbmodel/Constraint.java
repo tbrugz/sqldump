@@ -1,11 +1,12 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.Utils;
 
-public class Constraint implements Comparable<Constraint> {
+public class Constraint implements Comparable<Constraint>, Serializable {
 	
 	public static enum ConstraintType {
 		CHECK,  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5); 

@@ -1,6 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
-public class Grant {
+import java.io.Serializable;
+
+public class Grant implements Serializable {
 	public String table;
 	public PrivilegeType privilege;
 	public String grantee;

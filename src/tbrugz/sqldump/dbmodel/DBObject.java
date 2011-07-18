@@ -1,9 +1,11 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.io.Serializable;
 import java.util.Collection;
 
-public abstract class DBObject implements Comparable<DBObject> {
-	
+public abstract class DBObject implements Comparable<DBObject>, Serializable {
+	private static final long serialVersionUID = 1L;
+
 	public static class DBObjectId implements Comparable<DBObjectId> {
 		public String schemaName;
 		public String name;
