@@ -49,7 +49,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXX: option to delete initial output dir?
  * XXX: compare 2 schema models?
  * XXXdone: serialize model (for later comparison)
- * XXX: XML schema model grabber/dumper
+ * XXX: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java
+ *   - jaxb, xtream, xmlbeans, castor, jibx
  */
 public class SQLDump implements SchemaModelGrabber {
 	
@@ -157,6 +158,7 @@ public class SQLDump implements SchemaModelGrabber {
 		conn.close();
 	}
 
+	@Override
 	public SchemaModel grabSchema() throws Exception {
 		DBMSFeatures feats = grabDbSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
@@ -475,6 +477,7 @@ public class SQLDump implements SchemaModelGrabber {
 	}
 	
 	//for conformance with SchemaModelGrabber
+	@Override
 	public void procProperties(Properties prop) {}
 
 	/**
@@ -510,6 +513,16 @@ public class SQLDump implements SchemaModelGrabber {
 			SchemaModelDumper schemaSerialDumper = new SchemaSerializer();
 			schemaSerialDumper.procProperties(sdd.papp);
 			schemaSerialDumper.dumpSchema(sm);
+			
+			//xml serializer (JAXB)
+			//SchemaModelDumper schemaXMLDumper = new JAXBSchemaXMLSerializer();
+			//schemaXMLDumper.procProperties(sdd.papp);
+			//schemaXMLDumper.dumpSchema(sm);
+
+			//xml serializer (Castor)
+			SchemaModelDumper schemaCastorXMLDumper = new CastorSchemaXMLSerializer();
+			schemaCastorXMLDumper.procProperties(sdd.papp);
+			schemaCastorXMLDumper.dumpSchema(sm);
 			
 			//graphml dump
 			SchemaModelDumper s2gml = new Schema2GraphML();

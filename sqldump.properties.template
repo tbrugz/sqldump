@@ -70,6 +70,14 @@ sqldump.datadump.rowlimit=100
 sqldump.datadump.TABLE_X.rowlimit=500
 sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
 
+# serialization & xml serialization
+sqldump.serialization.outfile=${outputdir}/schemaModel.ser
+sqldump.serialization.infile=${outputdir}/schemaModel.ser
+
+sqldump.xmlserialization.castor.outfile=${outputdir}/schemaModel.castor.xml
+sqldump.xmlserialization.castor.infile=${outputdir}/schemaModel.castor.xml
+
+# graphML output
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 
 ############

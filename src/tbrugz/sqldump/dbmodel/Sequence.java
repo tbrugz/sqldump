@@ -10,7 +10,7 @@ public class Sequence extends DBObject {
 	public long incrementBy;
 	public long lastNumber;
 	
-	public static boolean dumpStartWith = false;
+	public static transient boolean dumpStartWith = false;
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
