@@ -27,7 +27,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
-public class SchemaModelScriptDumper extends SchemaModelDumper {
+public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
 

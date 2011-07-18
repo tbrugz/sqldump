@@ -25,7 +25,7 @@ import tbrugz.xml.AbstractDump;
  * XXX: show PK columns, FK columns, constraints?
  * TODO: stereotype may include 'otherschema' or object type (table, view, synonym, temporary table, external table)
  */
-public class Schema2GraphML extends SchemaModelDumper {
+public class Schema2GraphML implements SchemaModelDumper {
 	
 	static Log log = LogFactory.getLog(AbstractDump.class);
 	
@@ -119,7 +119,6 @@ public class Schema2GraphML extends SchemaModelDumper {
 		log.info("...graphML dumped");
 	}
 
-	@Override
 	public void setOutput(File output) {
 		this.output = output;
 	}
