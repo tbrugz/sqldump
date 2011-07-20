@@ -62,13 +62,13 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	@Override
 	public void procProperties(Properties prop) {
 		//init control vars
-		doSchemaDumpPKs = prop.getProperty(SQLDump.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		doSchemaDumpPKs = prop.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		boolean doSchemaDumpFKsAtEnd = prop.getProperty(SQLDump.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		boolean doSchemaDumpFKsAtEnd = prop.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		dumpWithSchemaName = prop.getProperty(SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		dumpSynonymAsTable = prop.getProperty(SQLDump.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		dumpViewAsTable = prop.getProperty(SQLDump.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		dumpSynonymAsTable = prop.getProperty(JDBCSchemaGrabber.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		dumpViewAsTable = prop.getProperty(JDBCSchemaGrabber.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
@@ -76,7 +76,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
 		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
-		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(SQLDump.PROP_OUTPUTFILE); }
+		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(JDBCSchemaGrabber.PROP_OUTPUTFILE); }
 		
 		String outputobjectswithtable = prop.getProperty(PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE);
 		if(outputobjectswithtable!=null) {
