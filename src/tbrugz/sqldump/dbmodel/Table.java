@@ -8,6 +8,7 @@ import java.util.Set;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class Table extends DBObject {
 	TableType type;
@@ -30,14 +31,39 @@ public class Table extends DBObject {
 		//return "t:"+name;
 		//return "Table[name:"+name+"]";
 	}
+	
+	public void validateConstraints() {
+		boolean hasPK = false;
+		for(Constraint c: constraints) {
+			if(c.type.equals(Constraint.ConstraintType.PK)) {
+				hasPK = true;
+				break;
+			}
+		}
+		if(hasPK) { return; }
+		
+		List<String> pkCols = new ArrayList<String>(); 
+		for(Column c: columns) {
+			if(c.pk) pkCols.add(c.name);
+		}
+		if(pkCols.size()==0) {
+			//TODO: add pk = true to columns...
+			return; 
+		}
+		
+		Constraint cPK = new Constraint();
+		cPK.type = ConstraintType.PK;
+		cPK.name = pkConstraintName;
+		cPK.uniqueColumns = pkCols;
+	}
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		// XXX Table: getDefinition
-		return null;
+		// XXXxxx Table: getDefinition(dumpSchemaName, true, false, null, null)??
+		return getDefinition(dumpSchemaName, true, false, null, null);
 	}
 	
-	public String getDefinition(boolean dumpWithSchemaName, boolean doSchemaDumpPKs, boolean dumpFKsInsideTable, Properties colTypeConversionProp, Set<FK> foreignKeys) {
+	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		List<String> pkCols = new ArrayList<String>();
 		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
 		
@@ -50,13 +76,19 @@ public class Table extends DBObject {
 
 		//Columns
 		for(Column c: columns) {
-			String colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+			String colDesc = null;
+			if(colTypeConversionProp!=null) {
+				colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+			}
+			else {
+				colDesc = Column.getColumnDesc(c, null, null, null);
+			}
 			if(c.pk) { pkCols.add(c.name); }
 			sb.append("\t"+colDesc+",\n");
 		}
 		
 		//PKs
-		if(doSchemaDumpPKs && pkCols.size()>0) {
+		if(dumpPKs && pkCols.size()>0) {
 			sb.append("\tconstraint "+pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
 		}
 		
@@ -125,6 +157,7 @@ public class Table extends DBObject {
 		this.grants = grants;
 	}
 
+	//XXX: getPkConstraintName should be @XmlTransient?
 	public String getPkConstraintName() {
 		return pkConstraintName;
 	}

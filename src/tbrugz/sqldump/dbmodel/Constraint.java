@@ -10,8 +10,20 @@ public class Constraint implements Comparable<Constraint>, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static enum ConstraintType {
-		CHECK,  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5); 
-		UNIQUE; //CONSTRAINT unique1 UNIQUE("MANAGER_NAME", "EMAIL");
+		PK,     //CONSTRAINT pk1 PRIMARY KEY ("MANAGER_NAME", "EMAIL");
+		UNIQUE, //CONSTRAINT unique1 UNIQUE ("MANAGER_NAME", "EMAIL");
+		CHECK;  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5); 
+		
+		public String fullName() {
+			switch (this) {
+				case PK:
+					return "PRIMARY KEY";
+				case CHECK:
+				case UNIQUE:
+				default:
+					return this.toString();
+			}
+		}
 	}
 
 	public ConstraintType type;
@@ -25,7 +37,8 @@ public class Constraint implements Comparable<Constraint>, Serializable {
 			case CHECK:
 				return "constraint "+name+" "+type+" "+checkDescription;
 			case UNIQUE:
-				return "constraint "+name+" "+type+" ("+Utils.join(uniqueColumns, ", ")+")";
+			case PK:
+				return "constraint "+name+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ")+")";
 		}
 		throw new RuntimeException("unknown constraint type: "+type);
 	}

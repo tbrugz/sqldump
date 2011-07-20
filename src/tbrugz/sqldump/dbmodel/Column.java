@@ -1,17 +1,44 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
+import tbrugz.sqldump.SQLDump;
+
 public class Column implements Serializable {
 	private static final long serialVersionUID = 1L;
+	static Logger log = Logger.getLogger(Column.class);
+	
 	public String name;
 	public String type;
 	public int columSize;
 	public Integer decimalDigits;
-	public boolean pk;
+	public boolean pk; //XXX: should be transient? add PK info into constraint?
 	public boolean nullable;
 	
+	static Properties typeMapping = null;
+	{
+		typeMapping = new Properties();
+		try {
+			typeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE));
+		} catch (IOException e) {
+			log.warn("Error loading typeMapping from resource: "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE);
+			e.printStackTrace();
+		}
+	}
+	
+	public static String getColumnDesc(Column c) {
+		return getColumnDesc(c, typeMapping, null, null);
+	}
+	
+	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
+		return getColumnDesc(c, typeMapping, fromDbId, toDbId);
+	}
+	
+	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
 		String colType = c.type;
 		
@@ -40,7 +67,7 @@ public class Column implements Serializable {
 		return getColumnDesc(c, typeMapping, fromDbId, toDbId)+(c.pk?" primary key":"");
 	}
 
-	//??
+	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c, Properties typeMapping) {
 		String colType = c.type;
 		
@@ -52,6 +79,23 @@ public class Column implements Serializable {
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(!c.nullable?" not null":"");
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Column) {
+			Column c = (Column) obj;
+			return name.equals(c.name) && type.equals(c.type) && (columSize==c.columSize) 
+					&& (decimalDigits!=null?decimalDigits.equals(decimalDigits):c.decimalDigits==null) 
+					&& (pk==c.pk) && (nullable==c.nullable);
+		}
+		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return "[column:"+getColumnDesc(this)+"]";
+		//return "[column: "+name+" "+type+"]";
 	}
 	
 }
