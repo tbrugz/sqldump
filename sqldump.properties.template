@@ -83,6 +83,7 @@ sqldump.datadump.rowlimit=100
 sqldump.datadump.TABLE_X.rowlimit=500
 sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
 sqldump.datadump.TABLE_Y.columns=id, name
+sqldump.datadump.TABLE_Y.order=TYPE, NAME
 
 
 #

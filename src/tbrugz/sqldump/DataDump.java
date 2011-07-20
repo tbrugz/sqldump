@@ -118,11 +118,13 @@ public class DataDump {
 			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
 			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
+			String orderClause = prop.getProperty("sqldump.datadump."+table+".order");
 
 			log.info("dumping data from table: "+table);
 			Statement st = conn.createStatement();
 			String sql = "select "+selectColumns+" from \""+table+"\""
-					+ (whereClause!=null?" where "+whereClause:"");
+					+ (whereClause!=null?" where "+whereClause:"")
+					+ (orderClause!=null?" order by "+orderClause:"");
 			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
@@ -172,12 +174,14 @@ public class DataDump {
 			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
 			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
+			String orderClause = prop.getProperty("sqldump.datadump."+table+".order");
 
 			log.debug("dumping data/inserts from table: "+table);
 			Statement st = conn.createStatement();
 			//st.setFetchSize(20);
 			String sql = "select "+selectColumns+" from \""+table+"\""
-					+ (whereClause!=null?" where "+whereClause:"");
+					+ (whereClause!=null?" where "+whereClause:"")
+					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
 			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
