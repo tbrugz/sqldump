@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlTransient;
 
-public abstract class DBObject implements Comparable<DBObject>, Serializable {
+public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static class DBObjectId implements Comparable<DBObjectId> {
@@ -30,8 +30,7 @@ public abstract class DBObject implements Comparable<DBObject>, Serializable {
 	
 	@XmlTransient
 	public String schemaName;
-	@XmlTransient
-	public String name;
+	//@XmlTransient public String name;
 
 	public String getSchemaName() {
 		return schemaName;
@@ -41,13 +40,13 @@ public abstract class DBObject implements Comparable<DBObject>, Serializable {
 		this.schemaName = schemaName;
 	}
 
-	public String getName() {
+	/*public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
-	}
+	}*/
 	
 	//XXX: getDefinition() should have 'sql dialect' param?
 	public abstract String getDefinition(boolean dumpSchemaName);

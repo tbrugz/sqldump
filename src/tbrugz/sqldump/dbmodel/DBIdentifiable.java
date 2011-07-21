@@ -2,8 +2,11 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.Collection;
 
+import javax.xml.bind.annotation.XmlTransient;
+
 public abstract class DBIdentifiable {
-	String name;
+	@XmlTransient
+	public String name;
 	//DBObjectType objtype;
 
 	public String getName() {

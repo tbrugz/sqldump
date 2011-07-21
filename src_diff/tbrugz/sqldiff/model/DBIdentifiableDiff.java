@@ -7,20 +7,23 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.View;
 
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
 	ChangeType changeType;
 	DBIdentifiable ident;
-	String prepend;
+	//String prepend;
+	String tableName;
 
-	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable ident, String prepend) {
+	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable ident, String table) {
 		this.changeType = changeType;
 		this.ident = ident;
-		this.prepend = prepend;
+		this.tableName = table;
+		//this.prepend = prepend;
 	}
 
 	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable ident) {
-		this(changeType, ident, "");
+		this(changeType, ident, null);
 	}
 	
 	@Override
@@ -31,10 +34,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	@Override
 	public String getDiff() {
 		switch(changeType) {
-			case ADD: return prepend+" ADD "+ident.getDefinition(true);
+			case ADD: return (tableName!=null?"alter table "+tableName+" ADD ":"")+ident.getDefinition(true);
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP: return prepend+" DROP "+getType4Diff(ident)+" "+ident.getName();
+			//case DROP: return table!=null?"alter table "+table+" add ":ident.getDefinition(true);
+			case DROP: return (tableName!=null?"alter table "+tableName+" ":"")+"DROP "+getType4Diff(ident)+" "+ident.getName();
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBId.getDiff()");
 	}
@@ -42,7 +46,13 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	static DBObjectType getType4Diff(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }
 		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
+		//ExecutableObject
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
+		//Grant?
+		//Index
+		//Sequence
+		//Synonym
+		if(ident instanceof View) { return DBObjectType.VIEW; }
 		throw new RuntimeException("getType4Diff: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 	

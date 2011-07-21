@@ -49,8 +49,8 @@ public class SchemaDiff implements Diff {
 				TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, 
 						getFKsFromTable(modelOrig.getForeignKeys(), tOrig.getName()), 
 						getFKsFromTable(modelNew.getForeignKeys(), tNew.getName()), 
-						"alter table "+tOrig.getName(),
-						"alter table "+tNew.getName());
+						tOrig.getName(),
+						tNew.getName());
 				
 				for(Diff dt: diffs) {
 					if(dt instanceof TableDiff) {
@@ -91,10 +91,10 @@ public class SchemaDiff implements Diff {
 
 		//TODO: Table: grants, table.type?
 		
-		//FKs
-		//TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, modelOrig.getForeignKeys(), modelNew.getForeignKeys());
-
-		//TODO: views, triggers, executables, synonyms, indexes, sequences
+		//Views
+		TableDiff.diffs(DBObjectType.VIEW, diff.dbidDiffs, modelOrig.getViews(), modelNew.getViews());
+		
+		//TODO: triggers, executables, synonyms, indexes, sequences
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);

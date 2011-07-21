@@ -86,14 +86,14 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		
 		//constraints
 		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
-		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), "alter table "+origTable.getName(), "alter table "+newTable.getName());
+		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getName(), newTable.getName());
 		diffs.addAll(dbiddiffs);
 		
 		return diffs;
 	}
 	
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
-		diffs(objType, diffs, listOrig, listNew, "", "");
+		diffs(objType, diffs, listOrig, listNew, null, null);
 	}
 
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend) {
