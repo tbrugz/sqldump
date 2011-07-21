@@ -2,7 +2,11 @@ package tbrugz.sqldiff.model;
 
 import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
+import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.FK;
 
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
 	ChangeType changeType;
@@ -30,9 +34,16 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 			case ADD: return prepend+" ADD "+ident.getDefinition(true);
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP: return prepend+" DROP "+DBIdentifiable.getType(ident)+" "+ident.getName();
+			case DROP: return prepend+" DROP "+getType4Diff(ident)+" "+ident.getName();
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBId.getDiff()");
+	}
+	
+	static DBObjectType getType4Diff(DBIdentifiable ident) {
+		if(ident instanceof Column) { return DBObjectType.COLUMN; }
+		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
+		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
+		throw new RuntimeException("getType4Diff: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 	
 	@Override

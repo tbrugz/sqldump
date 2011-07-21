@@ -12,6 +12,8 @@ import tbrugz.sqldiff.Diff;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 
 //XXX: should SchemaDiff implement Diff?
@@ -40,9 +42,16 @@ public class SchemaDiff implements Diff {
 			else {
 				//new and old tables exists
 				newTablesThatExistsInOrigModel.add(tNew);
-				//rename
-				//XXX: what about rename? external info needed?
+				//rename XXX: what about rename? external info needed?
 				List<Diff> diffs = TableDiff.tableDiffs(tOrig, tNew);
+				
+				//FKs
+				TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, 
+						getFKsFromTable(modelOrig.getForeignKeys(), tOrig.getName()), 
+						getFKsFromTable(modelNew.getForeignKeys(), tNew.getName()), 
+						"alter table "+tOrig.getName(),
+						"alter table "+tNew.getName());
+				
 				for(Diff dt: diffs) {
 					if(dt instanceof TableDiff) {
 						diff.tableDiffs.add((TableDiff)dt);
@@ -80,8 +89,12 @@ public class SchemaDiff implements Diff {
 			diff.tableDiffs.add(td);
 		}
 
-		//TODO: Table: constraints, grants, table.type? 
-		//TODO: FKs, views, triggers, executables, synonyms, indexes, sequences
+		//TODO: Table: grants, table.type?
+		
+		//FKs
+		//TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, modelOrig.getForeignKeys(), modelNew.getForeignKeys());
+
+		//TODO: views, triggers, executables, synonyms, indexes, sequences
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);
@@ -104,6 +117,14 @@ public class SchemaDiff implements Diff {
 		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.columnDiffs).size());
 		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.columnDiffs).size());
 		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.columnDiffs).size());
+	}
+	
+	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
+		Set<FK> retfks = new HashSet<FK>();
+		for(FK fk: fks) {
+			if(fk.fkTable.equals(table)) { retfks.add(fk); }
+		}
+		return retfks;
 	}
 	
 	@Override

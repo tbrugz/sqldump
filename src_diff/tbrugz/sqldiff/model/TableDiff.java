@@ -85,40 +85,18 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		}
 		
 		//constraints
-		/*
-		Set<Constraint> newConstraintsThatExistsInOrigModel = new HashSet<Constraint>();
-		for(Constraint cOrig: origTable.getConstraints()) {
-			Constraint cNew = DBIdentifiable.getDBIdentifiableByName(newTable.getConstraints(), cOrig.getName());
-			if(cNew!=null) {
-				newConstraintsThatExistsInOrigModel.add(cNew);
-				if(!cOrig.equals(cNew)) {
-					log.debug("add/drop constraint: orig: "+cOrig+" new: "+cNew);
-					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, "alter table "+origTable.getName()));
-					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, "alter table "+newTable.getName()));
-				}
-			}
-			else {
-				log.debug("drop constraint: orig: "+cOrig);
-				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, "alter table "+origTable.getName()));
-			}
-		}
-		for(Constraint cNew: newTable.getConstraints()) {
-			if(newConstraintsThatExistsInOrigModel.contains(cNew)) { continue; }
-			log.debug("add constraint: new: "+cNew);
-			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, "alter table "+newTable.getName()));
-		}*/
-	
-		//constraints
-		diffs(DBObjectType.CONSTRAINT, diffs, origTable.getConstraints(), newTable.getConstraints(), "alter table "+origTable.getName(), "alter table "+newTable.getName());
+		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
+		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), "alter table "+origTable.getName(), "alter table "+newTable.getName());
+		diffs.addAll(dbiddiffs);
 		
 		return diffs;
 	}
 	
-	static void diffs(DBObjectType objType, List<Diff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
+	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
 		diffs(objType, diffs, listOrig, listNew, "", "");
 	}
 
-	static void diffs(DBObjectType objType, List<Diff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend) {
+	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend) {
 		//constraints
 		Set<DBIdentifiable> newConstraintsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
 		for(DBIdentifiable cOrig: listOrig) {

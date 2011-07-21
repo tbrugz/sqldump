@@ -61,4 +61,14 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		return fkSimpleScript(this, " ", true);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof FK) {
+			FK fk = (FK) obj;
+			return pkTable.equals(fk.pkTable) && fkTable.equals(fk.fkTable) 
+					&& pkColumns.equals(fk.pkColumns) && fkColumns.equals(fk.fkColumns);
+		}
+		return false;
+	}
+	
 }

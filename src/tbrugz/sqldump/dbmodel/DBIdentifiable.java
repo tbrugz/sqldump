@@ -24,11 +24,4 @@ public abstract class DBIdentifiable {
 		return null;
 	}
 	
-	public static DBObjectType getType(DBIdentifiable ident) {
-		if(ident instanceof Column) { return DBObjectType.COLUMN; }
-		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
-		if(ident instanceof FK) { return DBObjectType.FK; }
-		throw new RuntimeException("DBObjectType not defined for: "+ident.getClass().getName());
-	}
-	
 }
