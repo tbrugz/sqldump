@@ -8,11 +8,11 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLDump;
 
-public class Column implements Serializable {
+public class Column extends DBIdentifiable implements Serializable {
 	private static final long serialVersionUID = 1L;
 	static Logger log = Logger.getLogger(Column.class);
 	
-	public String name;
+	//public String name;
 	public String type;
 	public int columSize;
 	public Integer decimalDigits;
@@ -96,6 +96,11 @@ public class Column implements Serializable {
 	public String toString() {
 		return "[column:"+getColumnDesc(this)+"]";
 		//return "[column: "+name+" "+type+"]";
+	}
+
+	@Override
+	public String getDefinition(boolean dumpSchemaName) {
+		return getColumnDesc(this);
 	}
 	
 }

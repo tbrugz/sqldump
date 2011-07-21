@@ -6,7 +6,7 @@ import java.util.List;
 
 import tbrugz.sqldump.Utils;
 
-public class Constraint implements Comparable<Constraint>, Serializable {
+public class Constraint extends DBIdentifiable implements Comparable<Constraint>, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static enum ConstraintType {
@@ -27,7 +27,7 @@ public class Constraint implements Comparable<Constraint>, Serializable {
 	}
 
 	public ConstraintType type;
-	public String name;
+	//public String name;
 	public String checkDescription;
 	public List<String> uniqueColumns = new ArrayList<String>();
 	
@@ -53,5 +53,24 @@ public class Constraint implements Comparable<Constraint>, Serializable {
 	@Override
 	public String toString() {
 		return "["+type+":"+name+"]";
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Constraint) {
+			Constraint cc = (Constraint) obj;
+			if(!name.equals(cc.name)) { return false; }
+			if(type.equals(cc.type)) {
+				switch (type) {
+				case CHECK:
+					return checkDescription.equals(cc.checkDescription);
+				case UNIQUE:
+				case PK:
+					return uniqueColumns.equals(cc.uniqueColumns);
+				}
+			}
+			else return false;
+		}
+		return false;
 	}
 }

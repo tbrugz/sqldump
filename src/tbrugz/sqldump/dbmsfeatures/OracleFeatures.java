@@ -280,7 +280,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			Constraint c = new Constraint();
 			String tableName = rs.getString(2);
 			c.type = Constraint.ConstraintType.CHECK;
-			c.name = rs.getString(3);
+			c.setName( rs.getString(3) );
 			c.checkDescription = rs.getString(5);
 			
 			//ignore NOT NULL constraints
@@ -326,7 +326,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
 				c.type = Constraint.ConstraintType.UNIQUE;
-				c.name = constraintName;
+				c.setName( constraintName );
 				countUniqueConstraints++;
 			}
 			c.uniqueColumns.add(rs.getString(4));

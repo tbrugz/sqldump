@@ -277,7 +277,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
-		c.name = cols.getString("COLUMN_NAME");
+		c.setName( cols.getString("COLUMN_NAME") );
 		c.type = cols.getString("TYPE_NAME");
 		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
 		c.columSize = cols.getInt("COLUMN_SIZE");

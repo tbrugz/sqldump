@@ -7,9 +7,9 @@ import java.util.TreeSet;
 import tbrugz.sqldump.Utils;
 
 //XXX~: extends DBObject?
-public class FK implements Comparable<FK>, Serializable {
+public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	private static final long serialVersionUID = 1L;
-	String name;
+	//String name;
 	public String pkTable;
 	public String fkTable;
 	public String pkTableSchemaName;
@@ -24,13 +24,13 @@ public class FK implements Comparable<FK>, Serializable {
 		//return "fk:"+name+"["+fkTable+"<-"+pkTable+"]";
 	}
 
-	public String getName() {
+	/*public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
-	}
+	}*/
 
 	public String getSourceId() {
 		return pkTableSchemaName+"."+pkTable;
@@ -54,6 +54,11 @@ public class FK implements Comparable<FK>, Serializable {
 		return "constraint "+fk.getName()
 			+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
 			")"+whitespace+"references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+")";
+	}
+
+	@Override
+	public String getDefinition(boolean dumpSchemaName) {
+		return fkSimpleScript(this, " ", true);
 	}
 	
 }

@@ -172,7 +172,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			Constraint c = new Constraint();
 			c.type = Constraint.ConstraintType.CHECK;
-			c.name = rs.getString(2);
+			c.setName( rs.getString(2) );
 			c.checkDescription = rs.getString(3);
 			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
 			if(t!=null) {
@@ -212,7 +212,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
 				}
 				c.type = Constraint.ConstraintType.UNIQUE;
-				c.name = constraintName;
+				c.setName( constraintName );
 				countUniqueConstraints++;
 			}
 			c.uniqueColumns.add(rs.getString(3));
