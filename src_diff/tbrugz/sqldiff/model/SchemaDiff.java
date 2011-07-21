@@ -21,6 +21,7 @@ public class SchemaDiff implements Diff {
 
 	Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
 	Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
+	Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 
 	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
 		SchemaDiff diff = new SchemaDiff();
@@ -48,6 +49,9 @@ public class SchemaDiff implements Diff {
 					}
 					else if(dt instanceof TableColumnDiff) {
 						diff.columnDiffs.add((TableColumnDiff)dt);
+					}
+					else if(dt instanceof DBIdentifiableDiff) {
+						diff.dbidDiffs.add((DBIdentifiableDiff)dt);
 					}
 					else {
 						log.warn("unknown diff: "+dt);
@@ -113,12 +117,16 @@ public class SchemaDiff implements Diff {
 		for(TableColumnDiff tcd: columnDiffs) {
 			sb.append(tcd.getDiff()+";\n");
 		}
+		//dbidentifiable
+		for(DBIdentifiableDiff dbdiff: dbidDiffs) {
+			sb.append(dbdiff.getDiff()+";\n");
+		}
 		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
-		return "[SchemaDiff: tables: #"+tableDiffs.size()+", cols: #"+columnDiffs.size()+"]"; //XXX: A(dd), M(modified), R(emoved)
+		return "[SchemaDiff: tables: #"+tableDiffs.size()+", cols: #"+columnDiffs.size()+", xtra: #"+dbidDiffs.size()+"]"; //XXX: A(dd), M(modified), R(emoved)
 	}
 
 	@Override

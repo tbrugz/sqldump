@@ -29,9 +29,9 @@ public class TableColumnDiff extends DBObject implements Diff {
 			case ALTER:
 				colChange = "ALTER COLUMN "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type; break;
 			case RENAME:
-				colChange = "RENAME COLUMN "+renameFrom+" TO "+column.name; break;
+				colChange = "RENAME COLUMN "+renameFrom+" TO "+column.getName(); break;
 			case DROP:
-				colChange = "DROP COLUMN "+column.name; break;
+				colChange = "DROP COLUMN "+column.getName(); break;
 		}
 		return "ALTER TABLE "+name+" "+colChange;
 	}
@@ -69,7 +69,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 				TableColumnDiff tcd = (TableColumnDiff) o;
 				comp = type.compareTo(tcd.type);
 				if(comp==0) {
-					return column.name.compareTo(tcd.column.name);
+					return column.getName().compareTo(tcd.column.getName());
 				}
 			}
 		}
