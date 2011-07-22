@@ -4,6 +4,7 @@ import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class TableColumnDiff extends DBObject implements Diff {
@@ -84,6 +85,11 @@ public class TableColumnDiff extends DBObject implements Diff {
 	@Override
 	public ChangeType getChangeType() {
 		return type;
+	}
+
+	@Override
+	public DBObjectType getObjectType() {
+		return DBObjectType.COLUMN;
 	}
 
 }

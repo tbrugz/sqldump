@@ -45,6 +45,9 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		}
 
 		Marshaller m = jc.createMarshaller();
+		//XXX: property for formatting or not JAXB output?
+		//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
 		m.marshal(schemaModel, new File(fileOutput));
 	}
 

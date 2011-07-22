@@ -21,6 +21,7 @@ import tbrugz.sqldump.dbmodel.Table;
 public class SchemaDiff implements Diff {
 	static Logger log = Logger.getLogger(SchemaDiff.class);
 
+	//XXX: should be List<>?
 	Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
 	Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
 	Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
@@ -133,6 +134,8 @@ public class SchemaDiff implements Diff {
 	@Override
 	public String getDiff() {
 		StringBuffer sb = new StringBuffer();
+		//TODO: how to order DDL changes?
+		
 		//tables
 		for(TableDiff td: tableDiffs) {
 			sb.append(td.getDiff()+";\n\n");
@@ -145,6 +148,7 @@ public class SchemaDiff implements Diff {
 		for(DBIdentifiableDiff dbdiff: dbidDiffs) {
 			sb.append(dbdiff.getDiff()+";\n\n");
 		}
+		
 		return sb.toString();
 	}
 
@@ -156,6 +160,11 @@ public class SchemaDiff implements Diff {
 	@Override
 	public ChangeType getChangeType() {
 		return null; //XXX: SchemaDiff.ChangeType?
+	}
+
+	@Override
+	public DBObjectType getObjectType() {
+		return null; //XXX: SchemaDiff.DBObjectType?
 	}
 
 }

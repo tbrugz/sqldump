@@ -55,6 +55,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		}
 		
 		//alter columns
+		//XXX: use diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend)??
 		Set<Column> newColumnsThatExistsInOrigModel = new HashSet<Column>();
 		for(Column cOrig: origTable.getColumns()) {
 			Column cNew = DBIdentifiable.getDBIdentifiableByName(newTable.getColumns(), cOrig.getName());
@@ -92,32 +93,33 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		return diffs;
 	}
 	
+	//XXX: move to another class
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
 		diffs(objType, diffs, listOrig, listNew, null, null);
 	}
 
-	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend) {
-		//constraints
-		Set<DBIdentifiable> newConstraintsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
+	//XXX: move to another class
+	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName) {
+		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
 		for(DBIdentifiable cOrig: listOrig) {
 			DBIdentifiable cNew = DBIdentifiable.getDBIdentifiableByName(listNew, cOrig.getName());
 			if(cNew!=null) {
-				newConstraintsThatExistsInOrigModel.add(cNew);
+				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {
-					log.debug("add/drop "+objType+": orig: "+cOrig+" new: "+cNew);
-					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origPrepend));
-					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newPrepend));
+					log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
+					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origOwnerTableName));
+					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newOwnerTableName));
 				}
 			}
 			else {
 				log.debug("drop "+objType+": orig: "+cOrig);
-				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origPrepend));
+				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origOwnerTableName));
 			}
 		}
 		for(DBIdentifiable cNew: listNew) {
-			if(newConstraintsThatExistsInOrigModel.contains(cNew)) { continue; }
+			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
 			log.debug("add "+objType+": new: "+cNew);
-			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newPrepend));
+			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newOwnerTableName));
 		}
 	}
 	
@@ -131,6 +133,11 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	@Override
 	public ChangeType getChangeType() {
 		return diffType;
+	}
+
+	@Override
+	public DBObjectType getObjectType() {
+		return DBObjectType.TABLE;
 	}
 
 }
