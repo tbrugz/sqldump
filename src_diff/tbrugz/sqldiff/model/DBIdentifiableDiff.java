@@ -7,6 +7,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
@@ -52,6 +53,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		//Index
 		//Sequence
 		//Synonym
+		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
 		if(ident instanceof View) { return DBObjectType.VIEW; }
 		throw new RuntimeException("getType4Diff: DBObjectType not defined for: "+ident.getClass().getName());
 	}

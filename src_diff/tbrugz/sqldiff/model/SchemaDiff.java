@@ -94,7 +94,10 @@ public class SchemaDiff implements Diff {
 		//Views
 		TableDiff.diffs(DBObjectType.VIEW, diff.dbidDiffs, modelOrig.getViews(), modelNew.getViews());
 		
-		//TODO: triggers, executables, synonyms, indexes, sequences
+		//Triggers
+		TableDiff.diffs(DBObjectType.TRIGGER, diff.dbidDiffs, modelOrig.getTriggers(), modelNew.getTriggers());
+		
+		//TODO: executables, synonyms, indexes, sequences
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);
