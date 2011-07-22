@@ -1,5 +1,7 @@
 package tbrugz.sqldiff.model;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -9,7 +11,6 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
-import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -119,25 +120,63 @@ public class SchemaDiff implements Diff {
 	}
 	
 	static void logInfo(SchemaDiff diff) {
-		//log.info("oldTables                     : "+modelOrig.getTables());
-		//log.info("newTables                     : "+modelNew.getTables());
-		//log.info("newTablesThatExistsInOrigModel: "+newTablesThatExistsInOrigModel);
-		//XXX log.info("addedTables...................: "+diff.getTables().size());
-		log.info("tableDiffs....................: "+diff.tableDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfType(ChangeType.ADD, diff.tableDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.tableDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.tableDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.tableDiffs).size());
+		/*log.info("tableDiffs....................: "+diff.tableDiffs.size());
+		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.tableDiffs).size());
+		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.tableDiffs).size());
+		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.tableDiffs).size());
+		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.tableDiffs).size());
 		log.info("tableColumnDiffs..............: "+diff.columnDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfType(ChangeType.ADD, diff.columnDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.columnDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.columnDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.columnDiffs).size());
+		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.columnDiffs).size());
+		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.columnDiffs).size());
+		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.columnDiffs).size());
+		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.columnDiffs).size());
 		log.info("dbIdentifiableDiffs...........: "+diff.dbidDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfType(ChangeType.ADD, diff.dbidDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.dbidDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.dbidDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.dbidDiffs).size());
+		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.dbidDiffs).size());
+		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.dbidDiffs).size());
+		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.dbidDiffs).size());
+		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.dbidDiffs).size());*/
+		logInfoByObjectAndChangeType(diff.tableDiffs);
+		logInfoByObjectAndChangeType(diff.columnDiffs);
+		logInfoByObjectAndChangeType(diff.dbidDiffs);
+	}
+
+	static void logInfoByObjectAndChangeType(Collection<? extends Diff> diffs) {
+		//Map<DBObjectType, Integer> map = new NeverNullGetMap<DBObjectType, Integer>(Integer.class);
+		for(DBObjectType type: DBObjectType.values()) {
+			List<Diff> diffsoftype = getDiffsByDBObjectType(diffs, type);
+			StringBuffer sb = new StringBuffer();
+			boolean changed = false;
+			sb.append(String.format("changes [%-12s]: ", type));
+			//sb.append("changes ["+type+"]: ");
+			for(ChangeType ct: ChangeType.values()) {
+				int size = getDiffOfChangeType(ct, diffsoftype).size();
+				if(size>0) {
+					sb.append(" "+ct+"("+getDiffOfChangeType(ct, diffsoftype).size()+")");
+					changed = true;
+				}
+			}
+			if(changed) {
+				log.info(sb.toString());
+			}
+		}
+	}
+
+	public static Collection<? extends Diff> getDiffOfChangeType(ChangeType changeType, Collection<? extends Diff> list) {
+		Collection<Diff> ret = new ArrayList<Diff>();
+		for(Diff d: list) {
+			if(changeType.equals(d.getChangeType())) { ret.add(d); }
+		}
+		return ret;
+	}
+	
+	static List<Diff> getDiffsByDBObjectType(Collection<? extends Diff> diffs, DBObjectType dbtype) {
+		List<Diff> retdiff = new ArrayList<Diff>();
+		for(Diff d: diffs) {
+			if(dbtype.equals(d.getObjectType())) {
+				retdiff.add(d);
+			}
+		}
+		return retdiff;
 	}
 	
 	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {

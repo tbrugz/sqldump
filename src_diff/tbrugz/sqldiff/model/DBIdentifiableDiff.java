@@ -59,6 +59,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 
 	@Override
 	public DBObjectType getObjectType() {
-		return DBIdentifiable.getType(ident);
+		//return DBIdentifiable.getType(ident);
+		return DBIdentifiable.getType4Diff(ident); //XXX: getType() or getType4Diff()? '4Diff' is better for logging...
 	}
 }

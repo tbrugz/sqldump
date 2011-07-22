@@ -1,7 +1,5 @@
 package tbrugz.sqldiff;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Properties;
 
 import tbrugz.sqldiff.model.SchemaDiff;
@@ -45,15 +43,8 @@ public class SQLDiff {
 		
 		//do diff
 		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
-		System.out.println("diff: "+diff+"\n"+diff.getDiff());
-	}
-	
-	public static Collection<? extends Diff> getDiffOfType(ChangeType changeType, Collection<? extends Diff> list) {
-		Collection<Diff> ret = new ArrayList<Diff>();
-		for(Diff d: list) {
-			if(changeType.equals(d.getChangeType())) { ret.add(d); }
-		}
-		return ret;
+		//System.out.println("diff: "+diff+"\n"+diff.getDiff());
+		System.out.println("diff:\n"+diff.getDiff());
 	}
 	
 	public static void main(String[] args) throws Exception {
