@@ -6,6 +6,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -47,7 +48,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	static DBObjectType getType(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }
 		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
-		//ExecutableObject
+		if(ident instanceof ExecutableObject) { return DBObjectType.EXECUTABLE; }
 		if(ident instanceof FK) { return DBObjectType.FK; }
 		//Grant?
 		if(ident instanceof Index) { return DBObjectType.INDEX; }
@@ -58,8 +59,10 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 
+	//used for 'DROP' statements
 	static DBObjectType getType4Diff(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
+		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return getType(ident);
 	}
 	

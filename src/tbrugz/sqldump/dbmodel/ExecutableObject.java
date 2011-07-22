@@ -16,16 +16,41 @@ public class ExecutableObject extends DBObject {
 	}
 	
 	@Override
+	public String toString() {
+		return "[Executable:"+type+":"+schemaName+"."+name+"]";
+	}
+	
+	@Override
 	public int compareTo(DBObject o) {
 		if(o instanceof ExecutableObject) {
 			ExecutableObject eo = (ExecutableObject) o;
-    		//System.out.println("EO.compareTo: "+this+"/"+eo);
-    		int typeCompare = type.compareTo(eo.type);
-    		if(typeCompare==0) { //if same type, compare name (calling "super()")
-    			return super.compareTo(eo);
-    		}
-    		return typeCompare;
+			//System.out.println("EO.compareTo: "+this+"/"+eo);
+			int typeCompare = type.compareTo(eo.type);
+			if(typeCompare==0) { //if same type, compare name (calling "super()")
+				return super.compareTo(eo);
+			}
+			return typeCompare;
 		}
 		return super.compareTo(o);
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExecutableObject other = (ExecutableObject) obj;
+		if (body == null) {
+			if (other.body != null)
+				return false;
+		} else if (!body.equals(other.body))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
+	}
+	
 }
