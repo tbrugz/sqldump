@@ -172,16 +172,19 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
+			String schemaName = rs.getString(1);
+			String tableName = rs.getString(2);
+			
 			Constraint c = new Constraint();
 			c.type = Constraint.ConstraintType.CHECK;
 			c.setName( rs.getString(3) );
 			c.checkDescription = rs.getString(4);
-			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), rs.getString(2));
+			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 			}
 			else {
-				log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
+				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 			}
 			count++;
 		}
@@ -203,21 +206,24 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		String previousConstraint = null;
 		Constraint c = null;
 		while(rs.next()) {
+			String schemaName = rs.getString(1);
+			String tableName = rs.getString(2);
 			String constraintName = rs.getString(3);
+			
 			if(!constraintName.equals(previousConstraint)) {
 				c = new Constraint();
-				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), rs.getString(2));
+				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 				}
 				else {
-					log.warn("constraint "+c+" can't be added to table '"+rs.getString(2)+"': table not found");
+					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
 				c.type = Constraint.ConstraintType.UNIQUE;
 				c.setName( constraintName );
 				countUniqueConstraints++;
 			}
-			c.uniqueColumns.add(rs.getString(3));
+			c.uniqueColumns.add(rs.getString(4));
 			previousConstraint = constraintName;
 			count++;
 		}
