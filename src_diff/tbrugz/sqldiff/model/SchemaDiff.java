@@ -32,7 +32,7 @@ public class SchemaDiff implements Diff {
 		//tables
 		Set<Table> newTablesThatExistsInOrigModel = new HashSet<Table>();
 		for(Table tOrig: modelOrig.getTables()) {
-			Table tNew = (Table) DBObject.findDBObjectByName(modelNew.getTables(), tOrig.getName());
+			Table tNew = (Table) DBObject.findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
 				//if new table doesn't exist, drop old
 				TableDiff td = new TableDiff(ChangeType.DROP, tOrig);
@@ -98,12 +98,12 @@ public class SchemaDiff implements Diff {
 		//Triggers
 		TableDiff.diffs(DBObjectType.TRIGGER, diff.dbidDiffs, modelOrig.getTriggers(), modelNew.getTriggers());
 
-		//FIXME: package and package body: findByName must also use object type! (and schemaName!)
+		//FIXedME: package and package body: findByName must also use object type! (and schemaName!)
 		//Executables
 		TableDiff.diffs(DBObjectType.EXECUTABLE, diff.dbidDiffs, modelOrig.getExecutables(), modelNew.getExecutables());
 
 		//Synonyms
-		//FIXME: doesn't detect schemaName changes
+		//FIXedME: doesn't detect schemaName changes
 		TableDiff.diffs(DBObjectType.SYNONYM, diff.dbidDiffs, modelOrig.getSynonyms(), modelNew.getSynonyms());
 		
 		//Indexes

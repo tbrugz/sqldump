@@ -2,17 +2,8 @@ package tbrugz.sqldiff.model;
 
 import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
-import tbrugz.sqldump.dbmodel.Column;
-import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.ExecutableObject;
-import tbrugz.sqldump.dbmodel.FK;
-import tbrugz.sqldump.dbmodel.Index;
-import tbrugz.sqldump.dbmodel.Sequence;
-import tbrugz.sqldump.dbmodel.Synonym;
-import tbrugz.sqldump.dbmodel.Trigger;
-import tbrugz.sqldump.dbmodel.View;
 
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
 	ChangeType changeType;
@@ -40,30 +31,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 			case ADD: return (ownerTableName!=null?"alter table "+ownerTableName+" ADD ":"")+ident.getDefinition(true).trim();
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"DROP "+getType4Diff(ident)+" "+ident.getName();
+			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"DROP "+DBIdentifiable.getType4Diff(ident)+" "+(ident.getSchemaName()!=null?ident.getSchemaName()+".":"")+ident.getName();
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBId.getDiff()");
-	}
-	
-	static DBObjectType getType(DBIdentifiable ident) {
-		if(ident instanceof Column) { return DBObjectType.COLUMN; }
-		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
-		if(ident instanceof ExecutableObject) { return DBObjectType.EXECUTABLE; }
-		if(ident instanceof FK) { return DBObjectType.FK; }
-		//Grant?
-		if(ident instanceof Index) { return DBObjectType.INDEX; }
-		if(ident instanceof Sequence) { return DBObjectType.SEQUENCE; }
-		if(ident instanceof Synonym) { return DBObjectType.SYNONYM; }
-		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
-		if(ident instanceof View) { return DBObjectType.VIEW; }
-		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
-	}
-
-	//used for 'DROP' statements
-	static DBObjectType getType4Diff(DBIdentifiable ident) {
-		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
-		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
-		return getType(ident);
 	}
 	
 	@Override
@@ -89,6 +59,6 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 
 	@Override
 	public DBObjectType getObjectType() {
-		return getType(ident);
+		return DBIdentifiable.getType(ident);
 	}
 }

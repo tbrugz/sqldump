@@ -286,7 +286,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			//ignore NOT NULL constraints
 			if(c.checkDescription.contains(" IS NOT NULL")) continue;
 			
-			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
+			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 			}
@@ -318,7 +318,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(!constraintName.equals(previousConstraint)) {
 				String tableName = rs.getString(2);
 				c = new Constraint();
-				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), tableName);
+				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 				}

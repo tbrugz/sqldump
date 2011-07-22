@@ -3,8 +3,6 @@ package tbrugz.sqldump.dbmodel;
 import java.io.Serializable;
 import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -28,18 +26,6 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 		}
 	}
 	
-	@XmlTransient
-	public String schemaName;
-	//@XmlTransient public String name;
-
-	public String getSchemaName() {
-		return schemaName;
-	}
-
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
-
 	/*public String getName() {
 		return name;
 	}
@@ -57,9 +43,9 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 		return name.compareTo(o.name);
 	}
 	
-	public static DBObject findDBObjectByName(Collection<? extends DBObject> col, String name) {
+	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {
-			if(name.equals(obj.name)) return obj;
+			if(schemaName.equals(obj.schemaName) && name.equals(obj.name)) return obj;
 		}
 		return null;
 	}

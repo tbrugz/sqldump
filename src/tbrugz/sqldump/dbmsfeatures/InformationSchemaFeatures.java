@@ -74,15 +74,17 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			//InformationSchemaTrigger t = (InformationSchemaTrigger) findTrigger(model.getTriggers(), rs.getString(3));
-			InformationSchemaTrigger t = (InformationSchemaTrigger) DBObject.findDBObjectByName(model.getTriggers(), rs.getString(3));
+			String schemaName = rs.getString(2);
+			String name = rs.getString(3);
+			InformationSchemaTrigger t = (InformationSchemaTrigger) DBObject.findDBObjectBySchemaAndName(model.getTriggers(), schemaName, name);
 			
 			if(t==null) {
 				t = new InformationSchemaTrigger();
 				model.getTriggers().add(t);
 				count++;
 			}
-			t.schemaName = rs.getString(2);
-			t.name = rs.getString(3);
+			t.schemaName = schemaName;
+			t.name = name;
 			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
 			//t.description = rs.getString(4);
@@ -160,7 +162,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.debug("grabbing constraints");
 		
 		//check constraints
-		String query = "select table_name, cc.constraint_name, check_clause " 
+		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
 				+"order by constraint_name ";
@@ -172,9 +174,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			Constraint c = new Constraint();
 			c.type = Constraint.ConstraintType.CHECK;
-			c.setName( rs.getString(2) );
-			c.checkDescription = rs.getString(3);
-			Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
+			c.setName( rs.getString(3) );
+			c.checkDescription = rs.getString(4);
+			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), rs.getString(2));
 			if(t!=null) {
 				t.getConstraints().add(c);
 			}
@@ -187,7 +189,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" check constraints grabbed");
 
 		//unique constraints
-		query = "select tc.table_name, tc.constraint_name, column_name " 
+		query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
 				+"and constraint_type = 'UNIQUE' "
@@ -201,15 +203,15 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		String previousConstraint = null;
 		Constraint c = null;
 		while(rs.next()) {
-			String constraintName = rs.getString(2);
+			String constraintName = rs.getString(3);
 			if(!constraintName.equals(previousConstraint)) {
 				c = new Constraint();
-				Table t = (Table) DBObject.findDBObjectByName(model.getTables(), rs.getString(1));
+				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), rs.getString(2));
 				if(t!=null) {
 					t.getConstraints().add(c);
 				}
 				else {
-					log.warn("constraint "+c+" can't be added to table '"+rs.getString(1)+"': table not found");
+					log.warn("constraint "+c+" can't be added to table '"+rs.getString(2)+"': table not found");
 				}
 				c.type = Constraint.ConstraintType.UNIQUE;
 				c.setName( constraintName );

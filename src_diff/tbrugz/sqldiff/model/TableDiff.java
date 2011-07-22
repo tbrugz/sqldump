@@ -38,7 +38,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			case RENAME:
 				return "ALTER TABLE "+renameFrom+" RENAME TO "+table.name;
 			case DROP:
-				return "DROP table "+table.name;
+				return "DROP table "+(table.schemaName!=null?table.schemaName+".":"")+table.name;
 		}
 		return null;
 	}
@@ -58,7 +58,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		//XXX: use diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend)??
 		Set<Column> newColumnsThatExistsInOrigModel = new HashSet<Column>();
 		for(Column cOrig: origTable.getColumns()) {
-			Column cNew = DBIdentifiable.getDBIdentifiableByName(newTable.getColumns(), cOrig.getName());
+			Column cNew = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(newTable.getColumns(), DBObjectType.COLUMN, origTable.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newColumnsThatExistsInOrigModel.add(cNew);
 				boolean equal = cNew.equals(cOrig);
@@ -102,7 +102,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName) {
 		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
 		for(DBIdentifiable cOrig: listOrig) {
-			DBIdentifiable cNew = DBIdentifiable.getDBIdentifiableByName(listNew, cOrig.getName());
+			DBIdentifiable cNew = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType4Diff(cOrig), cOrig.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {

@@ -34,7 +34,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 			case DROP:
 				colChange = "DROP COLUMN "+column.getName(); break;
 		}
-		return "ALTER TABLE "+name+" "+colChange;
+		return "ALTER TABLE "+(schemaName!=null?schemaName+".":"")+name+" "+colChange;
 	}
 
 	@Override
