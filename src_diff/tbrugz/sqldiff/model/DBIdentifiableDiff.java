@@ -8,6 +8,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -38,7 +39,6 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 			case ADD: return (ownerTableName!=null?"alter table "+ownerTableName+" ADD ":"")+ident.getDefinition(true).trim();
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			//case DROP: return table!=null?"alter table "+table+" add ":ident.getDefinition(true);
 			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"DROP "+getType4Diff(ident)+" "+ident.getName();
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBId.getDiff()");
@@ -51,11 +51,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		if(ident instanceof FK) { return DBObjectType.FK; }
 		//Grant?
 		if(ident instanceof Index) { return DBObjectType.INDEX; }
-		//Sequence
+		if(ident instanceof Sequence) { return DBObjectType.SEQUENCE; }
 		if(ident instanceof Synonym) { return DBObjectType.SYNONYM; }
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
 		if(ident instanceof View) { return DBObjectType.VIEW; }
-		throw new RuntimeException("getType4Diff: DBObjectType not defined for: "+ident.getClass().getName());
+		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 
 	static DBObjectType getType4Diff(DBIdentifiable ident) {

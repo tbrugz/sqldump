@@ -14,12 +14,17 @@ public class Index extends DBObject {
 	public String tableName;
 	public List<String> columns = new ArrayList<String>();
 	
-    @Override
-    public String getDefinition(boolean dumpSchemaName) {
-    	return "create "+(unique?"unique ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
-    		+" ("+Utils.join(columns, ", ")+")";
-    }
-
+	@Override
+	public String getDefinition(boolean dumpSchemaName) {
+		return "create "+(unique?"unique ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
+			+" ("+Utils.join(columns, ", ")+")";
+	}
+	
+	@Override
+	public String toString() {
+		return "[Index:"+schemaName+"."+name+":t:"+tableName+",u?"+unique+",c:"+columns+"]";
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

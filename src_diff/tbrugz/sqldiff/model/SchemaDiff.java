@@ -107,7 +107,8 @@ public class SchemaDiff implements Diff {
 		//Indexes
 		TableDiff.diffs(DBObjectType.INDEX, diff.dbidDiffs, modelOrig.getIndexes(), modelNew.getIndexes());
 
-		//TODO: sequences
+		//Sequences
+		TableDiff.diffs(DBObjectType.SEQUENCE, diff.dbidDiffs, modelOrig.getSequences(), modelNew.getSequences());
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);

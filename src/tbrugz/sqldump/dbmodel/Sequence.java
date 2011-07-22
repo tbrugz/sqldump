@@ -14,10 +14,34 @@ public class Sequence extends DBObject {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-    	return "create sequence "+(dumpSchemaName?schemaName+".":"")+name
-    		+" minvalue "+minValue
-    		+(dumpStartWith?" start with "+lastNumber:"")
-    		+" increment by "+incrementBy;
+		return "create sequence "+(dumpSchemaName?schemaName+".":"")+name
+			+" minvalue "+minValue
+			+(dumpStartWith?" start with "+lastNumber:"")
+			+" increment by "+incrementBy;
+	}
+	
+	@Override
+	public String toString() {
+		return "[Sequence:"+schemaName+"."+name+";min:"+minValue+",max:"+maxValue+"]";
 	}
 
+	//XXX: do not use lastNumber
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Sequence other = (Sequence) obj;
+		if (incrementBy != other.incrementBy)
+			return false;
+		if (maxValue != other.maxValue)
+			return false;
+		if (minValue != other.minValue)
+			return false;
+		return true;
+	}
+	
 }
