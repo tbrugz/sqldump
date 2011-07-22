@@ -7,6 +7,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
@@ -49,7 +50,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		//ExecutableObject
 		if(ident instanceof FK) { return DBObjectType.FK; }
 		//Grant?
-		//Index
+		if(ident instanceof Index) { return DBObjectType.INDEX; }
 		//Sequence
 		if(ident instanceof Synonym) { return DBObjectType.SYNONYM; }
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }

@@ -104,7 +104,10 @@ public class SchemaDiff implements Diff {
 		//FIXME: doesn't detect schemaName changes
 		TableDiff.diffs(DBObjectType.SYNONYM, diff.dbidDiffs, modelOrig.getSynonyms(), modelNew.getSynonyms());
 		
-		//TODO: indexes, sequences
+		//Indexes
+		TableDiff.diffs(DBObjectType.INDEX, diff.dbidDiffs, modelOrig.getIndexes(), modelNew.getIndexes());
+
+		//TODO: sequences
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);

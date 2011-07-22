@@ -20,4 +20,28 @@ public class Index extends DBObject {
     		+" ("+Utils.join(columns, ", ")+")";
     }
 
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Index other = (Index) obj;
+		if (columns == null) {
+			if (other.columns != null)
+				return false;
+		} else if (!columns.equals(other.columns))
+			return false;
+		if (tableName == null) {
+			if (other.tableName != null)
+				return false;
+		} else if (!tableName.equals(other.tableName))
+			return false;
+		if (unique != other.unique)
+			return false;
+		return true;
+	}
+
 }
