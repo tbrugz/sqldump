@@ -63,4 +63,22 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 		}
 		return null;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DBObject other = (DBObject) obj;
+		if (schemaName == null) {
+			if (other.schemaName != null)
+				return false;
+		} else if (!schemaName.equals(other.schemaName))
+			return false;
+		return true;
+	}
+	
 }

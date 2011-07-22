@@ -97,8 +97,14 @@ public class SchemaDiff implements Diff {
 		
 		//Triggers
 		TableDiff.diffs(DBObjectType.TRIGGER, diff.dbidDiffs, modelOrig.getTriggers(), modelNew.getTriggers());
+
+		//TODO: executables
+
+		//Synonyms
+		//FIXME: doesn't detect schemaName changes
+		TableDiff.diffs(DBObjectType.SYNONYM, diff.dbidDiffs, modelOrig.getSynonyms(), modelNew.getSynonyms());
 		
-		//TODO: executables, synonyms, indexes, sequences
+		//TODO: indexes, sequences
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		logInfo(diff);
@@ -121,6 +127,11 @@ public class SchemaDiff implements Diff {
 		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.columnDiffs).size());
 		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.columnDiffs).size());
 		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.columnDiffs).size());
+		log.info("dbIdentifiableDiffs...........: "+diff.dbidDiffs.size());
+		log.info("  add.........................: "+SQLDiff.getDiffOfType(ChangeType.ADD, diff.dbidDiffs).size());
+		log.info("  alter.......................: "+SQLDiff.getDiffOfType(ChangeType.ALTER, diff.dbidDiffs).size());
+		log.info("  rename......................: "+SQLDiff.getDiffOfType(ChangeType.RENAME, diff.dbidDiffs).size());
+		log.info("  drop........................: "+SQLDiff.getDiffOfType(ChangeType.DROP, diff.dbidDiffs).size());
 	}
 	
 	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
