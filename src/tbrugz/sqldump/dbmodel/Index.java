@@ -17,7 +17,7 @@ public class Index extends DBObject {
     @Override
     public String getDefinition(boolean dumpSchemaName) {
     	return "create "+(unique?"unique ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
-    		+" ("+Utils.join(columns, ", ")+");";
+    		+" ("+Utils.join(columns, ", ")+")";
     }
 
 }

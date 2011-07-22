@@ -132,15 +132,15 @@ public class SchemaDiff implements Diff {
 		StringBuffer sb = new StringBuffer();
 		//tables
 		for(TableDiff td: tableDiffs) {
-			sb.append(td.getDiff()+"\n");
+			sb.append(td.getDiff()+";\n\n");
 		}
 		//columns
 		for(TableColumnDiff tcd: columnDiffs) {
-			sb.append(tcd.getDiff()+";\n");
+			sb.append(tcd.getDiff()+";\n\n");
 		}
 		//dbidentifiable
 		for(DBIdentifiableDiff dbdiff: dbidDiffs) {
-			sb.append(dbdiff.getDiff()+";\n");
+			sb.append(dbdiff.getDiff()+";\n\n");
 		}
 		return sb.toString();
 	}
@@ -152,7 +152,7 @@ public class SchemaDiff implements Diff {
 
 	@Override
 	public ChangeType getChangeType() {
-		return null; //XXX: SchemaDiffType?
+		return null; //XXX: SchemaDiff.ChangeType?
 	}
 
 }

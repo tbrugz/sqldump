@@ -7,6 +7,7 @@ import java.util.TreeSet;
 import tbrugz.sqldump.Utils;
 
 //XXX~: extends DBObject?
+//XXX: should be constraint?
 public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	private static final long serialVersionUID = 1L;
 	//String name;

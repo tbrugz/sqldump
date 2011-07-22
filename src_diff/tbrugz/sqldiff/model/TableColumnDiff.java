@@ -39,7 +39,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return "ALTER TABLE "+(dumpSchemaName?schemaName+".":"")+name
-				+getDiff()+";";
+				+getDiff();
 	}
 	
 	/*public static List<TableColumnDiff> tableDiffs(Table origTable, Table newTable) {

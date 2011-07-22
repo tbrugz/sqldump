@@ -14,7 +14,7 @@ public class Table extends DBObject {
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
-	String pkConstraintName;
+	String pkConstraintName; //XXX: transient?
 	List<Constraint> constraints = new ArrayList<Constraint>();
 	
 	public Column getColumn(String name) {
@@ -104,10 +104,8 @@ public class Table extends DBObject {
 		
 		//Table end
 		sb.delete(sb.length()-2, sb.length());
-		//sb.append("\n);\n");
 		sb.append("\n)");
 		sb.append(getTableFooter4sql());
-		sb.append(";\n");
 		return sb.toString();
 	}
 

@@ -149,41 +149,16 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId);
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
-		//StringBuffer sb = new StringBuffer();
 		for(Table table: schemaModel.tables) {
 			switch(table.getType()) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 			}
-			//sb.setLength(0);
-			//List<String> pkCols = new ArrayList<String>();
 			
-			/*
-			//Table
-			sb.append("--drop table "+tableName+";\n");
-			sb.append("create table "+tableName+" ( -- type="+table.type+"\n");
-			//Columns
-			for(Column c: table.columns) {
-				String colDesc = Column.getColumnDesc(c, columnTypeMapping, fromDbId, toDbId);
-				if(c.pk) { pkCols.add(c.name); }
-				sb.append("\t"+colDesc+",\n");
-			}
-			//PKs
-			if(doSchemaDumpPKs && pkCols.size()>0) {
-				sb.append("\tconstraint "+table.pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
-			}
-			//FKs?
-			if(dumpFKsInsideTable) {
-				sb.append(dumpFKsInsideTable(schemaModel.foreignKeys, table.schemaName, table.name));
-			}
-			//Table end
-			sb.delete(sb.length()-2, sb.length());
-			sb.append("\n);\n");
-			*/
+			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys)+";\n");
 			
-			//sb.append(table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys));
-			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys));
-			//categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, sb.toString());
+			//table end: ';'
+			//categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, ";\n");
 
 			//FK outside table, with referencing table
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
@@ -200,7 +175,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				for(Index idx: schemaModel.indexes) {
 					//option for index output inside table
 					if(table.name.equals(idx.tableName)) {
-						categorizedOut(idx.schemaName, idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+"\n");
+						categorizedOut(idx.schemaName, idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+";\n");
 					}
 				}
 			}
@@ -233,7 +208,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		//Views
 		for(View v: schemaModel.views) {
-			categorizedOut(v.schemaName, v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+"\n");
+			categorizedOut(v.schemaName, v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Triggers
@@ -253,13 +228,13 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 		//Synonyms
 		for(Synonym s: schemaModel.synonyms) {
-			categorizedOut(s.schemaName, s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+"\n");
+			categorizedOut(s.schemaName, s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Indexes
 		if(!dumpIndexesWithReferencingTable) {
 			for(Index idx: schemaModel.indexes) {
-				categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+"\n");
+				categorizedOut(idx.schemaName, idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+";\n");
 			}
 		}
 		
@@ -276,7 +251,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 		//Sequences
 		for(Sequence s: schemaModel.sequences) {
-			categorizedOut(s.schemaName, s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+"\n");
+			categorizedOut(s.schemaName, s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		log.info("...schema dumped");

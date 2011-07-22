@@ -5,7 +5,7 @@ public class View extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create view "+(dumpSchemaName && schemaName!=null?schemaName+".":"")+name+" as \n"+query+";";
+		return "create view "+(dumpSchemaName && schemaName!=null?schemaName+".":"")+name+" as \n"+query;
 	}
 	
 	@Override

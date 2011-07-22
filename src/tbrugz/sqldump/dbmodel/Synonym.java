@@ -10,6 +10,6 @@ public class Synonym extends DBObject {
 	public String getDefinition(boolean dumpSchemaName) {
 		return "create "+(publik?"public ":"")+"synonym "+(dumpSchemaName?schemaName+".":"")+name
 			+" for "+objectOwner+"."+referencedObject
-			+(dbLink!=null?"@"+dbLink:"")+";";
+			+(dbLink!=null?"@"+dbLink:"");
 	}
 }

@@ -34,7 +34,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	@Override
 	public String getDiff() {
 		switch(changeType) {
-			case ADD: return (tableName!=null?"alter table "+tableName+" ADD ":"")+ident.getDefinition(true);
+			case ADD: return (tableName!=null?"alter table "+tableName+" ADD ":"")+ident.getDefinition(true).trim();
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
 			//case DROP: return table!=null?"alter table "+table+" add ":ident.getDefinition(true);

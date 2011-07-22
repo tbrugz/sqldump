@@ -17,8 +17,7 @@ public class Sequence extends DBObject {
     	return "create sequence "+(dumpSchemaName?schemaName+".":"")+name
     		+" minvalue "+minValue
     		+(dumpStartWith?" start with "+lastNumber:"")
-    		+" increment by "+incrementBy
-    		+";";
+    		+" increment by "+incrementBy;
 	}
 
 }
