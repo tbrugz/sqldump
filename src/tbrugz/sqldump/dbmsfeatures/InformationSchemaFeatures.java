@@ -60,7 +60,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
-		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		log.info(count+" views grabbed");
 	}
 
 	String grabDBTriggersQuery() {
@@ -78,7 +78,6 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
-			//InformationSchemaTrigger t = (InformationSchemaTrigger) findTrigger(model.getTriggers(), rs.getString(3));
 			String schemaName = rs.getString(2);
 			String name = rs.getString(3);
 			InformationSchemaTrigger t = (InformationSchemaTrigger) DBObject.findDBObjectBySchemaAndName(model.getTriggers(), schemaName, name);
@@ -92,8 +91,6 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			t.name = name;
 			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
-			//t.description = rs.getString(4);
-			//t.body = rs.getString(7);
 			t.actionStatement = rs.getString(7);
 			t.actionOrientation = rs.getString(8);
 			t.conditionTiming = rs.getString(9);
@@ -101,13 +98,6 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		log.info(count+" triggers grabbed");
 	}
-	
-	/*static Trigger findTrigger(Set<Trigger> triggers, String name) {
-		for(Trigger t: triggers) {
-			if(t.name.equals(name)) return t;
-		}
-		return null;
-	}*/
 
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
