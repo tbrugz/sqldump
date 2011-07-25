@@ -154,6 +154,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
 					table.getColumns().add(c);
+					dbmsfeatures.addColumnSpecificFeatures(c, cols);
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
 				cols.close();
@@ -196,7 +197,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
-				//sqle.printStackTrace();
+				log.debug("exception in table: "+tableName+" ["+sqle.getMessage()+"]", sqle);
 				tableNamesForDataDump.remove(tableName);
 			}
 			

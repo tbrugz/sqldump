@@ -18,6 +18,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	public Integer decimalDigits;
 	public boolean pk; //XXX: should be transient? add PK info into constraint?
 	public boolean nullable;
+	String defaultValue;
 	
 	static Properties typeMapping = null;
 	{
@@ -60,6 +61,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		}
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
+			+(c.defaultValue!=null?" default "+c.defaultValue:"")
 			+(!c.nullable?" not null":"");
 	}
 	
@@ -69,7 +71,8 @@ public class Column extends DBIdentifiable implements Serializable {
 
 	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c, Properties typeMapping) {
-		String colType = c.type;
+		return getColumnDesc(c, typeMapping, null, null);
+		/*String colType = c.type;
 		
 		boolean usePrecision = true;
 		if(typeMapping!=null) {
@@ -78,7 +81,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
-			+(!c.nullable?" not null":"");
+			+(!c.nullable?" not null":"");*/
 	}
 	
 	@Override
@@ -86,12 +89,21 @@ public class Column extends DBIdentifiable implements Serializable {
 		if(obj instanceof Column) {
 			Column c = (Column) obj;
 			return name.equals(c.name) && type.equals(c.type) && (columSize==c.columSize) 
-					&& (decimalDigits!=null?decimalDigits.equals(decimalDigits):c.decimalDigits==null) 
+					&& (decimalDigits!=null?decimalDigits.equals(c.decimalDigits):c.decimalDigits==null) 
+					&& (defaultValue!=null?defaultValue.equals(c.defaultValue):c.defaultValue==null) 
 					&& (pk==c.pk) && (nullable==c.nullable);
 		}
 		return false;
 	}
 	
+	public String getDefaultValue() {
+		return defaultValue;
+	}
+
+	public void setDefaultValue(String defaultValue) {
+		this.defaultValue = defaultValue;
+	}
+
 	@Override
 	public String toString() {
 		return "[column:"+getColumnDesc(this)+"]";

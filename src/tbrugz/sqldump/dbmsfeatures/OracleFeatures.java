@@ -262,6 +262,19 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			log.warn("Table "+t+" should be instance of OracleTable");
 		}
 	}
+	
+	@Override
+	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
+		String dataDefault;
+		try {
+			dataDefault = rs.getString("DATA_DEFAULT");
+			if(dataDefault!=null) {
+				c.setDefaultValue(dataDefault.trim());
+			}
+		} catch (SQLException e) {
+			log.warn("resultset has no 'DATA_DEFAULT' column [c: "+c+"]");
+		}
+	}
 
 	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing constraints");

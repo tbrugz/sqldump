@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 public interface DBMSFeatures {
@@ -16,6 +17,7 @@ public interface DBMSFeatures {
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
 	void addTableSpecificFeatures(Table t, ResultSet rs);
+	void addColumnSpecificFeatures(Column c, ResultSet rs);
 	Table getTableObject();
 	//XXX: should DBMS's Features return getDefaultDateFormat?
 }

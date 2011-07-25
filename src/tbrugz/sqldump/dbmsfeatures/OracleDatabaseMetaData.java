@@ -47,6 +47,33 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			}
 			sql += " TABLE_NAME = '"+tableNamePattern+"' ";
 		}
+		sql += "order by TABLE_SCHEM, TABLE_NAME";
+		Statement st = conn.createStatement();
+		log.debug("sql:\n"+sql);
+		return st.executeQuery(sql);
+	}
+	
+	@Override
+	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+			throws SQLException {
+		Connection conn = metadata.getConnection();
+		String sql = "select * from (";
+		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, COLUMN_NAME, data_type as TYPE_NAME, "
+				+"nvl(data_precision, data_length) as COLUMN_SIZE, data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, DATA_DEFAULT, COLUMN_ID as ORDINAL_POSITION "
+				+"from all_tab_columns ) ";
+		if(schemaPattern!=null) {
+			sql += "where TABLE_SCHEM = '"+schemaPattern+"' ";
+		}
+		if(tableNamePattern!=null) {
+			if(schemaPattern!=null) {
+				sql += "and ";
+			}
+			else {
+				sql += "where ";
+			}
+			sql += " TABLE_NAME = '"+tableNamePattern+"' ";
+		}
+		sql += "order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION ";
 		Statement st = conn.createStatement();
 		log.debug("sql:\n"+sql);
 		return st.executeQuery(sql);

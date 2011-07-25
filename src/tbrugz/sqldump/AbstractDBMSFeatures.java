@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 public abstract class AbstractDBMSFeatures implements DBMSFeatures {
@@ -12,5 +13,8 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 
 	public void addTableSpecificFeatures(Table t, ResultSet rs) {
+	}
+
+	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
 	}
 }
