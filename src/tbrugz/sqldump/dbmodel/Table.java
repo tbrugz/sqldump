@@ -129,6 +129,10 @@ public class Table extends DBObject {
 		return "";
 	}
 	
+	public String getAfterCreateTableScript() {
+		return ""; //"" or null
+	}
+	
 	//---------
 	
 	public TableType getType() {

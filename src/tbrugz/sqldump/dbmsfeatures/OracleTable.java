@@ -1,5 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 //TODO: property for selecting dump (true/false) of extra fields on script output?
@@ -18,5 +19,19 @@ public class OracleTable extends Table {
 		String footer = tableSpace!=null?"\nTABLESPACE "+tableSpace:"";
 		footer += logging?"\nLOGGING":"";
 		return footer; 
+	}
+	
+	@Override
+	public String getAfterCreateTableScript() {
+		//COMMENT ON COLUMN [schema.]table.column IS 'text'
+		StringBuffer sb = new StringBuffer();
+		for(Column c: getColumns()) {
+			String comment = c.getComment();
+			if(comment!=null && !comment.trim().equals("")) {
+				//XXX: escape comment?
+				sb.append("comment on column "+schemaName+"."+name+"."+c.name+" is '"+comment+"';\n");
+			}
+		}
+		return sb.toString();
 	}
 }

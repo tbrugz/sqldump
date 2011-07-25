@@ -156,6 +156,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			}
 			
 			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys)+";\n");
+			String afterTableScript = table.getAfterCreateTableScript();
+			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
+				categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, afterTableScript);
+			}
 			
 			//table end: ';'
 			//categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, ";\n");
@@ -330,6 +334,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			}
 		}
 		FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
+		//XXX: remove '\n'?
 		fos.write(message+"\n");
 		fos.close();
 	}

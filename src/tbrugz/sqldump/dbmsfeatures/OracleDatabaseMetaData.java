@@ -58,9 +58,12 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			throws SQLException {
 		Connection conn = metadata.getConnection();
 		String sql = "select * from (";
-		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, COLUMN_NAME, data_type as TYPE_NAME, "
-				+"nvl(data_precision, data_length) as COLUMN_SIZE, data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, DATA_DEFAULT, COLUMN_ID as ORDINAL_POSITION "
-				+"from all_tab_columns ) ";
+		sql += "select '' as TABLE_CAT, col.owner as TABLE_SCHEM, col.TABLE_NAME, col.COLUMN_NAME, data_type as TYPE_NAME, "
+				+"nvl(data_precision, data_length) as COLUMN_SIZE, data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, "
+				+"DATA_DEFAULT, COLUMN_ID as ORDINAL_POSITION, comments "
+				+"from all_tab_columns col, all_col_comments com "
+				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
+				+") ";
 		if(schemaPattern!=null) {
 			sql += "where TABLE_SCHEM = '"+schemaPattern+"' ";
 		}
