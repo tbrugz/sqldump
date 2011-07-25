@@ -13,6 +13,7 @@ import tbrugz.sqldump.AbstractDBMSFeatures;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -270,7 +271,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"from all_constraints "
 				+"where owner = '"+schemaPattern+"' "
 				+"and constraint_type = 'C' "
-				+"order by owner, table_name ";
+				+"order by owner, table_name, constraint_name ";
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
@@ -299,12 +300,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info(count+" check constraints grabbed");
 
 		//unique constraints
-		query = "select distinct al.owner, al.table_name, al.constraint_name, column_name "
+		query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
 				+"from all_constraints al, all_cons_columns acc "
 				+"where al.constraint_name = acc.constraint_name "
 				+"and al.owner = '"+schemaPattern+"' "
 				+"and constraint_type = 'U' "
-				+"order by owner, table_name, constraint_name ";
+				+"order by owner, table_name, constraint_name, position, column_name ";
 		st = conn.createStatement();
 		log.debug("sql: "+query);
 		rs = st.executeQuery(query);

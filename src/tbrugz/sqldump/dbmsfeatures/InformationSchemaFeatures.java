@@ -165,7 +165,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
-				+"order by constraint_name ";
+				+"order by table_name, constraint_name ";
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
@@ -196,7 +196,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
 				+"and constraint_type = 'UNIQUE' "
-				+"order by table_name, constraint_name ";
+				+"order by table_name, constraint_name, column_name ";
 		st = conn.createStatement();
 		log.debug("sql: "+query);
 		rs = st.executeQuery(query);
