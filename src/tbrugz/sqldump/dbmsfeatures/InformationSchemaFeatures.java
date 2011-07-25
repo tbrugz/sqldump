@@ -63,12 +63,17 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
+	String grabDBTriggersQuery() {
+		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, condition_timing "
+			+"from information_schema.triggers "
+			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
+	}
+	
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, condition_timing "
-				+"from information_schema.triggers "
-				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
+		String query = grabDBTriggersQuery();
 		Statement st = conn.createStatement();
+		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
