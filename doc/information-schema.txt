@@ -1,5 +1,14 @@
 http://en.wikipedia.org/wiki/Information_schema
 
+http://www.xcdsql.org/Misc/MySQL_INFORMATION_SCHEMA.html
+
+http://www.petefreitag.com/item/666.cfm
+
+mysql:
+http://dev.mysql.com/doc/refman/5.1/en/information-schema.html
+
+---
+
 select * from information_schema.check_constraints  
 
 select * from information_schema.tables

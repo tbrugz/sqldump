@@ -190,6 +190,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
 					indexesrs.close();
 				}
+				
+				tableNamesForDataDump.add(tableName);
 			}
 			catch(OutOfMemoryError oome) {
 				log.warn("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
@@ -198,12 +200,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
 				log.debug("exception in table: "+tableName+" ["+sqle.getMessage()+"]", sqle);
-				tableNamesForDataDump.remove(tableName);
+				//tableNamesForDataDump.remove(tableName);
 			}
 			
 			table.validateConstraints();
 
-			tableNamesForDataDump.add(tableName);
 			schemaModel.tables.add(table);
 		}
 		rs.close();

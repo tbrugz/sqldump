@@ -145,8 +145,8 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		log.debug("props->"+columnTypeMapping);
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		colTypeConversionProp.putAll(columnTypeMapping);
-		colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId);
-		colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId);
+		if(fromDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId ); }
+		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
 		for(Table table: schemaModel.tables) {

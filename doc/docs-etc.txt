@@ -23,7 +23,68 @@ ms access table types: SYSTEM TABLE | TABLE
  * Problem with getImportedKeys / getExportedKeys
  * http://archives.postgresql.org/pgsql-jdbc/2002-01/msg00133.php
 
+Database Access Through JDBC:
+http://oreilly.com/catalog/javadata/chapter/ch04.html
 
+
+==============
+TODO:
+- erros jdbc postgresql
+- criar driver jdbc para access (usando Jackess) 
+
+==============
+constraints:
+check, not null, unique 
+pk, fk
+
+http://www.w3schools.com/sql/sql_constraints.asp
+x   NOT NULL (Column)
+x   UNIQUE (Constraint)
+x   PRIMARY KEY (Constraint? Column?)
+x   FOREIGN KEY (FK)
+x   CHECK (Constraint)
+x   DEFAULT (Column)
+
+
+http://www.w3schools.com/sql/sql_unique.asp
+	The UNIQUE and PRIMARY KEY constraints both provide a guarantee for uniqueness for a column or set of columns.
+	A PRIMARY KEY constraint automatically has a UNIQUE constraint defined on it.
+	Note that you can have many UNIQUE constraints per table, but only one PRIMARY KEY constraint per table.
+
+	CREATE TABLE Persons
+	(
+	P_Id int NOT NULL,
+	LastName varchar(255) NOT NULL,
+	FirstName varchar(255),
+	Address varchar(255),
+	City varchar(255),
+	CONSTRAINT uc_PersonID UNIQUE (P_Id,LastName)
+	)
+
+	MySQL / SQL Server / Oracle / MS Access:
+	ALTER TABLE Persons
+	ADD CONSTRAINT uc_PersonID UNIQUE (P_Id,LastName)
+	
+	ALTER TABLE Persons
+	ADD CONSTRAINT pk_PersonID PRIMARY KEY (P_Id,LastName)
+
+http://www.w3schools.com/sql/sql_check.asp
+	CONSTRAINT chk_Person CHECK (P_Id>0 AND City='Sandnes')
+	
+	ALTER TABLE Persons
+	ADD CONSTRAINT chk_Person CHECK (P_Id>0 AND City='Sandnes')
+
+http://www.w3schools.com/sql/sql_default.asp
+	The DEFAULT constraint is used to insert a default value into a column.
+	CREATE TABLE Persons
+	(
+	P_Id int NOT NULL,
+	LastName varchar(255) NOT NULL,
+	FirstName varchar(255),
+	Address varchar(255),
+	City varchar(255) DEFAULT 'Sandnes'
+	)
+	
 ==============
 select distinct OBJECT_TYPE from all_objects order by object_type
 

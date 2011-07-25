@@ -29,7 +29,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXxx: derby specific features?
  * TODOne: grab specific table info (Oracle)
  * TODOne: grab constraints: ~UNIQUE, ~CHECK, xPK, xFK, xNOT NULL ; UNIQUE & CHECK for Oracle!
- * XXX: DEFAULT & COMMENT/REMARKS for columns (& tables?)
+ * XXXdone: DEFAULT for columns 
+ * XXX: COMMENT/REMARKS for columns (& tables?)
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
