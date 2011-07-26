@@ -24,6 +24,7 @@ import tbrugz.xml.AbstractDump;
 /*
  * XXX: show PK columns, FK columns, constraints?
  * TODO: stereotype may include 'otherschema' or object type (table, view, synonym, temporary table, external table)
+ * XXX: color by row count? height by col size?
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	

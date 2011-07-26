@@ -102,7 +102,9 @@ public class Utils {
 	*/
 	
 	public static boolean getPropBool(Properties prop, String key) {
-		return "true".equals(prop.getProperty(key));
+		String value = prop.getProperty(key);
+		if(value==null) { return false; }
+		return "true".equals(value.trim());
 	}
 	
 	public static Long getPropLong(Properties prop, String key) {
