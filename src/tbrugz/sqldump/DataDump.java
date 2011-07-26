@@ -103,6 +103,7 @@ public class DataDump {
 		for(String table: tableNamesForDataDump) {
 			if(tables4dump!=null) {
 				if(!tables4dump.contains(table)) { continue; }
+				else { tables4dump.remove(table); }
 			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
@@ -155,6 +156,9 @@ public class DataDump {
 			fos.close();
 		}
 		
+		if(tables4dump.size()>0) {
+			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
+		}
 	}
 
 	void dumpDataInsertIntoSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
@@ -166,6 +170,7 @@ public class DataDump {
 		for(String table: tableNamesForDataDump) {
 			if(tables4dump!=null) {
 				if(!tables4dump.contains(table)) { continue; }
+				else { tables4dump.remove(table); }
 			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
@@ -233,6 +238,9 @@ public class DataDump {
 			fos.close();
 		}
 		
+		if(tables4dump.size()>0) {
+			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
+		}
 	}
 
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
