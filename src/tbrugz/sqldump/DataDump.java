@@ -10,12 +10,16 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.Table;
 
 /*
  * TODOne: prop for selecting which tables to dump data from
@@ -38,6 +42,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
+	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -57,7 +62,7 @@ public class DataDump {
 	
 	static Logger log = Logger.getLogger(DataDump.class);
 	
-	void dumpData(Connection conn, List<String> tableNamesForDataDump, Properties prop) throws Exception {
+	void dumpData(Connection conn, Collection<Table> tableNamesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
 		Long globalRowlimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
@@ -77,12 +82,13 @@ public class DataDump {
 
 	Set<String> filesOpened = new HashSet<String>();
 	
-	void dumpDataRawSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
+	void dumpDataRawSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		String columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		boolean doTableNameHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_TABLENAMEHEADER, "false"));
 		boolean doColumnNamesHeaderDump = "true".equals(prop.getProperty(PROP_DATADUMP_COLUMNNAMESHEADER, "false"));
+		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK);
 
 		List<String> tables4dump = getTables4dump(prop);
 		
@@ -100,15 +106,16 @@ public class DataDump {
 		 *  
 		 */
 		
-		for(String table: tableNamesForDataDump) {
+		for(Table table: tablesForDataDump) {
+			String tableName = table.name;
 			if(tables4dump!=null) {
-				if(!tables4dump.contains(table)) { continue; }
-				else { tables4dump.remove(table); }
+				if(!tables4dump.contains(tableName)) { continue; }
+				else { tables4dump.remove(tableName); }
 			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
+			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
+			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
 			boolean alreadyOpened = filesOpened.contains(filename);
@@ -117,14 +124,23 @@ public class DataDump {
 			//if already opened, append; if not, create
 			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
 			
-			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
-			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
+			String whereClause = prop.getProperty("sqldump.datadump."+tableName+".where");
+			String selectColumns = prop.getProperty("sqldump.datadump."+tableName+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
-			String orderClause = prop.getProperty("sqldump.datadump."+table+".order");
+			String orderClause = prop.getProperty("sqldump.datadump."+tableName+".order");
+			if(orderClause==null && orderByPK) { 
+				Constraint ctt = table.getPKConstraint();
+				if(ctt!=null) {
+					orderClause = Utils.join(ctt.uniqueColumns, ", ");
+				}
+				else {
+					log.warn("table '"+tableName+"' has no PK for datadump ordering");
+				}
+			}
 
-			log.info("dumping data from table: "+table);
+			log.info("dumping data from table: "+tableName);
 			Statement st = conn.createStatement();
-			String sql = "select "+selectColumns+" from \""+table+"\""
+			String sql = "select "+selectColumns+" from \""+tableName+"\""
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			ResultSet rs = st.executeQuery(sql);
@@ -133,7 +149,7 @@ public class DataDump {
 
 			//headers
 			if(doTableNameHeaderDump) {
-				out("[table "+table+"]", fos, recordDelimiter);
+				out("[table "+tableName+"]", fos, recordDelimiter);
 			}
 			if(doColumnNamesHeaderDump) {
 				StringBuffer sb = new StringBuffer();
@@ -145,11 +161,11 @@ public class DataDump {
 			
 			int count = 0;
 			while(rs.next()) {
-				out(SQLUtils.getRowFromRS(rs, numCol, table, columnDelimiter), fos, recordDelimiter);
+				out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
 				count++;
 				if(rowlimit<=count) { break; }
 			}
-			log.info("dumped "+count+" rows from table: "+table);
+			log.info("dumped "+count+" rows from table: "+tableName);
 
 			rs.close();
 			
@@ -161,31 +177,42 @@ public class DataDump {
 		}
 	}
 
-	void dumpDataInsertIntoSyntax(Connection conn, List<String> tableNamesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
+	void dumpDataInsertIntoSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		List<String> tables4dump = getTables4dump(prop);
 		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
+		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK);
 		
-		for(String table: tableNamesForDataDump) {
+		for(Table table: tablesForDataDump) {
+			String tableName = table.name;
 			if(tables4dump!=null) {
-				if(!tables4dump.contains(table)) { continue; }
-				else { tables4dump.remove(table); }
+				if(!tables4dump.contains(tableName)) { continue; }
+				else { tables4dump.remove(tableName); }
 			}
 			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, table);
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+table+".rowlimit");
+			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
-			String whereClause = prop.getProperty("sqldump.datadump."+table+".where");
-			String selectColumns = prop.getProperty("sqldump.datadump."+table+".columns");
+			String whereClause = prop.getProperty("sqldump.datadump."+tableName+".where");
+			String selectColumns = prop.getProperty("sqldump.datadump."+tableName+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
-			String orderClause = prop.getProperty("sqldump.datadump."+table+".order");
+			String orderClause = prop.getProperty("sqldump.datadump."+tableName+".order");
+			if(orderClause==null && orderByPK) { 
+				Constraint ctt = table.getPKConstraint();
+				if(ctt!=null) {
+					orderClause = Utils.join(ctt.uniqueColumns, ", ");
+				}
+				else {
+					log.warn("table '"+tableName+"' has no PK for datadump ordering");
+				}
+			}
 
-			log.debug("dumping data/inserts from table: "+table);
+			log.debug("dumping data/inserts from table: "+tableName);
 			Statement st = conn.createStatement();
 			//st.setFetchSize(20);
-			String sql = "select "+selectColumns+" from \""+table+"\""
+			String sql = "select "+selectColumns+" from \""+tableName+"\""
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
@@ -224,7 +251,7 @@ public class DataDump {
 			int count = 0;
 			do {
 				List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-				out("insert into "+table+" "+
+				out("insert into "+tableName+" "+
 					colNames+"values ("+
 					Utils.join4sql(vals, ", ")+");", fos, "\n");
 					//Utils.join4sql(vals, ", ", "'", true)+");", fos, "\n");
@@ -232,7 +259,7 @@ public class DataDump {
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
-			log.info("dumped "+count+" rows from table: "+table);
+			log.info("dumped "+count+" rows from table: "+tableName);
 			
 			rs.close();
 			fos.close();

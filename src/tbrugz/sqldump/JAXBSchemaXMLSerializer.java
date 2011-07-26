@@ -10,6 +10,8 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.Table;
+
 public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGrabber {
 
 	static Logger log = Logger.getLogger(JAXBSchemaXMLSerializer.class);
@@ -59,7 +61,12 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		}
 		
 		Unmarshaller u = jc.createUnmarshaller();
-		return (SchemaModel) u.unmarshal(new File(fileInput));
+		SchemaModel sm = (SchemaModel) u.unmarshal(new File(fileInput));
+		//use Unmarshaller.afterUnmarshal()?
+		for(Table t: sm.getTables()) {
+			t.validateConstraints();
+		}
+		return sm;
 	}
 
 }

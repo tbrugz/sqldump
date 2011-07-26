@@ -17,7 +17,8 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 		public String fullName() {
 			switch (this) {
 				case PK:
-					return "PRIMARY KEY";
+					//return "PRIMARY KEY";
+					return "primary key";
 				case CHECK:
 				case UNIQUE:
 				default:
@@ -52,6 +53,7 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 	
 	@Override
 	public String toString() {
+		//return getDefinition(false);
 		return "["+type+":"+name+"]";
 	}
 	

@@ -6,16 +6,21 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlTransient;
+
+import org.apache.log4j.Logger;
+
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class Table extends DBObject {
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
-	String pkConstraintName; //XXX: transient?
+	transient String pkConstraintName; //XXX: transient?
 	List<Constraint> constraints = new ArrayList<Constraint>();
+	
+	static Logger log = Logger.getLogger(Table.class);
 	
 	public Column getColumn(String name) {
 		if(name==null) return null;
@@ -55,6 +60,8 @@ public class Table extends DBObject {
 		cPK.type = ConstraintType.PK;
 		cPK.name = pkConstraintName;
 		cPK.uniqueColumns = pkCols;
+		constraints.add(cPK);
+		//log.info("table "+name+" pk: "+cPK.getDefinition(true));
 	}
 
 	@Override
@@ -64,7 +71,7 @@ public class Table extends DBObject {
 	}
 	
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, Properties colTypeConversionProp, Set<FK> foreignKeys) {
-		List<String> pkCols = new ArrayList<String>();
+		//List<String> pkCols = new ArrayList<String>();
 		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
 		
 		StringBuffer sb = new StringBuffer();
@@ -83,18 +90,24 @@ public class Table extends DBObject {
 			else {
 				colDesc = Column.getColumnDesc(c, null, null, null);
 			}
-			if(c.pk) { pkCols.add(c.name); }
+			//if(c.pk) { pkCols.add(c.name); }
 			sb.append("\t"+colDesc+",\n");
 		}
 		
 		//PKs
-		if(dumpPKs && pkCols.size()>0) {
+		/*if(dumpPKs && pkCols.size()>0) {
 			sb.append("\tconstraint "+pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
-		}
+		}*/
 		
 		//Constraints (CHECK, UNIQUE)
 		for(Constraint cons: constraints) {
-			sb.append("\t"+cons.getDefinition(false)+",\n");
+			switch(cons.type) {
+				case PK: 
+					if(!dumpPKs) break;
+				case CHECK:
+				case UNIQUE:
+					sb.append("\t"+cons.getDefinition(false)+",\n");
+			}
 		}
 		
 		//FKs?
@@ -133,6 +146,16 @@ public class Table extends DBObject {
 		return ""; //"" or null
 	}
 	
+	public Constraint getPKConstraint() {
+		//validateConstraints();
+		for(Constraint c: constraints) {
+			if(c.type.equals(ConstraintType.PK)) {
+				return c;
+			}
+		}
+		return null;
+	}
+	
 	//---------
 	
 	public TableType getType() {
@@ -160,6 +183,7 @@ public class Table extends DBObject {
 	}
 
 	//XXX: getPkConstraintName should be @XmlTransient?
+	@XmlTransient
 	public String getPkConstraintName() {
 		return pkConstraintName;
 	}

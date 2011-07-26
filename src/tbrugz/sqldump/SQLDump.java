@@ -180,7 +180,8 @@ public class SQLDump {
 		}
 		if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
 			DataDump dd = new DataDump();
-			dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
+			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
+			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);
 		}
 		
 		sdd.end();
