@@ -55,12 +55,5 @@ public class ParametrizedProperties extends Properties {
 	public void setUseSystemProperties(boolean useSystemProperties) {
 		this.useSystemProperties = useSystemProperties;
 	}
-
-	@Deprecated
-	public static void main(String[] args) throws FileNotFoundException, IOException {
-		Properties prop = new ParametrizedProperties();
-		prop.load(new FileInputStream("sqldump.properties"));
-		System.out.println("p: "+prop.getProperty("sqldump.zzz"));
-	}
 	
 }

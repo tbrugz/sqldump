@@ -48,8 +48,14 @@ sqldump.dumpwithschemaname=true
 sqldump.doschemadump.recursivedumpbasedonfks=true
 sqldump.doschemadump.recursivedumpbasedonfks.deep=true
 
+#
+# 'sqldump.fromdbid' selects which specificgrabclass to use, column type conversion, ... 
+#
 sqldump.fromdbid=oracle
 sqldump.todbid=pgsql
+# autodetect database product
+sqldump.fromdbid.autodetect=true
+
 sqldump.dumpsynonymastable=false
 sqldump.dumpviewastable=false
 

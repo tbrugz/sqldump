@@ -46,6 +46,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	public List<String> tableNamesForDataDump = new Vector<String>();
 
 	Properties papp = new ParametrizedProperties();
+	Properties propOriginal;
 	Properties columnTypeMapping = new ParametrizedProperties();
 	
 	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
@@ -55,6 +56,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	@Override
 	public void procProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
+		propOriginal = prop;
+		//papp = prop;
 		papp.putAll(prop);
 		
 		//inicializa variaveis controle
@@ -86,11 +89,20 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	@Override
 	public SchemaModel grabSchema() throws Exception {
+		if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
+			String dbid = detectDbId(conn.getMetaData());
+			if(dbid!=null) {
+				log.info("database type identifier: "+dbid);
+				papp.setProperty(SQLDump.PROP_FROM_DB_ID, dbid);
+				propOriginal.setProperty(SQLDump.PROP_FROM_DB_ID, dbid);
+			}
+			else { log.warn("can't detect database type"); }
+		}
+
 		DBMSFeatures feats = grabDbSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
+		showDBInfo(conn.getMetaData());
 		
-		showDBInfo(dbmd);
-
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, null);
 
@@ -404,6 +416,23 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(idx!=null) {
 			indexes.add(idx);
 		}
+	}
+	
+	String detectDbId(DatabaseMetaData dbmd) {
+		try {
+			String dbProdName = dbmd.getDatabaseProductName();
+			String dbIdsProp = columnTypeMapping.getProperty("dbids");
+			String[] dbIds = dbIdsProp.split(",");
+			for(String dbid: dbIds) {
+				String regex = columnTypeMapping.getProperty("dbid."+dbid.trim()+".detectregex");
+				if(regex==null) { continue; }
+				if(dbProdName.matches(regex)) { return dbid.trim(); }
+			}
+		} catch (SQLException e) {
+			log.warn("Error detecting database type: "+e);
+			log.debug("Error detecting database type",e);
+		}
+		return null;
 	}
 	
 }
