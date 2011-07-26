@@ -7,12 +7,14 @@ import java.io.*;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
 
 /*
@@ -325,35 +327,25 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 	
 	void grabSchemaPKs(ResultSet pks, Table table) throws SQLException {
-		//PKs
-		Map<String, Set<String>> tablePK = new HashMap<String, Set<String>>();
-		//ResultSet pks = dbmd.getPrimaryKeys(null, schemaPattern, tableName);
+		Map<Integer, String> pkCols = new TreeMap<Integer, String>();
+		String pkName = null;
+		
 		int count=0;
 		while(pks.next()) {
-			String pkName = pks.getString("PK_NAME");
+			pkName = pks.getString("PK_NAME");
 			if(pkName==null) {
-				pkName = "PK_"+count;
-				count++;
+				pkName = "PK_"+table.name;
 			}
-			table.setPkConstraintName(pkName);
-			Set<String> pk = tablePK.get(pkName);
-			if(pk==null) {
-				pk = new HashSet<String>(); //XXXxx: TreeSet? no need...
-				tablePK.put(pkName, pk);
-			}
-			pk.add(pks.getString("COLUMN_NAME"));
+			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
+			count++;
 		}
-		for(String key: tablePK.keySet()) {
-			for(String colName: tablePK.get(key)) {
-				if(table.getColumn(colName)==null) {
-					log.warn("column belongs to PK but not to table? "+table+"."+colName+" ["+key+"]");
-				}
-				else {
-					table.getColumn(colName).pk = true;
-				}
-			}
-		}
-		
+		if(count==0) return; //no PK
+
+		Constraint cPK = new Constraint();
+		cPK.type = ConstraintType.PK;
+		cPK.setName(pkName);
+		cPK.uniqueColumns.addAll( pkCols.values() );
+		table.getConstraints().add(cPK);
 	}
 
 	void grabSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys) throws SQLException, IOException {

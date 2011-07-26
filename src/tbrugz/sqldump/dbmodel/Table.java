@@ -17,7 +17,7 @@ public class Table extends DBObject {
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
-	transient String pkConstraintName; //XXX: transient?
+	//String pkConstraintName;
 	List<Constraint> constraints = new ArrayList<Constraint>();
 	
 	static Logger log = Logger.getLogger(Table.class);
@@ -38,7 +38,7 @@ public class Table extends DBObject {
 	}
 	
 	public void validateConstraints() {
-		boolean hasPK = false;
+		/*boolean hasPK = false;
 		for(Constraint c: constraints) {
 			if(c.type.equals(Constraint.ConstraintType.PK)) {
 				hasPK = true;
@@ -62,6 +62,7 @@ public class Table extends DBObject {
 		cPK.uniqueColumns = pkCols;
 		constraints.add(cPK);
 		//log.info("table "+name+" pk: "+cPK.getDefinition(true));
+		*/
 	}
 
 	@Override
@@ -182,6 +183,7 @@ public class Table extends DBObject {
 		this.grants = grants;
 	}
 
+	/*
 	//XXX: getPkConstraintName should be @XmlTransient?
 	@XmlTransient
 	public String getPkConstraintName() {
@@ -191,6 +193,7 @@ public class Table extends DBObject {
 	public void setPkConstraintName(String pkConstraintName) {
 		this.pkConstraintName = pkConstraintName;
 	}
+	*/
 
 	public List<Constraint> getConstraints() {
 		return constraints;
