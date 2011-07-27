@@ -117,6 +117,11 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 # connection/driver info 
 #
 
+#
+# reads password from console
+#
+sqldump.askforpassword=true
+
 # MS Access - doesn't really work (yet)
 #sqldump.driverclass=sun.jdbc.odbc.JdbcOdbcDriver
 #sqldump.dburl=jdbc:odbc:Driver={MicroSoft Access Driver (*.mdb)};DBQ=Northwind.mdb

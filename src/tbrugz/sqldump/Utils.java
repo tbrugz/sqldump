@@ -1,6 +1,9 @@
 package tbrugz.sqldump;
 
+import java.io.Console;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -8,7 +11,11 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 public class Utils {
+	
+	static Logger log = Logger.getLogger(Utils.class);
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
 	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
@@ -116,6 +123,45 @@ public class Utils {
 		catch(Exception e) {
 			return null;
 		}
+	}
+	
+	public static String readPassword(String message) {
+		Console cons = System.console();
+		//log.info("console: "+cons);
+		char[] passwd;
+		if (cons != null) {
+			System.out.print(message);
+			passwd = cons.readPassword(); //"[%s]", message
+			return new String(passwd);
+			//java.util.Arrays.fill(passwd, ' ');
+		}
+		else {
+			//XXX: System.console() doesn't work in Eclipse - https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429
+			return Utils.readPasswordIntern(message, "");
+		}
+	}
+	
+	static String readPasswordIntern(String message, String replacer) {
+		System.out.print(message);
+		StringBuffer sb = new StringBuffer();
+		InputStream is = System.in;
+		try {
+			int read = 0;
+			while((read = is.read()) != -1) {
+				if(read==13) break;
+				char c = (char) (read & 0xff);
+				sb.append(c);
+				System.out.print(replacer);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sb.toString();
+	}
+	
+	public static void main(String[] args) {
+		String s = readPasswordIntern("pass: ", "*");
+		System.out.println("s = "+s);
 	}
 	
 }

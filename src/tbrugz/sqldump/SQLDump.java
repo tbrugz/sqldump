@@ -30,7 +30,8 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: grab specific table info (Oracle)
  * TODOne: grab constraints: ~UNIQUE, ~CHECK, xPK, xFK, xNOT NULL ; UNIQUE & CHECK for Oracle!
  * XXXdone: DEFAULT for columns 
- * XXX: COMMENT/REMARKS for columns (& tables?)
+ * XXXdone: COMMENT/REMARKS for columns (Oracle) 
+ * XXX: COMMENT/REMARKS for tables
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
@@ -52,7 +53,8 @@ public class SQLDump {
 	static final String PROP_URL = "sqldump.dburl";
 	static final String PROP_USER = "sqldump.user";
 	static final String PROP_PASSWD = "sqldump.password";
-
+	static final String PROP_ASKFORPASSWD = "sqldump.askforpassword";
+		
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
@@ -103,10 +105,14 @@ public class SQLDump {
 
 		//init database
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
-
+		
 		Properties p = new Properties();
 		p.setProperty("user", papp.getProperty(PROP_USER, ""));
 		p.setProperty("password", papp.getProperty(PROP_PASSWD, ""));
+		
+		if(Utils.getPropBool(papp, PROP_ASKFORPASSWD)) {
+			p.setProperty("password", Utils.readPassword("password: "));
+		}
 
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);
 		
