@@ -2,6 +2,7 @@ package tbrugz.sqldiff.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -192,6 +193,18 @@ public class SchemaDiff implements Diff {
 		StringBuffer sb = new StringBuffer();
 		//TODO: how to order DDL changes?
 		
+		List<Diff> diffs = new ArrayList<Diff>();
+		diffs.addAll(tableDiffs);
+		diffs.addAll(columnDiffs);
+		diffs.addAll(dbidDiffs);
+		
+		Collections.sort(diffs, new DiffComparator());
+		
+		for(Diff d: diffs) {
+			sb.append(d.getDiff()+";\n\n");
+		}
+
+		/*
 		//tables
 		for(TableDiff td: tableDiffs) {
 			sb.append(td.getDiff()+";\n\n");
@@ -204,6 +217,7 @@ public class SchemaDiff implements Diff {
 		for(DBIdentifiableDiff dbdiff: dbidDiffs) {
 			sb.append(dbdiff.getDiff()+";\n\n");
 		}
+		*/
 		
 		return sb.toString();
 	}
