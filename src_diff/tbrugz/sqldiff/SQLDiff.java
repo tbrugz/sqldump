@@ -1,11 +1,14 @@
 package tbrugz.sqldiff;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelGrabber;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 
 public class SQLDiff {
 	
@@ -43,8 +46,11 @@ public class SQLDiff {
 		
 		//do diff
 		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
-		//System.out.println("diff: "+diff+"\n"+diff.getDiff());
+		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());
+		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
+		List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
+		System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
 	}
 	
 	public static void main(String[] args) throws Exception {

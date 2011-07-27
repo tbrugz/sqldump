@@ -188,18 +188,22 @@ public class SchemaDiff implements Diff {
 		return retfks;
 	}
 	
-	@Override
-	public String getDiff() {
-		StringBuffer sb = new StringBuffer();
-		//TODO: how to order DDL changes?
-		
+	List<Diff> getDiffList() {
 		List<Diff> diffs = new ArrayList<Diff>();
 		diffs.addAll(tableDiffs);
 		diffs.addAll(columnDiffs);
 		diffs.addAll(dbidDiffs);
 		
 		Collections.sort(diffs, new DiffComparator());
+		return diffs;
+	}
+	
+	@Override
+	public String getDiff() {
+		StringBuffer sb = new StringBuffer();
 		
+		List<Diff> diffs = getDiffList();
+
 		for(Diff d: diffs) {
 			sb.append(d.getDiff()+";\n\n");
 		}
@@ -222,6 +226,20 @@ public class SchemaDiff implements Diff {
 		return sb.toString();
 	}
 
+	public String getDiffByDBObjectTypes(List<DBObjectType> types) {
+		StringBuffer sb = new StringBuffer();
+		
+		List<Diff> diffs = getDiffList();
+
+		for(Diff d: diffs) {
+			if(types.contains(d.getObjectType())) {
+				sb.append(d.getDiff()+";\n\n");
+			}
+		}
+
+		return sb.toString();
+	}
+	
 	@Override
 	public String toString() {
 		return "[SchemaDiff: tables: #"+tableDiffs.size()+", cols: #"+columnDiffs.size()+", xtra: #"+dbidDiffs.size()+"]"; //XXX: A(dd), M(modified), R(emoved)
