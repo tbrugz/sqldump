@@ -187,6 +187,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" check constraints grabbed");
 
 		//unique constraints
+		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
 		query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "

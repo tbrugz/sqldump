@@ -16,7 +16,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	public String type;
 	public int columSize;
 	public Integer decimalDigits;
-	public transient boolean pk; //XXX: should be transient? add PK info into constraint?
+	transient boolean pk; //XXXdone: should be transient? add PK info into constraint? yes, yes
 	public boolean nullable;
 	String defaultValue;
 	String comment;

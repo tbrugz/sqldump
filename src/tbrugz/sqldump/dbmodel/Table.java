@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLDump;
@@ -38,31 +36,17 @@ public class Table extends DBObject {
 	}
 	
 	public void validateConstraints() {
-		/*boolean hasPK = false;
-		for(Constraint c: constraints) {
-			if(c.type.equals(Constraint.ConstraintType.PK)) {
-				hasPK = true;
-				break;
+		Constraint cPK = getPKConstraint();
+		if(cPK==null) {
+			log.debug("table "+name+" ["+type+"] has no PK");
+			return;
+		}
+		for(Column c: columns) {
+			if(cPK.uniqueColumns.contains(c.name)) {
+				c.pk = true;
+				//log.info("table "+name+" pkcol: "+c);
 			}
 		}
-		if(hasPK) { return; }
-		
-		List<String> pkCols = new ArrayList<String>(); 
-		for(Column c: columns) {
-			if(c.pk) pkCols.add(c.name);
-		}
-		if(pkCols.size()==0) {
-			//TODO: add pk = true to columns...
-			return; 
-		}
-		
-		Constraint cPK = new Constraint();
-		cPK.type = ConstraintType.PK;
-		cPK.name = pkConstraintName;
-		cPK.uniqueColumns = pkCols;
-		constraints.add(cPK);
-		//log.info("table "+name+" pk: "+cPK.getDefinition(true));
-		*/
 	}
 
 	@Override
