@@ -178,6 +178,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			if(dumpIndexesWithReferencingTable) {
 				for(Index idx: schemaModel.indexes) {
 					//option for index output inside table
+					if(table==null || idx==null) {
+						log.warn("index null? table: "+table+" / idx: "+idx);
+						continue;
+					}
 					if(table.name.equals(idx.tableName)) {
 						categorizedOut(idx.schemaName, idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+";\n");
 					}

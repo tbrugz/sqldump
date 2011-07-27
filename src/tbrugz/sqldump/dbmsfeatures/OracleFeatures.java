@@ -56,7 +56,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		String query = "SELECT VIEW_NAME, TEXT FROM USER_VIEWS ORDER BY VIEW_NAME";
+		String query = "SELECT VIEW_NAME, TEXT FROM ALL_VIEWS "
+				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -75,7 +76,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY FROM USER_TRIGGERS";
+		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY "
+				+"FROM ALL_TRIGGERS where owner = '"+schemaPattern+"' ORDER BY trigger_name";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -96,8 +98,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = "select name, type, line, text from user_source "
+		String query = "select name, type, line, text from all_source "
 			+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
+			+"and owner = '"+schemaPattern+"' "
 			+"order by type, name, line";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -144,7 +147,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
-		String query = "select synonym_name, table_owner, table_name, db_link from user_synonyms";
+		String query = "select synonym_name, table_owner, table_name, db_link from all_synonyms "
+				+"where owner = '"+schemaPattern+"'";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -179,8 +183,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		*/
 			
 		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.table_name, uic.column_name "
-			+"from user_indexes ui, user_ind_columns uic "
+			+"from all_indexes ui, all_ind_columns uic "
 			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
+			+"and ui.owner = '"+schemaPattern+"' "
 			+"order by ui.table_owner, ui.index_name, uic.column_position";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -213,7 +218,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
-		String query = "select sequence_name, min_value, increment_by, last_number from user_sequences order by sequence_name";
+		String query = "select sequence_name, min_value, increment_by, last_number from all_sequences "
+				+"where sequence_owner = '"+schemaPattern+"' order by sequence_name";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
