@@ -184,22 +184,17 @@ public class DataDump {
 			log.debug("coltypes: "+lsColTypes);
 			
 			String defaultFilename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			boolean resultSetAtBegin = true;
 
-			//TODO: refactoring: do not re-execute query
+			Writer fosII = null;
+			Writer fosCSV = null;
+			
+			//TODOne: refactoring: do not re-execute query
 			if(dumpInsertInfoSyntax) {
 				String filename = prop.getProperty(PROP_DATADUMP_INSERTINTO_FILEPATTERN, defaultFilename);
 				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 				boolean alreadyOpened = filesOpened.contains(filename);
 				if(!alreadyOpened) { filesOpened.add(filename); }
-				Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-				
-				//never needed... if(!resultSetAtBegin) { rs = st.executeQuery(sql); }
-				//Insert Into
-				dumpRowsInsertIntoSyntax(rs, tableName, numCol, rowlimit, colNames, lsColTypes, fos);
-				
-				resultSetAtBegin = false;
-				fos.close();
+				fosII = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
 			}
 			
 			if(dumpCSVSyntax) {
@@ -207,15 +202,29 @@ public class DataDump {
 				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 				boolean alreadyOpened = filesOpened.contains(filename);
 				if(!alreadyOpened) { filesOpened.add(filename); }
-				Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-				
-				if(!resultSetAtBegin) { rs = st.executeQuery(sql); rs.next(); }
-				//CSV
-				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fos);
-				dumpRowsCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, rowlimit, fos);
-				
-				resultSetAtBegin = false;
-				fos.close();
+				fosCSV = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
+			}
+			
+			int count = 0;
+			do {
+				if(dumpInsertInfoSyntax) {
+					dumpRowInsertIntoSyntax(rs, tableName, numCol, colNames, lsColTypes, fosII);
+				}
+				if(dumpCSVSyntax) {
+					dumpRowCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
+				}
+				count++;
+				if(rowlimit<=count) { break; }
+			}
+			while(rs.next());
+			log.info("dumped "+count+" rows from table: "+tableName);
+
+			if(dumpInsertInfoSyntax) {
+				fosII.close();
+			}
+			if(dumpCSVSyntax) {
+				fosCSV.close();
 			}
 			
 			rs.close();
@@ -226,7 +235,7 @@ public class DataDump {
 		}
 		
 	}
-	
+	/*
 	void dumpRowsInsertIntoSyntax(ResultSet rs, String tableName, int numCol, long rowlimit, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {
 		//lines
 		int count = 0;
@@ -241,8 +250,15 @@ public class DataDump {
 		}
 		while(rs.next());
 		log.info("dumped "+count+" rows from table: "+tableName);
-	}
+	}*/
 
+	void dumpRowInsertIntoSyntax(ResultSet rs, String tableName, int numCol, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		out("insert into "+tableName+" "+
+			colNames+"values ("+
+			Utils.join4sql(vals, ", ")+");", fos, "\n");
+	}
+	
 	void dumpHeaderCSVSyntax(ResultSetMetaData md, boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
 		//headers
 		if(doTableNameHeaderDump) {
@@ -256,7 +272,7 @@ public class DataDump {
 			out(sb.toString(), fos, recordDelimiter);
 		}
 	}
-		
+	/*
 	void dumpRowsCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, long rowlimit, Writer fos) throws Exception {
 		//lines
 		int count = 0;
@@ -267,8 +283,12 @@ public class DataDump {
 		}
 		while(rs.next());
 		log.info("dumped "+count+" rows from table: "+tableName);
-	}
+	}*/
 
+	void dumpRowCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
+		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
+	}
+	
 	/*void dumpDataInsertIntoSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 	}*/
 
