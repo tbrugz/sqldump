@@ -29,21 +29,32 @@ import tbrugz.sqldump.dbmodel.Table;
  * TODOne: 'insert into' datadump syntax:
  *   sqldump.datadump.useinsertintosyntax=false
  *   sqldump.datadump.useinsertintosyntax.withcolumnnames=true
- * XXX: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
+ * XXXdone: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
  * XXXxx: property for selecting which columns to dump
- * XXX: order-by-primary-key prop? asc, desc?
+ * XXXdone: order-by-primary-key prop? asc, desc?
+ * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, JSON, fixedcolumnsize
  */
 public class DataDump {
 
 	//generic props
 	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
-	static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
-	//static final String PROP_DATADUMP_SYNTAXES = "sqldump.datadump.dumpsyntaxes";
+	//static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
+	static final String PROP_DATADUMP_SYNTAXES = "sqldump.datadump.dumpsyntaxes";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
+	
+	static final String PROP_DATADUMP_INSERTINTO_FILEPATTERN = "sqldump.datadump.insertinto.filepattern";
+	static final String PROP_DATADUMP_CSV_FILEPATTERN = "sqldump.datadump.csv.filepattern";
+	
+	//datadump syntaxes
+	static final String SYNTAX_INSERTINTO = "insertinto"; 
+	static final String SYNTAX_CSV = "csv"; 
+	
+	//static final String SYNTAX_XML = "xml"; 
+	//static final String SYNTAX_JSON = "json"; 
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -97,16 +108,26 @@ public class DataDump {
 		List<String> tables4dump = getTables4dump(prop);
 		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
-
-		//=================
-		/*boolean doInsertIntoDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO, "false"));
-		if(doInsertIntoDump) {
-			dumpDataInsertIntoSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
-		}
-		else {
-			dumpDataRawSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
-		}*/
 		
+		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false;
+		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
+		if(syntaxes==null) {
+			log.warn("no datadump syntax defined");
+			return;
+		}
+		String[] syntaxArr = syntaxes.split(",");
+		for(String syntax: syntaxArr) {
+			if(SYNTAX_INSERTINTO.equals(syntax.trim())) {
+				dumpInsertInfoSyntax = true;
+			}
+			else if(SYNTAX_CSV.equals(syntax.trim())) {
+				dumpCSVSyntax = true;
+			}
+			else {
+				log.warn("unknown datadump syntax: "+syntax.trim());
+			}
+		}
+
 		for(Table table: tablesForDataDump) {
 			String tableName = table.name;
 			if(tables4dump!=null) {
@@ -145,17 +166,6 @@ public class DataDump {
 			//so empty tables do not create empty dump files
 			if(!hasData) continue;
 			
-			//TODO String syntaxes = 
-
-			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-
-			boolean alreadyOpened = filesOpened.contains(filename);
-			if(!alreadyOpened) { filesOpened.add(filename); }
-			//Writer fos = new PrintWriter(filename, charset);
-			//if already opened, append; if not, create
-			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
-			
 			//headers
 			String colNames = "";
 			List<String> lsColNames = new ArrayList<String>();
@@ -173,34 +183,42 @@ public class DataDump {
 			log.debug("colnames: "+lsColNames);
 			log.debug("coltypes: "+lsColTypes);
 			
-			//TODOne: integet/float vals without quotes?
-			/*int count = 0;
-			do {
-				List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-				out("insert into "+tableName+" "+
-					colNames+"values ("+
-					Utils.join4sql(vals, ", ")+");", fos, "\n");
-					//Utils.join4sql(vals, ", ", "'", true)+");", fos, "\n");
-				count++;
-				if(rowlimit<=count) { break; }
-			}
-			while(rs.next());
-			log.info("dumped "+count+" rows from table: "+tableName);*/
-			
-			//TODO: different names for different syntaxes...
-			
-			if(Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO)) {
+			String defaultFilename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
+			boolean resultSetAtBegin = true;
+
+			//TODO: refactoring: do not re-execute query
+			if(dumpInsertInfoSyntax) {
+				String filename = prop.getProperty(PROP_DATADUMP_INSERTINTO_FILEPATTERN, defaultFilename);
+				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+				boolean alreadyOpened = filesOpened.contains(filename);
+				if(!alreadyOpened) { filesOpened.add(filename); }
+				Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				
+				//never needed... if(!resultSetAtBegin) { rs = st.executeQuery(sql); }
 				//Insert Into
 				dumpRowsInsertIntoSyntax(rs, tableName, numCol, rowlimit, colNames, lsColTypes, fos);
+				
+				resultSetAtBegin = false;
+				fos.close();
 			}
-			else {
+			
+			if(dumpCSVSyntax) {
+				String filename = prop.getProperty(PROP_DATADUMP_CSV_FILEPATTERN, defaultFilename);
+				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+				boolean alreadyOpened = filesOpened.contains(filename);
+				if(!alreadyOpened) { filesOpened.add(filename); }
+				Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				
+				if(!resultSetAtBegin) { rs = st.executeQuery(sql); rs.next(); }
 				//CSV
 				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fos);
 				dumpRowsCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, rowlimit, fos);
+				
+				resultSetAtBegin = false;
+				fos.close();
 			}
 			
 			rs.close();
-			fos.close();
 		}
 		
 		if(tables4dump.size()>0) {

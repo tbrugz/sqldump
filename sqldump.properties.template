@@ -73,8 +73,13 @@ sqldump.dbspecificfeatures.sequencestartwithdump=false
 #
 sqldump.dodatadump=false
 sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
-sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
-sqldump.datadump.useinsertintosyntax=true
+
+# syntaxes
+sqldump.datadump.dumpsyntaxes=insertinto, csv
+# default prop: sqldump.datadump.filepattern
+# sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
+sqldump.datadump.insertinto.filepattern=${outputdir}/data_${tablename}.sql
+sqldump.datadump.csv.filepattern=${outputdir}/data_${tablename}.csv
 
 #
 # InsertInfo syntax props
