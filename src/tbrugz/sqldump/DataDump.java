@@ -32,7 +32,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXdone: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
  * XXXxx: property for selecting which columns to dump
  * XXXdone: order-by-primary-key prop? asc, desc?
- * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, JSON, fixedcolumnsize
+ * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, fixedcolumnsize
  */
 public class DataDump {
 
@@ -91,7 +91,7 @@ public class DataDump {
 
 	Set<String> filesOpened = new HashSet<String>();
 	
-	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws Exception {
+	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
@@ -156,19 +156,40 @@ public class DataDump {
 			}
 
 			log.debug("dumping data/inserts from table: "+tableName);
-			Statement st = conn.createStatement();
-			//st.setFetchSize(20);
 			String sql = "select "+selectColumns+" from \""+tableName+"\""
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
+			
+			//XXX: call
+			runQuery(conn, sql, prop, tableName, charset, 
+					rowlimit, 
+					dumpInsertInfoSyntax, dumpCSVSyntax, dumpJSONSyntax,
+					doColumnNamesDump,
+					doTableNameHeaderDump, doColumnNamesHeaderDump, columnDelimiter, recordDelimiter);
+		}
+		
+		if(tables4dump.size()>0) {
+			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
+		}
+	}
+	
+	public void runQuery(Connection conn, String sql, Properties prop, String tableName, String charset, 
+			long rowlimit,
+			boolean dumpInsertInfoSyntax, boolean dumpCSVSyntax, boolean dumpJSONSyntax,
+			boolean doColumnNamesDump, //InsertInto parameter 
+			boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String columnDelimiter, String recordDelimiter //CSV parameters
+			) throws Exception {
+		
+			Statement st = conn.createStatement();
+			//st.setFetchSize(20);
 			ResultSet rs = st.executeQuery(sql);
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
-			if(!hasData) continue;
+			if(!hasData) return;
 			
 			//headers
 			String colNames = "";
@@ -249,12 +270,6 @@ public class DataDump {
 			}
 			
 			rs.close();
-		}
-		
-		if(tables4dump.size()>0) {
-			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
-		}
-		
 	}
 	/*
 	void dumpRowsInsertIntoSyntax(ResultSet rs, String tableName, int numCol, long rowlimit, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {

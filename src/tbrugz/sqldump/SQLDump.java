@@ -36,11 +36,11 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
  * XXXdone: data dump: limit tables to dump 
- * XXX?: define output patterns for data dump
+ * XXXxx: define output patterns for data dump
  * TODO: include demo schema and data
- * XXX: option to delete initial output dir?
+ * XXX: option to delete initial output dir contents (except special hidden files (unix dotfiles) eg: .svn, .git, .hg)?
  * ---
- * XXX: compare 2 schema models? generate "alter table" database script...
+ * XXXxxx: compare 2 schema models? generate "alter table" database script... see SQLDiff
  * XXX(later): generate schema model from graphML file (XMLUnit?). may be used for model comparison 
  * XXXdone: serialize model (for later comparison)
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
