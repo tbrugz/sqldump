@@ -53,31 +53,13 @@ public class Utils {
 	}
 	
 	static String DEFAULT_ENCLOSING = "'";
+	static String DOUBLEQUOTE = "\"";
 	
 	public static String join4sql(Collection<?> s, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
-			Object elem = iter.next();
-			if(elem == null) {
-				buffer.append(elem);
-			}
-			else if(elem instanceof String) {
-				/* XXX?: String escaping? "\n, \r, ', ..."
-				 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
-				 */
-				elem = ((String) elem).replaceAll("'", "''");
-				buffer.append(DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING);
-			}
-			else if(elem instanceof Integer) {
-				buffer.append(elem);
-			}
-			else if(elem instanceof Date) {
-				buffer.append(dateFormatter.format((Date)elem));
-			}
-			else {
-				buffer.append(elem);
-			}
+			buffer.append(getFormattedSQLValue(iter.next()));
 
 			if (iter.hasNext()) {
 				buffer.append(delimiter);
@@ -85,6 +67,43 @@ public class Utils {
 		}
 		return buffer.toString();
 	}
+	
+	public static String getFormattedSQLValue(Object elem) {
+		if(elem == null) {
+			return null;
+		}
+		else if(elem instanceof String) {
+			/* XXX?: String escaping? "\n, \r, ', ..."
+			 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
+			 */
+			elem = ((String) elem).replaceAll("'", "''");
+			return DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING;
+		}
+		else if(elem instanceof Date) {
+			return dateFormatter.format((Date)elem);
+		}
+		/*else if(elem instanceof Integer) {
+			return String.valueOf(elem);
+		}*/
+
+		return String.valueOf(elem);
+	} 
+	
+	public static String getFormattedJSONValue(Object elem) {
+		if(elem == null) {
+			return null;
+		}
+		else if(elem instanceof String) {
+			elem = ((String) elem).replaceAll(DOUBLEQUOTE, "&quot;");
+			return DOUBLEQUOTE+elem+DOUBLEQUOTE;
+		}
+		else if(elem instanceof Date) {
+			//XXX: JSON dateFormatter?
+			return dateFormatter.format((Date)elem);
+		}
+
+		return String.valueOf(elem);
+	} 
 	
 	public static String normalizeEnumStringConstant(String strEnumConstant) {
 		return strEnumConstant.replace(' ', '_');

@@ -48,13 +48,14 @@ public class DataDump {
 	
 	static final String PROP_DATADUMP_INSERTINTO_FILEPATTERN = "sqldump.datadump.insertinto.filepattern";
 	static final String PROP_DATADUMP_CSV_FILEPATTERN = "sqldump.datadump.csv.filepattern";
+	static final String PROP_DATADUMP_JSON_FILEPATTERN = "sqldump.datadump.json.filepattern";
 	
 	//datadump syntaxes
-	static final String SYNTAX_INSERTINTO = "insertinto"; 
-	static final String SYNTAX_CSV = "csv"; 
+	static final String SYNTAX_INSERTINTO = "insertinto";
+	static final String SYNTAX_CSV = "csv";
+	static final String SYNTAX_JSON = "json"; 
 	
 	//static final String SYNTAX_XML = "xml"; 
-	//static final String SYNTAX_JSON = "json"; 
 
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
@@ -109,7 +110,7 @@ public class DataDump {
 		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
 		
-		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false;
+		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpJSONSyntax = false;
 		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
 		if(syntaxes==null) {
 			log.warn("no datadump syntax defined");
@@ -122,6 +123,9 @@ public class DataDump {
 			}
 			else if(SYNTAX_CSV.equals(syntax.trim())) {
 				dumpCSVSyntax = true;
+			}
+			else if(SYNTAX_JSON.equals(syntax.trim())) {
+				dumpJSONSyntax = true;
 			}
 			else {
 				log.warn("unknown datadump syntax: "+syntax.trim());
@@ -187,6 +191,7 @@ public class DataDump {
 
 			Writer fosII = null;
 			Writer fosCSV = null;
+			Writer fosJSON = null;
 			
 			//TODOne: refactoring: do not re-execute query
 			if(dumpInsertInfoSyntax) {
@@ -205,6 +210,15 @@ public class DataDump {
 				fosCSV = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
 				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
 			}
+
+			if(dumpJSONSyntax) {
+				String filename = prop.getProperty(PROP_DATADUMP_JSON_FILEPATTERN, defaultFilename);
+				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+				boolean alreadyOpened = filesOpened.contains(filename);
+				if(!alreadyOpened) { filesOpened.add(filename); }
+				fosJSON = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				dumpHeaderJSONSyntax(tableName, fosJSON);
+			}
 			
 			int count = 0;
 			do {
@@ -213,6 +227,9 @@ public class DataDump {
 				}
 				if(dumpCSVSyntax) {
 					dumpRowCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
+				}
+				if(dumpJSONSyntax) {
+					dumpRowJSONSyntax(rs, tableName, numCol, lsColNames, lsColTypes, count, fosJSON);
 				}
 				count++;
 				if(rowlimit<=count) { break; }
@@ -225,6 +242,10 @@ public class DataDump {
 			}
 			if(dumpCSVSyntax) {
 				fosCSV.close();
+			}
+			if(dumpJSONSyntax) {
+				dumpFooterJSONSyntax(fosJSON);
+				fosJSON.close();
 			}
 			
 			rs.close();
@@ -288,10 +309,29 @@ public class DataDump {
 	void dumpRowCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
 		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
 	}
-	
-	/*void dumpDataInsertIntoSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
-	}*/
 
+	//JSON
+	void dumpHeaderJSONSyntax(String tableName, Writer fos) throws Exception {
+		out("{ \""+tableName+"\": [", fos, "\n");
+	}
+
+	//JSON
+	void dumpRowJSONSyntax(ResultSet rs, String tableName, int numCol, List<String> lsColNames, List<Class> lsColTypes, int count, Writer fos) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\t"+(count==0?"":",")+"{");
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		for(int i=0;i<lsColNames.size();i++) {
+			sb.append((i==0?"":", ")+Utils.getFormattedJSONValue( lsColNames.get(i) )+": "+Utils.getFormattedJSONValue( vals.get(i) ));
+		}
+		sb.append("}");
+		out(sb.toString(), fos, "\n");
+	}
+
+	//JSON
+	void dumpFooterJSONSyntax(Writer fos) throws Exception {
+		out("  ]\n}",fos, "");
+	}
+	
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
 	}
