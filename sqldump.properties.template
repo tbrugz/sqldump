@@ -75,11 +75,20 @@ sqldump.dodatadump=false
 sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 sqldump.datadump.filepattern=${outputdir}/data_${tablename}.sql
 sqldump.datadump.useinsertintosyntax=true
+
+#
+# InsertInfo syntax props
+#
 sqldump.datadump.useinsertintosyntax.withcolumnnames=false
+
+#
+# CSV syntax props
+#
 sqldump.datadump.tablenameheader=false
 sqldump.datadump.columnnamesheader=true
 sqldump.datadump.recorddelimiter=\r\n
 sqldump.datadump.columndelimiter=;
+
 # charset:: default: UTF-8; options: ISO-8859-1, UTF-16, US-ASCII, ...
 #sqldump.datadump.charset=UTF-8 
 # default date format: ''yyyy-MM-dd''

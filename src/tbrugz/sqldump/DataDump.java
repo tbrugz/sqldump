@@ -38,6 +38,7 @@ public class DataDump {
 	//generic props
 	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
 	static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
+	//static final String PROP_DATADUMP_SYNTAXES = "sqldump.datadump.dumpsyntaxes";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
@@ -62,27 +63,30 @@ public class DataDump {
 	
 	static Logger log = Logger.getLogger(DataDump.class);
 	
-	void dumpData(Connection conn, Collection<Table> tableNamesForDataDump, Properties prop) throws Exception {
+	/*
+	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
+	 *
+	 * US-ASCII 	Seven-bit ASCII, a.k.a. ISO646-US, a.k.a. the Basic Latin block of the Unicode character set
+	 * ISO-8859-1   	ISO Latin Alphabet No. 1, a.k.a. ISO-LATIN-1
+	 * UTF-8 	Eight-bit UCS Transformation Format
+	 * UTF-16BE 	Sixteen-bit UCS Transformation Format, big-endian byte order
+	 * UTF-16LE 	Sixteen-bit UCS Transformation Format, little-endian byte order
+	 * UTF-16 	Sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order mark
+	 *
+	 * XXX: use java.nio.charset.Charset.availableCharsets() ?
+	 *  
+	 */
+
+	Set<String> filesOpened = new HashSet<String>();
+	
+	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
-		Long globalRowlimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
+		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
 		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
 		if(dateFormat!=null) {
 			Utils.dateFormatter = new SimpleDateFormat(dateFormat);
 		}
-		
-		boolean doInsertIntoDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO, "false"));
-		if(doInsertIntoDump) {
-			dumpDataInsertIntoSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
-		}
-		else {
-			dumpDataRawSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
-		}
-	}
-
-	Set<String> filesOpened = new HashSet<String>();
-	
-	void dumpDataRawSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
 		String recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		String columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
@@ -92,97 +96,16 @@ public class DataDump {
 
 		List<String> tables4dump = getTables4dump(prop);
 		
-		/*
-		 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
-		 *
-		 * US-ASCII 	Seven-bit ASCII, a.k.a. ISO646-US, a.k.a. the Basic Latin block of the Unicode character set
-		 * ISO-8859-1   	ISO Latin Alphabet No. 1, a.k.a. ISO-LATIN-1
-		 * UTF-8 	Eight-bit UCS Transformation Format
-		 * UTF-16BE 	Sixteen-bit UCS Transformation Format, big-endian byte order
-		 * UTF-16LE 	Sixteen-bit UCS Transformation Format, little-endian byte order
-		 * UTF-16 	Sixteen-bit UCS Transformation Format, byte order identified by an optional byte-order mark
-		 *
-		 * XXX: use java.nio.charset.Charset.availableCharsets() ?
-		 *  
-		 */
-		
-		for(Table table: tablesForDataDump) {
-			String tableName = table.name;
-			if(tables4dump!=null) {
-				if(!tables4dump.contains(tableName)) { continue; }
-				else { tables4dump.remove(tableName); }
-			}
-			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
-			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
-			
-			boolean alreadyOpened = filesOpened.contains(filename);
-			if(!alreadyOpened) { filesOpened.add(filename); }
-			//Writer fos = new PrintWriter(filename, charset);
-			//if already opened, append; if not, create
-			Writer fos = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset); 
-			
-			String whereClause = prop.getProperty("sqldump.datadump."+tableName+".where");
-			String selectColumns = prop.getProperty("sqldump.datadump."+tableName+".columns");
-			if(selectColumns==null) { selectColumns = "*"; }
-			String orderClause = prop.getProperty("sqldump.datadump."+tableName+".order");
-			if(orderClause==null && orderByPK) { 
-				Constraint ctt = table.getPKConstraint();
-				if(ctt!=null) {
-					orderClause = Utils.join(ctt.uniqueColumns, ", ");
-				}
-				else {
-					log.warn("table '"+tableName+"' has no PK for datadump ordering");
-				}
-			}
-
-			log.info("dumping data from table: "+tableName);
-			Statement st = conn.createStatement();
-			String sql = "select "+selectColumns+" from \""+tableName+"\""
-					+ (whereClause!=null?" where "+whereClause:"")
-					+ (orderClause!=null?" order by "+orderClause:"");
-			ResultSet rs = st.executeQuery(sql);
-			ResultSetMetaData md = rs.getMetaData();
-			int numCol = md.getColumnCount();
-
-			//headers
-			if(doTableNameHeaderDump) {
-				out("[table "+tableName+"]", fos, recordDelimiter);
-			}
-			if(doColumnNamesHeaderDump) {
-				StringBuffer sb = new StringBuffer();
-				for(int i=0;i<numCol;i++) {
-					sb.append(md.getColumnName(i+1)+columnDelimiter);
-				}
-				out(sb.toString(), fos, recordDelimiter);
-			}
-			
-			int count = 0;
-			while(rs.next()) {
-				out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
-				count++;
-				if(rowlimit<=count) { break; }
-			}
-			log.info("dumped "+count+" rows from table: "+tableName);
-
-			rs.close();
-			
-			fos.close();
-		}
-		
-		if(tables4dump.size()>0) {
-			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
-		}
-	}
-
-	void dumpDataInsertIntoSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
-		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
-		List<String> tables4dump = getTables4dump(prop);
-		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
-		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK);
+
+		//=================
+		/*boolean doInsertIntoDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO, "false"));
+		if(doInsertIntoDump) {
+			dumpDataInsertIntoSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
+		}
+		else {
+			dumpDataRawSyntax(conn, tableNamesForDataDump, prop, globalRowlimit);
+		}*/
 		
 		for(Table table: tablesForDataDump) {
 			String tableName = table.name;
@@ -190,8 +113,6 @@ public class DataDump {
 				if(!tables4dump.contains(tableName)) { continue; }
 				else { tables4dump.remove(tableName); }
 			}
-			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
@@ -223,6 +144,11 @@ public class DataDump {
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
 			if(!hasData) continue;
+			
+			//TODO String syntaxes = 
+
+			String filename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
+			filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 
 			boolean alreadyOpened = filesOpened.contains(filename);
 			if(!alreadyOpened) { filesOpened.add(filename); }
@@ -248,7 +174,7 @@ public class DataDump {
 			log.debug("coltypes: "+lsColTypes);
 			
 			//TODOne: integet/float vals without quotes?
-			int count = 0;
+			/*int count = 0;
 			do {
 				List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 				out("insert into "+tableName+" "+
@@ -259,7 +185,19 @@ public class DataDump {
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
-			log.info("dumped "+count+" rows from table: "+tableName);
+			log.info("dumped "+count+" rows from table: "+tableName);*/
+			
+			//TODO: different names for different syntaxes...
+			
+			if(Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO)) {
+				//Insert Into
+				dumpRowsInsertIntoSyntax(rs, tableName, numCol, rowlimit, colNames, lsColTypes, fos);
+			}
+			else {
+				//CSV
+				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fos);
+				dumpRowsCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, rowlimit, fos);
+			}
 			
 			rs.close();
 			fos.close();
@@ -268,7 +206,53 @@ public class DataDump {
 		if(tables4dump.size()>0) {
 			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
 		}
+		
 	}
+	
+	void dumpRowsInsertIntoSyntax(ResultSet rs, String tableName, int numCol, long rowlimit, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {
+		//lines
+		int count = 0;
+		do {
+			List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+			out("insert into "+tableName+" "+
+				colNames+"values ("+
+				Utils.join4sql(vals, ", ")+");", fos, "\n");
+				//Utils.join4sql(vals, ", ", "'", true)+");", fos, "\n");
+			count++;
+			if(rowlimit<=count) { break; }
+		}
+		while(rs.next());
+		log.info("dumped "+count+" rows from table: "+tableName);
+	}
+
+	void dumpHeaderCSVSyntax(ResultSetMetaData md, boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
+		//headers
+		if(doTableNameHeaderDump) {
+			out("[table "+tableName+"]", fos, recordDelimiter);
+		}
+		if(doColumnNamesHeaderDump) {
+			StringBuffer sb = new StringBuffer();
+			for(int i=0;i<numCol;i++) {
+				sb.append(md.getColumnName(i+1)+columnDelimiter);
+			}
+			out(sb.toString(), fos, recordDelimiter);
+		}
+	}
+		
+	void dumpRowsCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, long rowlimit, Writer fos) throws Exception {
+		//lines
+		int count = 0;
+		do {
+			out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
+			count++;
+			if(rowlimit<=count) { break; }
+		}
+		while(rs.next());
+		log.info("dumped "+count+" rows from table: "+tableName);
+	}
+
+	/*void dumpDataInsertIntoSyntax(Connection conn, Collection<Table> tablesForDataDump, Properties prop, Long globalRowLimit) throws Exception {
+	}*/
 
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
