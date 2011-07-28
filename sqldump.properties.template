@@ -108,6 +108,14 @@ sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
 sqldump.datadump.TABLE_Y.columns=id, name
 sqldump.datadump.TABLE_Y.order=TYPE, NAME
 
+#
+# sql queries
+#
+sqldump.query.1.sql=\
+select * from TABLE_X
+sqldump.query.1.name=TABLE_X
+sqldump.query.1.rowlimit=10000
+
 
 #
 # serialization & xml serialization

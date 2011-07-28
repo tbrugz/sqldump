@@ -64,6 +64,7 @@ public class SQLDump {
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
+	static final String PROP_DO_QUERIESDUMP = "sqldump.doqueriesdump";
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
@@ -137,6 +138,10 @@ public class SQLDump {
 		
 		if(sdd.doTests) {
 			SQLTests.tests(sdd.conn);
+		}
+		
+		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
+			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
 		//grabbing model
