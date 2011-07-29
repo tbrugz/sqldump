@@ -5,10 +5,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -19,6 +22,22 @@ public class Utils {
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
 	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
+	public static NumberFormat floatFormatterSQL = null;
+	public static NumberFormat floatFormatterBR = null;
+	
+	static {
+		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");
+		DecimalFormat df = (DecimalFormat) floatFormatterSQL;
+		df.setGroupingUsed(false);
+		df.applyPattern("###0.00#");
+	}
+
+	static {
+		floatFormatterBR = NumberFormat.getNumberInstance();
+		DecimalFormat df = (DecimalFormat) floatFormatterBR;
+		df.setGroupingUsed(false);
+		df.applyPattern("###0.000");
+	}
 	
 	/*
 	 * http://snippets.dzone.com/posts/show/91
@@ -82,6 +101,13 @@ public class Utils {
 		else if(elem instanceof Date) {
 			return dateFormatter.format((Date)elem);
 		}
+		else if(elem instanceof Float) {
+			return floatFormatterSQL.format((Float)elem);
+		}
+		else if(elem instanceof Double) {
+			//log.debug("format:: "+elem+" / "+floatFormatterSQL.format((Double)elem));
+			return floatFormatterSQL.format((Double)elem);
+		}
 		/*else if(elem instanceof Integer) {
 			return String.valueOf(elem);
 		}*/
@@ -100,6 +126,17 @@ public class Utils {
 		else if(elem instanceof Date) {
 			//XXX: JSON dateFormatter?
 			return dateFormatter.format((Date)elem);
+		}
+
+		return String.valueOf(elem);
+	} 
+
+	public static String getFormattedCSVBrValue(Object elem) {
+		if(elem == null) {
+			return null;
+		}
+		else if(elem instanceof Double) {
+			return floatFormatterBR.format((Double)elem);
 		}
 
 		return String.valueOf(elem);

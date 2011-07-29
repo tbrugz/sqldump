@@ -33,6 +33,8 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXxx: property for selecting which columns to dump
  * XXXdone: order-by-primary-key prop? asc, desc?
  * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, fixedcolumnsize
+ * XXX: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
+ * TODO: floatFormatter!
  */
 public class DataDump {
 
@@ -48,11 +50,13 @@ public class DataDump {
 	
 	static final String PROP_DATADUMP_INSERTINTO_FILEPATTERN = "sqldump.datadump.insertinto.filepattern";
 	static final String PROP_DATADUMP_CSV_FILEPATTERN = "sqldump.datadump.csv.filepattern";
+	static final String PROP_DATADUMP_XML_FILEPATTERN = "sqldump.datadump.xml.filepattern";
 	static final String PROP_DATADUMP_JSON_FILEPATTERN = "sqldump.datadump.json.filepattern";
 	
 	//datadump syntaxes
 	static final String SYNTAX_INSERTINTO = "insertinto";
 	static final String SYNTAX_CSV = "csv";
+	static final String SYNTAX_XML = "xml";
 	static final String SYNTAX_JSON = "json"; 
 	
 	//static final String SYNTAX_XML = "xml"; 
@@ -60,7 +64,7 @@ public class DataDump {
 	//'insert into' props
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
 
-	//'raw dump' props
+	//'csv dump' props
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.tablenameheader";
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.columnnamesheader";
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.recorddelimiter";
@@ -110,7 +114,7 @@ public class DataDump {
 		
 		boolean doColumnNamesDump = "true".equals(prop.getProperty(PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, "true"));
 		
-		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpJSONSyntax = false;
+		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpJSONSyntax = false, dumpXMLSyntax = false;
 		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
 		if(syntaxes==null) {
 			log.warn("no datadump syntax defined");
@@ -123,6 +127,9 @@ public class DataDump {
 			}
 			else if(SYNTAX_CSV.equals(syntax.trim())) {
 				dumpCSVSyntax = true;
+			}
+			else if(SYNTAX_XML.equals(syntax.trim())) {
+				dumpXMLSyntax = true;
 			}
 			else if(SYNTAX_JSON.equals(syntax.trim())) {
 				dumpJSONSyntax = true;
@@ -164,7 +171,7 @@ public class DataDump {
 			//XXX: call
 			runQuery(conn, sql, prop, tableName, charset, 
 					rowlimit, 
-					dumpInsertInfoSyntax, dumpCSVSyntax, dumpJSONSyntax,
+					dumpInsertInfoSyntax, dumpCSVSyntax, dumpXMLSyntax, dumpJSONSyntax,
 					doColumnNamesDump,
 					doTableNameHeaderDump, doColumnNamesHeaderDump, columnDelimiter, recordDelimiter);
 		}
@@ -176,7 +183,7 @@ public class DataDump {
 	
 	public void runQuery(Connection conn, String sql, Properties prop, String tableName, String charset, 
 			long rowlimit,
-			boolean dumpInsertInfoSyntax, boolean dumpCSVSyntax, boolean dumpJSONSyntax,
+			boolean dumpInsertInfoSyntax, boolean dumpCSVSyntax, boolean dumpXMLSyntax, boolean dumpJSONSyntax,
 			boolean doColumnNamesDump, //InsertInto parameter 
 			boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String columnDelimiter, String recordDelimiter //CSV parameters
 			) throws Exception {
@@ -199,7 +206,7 @@ public class DataDump {
 				lsColNames.add(md.getColumnName(i+1));
 			}
 			for(int i=0;i<numCol;i++) {
-				lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1)));
+				lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getScale(i+1)));
 			}
 			if(doColumnNamesDump) {
 				colNames = "("+Utils.join(lsColNames, ", ")+") ";
@@ -212,6 +219,7 @@ public class DataDump {
 
 			Writer fosII = null;
 			Writer fosCSV = null;
+			Writer fosXML = null;
 			Writer fosJSON = null;
 			
 			//TODOne: refactoring: do not re-execute query
@@ -232,6 +240,15 @@ public class DataDump {
 				dumpHeaderCSVSyntax(md, doTableNameHeaderDump, doColumnNamesHeaderDump, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
 			}
 
+			if(dumpXMLSyntax) {
+				String filename = prop.getProperty(PROP_DATADUMP_XML_FILEPATTERN, defaultFilename);
+				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+				boolean alreadyOpened = filesOpened.contains(filename);
+				if(!alreadyOpened) { filesOpened.add(filename); }
+				fosXML = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				dumpHeaderXMLSyntax(tableName, fosXML);
+			}
+
 			if(dumpJSONSyntax) {
 				String filename = prop.getProperty(PROP_DATADUMP_JSON_FILEPATTERN, defaultFilename);
 				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
@@ -247,7 +264,11 @@ public class DataDump {
 					dumpRowInsertIntoSyntax(rs, tableName, numCol, colNames, lsColTypes, fosII);
 				}
 				if(dumpCSVSyntax) {
-					dumpRowCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
+					dumpRowCSVBrSyntax(rs, tableName, numCol, lsColTypes, columnDelimiter, recordDelimiter, fosCSV);
+					//dumpRowCSVSyntax(rs, tableName, numCol, columnDelimiter, recordDelimiter, fosCSV);
+				}
+				if(dumpXMLSyntax) {
+					dumpRowXMLSyntax(rs, tableName, numCol, lsColNames, lsColTypes, count, fosXML);
 				}
 				if(dumpJSONSyntax) {
 					dumpRowJSONSyntax(rs, tableName, numCol, lsColNames, lsColTypes, count, fosJSON);
@@ -263,6 +284,10 @@ public class DataDump {
 			}
 			if(dumpCSVSyntax) {
 				fosCSV.close();
+			}
+			if(dumpXMLSyntax) {
+				dumpFooterXMLSyntax(tableName, fosXML);
+				fosXML.close();
 			}
 			if(dumpJSONSyntax) {
 				dumpFooterJSONSyntax(fosJSON);
@@ -288,6 +313,7 @@ public class DataDump {
 		log.info("dumped "+count+" rows from table: "+tableName);
 	}*/
 
+	//InsertInfo
 	void dumpRowInsertIntoSyntax(ResultSet rs, String tableName, int numCol, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		out("insert into "+tableName+" "+
@@ -295,6 +321,7 @@ public class DataDump {
 			Utils.join4sql(vals, ", ")+");", fos, "\n");
 	}
 	
+	//CSV
 	void dumpHeaderCSVSyntax(ResultSetMetaData md, boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
 		//headers
 		if(doTableNameHeaderDump) {
@@ -321,8 +348,41 @@ public class DataDump {
 		log.info("dumped "+count+" rows from table: "+tableName);
 	}*/
 
+	//CSV
 	void dumpRowCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
 		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
+	}
+
+	//CSV2
+	void dumpRowCSVBrSyntax(ResultSet rs, String tableName, int numCol, List<Class> lsColTypes, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		for(int i=0;i<lsColTypes.size();i++) {
+			sb.append( (i!=0?columnDelimiter:"")+ Utils.getFormattedCSVBrValue(vals.get(i)) );
+		}
+		out(sb.toString(), fos, recordDelimiter);
+	}
+	
+	//XML
+	void dumpHeaderXMLSyntax(String tableName, Writer fos) throws Exception {
+		out("<"+tableName+">", fos, "\n");
+	}
+
+	//XML
+	void dumpRowXMLSyntax(ResultSet rs, String tableName, int numCol, List<String> lsColNames, List<Class> lsColTypes, int count, Writer fos) throws Exception {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\t"+"<row>");
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		for(int i=0;i<lsColNames.size();i++) {
+			sb.append( "<"+lsColNames.get(i)+">"+ vals.get(i) +"</"+lsColNames.get(i)+">");
+		}
+		sb.append("</row>");
+		out(sb.toString(), fos, "\n");
+	}
+
+	//XML
+	void dumpFooterXMLSyntax(String tableName, Writer fos) throws Exception {
+		out("</"+tableName+">", fos, "");
 	}
 
 	//JSON

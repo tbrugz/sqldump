@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 public class SQLUtils {
 
+	static Logger log = Logger.getLogger(SQLUtils.class);
 	static StringBuffer sbTmp = new StringBuffer();
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
@@ -38,44 +41,88 @@ public class SQLUtils {
 		}
 		return ls;
 	}
+	
+	static boolean isInt(double d) {
+		long l = (long) d*1000;
+		return (l==Math.round(d*1000));
+	}
 
+	private static boolean hasWarnedColType = false;
 	public static List getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
 		List ls = new ArrayList();
+		boolean thisHasWarned = false;
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
 			Class coltype = colTypes.get(i-1);
 			if(coltype.equals(String.class)) {
+				if(!hasWarnedColType) {
+					log.debug("str type: "+i+"/"+coltype);
+					thisHasWarned = true;
+				}
 				value = rs.getString(i);
 			}
 			else if(coltype.equals(Integer.class)) {
-				value = rs.getLong(i);
+				if(!hasWarnedColType) {
+					log.debug("int type: "+i+"/"+coltype);
+					thisHasWarned = true;
+				}
+				value = rs.getDouble(i);
+				Double dValue = (Double) value;
+				if(isInt(dValue)) {
+					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i)+"/"+rs.getDouble(i));
+					value = rs.getLong(i);
+				}
+				else { 
+					//log.warn("double type: "+i+"/"+coltype+"/"+rs.getDouble(i));
+					value = rs.getDouble(i);
+				}
 			}
 			else if(coltype.equals(Double.class)) {
+				if(!hasWarnedColType) {
+					log.debug("double type: "+i+"/"+coltype);
+					thisHasWarned = true;
+				}
 				value = rs.getDouble(i);
+				Double dValue = (Double) value;
+				if(isInt(dValue)) {
+					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i));
+					value = rs.getLong(i);
+				}
+				else { value = rs.getDouble(i); }
 			}
 			else if(coltype.equals(Date.class)) {
+				if(!hasWarnedColType) {
+					log.debug("date type: "+i+"/"+coltype);
+					thisHasWarned = true;
+				}
 				//TODOne: how to format Date value?
 				value = rs.getDate(i);
 			}
 			else {
+				if(!hasWarnedColType) {
+					log.debug("unknown type: "+i+"/"+coltype);
+					thisHasWarned = true;
+				}
 				value = rs.getString(i);
 			}
 			ls.add(value);
 		}
+		if(thisHasWarned) hasWarnedColType = true;
 		return ls;
 	}
 
 	//TODOne: Date class type for dump?
-	static Class getClassFromSqlType(int type) {
+	static Class getClassFromSqlType(int type, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
 			case Types.TINYINT: 
 			case Types.SMALLINT:
 			case Types.INTEGER:
 			case Types.BIGINT:
-			case Types.DECIMAL: //??
-			case Types.NUMERIC: //??
 				return Integer.class;
+			case Types.DECIMAL:
+			case Types.NUMERIC:
+				return (scale>0)?Double.class:Integer.class; //XXX: doesnt seems to work
 			case Types.REAL:
 			case Types.FLOAT:
 			case Types.DOUBLE:

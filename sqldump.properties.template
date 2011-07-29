@@ -119,6 +119,9 @@ sqldump.query.1.sql=\
 select * from TABLE_X
 sqldump.query.1.name=TABLE_X
 sqldump.query.1.rowlimit=10000
+sqldump.query.2.file=c:/xxx/query2.sql
+sqldump.query.2.name=query_2
+sqldump.query.2.rowlimit=10000
 
 
 #
