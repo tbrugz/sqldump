@@ -2,6 +2,7 @@ package tbrugz.sqldump;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.sql.Connection;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -42,6 +43,11 @@ public class CastorSchemaXMLSerializer implements SchemaModelDumper, SchemaModel
 		}
 		
 		return (SchemaModel) Unmarshaller.unmarshal(SchemaModel.class, new FileReader(fileInput));
+	}
+
+	@Override
+	public void setConnection(Connection conn) {
+		log.debug("setConnection() is empty");
 	}
 
 }

@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.io.File;
+import java.sql.Connection;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
@@ -67,6 +68,11 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			t.validateConstraints();
 		}
 		return sm;
+	}
+
+	@Override
+	public void setConnection(Connection conn) {
+		log.debug("setConnection() is empty");
 	}
 
 }

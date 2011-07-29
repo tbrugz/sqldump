@@ -34,6 +34,10 @@ sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
 #
 # schema grab props
 #
+
+# grabclass can be: JDBCSchemaGrabber, JAXBSchemaXMLSerializer, SchemaSerializer, CastorSchemaXMLSerializer
+sqldump.schemagrab.grabclass=JDBCSchemaGrabber
+
 sqldump.dotests=true
 sqldump.doschemadump=true
 sqldump.doschemadump.grants=true

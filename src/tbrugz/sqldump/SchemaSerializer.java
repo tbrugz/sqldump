@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Connection;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -47,6 +48,11 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		SchemaModel sm = (SchemaModel) ois.readObject();
 		ois.close();
 		return sm;
+	}
+
+	@Override
+	public void setConnection(Connection conn) {
+		log.debug("setConnection() is empty");
 	}
 
 }

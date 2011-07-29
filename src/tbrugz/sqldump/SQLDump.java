@@ -57,6 +57,8 @@ public class SQLDump {
 		
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
+	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
+	
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
@@ -144,11 +146,33 @@ public class SQLDump {
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
+		SchemaModel sm = null;
+		SchemaModelGrabber schemaGrabber = null;
+		
 		//grabbing model
-		JDBCSchemaGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();
-		schemaJDBCGrabber.procProperties(sdd.papp);
-		schemaJDBCGrabber.setConnection(sdd.conn);
-		SchemaModel sm = schemaJDBCGrabber.grabSchema();
+		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
+		if(grabClassName!=null) {
+			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName);
+			if(schemaGrabber==null) {
+				schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance("tbrugz.sqldump."+grabClassName);
+			}
+			if(schemaGrabber!=null) {
+				schemaGrabber.procProperties(sdd.papp);
+				schemaGrabber.setConnection(sdd.conn);
+				sm = schemaGrabber.grabSchema();
+			}
+			else {
+				log.warn("class '"+grabClassName+"' not found");
+			}
+		}
+		else {
+			log.info("no schema grab class defined");
+		}
+		
+		//SchemaModelGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();
+		//schemaJDBCGrabber.procProperties(sdd.papp);
+		//schemaJDBCGrabber.setConnection(sdd.conn);
+		//SchemaModel sm = schemaJDBCGrabber.grabSchema();
 
 		//serializer input
 		//SchemaModelGrabber schemaSerialGrabber = new SchemaSerializer();
@@ -189,7 +213,8 @@ public class SQLDump {
 			s2gml.procProperties(sdd.papp);
 			s2gml.dumpSchema(sm);
 		}
-		if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
+		//if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
+		if(sdd.doDataDump && schemaGrabber!=null) {
 			DataDump dd = new DataDump();
 			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
 			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);

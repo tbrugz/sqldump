@@ -178,6 +178,20 @@ public class Utils {
 		return sb.toString();
 	}
 	
+	public static Object getClassInstance(String className) {
+		try {
+			Class<?> c = Class.forName(className);
+			return c.newInstance();
+		} catch (ClassNotFoundException e) {
+			log.debug("class not found: "+e.getMessage(), e);
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	} 
+	
 	public static void main(String[] args) {
 		String s = readPasswordIntern("pass: ", "*");
 		System.out.println("s = "+s);

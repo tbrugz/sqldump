@@ -45,7 +45,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	Connection conn;
 	
 	//tables OK for data dump
-	public List<String> tableNamesForDataDump = new Vector<String>();
+	//public List<String> tableNamesForDataDump = new Vector<String>();
 
 	Properties papp = new ParametrizedProperties();
 	Properties propOriginal;
@@ -80,7 +80,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 	}
 
-	void setConnection(Connection conn) {
+	public void setConnection(Connection conn) {
 		this.conn = conn;
 	}
 	
@@ -205,7 +205,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					indexesrs.close();
 				}
 				
-				tableNamesForDataDump.add(tableName);
+				//tableNamesForDataDump.add(tableName);
 			}
 			catch(OutOfMemoryError oome) {
 				log.warn("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
@@ -275,6 +275,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	DBMSFeatures grabDbSpecificFeaturesClass() {
 		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(SQLDump.PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
+			//XXX: call Utils.getClassByName()
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
