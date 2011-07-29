@@ -61,6 +61,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" views grabbed");
 	}
 
@@ -102,6 +104,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" triggers grabbed");
 	}
 	
@@ -126,6 +130,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" sequences grabbed");
 	}
 

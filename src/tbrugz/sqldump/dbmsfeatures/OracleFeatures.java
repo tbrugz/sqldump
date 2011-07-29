@@ -70,6 +70,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			model.getViews().add(v);
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
@@ -92,6 +94,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			model.getTriggers().add(t);
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(count+" triggers grabbed");
 	}
@@ -141,6 +145,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			model.getExecutables().add(eo);
 			countExecutables++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(countExecutables+" executable objects grabbed [linecount="+count+"]");
 	}
@@ -163,6 +169,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			model.getSynonyms().add(s);
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(count+" synonyms grabbed");
 	}
@@ -212,6 +220,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			count++;
 		}
 		model.getIndexes().add(idx);
+		rs.close();
+		st.close();
 		
 		log.info(model.getIndexes().size()+" indexes grabbed [colcount="+count+"]");
 	}
@@ -234,6 +244,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			model.getSequences().add(s);
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(count+" sequences grabbed");
 	}
@@ -318,6 +330,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			}
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(count+" check constraints grabbed");
 
@@ -356,9 +370,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			previousConstraint = constraintName;
 			count++;
 		}
+		rs.close();
+		st.close();
 		
 		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
-		
 	}
 	
 }

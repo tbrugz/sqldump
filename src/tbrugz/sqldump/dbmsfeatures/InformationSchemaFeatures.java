@@ -60,6 +60,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" views grabbed");
 	}
 
@@ -96,6 +98,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			t.conditionTiming = rs.getString(9);
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" triggers grabbed");
 	}
 
@@ -127,6 +131,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" executable objects/routines grabbed");
 	}
 
@@ -150,6 +156,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" sequences grabbed");
 	}
 
@@ -184,6 +192,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(count+" check constraints grabbed");
 
 		//unique constraints
@@ -224,6 +234,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			count++;
 		}
 		
+		rs.close();
+		st.close();
 		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
 	}
 	
