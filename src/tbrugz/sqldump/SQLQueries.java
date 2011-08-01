@@ -12,9 +12,11 @@ import org.apache.log4j.Logger;
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql
 //XXX: add prop: sqldump.query.<x>.params=1,23,111
 //XXX: add prop: sqldump.query.<x>.param.pid_xx=1
-//XXX?: add prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
-//XXX: add prop: sqldump.queries=q1,2,3,xxx (ids)
+//XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
+//XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
 public class SQLQueries {
+	
+	static final String PROP_QUERIES = "sqldump.queries";
 
 	static Logger log = Logger.getLogger(SQLQueries.class);
 	
@@ -53,34 +55,37 @@ public class SQLQueries {
 			}
 		}
 
-		int i=1;
-		for(;true;i++) {
-			String sql = prop.getProperty("sqldump.query."+i+".sql");
+		String queriesStr = prop.getProperty(PROP_QUERIES);
+		String[] queriesArr = queriesStr.split(",");
+		int i=0;
+		for(String qid: queriesArr) {
+			qid = qid.trim();
+			String sql = prop.getProperty("sqldump.query."+qid+".sql");
 			if(sql==null) {
 				//load from file
-				String sqlfile = prop.getProperty("sqldump.query."+i+".file");
+				String sqlfile = prop.getProperty("sqldump.query."+qid+".file");
 				if(sqlfile!=null) {
 					sql = readFile(sqlfile);
 				}
 			}
-			String tableName = prop.getProperty("sqldump.query."+i+".name");
+			String tableName = prop.getProperty("sqldump.query."+qid+".name");
 			if(sql==null || tableName==null) { break; }
 
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+i+".rowlimit");
+			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
 			try {
-				log.debug("running query ["+i+", "+tableName+"]: "+sql);
+				log.debug("running query ["+qid+", "+tableName+"]: "+sql);
 				dd.runQuery(conn, sql, prop, tableName, charset, rowlimit, 
 						dumpInsertInfoSyntax, dumpCSVSyntax, dumpXMLSyntax, dumpJSONSyntax, 
 						doColumnNamesDump, //insert into param
 						doTableNameHeaderDump, doColumnNamesHeaderDump, columnDelimiter, recordDelimiter); //csv params
 			} catch (Exception e) {
-				log.warn("error on query "+i+": "+e);
-				log.debug("error on query "+i+": "+e.getMessage(), e);
+				log.warn("error on query "+qid+": "+e);
+				log.debug("error on query "+qid+": "+e.getMessage(), e);
 			}
+			i++;
 		}
-		i--;
 		log.info(i+" queries runned");
 	}
 	
