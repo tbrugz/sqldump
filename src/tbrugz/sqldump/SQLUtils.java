@@ -112,7 +112,7 @@ public class SQLUtils {
 	}
 
 	//TODOne: Date class type for dump?
-	static Class getClassFromSqlType(int type, int scale) {
+	public static Class getClassFromSqlType(int type, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
 			case Types.TINYINT: 

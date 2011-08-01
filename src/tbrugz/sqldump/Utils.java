@@ -133,7 +133,7 @@ public class Utils {
 
 	public static String getFormattedCSVBrValue(Object elem) {
 		if(elem == null) {
-			return null;
+			return "";
 		}
 		else if(elem instanceof Double) {
 			return floatFormatterBR.format((Double)elem);

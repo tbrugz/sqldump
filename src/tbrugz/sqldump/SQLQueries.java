@@ -4,9 +4,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
+
+import tbrugz.sqldump.datadump.CSVDataDump;
+import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.InsertIntoDataDump;
+import tbrugz.sqldump.datadump.JSONDataDump;
+import tbrugz.sqldump.datadump.XMLDataDump;
 
 //XXX: partition over (columnX) - different outputfiles for different values of columnX
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql
@@ -24,31 +32,35 @@ public class SQLQueries {
 		DataDump dd = new DataDump();
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
-		String recordDelimiter = prop.getProperty(DataDump.PROP_DATADUMP_RECORDDELIMITER, DataDump.DELIM_RECORD_DEFAULT);
-		String columnDelimiter = prop.getProperty(DataDump.PROP_DATADUMP_COLUMNDELIMITER, DataDump.DELIM_COLUMN_DEFAULT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
-		boolean doTableNameHeaderDump = Utils.getPropBool(prop, DataDump.PROP_DATADUMP_TABLENAMEHEADER);
-		boolean doColumnNamesHeaderDump = Utils.getPropBool(prop, DataDump.PROP_DATADUMP_COLUMNNAMESHEADER);
-		boolean doColumnNamesDump = Utils.getPropBool(prop, DataDump.PROP_DATADUMP_INSERTINTO_WITHCOLNAMES);
-		boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpXMLSyntax = false, dumpJSONSyntax = false;
+		//boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpXMLSyntax = false, dumpJSONSyntax = false;
 		String syntaxes = prop.getProperty(DataDump.PROP_DATADUMP_SYNTAXES);
 		if(syntaxes==null) {
 			log.warn("no datadump syntax defined");
 			return;
 		}
 		String[] syntaxArr = syntaxes.split(",");
+		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		for(String syntax: syntaxArr) {
 			if(DataDump.SYNTAX_INSERTINTO.equals(syntax.trim())) {
-				dumpInsertInfoSyntax = true;
+				InsertIntoDataDump dtd = new InsertIntoDataDump();
+				dtd.procProperties(prop);
+				syntaxList.add(dtd);
 			}
 			else if(DataDump.SYNTAX_CSV.equals(syntax.trim())) {
-				dumpCSVSyntax = true;
+				CSVDataDump dtd = new CSVDataDump();
+				dtd.procProperties(prop);
+				syntaxList.add(dtd);
 			}
 			else if(DataDump.SYNTAX_XML.equals(syntax.trim())) {
-				dumpXMLSyntax = true;
+				XMLDataDump dtd = new XMLDataDump();
+				dtd.procProperties(prop);
+				syntaxList.add(dtd);
 			}
 			else if(DataDump.SYNTAX_JSON.equals(syntax.trim())) {
-				dumpJSONSyntax = true;
+				JSONDataDump dtd = new JSONDataDump();
+				dtd.procProperties(prop);
+				syntaxList.add(dtd);
 			}
 			else {
 				log.warn("unknown datadump syntax: "+syntax.trim());
@@ -56,6 +68,10 @@ public class SQLQueries {
 		}
 
 		String queriesStr = prop.getProperty(PROP_QUERIES);
+		if(queriesStr==null) {
+			log.warn("prop '"+PROP_QUERIES+"' not defined");
+			return;
+		}
 		String[] queriesArr = queriesStr.split(",");
 		int i=0;
 		for(String qid: queriesArr) {
@@ -76,10 +92,7 @@ public class SQLQueries {
 
 			try {
 				log.debug("running query ["+qid+", "+tableName+"]: "+sql);
-				dd.runQuery(conn, sql, prop, tableName, charset, rowlimit, 
-						dumpInsertInfoSyntax, dumpCSVSyntax, dumpXMLSyntax, dumpJSONSyntax, 
-						doColumnNamesDump, //insert into param
-						doTableNameHeaderDump, doColumnNamesHeaderDump, columnDelimiter, recordDelimiter); //csv params
+				dd.runQuery(conn, sql, prop, tableName, charset, rowlimit, syntaxList);
 			} catch (Exception e) {
 				log.warn("error on query "+qid+": "+e);
 				log.debug("error on query "+qid+": "+e.getMessage(), e);
