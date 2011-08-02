@@ -86,13 +86,22 @@ public class SQLQueries {
 			}
 			String tableName = prop.getProperty("sqldump.query."+qid+".name");
 			if(sql==null || tableName==null) { break; }
+			//params
+			int paramCount = 1;
+			List<String> params = new ArrayList<String>();
+			while(true) {
+				String paramStr = prop.getProperty("sqldump.query."+qid+".param."+paramCount);
+				if(paramStr==null) { break; }
+				params.add(paramStr);
+				paramCount++;
+			}
 
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
 			try {
 				log.debug("running query ["+qid+", "+tableName+"]: "+sql);
-				dd.runQuery(conn, sql, prop, tableName, charset, rowlimit, syntaxList);
+				dd.runQuery(conn, sql, params, prop, tableName, charset, rowlimit, syntaxList);
 			} catch (Exception e) {
 				log.warn("error on query "+qid+": "+e);
 				log.debug("error on query "+qid+": "+e.getMessage(), e);

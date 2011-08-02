@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
@@ -173,7 +174,7 @@ public class DataDump {
 			log.debug("sql: "+sql);
 			
 			//XXX: call
-			runQuery(conn, sql, prop, tableName, charset, 
+			runQuery(conn, sql, null, prop, tableName, charset, 
 					rowlimit, 
 					syntaxList
 					);
@@ -184,14 +185,19 @@ public class DataDump {
 		}
 	}
 	
-	public void runQuery(Connection conn, String sql, Properties prop, String tableName, String charset, 
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList
 			) throws Exception {
 		
-			Statement st = conn.createStatement();
+			PreparedStatement st = conn.prepareStatement(sql);
 			//st.setFetchSize(20);
-			ResultSet rs = st.executeQuery(sql);
+			if(params!=null) {
+				for(int i=0;i<params.size();i++) {
+					st.setString(i+1, params.get(i));
+				}
+			}
+			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
 			int numCol = md.getColumnCount();
 

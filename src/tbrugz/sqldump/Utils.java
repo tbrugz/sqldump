@@ -24,6 +24,7 @@ public class Utils {
 	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
 	public static NumberFormat floatFormatterSQL = null;
 	public static NumberFormat floatFormatterBR = null;
+	public static NumberFormat longFormatter = null;
 	
 	static {
 		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");
@@ -37,6 +38,14 @@ public class Utils {
 		DecimalFormat df = (DecimalFormat) floatFormatterBR;
 		df.setGroupingUsed(false);
 		df.applyPattern("###0.000");
+	}
+
+	static {
+		longFormatter = NumberFormat.getNumberInstance();
+		DecimalFormat df = (DecimalFormat) longFormatter;
+		df.setGroupingUsed(false);
+		df.setMaximumIntegerDigits(20); //E??
+		df.applyPattern("###0");//87612933000118
 	}
 	
 	/*
@@ -126,6 +135,10 @@ public class Utils {
 		else if(elem instanceof Date) {
 			//XXX: JSON dateFormatter?
 			return dateFormatter.format((Date)elem);
+		}
+		else if(elem instanceof Long) {
+			//log.warn("long: "+(Long)elem+"; "+longFormatter.format((Long)elem));
+			return longFormatter.format((Long)elem);
 		}
 
 		return String.valueOf(elem);
@@ -227,7 +240,7 @@ public class Utils {
 			e.printStackTrace();
 		}
 		return null;
-	} 
+	}
 	
 	public static void main(String[] args) {
 		String s = readPasswordIntern("pass: ", "*");
