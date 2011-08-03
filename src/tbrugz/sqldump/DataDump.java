@@ -17,11 +17,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.CSVDataDump;
 import tbrugz.sqldump.datadump.DumpSyntax;
-import tbrugz.sqldump.datadump.InsertIntoDataDump;
-import tbrugz.sqldump.datadump.JSONDataDump;
-import tbrugz.sqldump.datadump.XMLDataDump;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -37,7 +33,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXxx: property for selecting which columns to dump
  * XXXdone: order-by-primary-key prop? asc, desc?
  * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, fixedcolumnsize
- * XXX~: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
+ * XXXdone: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
  * TODO: floatFormatter!
  */
 public class DataDump {
@@ -176,7 +172,6 @@ public class DataDump {
 			}
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
-			//int numCol = md.getColumnCount();
 
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
@@ -184,102 +179,37 @@ public class DataDump {
 			
 			String defaultFilename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 
-			Writer fosII = null;
-			Writer fosCSV = null;
-			Writer fosXML = null;
-			Writer fosJSON = null;
+			List<Writer> writerList = new ArrayList<Writer>();
+			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
 			
-			//TODOne: refactoring: do not re-execute query
-			for(DumpSyntax ds: syntaxList) {
+			for(int i=0;i<syntaxList.size();i++) {
+				DumpSyntax ds = syntaxList.get(i);
 				ds.initDump(tableName, md);
-			}
-			
-			DumpSyntax insertIntoSyntax = getObjectOfClass(syntaxList, InsertIntoDataDump.class);
-			DumpSyntax csvSyntax = getObjectOfClass(syntaxList, CSVDataDump.class);
-			DumpSyntax xmlSyntax = getObjectOfClass(syntaxList, XMLDataDump.class);
-			DumpSyntax jsonSyntax = getObjectOfClass(syntaxList, JSONDataDump.class);
-
-			boolean dumpInsertIntoSyntax = insertIntoSyntax!=null;
-			boolean dumpCSVSyntax = csvSyntax!=null;
-			boolean dumpXMLSyntax = xmlSyntax!=null;
-			boolean dumpJSONSyntax = jsonSyntax!=null;
-			
-			if(dumpInsertIntoSyntax) {
-				String filename = prop.getProperty(PROP_DATADUMP_INSERTINTO_FILEPATTERN, defaultFilename);
+				doSyntaxDumpList.add(false);
+				writerList.add(null);
+				
+				String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
 				if(filename==null) {
-					log.warn("no output file defined for syntax 'insertinto'");
-					dumpInsertIntoSyntax = false;
+					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
 				}
 				else {
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
 					boolean alreadyOpened = filesOpened.contains(filename);
 					if(!alreadyOpened) { filesOpened.add(filename); }
-					fosII = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+					
+					doSyntaxDumpList.set(i, true);
+					writerList.set(i, new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset));
+					ds.dumpHeader(writerList.get(i));
 				}
-			}
-			
-			if(dumpCSVSyntax) { 
-				String filename = prop.getProperty(PROP_DATADUMP_CSV_FILEPATTERN, defaultFilename);
-				if(filename==null) {
-					log.warn("no output file defined for syntax 'csv'");
-					dumpCSVSyntax = false;
-				}
-				else {
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-					boolean alreadyOpened = filesOpened.contains(filename);
-					if(!alreadyOpened) { filesOpened.add(filename); }
-					fosCSV = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-					csvSyntax.dumpHeader(fosCSV);
-				}
-			}
-
-			if(dumpXMLSyntax) {
-				String filename = prop.getProperty(PROP_DATADUMP_XML_FILEPATTERN, defaultFilename);
-				if(filename==null) {
-					log.warn("no output file defined for syntax 'xml'");
-					dumpXMLSyntax = false;
-				}
-				else {
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-					boolean alreadyOpened = filesOpened.contains(filename);
-					if(!alreadyOpened) { filesOpened.add(filename); }
-					fosXML = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-					xmlSyntax.dumpHeader(fosXML);
-				}
-			}
-
-			if(dumpJSONSyntax) {
-				String filename = prop.getProperty(PROP_DATADUMP_JSON_FILEPATTERN, defaultFilename);
-				if(filename==null) {
-					log.warn("no output file defined for syntax 'json'");
-					dumpInsertIntoSyntax = false;
-				}
-				else {
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-					boolean alreadyOpened = filesOpened.contains(filename);
-					if(!alreadyOpened) { filesOpened.add(filename); }
-					fosJSON = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-					jsonSyntax.dumpHeader(fosJSON);
-				}
-			}
-			
-			for(DumpSyntax s: syntaxList) {
-				s.initDump(tableName, md);
 			}
 			
 			int count = 0;
 			do {
-				if(dumpInsertIntoSyntax) {
-					insertIntoSyntax.dumpRow(rs, count, fosII);
-				}
-				if(dumpCSVSyntax) {
-					csvSyntax.dumpRow(rs, count, fosCSV);
-				}
-				if(dumpXMLSyntax) {
-					xmlSyntax.dumpRow(rs, count, fosXML);
-				}
-				if(dumpJSONSyntax) {
-					jsonSyntax.dumpRow(rs, count, fosJSON);
+				for(int i=0;i<syntaxList.size();i++) {
+					DumpSyntax ds = syntaxList.get(i);
+					if(doSyntaxDumpList.get(i)) {
+						ds.dumpRow(rs, count, writerList.get(i));
+					}
 				}
 				count++;
 				if(rowlimit<=count) { break; }
@@ -287,21 +217,12 @@ public class DataDump {
 			while(rs.next());
 			log.info("dumped "+count+" rows from table: "+tableName);
 
-			if(dumpInsertIntoSyntax) {
-				fosII.close();
-			}
-			if(dumpCSVSyntax) {
-				fosCSV.close();
-			}
-			if(dumpXMLSyntax) {
-				xmlSyntax.dumpFooter(fosXML);
-				//dumpFooterXMLSyntax(tableName, fosXML);
-				fosXML.close();
-			}
-			if(dumpJSONSyntax) {
-				jsonSyntax.dumpFooter(fosJSON);
-				//dumpFooterJSONSyntax(fosJSON);
-				fosJSON.close();
+			for(int i=0;i<syntaxList.size();i++) {
+				DumpSyntax ds = syntaxList.get(i);
+				if(doSyntaxDumpList.get(i)) {
+					ds.dumpFooter(writerList.get(i));
+					writerList.get(i).close();
+				}
 			}
 			
 			rs.close();
