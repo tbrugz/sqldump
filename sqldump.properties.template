@@ -183,3 +183,11 @@ sqldump.askforpassword=true
 #sqldump.user=sa
 #sqldump.password=sa
 #sqldump.dumpschemapattern=SA
+
+# MySQL
+#sqldump.driverclass=com.mysql.jdbc.Driver
+#sqldump.dburl=jdbc:mysql://<host>:<port>/<database>
+#sqldump.user=
+#sqldump.password=
+#sqldump.dumpschemapattern=dw
+

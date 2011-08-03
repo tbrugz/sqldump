@@ -103,12 +103,16 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" triggers grabbed");
 	}
 
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing executables");
-		String query = "select routine_name, routine_type, data_type, external_language, routine_definition "
+	String grabDBRoutinesQuery() {
+		return "select routine_name, routine_type, data_type, external_language, routine_definition "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
 				+"order by routine_catalog, routine_schema, routine_name ";
+	}
+	
+	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing executables");
+		String query = grabDBRoutinesQuery();
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
