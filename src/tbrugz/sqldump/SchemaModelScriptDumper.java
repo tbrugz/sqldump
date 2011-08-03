@@ -320,6 +320,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
 		
+		if(schemaName==null) { schemaName = ""; };
 		String outFile = outFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
 			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
 			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);

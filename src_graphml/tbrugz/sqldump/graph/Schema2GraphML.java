@@ -62,7 +62,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
-			if(t.schemaName.equals(defaultSchemaName)) {
+			if(t.schemaName!=null && t.schemaName.equals(defaultSchemaName)) {
 			}
 			else {
 				//log.debug("t: "+t.name+", "+t.schemaName+"; "+defaultSchemaName);
