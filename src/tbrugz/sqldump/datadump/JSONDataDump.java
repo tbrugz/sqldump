@@ -14,6 +14,8 @@ import tbrugz.sqldump.Utils;
 
 public class JSONDataDump extends DumpSyntax {
 
+	static final String JSON_SYNTAX_ID = "json";
+	
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
@@ -69,4 +71,8 @@ public class JSONDataDump extends DumpSyntax {
 		pw.write(s);
 	}
 	
+	@Override
+	public String getSyntaxId() {
+		return JSON_SYNTAX_ID;
+	}
 }

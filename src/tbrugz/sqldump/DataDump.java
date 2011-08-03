@@ -1,14 +1,12 @@
 package tbrugz.sqldump;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +37,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXxx: property for selecting which columns to dump
  * XXXdone: order-by-primary-key prop? asc, desc?
  * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, fixedcolumnsize
- * XXX: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
+ * XXX~: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
  * TODO: floatFormatter!
  */
 public class DataDump {
@@ -64,15 +62,6 @@ public class DataDump {
 	static final String SYNTAX_CSV = "csv";
 	static final String SYNTAX_XML = "xml";
 	static final String SYNTAX_JSON = "json"; 
-	
-	//static final String SYNTAX_XML = "xml"; 
-
-	//'insert into' props
-	//static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
-
-	//'csv dump' props
-	//static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.tablenameheader";
-	//static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.columnnamesheader";
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
@@ -119,27 +108,16 @@ public class DataDump {
 		}
 		String[] syntaxArr = syntaxes.split(",");
 		for(String syntax: syntaxArr) {
-			if(SYNTAX_INSERTINTO.equals(syntax.trim())) {
-				InsertIntoDataDump dd = new InsertIntoDataDump();
-				dd.procProperties(prop);
-				syntaxList.add(dd);
+			boolean syntaxAdded = false;
+			for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
+				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
+				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
+					ds.procProperties(prop);
+					syntaxList.add(ds);
+					syntaxAdded = true;
+				}
 			}
-			else if(SYNTAX_CSV.equals(syntax.trim())) {
-				CSVDataDump dd = new CSVDataDump();
-				dd.procProperties(prop);
-				syntaxList.add(dd);
-			}
-			else if(SYNTAX_XML.equals(syntax.trim())) {
-				XMLDataDump dd = new XMLDataDump();
-				dd.procProperties(prop);
-				syntaxList.add(dd);
-			}
-			else if(SYNTAX_JSON.equals(syntax.trim())) {
-				JSONDataDump dd = new JSONDataDump();
-				dd.procProperties(prop);
-				syntaxList.add(dd);
-			}
-			else {
+			if(!syntaxAdded) {
 				log.warn("unknown datadump syntax: "+syntax.trim());
 			}
 		}
@@ -173,7 +151,6 @@ public class DataDump {
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
 			
-			//XXX: call
 			runQuery(conn, sql, null, prop, tableName, charset, 
 					rowlimit, 
 					syntaxList
@@ -199,7 +176,7 @@ public class DataDump {
 			}
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
-			int numCol = md.getColumnCount();
+			//int numCol = md.getColumnCount();
 
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
@@ -217,49 +194,73 @@ public class DataDump {
 				ds.initDump(tableName, md);
 			}
 			
-			DumpSyntax insertInfoSyntax = getObjectOfClass(syntaxList, InsertIntoDataDump.class);
+			DumpSyntax insertIntoSyntax = getObjectOfClass(syntaxList, InsertIntoDataDump.class);
 			DumpSyntax csvSyntax = getObjectOfClass(syntaxList, CSVDataDump.class);
 			DumpSyntax xmlSyntax = getObjectOfClass(syntaxList, XMLDataDump.class);
 			DumpSyntax jsonSyntax = getObjectOfClass(syntaxList, JSONDataDump.class);
 
-			boolean dumpInsertInfoSyntax = insertInfoSyntax!=null;
+			boolean dumpInsertIntoSyntax = insertIntoSyntax!=null;
 			boolean dumpCSVSyntax = csvSyntax!=null;
 			boolean dumpXMLSyntax = xmlSyntax!=null;
 			boolean dumpJSONSyntax = jsonSyntax!=null;
 			
-			if(dumpInsertInfoSyntax) {
+			if(dumpInsertIntoSyntax) {
 				String filename = prop.getProperty(PROP_DATADUMP_INSERTINTO_FILEPATTERN, defaultFilename);
-				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-				boolean alreadyOpened = filesOpened.contains(filename);
-				if(!alreadyOpened) { filesOpened.add(filename); }
-				fosII = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				if(filename==null) {
+					log.warn("no output file defined for syntax 'insertinto'");
+					dumpInsertIntoSyntax = false;
+				}
+				else {
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					boolean alreadyOpened = filesOpened.contains(filename);
+					if(!alreadyOpened) { filesOpened.add(filename); }
+					fosII = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+				}
 			}
 			
-			if(dumpCSVSyntax) {
+			if(dumpCSVSyntax) { 
 				String filename = prop.getProperty(PROP_DATADUMP_CSV_FILEPATTERN, defaultFilename);
-				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-				boolean alreadyOpened = filesOpened.contains(filename);
-				if(!alreadyOpened) { filesOpened.add(filename); }
-				fosCSV = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-				csvSyntax.dumpHeader(fosCSV);
+				if(filename==null) {
+					log.warn("no output file defined for syntax 'csv'");
+					dumpCSVSyntax = false;
+				}
+				else {
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					boolean alreadyOpened = filesOpened.contains(filename);
+					if(!alreadyOpened) { filesOpened.add(filename); }
+					fosCSV = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+					csvSyntax.dumpHeader(fosCSV);
+				}
 			}
 
 			if(dumpXMLSyntax) {
 				String filename = prop.getProperty(PROP_DATADUMP_XML_FILEPATTERN, defaultFilename);
-				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-				boolean alreadyOpened = filesOpened.contains(filename);
-				if(!alreadyOpened) { filesOpened.add(filename); }
-				fosXML = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-				xmlSyntax.dumpHeader(fosXML);
+				if(filename==null) {
+					log.warn("no output file defined for syntax 'xml'");
+					dumpXMLSyntax = false;
+				}
+				else {
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					boolean alreadyOpened = filesOpened.contains(filename);
+					if(!alreadyOpened) { filesOpened.add(filename); }
+					fosXML = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+					xmlSyntax.dumpHeader(fosXML);
+				}
 			}
 
 			if(dumpJSONSyntax) {
 				String filename = prop.getProperty(PROP_DATADUMP_JSON_FILEPATTERN, defaultFilename);
-				filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
-				boolean alreadyOpened = filesOpened.contains(filename);
-				if(!alreadyOpened) { filesOpened.add(filename); }
-				fosJSON = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
-				jsonSyntax.dumpHeader(fosJSON);
+				if(filename==null) {
+					log.warn("no output file defined for syntax 'json'");
+					dumpInsertIntoSyntax = false;
+				}
+				else {
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					boolean alreadyOpened = filesOpened.contains(filename);
+					if(!alreadyOpened) { filesOpened.add(filename); }
+					fosJSON = new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset);
+					jsonSyntax.dumpHeader(fosJSON);
+				}
 			}
 			
 			for(DumpSyntax s: syntaxList) {
@@ -268,8 +269,8 @@ public class DataDump {
 			
 			int count = 0;
 			do {
-				if(dumpInsertInfoSyntax) {
-					insertInfoSyntax.dumpRow(rs, count, fosII);
+				if(dumpInsertIntoSyntax) {
+					insertIntoSyntax.dumpRow(rs, count, fosII);
 				}
 				if(dumpCSVSyntax) {
 					csvSyntax.dumpRow(rs, count, fosCSV);
@@ -286,7 +287,7 @@ public class DataDump {
 			while(rs.next());
 			log.info("dumped "+count+" rows from table: "+tableName);
 
-			if(dumpInsertInfoSyntax) {
+			if(dumpInsertIntoSyntax) {
 				fosII.close();
 			}
 			if(dumpCSVSyntax) {
@@ -306,111 +307,12 @@ public class DataDump {
 			rs.close();
 	}
 	
-	static DumpSyntax getObjectOfClass(List<? extends DumpSyntax> l, Class c) {
+	static DumpSyntax getObjectOfClass(List<? extends DumpSyntax> l, Class<?> c) {
 		for(Object o: l) {
 			if(c.isAssignableFrom(o.getClass())) { return (DumpSyntax) o; }
 		}
 		return null;
 	}
-
-	/*
-	//InsertInfo
-	void dumpRowInsertIntoSyntax(ResultSet rs, String tableName, int numCol, String colNames, List<Class> lsColTypes, Writer fos) throws Exception {
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-		out("insert into "+tableName+" "+
-			colNames+"values ("+
-			Utils.join4sql(vals, ", ")+");", fos, "\n");
-	}
-	
-	//CSV
-	void dumpHeaderCSVSyntax(ResultSetMetaData md, boolean doTableNameHeaderDump, boolean doColumnNamesHeaderDump, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
-		//headers
-		if(doTableNameHeaderDump) {
-			out("[table "+tableName+"]", fos, recordDelimiter);
-		}
-		if(doColumnNamesHeaderDump) {
-			StringBuffer sb = new StringBuffer();
-			for(int i=0;i<numCol;i++) {
-				sb.append(md.getColumnName(i+1)+columnDelimiter);
-			}
-			out(sb.toString(), fos, recordDelimiter);
-		}
-	}
-	/*
-	void dumpRowsCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, long rowlimit, Writer fos) throws Exception {
-		//lines
-		int count = 0;
-		do {
-			out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
-			count++;
-			if(rowlimit<=count) { break; }
-		}
-		while(rs.next());
-		log.info("dumped "+count+" rows from table: "+tableName);
-	}
-
-	//CSV
-	void dumpRowCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
-		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
-	}
-
-	//CSV2
-	void dumpRowCSVBrSyntax(ResultSet rs, String tableName, int numCol, List<Class> lsColTypes, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
-		StringBuffer sb = new StringBuffer();
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-		for(int i=0;i<lsColTypes.size();i++) {
-			sb.append( (i!=0?columnDelimiter:"")+ Utils.getFormattedCSVBrValue(vals.get(i)) );
-		}
-		out(sb.toString(), fos, recordDelimiter);
-	}
-	
-	//XML
-	void dumpHeaderXMLSyntax(String tableName, Writer fos) throws Exception {
-		out("<"+tableName+">", fos, "\n");
-	}
-
-	//XML
-	void dumpRowXMLSyntax(ResultSet rs, String tableName, int numCol, List<String> lsColNames, List<Class> lsColTypes, int count, Writer fos) throws Exception {
-		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+"<row>");
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-		for(int i=0;i<lsColNames.size();i++) {
-			sb.append( "<"+lsColNames.get(i)+">"+ vals.get(i) +"</"+lsColNames.get(i)+">");
-		}
-		sb.append("</row>");
-		out(sb.toString(), fos, "\n");
-	}
-
-	//XML
-	void dumpFooterXMLSyntax(String tableName, Writer fos) throws Exception {
-		out("</"+tableName+">", fos, "");
-	}
-
-	//JSON
-	void dumpHeaderJSONSyntax(String tableName, Writer fos) throws Exception {
-		out("{ \""+tableName+"\": [", fos, "\n");
-	}
-
-	//JSON
-	void dumpRowJSONSyntax(ResultSet rs, String tableName, int numCol, List<String> lsColNames, List<Class> lsColTypes, int count, Writer fos) throws Exception {
-		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+(count==0?"":",")+"{");
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
-		for(int i=0;i<lsColNames.size();i++) {
-			sb.append((i==0?"":", ")+Utils.getFormattedJSONValue( lsColNames.get(i) )+": "+Utils.getFormattedJSONValue( vals.get(i) ));
-		}
-		sb.append("}");
-		out(sb.toString(), fos, "\n");
-	}
-
-	//JSON
-	void dumpFooterJSONSyntax(Writer fos) throws Exception {
-		out("  ]\n}",fos, "");
-	}
-	
-	void out(String s, Writer pw, String recordDelimiter) throws IOException {
-		pw.write(s+recordDelimiter);
-	}*/
 
 	static List<String> getTables4dump(Properties prop) {
 		String tables4dumpProp = prop.getProperty(PROP_DATADUMP_TABLES);

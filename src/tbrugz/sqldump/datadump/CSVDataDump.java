@@ -20,6 +20,8 @@ public class CSVDataDump extends DumpSyntax {
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ";";
+
+	static final String CSV_SYNTAX_ID = "csv";
 	
 	String tableName;
 	int numCol;
@@ -108,6 +110,11 @@ public class CSVDataDump extends DumpSyntax {
 	
 	void out(String s, Writer pw, String recordDelimiter) throws IOException {
 		pw.write(s+recordDelimiter);
+	}
+
+	@Override
+	public String getSyntaxId() {
+		return CSV_SYNTAX_ID;
 	}
 	
 }

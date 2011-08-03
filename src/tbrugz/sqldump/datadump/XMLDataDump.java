@@ -13,6 +13,8 @@ import tbrugz.sqldump.SQLUtils;
 
 public class XMLDataDump extends DumpSyntax {
 
+	static final String XML_SYNTAX_ID = "xml";
+	
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
@@ -62,4 +64,8 @@ public class XMLDataDump extends DumpSyntax {
 		pw.write(s);
 	}
 	
+	@Override
+	public String getSyntaxId() {
+		return XML_SYNTAX_ID;
+	}
 }

@@ -228,16 +228,23 @@ public class Utils {
 		return sb.toString();
 	}
 	
-	public static Object getClassInstance(String className) {
+	public static Object getClassInstance(Class<?> c) {
 		try {
-			Class<?> c = Class.forName(className);
 			return c.newInstance();
-		} catch (ClassNotFoundException e) {
-			log.debug("class not found: "+e.getMessage(), e);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public static Object getClassInstance(String className) {
+		try {
+			Class<?> c = Class.forName(className);
+			return getClassInstance(c);
+		} catch (ClassNotFoundException e) {
+			log.debug("class not found: "+e.getMessage(), e);
 		}
 		return null;
 	}

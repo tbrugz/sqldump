@@ -10,15 +10,11 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.CSVDataDump;
 import tbrugz.sqldump.datadump.DumpSyntax;
-import tbrugz.sqldump.datadump.InsertIntoDataDump;
-import tbrugz.sqldump.datadump.JSONDataDump;
-import tbrugz.sqldump.datadump.XMLDataDump;
 
 //XXX: partition over (columnX) - different outputfiles for different values of columnX
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql
-//XXX: add prop: sqldump.query.<x>.params=1,23,111
+//XXXxxx: add prop: sqldump.query.<x>.params=1,23,111
 //XXX: add prop: sqldump.query.<x>.param.pid_xx=1
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
@@ -42,27 +38,16 @@ public class SQLQueries {
 		String[] syntaxArr = syntaxes.split(",");
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		for(String syntax: syntaxArr) {
-			if(DataDump.SYNTAX_INSERTINTO.equals(syntax.trim())) {
-				InsertIntoDataDump dtd = new InsertIntoDataDump();
-				dtd.procProperties(prop);
-				syntaxList.add(dtd);
+			boolean syntaxAdded = false;
+			for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
+				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
+				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
+					ds.procProperties(prop);
+					syntaxList.add(ds);
+					syntaxAdded = true;
+				}
 			}
-			else if(DataDump.SYNTAX_CSV.equals(syntax.trim())) {
-				CSVDataDump dtd = new CSVDataDump();
-				dtd.procProperties(prop);
-				syntaxList.add(dtd);
-			}
-			else if(DataDump.SYNTAX_XML.equals(syntax.trim())) {
-				XMLDataDump dtd = new XMLDataDump();
-				dtd.procProperties(prop);
-				syntaxList.add(dtd);
-			}
-			else if(DataDump.SYNTAX_JSON.equals(syntax.trim())) {
-				JSONDataDump dtd = new JSONDataDump();
-				dtd.procProperties(prop);
-				syntaxList.add(dtd);
-			}
-			else {
+			if(!syntaxAdded) {
 				log.warn("unknown datadump syntax: "+syntax.trim());
 			}
 		}

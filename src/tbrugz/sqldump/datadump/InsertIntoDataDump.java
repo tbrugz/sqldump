@@ -14,6 +14,7 @@ import tbrugz.sqldump.Utils;
 
 public class InsertIntoDataDump extends DumpSyntax {
 
+	static final String INSERTINTO_SYNTAX_ID = "insertinto";
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
 
 	String tableName;
@@ -64,4 +65,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 		//do nothing
 	}
 
+	@Override
+	public String getSyntaxId() {
+		return INSERTINTO_SYNTAX_ID;
+	}
 }
