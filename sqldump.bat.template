@@ -1,0 +1,1 @@
+java -cp bin;lib/commons-logging-1.1.1.jar;lib/kmlutils.jar;lib/log4j-1.2.15.jar;<other jdbc drivers> tbrugz.sqldump.SQLDump -propfile=<propfile>

@@ -27,6 +27,11 @@ public class InsertIntoDataDump extends DumpSyntax {
 	public void procProperties(Properties prop) {
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES);
 	}
+	
+	@Override
+	public String getDefaultFileExtension() {
+		return "sql";
+	}
 
 	@Override
 	public void initDump(String tableName, ResultSetMetaData md) throws SQLException {

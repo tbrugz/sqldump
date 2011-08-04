@@ -18,6 +18,10 @@ public abstract class DumpSyntax {
 	public abstract void procProperties(Properties prop);
 	
 	public abstract String getSyntaxId();
+
+	public String getDefaultFileExtension() {
+		return getSyntaxId();
+	}
 	
 	public abstract void initDump(String tableName, ResultSetMetaData md) throws Exception;
 	

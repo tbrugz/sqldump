@@ -114,7 +114,7 @@ public class SQLDump {
 		p.setProperty("password", papp.getProperty(PROP_PASSWD, ""));
 		
 		if(Utils.getPropBool(papp, PROP_ASKFORPASSWD)) {
-			p.setProperty("password", Utils.readPassword("password: "));
+			p.setProperty("password", Utils.readPassword("password [user="+p.getProperty("user")+"]: "));
 		}
 
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);

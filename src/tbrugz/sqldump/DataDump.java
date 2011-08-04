@@ -63,6 +63,7 @@ public class DataDump {
 	static final String CHARSET_DEFAULT = "UTF-8";
 	
 	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
+	static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
 	static Logger log = Logger.getLogger(DataDump.class);
 	
@@ -194,6 +195,7 @@ public class DataDump {
 				}
 				else {
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
 					boolean alreadyOpened = filesOpened.contains(filename);
 					if(!alreadyOpened) { filesOpened.add(filename); }
 					
