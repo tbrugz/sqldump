@@ -14,13 +14,6 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 				+"where routine_definition is not null "
 				+"order by routine_catalog, routine_schema, routine_name ";
 	}
-
-	@Override
-	String grabDBTriggersQuery() {
-		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing "
-			+"from information_schema.triggers "
-			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
-	}
 	
 	@Override
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
