@@ -166,7 +166,7 @@ public class SQLDump {
 			}
 		}
 		else {
-			log.info("no schema grab class defined");
+			log.info("no schema grab class [prop 'sqldump.schemagrab.grabclass'] defined");
 		}
 		
 		//SchemaModelGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();

@@ -82,6 +82,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	public void setConnection(Connection conn) {
 		this.conn = conn;
+		try {
+			conn.setReadOnly(true);
+		} catch (SQLException e) {
+			log.warn("error setting props [readonly=true] for db connection");
+			e.printStackTrace();
+		}
 	}
 	
 	void end() throws Exception {
@@ -171,14 +177,14 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					dbmsfeatures.addColumnSpecificFeatures(c, cols);
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
-				cols.close();
+				closeResultSetAndStatement(cols);
 				
 				//PKs
 				if(doSchemaGrabPKs) {
 					log.debug("getting PKs from "+fullTablename);
 					ResultSet pks = dbmd.getPrimaryKeys(null, table.schemaName, tableName);
 					grabSchemaPKs(pks, table);
-					pks.close();
+					closeResultSetAndStatement(pks);
 				}
 
 				//FKs
@@ -186,7 +192,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					log.debug("getting FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getImportedKeys(null, table.schemaName, tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
-					fkrs.close();
+					closeResultSetAndStatement(fkrs);
 				}
 				
 				//GRANTs
@@ -194,7 +200,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					log.debug("getting grants from "+fullTablename);
 					ResultSet grantrs = dbmd.getTablePrivileges(null, table.schemaName, tableName);
 					table.setGrants( grabSchemaGrants(grantrs, tableName) );
-					grantrs.close();
+					closeResultSetAndStatement(grantrs);
 				}
 				
 				//INDEXes
@@ -202,7 +208,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					log.debug("getting indexes from "+fullTablename);
 					ResultSet indexesrs = dbmd.getIndexInfo(null, table.schemaName, tableName, false, false);
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
-					indexesrs.close();
+					closeResultSetAndStatement(indexesrs);
 				}
 				
 				//tableNamesForDataDump.add(tableName);
@@ -221,7 +227,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 			schemaModel.tables.add(table);
 		}
-		rs.close();
+		closeResultSetAndStatement(rs);
 
 		if(recursivedump && (!tableOnly || deeprecursivedump)) {
 			grabTablesRecursivebasedOnFKs(dbmd, dbmsfeatures, schemaModel, schemaPattern);
@@ -428,4 +434,17 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		return null;
 	}
 	
+	static void closeResultSetAndStatement(ResultSet rs) {
+		try {
+			if(rs!=null) {
+				if(rs.getStatement()!=null) {
+					rs.getStatement().close();
+				}
+				rs.close();
+			}
+		} catch (SQLException e) {
+			log.warn("Error closing resultset or statement: "+e);
+			log.debug("Error closing resultset or statement: "+e.getMessage(), e);
+		}
+	}
 }

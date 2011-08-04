@@ -46,6 +46,10 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			log.warn("xml serialization output file ["+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
 			return;
 		}
+		if(schemaModel==null) {
+			log.warn("schemaModel is null!");
+			return;
+		}
 
 		Marshaller m = jc.createMarshaller();
 		//XXX: property for formatting or not JAXB output?

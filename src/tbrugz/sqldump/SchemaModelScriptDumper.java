@@ -149,6 +149,11 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
+		if(schemaModel==null || schemaModel.tables==null) {
+			log.warn("no tables grabbed! terminating dumpSchema()");
+			return;
+		}
+		
 		for(Table table: schemaModel.tables) {
 			switch(table.getType()) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 

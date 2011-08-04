@@ -112,6 +112,10 @@ public class Schema2GraphML implements SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		log.info("dumping graphML: translating model");
+		if(schemaModel==null) {
+			log.warn("schemaModel is null!");
+			return;
+		}
 		Root r = getGraphMlModel(schemaModel);
 		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
