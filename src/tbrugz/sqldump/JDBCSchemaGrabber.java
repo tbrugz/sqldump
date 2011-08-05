@@ -54,7 +54,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
 	boolean doSchemaGrabDbSpecific = false;
 	
-	//for conformance with SchemaModelGrabber
 	@Override
 	public void procProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
@@ -95,6 +94,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		conn.close();
 	}
 
+	Map<TableType, Integer> tablesCountByTableType;
+	
 	@Override
 	public SchemaModel grabSchema() throws Exception {
 		if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
@@ -115,9 +116,14 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, null);
 
 		log.info("schema dump... schemapattern: "+schemaPattern);
+		tablesCountByTableType = new HashMap<TableType, Integer>();
+		for(TableType tt: TableType.values()) {
+			tablesCountByTableType.put(tt, 0);
+		}
+		
 		grabSchema(schemaModel, dbmd, feats, schemaPattern, null, false);
 		
-		log.info(schemaModel.tables.size()+" tables grabbed");
+		log.info(schemaModel.tables.size()+" tables grabbed ["+tableStats()+"]");
 		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
 			log.info(schemaModel.indexes.size()+" indexes grabbed");
@@ -128,6 +134,20 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		
 		return schemaModel;
+	}
+	
+	String tableStats() {
+		StringBuffer sb = new StringBuffer();
+		int countTT = 0;
+		for(TableType tt: tablesCountByTableType.keySet()) {
+			int count = tablesCountByTableType.get(tt);
+			if(count>0) {
+				sb.append((countTT==0?"":", ")+"#"+tt+"s="+count);
+				countTT++;
+			}
+		}
+		return sb.toString();
+		
 	}
 	
 	static void showDBInfo(DatabaseMetaData dbmd) {
@@ -157,6 +177,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			if(ttype==null) { continue; }
+			
+			tablesCountByTableType.put(ttype, tablesCountByTableType.get(ttype)+1);
 			
 			//defining model
 			Table table = dbmsfeatures.getTableObject();

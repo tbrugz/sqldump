@@ -64,8 +64,10 @@ public class Table extends DBObject {
 		sb.append("--drop table "+tableName+";\n");
 		sb.append("create ");
 		sb.append(getTableType4sql());
-		sb.append("table "+tableName+" ( -- type="+type+"\n");
+		sb.append("table "+tableName+" ( -- type="+type);
 
+		int countTabElements=0;
+		
 		//Columns
 		for(Column c: columns) {
 			String colDesc = null;
@@ -76,7 +78,8 @@ public class Table extends DBObject {
 				colDesc = Column.getColumnDesc(c, null, null, null);
 			}
 			//if(c.pk) { pkCols.add(c.name); }
-			sb.append("\t"+colDesc+",\n");
+			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);
+			countTabElements++;
 		}
 		
 		//PKs
@@ -91,33 +94,41 @@ public class Table extends DBObject {
 					if(!dumpPKs) break;
 				case CHECK:
 				case UNIQUE:
-					sb.append("\t"+cons.getDefinition(false)+",\n");
+					sb.append((countTabElements==0?"":",")+"\n\t"+cons.getDefinition(false));
 			}
+			countTabElements++;
 		}
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
-			sb.append(dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
+			//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
+			for(FK fk: foreignKeys) {
+				if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
+					sb.append((countTabElements==0?"":",")+"\n\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName));
+				}
+				countTabElements++;
+			}
 		}
 		
 		//Table end
-		sb.delete(sb.length()-2, sb.length());
+		//sb.delete(sb.length()-2, sb.length());
 		sb.append("\n)");
 		sb.append(getTableFooter4sql());
 		return sb.toString();
 	}
 
-	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName, boolean dumpWithSchemaName) {
+	/*String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName, boolean dumpWithSchemaName) {
 		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
 				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
 				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
+				//sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
 				sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
 			}
 		}
 		return sb.toString();
-	}
+	}*/
 	
 	public String getTableType4sql() {
 		return "";
