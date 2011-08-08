@@ -37,7 +37,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			//grabDBIndexes(model, schemaPattern, conn);
 		//}
 		grabDBSequences(model, schemaPattern, conn);
-		grabDBConstraints(model, schemaPattern, conn);
+		grabDBCheckConstraints(model, schemaPattern, conn);
+		grabDBUniqueConstraints(model, schemaPattern, conn);
 	}
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -165,10 +166,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" sequences grabbed");
 	}
 
-	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing constraints");
+	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing check constraints");
 		
-		//check constraints
 		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
@@ -199,29 +199,39 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		rs.close();
 		st.close();
 		log.info(count+" check constraints grabbed");
+	}
 
-		//unique constraints
-		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
-		query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
+	String grabDBUniqueConstraintsQuery() {
+		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
 				+"and constraint_type = 'UNIQUE' "
 				+"order by table_name, constraint_name, column_name ";
-		st = conn.createStatement();
+	}
+	
+	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing unique constraints");
+
+		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
+		String query = grabDBUniqueConstraintsQuery();
+		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery(query);
 		
-		count = 0;
+		int count = 0;
 		int countUniqueConstraints = 0;
-		String previousConstraint = null;
+		String previousConstraintId = null;
 		Constraint c = null;
 		while(rs.next()) {
 			String schemaName = rs.getString(1);
 			String tableName = rs.getString(2);
 			String constraintName = rs.getString(3);
+			String constraintId = tableName+"."+constraintName;
 			
-			if(!constraintName.equals(previousConstraint)) {
+			if(!constraintId.equals(previousConstraintId)) {
 				c = new Constraint();
+				c.type = Constraint.ConstraintType.UNIQUE;
+				c.setName( constraintName );
 				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
@@ -229,12 +239,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				else {
 					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
-				c.type = Constraint.ConstraintType.UNIQUE;
-				c.setName( constraintName );
 				countUniqueConstraints++;
 			}
 			c.uniqueColumns.add(rs.getString(4));
-			previousConstraint = constraintName;
+			previousConstraintId = constraintId;
 			count++;
 		}
 		

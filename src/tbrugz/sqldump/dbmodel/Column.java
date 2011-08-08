@@ -42,7 +42,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	
 	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
-		String colType = c.type;
+		String colType = c.type.trim();
 		
 		if(fromDbId!=null && toDbId!=null) {
 			if(fromDbId.equals(toDbId)) {
@@ -58,7 +58,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		
 		boolean usePrecision = true;
 		if(typeMapping!=null) {
-			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
+			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType.toUpperCase()+".useprecision"));
 		}
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
