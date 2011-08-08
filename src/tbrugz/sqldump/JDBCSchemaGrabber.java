@@ -174,6 +174,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			TableType ttype = null;
 			String tableName = rs.getString("TABLE_NAME");
 			String schemaName = rs.getString("TABLE_SCHEM");
+			String catalogName = rs.getString("TABLE_CAT");
+			
+			//for MySQL
+			if(schemaName==null && catalogName!=null) { schemaName = catalogName; }
 			
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			if(ttype==null) { continue; }
@@ -362,7 +366,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		int count=0;
 		while(pks.next()) {
 			pkName = pks.getString("PK_NAME");
-			if(pkName==null) {
+			if(pkName==null || pkName.equals("PRIMARY")) { //equals("PRIMARY"): for MySQL
 				pkName = "PK_"+table.name;
 			}
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
