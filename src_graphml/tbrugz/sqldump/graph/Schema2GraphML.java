@@ -2,7 +2,9 @@ package tbrugz.sqldump.graph;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -33,7 +35,8 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 
 	File output;
-	String defaultSchemaName;
+	List<String> schemaNamesList = new ArrayList<String>();
+	//String defaultSchemaName;
 	
 	public Root getGraphMlModel(SchemaModel schemaModel) {
 		Root graphModel = new Root();
@@ -62,7 +65,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
-			if(t.schemaName!=null && t.schemaName.equals(defaultSchemaName)) {
+			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
 			}
 			else {
 				//log.debug("t: "+t.name+", "+t.schemaName+"; "+defaultSchemaName);
@@ -131,7 +134,14 @@ public class Schema2GraphML implements SchemaModelDumper {
 	@Override
 	public void procProperties(Properties prop) {
 		String s = prop.getProperty(PROP_OUTPUTFILE);
-		defaultSchemaName = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
+		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
+
+		String[] schemasArr = schemaPattern.split(",");
+		schemaNamesList = new ArrayList<String>();
+		for(String schemaName: schemasArr) {
+			schemaNamesList.add(schemaName.trim());
+		}
+		
 		setOutput(new File(s));
 	}
 }

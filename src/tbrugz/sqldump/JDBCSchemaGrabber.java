@@ -121,18 +121,27 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			tablesCountByTableType.put(tt, 0);
 		}
 		
-		grabSchema(schemaModel, dbmd, feats, schemaPattern, null, false);
-		
+		String[] schemasArr = schemaPattern.split(",");
+		List<String> schemasList = new ArrayList<String>();
+		for(String schemaName: schemasArr) {
+			schemasList.add(schemaName.trim());
+		}
+
+		for(String schemaName: schemasList) {
+			grabSchema(schemaModel, dbmd, feats, schemaName, null, false);
+		}
 		log.info(schemaModel.tables.size()+" tables grabbed ["+tableStats()+"]");
 		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
 			log.info(schemaModel.indexes.size()+" indexes grabbed");
 		}
-
+			
 		if(doSchemaGrabDbSpecific) {
-			grabDbSpecific(schemaModel, schemaPattern);
+			for(String schemaName: schemasList) {
+				grabDbSpecific(schemaModel, schemaName);
+			}
 		}
-		
+
 		return schemaModel;
 	}
 	
@@ -163,7 +172,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	//private static String PADDING = "  ";
 	
 	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
-		log.debug("schema dump... schemapattern: "+schemaPattern+", tablePattern: "+tablePattern);
+		log.debug("grabSchema()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 

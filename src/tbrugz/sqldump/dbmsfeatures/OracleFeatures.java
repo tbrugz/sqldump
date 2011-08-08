@@ -73,7 +73,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		log.info("["+schemaPattern+"]: "+count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -97,7 +97,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(count+" triggers grabbed");
+		log.info("["+schemaPattern+"]: "+count+" triggers grabbed");
 	}
 
 	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -148,7 +148,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(countExecutables+" executable objects grabbed [linecount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+count+"]");
 	}
 
 	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -172,7 +172,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(count+" synonyms grabbed");
+		log.info("["+schemaPattern+"]: "+count+" synonyms grabbed");
 	}
 
 	void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -198,7 +198,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
-		int count = 0;
+		int colCount = 0;
+		int idxCount = 0;
 		Index idx = null;
 		
 		while(rs.next()) {
@@ -208,6 +209,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//end last object
 				if(idx!=null) {
 					model.getIndexes().add(idx);
+					idxCount++;
 				}
 				//new object
 				idx = new Index();
@@ -217,13 +219,16 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				idx.tableName = rs.getString(4);
 			}
 			idx.columns.add(rs.getString(5));
-			count++;
+			colCount++;
 		}
-		model.getIndexes().add(idx);
+		if(idx!=null) {
+			model.getIndexes().add(idx);
+			idxCount++;
+		}
 		rs.close();
 		st.close();
 		
-		log.info(model.getIndexes().size()+" indexes grabbed [colcount="+count+"]");
+		log.info("["+schemaPattern+"]: "+idxCount+" indexes grabbed [colcount="+colCount+"]");
 	}
 
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -247,7 +252,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(count+" sequences grabbed");
+		log.info("["+schemaPattern+"]: "+count+" sequences grabbed");
 	}
 	
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
@@ -333,7 +338,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(count+" check constraints grabbed");
+		log.info("["+schemaPattern+"]: "+count+" check constraints grabbed");
 
 		//unique constraints
 		query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
@@ -373,7 +378,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
 	}
 	
 }
