@@ -28,6 +28,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
+	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
+	
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	
@@ -178,6 +180,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 		boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
 		boolean deeprecursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP));
+		boolean ignoretableswithzerocolumns = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS);
 		
 		while(rs.next()) {
 			TableType ttype = null;
@@ -206,13 +209,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 				//columns
 				ResultSet cols = dbmd.getColumns(null, table.schemaName, tableName, null);
+				int numCol = 0;
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
 					table.getColumns().add(c);
 					dbmsfeatures.addColumnSpecificFeatures(c, cols);
+					numCol++;
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
 				closeResultSetAndStatement(cols);
+				if(numCol==0) {	
+					log.warn("zero columns on table '"+fullTablename+"'? [ignored="+ignoretableswithzerocolumns+"]");
+					if(ignoretableswithzerocolumns) { continue; }
+				}
 				
 				//PKs
 				if(doSchemaGrabPKs) {
