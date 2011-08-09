@@ -32,6 +32,12 @@ sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
 #sqldump.outputfilepattern.bytype.FK=output/FK.sql
 
 #
+# delete files
+# option option to delete initial output dir contents (except special hidden files (unix dotfiles, eg: .svn, .git, .hg) and files that starts with "_")
+#
+sqldump.deleteregularfilesfromdir=${outputdir}
+
+#
 # schema grab props
 #
 

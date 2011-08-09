@@ -14,7 +14,18 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Properties;
 
+import java.io.FileFilter;
+
 import org.apache.log4j.Logger;
+
+class RegularFileFilter implements FileFilter {
+	
+	@Override
+	public boolean accept(File f) {
+		return !f.getName().startsWith(".") && !f.getName().startsWith("_");
+		//return !f.getName().startsWith(".");
+	}
+}
 
 public class Utils {
 	
@@ -248,6 +259,22 @@ public class Utils {
 		}
 		return null;
 	}
+	
+	public static void deleteDirRegularContents(String s) {
+		log.info("deleting regular files from dir: "+s);
+		File f = new File(s);
+		File files[] = f.listFiles(new RegularFileFilter());
+		for(File ff: files) {
+			if(ff.isFile()) {
+				log.debug("file to delete: "+ff);
+				ff.delete();
+			}
+			else if(ff.isDirectory()) {
+				//XXX: deleteDirRegularContents: recurse int subdirs
+				log.debug("ignored dir: "+ff);
+			}
+		}
+	} 
 	
 	public static void main(String[] args) {
 		String s = readPasswordIntern("pass: ", "*");

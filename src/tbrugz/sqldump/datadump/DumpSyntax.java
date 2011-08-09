@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-//XXX: add syntax: html
-//XXX: add syntax: 'formatted fixed column' (sqlplus-like) 
+//TODO: add syntax: html
+//TODO: add syntax: 'formatted fixed column' (sqlplus-like) 
 public abstract class DumpSyntax {
 	
 	static final Class[] arr = {InsertIntoDataDump.class, CSVDataDump.class, XMLDataDump.class, JSONDataDump.class};

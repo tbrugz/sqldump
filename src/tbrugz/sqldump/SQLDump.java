@@ -58,6 +58,7 @@ public class SQLDump {
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
+	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
@@ -183,6 +184,11 @@ public class SQLDump {
 		//SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		//schemaSerialGrabber.procProperties(sdd.papp);
 		//SchemaModel sm = schemaSerialGrabber.grabSchema();
+		
+		String dirToDeleteFiles = sdd.papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
+		if(dirToDeleteFiles!=null) {
+			Utils.deleteDirRegularContents(dirToDeleteFiles);
+		}
 		
 		if(sdd.doSchemaDump) {
 			
