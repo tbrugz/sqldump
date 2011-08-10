@@ -7,11 +7,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-//TODO: add syntax: html
+//TODOne: add syntax: html
 //TODO: add syntax: 'formatted fixed column' (sqlplus-like) 
 public abstract class DumpSyntax {
 	
-	static final Class[] arr = {InsertIntoDataDump.class, CSVDataDump.class, XMLDataDump.class, JSONDataDump.class};
+	static final Class[] arr = {
+		InsertIntoDataDump.class,
+		CSVDataDump.class,
+		XMLDataDump.class,
+		HTMLDataDump.class,
+		JSONDataDump.class
+	};
 	
 	public static List<Class> getSyntaxes() {
 		return Arrays.asList(arr);

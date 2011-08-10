@@ -87,7 +87,7 @@ sqldump.dodatadump=false
 sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 
 # syntaxes
-sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml
+sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml, html
 
 # default prop: sqldump.datadump.filepattern
 # sqldump.datadump.filepattern=${outputdir}/data_${tablename}.${syntaxfileext}
