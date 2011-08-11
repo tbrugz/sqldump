@@ -12,29 +12,45 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.Utils;
 
 //XXXdone: left-align for strings & right-align for numbers
-//XXX: prop for 'separator' & 'lineGroupSize'
+//XXXdone: prop for 'separator' & 'lineGroupSize'
+//XXXdone: prop for null value? defalut <null>?
 
 //FFC: Formatted Fixed Column
 public class FFCDataDump extends DumpSyntax {
 
+	static final String PROP_DATADUMP_FCC_COLUMNDELIMITER = "sqldump.datadump.fcc.columndelimiter";
+	static final String PROP_DATADUMP_FCC_LINEGROUPSIZE = "sqldump.datadump.fcc.linegroupsize";
+	static final String PROP_DATADUMP_FCC_NULLVALUE = "sqldump.datadump.fcc.nullvalue";
+
 	static final String FFC_SYNTAX_ID = "ffc";
+	static final String DEFAULT_NULL_VALUE = "";
 	static Logger log = Logger.getLogger(FFCDataDump.class);
 	
-	//String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
 	
-	
 	@Override
 	public void procProperties(Properties prop) {
+		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FCC_LINEGROUPSIZE);
+		if(propLineGroupSize!=null && propLineGroupSize>0) {
+			lineGroupSize = (int)(long) propLineGroupSize;
+		}
+		String propColDelim = prop.getProperty(PROP_DATADUMP_FCC_COLUMNDELIMITER);
+		if(propColDelim!=null) {
+			separator = propColDelim;
+		}
+		String propNullValue = prop.getProperty(PROP_DATADUMP_FCC_NULLVALUE);
+		if(propNullValue!=null) {
+			nullValue = propNullValue;
+		}
 	}
 
 	@Override
 	public void initDump(String tableName, ResultSetMetaData md) throws SQLException {
-		//this.tableName = tableName;
 		numCol = md.getColumnCount();		
 		lsColNames.clear();
 		lsColTypes.clear();
@@ -59,6 +75,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	int lineGroupSize = 20;
 	String separator = " | ";
+	String nullValue = DEFAULT_NULL_VALUE;
 
 	//List<Integer> headersColsMaxLenght = new ArrayList<Integer>();
 	List<Integer> colsMaxLenght = new ArrayList<Integer>();
@@ -71,26 +88,34 @@ public class FFCDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpRow(ResultSet rs, int count, Writer fos) throws Exception {
-		if(count!=0 && count%lineGroupSize==0) {
+		//first count is equal 0
+		if((count+1)%lineGroupSize==0) {
 			dumpBuffer(fos);
 		}
 
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List<String> valsStr = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) {
 			int max = colsMaxLenght.get(i);
-			Object value = vals.get(i);
+			/*Object value = vals.get(i);
 			if(value!=null) {
-				String valueStr = String.valueOf(value);
+				String valueStr = getFormattedValue(value);
 				if(max<valueStr.length()) { 
 					colsMaxLenght.set(i, valueStr.length());
 				}
+			}*/
+			String valueStr = getFormattedValue(vals.get(i));
+			if(max<valueStr.length()) { 
+				colsMaxLenght.set(i, valueStr.length());
 			}
+
 			int maxCol = lsColNames.get(i).length();
-			if(maxCol>max) {
+			if(max<maxCol) {
 				colsMaxLenght.set(i, maxCol);
 			}
+			valsStr.add(valueStr);
 		}
-		valuesBuffer.add(vals);
+		valuesBuffer.add(valsStr);
 	}
 	
 	void clearBuffer() {
@@ -112,7 +137,7 @@ public class FFCDataDump extends DumpSyntax {
 		for(int i=0;i<valuesBuffer.size();i++) {
 			List<String> vals = valuesBuffer.get(i);
 			for(int j=0;j<lsColNames.size();j++) {
-				appendString(sb, colsMaxLenght.get(j), String.valueOf(vals.get(j)), j );
+				appendString(sb, colsMaxLenght.get(j), vals.get(j), j );
 			}
 			sb.append("\n");
 		}
@@ -129,6 +154,11 @@ public class FFCDataDump extends DumpSyntax {
 		else {
 			sb.append( String.format("%"+len+"s"+separator, value) );
 		}
+	}
+	
+	String getFormattedValue(Object o) {
+		if(o==null) return nullValue;
+		return Utils.getFormattedCSVBrValue(o);
 	}
 
 	@Override

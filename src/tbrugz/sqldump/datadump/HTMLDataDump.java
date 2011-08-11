@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import tbrugz.sqldump.SQLUtils;
 
+//XXX: prop for stylesheet?
 public class HTMLDataDump extends DumpSyntax {
 
 	static final String HTML_SYNTAX_ID = "html";
