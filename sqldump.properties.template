@@ -111,10 +111,12 @@ sqldump.datadump.columnnamesheader=true
 sqldump.datadump.recorddelimiter=\r\n
 sqldump.datadump.columndelimiter=;
 
-# formatted fixed column (FFC) syntax props
+# FFC (formatted fixed column) syntax props
 #sqldump.datadump.fcc.linegroupsize=30
 #sqldump.datadump.fcc.columndelimiter=\ ;\ 
 #sqldump.datadump.fcc.nullvalue=<null>
+#sqldump.datadump.fcc.showcolnames=false
+#sqldump.datadump.fcc.showcolnameslines=false
 
 # charset:: default: UTF-8; options: ISO-8859-1, UTF-16, US-ASCII, ...
 #sqldump.datadump.charset=UTF-8 

@@ -17,6 +17,7 @@ import tbrugz.sqldump.Utils;
 //XXXdone: left-align for strings & right-align for numbers
 //XXXdone: prop for 'separator' & 'lineGroupSize'
 //XXXdone: prop for null value? defalut <null>?
+//XXXdone: prop for showing or not column names
 
 //FFC: Formatted Fixed Column
 public class FFCDataDump extends DumpSyntax {
@@ -24,6 +25,8 @@ public class FFCDataDump extends DumpSyntax {
 	static final String PROP_DATADUMP_FCC_COLUMNDELIMITER = "sqldump.datadump.fcc.columndelimiter";
 	static final String PROP_DATADUMP_FCC_LINEGROUPSIZE = "sqldump.datadump.fcc.linegroupsize";
 	static final String PROP_DATADUMP_FCC_NULLVALUE = "sqldump.datadump.fcc.nullvalue";
+	static final String PROP_DATADUMP_FCC_SHOWCOLNAMES = "sqldump.datadump.fcc.showcolnames";
+	static final String PROP_DATADUMP_FCC_SHOWCOLNAMESLINES = "sqldump.datadump.fcc.showcolnameslines";
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	static final String DEFAULT_NULL_VALUE = "";
@@ -32,6 +35,7 @@ public class FFCDataDump extends DumpSyntax {
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
+	boolean showColNames = true, showColNamesLines = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -47,6 +51,8 @@ public class FFCDataDump extends DumpSyntax {
 		if(propNullValue!=null) {
 			nullValue = propNullValue;
 		}
+		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FCC_SHOWCOLNAMES, true);
+		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FCC_SHOWCOLNAMESLINES, true);
 	}
 
 	@Override
@@ -109,9 +115,11 @@ public class FFCDataDump extends DumpSyntax {
 				colsMaxLenght.set(i, valueStr.length());
 			}
 
-			int maxCol = lsColNames.get(i).length();
-			if(max<maxCol) {
-				colsMaxLenght.set(i, maxCol);
+			if(showColNames) {
+				int maxCol = lsColNames.get(i).length();
+				if(max<maxCol) {
+					colsMaxLenght.set(i, maxCol);
+				}
 			}
 			valsStr.add(valueStr);
 		}
@@ -129,11 +137,34 @@ public class FFCDataDump extends DumpSyntax {
 	void dumpBuffer(Writer fos) throws IOException {
 		//print buffer
 		StringBuffer sb = new StringBuffer();
-		for(int j=0;j<lsColNames.size();j++) {
-			//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-			appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
+
+		if(showColNames) {
+			if(showColNamesLines) {
+				//upper line
+				for(int j=0;j<lsColNames.size();j++) {
+					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
+					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
+				}
+				sb.append("\n");
+			}
+	
+			//col names
+			for(int j=0;j<lsColNames.size();j++) {
+				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
+				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
+			}
+			sb.append("\n");
+	
+			if(showColNamesLines) {
+				//lower line
+				for(int j=0;j<lsColNames.size();j++) {
+					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
+					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
+				}
+				sb.append("\n");
+			}
 		}
-		sb.append("\n");
+		
 		for(int i=0;i<valuesBuffer.size();i++) {
 			List<String> vals = valuesBuffer.get(i);
 			for(int j=0;j<lsColNames.size();j++) {
@@ -154,6 +185,14 @@ public class FFCDataDump extends DumpSyntax {
 		else {
 			sb.append( String.format("%"+len+"s"+separator, value) );
 		}
+	}
+
+	void appendPattern(StringBuffer sb, int len, String pattern, String separator) {
+		//sb.append( String.format("%"+len+"s"+separator, value) );
+		for(int i=0;i<len;i++) {
+			sb.append( pattern );
+		}
+		sb.append(separator);
 	}
 	
 	String getFormattedValue(Object o) {

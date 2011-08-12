@@ -189,8 +189,12 @@ public class Utils {
 	*/
 	
 	public static boolean getPropBool(Properties prop, String key) {
+		return getPropBool(prop, key, false);
+	}
+
+	public static boolean getPropBool(Properties prop, String key, boolean defaultValue) {
 		String value = prop.getProperty(key);
-		if(value==null) { return false; }
+		if(value==null) { return defaultValue; }
 		return "true".equals(value.trim());
 	}
 	
