@@ -103,22 +103,18 @@ public class FFCDataDump extends DumpSyntax {
 		List<String> valsStr = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) {
 			int max = colsMaxLenght.get(i);
-			/*Object value = vals.get(i);
-			if(value!=null) {
-				String valueStr = getFormattedValue(value);
-				if(max<valueStr.length()) { 
-					colsMaxLenght.set(i, valueStr.length());
-				}
-			}*/
+
 			String valueStr = getFormattedValue(vals.get(i));
-			if(max<valueStr.length()) { 
-				colsMaxLenght.set(i, valueStr.length());
+			if(max<valueStr.length()) {
+				max = valueStr.length();
+				colsMaxLenght.set(i, max);
 			}
 
 			if(showColNames) {
 				int maxCol = lsColNames.get(i).length();
 				if(max<maxCol) {
-					colsMaxLenght.set(i, maxCol);
+					max = maxCol;
+					colsMaxLenght.set(i, max);
 				}
 			}
 			valsStr.add(valueStr);

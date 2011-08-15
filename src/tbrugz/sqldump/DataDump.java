@@ -32,7 +32,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * XXXdone: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
  * XXXxx: property for selecting which columns to dump
  * XXXdone: order-by-primary-key prop? asc, desc?
- * TODO: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, fixedcolumnsize
+ * TODOne: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, x fixedcolumnsize
  * XXXdone: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
  * TODO: floatFormatter!
  */
