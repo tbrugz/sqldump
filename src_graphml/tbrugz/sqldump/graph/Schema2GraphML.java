@@ -21,37 +21,34 @@ import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.xml.AbstractDump;
+
+enum EdgeLabelType {
+	FK, FKANDCOLUMNS, COLUMNS, NONE;
+}
 
 /*
  * XXX: show PK columns, FK columns, constraints?
- * TODO: stereotype may include 'otherschema' or object type (table, view, synonym, temporary table, external table)
- * XXX: color by row count? height by col size?
+ * TODO: stereotype may include 'otherschema' or object type (table, view, synonym(?), temporary table, external table)
+ * XXX: color by row count? 
+ * XXXdone: height by col size?
+ * XXX: prop for toggling on/off the adjustment of node height?
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
-	static Log log = LogFactory.getLog(AbstractDump.class);
+	static Log log = LogFactory.getLog(Schema2GraphML.class);
 	
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
+	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
+	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
+	
 	//String defaultSchemaName;
 	
 	public Root getGraphMlModel(SchemaModel schemaModel) {
 		Root graphModel = new Root();
 		
-		/*Set<FK> fks = schemaModel.getForeignKeys();
-		Map<String, Set<FK>> fkMap = new HashMap<String, Set<FK>>(); 
-		for(FK fk: fks) {
-			String fkId = fk.getSourceId();
-			Set<FK> fkSet = fkMap.get(fkId);
-			if(fkSet==null) {
-				fkSet = new HashSet<FK>();
-				fkMap.put(fkId, fkSet);
-			}
-			fkSet.add(fk);
-		}*/
 		Set<String> tableIds = new HashSet<String>();
 		
 		for(Table t: schemaModel.getTables()) {
@@ -59,6 +56,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			String id = t.getSchemaName()+"."+t.getName();
 			n.setId(id);
 			n.setLabel(id);
+			n.setColumnNumber(t.getColumns().size());
 			StringBuffer sb = new StringBuffer();
 			//sb.append("--type: "+t.type+"\n");
 			for(Column c: t.getColumns()) {
@@ -74,13 +72,6 @@ public class Schema2GraphML implements SchemaModelDumper {
 			
 			tableIds.add(id);
 			graphModel.getChildren().add(n);
-			/*Set<FK> fkSet = fkMap.get(id);
-			if(fkSet!=null) {
-    			for(FK fk: fkSet) {
-    				Link l = fkToLink(fk);
-    				n.getProx().add(l);
-    			}
-			}*/
 		}
 		
 		for(FK fk: schemaModel.getForeignKeys()) {
@@ -102,10 +93,20 @@ public class Schema2GraphML implements SchemaModelDumper {
 		return graphModel;
 	}
 	
-	static Edge fkToLink(FK fk) {
+	Edge fkToLink(FK fk) {
 		Edge l = new Edge();
-		//l.setName(fk.getName()); //old fk label: just fk name
-		l.setName(fk.getName()+" ("+fk.fkColumns+" -> "+fk.pkColumns+")"); //fk label: fk name + columns involved
+		switch(edgeLabel) {
+			case FK: 
+				l.setName(fk.getName()); break;
+			case COLUMNS: 
+				l.setName("("+fk.fkColumns+" -> "+fk.pkColumns+")"); break;
+			case FKANDCOLUMNS:
+				//fk label: fk name + columns involved
+				l.setName(fk.getName()+" ("+fk.fkColumns+" -> "+fk.pkColumns+")"); break;
+			case NONE:
+			default:
+				l.setName(""); break;
+		}
 		l.setSource(fk.getSourceId());
 		l.setTarget(fk.getTargetId());
 		
@@ -140,6 +141,15 @@ public class Schema2GraphML implements SchemaModelDumper {
 		schemaNamesList = new ArrayList<String>();
 		for(String schemaName: schemasArr) {
 			schemaNamesList.add(schemaName.trim());
+		}
+		
+		//sqldump.graphmldump.edgelabel=FK|FKANDCOLUMNS|COLUMNS|NONE
+		String edgeLabelStr = prop.getProperty(PROP_EDGELABEL, EdgeLabelType.NONE.name());
+		try {
+			edgeLabel = EdgeLabelType.valueOf(edgeLabelStr);
+		}
+		catch(IllegalArgumentException e) {
+			log.warn("Illegal value for prop '"+PROP_EDGELABEL+"': "+edgeLabelStr);
 		}
 		
 		setOutput(new File(s));

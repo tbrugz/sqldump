@@ -14,8 +14,13 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 	@Override
 	public void outNodeContents(Node t, int level) {
 		if(t instanceof TableNode) {
+			TableNode tn = (TableNode) t;
 			//log.debug("outNode: "+t.getId()+" sn: "+getSnippetId(t, "node")+", st: "+t.getStereotype());
-			outSnippet(getSnippetId(t, "node"), level, t.getLabel(), ((TableNode)t).getColumnsDesc());
+			outSnippet(getSnippetId(t, "node"), level, 
+					t.getLabel(), //label 
+					tn.getColumnsDesc(), //contents
+					String.valueOf(50 + (tn.getColumnNumber()*15)) //height
+					);
 		}
 		else {
 			log.warn("Unknown node type: "+t);
