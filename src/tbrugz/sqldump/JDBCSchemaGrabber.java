@@ -410,8 +410,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fkName = "FK_"+count;
 				count++;
 			}
-			log.debug("fk: "+fkName);
 			FK fk = fks.get(fkName);
+			log.debug("fk: "+fkName+" - "+fk);
 			if(fk==null) {
 				fk = new FK();
 				fk.setName(fkName);

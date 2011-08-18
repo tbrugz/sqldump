@@ -22,11 +22,11 @@ import tbrugz.sqldump.Utils;
 //FFC: Formatted Fixed Column
 public class FFCDataDump extends DumpSyntax {
 
-	static final String PROP_DATADUMP_FCC_COLUMNDELIMITER = "sqldump.datadump.fcc.columndelimiter";
-	static final String PROP_DATADUMP_FCC_LINEGROUPSIZE = "sqldump.datadump.fcc.linegroupsize";
-	static final String PROP_DATADUMP_FCC_NULLVALUE = "sqldump.datadump.fcc.nullvalue";
-	static final String PROP_DATADUMP_FCC_SHOWCOLNAMES = "sqldump.datadump.fcc.showcolnames";
-	static final String PROP_DATADUMP_FCC_SHOWCOLNAMESLINES = "sqldump.datadump.fcc.showcolnameslines";
+	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
+	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
+	static final String PROP_DATADUMP_FFC_NULLVALUE = "sqldump.datadump.ffc.nullvalue";
+	static final String PROP_DATADUMP_FFC_SHOWCOLNAMES = "sqldump.datadump.ffc.showcolnames";
+	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	static final String DEFAULT_NULL_VALUE = "";
@@ -39,20 +39,20 @@ public class FFCDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FCC_LINEGROUPSIZE);
+		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FFC_LINEGROUPSIZE);
 		if(propLineGroupSize!=null && propLineGroupSize>0) {
 			lineGroupSize = (int)(long) propLineGroupSize;
 		}
-		String propColDelim = prop.getProperty(PROP_DATADUMP_FCC_COLUMNDELIMITER);
+		String propColDelim = prop.getProperty(PROP_DATADUMP_FFC_COLUMNDELIMITER);
 		if(propColDelim!=null) {
 			separator = propColDelim;
 		}
-		String propNullValue = prop.getProperty(PROP_DATADUMP_FCC_NULLVALUE);
+		String propNullValue = prop.getProperty(PROP_DATADUMP_FFC_NULLVALUE);
 		if(propNullValue!=null) {
 			nullValue = propNullValue;
 		}
-		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FCC_SHOWCOLNAMES, true);
-		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FCC_SHOWCOLNAMESLINES, true);
+		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
+		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 	}
 
 	@Override
