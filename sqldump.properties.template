@@ -48,6 +48,7 @@ sqldump.dotests=true
 sqldump.doschemadump=true
 sqldump.doschemadump.grants=true
 sqldump.doschemadump.fks=true
+sqldump.doschemadump.exportedfks=true
 sqldump.doschemadump.fks.atend=true
 sqldump.doschemadump.pks=true
 # sqldump.dbspecificfeatures.grabindexes may be used instead of sqldump.doschemadump.indexes (really better performance on oracle)
@@ -58,6 +59,7 @@ sqldump.dumpwithschemaname=true
 
 # recursive dump of tables based on FKs
 sqldump.doschemadump.recursivedumpbasedonfks=true
+sqldump.doschemadump.recursivedumpbasedonfks.exportedfks=false
 sqldump.doschemadump.recursivedumpbasedonfks.deep=true
 
 #

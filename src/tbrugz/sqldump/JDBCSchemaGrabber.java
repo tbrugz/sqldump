@@ -18,13 +18,16 @@ import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
 
 /*
- * TODO: accept list of schemas, tables/objects to grab/dump, types of objects to grab/dump
+ * TODOne: accept list of schemas to grab/dump
+ * TODO: accept list of tables/objects to grab/dump, types of objects to grab/dump
+ * XXX: performance optimization: grab (columns, FKs, ...) in bulk
  */
 public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
+	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
@@ -32,6 +35,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 	
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
@@ -53,7 +57,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	Properties propOriginal;
 	Properties columnTypeMapping = new ParametrizedProperties();
 	
-	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
+	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabExportedFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
 	boolean doSchemaGrabDbSpecific = false;
 	
 	@Override
@@ -66,11 +70,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		//inicializa variaveis controle
 		doSchemaGrabPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
 		doSchemaGrabFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		//doSchemaDumpFKsAtEnd = papp.getProperty(PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		doSchemaGrabExportedFKs = papp.getProperty(PROP_DO_SCHEMADUMP_EXPORTEDFKS, "").equals("true");
 		doSchemaGrabGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		//dumpWithSchemaName = papp.getProperty(PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		//dumpSynonymAsTable = papp.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		//dumpViewAsTable = papp.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 		doSchemaGrabIndexes = papp.getProperty(PROP_DO_SCHEMADUMP_INDEXES, "").equals("true");
 		doSchemaGrabDbSpecific = papp.getProperty(PROP_DUMP_DBSPECIFIC, "").equals("true");
 
@@ -132,6 +133,21 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		for(String schemaName: schemasList) {
 			grabSchema(schemaModel, dbmd, feats, schemaName, null, false);
 		}
+		
+		boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
+		if(recursivedump) {
+			boolean grabExportedFKsAlso = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS));
+			int lastTableCount = schemaModel.tables.size();
+			log.info("grabbing tables recursively: #ini:"+lastTableCount);
+			while(true) {
+				grabTablesRecursivebasedOnFKs(dbmd, feats, schemaModel, schemaPattern, grabExportedFKsAlso);
+				int newTableCount = schemaModel.tables.size();
+				if(newTableCount <= lastTableCount) { break; }
+				log.info("grabbing tables recursively: #last:"+lastTableCount+" #now:"+newTableCount);
+				lastTableCount = newTableCount;
+			}
+		}
+		
 		log.info(schemaModel.tables.size()+" tables grabbed ["+tableStats()+"]");
 		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
@@ -178,7 +194,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 
-		boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
+		//boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
 		boolean deeprecursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP));
 		boolean ignoretableswithzerocolumns = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS);
 		
@@ -238,6 +254,14 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					closeResultSetAndStatement(fkrs);
 				}
+
+				//FKs "exported"
+				if(doSchemaGrabExportedFKs && (!tableOnly || deeprecursivedump)) {
+					log.debug("getting 'exported' FKs from "+fullTablename);
+					ResultSet fkrs = dbmd.getExportedKeys(null, table.schemaName, tableName);
+					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
+					closeResultSetAndStatement(fkrs);
+				}
 				
 				//GRANTs
 				if(doSchemaGrabGrants) {
@@ -272,11 +296,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			schemaModel.tables.add(table);
 		}
 		closeResultSetAndStatement(rs);
-
-		if(recursivedump && (!tableOnly || deeprecursivedump)) {
-			grabTablesRecursivebasedOnFKs(dbmd, dbmsfeatures, schemaModel, schemaPattern);
-		}
 		
+		/*if(recursivedump && (!tableOnly || deeprecursivedump)) {
+			grabTablesRecursivebasedOnFKs(dbmd, dbmsfeatures, schemaModel, schemaPattern);
+		}*/
+
 		//log.debug("tables::["+schemaModel.tables.size()+"]\n"+schemaModel.tables+"\n");
 		//log.debug("FKs::["+schemaModel.foreignKeys.size()+"]\n"+schemaModel.foreignKeys+"\n");
 
@@ -288,7 +312,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		//return schemaModel;
 	}
 	
-	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern) throws Exception { //, String padding
+	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern, boolean grabExportedFKsAlso) throws Exception { //, String padding
 		log.debug("recursivegrab: "+schemaPattern);
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.foreignKeys) {
@@ -296,6 +320,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			dbid.name = fk.pkTable;
 			dbid.schemaName = fk.pkTableSchemaName;
 			ids.add(dbid);
+	
+			//Exported FKs
+			if(grabExportedFKsAlso) {
+				DBObjectId dbidFk = new DBObjectId();
+				dbidFk.name = fk.fkTable;
+				dbidFk.schemaName = fk.fkTableSchemaName;
+				ids.add(dbidFk);
+			}
+			
 			/*if(!schemaPattern.equals(fk.pkTableSchemaName) && !containsTableWithSchemaAndName(schemaModel.tables, fk.pkTableSchemaName, fk.pkTable)) {
 				log.warn("recursivegrab-grabschema: "+fk.pkTableSchemaName+"."+fk.pkTable);
 				grabSchema(dbmd, fk.pkTableSchemaName, fk.pkTable, true);				

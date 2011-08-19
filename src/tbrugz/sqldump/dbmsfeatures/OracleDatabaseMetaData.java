@@ -90,12 +90,12 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	public ResultSet getImportedKeys(String catalog, String schema, String table)
 			throws SQLException {
 		//TODOne: do not grab FKs that do not reference a PK
-		//XXX: this makes grabbing slower. prop option to use default method
 		
 		if(!grabFKFromUK) {
 			return super.getImportedKeys(catalog, schema, table);
 		}
 		
+		//XXX: this makes grabbing slower. prop option to use default method
 		Connection conn = metadata.getConnection();
 		String sql = "select * from (";
 		sql += "select '' as PKTABLE_CAT, acuk.owner as PKTABLE_SCHEM, acuk.table_name as PKTABLE_NAME, accuk.column_name as PKCOLUMN_NAME, \n"
@@ -109,9 +109,6 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"  and acuk.owner = accuk.owner and acuk.constraint_name = accuk.constraint_name and acuk.constraint_type in ('P','U') \n"
 				+"  and acfk.r_owner = acuk.owner and acfk.r_constraint_name = acuk.constraint_name \n"
 				+"  and accfk.position = accuk.position \n" 
-				//+"and acfk.owner = 'DW_TCE' \n"
-				//+"--and acfk.r_constraint_name = 'DWD_ORGAOS_ORC_ORIGINAL_U01' \n"
-				//+"and acfk.constraint_name = 'EXECUCAO_ORGAOS_ORC_ORI_FK' \n"
 				+"order by acfk.owner, acfk.constraint_name, accfk.position "
 				+") ";
 
