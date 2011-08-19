@@ -11,6 +11,7 @@ import tbrugz.sqldump.dbmodel.Table;
 
 public interface DBMSFeatures {
 	static String PROP_GRAB_INDEXES = "sqldump.dbspecificfeatures.grabindexes";
+	static String PROP_GRAB_FKFROMUK = "sqldump.dbspecificfeatures.grabfkfromuk";
 	static String PROP_SEQUENCE_STARTWITHDUMP = "sqldump.dbspecificfeatures.sequencestartwithdump";
 	
 	void procProperties(Properties prop);

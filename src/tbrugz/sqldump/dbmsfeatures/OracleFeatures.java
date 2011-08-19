@@ -37,6 +37,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		grabIndexes = "true".equals(prop.getProperty(PROP_GRAB_INDEXES));
 		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 		Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
+		OracleDatabaseMetaData.grabFKFromUK = Utils.getPropBool(prop, PROP_GRAB_FKFROMUK, false);
 	}
 	
 	/* (non-Javadoc)

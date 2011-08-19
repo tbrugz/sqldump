@@ -78,6 +78,7 @@ sqldump.dumpviewastable=false
 sqldump.usedbspecificfeatures=true
 sqldump.dbspecificfeatures.grabindexes=true
 sqldump.dbspecificfeatures.sequencestartwithdump=false
+sqldump.dbspecificfeatures.grabfkfromuk=false
 
 
 #

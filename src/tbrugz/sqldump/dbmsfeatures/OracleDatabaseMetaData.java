@@ -81,4 +81,54 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		log.debug("sql:\n"+sql);
 		return st.executeQuery(sql);
 	}
+	
+	static boolean grabFKFromUK = false;
+	
+	@Override
+	public ResultSet getImportedKeys(String catalog, String schema, String table)
+			throws SQLException {
+		//TODOne: do not grab FKs that do not reference a PK
+		//XXX: this makes grabbing slower. prop option to use default method
+		
+		if(!grabFKFromUK) {
+			return super.getImportedKeys(catalog, schema, table);
+		}
+		
+		Connection conn = metadata.getConnection();
+		String sql = "select * from (";
+		sql += "select '' as PKTABLE_CAT, acuk.owner as PKTABLE_SCHEM, acuk.table_name as PKTABLE_NAME, accuk.column_name as PKCOLUMN_NAME, \n"
+				+"       '' as FKTABLE_CAT, acfk.owner as FKTABLE_SCHEM, acfk.table_name as FKTABLE_NAME, accfk.column_name as FKCOLUMN_NAME, \n"
+				+"       accuk.position as KEY_SEQ, '' as UPDATE_RULE, '' as DELETE_RULE, \n"
+				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY \n"
+				+"       ,acuk.constraint_type as PKCONSTRAINT_TYPE " //returns type of unique key: P - primary, unique
+				+"from all_constraints acfk, all_cons_columns accfk, \n"
+				+" all_constraints acuk, all_cons_columns accuk \n"
+				+"where acfk.owner = accfk.owner and acfk.constraint_name = accfk.constraint_name and acfk.constraint_type = 'R' \n"
+				+"  and acuk.owner = accuk.owner and acuk.constraint_name = accuk.constraint_name and acuk.constraint_type in ('P','U') \n"
+				+"  and acfk.r_owner = acuk.owner and acfk.r_constraint_name = acuk.constraint_name \n"
+				+"  and accfk.position = accuk.position \n" 
+				//+"and acfk.owner = 'DW_TCE' \n"
+				//+"--and acfk.r_constraint_name = 'DWD_ORGAOS_ORC_ORIGINAL_U01' \n"
+				//+"and acfk.constraint_name = 'EXECUCAO_ORGAOS_ORC_ORI_FK' \n"
+				+"order by acfk.owner, acfk.constraint_name, accfk.position "
+				+") ";
+
+		if(schema!=null) {
+			sql += "where FKTABLE_SCHEM = '"+schema+"' \n";
+		}
+		if(table!=null) {
+			if(schema!=null) {
+				sql += "and ";
+			}
+			else {
+				sql += "where ";
+			}
+			sql += "FKTABLE_NAME = '"+table+"' ";
+		}
+		sql += "order by PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ";
+		Statement st = conn.createStatement();
+		log.debug("sql:\n"+sql);
+		return st.executeQuery(sql);
+	}
+	
 }
