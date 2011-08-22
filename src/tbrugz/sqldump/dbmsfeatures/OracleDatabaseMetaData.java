@@ -25,20 +25,23 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		String sql = "select * from (";
 		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKS, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS "
+				+", owner as TABLE_SCHEM_FILTER "
 				+"from all_tables \n";
 		//synonyms
-		sql += "union select '' as TABLE_CAT, alls.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
+		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
+				+", alls.owner as TABLE_SCHEM_FILTER "
 				+"from all_synonyms alls, all_tables allt "
 				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n";
 		//views
 		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
+				+", owner as TABLE_SCHEM_FILTER "
 				+"from all_views ";
 		sql += ") ";
 		if(schemaPattern!=null) {
-			sql += "where TABLE_SCHEM = '"+schemaPattern+"' ";
+			sql += "where TABLE_SCHEM_FILTER = '"+schemaPattern+"' ";
 		}
 		if(tableNamePattern!=null) {
 			if(schemaPattern!=null) {
