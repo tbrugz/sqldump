@@ -38,11 +38,13 @@ public class Schema2GraphML implements SchemaModelDumper {
 	static Log log = LogFactory.getLog(Schema2GraphML.class);
 	
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
+	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
+	boolean showSchemaName = true;
 	
 	//String defaultSchemaName;
 	
@@ -55,7 +57,12 @@ public class Schema2GraphML implements SchemaModelDumper {
 			TableNode n = new TableNode();
 			String id = t.getSchemaName()+"."+t.getName();
 			n.setId(id);
-			n.setLabel(id);
+			if(showSchemaName) {
+				n.setLabel(id);
+			}
+			else {
+				n.setLabel(t.getName());
+			}
 			n.setColumnNumber(t.getColumns().size());
 			StringBuffer sb = new StringBuffer();
 			//sb.append("--type: "+t.type+"\n");
@@ -152,6 +159,8 @@ public class Schema2GraphML implements SchemaModelDumper {
 		catch(IllegalArgumentException e) {
 			log.warn("Illegal value for prop '"+PROP_EDGELABEL+"': "+edgeLabelStr);
 		}
+		
+		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
 		
 		setOutput(new File(s));
 	}

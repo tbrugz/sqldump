@@ -163,9 +163,9 @@ sqldump.xmlserialization.castor.infile=${outputdir}/schemaModel.castor.xml
 # graphML output
 #
 sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
+#sqldump.graphmldump.showschemaname=true|false
 # default edgelabel: NONE
 #sqldump.graphmldump.edgelabel=FK|FKANDCOLUMNS|COLUMNS|NONE
-
 
 ############
 #

@@ -51,5 +51,7 @@ Usage (without sources)
 - Download latest version of [sqldump.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.properties.template) template as `sqldump.properties`
 - Download jdbc jars for your database of choice
 - Edit `sqldump.properties` and (windows) `sqldump.bat`
-- Run `sqldump.bat`
+- (windows) Run `sqldump.bat`
 -- you may also specify a different properties file by appending to command line inside `sqldump.bat`: ` -propfile=<path-to-prop-file>` 
+- (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp bin:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
+-- you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
