@@ -94,7 +94,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	}
 	
 	Edge fkToLink(FK fk) {
-		Edge l = new Edge();
+		FKEdge l = new FKEdge();
 		switch(edgeLabel) {
 			case FK: 
 				l.setName(fk.getName()); break;
@@ -107,6 +107,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			default:
 				l.setName(""); break;
 		}
+		l.referencesPK = fk.fkReferencesPK;
 		l.setSource(fk.getSourceId());
 		l.setTarget(fk.getTargetId());
 		

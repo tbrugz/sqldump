@@ -29,6 +29,6 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 	
 	@Override
 	public void outEdgeContents(Edge l, int level) {
-		outSnippet("edge", level, l.getName());
+		outSnippet(getSnippetId(l, "edge"), level, l.getName());
 	}
 }
