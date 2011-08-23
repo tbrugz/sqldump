@@ -435,6 +435,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	void grabSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
+		boolean askForUkType = true;
 		while(fkrs.next()) {
 			//log.debug("FK!!!");
 			String fkName = fkrs.getString("FK_NAME");
@@ -455,6 +456,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fk.fkTable = fkrs.getString("FKTABLE_NAME");
 				fk.pkTableSchemaName = fkrs.getString("PKTABLE_SCHEM");
 				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
+				if(askForUkType) {
+					try {
+						fk.fkReferencesPK = "P".equals(fkrs.getString("UK_CONSTRAINT_TYPE"));
+					}
+					catch(SQLException e) {
+						askForUkType = false;
+						log.debug("resultset has no 'UK_CONSTRAINT_TYPE' column [fkTable='"+fk.fkTable+"'; ukTable='"+fk.pkTable+"']");
+					}
+				}
 			}
 			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
 			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));

@@ -15,6 +15,7 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	public String fkTable;
 	public String pkTableSchemaName;
 	public String fkTableSchemaName;
+	public Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
 
 	public Set<String> pkColumns = new TreeSet<String>(); //XXX: should be List<String>?
 	public Set<String> fkColumns = new TreeSet<String>(); //should be List<String>?

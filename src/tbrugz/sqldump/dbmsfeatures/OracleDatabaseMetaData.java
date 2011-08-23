@@ -89,6 +89,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	
 	static boolean grabFKFromUK = false;
 	
+	/**
+	 * added a UK_CONSTRAINT_TYPE column, which returns: P - primary key, U - unique key
+	 */
 	@Override
 	public ResultSet getImportedKeys(String catalog, String schema, String table)
 			throws SQLException {
@@ -105,7 +108,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"       '' as FKTABLE_CAT, acfk.owner as FKTABLE_SCHEM, acfk.table_name as FKTABLE_NAME, accfk.column_name as FKCOLUMN_NAME, \n"
 				+"       accuk.position as KEY_SEQ, '' as UPDATE_RULE, '' as DELETE_RULE, \n"
 				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY \n"
-				+"       ,acuk.constraint_type as PKCONSTRAINT_TYPE " //returns type of unique key: P - primary, unique
+				+"       ,acuk.constraint_type as UK_CONSTRAINT_TYPE " //returns type of unique key: P - primary, U - unique
 				+"from all_constraints acfk, all_cons_columns accfk, \n"
 				+" all_constraints acuk, all_cons_columns accuk \n"
 				+"where acfk.owner = accfk.owner and acfk.constraint_name = accfk.constraint_name and acfk.constraint_type = 'R' \n"
