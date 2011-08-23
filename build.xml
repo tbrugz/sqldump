@@ -5,6 +5,7 @@
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="javadoc.dir" value="dist/javadoc"/>
+	<property name="sqldump.main.class" value="tbrugz.sqldump.SQLDump"/>
 	
 	<property file="build.properties"/>
 
@@ -46,7 +47,7 @@
 	</target>
 
 	<target name="run">
-		<java classpathref="classpath.run" classname="tbrugz.sqldump.SQLDump">
+		<java classpathref="classpath.run" classname="${sqldump.main.class}">
 			<arg value="${run.arg}"/>
 		</java>
 	</target>
@@ -54,9 +55,9 @@
 	<target name="jar" depends="prepare">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"
-			includes="**/*.class, *.properties">
+			includes="**/*.class, *.properties, **/jaxb.index">
 			<manifest>
-				<attribute name="Main-Class" value="tbrugz.sqldump.SQLDataDump"/>
+				<attribute name="Main-Class" value="${sqldump.main.class}"/>
 			</manifest>
 		</jar>
 	</target>
