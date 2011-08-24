@@ -10,6 +10,8 @@ import tbrugz.graphml.model.Node;
 public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 
 	static Log log = LogFactory.getLog(DumpSchemaGraphMLModel.class);
+	static boolean nodeHeightByColsNumber = true;
+	static final String DEFAULT_NODE_HEIGHT = "400.0";
 	
 	@Override
 	public void outNodeContents(Node t, int level) {
@@ -19,7 +21,7 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 			outSnippet(getSnippetId(t, "node"), level, 
 					t.getLabel(), //label 
 					tn.getColumnsDesc(), //contents
-					String.valueOf(50 + (tn.getColumnNumber()*15)) //height
+					nodeHeightByColsNumber?String.valueOf(50 + (tn.getColumnNumber()*15)):DEFAULT_NODE_HEIGHT //height
 					);
 		}
 		else {

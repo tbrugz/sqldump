@@ -27,11 +27,12 @@ enum EdgeLabelType {
 }
 
 /*
- * XXX: show PK columns, FK columns, constraints?
+ * XXX: node contents: show PK columns, FK columns, constraints?
  * TODO: stereotype may include 'otherschema' or object type (table, view, synonym(?), temporary table, external table)
- * XXX: color by row count? 
+ * XXX: node color by row count?
+ * XXX: stereotypes: FK-source-only nodes, FK-target-only nodes
  * XXXdone: height by col size?
- * XXX: prop for toggling on/off the adjustment of node height?
+ * XXXdone: prop for toggling on/off the adjustment of node height?
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
@@ -40,6 +41,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
+	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
 
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
@@ -161,6 +163,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 		}
 		
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
+		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
 		
 		setOutput(new File(s));
 	}
