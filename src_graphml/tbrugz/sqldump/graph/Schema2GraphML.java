@@ -33,6 +33,11 @@ enum EdgeLabelType {
  * XXX: stereotypes: FK-source-only nodes, FK-target-only nodes
  * XXXdone: height by col size?
  * XXXdone: prop for toggling on/off the adjustment of node height?
+ * XXX: prop for setting 'graphml-snippets.properties' location
+ * TODO: merge with existing graphml (then layout is not lost) 
+ *  - update node contents, update edge label, add new nodes and edges
+ *  - specific stereotype for 'new' nodes & edges
+ * XXXdone: FK stereotype: composite? 
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
@@ -117,6 +122,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 				l.setName(""); break;
 		}
 		l.referencesPK = fk.fkReferencesPK;
+		l.composite = fk.fkColumns.size()>1;
 		l.setSource(fk.getSourceId());
 		l.setTarget(fk.getTargetId());
 		
