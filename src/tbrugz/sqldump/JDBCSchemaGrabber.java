@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.util.*;
+import java.util.regex.Pattern;
 import java.sql.*;
 import java.io.*;
 
@@ -98,6 +99,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 
 	Map<TableType, Integer> tablesCountByTableType;
+	List<Pattern> excludeTableFilters;
 	
 	@Override
 	public SchemaModel grabSchema() throws Exception {
@@ -123,6 +125,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		for(TableType tt: TableType.values()) {
 			tablesCountByTableType.put(tt, 0);
 		}
+		
+		//register excklude table filters
+		excludeTableFilters = getExcludeTableFilters(papp);
 		
 		String[] schemasArr = schemaPattern.split(",");
 		List<String> schemasList = new ArrayList<String>();
@@ -209,6 +214,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			if(ttype==null) { continue; }
+			
+			//test for filter exclusion
+			boolean ignoreTable = false;
+			for(Pattern p: excludeTableFilters) {
+				if(p.matcher(tableName).matches()) {
+					log.info("ignoring table: "+tableName);
+					ignoreTable = true; break;
+				}
+			}
+			if(ignoreTable) { continue; }
 			
 			tablesCountByTableType.put(ttype, tablesCountByTableType.get(ttype)+1);
 			
@@ -533,5 +548,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			log.warn("Error closing resultset or statement: "+e);
 			log.debug("Error closing resultset or statement: "+e.getMessage(), e);
 		}
+	}
+	
+	static List<Pattern> getExcludeTableFilters(Properties prop) {
+		List<Pattern> excludeFilters = new ArrayList<Pattern>();
+		int count = 1;
+		while(true) {
+			String filterProp = "sqldump.schemadump.tablename.exclude."+count;
+			String regex = prop.getProperty(filterProp);
+			if(regex==null) { break; }
+			log.info("added ignore filter: "+regex);
+			excludeFilters.add(Pattern.compile(regex));
+			count++;
+		}
+		return excludeFilters;
 	}
 }

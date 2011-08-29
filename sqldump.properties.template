@@ -55,6 +55,14 @@ sqldump.doschemadump.pks=true
 sqldump.doschemadump.indexes=false
 sqldump.doschemadump.ignoretableswithzerocolumns=true
 
+# schema names to dump
+sqldump.dumpschemapattern=DW, SA, EMPDEPT
+
+# exclude table filters (regex)
+sqldump.schemadump.tablename.exclude.1=EMPT.*
+sqldump.schemadump.tablename.exclude.2=.*_OLD
+sqldump.schemadump.tablename.exclude.3=ZZZ_.*
+
 sqldump.dumpwithschemaname=true
 
 # recursive dump of tables based on FKs
@@ -195,33 +203,27 @@ sqldump.askforpassword=true
 #sqldump.dburl=jdbc:oracle:thin:@<url>:<port>:<sid>
 #sqldump.user=scott
 #sqldump.password=tiger
-#sqldump.dumpschemapattern=EMPDEPT
 
 # PostgreSQL
 #sqldump.driverclass=org.postgresql.Driver
 #sqldump.dburl=jdbc:postgresql://<host>/<db>
 #sqldump.user=
 #sqldump.password=
-#sqldump.dumpschemapattern=public
 
 # Derby Embedded
 #sqldump.driverclass=org.apache.derby.jdbc.EmbeddedDriver
 #sqldump.dburl=jdbc:derby:<db-path>
 #sqldump.user=sa
 #sqldump.password=sa
-#sqldump.dumpschemapattern=SA
 
 # HSQLDB In-Process
 #sqldump.driverclass=org.hsqldb.jdbc.JDBCDriver
 #sqldump.dburl=jdbc:hsqldb:file:<db-path>
 #sqldump.user=sa
 #sqldump.password=sa
-#sqldump.dumpschemapattern=SA
 
 # MySQL
 #sqldump.driverclass=com.mysql.jdbc.Driver
 #sqldump.dburl=jdbc:mysql://<host>:<port>/<database>
 #sqldump.user=
 #sqldump.password=
-#sqldump.dumpschemapattern=dw
-
