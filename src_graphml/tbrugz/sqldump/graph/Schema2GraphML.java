@@ -37,7 +37,8 @@ enum EdgeLabelType {
  * TODO: merge with existing graphml (then layout is not lost) 
  *  - update node contents, update edge label, add new nodes and edges
  *  - specific stereotype for 'new' nodes & edges
- * XXXdone: FK stereotype: composite? 
+ * XXXdone: FK stereotype: composite?
+ * XXX: schema_name as node stereotype?
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	

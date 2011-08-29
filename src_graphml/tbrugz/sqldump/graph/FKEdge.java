@@ -9,8 +9,9 @@ public class FKEdge extends Edge {
 	@Override
 	public String getStereotype() {
 		return referencesPK?
-				(composite?"composite":"pkref")
-				:"";
+				(composite?"composite.pkref":"pkref")
+				:
+				(composite?"composite.ukref":"ukref");
 	}
 	
 }

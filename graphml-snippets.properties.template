@@ -71,3 +71,6 @@ edge.composite=<data key="d5"/>\
         </y:PolyLineEdge>\
       </data>
 
+#
+# also avaiable: composite.pkref, composite.ukref, ukref
+#
