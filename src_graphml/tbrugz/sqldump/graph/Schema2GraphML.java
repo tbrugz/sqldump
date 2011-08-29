@@ -3,10 +3,13 @@ package tbrugz.sqldump.graph;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
+import tbrugz.graphml.model.Stereotyped;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
@@ -38,7 +42,8 @@ enum EdgeLabelType {
  *  - update node contents, update edge label, add new nodes and edges
  *  - specific stereotype for 'new' nodes & edges
  * XXXdone: FK stereotype: composite?
- * XXX: schema_name as node stereotype?
+ * XXXdone: schema_name as node stereotype?
+ * XXXdone: table name pattern as node stereotype
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
@@ -48,11 +53,14 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
+	
+	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
+	Map<String, Pattern> stereotypeRegexes = new HashMap<String, Pattern>();
 	
 	//String defaultSchemaName;
 	
@@ -78,13 +86,28 @@ public class Schema2GraphML implements SchemaModelDumper {
 				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
 			}
 			n.setColumnsDesc(sb.toString());
+			
+			//node stereotype
+			switch (t.getType()) {
+				case SYSTEM_TABLE: 
+				case VIEW: 
+					n.setStereotype("type@"+t.getType()); break;
+				case TABLE:
+				default:
+					break;
+			}
+			for(String key: stereotypeRegexes.keySet()) {
+				if(stereotypeRegexes.get(key).matcher(t.getName()).matches()) {
+					addStereotype(n, "regex@"+key);
+				}
+			}
 			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
-				n.setStereotype(t.schemaName);
+				addStereotype(n, "schema@"+t.schemaName);
 			}
 			else {
-				//log.debug("t: "+t.name+", "+t.schemaName+"; "+defaultSchemaName);
-				n.setStereotype("otherschema."+t.schemaName);
+				addStereotype(n, "otherschema.schema@"+t.schemaName);
 			}
+			//end stereotype
 			
 			tableIds.add(id);
 			graphModel.getChildren().add(n);
@@ -152,9 +175,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		String s = prop.getProperty(PROP_OUTPUTFILE);
+		String outFileStr = prop.getProperty(PROP_OUTPUTFILE);
 		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
-
+		
 		String[] schemasArr = schemaPattern.split(",");
 		schemaNamesList = new ArrayList<String>();
 		for(String schemaName: schemasArr) {
@@ -170,9 +193,26 @@ public class Schema2GraphML implements SchemaModelDumper {
 			log.warn("Illegal value for prop '"+PROP_EDGELABEL+"': "+edgeLabelStr);
 		}
 		
+		//node stereotype regex
+		for(String key: Utils.getKeysStartingWith(prop, PROP_NODESTEREOTYPEREGEX_PREFIX)) {
+			String stereotype = key.substring(PROP_NODESTEREOTYPEREGEX_PREFIX.length());
+			String regex = prop.getProperty(key);
+			stereotypeRegexes.put(stereotype, Pattern.compile(regex));
+		}
+		
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
 		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
 		
-		setOutput(new File(s));
+		setOutput(new File(outFileStr));
+	}
+	
+	
+	static void addStereotype(Stereotyped stereo, String str){
+		if(stereo.getStereotype()!=null) {
+			stereo.setStereotype(stereo.getStereotype()+"."+str);
+		}
+		else {
+			stereo.setStereotype(str);
+		}
 	}
 }

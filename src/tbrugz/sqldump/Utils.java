@@ -8,9 +8,11 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -278,7 +280,18 @@ public class Utils {
 				log.debug("ignored dir: "+ff);
 			}
 		}
-	} 
+	}
+	
+	public static List<String> getKeysStartingWith(Properties prop, String startStr) {
+		List<String> ret = new ArrayList<String>();
+		for(Object o: prop.keySet()) {
+			String s = (String) o;
+			if(s.startsWith(startStr)) {
+				ret.add(s);
+			}
+		}
+		return ret;
+	}
 	
 	public static void main(String[] args) {
 		String s = readPasswordIntern("pass: ", "*");

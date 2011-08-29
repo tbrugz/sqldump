@@ -183,6 +183,9 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 # default edgelabel: NONE
 #sqldump.graphmldump.edgelabel=FK|FKANDCOLUMNS|COLUMNS|NONE
 #sqldump.graphmldump.nodeheightbycolsnumber=true|false
+#
+# regex-based stereotypes 
+sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.*
 
 ############
 #
