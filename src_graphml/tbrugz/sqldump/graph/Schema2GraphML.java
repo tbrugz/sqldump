@@ -79,10 +79,11 @@ public class Schema2GraphML implements SchemaModelDumper {
 			}
 			n.setColumnsDesc(sb.toString());
 			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
+				n.setStereotype(t.schemaName);
 			}
 			else {
 				//log.debug("t: "+t.name+", "+t.schemaName+"; "+defaultSchemaName);
-				n.setStereotype("otherschema");
+				n.setStereotype("otherschema."+t.schemaName);
 			}
 			
 			tableIds.add(id);

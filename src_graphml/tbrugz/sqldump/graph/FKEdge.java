@@ -3,12 +3,14 @@ package tbrugz.sqldump.graph;
 import tbrugz.graphml.model.Edge;
 
 public class FKEdge extends Edge {
-	public boolean referencesPK;
+	public Boolean referencesPK;
 	public boolean composite;
 	
 	@Override
 	public String getStereotype() {
-		return referencesPK?
+		return referencesPK==null?
+				(composite?"composite.?ref":"?ref"):
+			referencesPK?
 				(composite?"composite.pkref":"pkref")
 				:
 				(composite?"composite.ukref":"ukref");
