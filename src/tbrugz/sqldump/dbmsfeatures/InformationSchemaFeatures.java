@@ -21,22 +21,29 @@ import tbrugz.sqldump.dbmodel.View;
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	static Logger log = Logger.getLogger(InformationSchemaFeatures.class);
 
-	//boolean grabIndexes = false;
 	//boolean dumpSequenceStartWith = true;
 	
 	public void procProperties(Properties prop) {
-		//grabIndexes = "true".equals(prop.getProperty(PROP_GRAB_INDEXES));
+		super.procProperties(prop);
 		//Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 	}
 	
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		grabDBViews(model, schemaPattern, conn);
-		grabDBTriggers(model, schemaPattern, conn);
-		grabDBRoutines(model, schemaPattern, conn);
+		if(grabViews) {
+			grabDBViews(model, schemaPattern, conn);
+		}
+		if(grabTriggers) {
+			grabDBTriggers(model, schemaPattern, conn);
+		}
+		if(grabExecutables) {
+			grabDBRoutines(model, schemaPattern, conn);
+		}
 		//if(grabIndexes) {
 			//grabDBIndexes(model, schemaPattern, conn);
 		//}
-		grabDBSequences(model, schemaPattern, conn);
+		if(grabSequences) {
+			grabDBSequences(model, schemaPattern, conn);
+		}
 		grabDBCheckConstraints(model, schemaPattern, conn);
 		grabDBUniqueConstraints(model, schemaPattern, conn);
 	}

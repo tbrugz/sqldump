@@ -78,7 +78,15 @@ sqldump.dumpviewastable=false
 # dbms specific features grab
 #
 sqldump.usedbspecificfeatures=true
+
+# grab dbspecific by type: default is true
 sqldump.dbspecificfeatures.grabindexes=true
+sqldump.dbspecificfeatures.grabexecutables=false
+#sqldump.dbspecificfeatures.grabviews=false
+#sqldump.dbspecificfeatures.grabtriggers=false
+#sqldump.dbspecificfeatures.grabsynonyms=false
+#sqldump.dbspecificfeatures.grabsequences=false
+
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 sqldump.dbspecificfeatures.grabfkfromuk=false
 

@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -20,15 +19,18 @@ import tbrugz.sqldump.dbmodel.View;
 public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Logger log = Logger.getLogger(DerbyFeatures.class);
 
-	public void procProperties(Properties prop) {
-	}
-
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		grabDBViews(model, schemaPattern, conn);
-		grabDBTriggers(model, schemaPattern, conn);
+		if(grabViews) {
+			grabDBViews(model, schemaPattern, conn);
+		}
+		if(grabTriggers) {
+			grabDBTriggers(model, schemaPattern, conn);
+		}
 		
 		try {
-			grabDBSequences(model, schemaPattern, conn);
+			if(grabSequences) { 
+				grabDBSequences(model, schemaPattern, conn);
+			}
 		}
 		catch(SQLSyntaxErrorException e) {
 			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current derby db version?

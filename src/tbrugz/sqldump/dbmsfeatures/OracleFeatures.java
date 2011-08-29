@@ -28,13 +28,10 @@ import tbrugz.sqldump.dbmodel.View;
 public class OracleFeatures extends AbstractDBMSFeatures {
 	static Logger log = Logger.getLogger(OracleFeatures.class);
 
-	boolean grabIndexes = false;
 	boolean dumpSequenceStartWith = true;
 	
 	public void procProperties(Properties prop) {
-		//String grabIndexesStr = prop.getProperty(PROP_GRAB_INDEXES);
-		//grabIndexes = "true".equals(grabIndexesStr);
-		grabIndexes = "true".equals(prop.getProperty(PROP_GRAB_INDEXES));
+		super.procProperties(prop);
 		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 		Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 		OracleDatabaseMetaData.grabFKFromUK = Utils.getPropBool(prop, PROP_GRAB_FKFROMUK, false);
@@ -44,15 +41,26 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	 * @see tbrugz.sqldump.DbmgrFeatures#grabDBObjects(tbrugz.sqldump.SchemaModel, java.lang.String, java.sql.Connection)
 	 */
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		grabDBViews(model, schemaPattern, conn);
-		grabDBTriggers(model, schemaPattern, conn);
-		grabDBExecutables(model, schemaPattern, conn);
-		grabDBSynonyms(model, schemaPattern, conn);
+		if(grabViews) {
+			grabDBViews(model, schemaPattern, conn);
+		}
+		if(grabTriggers) {
+			grabDBTriggers(model, schemaPattern, conn);
+		}
+		if(grabExecutables) {
+			grabDBExecutables(model, schemaPattern, conn);
+		}
+		if(grabSynonyms) {
+			grabDBSynonyms(model, schemaPattern, conn);
+		}
 		if(grabIndexes) {
 			grabDBIndexes(model, schemaPattern, conn);
 		}
-		grabDBSequences(model, schemaPattern, conn);
-		grabDBConstraints(model, schemaPattern, conn);
+		if(grabSequences) {
+			grabDBSequences(model, schemaPattern, conn);
+		}
+		grabDBCheckConstraints(model, schemaPattern, conn);
+		grabDBUniqueConstraints(model, schemaPattern, conn);
 	}
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -303,8 +311,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 	}
 
-	void grabDBConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing constraints");
+	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing check constraints");
 		
 		//check constraints
 		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
@@ -340,19 +348,23 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+count+" check constraints grabbed");
+	}
+
+	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing unique constraints");
 
 		//unique constraints
-		query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
+		String query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
 				+"from all_constraints al, all_cons_columns acc "
 				+"where al.constraint_name = acc.constraint_name "
 				+"and al.owner = '"+schemaPattern+"' "
 				+"and constraint_type = 'U' "
 				+"order by owner, table_name, constraint_name, position, column_name ";
-		st = conn.createStatement();
+		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery(query);
 		
-		count = 0;
+		int count = 0;
 		int countUniqueConstraints = 0;
 		String previousConstraint = null;
 		Constraint c = null;
