@@ -38,6 +38,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	boolean dumpFKsInsideTable;
 	boolean dumpSynonymAsTable;
 	boolean dumpViewAsTable;
+	boolean dumpMaterializedViewAsTable;
 	
 	boolean dumpGrantsWithReferencingTable = false;
 	boolean dumpIndexesWithReferencingTable = false;
@@ -57,6 +58,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	
+	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
+	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
+	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
+	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
 	@Override
@@ -67,8 +72,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		boolean doSchemaDumpFKsAtEnd = prop.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		dumpWithSchemaName = prop.getProperty(SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		dumpSynonymAsTable = prop.getProperty(JDBCSchemaGrabber.PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		dumpViewAsTable = prop.getProperty(JDBCSchemaGrabber.PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		dumpSynonymAsTable = prop.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
+		dumpViewAsTable = prop.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
+		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, false); //default should be 'true'?
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
@@ -158,6 +164,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			switch(table.getType()) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
+				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
 			}
 			
 			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys)+";\n");

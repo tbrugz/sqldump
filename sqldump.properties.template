@@ -80,6 +80,7 @@ sqldump.fromdbid.autodetect=true
 
 sqldump.dumpsynonymastable=false
 sqldump.dumpviewastable=false
+sqldump.dumpmaterializedviewastable=false
 
 
 #

@@ -38,8 +38,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 	
-	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
-	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
@@ -120,7 +118,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, null);
 
-		log.info("schema dump... schemapattern: "+schemaPattern);
+		log.info("schema dump... schema(s): "+schemaPattern);
 		tablesCountByTableType = new HashMap<TableType, Integer>();
 		for(TableType tt: TableType.values()) {
 			tablesCountByTableType.put(tt, 0);
