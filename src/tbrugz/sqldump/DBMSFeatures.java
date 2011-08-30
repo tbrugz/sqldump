@@ -16,6 +16,7 @@ public interface DBMSFeatures {
 	static String PROP_GRAB_TRIGGERS = "sqldump.dbspecificfeatures.grabtriggers";
 	static String PROP_GRAB_SYNONYMS = "sqldump.dbspecificfeatures.grabsynonyms";
 	static String PROP_GRAB_SEQUENCES = "sqldump.dbspecificfeatures.grabsequences";
+	static String PROP_GRAB_CONSTRAINTS_XTRA = "sqldump.dbspecificfeatures.grabextraconstraints";
 	
 	static String PROP_GRAB_FKFROMUK = "sqldump.dbspecificfeatures.grabfkfromuk";
 	static String PROP_SEQUENCE_STARTWITHDUMP = "sqldump.dbspecificfeatures.sequencestartwithdump";

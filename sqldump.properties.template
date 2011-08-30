@@ -95,6 +95,7 @@ sqldump.dbspecificfeatures.grabexecutables=false
 #sqldump.dbspecificfeatures.grabtriggers=false
 #sqldump.dbspecificfeatures.grabsynonyms=false
 #sqldump.dbspecificfeatures.grabsequences=false
+#sqldump.dbspecificfeatures.grabextraconstraints=false
 
 sqldump.dbspecificfeatures.sequencestartwithdump=false
 sqldump.dbspecificfeatures.grabfkfromuk=false

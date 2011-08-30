@@ -15,6 +15,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabSynonyms = false;
 	protected boolean grabTriggers = false;
 	protected boolean grabViews = false;
+	protected boolean grabExtraConstraints = false;
 
 	public void procProperties(Properties prop) {
 		grabIndexes = Utils.getPropBool(prop, PROP_GRAB_INDEXES, true);
@@ -23,6 +24,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, true);
 		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, true);
 		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, true);
+		grabExtraConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, true);
 	}
 	
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {

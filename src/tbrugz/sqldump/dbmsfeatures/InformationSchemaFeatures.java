@@ -44,8 +44,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		if(grabSequences) {
 			grabDBSequences(model, schemaPattern, conn);
 		}
-		grabDBCheckConstraints(model, schemaPattern, conn);
-		grabDBUniqueConstraints(model, schemaPattern, conn);
+		if(grabExtraConstraints) {
+			grabDBCheckConstraints(model, schemaPattern, conn);
+			grabDBUniqueConstraints(model, schemaPattern, conn);
+		}
 	}
 	
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {

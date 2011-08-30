@@ -37,7 +37,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			log.debug("nested exception: "+e);
 		}
 		
-		//XXX: derby: add procedures/functions? synonyms?
+		//XXX: derby: add procedures/functions? synonyms? check/unique constraints?
 	}
 
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
