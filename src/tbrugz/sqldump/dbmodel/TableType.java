@@ -3,10 +3,11 @@ package tbrugz.sqldump.dbmodel;
 import org.apache.log4j.Logger;
 
 public enum TableType {
-	TABLE, SYNONYM, SYSTEM_TABLE, 
-	VIEW, MATERIALIZED_VIEW; 
+	TABLE, SYNONYM, SYSTEM_TABLE,
+	VIEW, MATERIALIZED_VIEW,
+	EXTERNAL_TABLE;
 	//XXXdone: temporary table, materialized view?
-	//TODO: external table?
+	//TODOne: external table?
 	
 	static Logger log = Logger.getLogger(TableType.class);
 	
@@ -25,6 +26,9 @@ public enum TableType {
 		}
 		else if(tableType.equals("MATERIALIZED VIEW")) {
 			return TableType.MATERIALIZED_VIEW;
+		}
+		else if(tableType.equals("EXTERNAL TABLE")) {
+			return TableType.EXTERNAL_TABLE;
 		}
 
 		log.warn("table "+tableName+" of unknown type: "+tableType);

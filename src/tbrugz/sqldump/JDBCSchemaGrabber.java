@@ -219,7 +219,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			boolean ignoreTable = false;
 			for(Pattern p: excludeTableFilters) {
 				if(p.matcher(tableName).matches()) {
-					log.info("ignoring table: "+tableName);
+					log.debug("ignoring table: "+tableName);
 					ignoreTable = true; break;
 				}
 			}
