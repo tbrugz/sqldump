@@ -22,11 +22,11 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 		
 		Connection conn = metadata.getConnection();
-		String sql = "select * from (";
+		String sql = "select * from (\n";
 		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKS, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS "
 				+", owner as TABLE_SCHEM_FILTER "
-				+"from all_tables \n";
+				+"from all_tables where (owner, table_name) not in (select owner, mview_name from all_mviews)\n";
 		//synonyms
 		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
@@ -39,7 +39,12 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
 				+", owner as TABLE_SCHEM_FILTER "
 				+"from all_views ";
-		sql += ") ";
+		//materialized views
+		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, null as REMARKS, "
+				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, "
+				+"allmv.owner as TABLE_SCHEM_FILTER "
+				+"from all_tables allt, all_mviews allmv where allt.owner = allmv.owner and allt.table_name = allmv.mview_name";		
+		sql += "\n) ";
 		if(schemaPattern!=null) {
 			sql += "where TABLE_SCHEM_FILTER = '"+schemaPattern+"' ";
 		}
