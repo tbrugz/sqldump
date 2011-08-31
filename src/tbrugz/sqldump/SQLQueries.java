@@ -87,7 +87,7 @@ public class SQLQueries {
 			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 
 			try {
-				log.debug("running query ["+qid+", "+tableName+"]: "+sql);
+				log.debug("running query [id="+qid+"; name="+tableName+"]: "+sql);
 				dd.runQuery(conn, sql, params, prop, tableName, charset, rowlimit, syntaxList, partitionBy);
 			} catch (Exception e) {
 				log.warn("error on query "+qid+": "+e);

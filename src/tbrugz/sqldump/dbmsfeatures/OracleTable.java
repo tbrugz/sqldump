@@ -5,7 +5,7 @@ import tbrugz.sqldump.dbmodel.Table;
 
 /*
  * TODO: property for selecting dump (true/false) of extra fields on script output?
- * XXX: sys.all_external_tables, sys.all_mviews
+ * XXXxxx: sys.all_external_tables, sys.all_mviews
  */
 public class OracleTable extends Table {
 	public String tableSpace;

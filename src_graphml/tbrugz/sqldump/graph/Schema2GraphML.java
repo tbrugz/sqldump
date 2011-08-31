@@ -32,12 +32,13 @@ enum EdgeLabelType {
 
 /*
  * XXX: node contents: show PK columns, FK columns, constraints?
- * TODO: stereotype may include 'otherschema' or object type (table, view, synonym(?), temporary table, external table)
+ * TODOne: stereotype may include 'otherschema' or table type (table, view, synonym(?), external table)
+ * XXX: stereotype may be 'temporary table' 
  * XXX: node color by row count?
  * XXX: stereotypes: FK-source-only nodes, FK-target-only nodes
  * XXXdone: height by col size?
  * XXXdone: prop for toggling on/off the adjustment of node height?
- * XXX: prop for setting 'graphml-snippets.properties' location
+ * TODO: prop for setting 'graphml-snippets.properties' location
  * TODO: merge with existing graphml (then layout is not lost) 
  *  - update node contents, update edge label, add new nodes and edges
  *  - specific stereotype for 'new' nodes & edges
