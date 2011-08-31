@@ -64,7 +64,7 @@ public class SQLQueries {
 			String sql = prop.getProperty("sqldump.query."+qid+".sql");
 			if(sql==null) {
 				//load from file
-				String sqlfile = prop.getProperty("sqldump.query."+qid+".file");
+				String sqlfile = prop.getProperty("sqldump.query."+qid+".sqlfile");
 				if(sqlfile!=null) {
 					sql = readFile(sqlfile);
 				}
@@ -83,10 +83,12 @@ public class SQLQueries {
 
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
+			
+			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 
 			try {
 				log.debug("running query ["+qid+", "+tableName+"]: "+sql);
-				dd.runQuery(conn, sql, params, prop, tableName, charset, rowlimit, syntaxList);
+				dd.runQuery(conn, sql, params, prop, tableName, charset, rowlimit, syntaxList, partitionBy);
 			} catch (Exception e) {
 				log.warn("error on query "+qid+": "+e);
 				log.debug("error on query "+qid+": "+e.getMessage(), e);

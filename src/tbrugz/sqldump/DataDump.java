@@ -1,19 +1,25 @@
 package tbrugz.sqldump;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -63,6 +69,7 @@ public class DataDump {
 	static final String CHARSET_DEFAULT = "UTF-8";
 	
 	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
+	//static final String FILENAME_PATTERN_QUERYNAME = "\\$\\{queryname\\}";
 	static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
 	static Logger log = Logger.getLogger(DataDump.class);
@@ -81,8 +88,6 @@ public class DataDump {
 	 *  
 	 */
 
-	Set<String> filesOpened = new HashSet<String>();
-	
 	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws Exception {
 		log.info("data dumping...");
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
@@ -148,6 +153,7 @@ public class DataDump {
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
 			
+			//XXX: table dump with partitionBy?
 			runQuery(conn, sql, null, prop, tableName, charset, 
 					rowlimit, 
 					syntaxList
@@ -159,9 +165,16 @@ public class DataDump {
 		}
 	}
 	
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableName, String charset, 
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
+			String tableOrQueryName, String charset, long rowlimit, List<DumpSyntax> syntaxList
+			) throws Exception {
+		runQuery(conn, sql, params, prop, tableOrQueryName, charset, rowlimit, syntaxList, null);
+	}
+		
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableOrQueryName, String charset, 
 			long rowlimit,
-			List<DumpSyntax> syntaxList
+			List<DumpSyntax> syntaxList,
+			String partitionByPattern
 			) throws Exception {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -180,54 +193,177 @@ public class DataDump {
 			
 			String defaultFilename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 
-			List<Writer> writerList = new ArrayList<Writer>();
+			List<String> filenameList = new ArrayList<String>();
 			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
 			
+			//String partitionBy = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
+			if(partitionByPattern==null) { partitionByPattern = ""; }
+			List<String> partitionByCols = getPartitionCols(partitionByPattern);
+			
+			String partitionByStrId = "";
+			String partitionByStrIdOld = "";
+			
+			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
+			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
+
+			//header
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
-				ds.initDump(tableName, md);
+				ds.initDump(tableOrQueryName, md);
 				doSyntaxDumpList.add(false);
-				writerList.add(null);
+				filenameList.add(null);
 				
-				String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
+				//String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
+				String filename = getDynamicFileName(prop, tableOrQueryName, ds.getSyntaxId(), defaultFilename);
+				
 				if(filename==null) {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
 				}
 				else {
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableName);
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableOrQueryName);
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
-					boolean alreadyOpened = filesOpened.contains(filename);
-					if(!alreadyOpened) { filesOpened.add(filename); }
 					
 					doSyntaxDumpList.set(i, true);
-					writerList.set(i, new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset));
-					ds.dumpHeader(writerList.get(i));
+					//writerList.set(i, new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset));
+					filenameList.set(i, filename);
+
+					partitionByStrIdOld = partitionByStrId; 
+					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+					String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
+					//Writer w = getWriterForFilename(finalFilename, charset, false);
+					boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);
+					Writer w = writersOpened.get(finalFilename);
+					if(newFilename) {
+						//should always be true
+						log.debug("new filename="+finalFilename);
+					}
+					else {
+						log.warn("filename '"+finalFilename+"' shouldn't have been already opened...");
+					}
+
+					writersSyntaxes.put(finalFilename, ds);
+					ds.dumpHeader(w);
+					//ds.dumpHeader(writerList.get(i));
 				}
 			}
 			
+			//rows
 			int count = 0;
 			do {
+				partitionByStrIdOld = partitionByStrId; 
+				partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+				if(!partitionByStrId.equals(partitionByStrIdOld)) {
+					log.debug("partitionId changed: from='"+partitionByStrIdOld+"' to='"+partitionByStrId+"'");
+				}
+				
 				for(int i=0;i<syntaxList.size();i++) {
 					DumpSyntax ds = syntaxList.get(i);
 					if(doSyntaxDumpList.get(i)) {
-						ds.dumpRow(rs, count, writerList.get(i));
+						String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
+						//Writer w = getWriterForFilename(finalFilename, charset, true);
+						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);
+						Writer w = writersOpened.get(finalFilename);
+						if(newFilename) {
+							log.debug("new filename="+finalFilename);
+							ds.dumpHeader(w);
+							writersSyntaxes.put(finalFilename, ds);
+						}
+						ds.dumpRow(rs, count, w);
+						//ds.dumpRow(rs, count, writerList.get(i));
 					}
 				}
 				count++;
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
-			log.info("dumped "+count+" rows from table: "+tableName);
+			log.info("dumped "+count+" rows from table: "+tableOrQueryName);
 
+			//footer
+			for(String filename: writersSyntaxes.keySet()) {
+				Writer w = writersOpened.get(filename);
+				DumpSyntax ds = writersSyntaxes.get(filename);
+				try {
+					ds.dumpFooter(w);
+				}
+				catch(Exception e) {
+					log.warn("error closing stream: "+w+"; filename: "+filename);
+					log.debug("error closing stream: ", e);
+				}
+				w.close();
+			}
+			
+			/*
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
 				if(doSyntaxDumpList.get(i)) {
-					ds.dumpFooter(writerList.get(i));
-					writerList.get(i).close();
+					//partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+					String finalFilename = getFinalFilenameForAbstractFilename(writerList.get(i), partitionByStrId);
+					//Writer w = getWriterForFilename(finalFilename, charset);
+					Writer w = writersOpened.get(finalFilename);
+					ds.dumpFooter(w);
+					//ds.dumpFooter(writerList.get(i));
+					
+					//writerList.get(i).close();
 				}
 			}
 			
+			for(String s: writersOpened.keySet()) {
+				writersOpened.get(s).close();
+			}
+			*/
+			
 			rs.close();
+	}
+	
+	String getDynamicFileName(Properties prop, String tableOrQueryName, String syntaxId, String defaultFilename) {
+		String filename = prop.getProperty("sqldump.datadump."+syntaxId+".filepattern", defaultFilename);
+		return filename;
+	}
+	
+	String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
+		return filenameAbstract.replaceAll("\\$\\{partitionby\\}", partitionByStr);
+	}
+	
+	/*Writer getWriterForFilename(String filename, String charset, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
+		//String filename = getNewForFilename(filenameAbstract, partitionByStr);
+		/*boolean alreadyOpened = filesOpened.contains(filename);
+		if(!alreadyOpened) { 
+			filesOpened.add(filename);
+			log.debug("new file out: "+filename);
+		}*
+		//Writer w = new OutputStreamWriter(new FileOutputStream(filename, true), charset);
+		Writer w = new OutputStreamWriter(new FileOutputStream(filename, append), charset);
+		return w;
+	}*/
+	
+	boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset) throws UnsupportedEncodingException, FileNotFoundException {
+		if(! writersOpened.containsKey(fname)) {
+			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), charset); //XXX: false: never append
+			writersOpened.put(fname, w);
+			//filesOpened.add(fname);
+			return true;
+		}
+		return false;
+	}
+	
+	static List<String> getPartitionCols(String partitionByPattern) {
+		List<String> rets = new ArrayList<String>();
+		String sMatcher = "\\$\\{col:(.+?)\\}";
+		Matcher m = Pattern.compile(sMatcher).matcher(partitionByPattern);
+		while(m.find()) {
+			rets.add(m.group(1));
+		}
+		return rets;
+	}
+	
+	static String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
+		//XXX: numberformatter (leading 0s) for partitionId?
+		for(String c: cols) {
+			String replacement = rs.getString(c);
+			if(replacement==null) { replacement = ""; }
+			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement);
+		}
+		return partitionByStr;
 	}
 	
 	static DumpSyntax getObjectOfClass(List<? extends DumpSyntax> l, Class<?> c) {

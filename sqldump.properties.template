@@ -112,12 +112,13 @@ sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml, html, ffc
 
 # default prop: sqldump.datadump.filepattern
 # sqldump.datadump.filepattern=${outputdir}/data_${tablename}.${syntaxfileext}
+sqldump.datadump.filepattern=${outputdir}/data_${tablename}${partitionby}.${syntaxfileext}
 
 # syntax-specific props: sqldump.datadump.<syntaxid>.filepattern
-sqldump.datadump.insertinto.filepattern=${outputdir}/data_${tablename}.sql
-sqldump.datadump.csv.filepattern=${outputdir}/data_${tablename}.csv
-sqldump.datadump.json.filepattern=${outputdir}/data_${tablename}.json
-sqldump.datadump.xml.filepattern=${outputdir}/data_${tablename}.xml
+#sqldump.datadump.insertinto.filepattern=${outputdir}/data_${tablename}.sql
+#sqldump.datadump.csv.filepattern=${outputdir}/data_${tablename}.csv
+#sqldump.datadump.json.filepattern=${outputdir}/data_${tablename}.json
+#sqldump.datadump.xml.filepattern=${outputdir}/data_${tablename}.xml
 
 #
 # InsertInfo syntax props
@@ -155,14 +156,22 @@ sqldump.datadump.TABLE_Y.order=TYPE, NAME
 #
 # sql queries
 #
-sqldump.query.1.sql=\
-select * from TABLE_X
-sqldump.query.1.name=TABLE_X
-sqldump.query.1.rowlimit=10000
-sqldump.query.2.file=c:/xxx/query2.sql
-sqldump.query.2.name=query_2
-sqldump.query.2.rowlimit=10000
+sqldump.queries=table_x, q2, partitiontest
 
+sqldump.query.table_x.sql=\
+select * from TABLE_X
+sqldump.query.table_x.name=TABLE_X
+sqldump.query.table_x.rowlimit=10000
+
+sqldump.query.q2.sqlfile=c:/xxx/query2.sql
+sqldump.query.q2.name=query_2
+sqldump.query.q2.rowlimit=10000
+
+sqldump.query.partitiontest.name=partition_test
+sqldump.query.partitiontest.sql=\
+select group_id, id, name\
+from partition_table_test
+sqldump.query.partitiontest.partitionby=_${col:group_id}
 
 #
 # serialization & xml serialization

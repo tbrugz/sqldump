@@ -143,10 +143,6 @@ public class SQLDump {
 			SQLTests.tests(sdd.conn);
 		}
 		
-		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
-			SQLQueries.doQueries(sdd.conn, sdd.papp);
-		}
-		
 		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;
 		
@@ -188,6 +184,10 @@ public class SQLDump {
 		String dirToDeleteFiles = sdd.papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
 		if(dirToDeleteFiles!=null) {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
+		}
+		
+		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
+			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
 		if(sdd.doSchemaDump) {
