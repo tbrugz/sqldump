@@ -39,4 +39,6 @@ public abstract class DumpSyntax {
 	public abstract void dumpRow(ResultSet rs, int count, Writer fos) throws Exception;
 
 	public abstract void dumpFooter(Writer fos) throws Exception;
+
+	public void flushBuffer(Writer fos) throws Exception {}
 }

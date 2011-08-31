@@ -42,7 +42,7 @@ public class HTMLDataDump extends DumpSyntax {
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
-		sb.append("<table id='"+tableName+"'>\n<tr>");
+		sb.append("<table id='"+tableName+"'>\n\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
 			sb.append("<th>"+lsColNames.get(i)+"</th>");
 		}

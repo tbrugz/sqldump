@@ -14,12 +14,17 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
-//XXXdone: left-align for strings & right-align for numbers
-//XXXdone: prop for 'separator' & 'lineGroupSize'
-//XXXdone: prop for null value? defalut <null>?
-//XXXdone: prop for showing or not column names
-
-//FFC: Formatted Fixed Column
+/*
+ * XXXdone: left-align for strings & right-align for numbers
+ * XXXdone: prop for 'separator' & 'lineGroupSize'
+ * XXXdone: prop for null value? defalut <null>?
+ * XXXdone: prop for showing or not column names
+ * 
+ * XXX: problem with 'partitionby' and column of partition is null
+ */
+/**
+ * FFC: Formatted Fixed Column
+ */
 public class FFCDataDump extends DumpSyntax {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
@@ -90,12 +95,29 @@ public class FFCDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
+		setColMaxLenghtForColNames();
+	}
+	
+	void setColMaxLenghtForColNames() {
+		//setting colsMaxLenght
+		for(int i=0;i<lsColNames.size();i++) {
+			int max = colsMaxLenght.get(i);
+
+			if(showColNames) {
+				int maxCol = lsColNames.get(i).length();
+				if(max<maxCol) {
+					max = maxCol;
+					colsMaxLenght.set(i, max);
+				}
+			}
+			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+lsColNames.get(i)); }
+		}
 	}
 
 	@Override
 	public void dumpRow(ResultSet rs, int count, Writer fos) throws Exception {
 		//first count is equal 0
-		if((count+1)%lineGroupSize==0) {
+		if(count%lineGroupSize==0) {
 			dumpBuffer(fos);
 		}
 
@@ -117,6 +139,7 @@ public class FFCDataDump extends DumpSyntax {
 					colsMaxLenght.set(i, max);
 				}
 			}
+			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+lsColNames.get(i)); }
 			valsStr.add(valueStr);
 		}
 		valuesBuffer.add(valsStr);
@@ -131,6 +154,8 @@ public class FFCDataDump extends DumpSyntax {
 	}
 	
 	void dumpBuffer(Writer fos) throws IOException {
+		if(valuesBuffer.size()<=0) { return; } //should it be here?
+		
 		//print buffer
 		StringBuffer sb = new StringBuffer();
 
@@ -174,7 +199,9 @@ public class FFCDataDump extends DumpSyntax {
 	}
 	
 	void appendString(StringBuffer sb, int len, String value, int colIndex) {
-		//sb.append( String.format("%"+len+"s"+separator, value) );
+		if(len==0) {
+			log.warn("FFCSyntax error: len="+len+"; value: "+value+"; bufsize="+valuesBuffer.size());
+		}
 		if(leftAlignField.get(colIndex)) {
 			sb.append( String.format("%-"+len+"s"+separator, value) );
 		}
@@ -198,6 +225,13 @@ public class FFCDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(Writer fos) throws Exception {
+		setColMaxLenghtForColNames();
+		dumpBuffer(fos);
+	}
+	
+	@Override
+	public void flushBuffer(Writer fos) throws Exception {
+		if(valuesBuffer.size()<=0) { return; } //not needed now: dumpBuffer() already does it
 		dumpBuffer(fos);
 	}
 

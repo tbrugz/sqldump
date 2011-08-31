@@ -249,10 +249,14 @@ public class DataDump {
 			
 			//rows
 			int count = 0;
+			int countInPartition = 0;
 			do {
 				partitionByStrIdOld = partitionByStrId; 
 				partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+				boolean partitionChanged = false;
 				if(!partitionByStrId.equals(partitionByStrIdOld)) {
+					partitionChanged = true;
+					countInPartition = 0;
 					log.debug("partitionId changed: from='"+partitionByStrIdOld+"' to='"+partitionByStrId+"'");
 				}
 				
@@ -263,16 +267,24 @@ public class DataDump {
 						//Writer w = getWriterForFilename(finalFilename, charset, true);
 						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);
 						Writer w = writersOpened.get(finalFilename);
+						if(partitionChanged) {
+							//for DumpSyntaxes that have buffer (like FFC)
+							String finalFilenameOld = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrIdOld);
+							ds.flushBuffer(writersOpened.get(finalFilenameOld));
+						}
+						
 						if(newFilename) {
 							log.debug("new filename="+finalFilename);
 							ds.dumpHeader(w);
 							writersSyntaxes.put(finalFilename, ds);
 						}
-						ds.dumpRow(rs, count, w);
+						//TODOne: count should be total count or file count? i vote on file count :) (FFC uses it for buffering)
+						ds.dumpRow(rs, countInPartition, w);
 						//ds.dumpRow(rs, count, writerList.get(i));
 					}
 				}
 				count++;
+				countInPartition++;
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
