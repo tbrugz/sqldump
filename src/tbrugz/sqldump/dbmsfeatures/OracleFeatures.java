@@ -225,7 +225,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		see: http://www.dba-oracle.com/concepts/creating_indexes.htm
 		*/
 			
-		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.table_name, uic.column_name "
+		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name "
 			+"from all_indexes ui, all_ind_columns uic "
 			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
 			+"and ui.owner = '"+schemaPattern+"' "
@@ -251,9 +251,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				idx.name = idxName;
 				idx.unique = rs.getString(3).equals("UNIQUE");
 				idx.schemaName = rs.getString(1);
-				idx.tableName = rs.getString(4);
+				setIndexType(idx, rs.getString(4));
+				idx.tableName = rs.getString(5);
 			}
-			idx.columns.add(rs.getString(5));
+			idx.columns.add(rs.getString(6));
 			colCount++;
 		}
 		if(idx!=null) {
@@ -264,6 +265,15 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+idxCount+" indexes grabbed [colcount="+colCount+"]");
+	}
+	
+	static void setIndexType(Index idx, String typeStr) {
+		if(typeStr==null) { return; }
+		if(typeStr.equals("NORMAL")) { return; }
+		if(typeStr.equals("BITMAP")) { idx.type = typeStr; return; }
+		if(typeStr.equals("NORMAL/REV")) { idx.reverse = true; return; }
+		//XXX: 'unknown' index types: DOMAIN, FUNCTION-BASED NORMAL, FUNCTION-BASED DOMAIN, IOT - TOP
+		idx.comment = "unknown index type: '"+typeStr+"'";
 	}
 
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {

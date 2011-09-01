@@ -7,17 +7,22 @@ import tbrugz.sqldump.Utils;
 
 /*
  * see: http://download.oracle.com/docs/cd/B19306_01/server.102/b14200/statements_5010.htm
+ * XXX: index type. e.g. bitmap (done for oracle)
  */
 public class Index extends DBObject {
 	
 	public boolean unique;
+	public String type;
+	public Boolean reverse;
 	public String tableName;
 	public List<String> columns = new ArrayList<String>();
+	public String comment;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create "+(unique?"unique ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
-			+" ("+Utils.join(columns, ", ")+")";
+		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
+			+" ("+Utils.join(columns, ", ")+")"
+			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" --"+comment:"");
 	}
 	
 	@Override
