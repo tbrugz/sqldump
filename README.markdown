@@ -25,8 +25,8 @@ Dependencies
 - ant (recommended)
 
 
-Usage (with ant)
-----------------
+Usage (with sources & ant)
+--------------------------
 - Run `ant compile`
 - Copy `sqldump.properties.template` to `sqldump.properties`
 - Edit `sqldump.properties`

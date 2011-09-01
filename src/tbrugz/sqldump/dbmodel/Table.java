@@ -16,6 +16,7 @@ public class Table extends DBObject {
 	List<Grant> grants = new ArrayList<Grant>();
 	//String pkConstraintName;
 	List<Constraint> constraints = new ArrayList<Constraint>();
+	String remarks;	//e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	
 	static Logger log = Logger.getLogger(Table.class);
 	
@@ -195,6 +196,14 @@ public class Table extends DBObject {
 
 	public void setConstraints(List<Constraint> constraints) {
 		this.constraints = constraints;
+	}
+
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
 	
 }

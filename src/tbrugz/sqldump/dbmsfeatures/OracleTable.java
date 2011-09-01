@@ -28,6 +28,9 @@ public class OracleTable extends Table {
 	public String getAfterCreateTableScript() {
 		//COMMENT ON COLUMN [schema.]table.column IS 'text'
 		StringBuffer sb = new StringBuffer();
+		if(getRemarks()!=null) {
+			sb.append("comment on table "+schemaName+"."+name+" is '"+getRemarks()+"';\n");
+		}
 		for(Column c: getColumns()) {
 			String comment = c.getComment();
 			if(comment!=null && !comment.trim().equals("")) {

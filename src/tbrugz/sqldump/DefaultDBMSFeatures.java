@@ -9,6 +9,7 @@ import tbrugz.sqldump.dbmodel.Table;
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 
 	public void procProperties(Properties prop) {
+		super.procProperties(prop);
 	}
 
 	public void grabDBObjects(SchemaModel model, String schemaPattern,

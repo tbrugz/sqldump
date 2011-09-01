@@ -230,6 +230,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			table.name = tableName;
 			table.schemaName = schemaName;
 			table.setType(ttype);
+			table.setRemarks(rs.getString("REMARKS"));
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {

@@ -20,49 +20,44 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
-		
+
+		//REMARKS String => comment describing column (may be null)
 		Connection conn = metadata.getConnection();
-		String sql = "select * from (\n";
-		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKS, " 
+		String sql = "select tables.*, comm.comments as REMARKS from (\n";
+		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKSz, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS "
 				+", owner as TABLE_SCHEM_FILTER "
 				+"from all_tables where (owner, table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n";
 		//synonyms
-		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
+		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKSz, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
 				+", alls.owner as TABLE_SCHEM_FILTER "
 				+"from all_synonyms alls, all_tables allt "
 				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n";
 		//views
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
+		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKSz, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
 				+", owner as TABLE_SCHEM_FILTER "
 				+"from all_views \n";
 		//materialized views
-		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, null as REMARKS, "
+		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, null as REMARKSz, "
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, "
 				+"allmv.owner as TABLE_SCHEM_FILTER "
 				+"from all_tables allt, all_mviews allmv where allt.owner = allmv.owner and allt.table_name = allmv.mview_name \n";
 		//external tables
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKS, "
+		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKSz, "
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, "
 				+"owner as TABLE_SCHEM_FILTER "
 				+"from all_external_tables \n";
-		sql += ") ";
+		sql += ") tables, all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";
 		if(schemaPattern!=null) {
-			sql += "where TABLE_SCHEM_FILTER = '"+schemaPattern+"' ";
+			sql += "and TABLE_SCHEM_FILTER = '"+schemaPattern+"' ";
 		}
 		if(tableNamePattern!=null) {
-			if(schemaPattern!=null) {
-				sql += "and ";
-			}
-			else {
-				sql += "where ";
-			}
-			sql += " TABLE_NAME = '"+tableNamePattern+"' ";
+			sql += "and tables.TABLE_NAME = '"+tableNamePattern+"' ";
 		}
-		sql += "order by TABLE_SCHEM, TABLE_NAME";
+		sql += "order by tables.TABLE_SCHEM, tables.TABLE_NAME";
 		Statement st = conn.createStatement();
 		log.debug("sql:\n"+sql);
 		return st.executeQuery(sql);
