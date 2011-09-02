@@ -1,8 +1,8 @@
 package tbrugz.sqldump;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -45,7 +45,7 @@ import tbrugz.sqldump.dbmodel.Table;
 public class DataDump {
 
 	//generic props
-	static final String PROP_DATADUMP_FILEPATTERN = "sqldump.datadump.filepattern";
+	static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
 	//static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
 	static final String PROP_DATADUMP_SYNTAXES = "sqldump.datadump.dumpsyntaxes";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
@@ -53,17 +53,6 @@ public class DataDump {
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
-	
-	static final String PROP_DATADUMP_INSERTINTO_FILEPATTERN = "sqldump.datadump.insertinto.filepattern";
-	static final String PROP_DATADUMP_CSV_FILEPATTERN = "sqldump.datadump.csv.filepattern";
-	static final String PROP_DATADUMP_XML_FILEPATTERN = "sqldump.datadump.xml.filepattern";
-	static final String PROP_DATADUMP_JSON_FILEPATTERN = "sqldump.datadump.json.filepattern";
-	
-	//datadump syntaxes
-	static final String SYNTAX_INSERTINTO = "insertinto";
-	static final String SYNTAX_CSV = "csv";
-	static final String SYNTAX_XML = "xml";
-	static final String SYNTAX_JSON = "json"; 
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
@@ -154,7 +143,7 @@ public class DataDump {
 			log.debug("sql: "+sql);
 			
 			//XXX: table dump with partitionBy?
-			runQuery(conn, sql, null, prop, tableName, charset, 
+			runQuery(conn, sql, null, prop, tableName, tableName, charset, 
 					rowlimit, 
 					syntaxList
 					);
@@ -166,12 +155,12 @@ public class DataDump {
 	}
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
-			String tableOrQueryName, String charset, long rowlimit, List<DumpSyntax> syntaxList
+			String tableOrQueryId, String tableOrQueryName, String charset, long rowlimit, List<DumpSyntax> syntaxList
 			) throws Exception {
-		runQuery(conn, sql, params, prop, tableOrQueryName, charset, rowlimit, syntaxList, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null);
 	}
 		
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableOrQueryName, String charset, 
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
 			String partitionByPattern
@@ -191,7 +180,7 @@ public class DataDump {
 			//so empty tables do not create empty dump files
 			if(!hasData) return;
 			
-			String defaultFilename = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
+			//String defaultFilename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN);
 
 			List<String> filenameList = new ArrayList<String>();
 			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
@@ -214,7 +203,7 @@ public class DataDump {
 				filenameList.add(null);
 				
 				//String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
-				String filename = getDynamicFileName(prop, tableOrQueryName, ds.getSyntaxId(), defaultFilename);
+				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
 				
 				if(filename==null) {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
@@ -327,9 +316,22 @@ public class DataDump {
 			rs.close();
 	}
 	
-	String getDynamicFileName(Properties prop, String tableOrQueryName, String syntaxId, String defaultFilename) {
-		String filename = prop.getProperty("sqldump.datadump."+syntaxId+".filepattern", defaultFilename);
-		return filename;
+	String getDynamicFileName(Properties prop, String tableOrQueryId, String syntaxId) {
+		log.debug("getDynamicOutFileName: id="+tableOrQueryId+"; syntax="+syntaxId);
+		String filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN+".id@"+tableOrQueryId+".syntax@"+syntaxId);
+		if(filename!=null) { return filename; }
+
+		filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN+".id@"+tableOrQueryId);
+		if(filename!=null) { return filename; }
+		
+		filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN+".syntax@"+syntaxId);
+		if(filename!=null) { return filename; }
+
+		filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN);
+		if(filename!=null) { return filename; }
+		
+		log.warn("no '"+PROP_DATADUMP_OUTFILEPATTERN+"' defined");
+		return null;
 	}
 	
 	String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
@@ -350,6 +352,12 @@ public class DataDump {
 	
 	boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset) throws UnsupportedEncodingException, FileNotFoundException {
 		if(! writersOpened.containsKey(fname)) {
+			File f = new File(fname);
+			File parent = f.getParentFile();
+			if(!parent.isDirectory()) {
+				log.info("creating dir: "+parent);
+				parent.mkdirs();
+			}
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), charset); //XXX: false: never append
 			writersOpened.put(fname, w);
 			//filesOpened.add(fname);

@@ -69,8 +69,8 @@ public class SQLQueries {
 					sql = readFile(sqlfile);
 				}
 			}
-			String tableName = prop.getProperty("sqldump.query."+qid+".name");
-			if(sql==null || tableName==null) { break; }
+			String queryName = prop.getProperty("sqldump.query."+qid+".name");
+			if(sql==null || queryName==null) { break; }
 			//params
 			int paramCount = 1;
 			List<String> params = new ArrayList<String>();
@@ -87,8 +87,8 @@ public class SQLQueries {
 			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 
 			try {
-				log.debug("running query [id="+qid+"; name="+tableName+"]: "+sql);
-				dd.runQuery(conn, sql, params, prop, tableName, charset, rowlimit, syntaxList, partitionBy);
+				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
+				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy);
 			} catch (Exception e) {
 				log.warn("error on query "+qid+": "+e);
 				log.debug("error on query "+qid+": "+e.getMessage(), e);
