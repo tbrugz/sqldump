@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -18,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,11 +59,14 @@ public class DataDump {
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
 	
+	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
 	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
 	//static final String FILENAME_PATTERN_QUERYNAME = "\\$\\{queryname\\}";
 	static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
 	static Logger log = Logger.getLogger(DataDump.class);
+	static Logger logDir = Logger.getLogger(DataDump.class.getName()+".datadump-dir");
+	static Logger logRow = Logger.getLogger(DataDump.class.getName()+".datadump-row");
 	
 	/*
 	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
@@ -194,6 +199,9 @@ public class DataDump {
 			
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
+			
+			//XXX: prop for setting 'logEachXRows'
+			long logEachXRows = 10000;
 
 			//header
 			for(int i=0;i<syntaxList.size();i++) {
@@ -209,6 +217,7 @@ public class DataDump {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
 				}
 				else {
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLE_QUERY_ID, tableOrQueryId);
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableOrQueryName);
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
 					
@@ -237,8 +246,8 @@ public class DataDump {
 			}
 			
 			//rows
-			int count = 0;
-			int countInPartition = 0;
+			long count = 0;
+			long countInPartition = 0;
 			do {
 				partitionByStrIdOld = partitionByStrId; 
 				partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
@@ -260,6 +269,10 @@ public class DataDump {
 							//for DumpSyntaxes that have buffer (like FFC)
 							String finalFilenameOld = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrIdOld);
 							ds.flushBuffer(writersOpened.get(finalFilenameOld));
+							//XXX: write footer & close file here? (less simultaneous open-files)
+							closeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
+							removeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
+							//w.flush();
 						}
 						
 						if(newFilename) {
@@ -274,14 +287,20 @@ public class DataDump {
 				}
 				count++;
 				countInPartition++;
+				
+				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
+					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped");
+				}
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
-			log.info("dumped "+count+" rows from table: "+tableOrQueryName);
+			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName);
 
 			//footer
-			for(String filename: writersSyntaxes.keySet()) {
-				Writer w = writersOpened.get(filename);
+			Set<String> filenames = writersOpened.keySet();
+			for(String filename: filenames) {
+				closeWriter(writersOpened, writersSyntaxes, filename);
+				/*Writer w = writersOpened.get(filename);
 				DumpSyntax ds = writersSyntaxes.get(filename);
 				try {
 					ds.dumpFooter(w);
@@ -290,8 +309,11 @@ public class DataDump {
 					log.warn("error closing stream: "+w+"; filename: "+filename);
 					log.debug("error closing stream: ", e);
 				}
-				w.close();
+				w.close();*/
 			}
+			writersOpened.clear();
+			writersSyntaxes.clear();
+			log.debug("wrote all footers for table/query: "+tableOrQueryName);
 			
 			/*
 			for(int i=0;i<syntaxList.size();i++) {
@@ -314,6 +336,26 @@ public class DataDump {
 			*/
 			
 			rs.close();
+	}
+	
+	void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
+		Writer w = writersOpened.get(filename);
+		DumpSyntax ds = writersSyntaxes.get(filename);
+		try {
+			ds.dumpFooter(w);
+		}
+		catch(Exception e) {
+			log.warn("error closing stream: "+w+"; filename: "+filename);
+			log.debug("error closing stream: ", e);
+		}
+		w.close();
+	}
+	
+	void removeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
+		Writer writerRemoved = writersOpened.remove(filename);
+		if(writerRemoved==null) { log.warn("writer for file '"+filename+"' not found"); }
+		DumpSyntax syntaxRemoved = writersSyntaxes.remove(filename);
+		if(syntaxRemoved==null) { log.warn("syntax for file '"+filename+"' not found"); }
 	}
 	
 	String getDynamicFileName(Properties prop, String tableOrQueryId, String syntaxId) {
@@ -355,7 +397,7 @@ public class DataDump {
 			File f = new File(fname);
 			File parent = f.getParentFile();
 			if(!parent.isDirectory()) {
-				log.info("creating dir: "+parent);
+				logDir.debug("creating dir: "+parent);
 				parent.mkdirs();
 			}
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), charset); //XXX: false: never append
