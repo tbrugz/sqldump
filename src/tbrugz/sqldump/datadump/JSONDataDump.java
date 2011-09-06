@@ -45,7 +45,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, int count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t"+(count==0?"":",")+"{");
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);

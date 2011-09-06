@@ -94,7 +94,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, int count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {

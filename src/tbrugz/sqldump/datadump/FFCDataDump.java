@@ -115,7 +115,7 @@ public class FFCDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, int count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		//first count is equal 0
 		if(count%lineGroupSize==0) {
 			dumpBuffer(fos);
@@ -154,7 +154,7 @@ public class FFCDataDump extends DumpSyntax {
 	}
 	
 	void dumpBuffer(Writer fos) throws IOException {
-		if(valuesBuffer.size()<=0) { return; } //should it be here?
+		if(valuesBuffer.size()<=0) { return; } //should it be here? XXX: dump header only when rowCount = 0? 
 		
 		//print buffer
 		StringBuffer sb = new StringBuffer();
@@ -225,7 +225,7 @@ public class FFCDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(Writer fos) throws Exception {
-		setColMaxLenghtForColNames();
+		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
 	}
 	
