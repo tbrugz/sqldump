@@ -45,6 +45,7 @@ enum EdgeLabelType {
  * XXXdone: FK stereotype: composite?
  * XXXdone: schema_name as node stereotype?
  * XXXdone: table name pattern as node stereotype
+ * XXX: option to show only table names
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	

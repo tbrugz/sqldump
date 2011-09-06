@@ -14,7 +14,6 @@ public class Table extends DBObject {
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
-	//String pkConstraintName;
 	List<Constraint> constraints = new ArrayList<Constraint>();
 	String remarks;	//e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	
@@ -31,7 +30,6 @@ public class Table extends DBObject {
 	@Override
 	public String toString() {
 		return type+":"+name;
-		//return "t:"+name;
 		//return "Table[name:"+name+"]";
 	}
 	
@@ -51,7 +49,6 @@ public class Table extends DBObject {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		// XXXxxx Table: getDefinition(dumpSchemaName, true, false, null, null)??
 		return getDefinition(dumpSchemaName, true, false, null, null);
 	}
 	

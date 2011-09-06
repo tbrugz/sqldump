@@ -18,6 +18,7 @@ import tbrugz.sqldump.datadump.DumpSyntax;
 //XXX: add prop: sqldump.query.<x>.param.pid_xx=1
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
+//XXX: option to log each 'n' rows dumped
 public class SQLQueries {
 	
 	static final String PROP_QUERIES = "sqldump.queries";
@@ -90,7 +91,7 @@ public class SQLQueries {
 				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy);
 			} catch (Exception e) {
-				log.warn("error on query "+qid+": "+e);
+				log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 				log.debug("error on query "+qid+": "+e.getMessage(), e);
 			}
 			i++;

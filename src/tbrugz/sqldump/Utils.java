@@ -267,19 +267,35 @@ public class Utils {
 	}
 	
 	public static void deleteDirRegularContents(String s) {
-		log.info("deleting regular files from dir: "+s);
+		deleteDirRegularContents(s, 0);
+	}
+	
+	static int deleteDirRegularContents(String s, int level) {
+		if(level==0) {
+			log.info("deleting regular files from dir: "+s);
+		}
 		File f = new File(s);
 		File files[] = f.listFiles(new RegularFileFilter());
+		if(files==null) return 0;
+		int delCount = 0;
 		for(File ff: files) {
 			if(ff.isFile()) {
 				log.debug("file to delete: "+ff);
 				ff.delete();
+				delCount++;
 			}
 			else if(ff.isDirectory()) {
-				//XXX: deleteDirRegularContents: recurse int subdirs
-				log.debug("ignored dir: "+ff);
+				//XXXxx: deleteDirRegularContents: recurse int subdirs
+				delCount += deleteDirRegularContents(ff.getAbsolutePath(), level+1);
+				log.debug("dir to delete: "+ff);
+				ff.delete();
+				delCount++;
 			}
 		}
+		if(level==0) {
+			log.info(delCount+" files deteted");
+		}
+		return delCount;
 	}
 	
 	public static List<String> getKeysStartingWith(Properties prop, String startStr) {
