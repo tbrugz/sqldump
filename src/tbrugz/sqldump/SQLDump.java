@@ -73,6 +73,7 @@ public class SQLDump {
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
 	public static final String COLUMN_TYPE_MAPPING_RESOURCE = "column-type-mapping.properties";
+	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
 	
 	static Logger log = Logger.getLogger(SQLDump.class);
 	
@@ -108,6 +109,13 @@ public class SQLDump {
 			papp.load(new FileInputStream(PROPERTIES_FILENAME));
 		}*/
 
+		//init control vars
+		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
+		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
+		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
+	}
+
+	void initDBDriver(String[] args) throws Exception {
 		//init database
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
 		
@@ -120,16 +128,13 @@ public class SQLDump {
 		}
 
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);
-		
-		//init control vars
-		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
-		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
-		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
 	}
-
+	
 	void end() throws Exception {
 		log.info("...done");
-		conn.close();
+		if(conn!=null) {
+			conn.close();
+		}
 	}
 	
 	/**
@@ -140,31 +145,27 @@ public class SQLDump {
 
 		sdd.init(args);
 		
-		if(sdd.doTests) {
-			SQLTests.tests(sdd.conn);
-		}
-		
 		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;
 		
 		//grabbing model
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName);
-			if(schemaGrabber==null) {
-				schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance("tbrugz.sqldump."+grabClassName);
-			}
+			schemaGrabber = (SchemaModelGrabber) getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGE);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
+				if(schemaGrabber.needsConnection() && sdd.conn==null) {
+					sdd.initDBDriver(args);
+				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
 			}
 			else {
-				log.warn("class '"+grabClassName+"' not found");
+				log.warn("schema grabber class '"+grabClassName+"' not found");
 			}
 		}
 		else {
-			log.info("no schema grab class [prop 'sqldump.schemagrab.grabclass'] defined");
+			log.info("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
 		//SchemaModelGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();
@@ -186,6 +187,10 @@ public class SQLDump {
 		if(dirToDeleteFiles!=null) {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
 		}
+
+		if(sdd.doTests) {
+			SQLTests.tests(sdd.conn);
+		}
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
@@ -198,10 +203,18 @@ public class SQLDump {
 			if(dumpSchemaClasses!=null) {
 				String dumpClasses[] = dumpSchemaClasses.split(",");
 				for(String dumpClass: dumpClasses) {
-					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass, "tbrugz.sqldump");
-					schemaDumper.procProperties(sdd.papp);
-					schemaDumper.dumpSchema(sm);
+					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGE);
+					if(schemaDumper!=null) {
+						schemaDumper.procProperties(sdd.papp);
+						schemaDumper.dumpSchema(sm);
+					}
+					else {
+						log.warn("Error initializing dump class: '"+dumpClass+"'");
+					}
 				}
+			}
+			else {
+				log.info("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 			}
 			
 			/*

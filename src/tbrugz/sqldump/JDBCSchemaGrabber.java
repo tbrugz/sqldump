@@ -91,6 +91,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 	}
 	
+	@Override
+	public boolean needsConnection() {
+		return true;
+	}
+	
 	void end() throws Exception {
 		log.info("...done");
 		conn.close();

@@ -35,6 +35,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileOutput));
 		oos.writeObject(schemaModel);
 		oos.close();
+		log.info("schema model serialized to '"+fileOutput+"'");
 	}
 
 	@Override
@@ -47,6 +48,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileInput));
 		SchemaModel sm = (SchemaModel) ois.readObject();
 		ois.close();
+		log.info("serialized schema model grabbed from '"+fileInput+"'");
 		return sm;
 	}
 
@@ -55,4 +57,9 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		log.debug("setConnection() is empty");
 	}
 
+	@Override
+	public boolean needsConnection() {
+		return false;
+	}
+	
 }

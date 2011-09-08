@@ -56,6 +56,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
 		m.marshal(schemaModel, new File(fileOutput));
+		log.info("xml schema model dumped to '"+fileOutput+"'");
 	}
 
 	@Override
@@ -71,12 +72,18 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		for(Table t: sm.getTables()) {
 			t.validateConstraints();
 		}
+		log.info("xml schema model grabbed from '"+fileInput+"'");
 		return sm;
 	}
 
 	@Override
 	public void setConnection(Connection conn) {
 		log.debug("setConnection() is empty");
+	}
+	
+	@Override
+	public boolean needsConnection() {
+		return false;
 	}
 
 }

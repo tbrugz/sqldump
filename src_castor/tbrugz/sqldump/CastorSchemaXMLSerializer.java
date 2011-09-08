@@ -50,4 +50,9 @@ public class CastorSchemaXMLSerializer implements SchemaModelDumper, SchemaModel
 		log.debug("setConnection() is empty");
 	}
 
+	@Override
+	public boolean needsConnection() {
+		return false;
+	}
+	
 }
