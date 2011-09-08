@@ -2,19 +2,10 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="src_graphml"/>
-	<classpathentry kind="src" path="src_castor"/>
 	<classpathentry kind="src" path="src_diff"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
-	<classpathentry kind="lib" path="D:/java/libs-jdbc/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="D:/java/libs-jdbc/postgresql-9.0-801.jdbc4.jar"/>
-	<classpathentry kind="lib" path="D:/java/db-derby-10.8.1.2-bin/lib/derby.jar"/>
-	<classpathentry kind="lib" path="D:/java/castor-1.3.2/castor-1.3.2-core.jar"/>
-	<classpathentry kind="lib" path="D:/java/castor-1.3.2/castor-1.3.2-xml.jar"/>
-	<classpathentry kind="lib" path="D:/java/commons-lang-2.6/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="D:/java/hsqldb-2.2.5/hsqldb/lib/hsqldb.jar"/>
-	<classpathentry kind="lib" path="D:/java/libs-jdbc/mysql-connector-java-3.1.14-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

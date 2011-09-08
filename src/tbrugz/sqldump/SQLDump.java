@@ -58,6 +58,7 @@ public class SQLDump {
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
+	static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
@@ -190,8 +191,20 @@ public class SQLDump {
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
+		//dumping model
 		if(sdd.doSchemaDump) {
 			
+			String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+			if(dumpSchemaClasses!=null) {
+				String dumpClasses[] = dumpSchemaClasses.split(",");
+				for(String dumpClass: dumpClasses) {
+					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass, "tbrugz.sqldump");
+					schemaDumper.procProperties(sdd.papp);
+					schemaDumper.dumpSchema(sm);
+				}
+			}
+			
+			/*
 			//script dump
 			SchemaModelDumper schemaDumper = new SchemaModelScriptDumper();
 			schemaDumper.procProperties(sdd.papp);
@@ -218,7 +231,11 @@ public class SQLDump {
 			SchemaModelDumper s2gml = new Schema2GraphML();
 			s2gml.procProperties(sdd.papp);
 			s2gml.dumpSchema(sm);
+			
+			*/
 		}
+		
+		//dumping data
 		//if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
 		if(sdd.doDataDump && schemaGrabber!=null) {
 			DataDump dd = new DataDump();
@@ -227,6 +244,16 @@ public class SQLDump {
 		}
 		
 		sdd.end();
+	}
+	
+	static Object getClassInstance(String className, String... defaultPackages) {
+		Object o = Utils.getClassInstance(className);
+		int countPack = 0;
+		while(o==null && defaultPackages!=null && defaultPackages.length > countPack) {
+			o = Utils.getClassInstance(defaultPackages[countPack]+"."+className);
+			countPack++;
+		}
+		return o;
 	}
 	
 }

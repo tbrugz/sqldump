@@ -46,6 +46,8 @@ sqldump.schemagrab.grabclass=JDBCSchemaGrabber
 
 sqldump.dotests=true
 sqldump.doschemadump=true
+# dumpclasses can be: SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML
+sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML
 sqldump.doschemadump.grants=true
 sqldump.doschemadump.fks=true
 sqldump.doschemadump.exportedfks=true
