@@ -55,6 +55,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
+	public static final String PROP_SNIPPETS_FILE = "sqldump.graphmldump.snippetsfile";
 	
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 
@@ -204,6 +205,11 @@ public class Schema2GraphML implements SchemaModelDumper {
 		
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
 		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
+		
+		String snippetsFile = prop.getProperty(PROP_SNIPPETS_FILE);
+		if(snippetsFile!=null) {
+			DumpSchemaGraphMLModel.snippetsFile = snippetsFile;
+		}
 		
 		setOutput(new File(outFileStr));
 	}

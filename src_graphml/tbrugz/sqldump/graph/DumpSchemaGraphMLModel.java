@@ -11,7 +11,16 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 
 	static Log log = LogFactory.getLog(DumpSchemaGraphMLModel.class);
 	static boolean nodeHeightByColsNumber = true;
+	static String snippetsFile;
+	
 	static final String DEFAULT_NODE_HEIGHT = "400.0";
+	
+	{
+		if(snippetsFile!=null) {
+			loadSnippets(snippetsFile);
+			log.info("loaded snippets file: '"+snippetsFile+"'");
+		}
+	}
 	
 	@Override
 	public void outNodeContents(Node t, int level) {
