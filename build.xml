@@ -52,6 +52,12 @@
 		</java>
 	</target>
 	
+	<target name="test">
+		<java classpathref="classpath.run" classname="${sqldump.main.class}">
+			<arg value="-propfile=test/sqldump-jaxb-test.properties"/>
+		</java>
+	</target>
+	
 	<target name="jar" depends="prepare">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"

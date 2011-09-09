@@ -31,14 +31,14 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * TODOne: grab constraints: ~UNIQUE, ~CHECK, xPK, xFK, xNOT NULL ; UNIQUE & CHECK for Oracle!
  * XXXdone: DEFAULT for columns 
  * XXXdone: COMMENT/REMARKS for columns (Oracle) 
- * XXX: COMMENT/REMARKS for tables
+ * XXXdone: COMMENT/REMARKS for tables (Oracle)
  * TODOne: bitbucket project's wiki
  * TODOne: main(): args: point to different .properties init files. 
  * XXXdone: Use ${xxx} params inside Properties
  * XXXdone: data dump: limit tables to dump 
  * XXXxx: define output patterns for data dump
- * TODO: include demo schema and data
- * XXX: option to delete initial output dir contents (except special hidden files (unix dotfiles) eg: .svn, .git, .hg)?
+ * !TODO: include demo schema and data
+ * XXXdone: option to delete initial output dir contents (except special hidden files (unix dotfiles) eg: .svn, .git, .hg)?
  * ---
  * XXXxxx: compare 2 schema models? generate "alter table" database script... see SQLDiff
  * XXX(later): generate schema model from graphML file (XMLUnit?). may be used for model comparison 
@@ -115,8 +115,9 @@ public class SQLDump {
 		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
 	}
 
-	void initDBDriver(String[] args) throws Exception {
+	void initDBConnection(String[] args) throws Exception {
 		//init database
+		log.debug("initDBConnection...");
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
 		
 		Properties p = new Properties();
@@ -155,7 +156,7 @@ public class SQLDump {
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
-					sdd.initDBDriver(args);
+					sdd.initDBConnection(args);
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
@@ -223,7 +224,7 @@ public class SQLDump {
 			schemaDumper.procProperties(sdd.papp);
 			schemaDumper.dumpSchema(sm);
 			
-			//TODO prop doSerializeDump? doGraphMLDump?
+			//TODOzzz prop doSerializeDump? doGraphMLDump?
 
 			//serialize
 			SchemaModelDumper schemaSerialDumper = new SchemaSerializer();
