@@ -136,7 +136,22 @@ public class Table extends DBObject {
 	}
 	
 	public String getAfterCreateTableScript() {
-		return ""; //"" or null
+		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
+		StringBuffer sb = new StringBuffer();
+		String tableComment = getRemarks();
+		if(tableComment!=null && !tableComment.trim().equals("")) {
+			tableComment = tableComment.replaceAll("'", "''");
+			sb.append("comment on table "+schemaName+"."+name+" is '"+tableComment+"';\n");
+		}
+		for(Column c: getColumns()) {
+			String comment = c.getRemarks();
+			if(comment!=null && !comment.trim().equals("")) {
+				//XXXdone: escape comment
+				comment = comment.replaceAll("'", "''");
+				sb.append("comment on column "+schemaName+"."+name+"."+c.name+" is '"+comment+"';\n");
+			}
+		}
+		return sb.toString();
 	}
 	
 	public Constraint getPKConstraint() {

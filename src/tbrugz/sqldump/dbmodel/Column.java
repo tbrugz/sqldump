@@ -19,7 +19,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	transient boolean pk; //XXXdone: should be transient? add PK info into constraint? yes, yes
 	public boolean nullable;
 	String defaultValue;
-	String comment;
+	String remarks;
 	
 	static Properties typeMapping = null;
 	{
@@ -105,12 +105,12 @@ public class Column extends DBIdentifiable implements Serializable {
 		this.defaultValue = defaultValue;
 	}
 	
-	public String getComment() {
-		return comment;
+	public String getRemarks() {
+		return remarks;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setRemarks(String comment) {
+		this.remarks = comment;
 	}
 
 	@Override

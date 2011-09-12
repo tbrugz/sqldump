@@ -1,6 +1,5 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 /*
@@ -23,21 +22,5 @@ public class OracleTable extends Table {
 		footer += logging?"\nLOGGING":"";
 		return footer; 
 	}
-	
-	@Override
-	public String getAfterCreateTableScript() {
-		//COMMENT ON COLUMN [schema.]table.column IS 'text'
-		StringBuffer sb = new StringBuffer();
-		if(getRemarks()!=null) {
-			sb.append("comment on table "+schemaName+"."+name+" is '"+getRemarks()+"';\n");
-		}
-		for(Column c: getColumns()) {
-			String comment = c.getComment();
-			if(comment!=null && !comment.trim().equals("")) {
-				//XXX: escape comment?
-				sb.append("comment on column "+schemaName+"."+name+"."+c.name+" is '"+comment+"';\n");
-			}
-		}
-		return sb.toString();
-	}
+
 }

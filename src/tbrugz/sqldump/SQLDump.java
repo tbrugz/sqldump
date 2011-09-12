@@ -6,8 +6,6 @@ import java.io.*;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.graph.Schema2GraphML;
-
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
  * XXXxxx: detach main (SQLDataDump) from data dump
@@ -45,6 +43,7 @@ import tbrugz.sqldump.graph.Schema2GraphML;
  * XXXdone: serialize model (for later comparison)
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
+ * XXX: new dumper: generate mondrian schema  
  */
 public class SQLDump {
 	

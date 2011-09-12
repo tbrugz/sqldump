@@ -335,15 +335,16 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
 		try {
 			String dataDefault = rs.getString("DATA_DEFAULT");
-			String comments = rs.getString("COMMENTS");
+			//String comments = rs.getString("REMARKS");
 			if(dataDefault!=null) {
 				c.setDefaultValue(dataDefault.trim());
 			}
-			if(comments!=null) {
-				c.setComment(comments.trim());
-			}
+			//if(comments!=null) {
+			//	c.setRemarks(comments.trim());
+			//}
 		} catch (SQLException e) {
-			log.warn("resultset has no 'DATA_DEFAULT' column [c: "+c+"]");
+			log.warn("resultset has no 'DATA_DEFAULT'; column: '"+c+"', message: '"+e.getMessage()+"'");
+			log.debug("sqlException:", e);
 		}
 	}
 

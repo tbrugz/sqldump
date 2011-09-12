@@ -400,6 +400,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		c.type = cols.getString("TYPE_NAME");
 		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
 		c.columSize = cols.getInt("COLUMN_SIZE");
+		c.setRemarks(cols.getString("REMARKS"));
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
 			int iDecimalDigits = ((Number) decimalDigits).intValue();
