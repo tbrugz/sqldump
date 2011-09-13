@@ -4,6 +4,7 @@ import tbrugz.graphml.model.Node;
 
 public class TableNode extends Node {
 	String columnsDesc;
+	String constraintsDesc; // = "";
 	String stereotype;
 	int columnNumber = 0;
 
@@ -32,5 +33,13 @@ public class TableNode extends Node {
 	public void setColumnNumber(int columnNumber) {
 		this.columnNumber = columnNumber;
 	}
-	
+
+	public String getConstraintsDesc() {
+		return constraintsDesc;
+	}
+
+	public void setConstraintsDesc(String constraintsDesc) {
+		this.constraintsDesc = constraintsDesc;
+	}
+
 }

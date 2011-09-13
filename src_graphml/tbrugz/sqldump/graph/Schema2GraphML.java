@@ -23,6 +23,7 @@ import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -31,21 +32,23 @@ enum EdgeLabelType {
 }
 
 /*
- * XXX: node contents: show PK columns, FK columns, constraints?
+ * XXX!: node contents: show PK columns, FK columns, constraints?
+ *  - add constraints (PK, FK, UK, check?, indexes?) inside <y:MethodLabel/>
  * TODOne: stereotype may include 'otherschema' or table type (table, view, synonym(?), external table)
  * XXX: stereotype may be 'temporary table' 
  * XXX: node color by row count?
- * XXX: stereotypes: FK-source-only nodes, FK-target-only nodes
+ * XXX!: stereotypes: FK-source-only nodes (roots), FK-target-only nodes (leafs)
  * XXXdone: height by col size?
  * XXXdone: prop for toggling on/off the adjustment of node height?
- * TODO: prop for setting 'graphml-snippets.properties' location
+ * TODOne: prop for setting 'graphml-snippets.properties' location
  * TODO: merge with existing graphml (then layout is not lost) 
  *  - update node contents, update edge label, add new nodes and edges
  *  - specific stereotype for 'new' nodes & edges
  * XXXdone: FK stereotype: composite?
  * XXXdone: schema_name as node stereotype?
  * XXXdone: table name pattern as node stereotype
- * XXX: option to show only table names
+ * XXXdone: option to show only table names - see/use: /sqldump/src_graphml/graphml-snippets-simple.properties
+ * XXX: node label: show table type (VIEW, EXTERNAL_TABLE, ...)?
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
@@ -53,6 +56,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
+	public static final String PROP_SHOWCONSTRAINTS = "sqldump.graphmldump.showconstraints";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
 	public static final String PROP_SNIPPETS_FILE = "sqldump.graphmldump.snippetsfile";
@@ -63,6 +67,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
+	boolean showConstraints = false;
 	Map<String, List<Pattern>> stereotypeRegexes = new HashMap<String, List<Pattern>>();
 	
 	//String defaultSchemaName;
@@ -76,19 +81,43 @@ public class Schema2GraphML implements SchemaModelDumper {
 			TableNode n = new TableNode();
 			String id = t.getSchemaName()+"."+t.getName();
 			n.setId(id);
+			
+			//label
 			if(showSchemaName) {
 				n.setLabel(id);
 			}
 			else {
 				n.setLabel(t.getName());
 			}
-			n.setColumnNumber(t.getColumns().size());
-			StringBuffer sb = new StringBuffer();
-			//sb.append("--type: "+t.type+"\n");
+			
+			//columns
+			StringBuffer sbCols = new StringBuffer();
 			for(Column c: t.getColumns()) {
-				sb.append(Column.getColumnDescFull(c, null, null, null)+"\n");
+				sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
 			}
-			n.setColumnsDesc(sb.toString());
+			n.setColumnsDesc(sbCols.toString());
+
+			//constraints
+			int constrCount = 0;
+			if(showConstraints) {
+				StringBuffer sbConstraints = new StringBuffer();
+				for(Constraint cons: t.getConstraints()) {
+					switch(cons.type) {
+						case PK: 
+						case CHECK:
+						case UNIQUE:
+							sbConstraints.append(cons.getDefinition(false)+"\n");
+							constrCount++;
+					}
+				}
+				n.setConstraintsDesc(sbConstraints.toString());
+			}
+			else {
+				n.setConstraintsDesc("");
+			}
+
+			//column number
+			n.setColumnNumber(t.getColumns().size()+constrCount);
 			
 			//node stereotype
 			switch (t.getType()) {
@@ -219,6 +248,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 		}
 		
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
+		showConstraints = Utils.getPropBool(prop, PROP_SHOWCONSTRAINTS, false);
 		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
 		
 		String snippetsFile = prop.getProperty(PROP_SNIPPETS_FILE);

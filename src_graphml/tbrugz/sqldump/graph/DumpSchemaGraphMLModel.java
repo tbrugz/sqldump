@@ -29,7 +29,8 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 			//log.debug("outNode: "+t.getId()+" sn: "+getSnippetId(t, "node")+", st: "+t.getStereotype());
 			outSnippet(getSnippetId(t, "node"), level, 
 					t.getLabel(), //label 
-					tn.getColumnsDesc(), //contents
+					tn.getColumnsDesc(), //contents/columns <y:AttributeLabel>
+					tn.getConstraintsDesc(), //constraints <y:MethodLabel/>
 					nodeHeightByColsNumber?String.valueOf(50 + (tn.getColumnNumber()*15)):DEFAULT_NODE_HEIGHT //height
 					);
 		}
