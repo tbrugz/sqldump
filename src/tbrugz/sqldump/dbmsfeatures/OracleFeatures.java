@@ -343,8 +343,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			//	c.setRemarks(comments.trim());
 			//}
 		} catch (SQLException e) {
-			log.warn("resultset has no 'DATA_DEFAULT'; column: '"+c+"', message: '"+e.getMessage()+"'");
-			log.debug("sqlException:", e);
+			log.warn("resultset has no 'DATA_DEFAULT'(?); column: '"+c+"', message: '"+e.getMessage()+"'");
+			log.debug("sql exception:", e);
 		}
 	}
 

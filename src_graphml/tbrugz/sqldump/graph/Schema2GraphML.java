@@ -63,7 +63,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
-	Map<String, Pattern> stereotypeRegexes = new HashMap<String, Pattern>();
+	Map<String, List<Pattern>> stereotypeRegexes = new HashMap<String, List<Pattern>>();
 	
 	//String defaultSchemaName;
 	
@@ -93,15 +93,21 @@ public class Schema2GraphML implements SchemaModelDumper {
 			//node stereotype
 			switch (t.getType()) {
 				case SYSTEM_TABLE: 
-				case VIEW: 
+				case VIEW:
+				case MATERIALIZED_VIEW:
+				case EXTERNAL_TABLE:
+				case SYNONYM:
 					n.setStereotype("type@"+t.getType()); break;
 				case TABLE:
 				default:
 					break;
 			}
 			for(String key: stereotypeRegexes.keySet()) {
-				if(stereotypeRegexes.get(key).matcher(t.getName()).matches()) {
-					addStereotype(n, "regex@"+key);
+				//List<Pattern> patterns = stereotypeRegexes.get(key);
+				for(Pattern pat: stereotypeRegexes.get(key)) {
+					if(pat.matcher(t.getName()).matches()) {
+						addStereotype(n, "regex@"+key);
+					}
 				}
 			}
 			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
@@ -199,8 +205,17 @@ public class Schema2GraphML implements SchemaModelDumper {
 		//node stereotype regex
 		for(String key: Utils.getKeysStartingWith(prop, PROP_NODESTEREOTYPEREGEX_PREFIX)) {
 			String stereotype = key.substring(PROP_NODESTEREOTYPEREGEX_PREFIX.length());
-			String regex = prop.getProperty(key);
-			stereotypeRegexes.put(stereotype, Pattern.compile(regex));
+			String[] regexes = prop.getProperty(key).split("\\|");
+			for(String regex: regexes) {
+				regex = regex.trim();
+				log.debug("added stereotype table pattern: stereotype: '"+stereotype+"', pattern: '"+regex+"'");
+				List<Pattern> patterns = stereotypeRegexes.get(stereotype);
+				if(patterns==null) {
+					patterns = new ArrayList<Pattern>();
+					stereotypeRegexes.put(stereotype, patterns);
+				}
+				patterns.add(Pattern.compile(regex));
+			}
 		}
 		
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);

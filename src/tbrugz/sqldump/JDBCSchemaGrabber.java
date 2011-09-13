@@ -37,6 +37,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
+
+	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
@@ -557,14 +559,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static List<Pattern> getExcludeTableFilters(Properties prop) {
 		List<Pattern> excludeFilters = new ArrayList<Pattern>();
-		int count = 1;
-		while(true) {
-			String filterProp = "sqldump.schemadump.tablename.exclude."+count;
-			String regex = prop.getProperty(filterProp);
-			if(regex==null) { break; }
-			log.info("added ignore filter: "+regex);
-			excludeFilters.add(Pattern.compile(regex));
-			count++;
+		//int count = 1;
+		String filter = prop.getProperty(PROP_SCHEMADUMP_EXCLUDETABLES);
+		if(filter==null) { return excludeFilters; }
+		String[] excludes = filter.split("\\|");
+		for(String ex: excludes) {
+			String pattern = ex.trim();
+			log.info("added ignore filter: "+pattern);
+			excludeFilters.add(Pattern.compile(pattern));
+			//count++;
 		}
 		return excludeFilters;
 	}

@@ -60,10 +60,8 @@ sqldump.doschemadump.ignoretableswithzerocolumns=true
 # schema names to dump
 sqldump.dumpschemapattern=DW, SA, EMPDEPT
 
-# exclude table filters (regex)
-sqldump.schemadump.tablename.exclude.1=EMPT.*
-sqldump.schemadump.tablename.exclude.2=.*_OLD
-sqldump.schemadump.tablename.exclude.3=ZZZ_.*
+# exclude table filters (regex), splitted by "|"
+sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.* 
 
 sqldump.dumpwithschemaname=true
 
@@ -203,8 +201,8 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 #sqldump.graphmldump.edgelabel=FK|FKANDCOLUMNS|COLUMNS|NONE
 #sqldump.graphmldump.nodeheightbycolsnumber=true|false
 #
-# regex-based stereotypes 
-sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.*
+# regex-based stereotypes, splitted by "|" - stereotype must be defined in a graphml-snippets properties file
+sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
 # snippets file (non-default)
 #sqldump.graphmldump.snippetsfile=graphml-snippets-simple.properties
