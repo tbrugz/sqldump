@@ -60,6 +60,8 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
 	public static final String PROP_SNIPPETS_FILE = "sqldump.graphmldump.snippetsfile";
+	public static final String PROP_STEREOTYPE_ADD_TABLETYPE = "sqldump.graphmldump.addtabletypestereotype";
+	public static final String PROP_STEREOTYPE_ADD_SCHEMA = "sqldump.graphmldump.addschemastereotype";
 	
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 
@@ -68,6 +70,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
 	boolean showConstraints = false;
+	boolean addTableTypeStereotype = true;
+	boolean addSchemaStereotype = true;
+	
 	Map<String, List<Pattern>> stereotypeRegexes = new HashMap<String, List<Pattern>>();
 	
 	//String defaultSchemaName;
@@ -115,21 +120,37 @@ public class Schema2GraphML implements SchemaModelDumper {
 			else {
 				n.setConstraintsDesc("");
 			}
+	
+			//root, leaf
+			boolean isRoot = true;
+			boolean isLeaf = true;
+			for(FK fk: schemaModel.getForeignKeys()) {
+				if(fk.pkTable.equals(t.getName())) {
+					isRoot = false;
+				}
+				if(fk.fkTable.equals(t.getName())) {
+					isLeaf = false;
+				}
+			}
+			n.setRoot(isRoot);
+			n.setLeaf(isLeaf);
 
 			//column number
 			n.setColumnNumber(t.getColumns().size()+constrCount);
 			
 			//node stereotype
-			switch (t.getType()) {
-				case SYSTEM_TABLE: 
-				case VIEW:
-				case MATERIALIZED_VIEW:
-				case EXTERNAL_TABLE:
-				case SYNONYM:
-					n.setStereotype("type@"+t.getType()); break;
-				case TABLE:
-				default:
-					break;
+			if(addTableTypeStereotype) {
+				switch (t.getType()) {
+					case SYSTEM_TABLE: 
+					case VIEW:
+					case MATERIALIZED_VIEW:
+					case EXTERNAL_TABLE:
+					case SYNONYM:
+						addStereotype(n, "type@"+t.getType()); break;
+					case TABLE:
+					default:
+						break;
+				}
 			}
 			for(String key: stereotypeRegexes.keySet()) {
 				//List<Pattern> patterns = stereotypeRegexes.get(key);
@@ -139,11 +160,35 @@ public class Schema2GraphML implements SchemaModelDumper {
 					}
 				}
 			}
-			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
-				addStereotype(n, "schema@"+t.schemaName);
+			if(addSchemaStereotype) {
+				if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
+					addStereotype(n, "schema@"+t.schemaName);
+				}
+				else {
+					addStereotype(n, "otherschema.schema@"+t.schemaName);
+				}
+			}
+			if(n.isRoot() && n.isLeaf()) {
+				//log.debug("table '"+t.getName()+"' is disconnected");
+				addStereotype(n, "disconnected");
+			}
+			else if(n.isRoot()) {
+				//log.debug("table '"+t.getName()+"' is root");
+				addStereotype(n, "root");
+			}
+			else if(n.isLeaf()) {
+				//log.debug("table '"+t.getName()+"' is leaf");
+				addStereotype(n, "leaf");
 			}
 			else {
-				addStereotype(n, "otherschema.schema@"+t.schemaName);
+				//is in the middle
+				addStereotype(n, "connected");
+			}
+			if(n.getStereotype()!=null) {
+				log.debug("node '"+t.getName()+"' has stereotype: "+n.getStereotype());
+			}
+			else {
+				log.debug("node '"+t.getName()+"' has no stereotype");
 			}
 			//end stereotype
 			
@@ -165,7 +210,6 @@ public class Schema2GraphML implements SchemaModelDumper {
 				log.warn("Link end ["+l.getSource()+"] not found");
 			}
 		}
-		
 		
 		return graphModel;
 	}
@@ -255,6 +299,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 		if(snippetsFile!=null) {
 			DumpSchemaGraphMLModel.snippetsFile = snippetsFile;
 		}
+		
+		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, true);
+		addSchemaStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_SCHEMA, true);
 		
 		setOutput(new File(outFileStr));
 	}

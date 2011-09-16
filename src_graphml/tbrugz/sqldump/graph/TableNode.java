@@ -7,6 +7,8 @@ public class TableNode extends Node {
 	String constraintsDesc; // = "";
 	String stereotype;
 	int columnNumber = 0;
+	boolean root = false;
+	boolean leaf = false;
 
 	public String getColumnsDesc() {
 		return columnsDesc;
@@ -40,6 +42,22 @@ public class TableNode extends Node {
 
 	public void setConstraintsDesc(String constraintsDesc) {
 		this.constraintsDesc = constraintsDesc;
+	}
+
+	public boolean isRoot() {
+		return root;
+	}
+
+	public void setRoot(boolean root) {
+		this.root = root;
+	}
+
+	public boolean isLeaf() {
+		return leaf;
+	}
+
+	public void setLeaf(boolean leaf) {
+		this.leaf = leaf;
 	}
 
 }

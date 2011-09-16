@@ -205,6 +205,10 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 # regex-based stereotypes, splitted by "|" - stereotype must be defined in a graphml-snippets properties file
 sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
+# include, or not, stereotype 'classes' (default: true)
+#sqldump.graphmldump.addtabletypestereotype=true
+#sqldump.graphmldump.addschemastereotype=true
+#
 # snippets file (non-default)
 #sqldump.graphmldump.snippetsfile=graphml-snippets-simple.properties
 
