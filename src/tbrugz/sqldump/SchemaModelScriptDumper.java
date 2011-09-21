@@ -44,6 +44,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	boolean dumpIndexesWithReferencingTable = false;
 	boolean dumpFKsWithReferencingTable = false;
 	boolean dumpTriggersWithReferencingTable = false;
+	boolean dumpDropStatements = false;
 	
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
@@ -61,6 +62,8 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
+
+	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
@@ -75,6 +78,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		dumpSynonymAsTable = prop.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
 		dumpViewAsTable = prop.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
 		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, false); //default should be 'true'?
+		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
@@ -278,7 +282,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	}
 	
 	String fkScriptWithAlterTable(FK fk) {
-		return "alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
+		//TODOne: generate (or not) drop command
+		return
+			(dumpDropStatements?"--alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable+" drop constraint "+fk.getName()+";\n":"")
+			+"alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
 			+"\n\tadd "+FK.fkSimpleScript(fk, "\n\t", dumpWithSchemaName)+";\n";
 			
 			//"add constraint "+fk.getName()

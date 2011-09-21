@@ -56,6 +56,7 @@ sqldump.doschemadump.pks=true
 # sqldump.dbspecificfeatures.grabindexes may be used instead of sqldump.doschemadump.indexes (really better performance on oracle)
 sqldump.doschemadump.indexes=false
 sqldump.doschemadump.ignoretableswithzerocolumns=true
+sqldump.schemadump.dumpdropstatements=false
 
 # schema names to dump
 sqldump.dumpschemapattern=DW, SA, EMPDEPT

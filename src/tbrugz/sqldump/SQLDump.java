@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
  * XXXdone: serialize model (for later comparison)
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
- * XXX: new dumper: generate mondrian schema  
+ * XXX: new dumper: generate mondrian schema
  */
 public class SQLDump {
 	
