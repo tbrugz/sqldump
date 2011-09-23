@@ -7,7 +7,7 @@ Utility to dump schema and data from a RDBMS. Features:
 - Does schema-dumping, using (mainly) standard java API, by way of `java.sql.DatabaseMetaData`
 - Can do data-dumping
 - Can be used with any JDBC-compliant databases
-- Generates Entity-Relationship diagrams based on Tables and FKs (graphML output)
+- Generates Entity-Relationship diagrams based on Tables and FKs (graphML output - [yEd](http://www.yworks.com/products/yed/) recommended)
 - Flexible schema output patterns (based on schema name, object type and object name)
 - Translation of metadata (column types, ...) between different RDBMS dialects/implementations (partial)
 
@@ -21,7 +21,13 @@ Dependencies
 - apache-commons-logging
 - log4j
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) (for graphML output)
-- database-dependent jdbc jars (e.g. [PostgreSQL](http://jdbc.postgresql.org/download.html), [MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), [Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html))
+- database-dependent JDBC jars (e.g. 
+	[PostgreSQL](http://jdbc.postgresql.org/download.html), 
+	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), 
+	[Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html),
+	[Derby](http://db.apache.org/derby/derby_downloads.html),
+	[HSQLDB](http://hsqldb.org/)
+	)
 - ant (recommended)
 
 
@@ -41,7 +47,7 @@ Usage (with sources, without ant)
 - Edit `sqldump.properties`
 - Compile sources into `bin`
 - Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
--- you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
+	you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
 
 
 Usage (without sources)
@@ -53,6 +59,6 @@ Usage (without sources)
 - Download jdbc jars for your database of choice
 - Edit `sqldump.properties` and (windows) `sqldump.bat`
 - (windows) Run `sqldump.bat`
--- you may also specify a different properties file by appending to command line inside `sqldump.bat`: ` -propfile=<path-to-prop-file>` 
+	you may also specify a different properties file by appending to command line inside `sqldump.bat`: ` -propfile=<path-to-prop-file>` 
 - (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
--- you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
+	you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
