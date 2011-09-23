@@ -62,6 +62,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_SNIPPETS_FILE = "sqldump.graphmldump.snippetsfile";
 	public static final String PROP_STEREOTYPE_ADD_TABLETYPE = "sqldump.graphmldump.addtabletypestereotype";
 	public static final String PROP_STEREOTYPE_ADD_SCHEMA = "sqldump.graphmldump.addschemastereotype";
+	public static final String PROP_STEREOTYPE_ADD_VERTEXTYPE = "sqldump.graphmldump.addvertextypestereotype";
 	
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 
@@ -70,8 +71,10 @@ public class Schema2GraphML implements SchemaModelDumper {
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
 	boolean showConstraints = false;
+	
 	boolean addTableTypeStereotype = true;
-	boolean addSchemaStereotype = true;
+	boolean addSchemaStereotype = false;
+	boolean addVertexTypeStereotype = false;
 	
 	Map<String, List<Pattern>> stereotypeRegexes = new HashMap<String, List<Pattern>>();
 	
@@ -160,29 +163,38 @@ public class Schema2GraphML implements SchemaModelDumper {
 					}
 				}
 			}
-			if(addSchemaStereotype) {
-				if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
+			
+			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
+				if(addSchemaStereotype) {
 					addStereotype(n, "schema@"+t.schemaName);
 				}
-				else {
-					addStereotype(n, "otherschema.schema@"+t.schemaName);
-				}
-			}
-			if(n.isRoot() && n.isLeaf()) {
-				//log.debug("table '"+t.getName()+"' is disconnected");
-				addStereotype(n, "disconnected");
-			}
-			else if(n.isRoot()) {
-				//log.debug("table '"+t.getName()+"' is root");
-				addStereotype(n, "root");
-			}
-			else if(n.isLeaf()) {
-				//log.debug("table '"+t.getName()+"' is leaf");
-				addStereotype(n, "leaf");
 			}
 			else {
-				//is in the middle
-				addStereotype(n, "connected");
+				if(addSchemaStereotype) {
+					addStereotype(n, "otherschema.schema@"+t.schemaName);
+				}
+				else {
+					addStereotype(n, "otherschema");
+				}
+			}
+			
+			if(addVertexTypeStereotype) {
+				if(n.isRoot() && n.isLeaf()) {
+					//log.debug("table '"+t.getName()+"' is disconnected");
+					addStereotype(n, "disconnected");
+				}
+				else if(n.isRoot()) {
+					//log.debug("table '"+t.getName()+"' is root");
+					addStereotype(n, "root");
+				}
+				else if(n.isLeaf()) {
+					//log.debug("table '"+t.getName()+"' is leaf");
+					addStereotype(n, "leaf");
+				}
+				else {
+					//is in the middle
+					addStereotype(n, "connected");
+				}
 			}
 			if(n.getStereotype()!=null) {
 				log.debug("node '"+t.getName()+"' has stereotype: "+n.getStereotype());
@@ -300,8 +312,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 			DumpSchemaGraphMLModel.snippetsFile = snippetsFile;
 		}
 		
-		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, true);
-		addSchemaStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_SCHEMA, true);
+		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, addTableTypeStereotype);
+		addSchemaStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_SCHEMA, addSchemaStereotype);
+		addVertexTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_VERTEXTYPE, addVertexTypeStereotype);
 		
 		setOutput(new File(outFileStr));
 	}

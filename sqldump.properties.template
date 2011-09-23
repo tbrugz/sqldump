@@ -2,6 +2,11 @@
 # TODO: copy/rename to sqldump.properties
 #
 
+#
+# includes other properties files
+#
+#@includes = other.properties, yet-another.properties
+
 # just a variable for using ahead - name has no special meaning 
 outputdir=output
 
@@ -206,9 +211,11 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 # regex-based stereotypes, splitted by "|" - stereotype must be defined in a graphml-snippets properties file
 sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
-# include, or not, stereotype 'classes' (default: true)
+# include, or not, stereotype 'classes' - defaults below
 #sqldump.graphmldump.addtabletypestereotype=true
-#sqldump.graphmldump.addschemastereotype=true
+#sqldump.graphmldump.addschemastereotype=false
+# vertex types: root, leaf, connected, disconnected
+#sqldump.graphmldump.addvertextypestereotype=false
 #
 # snippets file (non-default)
 #sqldump.graphmldump.snippetsfile=graphml-snippets-simple.properties

@@ -1,11 +1,51 @@
 package tbrugz.sqldump;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
+import org.apache.log4j.Logger;
 
 public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
+	public static final String DIRECTIVE_INCLUDE = "@includes";
+	static Logger log = Logger.getLogger(ParametrizedProperties.class);
+
 	boolean useSystemProperties = false;
+
+	List<String> loadedPropFiles = new ArrayList<String>();
+	
+	@Override
+	public synchronized void load(InputStream inStream) throws IOException {
+		super.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
+
+		String includes = getProperty(DIRECTIVE_INCLUDE);
+		if(includes!=null) {
+			String[] files = includes.split(",");
+			for(String f: files) {
+				f = f.trim();
+				if(loadedPropFiles.contains(f)) {
+					log.warn("already loaded prop file: "+f);
+					continue;
+				}
+				loadedPropFiles.add(f);
+				try {
+					log.debug("loading @include: "+f);
+					load(new FileInputStream(f));
+					log.info("loaded @include: "+f);
+				} catch (IOException e) {
+					log.warn("error loading @include '"+f+"': "+e.getMessage());
+					log.debug("error loading @include: "+f, e);
+				}
+			}
+		}
+		
+		//add another super.load(inStream), so 'main' props are prefered?
+	}
 	
 	@Override
 	public String getProperty(String key, String defaultValue) {
