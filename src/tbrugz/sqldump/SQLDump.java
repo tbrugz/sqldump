@@ -44,6 +44,7 @@ import org.apache.log4j.Logger;
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
  * XXX: new dumper: generate mondrian schema
+ * XXX: test with sqlite - http://www.zentus.com/sqlitejdbc/? luciddb?
  */
 public class SQLDump {
 	
@@ -189,10 +190,12 @@ public class SQLDump {
 		}
 
 		if(sdd.doTests) {
+			if(sdd.conn==null) { sdd.initDBConnection(args); }
 			SQLTests.tests(sdd.conn);
 		}
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
+			if(sdd.conn==null) { sdd.initDBConnection(args); }
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		

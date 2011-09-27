@@ -70,6 +70,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing views");
 		String query = "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT FROM ALL_VIEWS "
 				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -92,6 +93,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing materialized views");
 		String query = "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query from all_mviews "
 				+" where owner = '"+schemaPattern+"' ORDER BY MVIEW_NAME";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -115,6 +117,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing triggers");
 		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY "
 				+"FROM ALL_TRIGGERS where owner = '"+schemaPattern+"' ORDER BY trigger_name";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -141,6 +144,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 			+"and owner = '"+schemaPattern+"' "
 			+"order by type, name, line";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -190,6 +194,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing synonyms");
 		String query = "select synonym_name, table_owner, table_name, db_link from all_synonyms "
 				+"where owner = '"+schemaPattern+"'";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -210,6 +215,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" synonyms grabbed");
 	}
 
+	/*
+	 * TODO: move to OracleDatabaseMetaData
+	 */
 	void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing indexes");
 		/*
@@ -228,8 +236,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name "
 			+"from all_indexes ui, all_ind_columns uic "
 			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
+			+"and ui.table_name = uic.table_name "
+			+"and ui.table_owner = uic.table_owner "
 			+"and ui.owner = '"+schemaPattern+"' "
 			+"order by ui.table_owner, ui.index_name, uic.column_position";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -280,6 +291,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing sequences");
 		String query = "select sequence_name, min_value, increment_by, last_number from all_sequences "
 				+"where sequence_owner = '"+schemaPattern+"' order by sequence_name";
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		

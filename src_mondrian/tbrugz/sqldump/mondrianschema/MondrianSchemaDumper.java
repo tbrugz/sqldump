@@ -71,6 +71,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+		if(fileOutput==null) {
+			log.warn("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
+			return;
+		}
 		
 		Schema schema = new Schema();
 		schema.setName(schemaName);
@@ -168,6 +172,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 				level.setColumn(fk.pkColumns.iterator().next());
 				level.setLevelType("Regular");
+				
+				//TODO: snowflake: percorre 'arvore': cada vez q chega numa folha, adiciona hierarquia...
 				
 				Hierarchy hier = new Hierarchy();
 				hier.setName(dimName);
