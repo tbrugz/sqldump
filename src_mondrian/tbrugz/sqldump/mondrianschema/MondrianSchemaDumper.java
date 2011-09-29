@@ -3,7 +3,9 @@ package tbrugz.sqldump.mondrianschema;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.xml.bind.JAXBContext;
@@ -22,6 +24,13 @@ import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
+
+/*class HierarchyLevelData {
+	String levelName;
+	String levelColumn;
+	String levelNameColumn;
+	String levelType;
+}*/
 
 /*
  * XXXdone: prop for schema-name
@@ -188,7 +197,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				dim.setType("StandardDimension");
 				
 				List<Level> levels = new ArrayList<Level>();
-				procHierRecursive(schemaModel, dim, dimName, fk, fk.schemaName, fk.pkTable, levels);
+				procHierRecursive(schemaModel, dim, dimName, fk, fk.schemaName, fk.pkTable, levels, null);
 				
 				//dim.getHierarchy().add(hier);
 				
@@ -237,7 +246,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		List<Hierarchy> hiers = new ArrayList<Hierarchy>();
 	}*/
 	
-	void procHierRecursive(SchemaModel schemaModel, PrivateDimension dim, String dimName, FK fk, String schemaName, String pkTableName, List<Level> levels) {
+	Map<Join, Join> parentJoins = new HashMap<Hierarchy.Join, Hierarchy.Join>(); 
+	
+	void procHierRecursive(SchemaModel schemaModel, PrivateDimension dim, String dimName, FK fk, 
+			String schemaName, String pkTableName, List<Level> levels, Join parentJoin) {
 		List<Level> thisLevels = new ArrayList<Level>();
 		thisLevels.addAll(levels);
 		boolean isLevelLeaf = true;
@@ -257,12 +269,37 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		for(FK fkInt: schemaModel.getForeignKeys()) {
 			if(fkInt.fkTable.equals(pkTableName) && (fkInt.fkColumns.size()==1)) {
 				isLevelLeaf = false;
-				procHierRecursive(schemaModel, dim, dimName, fkInt, schemaName, fkInt.pkTable, thisLevels);
-				//isLeaf = false;
-				//fks.add(fkInt);
 			}
 		}
+
+		if(!isLevelLeaf) { 
+			tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
+			table.setSchema(schemaName);
+			table.setName(pkTableName);
+			Join join = new Join();
+			join.setLeftKey(fk.pkColumns.iterator().next());
+			join.getRelation().add(table);
+
+			if(parentJoin==null) { 
+				parentJoin = join;
+			}
+			else {
+				//rootJoin = cloneJoin(rootJoin);
+				parentJoin = cloneJoin(parentJoin);
+				parentJoin.getRelation().add(join);
+				parentJoins.put(join, parentJoin);
+			}
 		
+			for(FK fkInt: schemaModel.getForeignKeys()) {
+				if(fkInt.fkTable.equals(pkTableName) && (fkInt.fkColumns.size()==1)) {
+					//isLevelLeaf = false;
+					procHierRecursive(schemaModel, dim, dimName, fkInt, schemaName, fkInt.pkTable, thisLevels, join);
+					//isLeaf = false;
+					//fks.add(fkInt);
+				}
+			}
+		}
+	
 		//TODO: snowflake: percorre 'arvore': cada vez q chega numa folha, adiciona hierarquia...
 		
 		if(isLevelLeaf) {
@@ -270,44 +307,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			String hierName = "";
 			hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			
-			//Table / Join
-			if(thisLevels.size()==1) {
-				tbrugz.mondrian.xsdmodel.Table pkTable = new tbrugz.mondrian.xsdmodel.Table();
-				pkTable.setSchema(schemaName);
-				pkTable.setName(pkTableName);
-				
-				hier.setTable(pkTable);
-			}
-			else {
-				Join lastJoin = null;
-				for(int i=0; i < thisLevels.size(); i++) {
-					Level l = thisLevels.get(i);
-
-					tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
-					table.setSchema(schemaName);
-					table.setName(l.getName());
-
-					Join join = new Join();
-					join.setLeftKey(l.getColumn());
-					join.getRelation().add(table);
-
-					//if(i!=0) {
-					if(lastJoin!=null) {
-						//FIXME must be like fk.fkColumns.iterator().next()
-						lastJoin.setRightKey(l.getColumn());
-						//thisLevels.get(i-1).getColumn(); 
-					}
-					
-					if(i==0) { hier.setJoin(join); }
-					else if(i==thisLevels.size()-1) { lastJoin.getRelation().add(table); }
-					else { lastJoin.getRelation().add(join); }
-					
-					lastJoin = join;
-				}
-			}
-			
 			//Levels
-			for(int i= thisLevels.size()-1; i>=0; i--) {
+			for(int i = thisLevels.size()-1; i >= 0; i--) {
 				Level l = thisLevels.get(i);
 				log.debug("add level: "+l.getName());
 				hier.getLevel().add(l);
@@ -319,8 +320,91 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			hier.setName(hierName);
 			log.debug("add hier: "+hier.getName());
 			
+			//Table / Join
+			if(thisLevels.size()==1) {
+				tbrugz.mondrian.xsdmodel.Table pkTable = new tbrugz.mondrian.xsdmodel.Table();
+				pkTable.setSchema(schemaName);
+				pkTable.setName(pkTableName);
+				
+				hier.setTable(pkTable);
+			}
+			else {
+				Level lastLevel = thisLevels.get(thisLevels.size()-1);
+
+				parentJoin.setRightKey(lastLevel.getColumn());
+				
+				tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
+				table.setSchema(schemaName);
+				table.setName(lastLevel.getName());
+				
+				//log.debug("j:"+parentJoin+" add table: "+table.getName());
+				parentJoin = cloneJoin(parentJoin);
+				
+				parentJoin.getRelation().add(table);
+				/*Join join = new Join();
+				join.setLeftKey(lastLevel.getColumn());
+				join.getRelation().add(table);*/
+				
+				hier.setJoin(getRootJoin(parentJoin));
+				
+				log.debug("hier::: "+hier.getName()+":: "+table.getName());
+				//hier.setJoin(rootJoin);
+				/*Join lastJoin = null;
+				for(int i=0; i < thisLevels.size(); i++) {
+					Level l = thisLevels.get(i);
+					
+					/*tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
+					table.setSchema(schemaName);
+					table.setName(l.getName());
+
+					Join join = new Join();
+					join.setLeftKey(l.getColumn());
+					join.getRelation().add(table);*
+
+					//if(i!=0) {
+					if(lastJoin!=null) {
+						//FIXME must be like fk.fkColumns.iterator().next()
+						lastJoin.setRightKey(l.getColumn());
+						//thisLevels.get(i-1).getColumn(); 
+					}
+					
+					if(i==0) { hier.setJoin(rootJoin); }
+					else if(i==thisLevels.size()-1) { lastJoin.getRelation().add(table); }
+					//else { lastJoin.getRelation().add(join); }
+					
+					lastJoin = join;
+				}*/
+			}
+			
 			dim.getHierarchy().add(hier);
 		}
+	}
+	
+	Join cloneJoin(Join j) {
+		Join jret = new Join();
+		jret.setLeftAlias(j.getLeftAlias());
+		jret.setLeftKey(j.getLeftKey());
+		jret.setRightAlias(j.getRightAlias());
+		jret.setRightKey(j.getRightKey());
+		jret.getRelation().addAll(j.getRelation());
+		parentJoins.put(jret, parentJoins.get(j));
+		return jret;
+	}
+	
+	Join getRootJoin(Join join) {
+		Join lastNotNull = join;
+		Join jp = parentJoins.get(join);
+		while(jp!=null && jp!=join) {
+			lastNotNull = jp;
+			jp = parentJoins.get(jp);
+		}
+		return lastNotNull;
+	}
+	
+	String getJoinDesc(Join j) {
+		if(j==null) return "j[null]";
+		return "j["+j.getLeftKey()+" "+j.getRightKey()+"]";
+		//return "join["+j.getRelation()+"]";
 	}
 	
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {
@@ -329,6 +413,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
 		m.marshal(o, fileOutput);
 		log.info("mondrian schema model dumped to '"+fileOutput+"'");
+		
+		/*for(Join j: parentJoins.keySet()) {
+			log.debug("j1: "+getJoinDesc(j)+" j2: "+getJoinDesc(parentJoins.get(j)));
+		}*/
 	}
 
 }
