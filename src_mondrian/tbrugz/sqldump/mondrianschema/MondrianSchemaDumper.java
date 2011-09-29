@@ -19,6 +19,7 @@ import tbrugz.mondrian.xsdmodel.PrivateDimension;
 import tbrugz.mondrian.xsdmodel.Schema;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
+import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
@@ -40,11 +41,13 @@ class HierarchyLevelData {
  * XXX: prop for defining cube tables ? add done...
  * XXXdone: prop for measures ?
  * XXX: prop for Level.setNameExpression()?
+ * TODO: props for 'n' levels on one dim table (classic star schema - no snowflake)
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
 	public static final String PROP_MONDRIAN_SCHEMA = "sqldump.mondrianschema";
 	public static final String PROP_MONDRIAN_SCHEMA_OUTFILE = "sqldump.mondrianschema.outfile";
+	public static final String PROP_MONDRIAN_SCHEMA_DIMTABLES = "sqldump.mondrianschema.dimtables";
 	public static final String PROP_MONDRIAN_SCHEMA_XTRADIMTABLES = "sqldump.mondrianschema.xtradimtables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
 	
@@ -54,6 +57,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	List<String> numericTypes = new ArrayList<String>();
 	String fileOutput = "mondrian-schema.xml";
 	String mondrianSchemaName;
+	List<String> dimTables = null;
 	List<String> extraDimTables = new ArrayList<String>();
 	
 	{
@@ -74,11 +78,19 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		this.prop = prop;
 		fileOutput = prop.getProperty(PROP_MONDRIAN_SCHEMA_OUTFILE);
 		mondrianSchemaName = prop.getProperty(PROP_MONDRIAN_SCHEMA_NAME, "sqldumpSchema");
+		String dimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_DIMTABLES);
+		if(dimTablesStr!=null) {
+			dimTables = new ArrayList<String>();
+			String[] strs = dimTablesStr.split(",");
+			for(String s: strs) {
+				dimTables.add(s.trim());
+			}
+		}
 		String extraDimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_XTRADIMTABLES);
 		if(extraDimTablesStr!=null) {
 			String[] strs = extraDimTablesStr.split(",");
 			for(String s: strs) {
-				extraDimTables.add(s);
+				extraDimTables.add(s.trim());
 			}
 		}
 	}
@@ -111,7 +123,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
-			if(!isRoot && !extraDimTables.contains(t.name)) continue;
+			if(!isRoot && !extraDimTables.contains(t.name)) { continue; } 
+			if(dimTables!=null) {
+				if(!dimTables.contains(t.name)) { continue; }
+				else { dimTables.remove(t.name); }
+			}
 
 			Schema.Cube cube = new Schema.Cube();
 			cube.setName(t.name);
@@ -160,6 +176,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				measure.setAggregator("sum");
 				measure.setVisible(true);
 				cube.getMeasure().add(measure);
+			}
+			
+			if(cube.getMeasure().size()==0) {
+				log.warn("cube '"+cube.getName()+"' has no measure...");
 			}
 			
 			//dimensions
@@ -239,6 +259,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			schema.getCube().add(cube);
+		}
+		
+		if(dimTables!=null && dimTables.size()>0) {
+			log.warn("fact tables not found: "+Utils.join(dimTables, ", "));
 		}
 		
 		jaxbOutput(schema, new File(fileOutput));
