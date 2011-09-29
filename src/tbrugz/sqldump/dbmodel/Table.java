@@ -84,6 +84,12 @@ public class Table extends DBObject {
 			sb.append("\tconstraint "+pkConstraintName+" primary key ("+Utils.join(pkCols, ", ")+"),\n");
 		}*/
 		
+		/*String constraintDef = getConstraintsDefinition(dumpPKs);
+		if(constraintDef!=null && !constraintDef.equals("")) {
+			sb.append(constraintDef);
+			countTabElements++; // + 'n'?
+		}*/
+		
 		//Constraints (CHECK, UNIQUE)
 		for(Constraint cons: constraints) {
 			switch(cons.type) {
@@ -98,6 +104,11 @@ public class Table extends DBObject {
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
+			/*String fksDefinition = getFKsDefinition(dumpWithSchemaName, tableName, foreignKeys);
+			if(fksDefinition!=null && !fksDefinition.equals("")) {
+				sb.append(fksDefinition);
+				countTabElements++; // + 'n'?
+			}*/
 			//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
 			for(FK fk: foreignKeys) {
 				if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
@@ -113,7 +124,37 @@ public class Table extends DBObject {
 		sb.append(getTableFooter4sql());
 		return sb.toString();
 	}
+	
+	/*public String getConstraintsDefinition(boolean dumpPK) {
+		//Constraints (PK, CHECK, UNIQUE)
+		StringBuffer sb = new StringBuffer();
+		int count = 0;
+		for(Constraint cons: constraints) {
+			switch(cons.type) {
+				case PK: 
+					if(!dumpPK) break;
+				case CHECK:
+				case UNIQUE:
+					sb.append((count==0?"":",")+"\n\t"+cons.getDefinition(false));
+					count++;
+			}
+		}
+		return sb.toString();
+	}
 
+	public String getFKsDefinition(boolean dumpWithSchemaName, String tableName, Set<FK> foreignKeys) {
+		StringBuffer sb = new StringBuffer();
+		int count = 0;
+		//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
+		for(FK fk: foreignKeys) {
+			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
+				sb.append((count==0?"":",")+"\n\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName));
+			}
+			count++;
+		}
+		return sb.toString();
+	}*/
+	
 	/*String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName, boolean dumpWithSchemaName) {
 		StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {

@@ -515,7 +515,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//new object
 				idx = new Index();
 				idx.name = idxName;
-				idx.unique = indexesrs.getInt("NON_UNIQUE")==0;
+				boolean bNonUnique = indexesrs.getBoolean("NON_UNIQUE");
+				idx.unique = bNonUnique;
+				
+				/*String nonUnique = indexesrs.getString("NON_UNIQUE");
+				if("false".equalsIgnoreCase(nonUnique) || "f".equalsIgnoreCase(nonUnique) || "0".equalsIgnoreCase(nonUnique)) {
+					idx.unique = true;
+				}
+				else {
+					idx.unique = false;
+				}
+				log.debug("index: '"+idx.name+"', non-unique: "+nonUnique+" // "+bNonUnique);
+				//idx.unique = indexesrs.getInt("NON_UNIQUE")==0;*/
+				
 				idx.schemaName = indexesrs.getString("TABLE_SCHEM");
 				idx.tableName = indexesrs.getString("TABLE_NAME");
 			}

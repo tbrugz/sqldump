@@ -25,6 +25,7 @@ import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Table;
 
 enum EdgeLabelType {
@@ -57,6 +58,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_SHOWCONSTRAINTS = "sqldump.graphmldump.showconstraints";
+	public static final String PROP_SHOWINDEXES = "sqldump.graphmldump.showindexes";
 	public static final String PROP_EDGELABEL = "sqldump.graphmldump.edgelabel";
 	public static final String PROP_NODEHEIGHTBYCOLSNUMBER = "sqldump.graphmldump.nodeheightbycolsnumber";
 	public static final String PROP_SNIPPETS_FILE = "sqldump.graphmldump.snippetsfile";
@@ -71,6 +73,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
 	boolean showConstraints = false;
+	boolean showIndexes = false;
 	
 	boolean addTableTypeStereotype = true;
 	boolean addSchemaStereotype = false;
@@ -106,6 +109,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			n.setColumnsDesc(sbCols.toString());
 
 			//constraints
+			n.setConstraintsDesc("");
 			int constrCount = 0;
 			if(showConstraints) {
 				StringBuffer sbConstraints = new StringBuffer();
@@ -118,10 +122,20 @@ public class Schema2GraphML implements SchemaModelDumper {
 							constrCount++;
 					}
 				}
-				n.setConstraintsDesc(sbConstraints.toString());
+				n.setConstraintsDesc(n.getConstraintsDesc()+sbConstraints.toString());
 			}
-			else {
-				n.setConstraintsDesc("");
+			//indexes
+			int indexCount = 0;
+			if(showIndexes) {
+				StringBuffer sbIndexes = new StringBuffer();
+				for(Index idx: schemaModel.getIndexes()) {
+					//log.debug("idx: "+idx+" / t: "+t.name);
+					if(idx.tableName.equals(t.name)) {
+						sbIndexes.append(idx.getDefinition(false)+"\n");
+						indexCount++;
+					}
+				}
+				n.setConstraintsDesc(n.getConstraintsDesc()+sbIndexes.toString());
 			}
 	
 			//root, leaf
@@ -139,7 +153,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			n.setLeaf(isLeaf);
 
 			//column number
-			n.setColumnNumber(t.getColumns().size()+constrCount);
+			n.setColumnNumber(t.getColumns().size()+constrCount+indexCount);
 			
 			//node stereotype
 			if(addTableTypeStereotype) {
@@ -303,8 +317,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 			}
 		}
 		
-		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, true);
-		showConstraints = Utils.getPropBool(prop, PROP_SHOWCONSTRAINTS, false);
+		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, showSchemaName);
+		showConstraints = Utils.getPropBool(prop, PROP_SHOWCONSTRAINTS, showConstraints);
+		showIndexes = Utils.getPropBool(prop, PROP_SHOWINDEXES, showIndexes);
 		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
 		
 		String snippetsFile = prop.getProperty(PROP_SNIPPETS_FILE);
