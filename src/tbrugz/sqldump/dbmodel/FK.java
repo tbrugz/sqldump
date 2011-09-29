@@ -26,6 +26,10 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		//return "fk:"+name+"["+fkTable+"<-"+pkTable+"]";
 	}
 
+	public String toStringFull() {
+		return name+"["+fkTable+"("+fkColumns+")"+"<-"+pkTable+"("+pkColumns+")"+"]";
+	}
+	
 	/*public String getName() {
 		return name;
 	}

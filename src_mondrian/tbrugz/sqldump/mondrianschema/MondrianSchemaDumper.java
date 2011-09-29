@@ -23,10 +23,23 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 
+class HierarchyLevelData {
+	String levelName;
+	String levelColumn;
+	String levelNameColumn;
+	String levelType;
+	String levelTable;
+
+	//String joinPKTable;
+	String joinLeftKey;
+	String joinRightKey;
+}
+
 /*
  * XXXdone: prop for schema-name
  * XXX: prop for defining cube tables ? add done...
  * XXXdone: prop for measures ?
+ * XXX: prop for Level.setNameExpression()?
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -80,7 +93,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		Schema schema = new Schema();
 		schema.setName(mondrianSchemaName);
 		
-		//XXX: snowflake
+		//XXX~: snowflake
 		//XXX: virtual cubes / shared dimensions
 		//XXXdone: degenerate dimensions
 		
@@ -174,8 +187,6 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				level.setColumn(fk.pkColumns.iterator().next());
 				level.setLevelType("Regular");
 				
-				//TODO: snowflake: percorre 'arvore': cada vez q chega numa folha, adiciona hierarquia...
-				
 				Hierarchy hier = new Hierarchy();
 				hier.setName(dimName);
 				hier.setPrimaryKey(fk.pkColumns.iterator().next());
@@ -187,8 +198,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				dim.setForeignKey(fk.fkColumns.iterator().next());
 				dim.setType("StandardDimension");
 				
-				List<Level> levels = new ArrayList<Level>();
-				procHierRecursive(schemaModel, dim, dimName, fk, fk.schemaName, fk.pkTable, levels);
+				List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
+				procHierRecursive(schemaModel, dim, fk, fk.schemaName, fk.pkTable, levels);
 				
 				//dim.getHierarchy().add(hier);
 				
@@ -236,20 +247,30 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	/*void procHierararchy(SchemaModel schemaModel, String dimName, FK fk, tbrugz.mondrian.xsdmodel.Table pkTable) {
 		List<Hierarchy> hiers = new ArrayList<Hierarchy>();
 	}*/
-	
-	void procHierRecursive(SchemaModel schemaModel, PrivateDimension dim, String dimName, FK fk, String schemaName, String pkTableName, List<Level> levels) {
-		List<Level> thisLevels = new ArrayList<Level>();
-		thisLevels.addAll(levels);
+
+	/*
+	 * snowflake: travels the 'tree': when reaches a leaf, adds hierarchy
+	 */
+	void procHierRecursive(SchemaModel schemaModel, PrivateDimension dim, FK fk, String schemaName, 
+			String pkTableName, List<HierarchyLevelData> levelsData) {
+		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
+		thisLevels.addAll(levelsData);
 		boolean isLevelLeaf = true;
 
-		Level level = new Level();
-		level.setName(pkTableName);
-		String levelName = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.getName()+".levelnamecol");
+		HierarchyLevelData level = new HierarchyLevelData();
+		level.levelName = pkTableName;
+		String levelName = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.levelName+".levelnamecol");
 		if(levelName!=null) {
-			level.setNameColumn(levelName);
+			level.levelNameColumn = levelName;
 		}
-		level.setColumn(fk.pkColumns.iterator().next());
-		level.setLevelType("Regular");
+		level.levelColumn = fk.pkColumns.iterator().next();
+		level.levelType = "Regular";
+		level.joinLeftKey = fk.fkColumns.iterator().next();
+		level.joinRightKey = fk.pkColumns.iterator().next();
+		//level.joinPKTable = fk.pkTable;
+		level.levelTable = fk.pkTable;
+		
+		log.debug("fkk: "+fk.toStringFull());
 		
 		thisLevels.add(level);
 		//levels.add(level);
@@ -257,18 +278,17 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		for(FK fkInt: schemaModel.getForeignKeys()) {
 			if(fkInt.fkTable.equals(pkTableName) && (fkInt.fkColumns.size()==1)) {
 				isLevelLeaf = false;
-				procHierRecursive(schemaModel, dim, dimName, fkInt, schemaName, fkInt.pkTable, thisLevels);
+				procHierRecursive(schemaModel, dim, fkInt, schemaName, fkInt.pkTable, thisLevels);
 				//isLeaf = false;
 				//fks.add(fkInt);
 			}
 		}
 		
-		//TODO: snowflake: percorre 'arvore': cada vez q chega numa folha, adiciona hierarquia...
-		
 		if(isLevelLeaf) {
 			Hierarchy hier = new Hierarchy();
 			String hierName = "";
-			hier.setPrimaryKey(fk.pkColumns.iterator().next());
+			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
+			hier.setPrimaryKey(thisLevels.get(0).levelColumn);
 			
 			//Table / Join
 			if(thisLevels.size()==1) {
@@ -279,22 +299,33 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				hier.setTable(pkTable);
 			}
 			else {
+				//hier.setPrimaryKeyTable(fk.pkTable); //FIXedME!
+				hier.setPrimaryKeyTable(thisLevels.get(0).levelTable);
+				
 				Join lastJoin = null;
 				for(int i=0; i < thisLevels.size(); i++) {
-					Level l = thisLevels.get(i);
+					HierarchyLevelData l = thisLevels.get(i);
 
 					tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
 					table.setSchema(schemaName);
-					table.setName(l.getName());
+					table.setName(l.levelName);
 
 					Join join = new Join();
-					join.setLeftKey(l.getColumn());
 					join.getRelation().add(table);
+
+					if(i+1 == thisLevels.size()) {
+						log.debug("no nextlevel?");
+					}
+					else {
+						HierarchyLevelData nextl = thisLevels.get(i+1);
+						join.setLeftKey(nextl.joinLeftKey);
+						join.setRightKey(nextl.joinRightKey);
+					}
 
 					//if(i!=0) {
 					if(lastJoin!=null) {
-						//FIXME must be like fk.fkColumns.iterator().next()
-						lastJoin.setRightKey(l.getColumn());
+						//FIXedME must be like fk.fkColumns.iterator().next()
+						//lastJoin.setRightKey(l.joinRightKey);
 						//thisLevels.get(i-1).getColumn(); 
 					}
 					
@@ -308,7 +339,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			
 			//Levels
 			for(int i= thisLevels.size()-1; i>=0; i--) {
-				Level l = thisLevels.get(i);
+				//HierarchyLevelData xlevel = thisLevels.get(i);
+				Level l = cloneAsLevel(thisLevels.get(i));
 				log.debug("add level: "+l.getName());
 				hier.getLevel().add(l);
 				if(hierName.length() > 0) {
@@ -321,6 +353,17 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			
 			dim.getHierarchy().add(hier);
 		}
+	}
+	
+	Level cloneAsLevel(HierarchyLevelData l) {
+		Level lret = new Level();
+		lret.setColumn(l.levelColumn);
+		lret.setName(l.levelName);
+		lret.setNameColumn(l.levelNameColumn);
+		lret.setLevelType(l.levelType);
+		lret.setTable(l.levelTable);
+		//XXX: lret.setNameExpression(value)
+		return lret;
 	}
 	
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {

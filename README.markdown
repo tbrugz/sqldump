@@ -47,7 +47,7 @@ Usage (with sources, without ant)
 - Compile sources into `bin`
 - Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
 
-	you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
+(you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>`) 
 
 
 Usage (without sources)
@@ -60,8 +60,8 @@ Usage (without sources)
 - Edit `sqldump.properties` and (windows) `sqldump.bat`
 - (windows) Run `sqldump.bat`
 
-	you may also specify a different properties file by appending to command line inside `sqldump.bat`: ` -propfile=<path-to-prop-file>` 
+(you may also specify a different properties file by appending to command line inside `sqldump.bat`: ` -propfile=<path-to-prop-file>`) 
 
 - (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump`"
 
-	you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>` 
+(you may also specify a different properties file by appending to command line: ` -propfile=<path-to-prop-file>`) 
