@@ -42,6 +42,7 @@ class HierarchyLevelData {
  * XXXdone: prop for measures ?
  * XXX: prop for Level.setNameExpression()?
  * TODO: props for 'n' levels on one dim table (classic star schema - no snowflake)
+ * XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]?)
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -50,6 +51,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_DIMTABLES = "sqldump.mondrianschema.dimtables";
 	public static final String PROP_MONDRIAN_SCHEMA_XTRADIMTABLES = "sqldump.mondrianschema.xtradimtables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
+	public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -59,6 +61,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	String mondrianSchemaName;
 	List<String> dimTables = null;
 	List<String> extraDimTables = new ArrayList<String>();
+	boolean oneHierarchyPerDim = false;
 	
 	{
 		try {
@@ -93,6 +96,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				extraDimTables.add(s.trim());
 			}
 		}
+		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
 	}
 
 	@Override
@@ -221,6 +225,15 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
 				procHierRecursive(schemaModel, dim, fk, fk.schemaName, fk.pkTable, levels);
 				
+				if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
+					for(int i=0; i < dim.getHierarchy().size() ; i++) {
+						//XXX one hierarchy per dimension (keep first? last? longest? preferwithtable[X]?)
+						if(i!=0) { //first
+							log.debug("[one hierarchy per dimension; dim='"+dim.getName()+"'] removing hierarchy: "+dim.getHierarchy().get(i).getName());
+							dim.getHierarchy().remove(i);
+						}
+					}	
+				}
 				//dim.getHierarchy().add(hier);
 				
 				cube.getDimensionUsageOrDimension().add(dim);
