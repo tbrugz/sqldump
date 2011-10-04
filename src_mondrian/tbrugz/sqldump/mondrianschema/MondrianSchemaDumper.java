@@ -42,7 +42,7 @@ class HierarchyLevelData {
  * XXXdone: prop for measures ?
  * XXX: prop for Level.setNameExpression()?
  * TODO: props for 'n' levels on one dim table (classic star schema - no snowflake)
- * XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]?)
+ * XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]? addDimForEachHierarchy?)
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -52,6 +52,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_XTRADIMTABLES = "sqldump.mondrianschema.xtradimtables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
 	public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
+	public static final String PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY = "sqldump.mondrianschema.adddimforeachhierarchy";
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -61,7 +62,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	String mondrianSchemaName;
 	List<String> dimTables = null;
 	List<String> extraDimTables = new ArrayList<String>();
-	boolean oneHierarchyPerDim = false;
+	boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
+	boolean addDimForEachHierarchy = false;
 	
 	{
 		try {
@@ -97,6 +99,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 		}
 		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
+		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
 	}
 
 	@Override
@@ -217,7 +220,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				hier.setTable(pkTable);
 				hier.getLevel().add(level);*/
 
-				PrivateDimension dim = new PrivateDimension();
+				procHierRecursiveInit(schemaModel, cube, fk, dimName);
+				
+				/*PrivateDimension dim = new PrivateDimension();
 				dim.setName(dimName);
 				dim.setForeignKey(fk.fkColumns.iterator().next());
 				dim.setType("StandardDimension");
@@ -236,7 +241,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 				//dim.getHierarchy().add(hier);
 				
-				cube.getDimensionUsageOrDimension().add(dim);
+				cube.getDimensionUsageOrDimension().add(dim);*/
 			}
 			//degenerate dimensions - see: http://mondrian.pentaho.com/documentation/schema.php#Degenerate_dimensions
 			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+t.name+".degeneratedims");
@@ -288,7 +293,32 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	/*
 	 * snowflake: travels the 'tree': when reaches a leaf, adds hierarchy
 	 */
-	void procHierRecursive(SchemaModel schemaModel, PrivateDimension dim, FK fk, String schemaName, 
+	void procHierRecursiveInit(SchemaModel schemaModel, Schema.Cube cube, FK fk, String dimName) {
+		PrivateDimension dim = new PrivateDimension();
+		dim.setName(dimName);
+		dim.setForeignKey(fk.fkColumns.iterator().next());
+		dim.setType("StandardDimension");
+		
+		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
+		procHierRecursive(schemaModel, cube, dim, fk, fk.schemaName, fk.pkTable, levels);
+		
+		if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
+			for(int i=dim.getHierarchy().size()-1; i >= 0; i--) {
+				//XXX one hierarchy per dimension (keep first? last? longest? preferwithtable[X]?)
+				if(i!=0) { //first
+					log.warn("[one hierarchy per dimension; cube='"+cube.getName()+"'; dim='"+dim.getName()+"'] removing hierarchy: "+dim.getHierarchy().get(i).getName());
+					dim.getHierarchy().remove(i);
+				}
+			}	
+		}
+		//dim.getHierarchy().add(hier);
+		
+		if(!addDimForEachHierarchy) {
+			cube.getDimensionUsageOrDimension().add(dim);
+		}
+	}
+	
+	void procHierRecursive(SchemaModel schemaModel, Schema.Cube cube, PrivateDimension dim, FK fk, String schemaName, 
 			String pkTableName, List<HierarchyLevelData> levelsData) {
 		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
 		thisLevels.addAll(levelsData);
@@ -315,7 +345,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		for(FK fkInt: schemaModel.getForeignKeys()) {
 			if(fkInt.fkTable.equals(pkTableName) && (fkInt.fkColumns.size()==1)) {
 				isLevelLeaf = false;
-				procHierRecursive(schemaModel, dim, fkInt, schemaName, fkInt.pkTable, thisLevels);
+				procHierRecursive(schemaModel, cube, dim, fkInt, schemaName, fkInt.pkTable, thisLevels);
 				//isLeaf = false;
 				//fks.add(fkInt);
 			}
@@ -375,10 +405,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			//Levels
-			for(int i= thisLevels.size()-1; i>=0; i--) {
+			for(int i = thisLevels.size()-1; i>=0; i--) {
 				//HierarchyLevelData xlevel = thisLevels.get(i);
 				Level l = cloneAsLevel(thisLevels.get(i));
 				log.debug("add level: "+l.getName());
+				createLevels(hier, thisLevels.get(i).levelTable);
 				hier.getLevel().add(l);
 				if(hierName.length() > 0) {
 					hierName += "+";
@@ -388,11 +419,22 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			hier.setName(hierName);
 			log.debug("add hier: "+hier.getName());
 			
-			dim.getHierarchy().add(hier);
+			if(addDimForEachHierarchy) {
+				PrivateDimension newDim = new PrivateDimension();
+				//dim.setName(dimName);
+				newDim.setForeignKey(dim.getForeignKey());
+				newDim.setType(dim.getType());
+				newDim.getHierarchy().add(hier);
+				newDim.setName(hier.getName());
+				cube.getDimensionUsageOrDimension().add(newDim);
+			}
+			else {
+				dim.getHierarchy().add(hier);
+			}
 		}
 	}
 	
-	Level cloneAsLevel(HierarchyLevelData l) {
+	static Level cloneAsLevel(HierarchyLevelData l) {
 		Level lret = new Level();
 		lret.setColumn(l.levelColumn);
 		lret.setName(l.levelName);
@@ -401,6 +443,29 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		lret.setTable(l.levelTable);
 		//XXX: lret.setNameExpression(value)
 		return lret;
+	}
+	
+	void createLevels(Hierarchy hier, String levelTable) {
+		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+levelTable+".parentLevels");
+		if(parentLevels==null) {
+			return;
+		}
+		String[] levelPairs = parentLevels.split(",");
+		for(String pair: levelPairs) {
+			String[] tuple = pair.split(":");
+			String column = tuple[0].trim();
+
+			Level level = new Level();
+			level.setName(column);
+			level.setColumn(column);
+			level.setTable(levelTable);
+			if(tuple[1]!=null) {
+				String nameColumn = tuple[1].trim();
+				level.setNameColumn(nameColumn);
+			}
+			//level.setUniqueMembers(true);
+			hier.getLevel().add(level);
+		}
 	}
 	
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {

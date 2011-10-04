@@ -33,12 +33,12 @@ enum EdgeLabelType {
 }
 
 /*
- * XXX!: node contents: show PK columns, FK columns, constraints?
- *  - add constraints (PK, FK, UK, check?, indexes?) inside <y:MethodLabel/>
+ * TODO!: node contents: show PK columns, FK columns, IDX columns (at column side) 
+ * TODOne: add constraints (PK, UK, (check?,) indexes) inside <y:MethodLabel/>
  * TODOne: stereotype may include 'otherschema' or table type (table, view, synonym(?), external table)
  * XXX: stereotype may be 'temporary table' 
  * XXX: node color by row count?
- * XXX!: stereotypes: FK-source-only nodes (roots), FK-target-only nodes (leafs)
+ * XXXdone: stereotypes: FK-source-only nodes (roots), FK-target-only nodes (leafs)
  * XXXdone: height by col size?
  * XXXdone: prop for toggling on/off the adjustment of node height?
  * TODOne: prop for setting 'graphml-snippets.properties' location
