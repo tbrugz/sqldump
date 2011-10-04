@@ -43,17 +43,25 @@ import org.apache.log4j.Logger;
  * XXXdone: serialize model (for later comparison)
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
- * XXX: new dumper: generate mondrian schema
+ * XXXdone: new dumper: generate mondrian schema
  * XXX: test with sqlite - http://www.zentus.com/sqlitejdbc/? luciddb?
+ * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
  */
 public class SQLDump {
+	
+	//connection props
+	static final String CONN_PROP_USER = "user";
+	static final String CONN_PROP_PASSWORD = "password";
 	
 	//connection properties
 	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
 	static final String PROP_URL = "sqldump.dburl";
 	static final String PROP_USER = "sqldump.user";
 	static final String PROP_PASSWD = "sqldump.password";
+	static final String PROP_ASKFORUSERNAME = "sqldump.askforusername";
 	static final String PROP_ASKFORPASSWD = "sqldump.askforpassword";
+	static final String PROP_ASKFORUSERNAME_GUI = "sqldump.askforusernamegui";
+	static final String PROP_ASKFORPASSWD_GUI = "sqldump.askforpasswordgui";
 		
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
@@ -121,11 +129,21 @@ public class SQLDump {
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
 		
 		Properties p = new Properties();
-		p.setProperty("user", papp.getProperty(PROP_USER, ""));
-		p.setProperty("password", papp.getProperty(PROP_PASSWD, ""));
+		p.setProperty(CONN_PROP_USER, papp.getProperty(PROP_USER, ""));
+		p.setProperty(CONN_PROP_PASSWORD, papp.getProperty(PROP_PASSWD, ""));
 		
+		if(Utils.getPropBool(papp, PROP_ASKFORUSERNAME)) {
+			p.setProperty(CONN_PROP_USER, Utils.readText("username for '"+papp.getProperty(PROP_URL)+"': "));
+		}
+		else if(Utils.getPropBool(papp, PROP_ASKFORUSERNAME_GUI)) {
+			p.setProperty(CONN_PROP_USER, Utils.readTextGUI("username for '"+papp.getProperty(PROP_URL)+"': "));
+		}
+
 		if(Utils.getPropBool(papp, PROP_ASKFORPASSWD)) {
-			p.setProperty("password", Utils.readPassword("password [user="+p.getProperty("user")+"]: "));
+			p.setProperty(CONN_PROP_PASSWORD, Utils.readPassword("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
+		}
+		else if(Utils.getPropBool(papp, PROP_ASKFORPASSWD_GUI)) {
+			p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
 		}
 
 		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);

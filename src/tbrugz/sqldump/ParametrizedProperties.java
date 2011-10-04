@@ -21,6 +21,7 @@ public class ParametrizedProperties extends Properties {
 	
 	@Override
 	public synchronized void load(InputStream inStream) throws IOException {
+		//TODO: load in temp Properties; load from @include directive; load from temp Properties
 		super.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
 
 		String includes = getProperty(DIRECTIVE_INCLUDE);

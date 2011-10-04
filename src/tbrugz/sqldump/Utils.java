@@ -1,5 +1,10 @@
 package tbrugz.sqldump;
 
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +23,11 @@ import java.util.Properties;
 
 import java.io.FileFilter;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+
 import org.apache.log4j.Logger;
 
 class RegularFileFilter implements FileFilter {
@@ -26,6 +36,99 @@ class RegularFileFilter implements FileFilter {
 	public boolean accept(File f) {
 		return !f.getName().startsWith(".") && !f.getName().startsWith("_");
 		//return !f.getName().startsWith(".");
+	}
+}
+
+class BaseInputGUI extends JFrame implements KeyListener {
+	static int width = 200;
+	static int height = 100;
+
+	JTextField tf;
+	String value;
+	
+	public BaseInputGUI() {
+	}
+	
+	public void doGUI(String message) {
+		setTitle("sqldump");
+		getContentPane().setLayout(new FlowLayout());
+		getContentPane().add(new JLabel(message));
+		getContentPane().add(tf);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setSize(200, 100);
+		
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		Dimension screenSize = tk.getScreenSize();
+		final int WIDTH = screenSize.width;
+		final int HEIGHT = screenSize.height;
+		// Setup the frame accordingly
+		// This is assuming you are extending the JFrame //class
+		//this.setSize(WIDTH / 2, HEIGHT / 2);
+		this.setLocation((WIDTH - width)/ 2, (HEIGHT - height) / 2);
+		
+		setVisible(true);
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		if('\n'==e.getKeyChar()) {
+			value = tf.getText();
+			setVisible(false);
+			this.dispose();
+		}
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+	}
+	
+	public String getText() {
+		while(value==null) {
+			Thread.yield();
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		return value;
+	}
+	
+}
+
+class TextInputGUI extends BaseInputGUI {
+	//JTextField tf;
+	//String value;
+	
+	public TextInputGUI(String message) {
+		tf = new JTextField(15);
+		tf.addKeyListener(this);
+		doGUI(message);
+	}
+}
+
+class PasswordInputGUI extends BaseInputGUI {
+	//JPasswordField pf;
+	
+	public PasswordInputGUI(String message) {
+		//tf.removeKeyListener(this);
+		tf = new JPasswordField(15);
+		tf.addKeyListener(this);
+		doGUI(message);
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		if('\n'==e.getKeyChar()) {
+			//System.out.println("Enter! (pi)"+e.getKeyChar()+"; "+e);
+			value = String.valueOf(((JPasswordField)tf).getPassword());
+			setVisible(false);
+			this.dispose();
+		}
 	}
 }
 
@@ -223,11 +326,42 @@ public class Utils {
 		}
 		else {
 			//XXX: System.console() doesn't work in Eclipse - https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429
-			return Utils.readPasswordIntern(message, "");
+			return Utils.readTextIntern(message, "");
+		}
+	}
+
+	public static String readText(String message) {
+		Console cons = System.console();
+		//log.info("console: "+cons);
+		String text;
+		if (cons != null) {
+			System.out.print(message);
+			text = cons.readLine();
+			return text;
+		}
+		else {
+			//XXX: System.console() doesn't work in Eclipse - https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429
+			return Utils.readTextIntern(message, "");
 		}
 	}
 	
-	static String readPasswordIntern(String message, String replacer) {
+	/*public static String readPasswordSwing(String message) {
+		Console cons = System.console();
+		//log.info("console: "+cons);
+		char[] passwd;
+		if (cons != null) {
+			System.out.print(message);
+			passwd = cons.readPassword(); //"[%s]", message
+			return new String(passwd);
+			//java.util.Arrays.fill(passwd, ' ');
+		}
+		else {
+			//XXX: System.console() doesn't work in Eclipse - https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429
+			return Utils.readPasswordIntern(message, "");
+		}
+	}*/
+	
+	static String readTextIntern(String message, String replacer) {
 		System.out.print(message);
 		StringBuffer sb = new StringBuffer();
 		InputStream is = System.in;
@@ -309,9 +443,29 @@ public class Utils {
 		return ret;
 	}
 	
+	public static String readTextGUI(String message) {
+		BaseInputGUI tig = new TextInputGUI(message);
+		return tig.getText();
+	}
+	
+	public static String readPasswordGUI(String message) {
+		BaseInputGUI pig = new PasswordInputGUI(message);
+		return pig.getText();
+	}
+	
 	public static void main(String[] args) {
-		String s = readPasswordIntern("pass: ", "*");
-		System.out.println("s = "+s);
+		//String value = PasswordInputGUI.getPassword("pass: ");
+		
+		BaseInputGUI tig = new TextInputGUI("user: ");
+		String user = tig.getText();
+		System.out.println("user = "+user);
+		
+		BaseInputGUI pig = new PasswordInputGUI("pass for user "+user+": ");
+		String pass = pig.getText();
+		System.out.println("pass = "+pass);
+
+		//String s = readPasswordIntern("pass: ", "*");
+		//System.out.println("s = "+s);
 	}
 	
 }
