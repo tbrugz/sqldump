@@ -41,18 +41,21 @@ class HierarchyLevelData {
  * XXX: prop for defining cube tables ? add done...
  * XXXdone: prop for measures ?
  * XXX: prop for Level.setNameExpression()?
- * TODO: props for 'n' levels on one dim table (classic star schema - no snowflake)
- * XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]? addDimForEachHierarchy?)
+ * TODOne: props for 'n' levels on one dim table (classic star schema - no snowflake)
+ * ~XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]?
+ * XXXdone: addDimForEachHierarchy
+ * XXX: level properties
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
 	public static final String PROP_MONDRIAN_SCHEMA = "sqldump.mondrianschema";
 	public static final String PROP_MONDRIAN_SCHEMA_OUTFILE = "sqldump.mondrianschema.outfile";
-	public static final String PROP_MONDRIAN_SCHEMA_DIMTABLES = "sqldump.mondrianschema.dimtables";
-	public static final String PROP_MONDRIAN_SCHEMA_XTRADIMTABLES = "sqldump.mondrianschema.xtradimtables";
+	public static final String PROP_MONDRIAN_SCHEMA_FACTTABLES = "sqldump.mondrianschema.facttables";
+	public static final String PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES = "sqldump.mondrianschema.xtrafacttables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
 	public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
 	public static final String PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY = "sqldump.mondrianschema.adddimforeachhierarchy";
+	public static final String PROP_MONDRIAN_SCHEMA_IGNOREDIMS = "sqldump.mondrianschema.ignoredims";
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -60,8 +63,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	List<String> numericTypes = new ArrayList<String>();
 	String fileOutput = "mondrian-schema.xml";
 	String mondrianSchemaName;
-	List<String> dimTables = null;
-	List<String> extraDimTables = new ArrayList<String>();
+	List<String> factTables = null;
+	List<String> extraFactTables = new ArrayList<String>();
+	List<String> ignoreDims = new ArrayList<String>();
 	boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
 	boolean addDimForEachHierarchy = false;
 	
@@ -83,21 +87,32 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		this.prop = prop;
 		fileOutput = prop.getProperty(PROP_MONDRIAN_SCHEMA_OUTFILE);
 		mondrianSchemaName = prop.getProperty(PROP_MONDRIAN_SCHEMA_NAME, "sqldumpSchema");
-		String dimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_DIMTABLES);
+		
+		String dimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTTABLES);
 		if(dimTablesStr!=null) {
-			dimTables = new ArrayList<String>();
+			factTables = new ArrayList<String>();
 			String[] strs = dimTablesStr.split(",");
 			for(String s: strs) {
-				dimTables.add(s.trim());
+				factTables.add(s.trim());
 			}
 		}
-		String extraDimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_XTRADIMTABLES);
+		
+		String extraDimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES);
 		if(extraDimTablesStr!=null) {
 			String[] strs = extraDimTablesStr.split(",");
 			for(String s: strs) {
-				extraDimTables.add(s.trim());
+				extraFactTables.add(s.trim());
 			}
 		}
+		
+		String ignoreDimsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_IGNOREDIMS);
+		if(ignoreDimsStr!=null) {
+			String[] strs = ignoreDimsStr.split(",");
+			for(String s: strs) {
+				ignoreDims.add(s.trim());
+			}
+		}
+		
 		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
 	}
@@ -130,10 +145,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
-			if(!isRoot && !extraDimTables.contains(t.name)) { continue; } 
-			if(dimTables!=null) {
-				if(!dimTables.contains(t.name)) { continue; }
-				else { dimTables.remove(t.name); }
+			if(!isRoot && !extraFactTables.contains(t.name)) { continue; } 
+			if(factTables!=null) {
+				if(!factTables.contains(t.name)) { continue; }
+				else { factTables.remove(t.name); }
 			}
 
 			Schema.Cube cube = new Schema.Cube();
@@ -205,6 +220,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					dimName = fk.name;
 				}
 				
+				if(ignoreDims.contains(dimName)) {
+					continue;
+				}
 				/*Level level = new Level();
 				level.setName(dimName);
 				String levelName = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.getName()+".levelnamecol");
@@ -279,8 +297,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			schema.getCube().add(cube);
 		}
 		
-		if(dimTables!=null && dimTables.size()>0) {
-			log.warn("fact tables not found: "+Utils.join(dimTables, ", "));
+		if(factTables!=null && factTables.size()>0) {
+			log.warn("fact tables not found: "+Utils.join(factTables, ", "));
 		}
 		
 		jaxbOutput(schema, new File(fileOutput));
@@ -356,6 +374,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			String hierName = "";
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			hier.setPrimaryKey(thisLevels.get(0).levelColumn);
+			hier.setHasAll(true);
 			
 			//Table / Join
 			if(thisLevels.size()==1) {
