@@ -46,6 +46,8 @@ import org.apache.log4j.Logger;
  * XXXdone: new dumper: generate mondrian schema
  * XXX: test with sqlite - http://www.zentus.com/sqlitejdbc/? luciddb?
  * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
+ * XXX: new dumper: alter schema suggestions (PKs, FKs "create index"s)
+ * XXX: fixed prop 'basepropdir': properties file directory
  */
 public class SQLDump {
 	

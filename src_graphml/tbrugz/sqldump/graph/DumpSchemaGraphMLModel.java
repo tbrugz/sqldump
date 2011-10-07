@@ -33,6 +33,7 @@ public class DumpSchemaGraphMLModel extends DumpGraphMLModel {
 					tn.getConstraintsDesc(), //constraints <y:MethodLabel/>
 					nodeHeightByColsNumber?String.valueOf(50 + (tn.getColumnNumber()*15)):DEFAULT_NODE_HEIGHT //height
 					);
+			//XXX: add params: width, x, y
 		}
 		else {
 			log.warn("Unknown node type: "+t);

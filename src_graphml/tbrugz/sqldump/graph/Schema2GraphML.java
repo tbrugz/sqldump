@@ -33,7 +33,7 @@ enum EdgeLabelType {
 }
 
 /*
- * TODO!: node contents: show PK columns, FK columns, IDX columns (at column side) 
+ * TODO!: node contents: show PK columns, FK columns, IDX columns (at column side) - optional: order cols by name 
  * TODOne: add constraints (PK, UK, (check?,) indexes) inside <y:MethodLabel/>
  * TODOne: stereotype may include 'otherschema' or table type (table, view, synonym(?), external table)
  * XXX: stereotype may be 'temporary table' 
@@ -102,14 +102,16 @@ public class Schema2GraphML implements SchemaModelDumper {
 			}
 			
 			//columns
-			StringBuffer sbCols = new StringBuffer();
+			int colCount = setTableNodeAttributes(n, schemaModel, t);
+			/*StringBuffer sbCols = new StringBuffer();
 			for(Column c: t.getColumns()) {
 				sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
 			}
-			n.setColumnsDesc(sbCols.toString());
+			n.setColumnsDesc(sbCols.toString());*/
 
-			//constraints
-			n.setConstraintsDesc("");
+			//constraints + indexes
+			int methodCount = setTableNodeMethods(n, schemaModel, t);
+			/*n.setConstraintsDesc("");
 			int constrCount = 0;
 			if(showConstraints) {
 				StringBuffer sbConstraints = new StringBuffer();
@@ -136,7 +138,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 					}
 				}
 				n.setConstraintsDesc(n.getConstraintsDesc()+sbIndexes.toString());
-			}
+			}*/
 	
 			//root, leaf
 			boolean isRoot = true;
@@ -153,7 +155,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			n.setLeaf(isLeaf);
 
 			//column number
-			n.setColumnNumber(t.getColumns().size()+constrCount+indexCount);
+			n.setColumnNumber(colCount+methodCount);
 			
 			//node stereotype
 			if(addTableTypeStereotype) {
@@ -238,6 +240,51 @@ public class Schema2GraphML implements SchemaModelDumper {
 		}
 		
 		return graphModel;
+	}
+	
+	int setTableNodeAttributes(TableNode n, SchemaModel schemaModel, Table t) {
+		//columns
+		StringBuffer sbCols = new StringBuffer();
+		int colCount = 0;
+		for(Column c: t.getColumns()) {
+			sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
+			colCount++;
+		}
+		n.setColumnsDesc(sbCols.toString());
+		return colCount;
+	}
+
+	int setTableNodeMethods(TableNode n, SchemaModel schemaModel, Table t) {
+		//constraints
+		n.setConstraintsDesc("");
+		int constrCount = 0;
+		if(showConstraints) {
+			StringBuffer sbConstraints = new StringBuffer();
+			for(Constraint cons: t.getConstraints()) {
+				switch(cons.type) {
+					case PK: 
+					case CHECK:
+					case UNIQUE:
+						sbConstraints.append(cons.getDefinition(false)+"\n");
+						constrCount++;
+				}
+			}
+			n.setConstraintsDesc(n.getConstraintsDesc()+sbConstraints.toString());
+		}
+		//indexes
+		int indexCount = 0;
+		if(showIndexes) {
+			StringBuffer sbIndexes = new StringBuffer();
+			for(Index idx: schemaModel.getIndexes()) {
+				//log.debug("idx: "+idx+" / t: "+t.name);
+				if(idx.tableName.equals(t.name)) {
+					sbIndexes.append(idx.getDefinition(false)+"\n");
+					indexCount++;
+				}
+			}
+			n.setConstraintsDesc(n.getConstraintsDesc()+sbIndexes.toString());
+		}
+		return constrCount+indexCount;
 	}
 	
 	Edge fkToLink(FK fk) {

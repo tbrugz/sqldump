@@ -227,9 +227,12 @@ sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
 
 #
-# reads password from console
+# reads username/password from console or gui
 #
-sqldump.askforpassword=true
+#sqldump.askforusername=true
+#sqldump.askforpassword=true
+#sqldump.askforusernamegui=true
+#sqldump.askforpasswordgui=true
 
 # MS Access - doesn't really work (yet)
 #sqldump.driverclass=sun.jdbc.odbc.JdbcOdbcDriver
