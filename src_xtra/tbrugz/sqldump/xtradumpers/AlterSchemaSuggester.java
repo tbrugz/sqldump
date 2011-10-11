@@ -1,6 +1,7 @@
 package tbrugz.sqldump.xtradumpers;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -73,17 +74,23 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			return;
 		}
 		
-		dumpCreateIndexes(schemaModel);
-		dumpCreateFKs(schemaModel);
+		simpleOut("-- indexes", fileOutput);
+		dumpCreateIndexes(schemaModel, schemaModel.getForeignKeys());
+		
+		simpleOut("\n-- FKs", fileOutput);
+		Set<FK> alterFKs = dumpCreateFKs(schemaModel);
+		
+		simpleOut("\n-- indexes for generated FKs", fileOutput);
+		dumpCreateIndexes(schemaModel, alterFKs);
 	}
 		
-	int dumpCreateIndexes(SchemaModel schemaModel) throws Exception {
+	int dumpCreateIndexes(SchemaModel schemaModel, Set<FK> foreignKeys) throws Exception {
 		
 		Set<Index> indexes = new TreeSet<Index>(); //HashSet doesn't work (uses hashCode()?)
 		
 		//FKs
 		//int fkIndexCounter = 0;
-		for(FK fk: schemaModel.getForeignKeys()) {
+		for(FK fk: foreignKeys) {
 			boolean pkTableHasIndex = false;
 			boolean fkTableHasIndex = false;
 			
@@ -178,7 +185,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		}
 	}
 
-	int dumpCreateFKs(SchemaModel schemaModel) throws Exception {
+	Set<FK> dumpCreateFKs(SchemaModel schemaModel) throws Exception {
 		Set<FK> fks = new TreeSet<FK>();
 		
 		//Tables
@@ -226,7 +233,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		
 		int dumpCounter = 0;
 		if(fks.size()>0) {
-			log.info(fks.size()+" 'create foreign key's generated");
+			log.info(fks.size()+" 'add foreign key's generated");
 			FileWriter fos = new FileWriter(fileOutput, true); //append
 			for(FK fk: fks) {
 				if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.fkTableSchemaName))) {
@@ -235,14 +242,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 					dumpCounter++;
 				}
 			}
-			log.info("dumped "+dumpCounter+" 'create foreign key' statements");
+			log.info("dumped "+dumpCounter+" 'add foreign key' statements");
 			fos.close();
 		}
 		else {
-			log.info("no 'create foreign key' alter schema suggestions");
+			log.info("no 'add foreign key' alter schema suggestions");
 		}
 		
-		return dumpCounter;
+		return fks;
 	}
 	
 	/*static boolean containsBasedOnEquals(Collection col, Object o) {
@@ -276,6 +283,12 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			sb.append(s.substring(0, 1));
 		}
 		return sb.toString();
+	}
+	
+	static void simpleOut(String s, String fileOutput) throws IOException {
+		FileWriter fos = new FileWriter(fileOutput, true); //append
+		fos.write( s + "\n");
+		fos.close();
 	}
 	
 }
