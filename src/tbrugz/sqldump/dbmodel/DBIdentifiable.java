@@ -60,7 +60,17 @@ public abstract class DBIdentifiable {
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result
+				+ ((schemaName == null) ? 0 : schemaName.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -74,6 +84,11 @@ public abstract class DBIdentifiable {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
+			return false;
+		if (schemaName == null) {
+			if (other.schemaName != null)
+				return false;
+		} else if (!schemaName.equals(other.schemaName))
 			return false;
 		return true;
 	}
