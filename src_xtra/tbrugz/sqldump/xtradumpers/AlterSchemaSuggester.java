@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.SchemaModelScriptDumper;
+import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -28,22 +29,29 @@ import tbrugz.sqldump.dbmodel.Table;
  * - FKs creation based on column names and existing PKs/UKs
  * 
  * TODOne: FK creations based on column names and existing PKs/UKs
- * - option to suggest only simple (not composite) FKs
- * - test if FK is possible (all values in fkTable exists in pkTable) - needs connection, can be very time consuming
- * - test column types
+ * x option to suggest only simple (not composite) FKs
+ * - XXX: test if FK is possible (all values in fkTable exists in pkTable) - needs connection, can be very time consuming
+ * - XXX: test column types
  * 
- * XXX: suggest PKs for tables that doesn't have one...
+ * XXX: suggest PKs/UKs for tables [that doesn't have one?]
+ * - if count(*) == select count(*) from (select distinct colX) - good candidate
+ * -- 1st: test for each column; 
+ * -- 2nd: test for each 2-col combination that doesn't include known PK/UK
+ * -- 3rd+: test for each [2+]-col combination ...
+ * 
+ * XXX: output warn for tables that doesn't have PK
  */
 public class AlterSchemaSuggester implements SchemaModelDumper {
 
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_OUTFILE = "sqldump.alterschemasuggester.outfile";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS = "sqldump.alterschemasuggester.alterobjectsfromschemas";
+	public static final String PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY = "sqldump.alterschemasuggester.simplefksonly";
 	
 	static Logger log = Logger.getLogger(AlterSchemaSuggester.class);
 	
 	String fileOutput;
 	List<String> schemasToAlter;
-	boolean dumpSimpleFKsOnly = true; //XXX: add prop for dumpSimpleFKsOnly
+	boolean dumpSimpleFKsOnly = true; //XXXdone: add prop for dumpSimpleFKsOnly
 
 	@Override
 	public void procProperties(Properties prop) {
@@ -56,6 +64,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				schemasToAlter.add(sch.trim());
 			}
 		}
+		dumpSimpleFKsOnly = Utils.getPropBool(prop, PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY, dumpSimpleFKsOnly);
 	}
 
 	/*
@@ -287,7 +296,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	
 	static void simpleOut(String s, String fileOutput) throws IOException {
 		FileWriter fos = new FileWriter(fileOutput, true); //append
-		fos.write( s + "\n");
+		fos.write( s + "\n" );
 		fos.close();
 	}
 	

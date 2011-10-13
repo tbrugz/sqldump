@@ -42,9 +42,14 @@ class HierarchyLevelData {
  * XXXdone: prop for measures ?
  * XXX: prop for Level.setNameExpression()?
  * TODOne: props for 'n' levels on one dim table (classic star schema - no snowflake)
- * ~XXX: snowflake: option to dump only one hierarchy per dimension (first? last? longest? preferwithtable[X]?
+ * ~XXX: snowflake: option to dump only one hierarchy per dimension: first? last? longest? preferwithtable[X]?
  * XXXdone: addDimForEachHierarchy
  * XXX: level properties
+ * 
+ * XXX: new dumper: suggestions for aggregate tables. for each fact table with X dimensions:
+ * - for Y := X-1 to 0
+ * -- one aggregate for each combination of (X minus Y) dimensions
+ * ? similar to PAD - Pentaho Aggregate Designer ?
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -72,7 +77,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	{
 		try {
 			Properties mondrianProp = new Properties();
-				mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("/mondrianxsd.properties"));
+			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("/mondrianxsd.properties"));
 			String[] ntypes = mondrianProp.getProperty("type.numeric").split(",");
 			for(String s: ntypes) {
 				numericTypes.add(s.trim());
