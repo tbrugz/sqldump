@@ -313,6 +313,19 @@ public class Utils {
 			return null;
 		}
 	}
+
+	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter) {
+		String strings = prop.getProperty(key);
+		if(strings!=null) {
+			List<String> ret = new ArrayList<String>();
+			String[] retArr = strings.split(delimiter);
+			for(String s: retArr) {
+				ret.add(s.trim());
+			}
+			return ret;
+		}
+		return null;
+	}
 	
 	public static String readPassword(String message) {
 		Console cons = System.console();

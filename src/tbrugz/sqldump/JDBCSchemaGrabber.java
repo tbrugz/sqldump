@@ -38,6 +38,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 
+	static final String PROP_SCHEMADUMP_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
@@ -201,6 +202,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
 		log.debug("grabSchema()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
+		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_DOMAINTABLES, ",");
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 
@@ -238,6 +240,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			table.schemaName = schemaName;
 			table.setType(ttype);
 			table.setRemarks(rs.getString("REMARKS"));
+			if(domainTables!=null && domainTables.contains(table.name)) {
+				log.debug("domain table: "+table.name);
+				table.setDomainTable(true);
+			}
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {

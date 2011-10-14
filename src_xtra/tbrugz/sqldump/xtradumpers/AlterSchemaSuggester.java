@@ -51,7 +51,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	
 	String fileOutput;
 	List<String> schemasToAlter;
-	boolean dumpSimpleFKsOnly = true; //XXXdone: add prop for dumpSimpleFKsOnly
+	boolean dumpSimpleFKsOnly = false; //XXXdone: add prop for dumpSimpleFKsOnly
 
 	@Override
 	public void procProperties(Properties prop) {
@@ -207,6 +207,8 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				//Tables
 				for(Table otherT: schemaModel.getTables()) {
 					if(table.name.equals(otherT.name)) { continue; }
+					//if(otherT.getDomainTable() && !table.getDomainTable()) { continue; }
+					if(otherT.isTableADomainTable() && !table.isTableADomainTable()) { continue; } //can't have FK from non-domain table to domain table
 					
 					List<String> otherTCols = new ArrayList<String>();
 					for(Column c: otherT.getColumns()) {

@@ -53,8 +53,8 @@ sqldump.schemagrab.grabclass=JDBCSchemaGrabber
 
 sqldump.dotests=true
 sqldump.doschemadump=true
-# dumpclasses can be: SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML
-sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML
+# dumpclasses can be: SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML, xtradumpers.AlterSchemaSuggester
+sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, JAXBSchemaXMLSerializer, graph.Schema2GraphML
 sqldump.doschemadump.grants=true
 sqldump.doschemadump.fks=true
 sqldump.doschemadump.exportedfks=true
@@ -64,6 +64,10 @@ sqldump.doschemadump.pks=true
 sqldump.doschemadump.indexes=false
 sqldump.doschemadump.ignoretableswithzerocolumns=true
 sqldump.schemadump.dumpdropstatements=false
+
+# schema info: domain tables
+# (used by AlterSchemaSuggester, but may be have other uses, like 'sqldump.datadump.tables')
+sqldump.schemainfo.domaintables=DOMAIN_TABLE_X, DOMAIN_TABLE_Y
 
 # schema names to dump
 sqldump.dumpschemapattern=DW, SA, EMPDEPT
@@ -113,7 +117,8 @@ sqldump.dbspecificfeatures.grabfkfromuk=false
 # data dump props
 #
 sqldump.dodatadump=false
-sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
+#sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
+sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
 
 # syntaxes
 sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml, html, ffc
@@ -222,6 +227,14 @@ sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
 # snippets file (non-default)
 #sqldump.graphmldump.snippetsfile=graphml-snippets-simple.properties
+
+#
+# alter schema suggestions output
+#
+sqldump.alterschemasuggester.outfile=${outputdir}/alter-schema-suggestions.sql
+sqldump.alterschemasuggester.simplefksonly=true
+sqldump.alterschemasuggester.alterobjectsfromschemas=SCHEMA_X, SCHEMA_Y
+
 
 ############
 #

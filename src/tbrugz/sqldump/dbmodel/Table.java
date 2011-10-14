@@ -16,6 +16,7 @@ public class Table extends DBObject {
 	List<Grant> grants = new ArrayList<Grant>();
 	List<Constraint> constraints = new ArrayList<Constraint>();
 	String remarks;	//e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
+	Boolean domainTable;
 	
 	static Logger log = Logger.getLogger(Table.class);
 	
@@ -184,6 +185,7 @@ public class Table extends DBObject {
 			tableComment = tableComment.replaceAll("'", "''");
 			sb.append("comment on table "+schemaName+"."+name+" is '"+tableComment+"';\n");
 		}
+		//XXX: column comments should be ordered by col name?
 		for(Column c: getColumns()) {
 			String comment = c.getRemarks();
 			if(comment!=null && !comment.trim().equals("")) {
@@ -257,6 +259,19 @@ public class Table extends DBObject {
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	public Boolean getDomainTable() {
+		return domainTable;
+	}
+
+	public void setDomainTable(Boolean domainTable) {
+		this.domainTable = domainTable;
+	}
+
+	//public boolean isDomainTable() - jaxb is not happy with this - conflicts with get/set
+	public boolean isTableADomainTable() {
+		return domainTable!=null && domainTable;
 	}
 	
 }
