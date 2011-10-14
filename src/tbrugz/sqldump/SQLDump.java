@@ -48,6 +48,7 @@ import org.apache.log4j.Logger;
  * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
  * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
+ * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  */
 public class SQLDump {
 	
@@ -85,7 +86,7 @@ public class SQLDump {
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	public static final String COLUMN_TYPE_MAPPING_RESOURCE = "column-type-mapping.properties";
+	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
 	
 	static Logger log = Logger.getLogger(SQLDump.class);

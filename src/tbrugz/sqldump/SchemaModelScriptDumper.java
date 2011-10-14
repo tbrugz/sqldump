@@ -112,12 +112,12 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		columnTypeMapping = new ParametrizedProperties();
 		try {
-			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE);
-			if(is==null) throw new IOException("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
+			if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
 			columnTypeMapping.load(is);
 		}
 		catch(IOException ioe) {
-			log.warn("resource "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE+" not found");
+			log.warn("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
 		}
 		
 		for(DBObjectType dbtype: DBObjectType.values()) {

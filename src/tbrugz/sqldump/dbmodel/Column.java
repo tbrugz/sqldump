@@ -25,9 +25,9 @@ public class Column extends DBIdentifiable implements Serializable {
 	{
 		typeMapping = new Properties();
 		try {
-			typeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE));
+			typeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
-			log.warn("Error loading typeMapping from resource: "+SQLDump.COLUMN_TYPE_MAPPING_RESOURCE);
+			log.warn("Error loading typeMapping from resource: "+SQLDump.DBMS_SPECIFIC_RESOURCE);
 			e.printStackTrace();
 		}
 	}

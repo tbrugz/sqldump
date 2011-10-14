@@ -57,7 +57,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	Properties papp = new ParametrizedProperties();
 	Properties propOriginal;
-	Properties columnTypeMapping = new ParametrizedProperties();
+	Properties dbmsSpecificResource = new ParametrizedProperties();
 	
 	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabExportedFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
 	boolean doSchemaGrabDbSpecific = false;
@@ -78,7 +78,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		doSchemaGrabDbSpecific = papp.getProperty(PROP_DUMP_DBSPECIFIC, "").equals("true");
 
 		try {
-			columnTypeMapping.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.COLUMN_TYPE_MAPPING_RESOURCE));
+			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -383,7 +383,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 
 	DBMSFeatures grabDbSpecificFeaturesClass() {
-		String dbSpecificFeaturesClass = columnTypeMapping.getProperty("dbms."+papp.getProperty(SQLDump.PROP_FROM_DB_ID)+".specificgrabclass");
+		String dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+papp.getProperty(SQLDump.PROP_FROM_DB_ID)+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()
 			try {
@@ -547,10 +547,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	String detectDbId(DatabaseMetaData dbmd) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
-			String dbIdsProp = columnTypeMapping.getProperty("dbids");
+			String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
 			String[] dbIds = dbIdsProp.split(",");
 			for(String dbid: dbIds) {
-				String regex = columnTypeMapping.getProperty("dbid."+dbid.trim()+".detectregex");
+				String regex = dbmsSpecificResource.getProperty("dbid."+dbid.trim()+".detectregex");
 				if(regex==null) { continue; }
 				if(dbProdName.matches(regex)) { return dbid.trim(); }
 			}
