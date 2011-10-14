@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
  * XXX: test with sqlite - http://www.zentus.com/sqlitejdbc/? luciddb?
  * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
  * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
- * XXX: fixed prop 'basepropdir': properties file directory
+ * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  */
 public class SQLDump {
 	
@@ -64,6 +64,9 @@ public class SQLDump {
 	static final String PROP_ASKFORPASSWD = "sqldump.askforpassword";
 	static final String PROP_ASKFORUSERNAME_GUI = "sqldump.askforusernamegui";
 	static final String PROP_ASKFORPASSWD_GUI = "sqldump.askforpasswordgui";
+	
+	//static/constant properties
+	static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
 		
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
@@ -107,10 +110,16 @@ public class SQLDump {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
 			}
 		}
-
+		File propFile = new File(propFilename);
+		
 		//init properties
-		log.info("loading properties: "+propFilename);
-		papp.load(new FileInputStream(propFilename));
+		log.info("loading properties: "+propFile);
+		papp.load(new FileInputStream(propFile));
+		
+		File propFileDir = propFile.getAbsoluteFile().getParentFile();
+		log.debug("propfile base dir: "+propFileDir);
+		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+
 		/*try {
 			papp.load(new FileInputStream(propFilename));
 		}
@@ -162,7 +171,10 @@ public class SQLDump {
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
+
 		SQLDump sdd = new SQLDump();
+
+		try {
 
 		sdd.init(args);
 		
@@ -278,8 +290,12 @@ public class SQLDump {
 			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
 			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);
 		}
-		
-		sdd.end();
+
+		}
+		finally {
+			log.info("closing connection: "+sdd.conn);
+			sdd.end();
+		}
 	}
 	
 	static Object getClassInstance(String className, String... defaultPackages) {

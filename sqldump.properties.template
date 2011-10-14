@@ -10,6 +10,8 @@
 # just a variable for using ahead - name has no special meaning 
 outputdir=output
 
+# properties can use fixed/constant property: ${propfilebasedir} - prop that contains prop file directory
+
 #
 # output props
 #

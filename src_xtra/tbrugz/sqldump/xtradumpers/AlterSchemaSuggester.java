@@ -225,7 +225,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 						fk.fkTableSchemaName = otherT.schemaName;
 						fk.fkColumns.addAll(cons.uniqueColumns);
 						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
-						fk.name = suggestAcronym(fk.pkTable) + "_" + suggestAcronym(fk.fkTable) + "_FK";
+						fk.name = suggestAcronym(fk.fkTable) + "_" + suggestAcronym(fk.pkTable) + "_FK";
 
 						//Test if FK already exists
 						boolean fkAlreadyExists = false;

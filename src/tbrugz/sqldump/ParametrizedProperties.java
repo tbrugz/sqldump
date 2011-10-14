@@ -73,7 +73,7 @@ public class ParametrizedProperties extends Properties {
 			if(pos2<0) { break; }
 			count = pos1+1;
 			String prop = sb.substring(pos1+2, pos2);
-			String propSuperValue = super.getProperty(prop);
+			String propSuperValue = getProperty(prop);
 			
 			if(useSystemProperties && propSuperValue==null) {
 				propSuperValue = System.getProperty(prop);
