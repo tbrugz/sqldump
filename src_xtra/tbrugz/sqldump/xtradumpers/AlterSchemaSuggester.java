@@ -83,17 +83,42 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			return;
 		}
 		
-		simpleOut("-- indexes", fileOutput);
-		dumpCreateIndexes(schemaModel, schemaModel.getForeignKeys());
+		FileWriter fos = new FileWriter(fileOutput, false);
 		
-		simpleOut("\n-- FKs", fileOutput);
+		Set<Index> addIndexes = dumpCreateIndexes(schemaModel, schemaModel.getForeignKeys());
+		if(addIndexes.size()>0) {
+			simpleOut("-- indexes", fos);
+			int count = writeIndexes(addIndexes, fos);
+			log.info("dumped "+count+" 'create index' statements");
+		}
+		else {
+			log.info("dumped no 'create index' statements");
+		}
+		
 		Set<FK> alterFKs = dumpCreateFKs(schemaModel);
+		if(alterFKs.size()>0) {
+			simpleOut("\n-- FKs", fos);
+			int count = writeFKs(alterFKs, fos);
+			log.info("dumped "+count+" 'add foreign key' statements");
+		}
+		else {
+			log.info("dumped no 'add foreign key' statements");
+		}
 		
-		simpleOut("\n-- indexes for generated FKs", fileOutput);
-		dumpCreateIndexes(schemaModel, alterFKs);
+		Set<Index> addIndexesFromFKs = dumpCreateIndexes(schemaModel, alterFKs);
+		if(addIndexesFromFKs.size()>0) {
+			simpleOut("\n-- indexes for generated FKs", fos);
+			int count = writeIndexes(addIndexesFromFKs, fos);
+			log.info("dumped "+count+" 'create index' statements for generated FKs");
+		}
+		else {
+			log.info("dumped no 'create index' statements for generated FKs");
+		}
+		
+		fos.close();
 	}
 		
-	int dumpCreateIndexes(SchemaModel schemaModel, Set<FK> foreignKeys) throws Exception {
+	Set<Index> dumpCreateIndexes(SchemaModel schemaModel, Set<FK> foreignKeys) throws Exception {
 		
 		Set<Index> indexes = new TreeSet<Index>(); //HashSet doesn't work (uses hashCode()?)
 		
@@ -155,10 +180,10 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			}
 		}
 		
-		int dumpCounter = 0;
+		//int dumpCounter = 0;
 		if(indexes.size()>0) {
-			log.info(indexes.size()+" 'create index' generated");
-			FileWriter fos = new FileWriter(fileOutput, true); //append
+			log.debug(indexes.size()+" 'create index' generated");
+			/*FileWriter fos = new FileWriter(fileOutput, true); //append
 			for(Index idx: indexes) {
 				if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(idx.schemaName))) {
 					fos.write( idx.getDefinition(true)+";\n\n" );
@@ -166,13 +191,13 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				}
 			}
 			log.info("dumped "+dumpCounter+" 'create index' statements");
-			fos.close();
+			fos.close();*/
 		}
 		else {
 			log.info("no 'create index' alter schema suggestions");
 		}
 		
-		return dumpCounter;
+		return indexes;
 	}
 	
 	void addIndex(Set<Index> indexes, Index idx) {
@@ -180,14 +205,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		if(indexes.contains(idx)) {
 		//if(containsBasedOnEquals(indexes, idx)) {
 			log.debug("duplicate index "+idx+" ignored");
-			for(Index i: indexes) {
+			/*for(Index i: indexes) {
 				if(i.equals(idx)) {
 					log.debug("dup idx is: "+i);
 				}
 				if(i.hashCode()==idx.hashCode()) {
 					log.debug("dup idx is: "+i+"; hash is "+idx.hashCode());
 				}
-			}
+			}*/
 		}
 		else {
 			indexes.add(idx);
@@ -242,10 +267,10 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			}
 		}
 		
-		int dumpCounter = 0;
+		//int dumpCounter = 0;
 		if(fks.size()>0) {
-			log.info(fks.size()+" 'add foreign key's generated");
-			FileWriter fos = new FileWriter(fileOutput, true); //append
+			log.debug(fks.size()+" 'add foreign key's generated");
+			/*FileWriter fos = new FileWriter(fileOutput, true); //append
 			for(FK fk: fks) {
 				if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.fkTableSchemaName))) {
 					fos.write( SchemaModelScriptDumper.fkScriptWithAlterTable(fk, false, true) + "\n");
@@ -254,7 +279,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				}
 			}
 			log.info("dumped "+dumpCounter+" 'add foreign key' statements");
-			fos.close();
+			fos.close();*/
 		}
 		else {
 			log.info("no 'add foreign key' alter schema suggestions");
@@ -276,6 +301,29 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		return false;
 	}*/
 	
+	int writeIndexes(Set<Index> indexes, FileWriter fos) throws IOException {
+		int dumpCounter = 0;
+		for(Index idx: indexes) {
+			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(idx.schemaName))) {
+				fos.write( idx.getDefinition(true)+";\n\n" );
+				dumpCounter++;
+			}
+		}
+		return dumpCounter;
+	}
+	
+	int writeFKs(Set<FK> fks, FileWriter fos) throws IOException {
+		int dumpCounter = 0;
+		for(FK fk: fks) {
+			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.fkTableSchemaName))) {
+				fos.write( SchemaModelScriptDumper.fkScriptWithAlterTable(fk, false, true) + "\n");
+				//fos.write( fk.getDefinition(true)+";\n\n" );
+				dumpCounter++;
+			}
+		}
+		return dumpCounter;
+	}
+	
 	static String suggestAcronym(Collection<String> strings) {
 		StringBuffer sb = new StringBuffer();
 		for(String col: strings) {
@@ -296,10 +344,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		return sb.toString();
 	}
 	
-	static void simpleOut(String s, String fileOutput) throws IOException {
+	/*static void simpleOut(String s, String fileOutput) throws IOException {
 		FileWriter fos = new FileWriter(fileOutput, true); //append
 		fos.write( s + "\n" );
 		fos.close();
+	}*/
+
+	static void simpleOut(String s, FileWriter fos) throws IOException {
+		fos.write( s + "\n" );
 	}
 	
 }

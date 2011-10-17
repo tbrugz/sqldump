@@ -15,7 +15,7 @@ public class ParametrizedProperties extends Properties {
 	public static final String DIRECTIVE_INCLUDE = "@includes";
 	static Logger log = Logger.getLogger(ParametrizedProperties.class);
 
-	boolean useSystemProperties = false;
+	static boolean useSystemProperties = false;
 
 	List<String> loadedPropFiles = new ArrayList<String>();
 	
@@ -86,12 +86,12 @@ public class ParametrizedProperties extends Properties {
 		return sb.toString();
 	}
 	
-	public boolean isUseSystemProperties() {
+	public static boolean isUseSystemProperties() {
 		return useSystemProperties;
 	}
 
-	public void setUseSystemProperties(boolean useSystemProperties) {
-		this.useSystemProperties = useSystemProperties;
+	public static void setUseSystemProperties(boolean useSystemPropertiesParam) {
+		useSystemProperties = useSystemPropertiesParam;
 	}
 	
 }

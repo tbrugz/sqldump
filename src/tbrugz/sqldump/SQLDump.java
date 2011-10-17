@@ -98,6 +98,8 @@ public class SQLDump {
 	boolean doTests = false, doSchemaDump = false, doDataDump = false;
 	
 	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
+
+	static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
 	
 	void init(String[] args) throws Exception {
 		log.info("init...");
@@ -106,6 +108,9 @@ public class SQLDump {
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+			}
+			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
+				ParametrizedProperties.setUseSystemProperties(true);
 			}
 			else {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
@@ -178,6 +183,8 @@ public class SQLDump {
 		try {
 
 		sdd.init(args);
+		
+		//Utils.showSysProperties();
 		
 		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;

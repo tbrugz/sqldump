@@ -19,7 +19,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import java.io.FileFilter;
 
@@ -464,6 +466,18 @@ public class Utils {
 	public static String readPasswordGUI(String message) {
 		BaseInputGUI pig = new PasswordInputGUI(message);
 		return pig.getText();
+	}
+	
+	public static void showSysProperties() {
+		if(log.isDebugEnabled()) {
+			System.out.println("Util: show sys prop");
+			Map<Object, Object> m = new TreeMap<Object, Object>(System.getProperties());
+			log.debug("system properties:");
+			for(Object key: m.keySet()) {
+				log.debug("\t"+key+": "+m.get(key));
+			}
+			log.debug("end system properties");
+		}
 	}
 	
 	public static void main(String[] args) {
