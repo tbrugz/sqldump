@@ -10,13 +10,17 @@ import tbrugz.sqldump.SchemaModel;
  * 
  * see: http://www.sqlite.org/cvstrac/wiki?p=InformationSchema
  * 
- * TODO: MetaData.getImportedKeys(): not yet implemented...
+ * XXX: MetaData.getImportedKeys(MetaData.java:503): not yet implemented...
+ * XXX: MetaData.getIndexInfo(MetaData.java:506): not yet implemented...
+ * 
+ * ? MetaData.getTablePrivileges() ?
  */
 public class SQLiteFeatures extends InformationSchemaFeatures {
 	
 	@Override
 	String grabDBViewsQuery() {
-		return "select 'main' as table_catalog, 'sqlite' as table_schema, tbl_name as table_name, sql as view_definition "
+		//return "select 'main' as table_catalog, 'sqlite' as table_schema, tbl_name as table_name, sql as view_definition "
+		return "select null as table_catalog, null as table_schema, tbl_name as table_name, sql as view_definition "
 				+"from sqlite_master "
 				+"where type = 'view' "
 				+"order by table_catalog, table_schema, table_name";

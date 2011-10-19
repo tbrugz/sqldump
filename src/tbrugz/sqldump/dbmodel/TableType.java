@@ -16,6 +16,7 @@ public enum TableType {
 			return TableType.TABLE;
 		}
 		else if(tableType.equals("SYNONYM")) {
+			//XXX: synonym of what?
 			return TableType.SYNONYM;
 		}
 		else if(tableType.equals("VIEW")) {
@@ -29,6 +30,10 @@ public enum TableType {
 		}
 		else if(tableType.equals("EXTERNAL TABLE")) {
 			return TableType.EXTERNAL_TABLE;
+		}
+		else if(tableType.equalsIgnoreCase("INDEX")) {
+			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
+			return null;
 		}
 
 		log.warn("table "+tableName+" of unknown type: "+tableType);

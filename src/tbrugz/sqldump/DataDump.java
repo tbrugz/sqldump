@@ -82,7 +82,7 @@ public class DataDump {
 	 *  
 	 */
 
-	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws Exception {
+	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
@@ -142,19 +142,27 @@ public class DataDump {
 			}
 
 			log.debug("dumping data/inserts from table: "+tableName);
-			String sql = "select "+selectColumns+" from \""+tableName+"\""
+			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
+			String sql = "select "+selectColumns
+					+" from "+(table.schemaName!=null?table.schemaName+".":"")+tableName
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
 			
-			//XXX: table dump with partitionBy?
-			runQuery(conn, sql, null, prop, tableName, tableName, charset, 
-					rowlimit, 
-					syntaxList
-					);
+			try {
+				//XXX: table dump with partitionBy?
+				runQuery(conn, sql, null, prop, tableName, tableName, charset, 
+						rowlimit,
+						syntaxList
+						);
+			}
+			catch(Exception e) {
+				log.warn("error dumping data from table: "+tableName+"\n\tsql: "+sql+"\n\texception: "+e);
+				log.info("exception:", e);
+			}
 		}
 		
-		if(tables4dump.size()>0) {
+		if(tables4dump!=null && tables4dump.size()>0) {
 			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
 		}
 	}
