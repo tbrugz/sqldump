@@ -282,3 +282,8 @@ sqldump.alterschemasuggester.alterobjectsfromschemas=SCHEMA_X, SCHEMA_Y
 #sqldump.dburl=jdbc:mysql://<host>:<port>/<database>
 #sqldump.user=
 #sqldump.password=
+
+# SQLite
+#sqldump.driverclass=org.sqlite.JDBC
+#sqldump.dburl=jdbc:sqlite:/path/to/sqlite.db
+

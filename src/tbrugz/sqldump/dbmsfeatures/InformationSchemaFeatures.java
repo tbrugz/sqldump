@@ -50,12 +50,16 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 	}
 	
+	String grabDBViewsQuery() {
+		return "select table_catalog, table_schema, table_name, view_definition "
+			+"from information_schema.views "
+			+"where view_definition is not null "
+			+"order by table_catalog, table_schema, table_name ";
+	}
+
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		String query = "select table_catalog, table_schema, table_name, view_definition "
-				+"from information_schema.views "
-				+"where view_definition is not null "
-				+"order by table_catalog, table_schema, table_name ";
+		String query = grabDBViewsQuery();
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
