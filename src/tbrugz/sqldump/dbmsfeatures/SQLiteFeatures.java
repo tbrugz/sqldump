@@ -6,12 +6,18 @@ import java.sql.SQLException;
 import tbrugz.sqldump.SchemaModel;
 
 /*
- * using http://www.zentus.com/sqlitejdbc/
+ * using: http://code.google.com/p/sqlite-jdbc/ 
+ * was using: http://www.zentus.com/sqlitejdbc/
  * 
- * see: http://www.sqlite.org/cvstrac/wiki?p=InformationSchema
+ * see:
+ *   http://www.sqlite.org/cvstrac/wiki?p=InformationSchema
+ *   http://www.sqlite.org/pragma.html
  * 
- * XXX: MetaData.getImportedKeys(MetaData.java:503): not yet implemented...
- * XXX: MetaData.getIndexInfo(MetaData.java:506): not yet implemented...
+ * XXXold: MetaData.getImportedKeys(MetaData.java:503): not yet implemented...
+ *   - PRAGMA foreign_key_list(fkTable);
+ * XXXold: MetaData.getIndexInfo(MetaData.java:506): not yet implemented...
+ *   - PRAGMA index_list(table);
+ *   - PRAGMA index_info(indexName);
  * 
  * ? MetaData.getTablePrivileges() ?
  */

@@ -112,7 +112,7 @@ public class Table extends DBObject {
 			}*/
 			//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
 			for(FK fk: foreignKeys) {
-				if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
+				if((schemaName==null || fk.fkTableSchemaName==null || schemaName.equals(fk.fkTableSchemaName)) && name.equals(fk.fkTable)) {
 					sb.append((countTabElements==0?"":",")+"\n\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName));
 				}
 				countTabElements++;

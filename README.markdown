@@ -26,7 +26,8 @@ Dependencies
 	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), 
 	[Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html),
 	[Derby](http://db.apache.org/derby/derby_downloads.html),
-	[HSQLDB](http://hsqldb.org/))
+	[HSQLDB](http://hsqldb.org/),
+	[SQLite](http://code.google.com/p/sqlite-jdbc/))
 - ant (recommended)
 
 

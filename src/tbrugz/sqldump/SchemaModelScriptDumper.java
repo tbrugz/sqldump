@@ -144,7 +144,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	public void dumpSchema(SchemaModel schemaModel) throws Exception {
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
 		if(fromDbId==null || toDbId==null) {
-			log.warn("fromDbId or toDbId null: no conversion");
+			log.info("fromDbId or toDbId null: no conversion");
 		}
 		else {
 			if(fromDbId.equals(toDbId)) {
