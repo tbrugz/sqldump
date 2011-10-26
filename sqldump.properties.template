@@ -13,7 +13,7 @@ outputdir=output
 # properties can use fixed/constant property: ${propfilebasedir} - prop that contains prop file directory
 
 #
-# output props
+# filepattern output props
 #
 sqldump.mainoutputfilepattern=${outputdir}/${schemaname}_${objecttype}_dump.sql
 sqldump.outputobjectwithreferencingtable=grant,index
@@ -51,7 +51,7 @@ sqldump.deleteregularfilesfromdir=${outputdir}
 # grabclass can be: JDBCSchemaGrabber, JAXBSchemaXMLSerializer, SchemaSerializer, CastorSchemaXMLSerializer
 sqldump.schemagrab.grabclass=JDBCSchemaGrabber
 
-sqldump.dotests=true
+sqldump.dotests=false
 sqldump.doschemadump=true
 # dumpclasses can be: SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML, xtradumpers.AlterSchemaSuggester
 sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, JAXBSchemaXMLSerializer, graph.Schema2GraphML
@@ -77,7 +77,7 @@ sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.*
 
 sqldump.dumpwithschemaname=true
 
-# recursive dump of tables based on FKs
+# recursive dump (grab) of tables based on FKs
 sqldump.doschemadump.recursivedumpbasedonfks=true
 sqldump.doschemadump.recursivedumpbasedonfks.exportedfks=false
 sqldump.doschemadump.recursivedumpbasedonfks.deep=true
@@ -90,10 +90,14 @@ sqldump.todbid=pgsql
 # autodetect database product
 sqldump.fromdbid.autodetect=true
 
+#
+# script dump properties
+#
 sqldump.dumpsynonymastable=false
 sqldump.dumpviewastable=false
 sqldump.dumpmaterializedviewastable=false
 
+sqldump.schemadump.usecreateorreplace=true
 
 #
 # dbms specific features grab

@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
@@ -34,17 +35,19 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	//File fileOutput;
 	
 	boolean dumpWithSchemaName;
-	boolean doSchemaDumpPKs;
-	boolean dumpFKsInsideTable;
-	boolean dumpSynonymAsTable;
-	boolean dumpViewAsTable;
-	boolean dumpMaterializedViewAsTable;
+	boolean doSchemaDumpPKs = true;
+	boolean dumpFKsInsideTable = false;
+	boolean dumpSynonymAsTable = false;
+	boolean dumpViewAsTable = false;
+	boolean dumpMaterializedViewAsTable = false;
 	
 	boolean dumpGrantsWithReferencingTable = false;
 	boolean dumpIndexesWithReferencingTable = false;
 	boolean dumpFKsWithReferencingTable = false;
 	boolean dumpTriggersWithReferencingTable = false;
+	
 	boolean dumpDropStatements = false;
+	boolean dumpWithCreateOrReplace = false;
 	
 	Properties columnTypeMapping;
 	String fromDbId, toDbId;
@@ -64,21 +67,24 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
 
 	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
+	static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
 	@Override
 	public void procProperties(Properties prop) {
 		//init control vars
-		doSchemaDumpPKs = prop.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, "").equals("true");
+		doSchemaDumpPKs = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		boolean doSchemaDumpFKsAtEnd = prop.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_FKS_ATEND, "").equals("true");
+		boolean doSchemaDumpFKsAtEnd = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		dumpWithSchemaName = prop.getProperty(SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, "").equals("true");
-		dumpSynonymAsTable = prop.getProperty(PROP_DUMP_SYNONYM_AS_TABLE, "").equals("true");
-		dumpViewAsTable = prop.getProperty(PROP_DUMP_VIEW_AS_TABLE, "").equals("true");
-		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, false); //default should be 'true'?
+		dumpWithSchemaName = Utils.getPropBool(prop, SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
+		dumpSynonymAsTable = Utils.getPropBool(prop, PROP_DUMP_SYNONYM_AS_TABLE, dumpSynonymAsTable);
+		dumpViewAsTable = Utils.getPropBool(prop, PROP_DUMP_VIEW_AS_TABLE, dumpViewAsTable);
+		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable); //default should be 'true'?
 		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
+		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
+		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
@@ -384,20 +390,20 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			if(toDbId!=null && !privsToDump.contains(g.privilege.toString())) { continue; }
 			
 			if(g.withGrantOption) {
-    			Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
-    			if(privs==null) {
-    				privs = new TreeSet<PrivilegeType>();
-    				mapWithGrant.put(g.grantee, privs);
-    			}
-    			privs.add(g.privilege);
+				Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
+				if(privs==null) {
+					privs = new TreeSet<PrivilegeType>();
+					mapWithGrant.put(g.grantee, privs);
+				}
+				privs.add(g.privilege);
 			}
 			else {
-    			Set<PrivilegeType> privs = mapWOGrant.get(g.grantee);
-    			if(privs==null) {
-    				privs = new TreeSet<PrivilegeType>();
-    				mapWOGrant.put(g.grantee, privs);
-    			}
-    			privs.add(g.privilege);
+				Set<PrivilegeType> privs = mapWOGrant.get(g.grantee);
+				if(privs==null) {
+					privs = new TreeSet<PrivilegeType>();
+					mapWOGrant.put(g.grantee, privs);
+				}
+				privs.add(g.privilege);
 			}
 		}
 		
@@ -411,10 +417,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 					+" to "+grantee
 					+" WITH GRANT OPTION"+";\n\n");
 			/*for(PrivilegeType priv: privs) {
-    			sb.append("grant "+priv
-    					+" on "+tableName
-    					+" to "+grantee
-    					+" WITH GRANT OPTION"+";\n");
+				sb.append("grant "+priv
+					+" on "+tableName
+					+" to "+grantee
+					+" WITH GRANT OPTION"+";\n");
 			}*/
 		}
 
@@ -426,10 +432,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 					+" to "+grantee
 					+";\n\n");
 			/*for(PrivilegeType priv: privs) {
-    			sb.append("grant "+priv
-    					+" on "+tableName
-    					+" to "+grantee
-    					+";\n");
+				sb.append("grant "+priv
+					+" on "+tableName
+					+" to "+grantee
+					+";\n");
 			}*/
 		}
 

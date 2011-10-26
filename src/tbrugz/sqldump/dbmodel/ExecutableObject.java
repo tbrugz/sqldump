@@ -5,6 +5,7 @@ package tbrugz.sqldump.dbmodel;
  * create package: http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_6006.htm
  */
 public class ExecutableObject extends DBObject {
+
 	//public String type;
 	public DBObjectType type;
 	public String body;
@@ -12,7 +13,7 @@ public class ExecutableObject extends DBObject {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		//return "create "+type+" "+(dumpSchemaName?schemaName+".":"")+name+" as\n"+body;
-		return "create "+body;
+		return (dumpCreateOrReplace?"create or replace ":"create ") + body;
 	}
 	
 	@Override

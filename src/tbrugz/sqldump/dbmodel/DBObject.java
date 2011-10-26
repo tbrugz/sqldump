@@ -5,6 +5,7 @@ import java.util.Collection;
 
 public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
+	public static transient boolean dumpCreateOrReplace = false;
 
 	public static class DBObjectId implements Comparable<DBObjectId> {
 		public String schemaName;

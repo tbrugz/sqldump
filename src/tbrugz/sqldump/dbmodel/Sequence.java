@@ -14,7 +14,10 @@ public class Sequence extends DBObject {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create sequence "+(dumpSchemaName?schemaName+".":"")+name
+		//XXX: option to use "create or replace" for sequence?
+		//return (dumpCreateOrReplace?"create or replace ":"create ") 
+		return "create " 
+			+"sequence "+(dumpSchemaName?schemaName+".":"")+name
 			+" minvalue "+minValue
 			+(dumpStartWith?" start with "+lastNumber:"")
 			+" increment by "+incrementBy;

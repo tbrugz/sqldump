@@ -7,7 +7,8 @@ public class Trigger extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create trigger "+description+"\n"+body;
+		return (dumpCreateOrReplace?"create or replace ":"create ") + "trigger "
+				+ description + "\n" + body;
 	}
 
 	@Override
