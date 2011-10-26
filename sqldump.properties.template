@@ -136,15 +136,15 @@ sqldump.datadump.outfilepattern=${outputdir}/data_${tablename}${partitionby}.${s
 #
 # InsertInfo syntax props
 #
-sqldump.datadump.useinsertintosyntax.withcolumnnames=false
+sqldump.datadump.insertinto.withcolumnnames=true
 
 #
 # CSV syntax props
 #
-sqldump.datadump.tablenameheader=false
-sqldump.datadump.columnnamesheader=true
-sqldump.datadump.recorddelimiter=\r\n
-sqldump.datadump.columndelimiter=;
+sqldump.datadump.csv.tablenameheader=false
+sqldump.datadump.csv.columnnamesheader=true
+sqldump.datadump.csv.recorddelimiter=\r\n
+sqldump.datadump.csv.columndelimiter=;
 
 # FFC (formatted fixed column) syntax props
 #sqldump.datadump.ffc.linegroupsize=30

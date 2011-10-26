@@ -13,10 +13,10 @@ import tbrugz.sqldump.Utils;
 
 public class CSVDataDump extends DumpSyntax {
 	
-	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.recorddelimiter";
-	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.columndelimiter";
-	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.tablenameheader";
-	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.columnnamesheader";
+	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
+	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";
+	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.csv.tablenameheader";
+	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ";";
@@ -29,8 +29,8 @@ public class CSVDataDump extends DumpSyntax {
 	List<Class> lsColTypes = new ArrayList<Class>();
 	ResultSetMetaData md;
 	
-	boolean doTableNameHeaderDump;
-	boolean doColumnNamesHeaderDump;
+	boolean doTableNameHeaderDump = false;
+	boolean doColumnNamesHeaderDump = true;
 	String columnDelimiter;
 	String recordDelimiter;		
 	
@@ -38,8 +38,8 @@ public class CSVDataDump extends DumpSyntax {
 	public void procProperties(Properties prop) {
 		recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
-		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER);
-		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER);
+		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
+		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, doColumnNamesHeaderDump);
 	}
 
 	@Override

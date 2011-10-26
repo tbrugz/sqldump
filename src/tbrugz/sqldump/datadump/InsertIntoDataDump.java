@@ -15,17 +15,17 @@ import tbrugz.sqldump.Utils;
 public class InsertIntoDataDump extends DumpSyntax {
 
 	static final String INSERTINTO_SYNTAX_ID = "insertinto";
-	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.useinsertintosyntax.withcolumnnames";
+	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.insertinto.withcolumnnames";
 
 	String tableName;
 	int numCol;
 	String colNames;
 	List<Class> lsColTypes = new ArrayList<Class>();
-	boolean doColumnNamesDump;
+	boolean doColumnNamesDump = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
-		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES);
+		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 	}
 	
 	@Override
