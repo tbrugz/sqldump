@@ -12,6 +12,12 @@ import java.util.Properties;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
+/*
+ * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date
+ * 
+ * see: http://weblogs.asp.net/bleroy/archive/2008/01/18/dates-and-json.aspx
+ *      http://msdn.microsoft.com/en-us/library/bb299886.aspx 
+ */
 public class JSONDataDump extends DumpSyntax {
 
 	static final String JSON_SYNTAX_ID = "json";
@@ -23,6 +29,7 @@ public class JSONDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 	}
 
 	@Override
@@ -51,7 +58,7 @@ public class JSONDataDump extends DumpSyntax {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColNames.size();i++) {
 			try {
-				sb.append((i==0?"":", ")+Utils.getFormattedJSONValue( lsColNames.get(i) )+": "+Utils.getFormattedJSONValue( vals.get(i) ));
+				sb.append((i==0?"":", ")+Utils.getFormattedJSONValue( lsColNames.get(i), dateFormatter )+": "+Utils.getFormattedJSONValue( vals.get(i), dateFormatter ));
 			}
 			catch(Exception e) {
 				System.err.println(lsColNames+" / "+vals);

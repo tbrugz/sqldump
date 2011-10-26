@@ -201,11 +201,11 @@ public class Utils {
 	static String DEFAULT_ENCLOSING = "'";
 	static String DOUBLEQUOTE = "\"";
 	
-	public static String join4sql(Collection<?> s, String delimiter) {
+	public static String join4sql(Collection<?> s, DateFormat df, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
-			buffer.append(getFormattedSQLValue(iter.next()));
+			buffer.append(getFormattedSQLValue(iter.next(), df));
 
 			if (iter.hasNext()) {
 				buffer.append(delimiter);
@@ -214,7 +214,7 @@ public class Utils {
 		return buffer.toString();
 	}
 	
-	public static String getFormattedSQLValue(Object elem) {
+	public static String getFormattedSQLValue(Object elem, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
@@ -226,7 +226,7 @@ public class Utils {
 			return DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING;
 		}
 		else if(elem instanceof Date) {
-			return dateFormatter.format((Date)elem);
+			return df.format((Date)elem);
 		}
 		else if(elem instanceof Float) {
 			return floatFormatterSQL.format((Float)elem);
@@ -242,7 +242,7 @@ public class Utils {
 		return String.valueOf(elem);
 	} 
 	
-	public static String getFormattedJSONValue(Object elem) {
+	public static String getFormattedJSONValue(Object elem, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
@@ -251,8 +251,8 @@ public class Utils {
 			return DOUBLEQUOTE+elem+DOUBLEQUOTE;
 		}
 		else if(elem instanceof Date) {
-			//XXX: JSON dateFormatter?
-			return dateFormatter.format((Date)elem);
+			//XXXdone: JSON dateFormatter?
+			return df.format((Date)elem);
 		}
 		else if(elem instanceof Long) {
 			//log.warn("long: "+(Long)elem+"; "+longFormatter.format((Long)elem));

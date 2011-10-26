@@ -23,6 +23,7 @@ public class HTMLDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 	}
 
 	@Override
@@ -55,7 +56,8 @@ public class HTMLDataDump extends DumpSyntax {
 		sb.append("\t"+"<tr>");
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColNames.size();i++) {
-			sb.append( "<td>"+ vals.get(i) +"</td>");
+			Object value = getValueNotNull( vals.get(i) );
+			sb.append( "<td>"+ value +"</td>");
 		}
 		sb.append("</tr>");
 		out(sb.toString()+"\n", fos);

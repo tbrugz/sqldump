@@ -3,9 +3,13 @@ package tbrugz.sqldump.datadump;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
+import tbrugz.sqldump.Utils;
 
 //TODOne: add syntax: html
 //TODOne: add syntax: 'formatted fixed column' (sqlplus-like) 
@@ -20,11 +24,34 @@ public abstract class DumpSyntax {
 		FFCDataDump.class,
 	};
 	
+	public DateFormat dateFormatter;
+	public String nullValueStr = "null";
+	
 	public static List<Class> getSyntaxes() {
 		return Arrays.asList(arr);
 	}
 	
 	public abstract void procProperties(Properties prop);
+
+	public void procStandardProperties(Properties prop) {
+		String dateFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".dateformat");
+		if(dateFormat!=null) {
+			dateFormatter = new SimpleDateFormat(dateFormat);
+		}
+		else {
+			dateFormatter = Utils.dateFormatter;
+		}
+		
+		String nullValue = prop.getProperty("sqldump.datadump."+getSyntaxId()+".nullvalue");
+		if(nullValue!=null) {
+			nullValueStr = nullValue;
+		}
+	}
+	
+	public Object getValueNotNull(Object o) {
+		if(o==null) { return nullValueStr; }
+		return o;
+	}
 	
 	public abstract String getSyntaxId();
 

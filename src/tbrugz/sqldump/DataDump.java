@@ -302,7 +302,8 @@ public class DataDump {
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
-			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName);
+			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
+				(rs.next()?" (more rows exists)":"") );
 
 			//footer
 			Set<String> filenames = writersOpened.keySet();

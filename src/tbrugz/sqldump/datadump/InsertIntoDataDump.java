@@ -25,6 +25,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 	}
 	
@@ -53,7 +54,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		out("insert into "+tableName+" "+
 			colNames+" values ("+
-			Utils.join4sql(vals, ", ")+");", fos);
+			Utils.join4sql(vals, dateFormatter, ", ")+
+			");", fos);
 	}
 	
 	void out(String s, Writer pw) throws IOException {

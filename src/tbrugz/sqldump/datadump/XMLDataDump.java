@@ -22,6 +22,7 @@ public class XMLDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 	}
 
 	@Override
@@ -49,7 +50,8 @@ public class XMLDataDump extends DumpSyntax {
 		sb.append("\t"+"<row>");
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColNames.size();i++) {
-			sb.append( "<"+lsColNames.get(i)+">"+ vals.get(i) +"</"+lsColNames.get(i)+">");
+			Object value = getValueNotNull( vals.get(i) );
+			sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
 		}
 		sb.append("</row>");
 		out(sb.toString()+"\n", fos);

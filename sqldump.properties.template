@@ -137,6 +137,7 @@ sqldump.datadump.outfilepattern=${outputdir}/data_${tablename}${partitionby}.${s
 # InsertInfo syntax props
 #
 sqldump.datadump.insertinto.withcolumnnames=true
+sqldump.datadump.insertinto.dateformat='TO_DATE('''yyyy-MM-dd''',''YYYY-MM-DD'')'
 
 #
 # CSV syntax props
@@ -145,6 +146,15 @@ sqldump.datadump.csv.tablenameheader=false
 sqldump.datadump.csv.columnnamesheader=true
 sqldump.datadump.csv.recorddelimiter=\r\n
 sqldump.datadump.csv.columndelimiter=;
+
+# JSON syntax props
+sqldump.datadump.json.dateformat='"'yyyy-MM-dd'T'HH:mm:ss.SSSZ'"'
+
+# XML syntax props
+sqldump.datadump.xml.nullvalue=nil
+
+# HTML syntax props
+sqldump.datadump.html.nullvalue=
 
 # FFC (formatted fixed column) syntax props
 #sqldump.datadump.ffc.linegroupsize=30
