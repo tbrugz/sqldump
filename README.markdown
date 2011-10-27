@@ -5,7 +5,7 @@ SQLDump
 Utility to dump schema and data from a RDBMS. Features:
 
 - Does schema-dumping, using (mainly) standard java API, by way of `java.sql.DatabaseMetaData`
-- Can do data-dumping
+- Does data-dumping (formats: csv, xml, html, json, sql 'insert into', fixed column size)
 - Can be used with any JDBC-compliant databases
 - Generates Entity-Relationship diagrams based on Tables and FKs (graphML output - [yEd](http://www.yworks.com/products/yed/) recommended)
 - Flexible schema output patterns (based on schema name, object type and object name)
@@ -46,7 +46,7 @@ Usage (with sources, without ant)
 - Copy `sqldump.properties.template` to `sqldump.properties`
 - Edit `sqldump.properties`
 - Compile sources into `bin`
-- Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`"
+- Run `tbrugz.sqldump.SQLDump`, e.g., `java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
 Usage (without sources)
@@ -58,7 +58,7 @@ Usage (without sources)
 - Download jdbc jars for your database of choice
 - Edit `sqldump.properties` and (windows) `sqldump.bat` (you may include command-line options at end)
 - (windows) Run `sqldump.bat`
-- (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., "`java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`"
+- (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
 Command-line options

@@ -262,9 +262,9 @@ public class Utils {
 		return String.valueOf(elem);
 	} 
 
-	public static String getFormattedCSVBrValue(Object elem) {
+	public static String getFormattedCSVBrValue(Object elem, String nullValue) {
 		if(elem == null) {
-			return "";
+			return nullValue;
 		}
 		else if(elem instanceof Double) {
 			return floatFormatterBR.format((Double)elem);

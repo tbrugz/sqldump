@@ -24,8 +24,10 @@ public abstract class DumpSyntax {
 		FFCDataDump.class,
 	};
 	
+	public static String DEFAULT_NULL_VALUE = "";
+	
 	public DateFormat dateFormatter;
-	public String nullValueStr = "null";
+	public String nullValueStr = DEFAULT_NULL_VALUE;
 	
 	public static List<Class> getSyntaxes() {
 		return Arrays.asList(arr);

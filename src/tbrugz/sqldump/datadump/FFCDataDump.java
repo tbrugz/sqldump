@@ -29,12 +29,12 @@ public class FFCDataDump extends DumpSyntax {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
 	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
-	static final String PROP_DATADUMP_FFC_NULLVALUE = "sqldump.datadump.ffc.nullvalue";
+	//static final String PROP_DATADUMP_FFC_NULLVALUE = "sqldump.datadump.ffc.nullvalue";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMES = "sqldump.datadump.ffc.showcolnames";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 
 	static final String FFC_SYNTAX_ID = "ffc";
-	static final String DEFAULT_NULL_VALUE = "";
+	//static final String DEFAULT_NULL_VALUE = "";
 	static Logger log = Logger.getLogger(FFCDataDump.class);
 	
 	int numCol;
@@ -44,6 +44,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FFC_LINEGROUPSIZE);
 		if(propLineGroupSize!=null && propLineGroupSize>0) {
 			lineGroupSize = (int)(long) propLineGroupSize;
@@ -52,10 +53,10 @@ public class FFCDataDump extends DumpSyntax {
 		if(propColDelim!=null) {
 			separator = propColDelim;
 		}
-		String propNullValue = prop.getProperty(PROP_DATADUMP_FFC_NULLVALUE);
+		/*String propNullValue = prop.getProperty(PROP_DATADUMP_FFC_NULLVALUE);
 		if(propNullValue!=null) {
 			nullValue = propNullValue;
-		}
+		}*/
 		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
 		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 	}
@@ -86,7 +87,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	int lineGroupSize = 20;
 	String separator = " | ";
-	String nullValue = DEFAULT_NULL_VALUE;
+	//String nullValue = DEFAULT_NULL_VALUE;
 
 	//List<Integer> headersColsMaxLenght = new ArrayList<Integer>();
 	List<Integer> colsMaxLenght = new ArrayList<Integer>();
@@ -219,8 +220,8 @@ public class FFCDataDump extends DumpSyntax {
 	}
 	
 	String getFormattedValue(Object o) {
-		if(o==null) return nullValue;
-		return Utils.getFormattedCSVBrValue(o);
+		//if(o==null) return nullValue;
+		return Utils.getFormattedCSVBrValue(o, nullValueStr);
 	}
 
 	@Override

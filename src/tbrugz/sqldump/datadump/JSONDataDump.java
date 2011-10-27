@@ -14,6 +14,7 @@ import tbrugz.sqldump.Utils;
 
 /*
  * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date
+ *      dateformat? maybe with JSR-310 (http://threeten.sourceforge.net/)?
  * 
  * see: http://weblogs.asp.net/bleroy/archive/2008/01/18/dates-and-json.aspx
  *      http://msdn.microsoft.com/en-us/library/bb299886.aspx 
@@ -58,7 +59,7 @@ public class JSONDataDump extends DumpSyntax {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColNames.size();i++) {
 			try {
-				sb.append((i==0?"":", ")+Utils.getFormattedJSONValue( lsColNames.get(i), dateFormatter )+": "+Utils.getFormattedJSONValue( vals.get(i), dateFormatter ));
+				sb.append((i==0?"":", ") + "\"" + lsColNames.get(i) + "\"" + ": " + Utils.getFormattedJSONValue( vals.get(i), dateFormatter ));
 			}
 			catch(Exception e) {
 				System.err.println(lsColNames+" / "+vals);

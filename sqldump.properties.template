@@ -150,6 +150,7 @@ sqldump.datadump.csv.tablenameheader=false
 sqldump.datadump.csv.columnnamesheader=true
 sqldump.datadump.csv.recorddelimiter=\r\n
 sqldump.datadump.csv.columndelimiter=;
+sqldump.datadump.csv.nullvalue=
 
 # JSON syntax props
 sqldump.datadump.json.dateformat='"'yyyy-MM-dd'T'HH:mm:ss.SSSZ'"'

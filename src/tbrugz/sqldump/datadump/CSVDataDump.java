@@ -36,6 +36,7 @@ public class CSVDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		procStandardProperties(prop);
 		recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
@@ -98,7 +99,7 @@ public class CSVDataDump extends DumpSyntax {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
-			sb.append( (i!=0?columnDelimiter:"")+ Utils.getFormattedCSVBrValue(vals.get(i)) );
+			sb.append( (i!=0?columnDelimiter:"")+ Utils.getFormattedCSVBrValue(vals.get(i), nullValueStr) );
 		}
 		out(sb.toString(), fos, recordDelimiter);
 	}

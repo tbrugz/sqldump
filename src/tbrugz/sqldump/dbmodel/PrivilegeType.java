@@ -3,7 +3,7 @@ package tbrugz.sqldump.dbmodel;
 public enum PrivilegeType {
 	SELECT, INSERT, UPDATE, DELETE, ALTER, REFERENCES, INDEX,
 	DEBUG, FLASHBACK, ON_COMMIT_REFRESH, QUERY_REWRITE, //Oracle
-	RULE, TRIGGER, //Postgres
+	RULE, TRIGGER, //PostgreSQL
 	;
 	//XXX: filter privilegetype on output based on dbid... see: column-type-mapping.properties
 	

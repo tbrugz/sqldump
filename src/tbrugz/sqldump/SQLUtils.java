@@ -48,6 +48,7 @@ public class SQLUtils {
 	}
 
 	private static boolean hasWarnedColType = false;
+	
 	public static List getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
 		List ls = new ArrayList();
 		boolean thisHasWarned = false;
