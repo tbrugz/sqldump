@@ -44,11 +44,14 @@ import org.apache.log4j.Logger;
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
  * XXXdone: new dumper: generate mondrian schema
- * XXX: test with sqlite - http://www.zentus.com/sqlitejdbc/? luciddb?
+ * XXXdone: test with sqlite - http://code.google.com/p/sqlite-jdbc/
+ * XXX: luciddb?
  * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
  * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
+ * XXX: add startup option, before opening connection (SQLite, ...)
+ * TODO: sqlregen // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
  */
 public class SQLDump {
 	

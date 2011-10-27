@@ -71,7 +71,7 @@ public class CSVDataDump extends DumpSyntax {
 		if(doColumnNamesHeaderDump) {
 			StringBuffer sb = new StringBuffer();
 			for(int i=0;i<numCol;i++) {
-				sb.append(md.getColumnName(i+1)+columnDelimiter);
+				sb.append( (i!=0?columnDelimiter:"") + md.getColumnName(i+1));
 			}
 			out(sb.toString(), fos, recordDelimiter);
 		}
@@ -99,7 +99,7 @@ public class CSVDataDump extends DumpSyntax {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
-			sb.append( (i!=0?columnDelimiter:"")+ Utils.getFormattedCSVBrValue(vals.get(i), nullValueStr) );
+			sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVBrValue(vals.get(i), columnDelimiter, nullValueStr) );
 		}
 		out(sb.toString(), fos, recordDelimiter);
 	}

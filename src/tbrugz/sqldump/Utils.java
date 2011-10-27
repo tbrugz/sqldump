@@ -262,7 +262,7 @@ public class Utils {
 		return String.valueOf(elem);
 	} 
 
-	public static String getFormattedCSVBrValue(Object elem, String nullValue) {
+	public static String getFormattedCSVBrValue(Object elem, String separator, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
@@ -270,7 +270,12 @@ public class Utils {
 			return floatFormatterBR.format((Double)elem);
 		}
 
-		return String.valueOf(elem);
+		if(separator==null) {
+			return String.valueOf(elem);
+		}
+		else {
+			return String.valueOf(elem).replaceAll(separator, "");
+		}
 	} 
 	
 	public static String normalizeEnumStringConstant(String strEnumConstant) {
