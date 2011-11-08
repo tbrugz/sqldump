@@ -141,7 +141,7 @@ public class Utils {
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
 	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
 	public static NumberFormat floatFormatterSQL = null;
-	public static NumberFormat floatFormatterBR = null;
+	//public static NumberFormat floatFormatterBR = null;
 	public static NumberFormat longFormatter = null;
 	
 	static {
@@ -151,12 +151,12 @@ public class Utils {
 		df.applyPattern("###0.00#");
 	}
 
-	static {
+	/*static {
 		floatFormatterBR = NumberFormat.getNumberInstance();
 		DecimalFormat df = (DecimalFormat) floatFormatterBR;
 		df.setGroupingUsed(false);
 		df.applyPattern("###0.000");
-	}
+	}*/
 
 	static {
 		longFormatter = NumberFormat.getNumberInstance();
@@ -262,12 +262,12 @@ public class Utils {
 		return String.valueOf(elem);
 	} 
 
-	public static String getFormattedCSVBrValue(Object elem, String separator, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, NumberFormat floatFormatter, String separator, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
 		else if(elem instanceof Double) {
-			return floatFormatterBR.format((Double)elem);
+			return floatFormatter.format((Double)elem);
 		}
 
 		if(separator==null) {
@@ -277,7 +277,7 @@ public class Utils {
 			return String.valueOf(elem).replaceAll(separator, "");
 		}
 	} 
-	
+
 	public static String normalizeEnumStringConstant(String strEnumConstant) {
 		return strEnumConstant.replace(' ', '_');
 	}
@@ -483,6 +483,22 @@ public class Utils {
 			}
 			log.debug("end system properties");
 		}
+	}
+	
+	public static NumberFormat getFloatFormatter(String floatLocale, String syntax) {
+		NumberFormat floatFormatter = null;
+		if(floatLocale==null) {
+			floatFormatter = NumberFormat.getNumberInstance();
+		}
+		else {
+			Locale locale = new Locale(floatLocale);
+			log.info(syntax+" syntax locale: "+locale);
+			floatFormatter = NumberFormat.getNumberInstance(new Locale(floatLocale));
+		}
+		DecimalFormat df = (DecimalFormat) floatFormatter;
+		df.setGroupingUsed(false);
+		df.applyPattern("###0.000");
+		return floatFormatter;
 	}
 	
 	public static void main(String[] args) {

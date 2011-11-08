@@ -29,7 +29,6 @@ public class FFCDataDump extends DumpSyntax {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
 	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
-	//static final String PROP_DATADUMP_FFC_NULLVALUE = "sqldump.datadump.ffc.nullvalue";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMES = "sqldump.datadump.ffc.showcolnames";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 
@@ -221,7 +220,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	String getFormattedValue(Object o) {
 		//if(o==null) return nullValue;
-		return Utils.getFormattedCSVBrValue(o, null, nullValueStr);
+		return Utils.getFormattedCSVValue(o, floatFormatter, null, nullValueStr);
 	}
 
 	@Override

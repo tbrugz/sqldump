@@ -43,6 +43,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * TODOne: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, x fixedcolumnsize
  * XXXdone: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
  * TODO: floatFormatter!
+ * TODO: option to include, or not, partition columns in output
  */
 public class DataDump {
 

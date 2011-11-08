@@ -4,6 +4,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,9 @@ public abstract class DumpSyntax {
 	public static String DEFAULT_NULL_VALUE = "";
 	
 	public DateFormat dateFormatter;
+	//locales: http://www.loc.gov/standards/iso639-2/englangn.html
+	public NumberFormat floatFormatter;
+	
 	public String nullValueStr = DEFAULT_NULL_VALUE;
 	
 	public static List<Class> getSyntaxes() {
@@ -48,6 +52,8 @@ public abstract class DumpSyntax {
 		if(nullValue!=null) {
 			nullValueStr = nullValue;
 		}
+		String floatLocale = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatlocale");
+		floatFormatter = Utils.getFloatFormatter(floatLocale, getSyntaxId());
 	}
 	
 	public Object getValueNotNull(Object o) {

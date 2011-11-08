@@ -17,6 +17,7 @@ public class CSVDataDump extends DumpSyntax {
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.csv.tablenameheader";
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
+	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ";";
@@ -32,7 +33,7 @@ public class CSVDataDump extends DumpSyntax {
 	boolean doTableNameHeaderDump = false;
 	boolean doColumnNamesHeaderDump = true;
 	String columnDelimiter;
-	String recordDelimiter;		
+	String recordDelimiter;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -42,7 +43,7 @@ public class CSVDataDump extends DumpSyntax {
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
 		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, doColumnNamesHeaderDump);
 	}
-
+	
 	@Override
 	public void initDump(String tableName, ResultSetMetaData md) throws Exception {
 		this.tableName = tableName;
@@ -99,7 +100,7 @@ public class CSVDataDump extends DumpSyntax {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
-			sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVBrValue(vals.get(i), columnDelimiter, nullValueStr) );
+			sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVValue(vals.get(i), floatFormatter, columnDelimiter, nullValueStr) );
 		}
 		out(sb.toString(), fos, recordDelimiter);
 	}
