@@ -147,7 +147,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	 * @see tbrugz.sqldump.SchemaModelDumper#dumpSchema(tbrugz.sqldump.SchemaModel)
 	 */
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
+		try {
+			
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
 		if(fromDbId==null || toDbId==null) {
 			log.info("fromDbId or toDbId null: no conversion");
@@ -285,6 +287,12 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 
 		log.info("...schema dumped");
+		
+		}
+		catch(Exception e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 	
 	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {

@@ -430,7 +430,12 @@ public class Utils {
 		}
 		File f = new File(s);
 		File files[] = f.listFiles(new RegularFileFilter());
-		if(files==null) return 0;
+		if(files==null) {
+			if(level==0) {
+				log.info("no files deteted");
+			}
+			return 0;
+		}
 		int delCount = 0;
 		for(File ff: files) {
 			if(ff.isFile()) {
@@ -492,8 +497,8 @@ public class Utils {
 		}
 		else {
 			Locale locale = new Locale(floatLocale);
-			log.info(syntax+" syntax locale: "+locale);
-			floatFormatter = NumberFormat.getNumberInstance(new Locale(floatLocale));
+			log.info(syntax+" syntax float locale: "+locale);
+			floatFormatter = NumberFormat.getNumberInstance(locale);
 		}
 		DecimalFormat df = (DecimalFormat) floatFormatter;
 		df.setGroupingUsed(false);

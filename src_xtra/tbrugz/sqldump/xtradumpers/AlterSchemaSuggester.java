@@ -77,7 +77,9 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	 * - 2initials(table) + initials(col_names) + UKI/FKI  //...
 	 */
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
+		try {
+
 		if(fileOutput==null) {
 			log.warn("prop '"+PROP_ALTER_SCHEMA_SUGGESTER_OUTFILE+"' not defined");
 			return;
@@ -107,9 +109,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		}
 		
 		fos.close();
+		
+		} catch (IOException e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 		
-	Set<Index> dumpCreateIndexes(SchemaModel schemaModel, Set<FK> foreignKeys) throws Exception {
+	Set<Index> dumpCreateIndexes(SchemaModel schemaModel, Set<FK> foreignKeys) {
 		
 		Set<Index> indexes = new TreeSet<Index>(); //HashSet doesn't work (uses hashCode()?)
 		
@@ -201,7 +208,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		}
 	}
 
-	Set<FK> dumpCreateFKs(SchemaModel schemaModel) throws Exception {
+	Set<FK> dumpCreateFKs(SchemaModel schemaModel) {
 		Set<FK> fks = new TreeSet<FK>();
 		
 		//Tables

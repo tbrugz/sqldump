@@ -123,7 +123,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	}
 
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
 			log.warn("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
 			return;
@@ -306,7 +306,12 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			log.warn("fact tables not found: "+Utils.join(factTables, ", "));
 		}
 		
-		jaxbOutput(schema, new File(fileOutput));
+		try {
+			jaxbOutput(schema, new File(fileOutput));
+		} catch (JAXBException e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 	
 	/*void procHierararchy(SchemaModel schemaModel, String dimName, FK fk, tbrugz.mondrian.xsdmodel.Table pkTable) {

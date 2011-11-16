@@ -41,7 +41,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	}
 	
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
 			log.warn("xml serialization output file ["+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
 			return;
@@ -51,29 +51,43 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			return;
 		}
 
-		Marshaller m = jc.createMarshaller();
-		//XXX: property for formatting or not JAXB output?
-		//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
-		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
-		m.marshal(schemaModel, new File(fileOutput));
-		log.info("xml schema model dumped to '"+fileOutput+"'");
+		try {
+			Marshaller m = jc.createMarshaller();
+			//XXX: property for formatting or not JAXB output?
+			//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
+			m.marshal(schemaModel, new File(fileOutput));
+			log.info("xml schema model dumped to '"+fileOutput+"'");
+		}
+		catch(Exception e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 
 	@Override
-	public SchemaModel grabSchema() throws Exception {
+	public SchemaModel grabSchema() {
 		if(fileInput==null) {
 			log.warn("xml serialization input file ["+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
 			return null;
 		}
-		
-		Unmarshaller u = jc.createUnmarshaller();
-		SchemaModel sm = (SchemaModel) u.unmarshal(new File(fileInput));
-		//use Unmarshaller.afterUnmarshal()?
-		for(Table t: sm.getTables()) {
-			t.validateConstraints();
+
+		try {
+			Unmarshaller u = jc.createUnmarshaller();
+			SchemaModel sm = (SchemaModel) u.unmarshal(new File(fileInput));
+			//use Unmarshaller.afterUnmarshal()?
+			for(Table t: sm.getTables()) {
+				t.validateConstraints();
+			}
+			log.info("xml schema model grabbed from '"+fileInput+"'");
+			return sm;
 		}
-		log.info("xml schema model grabbed from '"+fileInput+"'");
-		return sm;
+		catch(Exception e) {
+			log.warn("error grabbing schema: "+e);
+			log.debug("error grabbing schema", e);
+			return null;
+		}
+		
 	}
 
 	@Override

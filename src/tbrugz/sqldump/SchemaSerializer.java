@@ -2,6 +2,7 @@ package tbrugz.sqldump;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
@@ -26,30 +27,48 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	}
 	
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
 			log.warn("serialization output file ["+PROP_SERIALIZATION_OUTFILE+"] not defined");
 			return;
 		}
 		
-		ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileOutput));
-		oos.writeObject(schemaModel);
-		oos.close();
-		log.info("schema model serialized to '"+fileOutput+"'");
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileOutput));
+			oos.writeObject(schemaModel);
+			oos.close();
+			log.info("schema model serialized to '"+fileOutput+"'");
+		}
+		catch(IOException e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 
 	@Override
-	public SchemaModel grabSchema() throws Exception {
+	public SchemaModel grabSchema() {
 		if(fileInput==null) {
 			log.warn("serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined");
 			return null;
 		}
-		
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileInput));
-		SchemaModel sm = (SchemaModel) ois.readObject();
-		ois.close();
-		log.info("serialized schema model grabbed from '"+fileInput+"'");
-		return sm;
+
+		try {
+			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileInput));
+			SchemaModel sm = (SchemaModel) ois.readObject();
+			ois.close();
+			log.info("serialized schema model grabbed from '"+fileInput+"'");
+			return sm;
+		}
+		catch (ClassNotFoundException e) {
+			log.warn("error grabbing schema: "+e);
+			log.debug("error grabbing schema", e);
+			return null;
+		}
+		catch(IOException e) {
+			log.warn("error grabbing schema: "+e);
+			log.debug("error grabbing schema", e);
+			return null;
+		}
 	}
 
 	@Override

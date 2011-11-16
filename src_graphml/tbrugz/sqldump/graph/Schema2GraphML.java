@@ -1,6 +1,7 @@
 package tbrugz.sqldump.graph;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -310,7 +311,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	}
 
 	@Override
-	public void dumpSchema(SchemaModel schemaModel) throws Exception {
+	public void dumpSchema(SchemaModel schemaModel) {
 		log.info("dumping graphML: translating model");
 		if(schemaModel==null) {
 			log.warn("schemaModel is null!");
@@ -320,8 +321,14 @@ public class Schema2GraphML implements SchemaModelDumper {
 		log.info("dumping model...");
 		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
 		Utils.prepareDir(output);
-		dg.dumpModel(r, new PrintStream(output));
-		log.info("...graphML dumped");
+		
+		try {
+			dg.dumpModel(r, new PrintStream(output));
+			log.info("...graphML dumped");
+		} catch (FileNotFoundException e) {
+			log.warn("error dumping schema: "+e);
+			log.debug("error dumping schema", e);
+		}
 	}
 
 	public void setOutput(File output) {

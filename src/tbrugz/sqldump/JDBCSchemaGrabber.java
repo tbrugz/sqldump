@@ -108,7 +108,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	List<Pattern> excludeTableFilters;
 	
 	@Override
-	public SchemaModel grabSchema() throws Exception {
+	public SchemaModel grabSchema() {
+		try {
+		
 		if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
 			String dbid = detectDbId(conn.getMetaData());
 			if(dbid!=null) {
@@ -172,6 +174,13 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 
 		return schemaModel;
+
+		}
+		catch(Exception e) {
+			log.warn("error grabbing schema: "+e);
+			log.debug("error grabbing schema", e);
+			return null;
+		}
 	}
 	
 	String tableStats() {

@@ -12,6 +12,6 @@ public interface SchemaModelDumper {
 
 	public void setDumpWithSchemaName(boolean dumpWithSchemaName) {}*/
 	
-	public void dumpSchema(SchemaModel schemaModel) throws Exception;
+	public void dumpSchema(SchemaModel schemaModel);
 
 }
