@@ -20,34 +20,37 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
-
 		//REMARKS String => comment describing column (may be null)
+		
 		Connection conn = metadata.getConnection();
 		String sql = "select tables.*, comm.comments as REMARKS from (\n";
-		sql += "select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKSz, " 
-				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS "
-				+", owner as TABLE_SCHEM_FILTER "
-				+"from all_tables where (owner, table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n";
+		//tables
+		sql += "select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKSz, " 
+				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, PARTITIONED, PARTITIONING_TYPE, "
+				+"at.owner as TABLE_SCHEM_FILTER "
+				+"from all_tables at, all_part_tables apt "
+				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) "
+				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n";
 		//synonyms
 		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKSz, " 
-				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
+				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
-				+", alls.owner as TABLE_SCHEM_FILTER "
+				+"alls.owner as TABLE_SCHEM_FILTER "
 				+"from all_synonyms alls, all_tables allt "
 				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n";
 		//views
 		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKSz, " 
-				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS "
-				+", owner as TABLE_SCHEM_FILTER "
+				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
+				+"owner as TABLE_SCHEM_FILTER "
 				+"from all_views \n";
 		//materialized views
 		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, null as REMARKSz, "
-				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, "
+				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"allmv.owner as TABLE_SCHEM_FILTER "
 				+"from all_tables allt, all_mviews allmv where allt.owner = allmv.owner and allt.table_name = allmv.mview_name \n";
 		//external tables
 		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKSz, "
-				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, "
+				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
 				+"from all_external_tables \n";
 		sql += ") tables, all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";

@@ -5,6 +5,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -328,6 +330,14 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				ot.tableSpace = rs.getString("TABLESPACE_NAME");
 				ot.temporary = "YES".equals(rs.getString("TEMPORARY"));
 				ot.logging = "YES".equals(rs.getString("LOGGING"));
+				if("YES".equals(rs.getString("PARTITIONED"))) {
+					ot.partitioned = true;
+					ot.partitionType = OracleTable.PartitionType.valueOf(rs.getString("PARTITIONING_TYPE"));
+					
+					//get partition type, columns
+					getPartitionColumns(ot, rs.getStatement().getConnection());
+					//get partitions
+				}
 			}
 			catch(SQLException e) {
 				try {
@@ -441,6 +451,26 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+	}
+	
+	void getPartitionColumns(OracleTable ot, Connection conn) throws SQLException {
+		String query = "select column_name, column_position "
+				+"from all_part_key_columns "
+				+"where object_type = 'TABLE' "
+				+"and owner = '"+ot.schemaName+"' "
+				+"and name = '"+ot.name+"' "
+				+"order by name, column_position ";
+		
+		Statement st = conn.createStatement();
+		log.debug("sql: "+query);
+		ResultSet rs = st.executeQuery(query);
+
+		List<String> columns = new ArrayList<String>();
+		while(rs.next()) {
+			String col = rs.getString(1);
+			columns.add(col);
+		}
+		ot.partitionColumns = columns;
 	}
 	
 }
