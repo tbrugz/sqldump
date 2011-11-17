@@ -337,6 +337,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					//get partition type, columns
 					getPartitionColumns(ot, rs.getStatement().getConnection());
 					//get partitions
+					getPartitions(ot, rs.getStatement().getConnection());
 				}
 			}
 			catch(SQLException e) {
@@ -471,6 +472,44 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			columns.add(col);
 		}
 		ot.partitionColumns = columns;
+	}
+	
+	void getPartitions(OracleTable ot, Connection conn) throws SQLException {
+		String query = "select table_owner, table_name, partition_name, partition_position, tablespace_name, high_value, high_value_length "
+				+"from all_tab_partitions "
+				+"where table_owner = '"+ot.schemaName+"' "
+				+"and table_name = '"+ot.name+"' "
+				+"order by table_name, partition_position ";
+		
+		Statement st = conn.createStatement();
+		log.debug("sql: "+query);
+		ResultSet rs = st.executeQuery(query);
+
+		List<OracleTablePartition> parts = new ArrayList<OracleTablePartition>();
+		while(rs.next()) {
+			OracleTablePartition otp = new OracleTablePartition();
+			otp.name = rs.getString("PARTITION_NAME");
+			otp.tableSpace = rs.getString("TABLESPACE_NAME");
+			switch (ot.partitionType) {
+				case RANGE:
+					//XXX
+					break;
+				case LIST:
+					//XXX
+					break;
+				case HASH:
+					break;
+				default:
+					throw new RuntimeException("Unknown partition type: "+ot.partitionType);
+			}
+			parts.add(otp);
+		}
+		
+		/*if(ot.partitionType==OracleTable.PartitionType.HASH) {
+			ot.numberOfPartitions = parts.size();
+		}*/
+		//ot.numberOfPartitions = parts.size();
+		ot.partitions = parts;
 	}
 	
 }

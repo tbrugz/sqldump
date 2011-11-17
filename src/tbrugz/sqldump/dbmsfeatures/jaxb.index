@@ -3,3 +3,4 @@ DerbyView
 InformationSchemaRoutine
 InformationSchemaTrigger
 OracleTable
+OracleTablePartition

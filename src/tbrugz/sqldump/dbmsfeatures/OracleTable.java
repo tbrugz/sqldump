@@ -25,7 +25,7 @@ public class OracleTable extends Table {
 	public PartitionType partitionType;
 	public List<String> partitionColumns;
 	public List<OracleTablePartition> partitions;
-	int numberOfHashPartitions; //only "hash_partitions_by_quantity::=", not "individual_hash_partitions::=" (number == 0)
+	Integer numberOfPartitions; //only "hash_partitions_by_quantity::=", not "individual_hash_partitions::=" (number == 0)
 	
 	@Override
 	public String getTableType4sql() {
@@ -34,11 +34,26 @@ public class OracleTable extends Table {
 	
 	@Override
 	public String getTableFooter4sql() {
-		String footer = tableSpace!=null?"\nTABLESPACE "+tableSpace:"";
-		footer += logging?"\nLOGGING":"";
+		String footer = tableSpace!=null?"\ntablespace "+tableSpace:"";
+		footer += logging?"\nlogging":"";
 		//partition by
 		if(partitioned!=null && partitioned) {
-			footer += "\nPARTITION BY "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")";
+			footer += "\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")";
+			if(partitions!=null) {
+				footer += " (\n";
+				for(OracleTablePartition otp: partitions) {
+					footer += "\tpartition "+otp.name+" tablespace "+otp.tableSpace+",\n";
+				}
+				footer += ")";
+			}
+			else {
+				if(numberOfPartitions!=null) {
+					footer += "partitions "+numberOfPartitions;
+				}
+				else {
+					throw new RuntimeException("inconsistent partition info [table = "+name+"]");
+				}
+			}
 		}
 		return footer; 
 	}

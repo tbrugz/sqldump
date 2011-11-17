@@ -291,7 +291,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		catch(Exception e) {
 			log.warn("error dumping schema: "+e);
-			log.debug("error dumping schema", e);
+			log.info("error dumping schema", e);
 		}
 	}
 	
