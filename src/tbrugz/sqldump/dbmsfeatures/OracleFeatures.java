@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -492,10 +493,14 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			otp.tableSpace = rs.getString("TABLESPACE_NAME");
 			switch (ot.partitionType) {
 				case RANGE:
-					//XXX
+					String highValues = rs.getString("HIGH_VALUE");
+					String[] hv = highValues.split(",");
+					otp.upperValues = Arrays.asList(hv);
 					break;
 				case LIST:
-					//XXX
+					String values = rs.getString("HIGH_VALUE");
+					String[] v = values.split(",");
+					otp.values = Arrays.asList(v);
 					break;
 				case HASH:
 					break;

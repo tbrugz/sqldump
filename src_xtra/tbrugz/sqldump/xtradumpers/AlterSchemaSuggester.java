@@ -318,7 +318,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		StringBuffer sb = new StringBuffer();
 		String[] strs = string.split("_");
 		for(String s: strs) {
-			sb.append(s.substring(0, 1));
+			sb.append(s.length()>0?s.substring(0, 1):"_");
 		}
 		return sb.toString();
 	}

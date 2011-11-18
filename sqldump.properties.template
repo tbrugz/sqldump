@@ -67,13 +67,13 @@ sqldump.schemadump.dumpdropstatements=false
 
 # schema info: domain tables
 # (used by AlterSchemaSuggester, but may be have other uses, like 'sqldump.datadump.tables')
-sqldump.schemainfo.domaintables=DOMAIN_TABLE_X, DOMAIN_TABLE_Y
+#sqldump.schemainfo.domaintables=DOMAIN_TABLE_X, DOMAIN_TABLE_Y
 
 # schema names to dump
 sqldump.dumpschemapattern=DW, SA, EMPDEPT
 
 # exclude table filters (regex), splitted by "|"
-sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.* 
+#sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.* 
 
 sqldump.dumpwithschemaname=true
 
@@ -85,17 +85,17 @@ sqldump.doschemadump.recursivedumpbasedonfks.deep=true
 #
 # 'sqldump.fromdbid' selects which specificgrabclass to use, column type conversion, ... 
 #
-sqldump.fromdbid=oracle
-sqldump.todbid=pgsql
+#sqldump.fromdbid=oracle
+#sqldump.todbid=pgsql
 # autodetect database product
 sqldump.fromdbid.autodetect=true
 
 #
 # script dump properties
 #
-sqldump.dumpsynonymastable=false
-sqldump.dumpviewastable=false
-sqldump.dumpmaterializedviewastable=false
+#sqldump.dumpsynonymastable=false
+#sqldump.dumpviewastable=false
+#sqldump.dumpmaterializedviewastable=false
 
 sqldump.schemadump.usecreateorreplace=true
 
@@ -122,7 +122,7 @@ sqldump.dbspecificfeatures.grabfkfromuk=false
 #
 sqldump.dodatadump=false
 #sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
-sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
+#sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
 
 # syntaxes
 sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml, html, ffc
@@ -179,34 +179,32 @@ sqldump.datadump.dateformat=''yyyy-MM-dd''
 sqldump.datadump.rowlimit=100
 sqldump.datadump.orderbypk=true
 
-sqldump.datadump.TABLE_X.rowlimit=500
-sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
-sqldump.datadump.TABLE_Y.columns=id, name
-sqldump.datadump.TABLE_Y.order=TYPE, NAME
+#sqldump.datadump.TABLE_X.rowlimit=500
+#sqldump.datadump.TABLE_X.where=NAME like 'Bill %'
+#sqldump.datadump.TABLE_Y.columns=id, name
+#sqldump.datadump.TABLE_Y.order=TYPE, NAME
 
 #
 # sql queries
 #
-sqldump.queries=table_x, q2, partitiontest
+#sqldump.queries=table_x, q2, partitiontest
 
-sqldump.query.table_x.sql=\
-select * from TABLE_X
-sqldump.query.table_x.name=TABLE_X
-sqldump.query.table_x.rowlimit=10000
+#sqldump.query.table_x.sql=\
+#select * from TABLE_X
+#sqldump.query.table_x.name=TABLE_X
+#sqldump.query.table_x.rowlimit=10000
 
-sqldump.query.q2.sqlfile=c:/xxx/query2.sql
-sqldump.query.q2.name=query_2
-sqldump.query.q2.rowlimit=10000
-sqldump.datadump.outfilepattern.id@q2=${outputdir}/data_q2_${tablename}.${syntaxfileext}
+#sqldump.query.q2.sqlfile=c:/xxx/query2.sql
+#sqldump.query.q2.name=query_2
+#sqldump.datadump.outfilepattern.id@q2=${outputdir}/data_q2_${tablename}.${syntaxfileext}
 
-sqldump.query.partitiontest.name=partition_test
-sqldump.query.partitiontest.sql=\
-  select group_id, id, name\
-  from partition_table_test
-sqldump.query.partitiontest.partitionby=_${col:group_id}
-sqldump.datadump.outfilepattern.id@partitiontest.syntax@csv=${outputdir}/data_partitiontest_csv_${tablename}${partitionby}.csv
-sqldump.datadump.outfilepattern.id@partitiontest=${outputdir}/data_partitiontest_${tablename}${partitionby}.${syntaxfileext}
-sqldump.datadump.outfilepattern.syntax@xml=${outputdir}/data_${tablename}${partitionby}.xml
+#sqldump.query.partitiontest.name=partition_test
+#sqldump.query.partitiontest.sql=\
+#  select group_id, id, name\
+#  from partition_table_test
+#sqldump.query.partitiontest.partitionby=_${col:group_id}
+#sqldump.datadump.outfilepattern.id@partitiontest.syntax@csv=${outputdir}/data_partitiontest_csv_${tablename}${partitionby}.csv
+#sqldump.datadump.outfilepattern.id@partitiontest=${outputdir}/data_partitiontest_${tablename}${partitionby}.${syntaxfileext}
 
 
 #
@@ -235,7 +233,7 @@ sqldump.graphmldump.outputfile=${outputdir}/db-schema.graphml
 #sqldump.graphmldump.nodeheightbycolsnumber=true|false
 #
 # regex-based stereotypes, splitted by "|" - stereotype must be defined in a graphml-snippets properties file
-sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
+#sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
 # include, or not, stereotype 'classes' - defaults below
 #sqldump.graphmldump.addtabletypestereotype=true
@@ -251,7 +249,7 @@ sqldump.graphmldump.nodestereotyperegex.zzz=ZZZ_.* | .*_ZZZ_.*
 #
 sqldump.alterschemasuggester.outfile=${outputdir}/alter-schema-suggestions.sql
 sqldump.alterschemasuggester.simplefksonly=true
-sqldump.alterschemasuggester.alterobjectsfromschemas=SCHEMA_X, SCHEMA_Y
+#sqldump.alterschemasuggester.alterobjectsfromschemas=SCHEMA_X, SCHEMA_Y
 
 
 ############

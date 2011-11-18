@@ -8,6 +8,8 @@ import tbrugz.sqldump.dbmodel.Table;
 /*
  * TODO: property for selecting dump (true/false) of extra fields on script output?
  * XXXxxx: sys.all_external_tables, sys.all_mviews
+ * 
+ * see: http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/statements_7002.htm
  */
 public class OracleTable extends Table {
 	
@@ -15,6 +17,9 @@ public class OracleTable extends Table {
 		RANGE, HASH, LIST;
 		//XXX: reference, composite-range, composite-list, system
 	}
+	
+	static boolean dumpSegmentAttributesClause = true; 
+	static boolean dumpLoggingClause = true; 
 	
 	public String tableSpace;
 	public boolean temporary;
@@ -25,6 +30,7 @@ public class OracleTable extends Table {
 	public PartitionType partitionType;
 	public List<String> partitionColumns;
 	public List<OracleTablePartition> partitions;
+	@Deprecated //XXX?
 	Integer numberOfPartitions; //only "hash_partitions_by_quantity::=", not "individual_hash_partitions::=" (number == 0)
 	
 	@Override
@@ -34,17 +40,31 @@ public class OracleTable extends Table {
 	
 	@Override
 	public String getTableFooter4sql() {
-		String footer = tableSpace!=null?"\ntablespace "+tableSpace:"";
-		footer += logging?"\nlogging":"";
+		String footer = "";
+		if(dumpSegmentAttributesClause) {
+			footer += tableSpace!=null?"\ntablespace "+tableSpace:"";
+		}
+		if(dumpLoggingClause) {
+			footer += logging?"\nlogging":"";
+		}
 		//partition by
 		if(partitioned!=null && partitioned) {
 			footer += "\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")";
 			if(partitions!=null) {
-				footer += " (\n";
+				footer += " (";
+				int partCount = 0;
 				for(OracleTablePartition otp: partitions) {
-					footer += "\tpartition "+otp.name+" tablespace "+otp.tableSpace+",\n";
+					footer += (partCount>0?",":"")+"\n\tpartition "+otp.name;
+					switch(partitionType) {
+					case RANGE:
+						footer += " values less than ("+Utils.join(otp.upperValues, ",")+")"; break;
+					case LIST:
+						footer += " values ("+Utils.join(otp.values, ",")+")"; break;
+					}
+					footer += (dumpSegmentAttributesClause?" tablespace "+otp.tableSpace:"");
+					partCount++;
 				}
-				footer += ")";
+				footer += "\n)";
 			}
 			else {
 				if(numberOfPartitions!=null) {

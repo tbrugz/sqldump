@@ -40,6 +40,7 @@ import org.apache.log4j.Logger;
  * ---
  * XXXxxx: compare 2 schema models? generate "alter table" database script... see SQLDiff
  * XXX(later): generate schema model from graphML file (XMLUnit?). may be used for model comparison 
+ * XXX: new grabber: scriptGrabber - antlr?
  * XXXdone: serialize model (for later comparison)
  * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
  *   - x jaxb, xtream, xmlbeans, x castor, jibx
@@ -50,7 +51,7 @@ import org.apache.log4j.Logger;
  * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
- * XXX: add startup option, before opening connection (SQLite, ...)
+ * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
  * TODO: sqlregen // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
  */
 public class SQLDump {
