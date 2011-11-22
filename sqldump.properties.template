@@ -113,9 +113,10 @@ sqldump.dbspecificfeatures.grabexecutables=false
 #sqldump.dbspecificfeatures.grabsequences=false
 #sqldump.dbspecificfeatures.grabextraconstraints=false
 
-sqldump.dbspecificfeatures.sequencestartwithdump=false
-sqldump.dbspecificfeatures.grabfkfromuk=false
-
+#sqldump.dbspecificfeatures.sequencestartwithdump=false
+#sqldump.dbspecificfeatures.grabfkfromuk=false
+#sqldump.dbspecificfeatures.dumpphysicalattributes=true
+#sqldump.dbspecificfeatures.dumplogging=true
 
 #
 # data dump props
@@ -124,12 +125,12 @@ sqldump.dodatadump=false
 #sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 #sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
 
-# syntaxes
-sqldump.datadump.dumpsyntaxes=insertinto, csv, json, xml, html, ffc
+# syntaxes (any of: insertinto, csv, json, xml, html, ffc)
+sqldump.datadump.dumpsyntaxes=insertinto, csv
 
 # default prop: sqldump.datadump.outfilepattern
-# sqldump.datadump.outfilepattern=${outputdir}/data_${tablename}.${syntaxfileext}
-sqldump.datadump.outfilepattern=${outputdir}/data_${tablename}${partitionby}.${syntaxfileext}
+# sqldump.datadump.outfilepattern=${outputdir}/data/${tablename}.${syntaxfileext}
+sqldump.datadump.outfilepattern=${outputdir}/data/${tablename}${partitionby}.${syntaxfileext}
 
 # syntax-specific props: sqldump.datadump.outfilepattern.syntax@<syntaxid>
 #sqldump.datadump.outfilepattern.syntax@insertinto=${outputdir}/data_${tablename}.sql

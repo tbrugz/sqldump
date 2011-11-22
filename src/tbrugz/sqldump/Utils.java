@@ -333,6 +333,8 @@ public class Utils {
 		}
 		return null;
 	}
+
+	public static String PASSECHO_WARN_MESSAGE = "WARN: password will be echoed";
 	
 	public static String readPassword(String message) {
 		Console cons = System.console();
@@ -346,7 +348,7 @@ public class Utils {
 		}
 		else {
 			//XXX: System.console() doesn't work in Eclipse - https://bugs.eclipse.org/bugs/show_bug.cgi?id=122429
-			return Utils.readTextIntern(message, "");
+			return Utils.readTextIntern(message+"["+PASSECHO_WARN_MESSAGE+"] ", "");
 		}
 	}
 

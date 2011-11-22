@@ -36,8 +36,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
-		Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
-		OracleDatabaseMetaData.grabFKFromUK = Utils.getPropBool(prop, PROP_GRAB_FKFROMUK, false);
+		Sequence.dumpStartWith = Utils.getPropBool(prop, PROP_DUMP_SEQUENCE_STARTWITH, Sequence.dumpStartWith);
+		OracleDatabaseMetaData.grabFKFromUK = Utils.getPropBool(prop, PROP_GRAB_FKFROMUK, OracleDatabaseMetaData.grabFKFromUK);
+		OracleTable.dumpPhysicalAttributes = Utils.getPropBool(prop, PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES, OracleTable.dumpPhysicalAttributes);
+		OracleTable.dumpLoggingClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_LOGGING, OracleTable.dumpLoggingClause);
 	}
 	
 	/* (non-Javadoc)

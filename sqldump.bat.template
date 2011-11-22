@@ -3,3 +3,5 @@ java -cp bin;lib/commons-logging-1.1.1.jar;lib/kmlutils.jar;lib/log4j-1.2.15.jar
 
 rem when downloaded sqldump.jar  
 java -cp sqldump.jar;lib/commons-logging-1.1.1.jar;lib/kmlutils.jar;lib/log4j-1.2.15.jar;<jdbc drivers> tbrugz.sqldump.SQLDump -propfile=<propfile>
+
+pause

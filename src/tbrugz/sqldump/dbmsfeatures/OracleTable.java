@@ -18,7 +18,7 @@ public class OracleTable extends Table {
 		//XXX: reference, composite-range, composite-list, system
 	}
 	
-	static boolean dumpSegmentAttributesClause = true; 
+	static boolean dumpPhysicalAttributes = true; 
 	static boolean dumpLoggingClause = true; 
 	
 	public String tableSpace;
@@ -41,7 +41,7 @@ public class OracleTable extends Table {
 	@Override
 	public String getTableFooter4sql() {
 		String footer = "";
-		if(dumpSegmentAttributesClause) {
+		if(dumpPhysicalAttributes) {
 			footer += tableSpace!=null?"\ntablespace "+tableSpace:"";
 		}
 		if(dumpLoggingClause) {
@@ -61,7 +61,7 @@ public class OracleTable extends Table {
 					case LIST:
 						footer += " values ("+Utils.join(otp.values, ",")+")"; break;
 					}
-					footer += (dumpSegmentAttributesClause?" tablespace "+otp.tableSpace:"");
+					footer += (dumpPhysicalAttributes?" tablespace "+otp.tableSpace:"");
 					partCount++;
 				}
 				footer += "\n)";

@@ -19,7 +19,9 @@ public interface DBMSFeatures {
 	static String PROP_GRAB_CONSTRAINTS_XTRA = "sqldump.dbspecificfeatures.grabextraconstraints";
 	
 	static String PROP_GRAB_FKFROMUK = "sqldump.dbspecificfeatures.grabfkfromuk";
-	static String PROP_SEQUENCE_STARTWITHDUMP = "sqldump.dbspecificfeatures.sequencestartwithdump";
+	static String PROP_DUMP_SEQUENCE_STARTWITH = "sqldump.dbspecificfeatures.sequencestartwithdump";
+	static String PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES = "sqldump.dbspecificfeatures.dumpphysicalattributes";
+	static String PROP_DUMP_TABLE_LOGGING = "sqldump.dbspecificfeatures.dumplogging";
 	
 	void procProperties(Properties prop);
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
