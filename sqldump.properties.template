@@ -15,12 +15,12 @@ outputdir=output
 #
 # filepattern output props
 #
-sqldump.mainoutputfilepattern=${outputdir}/${schemaname}_${objecttype}_dump.sql
+sqldump.mainoutputfilepattern=${outputdir}/${schemaname}_${objecttype}.sql
 sqldump.outputobjectwithreferencingtable=grant,index
 sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
 sqldump.outputfilepattern.maptype.TRIGGER=EXECUTABLE
 sqldump.outputfilepattern.maptype.FUNCTION=EXECUTABLE
-sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
+#sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
 
 # other sqldump.outputfilepattern examples:
 #sqldump.outputfilepattern=output/${schemaname}/${objecttype}/${objectname}.sql
@@ -106,7 +106,7 @@ sqldump.usedbspecificfeatures=true
 
 # grab dbspecific by type: default is true
 sqldump.dbspecificfeatures.grabindexes=true
-sqldump.dbspecificfeatures.grabexecutables=false
+#sqldump.dbspecificfeatures.grabexecutables=true
 #sqldump.dbspecificfeatures.grabviews=false
 #sqldump.dbspecificfeatures.grabtriggers=false
 #sqldump.dbspecificfeatures.grabsynonyms=false
@@ -122,6 +122,11 @@ sqldump.dbspecificfeatures.grabexecutables=false
 # data dump props
 #
 sqldump.dodatadump=false
+
+# types of table to dump (default: all but VIEW, MATERIALIZED_VIEW)
+#sqldump.datadump.tabletypes=TABLE, SYNONYM, SYSTEM_TABLE, VIEW, MATERIALIZED_VIEW, EXTERNAL_TABLE
+
+# filter tables to dump data
 #sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 #sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
 

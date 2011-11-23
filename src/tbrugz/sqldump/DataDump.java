@@ -14,6 +14,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.TableType;
 
 /*
  * TODOne: prop for selecting which tables to dump data from
@@ -56,6 +58,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
+	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
@@ -83,6 +86,7 @@ public class DataDump {
 	 *  
 	 */
 
+	//TODOne: filter tables by table type (table, view, ...)
 	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
@@ -118,13 +122,37 @@ public class DataDump {
 				log.warn("unknown datadump syntax: "+syntax.trim());
 			}
 		}
-
+		
+		List<TableType> typesToDump = new ArrayList<TableType>();
+		List<String> types = Utils.getStringListFromProp(prop, PROP_DATADUMP_TABLETYPES, ",");
+		if(types!=null) {
+			for(String type: types) {
+				try {
+					TableType ttype = TableType.valueOf(type.trim());
+					typesToDump.add(ttype);
+				}
+				catch(IllegalArgumentException e) {
+					log.warn("unknown table type: "+type.trim());
+				}
+			}
+			log.info("table types for dumping: "+Utils.join(typesToDump, ", "));
+		}
+		else {
+			typesToDump.addAll(Arrays.asList(TableType.values()));
+			typesToDump.remove(TableType.VIEW);
+			typesToDump.remove(TableType.MATERIALIZED_VIEW);
+		}
+		
 		for(Table table: tablesForDataDump) {
 			String tableName = table.name;
 			if(tables4dump!=null) {
 				if(!tables4dump.contains(tableName)) { continue; }
 				else { tables4dump.remove(tableName); }
 			}
+			if(typesToDump!=null) {
+				if(!typesToDump.contains(table.getType())) { continue; }
+			}
+			
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
