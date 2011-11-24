@@ -9,22 +9,22 @@ import tbrugz.sqldump.dbmodel.Table;
 
 public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 
-	protected boolean grabExecutables = false;
-	protected boolean grabIndexes = false;
-	protected boolean grabSequences = false;
-	protected boolean grabSynonyms = false;
-	protected boolean grabTriggers = false;
-	protected boolean grabViews = false;
-	protected boolean grabExtraConstraints = false;
+	protected boolean grabExecutables = true;
+	protected boolean grabIndexes = true;
+	protected boolean grabSequences = true;
+	protected boolean grabSynonyms = true;
+	protected boolean grabTriggers = true;
+	protected boolean grabViews = true;
+	protected boolean grabExtraConstraints = true;
 
 	public void procProperties(Properties prop) {
-		grabIndexes = Utils.getPropBool(prop, PROP_GRAB_INDEXES, true);
-		grabExecutables = Utils.getPropBool(prop, PROP_GRAB_EXECUTABLES, true);
-		grabSequences = Utils.getPropBool(prop, PROP_GRAB_SEQUENCES, true);
-		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, true);
-		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, true);
-		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, true);
-		grabExtraConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, true);
+		grabIndexes = Utils.getPropBool(prop, PROP_GRAB_INDEXES, grabIndexes);
+		grabExecutables = Utils.getPropBool(prop, PROP_GRAB_EXECUTABLES, grabExecutables);
+		grabSequences = Utils.getPropBool(prop, PROP_GRAB_SEQUENCES, grabSequences);
+		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, grabSynonyms);
+		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, grabTriggers);
+		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, grabViews);
+		grabExtraConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, grabExtraConstraints);
 	}
 	
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {

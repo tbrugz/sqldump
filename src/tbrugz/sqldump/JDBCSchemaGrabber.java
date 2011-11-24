@@ -29,7 +29,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
-	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
@@ -43,11 +42,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
-	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
-	
-	//properties files filenames
-	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	
 	static Logger log = Logger.getLogger(JDBCSchemaGrabber.class);
 	
 	Connection conn;
@@ -59,8 +53,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	Properties propOriginal;
 	Properties dbmsSpecificResource = new ParametrizedProperties();
 	
-	boolean doSchemaGrabPKs = false, doSchemaGrabFKs = false, doSchemaGrabExportedFKs = false, doSchemaGrabGrants = false, doSchemaGrabIndexes = false;
-	boolean doSchemaGrabDbSpecific = false;
+	boolean doSchemaGrabPKs = true, 
+			doSchemaGrabFKs = true, 
+			doSchemaGrabExportedFKs = false, 
+			doSchemaGrabGrants = false, 
+			doSchemaGrabIndexes = false,
+			doSchemaGrabDbSpecific = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -70,12 +68,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		papp.putAll(prop);
 		
 		//inicializa variaveis controle
-		doSchemaGrabPKs = papp.getProperty(PROP_DO_SCHEMADUMP_PKS, "").equals("true");
-		doSchemaGrabFKs = papp.getProperty(PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		doSchemaGrabExportedFKs = papp.getProperty(PROP_DO_SCHEMADUMP_EXPORTEDFKS, "").equals("true");
-		doSchemaGrabGrants = papp.getProperty(PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		doSchemaGrabIndexes = papp.getProperty(PROP_DO_SCHEMADUMP_INDEXES, "").equals("true");
-		doSchemaGrabDbSpecific = papp.getProperty(PROP_DUMP_DBSPECIFIC, "").equals("true");
+		doSchemaGrabPKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
+		doSchemaGrabFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
+		doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
+		doSchemaGrabGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabGrants);
+		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
+		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 
 		try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
@@ -147,9 +145,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			grabSchema(schemaModel, dbmd, feats, schemaName, null, false);
 		}
 		
-		boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
+		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
-			boolean grabExportedFKsAlso = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS));
+			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
 			int lastTableCount = schemaModel.tables.size();
 			log.info("grabbing tables recursively: #ini:"+lastTableCount);
 			while(true) {
@@ -215,9 +213,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 
-		//boolean recursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP));
-		boolean deeprecursivedump = "true".equals(papp.getProperty(JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP));
-		boolean ignoretableswithzerocolumns = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS);
+		boolean deeprecursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, false);
+		boolean ignoretableswithzerocolumns = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, true);
 		
 		while(rs.next()) {
 			TableType ttype = null;

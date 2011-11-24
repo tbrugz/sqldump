@@ -16,10 +16,10 @@ outputdir=output
 # filepattern output props
 #
 sqldump.mainoutputfilepattern=${outputdir}/${schemaname}_${objecttype}.sql
-sqldump.outputobjectwithreferencingtable=grant,index
-sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
-sqldump.outputfilepattern.maptype.TRIGGER=EXECUTABLE
-sqldump.outputfilepattern.maptype.FUNCTION=EXECUTABLE
+sqldump.outputobjectwithreferencingtable=grant, index
+#sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
+#sqldump.outputfilepattern.maptype.TRIGGER=EXECUTABLE
+#sqldump.outputfilepattern.maptype.FUNCTION=EXECUTABLE
 #sqldump.outputfilepattern.bytype.EXECUTABLE=${outputdir}/EXECUTABLEs.sql
 
 # other sqldump.outputfilepattern examples:
@@ -44,26 +44,29 @@ sqldump.outputfilepattern.maptype.FUNCTION=EXECUTABLE
 #
 sqldump.deleteregularfilesfromdir=${outputdir}
 
+#sqldump.dotests=false
+
 #
-# schema grab props
+# sqldump main properties (grab/dump classes)
 #
 
 # grabclass can be: JDBCSchemaGrabber, JAXBSchemaXMLSerializer, SchemaSerializer, CastorSchemaXMLSerializer
 sqldump.schemagrab.grabclass=JDBCSchemaGrabber
 
-sqldump.dotests=false
 sqldump.doschemadump=true
 # dumpclasses can be: SchemaModelScriptDumper, SchemaSerializer, JAXBSchemaXMLSerializer, CastorSchemaXMLSerializer, graph.Schema2GraphML, xtradumpers.AlterSchemaSuggester
 sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, JAXBSchemaXMLSerializer, graph.Schema2GraphML
-sqldump.doschemadump.grants=true
-sqldump.doschemadump.fks=true
-sqldump.doschemadump.exportedfks=true
-sqldump.doschemadump.fks.atend=true
-sqldump.doschemadump.pks=true
-# sqldump.dbspecificfeatures.grabindexes may be used instead of sqldump.doschemadump.indexes (really better performance on oracle)
-sqldump.doschemadump.indexes=false
-sqldump.doschemadump.ignoretableswithzerocolumns=true
-sqldump.schemadump.dumpdropstatements=false
+
+#
+# schema grab properties (JDBCSchemaGrabber) (defaults below)
+#
+#sqldump.doschemadump.pks=true
+#sqldump.doschemadump.fks=true
+#sqldump.doschemadump.exportedfks=false
+#sqldump.doschemadump.grants=false
+## sqldump.dbspecificfeatures.grabindexes may be used instead of sqldump.doschemadump.indexes (really better performance on oracle)
+#sqldump.doschemadump.indexes=false
+#sqldump.doschemadump.ignoretableswithzerocolumns=true
 
 # schema info: domain tables
 # (used by AlterSchemaSuggester, but may be have other uses, like 'sqldump.datadump.tables')
@@ -75,12 +78,10 @@ sqldump.dumpschemapattern=DW, SA, EMPDEPT
 # exclude table filters (regex), splitted by "|"
 #sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.* 
 
-sqldump.dumpwithschemaname=true
-
-# recursive dump (grab) of tables based on FKs
-sqldump.doschemadump.recursivedumpbasedonfks=true
-sqldump.doschemadump.recursivedumpbasedonfks.exportedfks=false
-sqldump.doschemadump.recursivedumpbasedonfks.deep=true
+# recursive dump (grab) of tables based on FKs, defaults below
+#sqldump.doschemadump.recursivedumpbasedonfks=false
+#sqldump.doschemadump.recursivedumpbasedonfks.exportedfks=false
+#sqldump.doschemadump.recursivedumpbasedonfks.deep=false
 
 #
 # 'sqldump.fromdbid' selects which specificgrabclass to use, column type conversion, ... 
@@ -93,26 +94,30 @@ sqldump.fromdbid.autodetect=true
 #
 # script dump properties
 #
+#sqldump.dumpwithschemaname=true
 #sqldump.dumpsynonymastable=false
 #sqldump.dumpviewastable=false
 #sqldump.dumpmaterializedviewastable=false
-
-sqldump.schemadump.usecreateorreplace=true
+#sqldump.schemadump.dumpdropstatements=false
+#sqldump.schemadump.usecreateorreplace=false
+#sqldump.doschemadump.fks.atend=true
 
 #
-# dbms specific features grab
+# dbms specific features grab (default: false)
 #
 sqldump.usedbspecificfeatures=true
 
-# grab dbspecific by type: default is true
-sqldump.dbspecificfeatures.grabindexes=true
+# grab dbspecific by type (defaults below)
+#sqldump.dbspecificfeatures.grabindexes=true
 #sqldump.dbspecificfeatures.grabexecutables=true
-#sqldump.dbspecificfeatures.grabviews=false
-#sqldump.dbspecificfeatures.grabtriggers=false
-#sqldump.dbspecificfeatures.grabsynonyms=false
-#sqldump.dbspecificfeatures.grabsequences=false
-#sqldump.dbspecificfeatures.grabextraconstraints=false
+#sqldump.dbspecificfeatures.grabviews=true
+#sqldump.dbspecificfeatures.grabtriggers=true
+#sqldump.dbspecificfeatures.grabsynonyms=true
+#sqldump.dbspecificfeatures.grabsequences=true
+# 'extraconstraints' are those besides PK & FK (like unique and check constraints)
+#sqldump.dbspecificfeatures.grabextraconstraints=true
 
+# extra dmbs-specific properties (oracle for now)
 #sqldump.dbspecificfeatures.sequencestartwithdump=false
 #sqldump.dbspecificfeatures.grabfkfromuk=false
 #sqldump.dbspecificfeatures.dumpphysicalattributes=true

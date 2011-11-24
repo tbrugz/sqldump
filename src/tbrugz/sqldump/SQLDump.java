@@ -81,7 +81,6 @@ public class SQLDump {
 	
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
-	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
@@ -93,17 +92,18 @@ public class SQLDump {
 	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
 	
+	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
+	static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
+	
 	static Logger log = Logger.getLogger(SQLDump.class);
 	
 	Connection conn;
 
 	Properties papp = new ParametrizedProperties();
 	
-	boolean doTests = false, doSchemaDump = false, doDataDump = false;
-	
-	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
-
-	static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
+	boolean doTests = false, 
+			doSchemaDump = false, //XXX: default for doSchemaDump should be true?
+			doDataDump = false;
 	
 	void init(String[] args) throws Exception {
 		log.info("init...");
@@ -139,9 +139,9 @@ public class SQLDump {
 		}*/
 
 		//init control vars
-		doSchemaDump = papp.getProperty(PROP_DO_SCHEMADUMP, "").equals("true");
-		doTests = papp.getProperty(PROP_DO_TESTS, "").equals("true");
-		doDataDump = papp.getProperty(PROP_DO_DATADUMP, "").equals("true"); 
+		doSchemaDump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP, doSchemaDump);
+		doTests = Utils.getPropBool(papp, PROP_DO_TESTS, doTests);
+		doDataDump = Utils.getPropBool(papp, PROP_DO_DATADUMP, doDataDump); 
 	}
 
 	void initDBConnection(String[] args) throws Exception {

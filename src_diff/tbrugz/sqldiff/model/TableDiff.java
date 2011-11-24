@@ -31,7 +31,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	public String getDiff() {
 		switch(diffType) {
 			case ADD:
-				return table.getDefinition(true, true, false, null, null); //XXX: is it useful?
+				return table.getDefinition(true); //XXX: is it useful?
 				//return getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, foreignKeys);
 			case ALTER:
 				return null; //XXX: alter table...??

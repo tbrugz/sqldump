@@ -50,16 +50,18 @@ public class Table extends DBObject {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return getDefinition(dumpSchemaName, true, false, null, null);
+		return getDefinition(dumpSchemaName, true, false, false, null, null);
 	}
 	
-	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, Properties colTypeConversionProp, Set<FK> foreignKeys) {
+	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
 		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
 		
 		StringBuffer sb = new StringBuffer();
 		//Table
-		sb.append("--drop table "+tableName+";\n");
+		if(dumpDropStatements) {
+			sb.append("drop table "+tableName+";\n\n");
+		}
 		sb.append("create ");
 		sb.append(getTableType4sql());
 		sb.append("table "+tableName+" ( -- type="+type);

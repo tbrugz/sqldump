@@ -34,7 +34,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 	//File fileOutput;
 	
-	boolean dumpWithSchemaName;
+	boolean dumpWithSchemaName = false;
 	boolean doSchemaDumpPKs = true;
 	boolean dumpFKsInsideTable = false;
 	boolean dumpSynonymAsTable = false;
@@ -62,6 +62,11 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	
+	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
+
+	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
+	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
+
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
@@ -76,9 +81,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		//init control vars
 		doSchemaDumpPKs = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
-		boolean doSchemaDumpFKsAtEnd = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
+		boolean doSchemaDumpFKsAtEnd = Utils.getPropBool(prop, PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		dumpWithSchemaName = Utils.getPropBool(prop, SQLDump.PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
+		dumpWithSchemaName = Utils.getPropBool(prop, PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
 		dumpSynonymAsTable = Utils.getPropBool(prop, PROP_DUMP_SYNONYM_AS_TABLE, dumpSynonymAsTable);
 		dumpViewAsTable = Utils.getPropBool(prop, PROP_DUMP_VIEW_AS_TABLE, dumpViewAsTable);
 		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable); //default should be 'true'?
@@ -92,7 +97,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
 		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
-		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(JDBCSchemaGrabber.PROP_OUTPUTFILE); }
+		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(PROP_OUTPUTFILE); }
 		
 		String outputobjectswithtable = prop.getProperty(PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE);
 		if(outputobjectswithtable!=null) {
@@ -179,7 +184,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
 			}
 			
-			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, schemaModel.foreignKeys)+";\n");
+			categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.foreignKeys)+";\n");
 			String afterTableScript = table.getAfterCreateTableScript();
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, afterTableScript);
