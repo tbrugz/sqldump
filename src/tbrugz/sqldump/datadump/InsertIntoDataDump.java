@@ -20,6 +20,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	String tableName;
 	int numCol;
 	String colNames;
+	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
 	boolean doColumnNamesDump = true;
 	
@@ -39,7 +40,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 		this.tableName = tableName;
 		numCol = md.getColumnCount();
 		lsColTypes.clear();
-		List<String> lsColNames = new ArrayList<String>();
+		lsColNames.clear();
+		//List<String> lsColNames = new ArrayList<String>();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
 		}

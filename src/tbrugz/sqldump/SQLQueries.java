@@ -89,7 +89,7 @@ public class SQLQueries {
 
 			try {
 				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
-				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy);
+				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, null);
 			} catch (Exception e) {
 				log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 				log.debug("error on query "+qid+": "+e.getMessage(), e);

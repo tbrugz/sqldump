@@ -53,6 +53,11 @@ import org.apache.log4j.Logger;
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
  * TODO: sqlregen // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
+ * XXX: default value for 'sqldump.dumpschemapattern'? user? upper(user)?
+ * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
+ * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
+ * XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
+ * XXX: mviews: refresh on commit|demand ; tablespace
  */
 public class SQLDump {
 	

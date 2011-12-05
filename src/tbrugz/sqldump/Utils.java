@@ -201,6 +201,15 @@ public class Utils {
 	static String DEFAULT_ENCLOSING = "'";
 	static String DOUBLEQUOTE = "\"";
 	
+	public static Collection<String> values4sql(Collection<?> s, DateFormat df) {
+		Iterator<?> iter = s.iterator();
+		List<String> ret = new ArrayList<String>();
+		while (iter.hasNext()) {
+			ret.add( getFormattedSQLValue(iter.next(), df) );
+		}
+		return ret;
+	}
+
 	public static String join4sql(Collection<?> s, DateFormat df, String delimiter) {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();

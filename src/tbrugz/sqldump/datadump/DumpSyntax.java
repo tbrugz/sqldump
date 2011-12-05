@@ -23,6 +23,7 @@ public abstract class DumpSyntax {
 		HTMLDataDump.class,
 		JSONDataDump.class,
 		FFCDataDump.class,
+		UpdateByPKDataDump.class,
 	};
 	
 	public static String DEFAULT_NULL_VALUE = "";
@@ -76,4 +77,8 @@ public abstract class DumpSyntax {
 	public abstract void dumpFooter(Writer fos) throws Exception;
 
 	public void flushBuffer(Writer fos) throws Exception {}
+
+	//XXX: add to initDump()?
+	public void setKeyColumns(List<String> cols) throws Exception {}
+
 }

@@ -169,6 +169,10 @@ public class DataDump {
 					log.warn("table '"+tableName+"' has no PK for datadump ordering");
 				}
 			}
+			List<String> pkCols = null;  
+			if(table.getPKConstraint()!=null) {
+				pkCols = table.getPKConstraint().uniqueColumns;
+			} 
 
 			log.debug("dumping data/inserts from table: "+tableName);
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
@@ -182,7 +186,9 @@ public class DataDump {
 				//XXX: table dump with partitionBy?
 				runQuery(conn, sql, null, prop, tableName, tableName, charset, 
 						rowlimit,
-						syntaxList
+						syntaxList,
+						null,
+						pkCols
 						);
 			}
 			catch(Exception e) {
@@ -197,15 +203,18 @@ public class DataDump {
 	}
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
-			String tableOrQueryId, String tableOrQueryName, String charset, long rowlimit, List<DumpSyntax> syntaxList
+			String tableOrQueryId, String tableOrQueryName, String charset,
+			long rowlimit, List<DumpSyntax> syntaxList
 			) throws Exception {
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null);
 	}
 		
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, String tableOrQueryId, String tableOrQueryName, String charset, 
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
+			String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
-			String partitionByPattern
+			String partitionByPattern,
+			List<String> keyColumns
 			) throws Exception {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -243,6 +252,7 @@ public class DataDump {
 			//header
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
+				ds.setKeyColumns(keyColumns);
 				ds.initDump(tableOrQueryName, md);
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
