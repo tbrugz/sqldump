@@ -73,7 +73,7 @@ sqldump.schemadump.dumpclasses=SchemaModelScriptDumper, JAXBSchemaXMLSerializer,
 #sqldump.schemainfo.domaintables=DOMAIN_TABLE_X, DOMAIN_TABLE_Y
 
 # schema names to dump
-sqldump.dumpschemapattern=DW, SA, EMPDEPT
+sqldump.dumpschemapattern=<DW, SA, EMPDEPT>
 
 # exclude table filters (regex), splitted by "|"
 #sqldump.schemadump.tablename.excludes=EMPT.* | .*_OLD | ZZZ_.* 
@@ -312,5 +312,4 @@ sqldump.alterschemasuggester.simplefksonly=true
 
 # SQLite
 #sqldump.driverclass=org.sqlite.JDBC
-#sqldump.dburl=jdbc:sqlite:/path/to/sqlite.db
-
+#sqldump.dburl=jdbc:sqlite:</path/to/sqlite.db>
