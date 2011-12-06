@@ -45,7 +45,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void initDump(String tableName, ResultSetMetaData md) throws Exception {
+	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws Exception {
 		this.tableName = tableName;
 		this.md = md;
 		numCol = md.getColumnCount();		

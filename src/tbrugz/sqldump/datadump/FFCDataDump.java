@@ -61,7 +61,7 @@ public class FFCDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String tableName, ResultSetMetaData md) throws SQLException {
+	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		numCol = md.getColumnCount();		
 		lsColNames.clear();
 		lsColTypes.clear();

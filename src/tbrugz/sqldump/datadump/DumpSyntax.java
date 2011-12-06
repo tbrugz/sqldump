@@ -68,7 +68,7 @@ public abstract class DumpSyntax {
 		return getSyntaxId();
 	}
 	
-	public abstract void initDump(String tableName, ResultSetMetaData md) throws Exception;
+	public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws Exception;
 	
 	public abstract void dumpHeader(Writer fos) throws Exception;
 
@@ -77,8 +77,5 @@ public abstract class DumpSyntax {
 	public abstract void dumpFooter(Writer fos) throws Exception;
 
 	public void flushBuffer(Writer fos) throws Exception {}
-
-	//XXX: add to initDump()?
-	public void setKeyColumns(List<String> cols) throws Exception {}
 
 }

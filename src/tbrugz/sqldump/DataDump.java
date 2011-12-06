@@ -252,8 +252,7 @@ public class DataDump {
 			//header
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
-				ds.setKeyColumns(keyColumns);
-				ds.initDump(tableOrQueryName, md);
+				ds.initDump(tableOrQueryName, keyColumns, md);
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
 				

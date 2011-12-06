@@ -18,6 +18,8 @@ import tbrugz.sqldump.Utils;
  * 
  * see: http://weblogs.asp.net/bleroy/archive/2008/01/18/dates-and-json.aspx
  *      http://msdn.microsoft.com/en-us/library/bb299886.aspx 
+ *      
+ * TODO: option to output as hash (using pkcols)
  */
 public class JSONDataDump extends DumpSyntax {
 
@@ -34,7 +36,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String tableName, ResultSetMetaData md) throws SQLException {
+	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		numCol = md.getColumnCount();
 		lsColNames.clear();

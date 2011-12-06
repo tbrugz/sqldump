@@ -27,7 +27,7 @@ public class HTMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String tableName, ResultSetMetaData md) throws SQLException {
+	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		numCol = md.getColumnCount();		
 		lsColNames.clear();

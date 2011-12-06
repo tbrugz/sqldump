@@ -21,25 +21,6 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	List<String> pkCols = null; 
 	
 	@Override
-	public void setKeyColumns(List<String> cols) throws Exception {
-		pkCols = cols;
-		if(cols!=null && pkCols.size()==0) {
-			pkCols = null;
-		}
-		/*pk = table.getPKConstraint();
-		for(Constraint c: table.getConstraints()) {
-			if(Constraint.ConstraintType.PK.equals(c.type)) {
-				pk = c;
-				return;
-			}
-		}*/
-		/*if(pkCols==null) {
-			log.warn("can't dump: needs unique key");
-			//throw new RuntimeException("updatebypk: datadump needs table with PK [cols: "+cols+"]");
-		}*/
-	}
-	
-	@Override
 	public String getSyntaxId() {
 		return UPDATEBYPK_SYNTAX_ID;
 	}
@@ -50,13 +31,17 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	}
 	
 	@Override
-	public void initDump(String tableName, ResultSetMetaData md)
+	public void initDump(String tableName, List<String> cols, ResultSetMetaData md)
 			throws SQLException {
+		pkCols = cols;
+		if(cols!=null && pkCols.size()==0) {
+			pkCols = null;
+		}
 		if(pkCols==null) {
 			log.warn("can't dump: needs unique key [query/table: "+tableName+"]");
 			return;
 		}
-		super.initDump(tableName, md);
+		super.initDump(tableName, null, md);
 	}
 	
 	@Override
