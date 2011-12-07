@@ -22,6 +22,7 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.MaterializedView;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
@@ -104,11 +105,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
-			View v = new View();
+			MaterializedView v = new MaterializedView();
 			v.name = rs.getString(2);
 			v.query = rs.getString(4);
 			v.schemaName = schemaPattern;
-			v.materialized = true;
+			//v.materialized = true;
 			model.getViews().add(v);
 			count++;
 		}

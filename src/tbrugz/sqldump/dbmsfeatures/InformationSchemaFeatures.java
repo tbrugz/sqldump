@@ -51,7 +51,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	String grabDBViewsQuery() {
-		return "select table_catalog, table_schema, table_name, view_definition "
+		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
 			+"order by table_catalog, table_schema, table_name ";
@@ -70,6 +70,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			v.query = rs.getString(4);
 			v.query = v.query.substring(0, v.query.length()-2);
 			v.schemaName = schemaPattern;
+			v.checkOption = View.CheckOptionType.valueOf(rs.getString(5)); //"YES".equalsIgnoreCase(rs.getString(5));
+			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));
 			model.getViews().add(v);
 			count++;
 		}
