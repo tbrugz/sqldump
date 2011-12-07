@@ -125,7 +125,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, null);
+		
+		if(schemaPattern==null) {
+			schemaPattern = papp.getProperty(SQLDump.PROP_USER);
+			if(schemaPattern!=null) {
+				schemaPattern = schemaPattern.toUpperCase();
+			}
+		}
 
+		if(schemaPattern==null) {
+			log.warn("schema name undefined, aborting...");
+			return null;
+		}
+		
 		log.info("schema dump... schema(s): "+schemaPattern);
 		tablesCountByTableType = new HashMap<TableType, Integer>();
 		for(TableType tt: TableType.values()) {
@@ -176,7 +188,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		catch(Exception e) {
 			log.warn("error grabbing schema: "+e);
-			log.debug("error grabbing schema", e);
+			log.info("error grabbing schema", e);
 			return null;
 		}
 	}

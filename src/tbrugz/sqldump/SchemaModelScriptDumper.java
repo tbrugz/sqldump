@@ -355,6 +355,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(outFilePattern==null) {
 			outFilePattern = mainOutputFilePattern;
 		}
+		if(outFilePattern==null) {
+			throw new RuntimeException("output file patterns (e.g. 'sqldump.mainoutputfilepattern') not defined, aborting");
+		}
 		
 		objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
 		

@@ -312,6 +312,11 @@ public class Schema2GraphML implements SchemaModelDumper {
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
+		if(output==null) {
+			log.warn("graphml output file is null. won't dump");
+			return;
+		}
+		
 		log.info("dumping graphML: translating model");
 		if(schemaModel==null) {
 			log.warn("schemaModel is null!");
@@ -338,6 +343,11 @@ public class Schema2GraphML implements SchemaModelDumper {
 	@Override
 	public void procProperties(Properties prop) {
 		String outFileStr = prop.getProperty(PROP_OUTPUTFILE);
+		if(outFileStr==null) {
+			log.warn("graphml output file ["+PROP_OUTPUTFILE+"] not defined");
+			return;
+		}
+		
 		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
 		
 		String[] schemasArr = schemaPattern.split(",");

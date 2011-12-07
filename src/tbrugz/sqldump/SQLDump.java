@@ -53,11 +53,11 @@ import org.apache.log4j.Logger;
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
  * TODO: sqlregen // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
- * XXX: default value for 'sqldump.dumpschemapattern'? user? upper(user)?
+ * !XXX: default value for 'sqldump.dumpschemapattern'? user? upper(user)/(oracle)? public (postgresql)?
  * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
- * XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
- * XXX: mviews: refresh on commit|demand ; tablespace
+ * ~XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
+ * XXX: add junit tests for all "supported" databases
  */
 public class SQLDump {
 	
@@ -215,7 +215,7 @@ public class SQLDump {
 			}
 		}
 		else {
-			log.info("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
+			log.warn("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
 		//SchemaModelGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();
@@ -266,7 +266,7 @@ public class SQLDump {
 				}
 			}
 			else {
-				log.info("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
+				log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 			}
 			
 			/*
