@@ -124,17 +124,25 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		showDBInfo(conn.getMetaData());
 		
 		SchemaModel schemaModel = new SchemaModel();
-		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, null);
+		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
 		
 		if(schemaPattern==null) {
-			schemaPattern = papp.getProperty(SQLDump.PROP_USER);
+			List<String> schemas = SQLUtils.getSchemaNames(conn.getMetaData());
+			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
+			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.PROP_USER)); 
+			if(schemaPattern==null) {
+				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, "public"); 
+			}
+			
 			if(schemaPattern!=null) {
-				schemaPattern = schemaPattern.toUpperCase();
+				log.info("setting suggested schema: "+schemaPattern);
+				papp.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
+				propOriginal.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
 			}
 		}
 
 		if(schemaPattern==null) {
-			log.warn("schema name undefined, aborting...");
+			log.warn("schema name undefined & no suggestion avaiable, aborting...");
 			return null;
 		}
 		

@@ -40,6 +40,8 @@ import tbrugz.sqldump.dbmodel.Table;
  * -- 3rd+: test for each [2+]-col combination ...
  * 
  * XXX: output warn for tables that doesn't have PK
+ * 
+ * XXX: option to ignore tables by regex pattern
  */
 public class AlterSchemaSuggester implements SchemaModelDumper {
 

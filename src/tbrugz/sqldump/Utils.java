@@ -517,6 +517,13 @@ public class Utils {
 		return floatFormatter;
 	}
 	
+	public static String getEqualIgnoreCaseFromList(Collection<String> col, String str) {
+		for(String s: col) {
+			if(str.equalsIgnoreCase(s)) { return s; }
+		}
+		return null;
+	}
+	
 	public static void main(String[] args) {
 		//String value = PasswordInputGUI.getPassword("pass: ");
 		

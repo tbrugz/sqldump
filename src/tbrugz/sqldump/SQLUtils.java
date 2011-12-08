@@ -1,5 +1,7 @@
 package tbrugz.sqldump;
 
+import java.io.PrintStream;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -139,10 +141,14 @@ public class SQLUtils {
 	}
 	
 	static void dumpRS(ResultSet rs) throws SQLException {
-		dumpRS(rs, rs.getMetaData());
+		dumpRS(rs, rs.getMetaData(), System.out);
 	}
 
-	static void dumpRS(ResultSet rs, ResultSetMetaData rsmd) throws SQLException {
+	static void dumpRS(ResultSet rs, PrintStream out) throws SQLException {
+		dumpRS(rs, rs.getMetaData(), out);
+	}
+
+	static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
 		int ncol = rsmd.getColumnCount();
 		StringBuffer sb = new StringBuffer();
 		//System.out.println(ncol);
@@ -158,7 +164,7 @@ public class SQLUtils {
 			}
 			sb.append("\n");
 		}
-		System.out.println("\n"+sb.toString()+"\n");
+		out.println("\n"+sb.toString()+"\n");
 	}
 
 	public static String getColumnNames(ResultSetMetaData md) throws SQLException {
@@ -172,5 +178,17 @@ public class SQLUtils {
 		//	lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1)));
 		//}
 		return Utils.join(lsColNames, ", ");
+	}
+	
+	static List<String> getColumnValues(ResultSet rs, String colName) throws SQLException {
+		List<String> colvals = new ArrayList<String>();
+		while(rs.next()) {
+			colvals.add(rs.getString(colName));
+		}
+		return colvals;
+	}
+
+	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
+		return getColumnValues(dbmd.getSchemas(), "table_schem");
 	}
 }

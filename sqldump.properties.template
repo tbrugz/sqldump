@@ -2,6 +2,11 @@
 # TODO: copy/rename to sqldump.properties
 #
 
+###############################################################################
+# sqldump config file                                                         #
+# https://bitbucket.org/tbrugz/sqldump                                        #
+###############################################################################
+
 #
 # includes other properties files
 #

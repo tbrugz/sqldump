@@ -12,6 +12,9 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
+/*
+ * XXX: do not create output file if pkCols==null
+ */
 public class UpdateByPKDataDump extends InsertIntoDataDump {
 	static final String UPDATEBYPK_SYNTAX_ID = "updatebypk";
 	static final String UPDATEBYPK_EXT = "ubpk.sql";
@@ -39,6 +42,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 		}
 		if(pkCols==null) {
 			log.warn("can't dump: needs unique key [query/table: "+tableName+"]");
+			//XXX: throw RuntimeException / IllegalArgument ?
 			return;
 		}
 		super.initDump(tableName, null, md);
