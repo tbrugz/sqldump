@@ -56,6 +56,7 @@ public class DataDump {
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
+	static final String PROP_DATADUMP_IGNORETABLES = "sqldump.datadump.ignoretables";
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
@@ -143,6 +144,12 @@ public class DataDump {
 			typesToDump.remove(TableType.MATERIALIZED_VIEW);
 		}
 		
+		List<String> ignoretablesregex = Utils.getStringListFromProp(prop, PROP_DATADUMP_IGNORETABLES, "\\|");
+		for(int i=0;i<ignoretablesregex.size();i++) {
+			ignoretablesregex.set(i, ignoretablesregex.get(i).trim());
+		}
+		
+		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
 			String tableName = table.name;
 			if(tables4dump!=null) {
@@ -151,6 +158,14 @@ public class DataDump {
 			}
 			if(typesToDump!=null) {
 				if(!typesToDump.contains(table.getType())) { continue; }
+			}
+			if(ignoretablesregex!=null) {
+				for(String tregex: ignoretablesregex) {
+					if(tableName.matches(tregex)) {
+						log.info("ignoring table: "+tableName);
+						continue LABEL_TABLE;
+					}
+				}
 			}
 			
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
