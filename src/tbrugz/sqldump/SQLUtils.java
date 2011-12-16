@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.io.PrintStream;
+import java.sql.Blob;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -101,7 +102,12 @@ public class SQLUtils {
 				//TODOne: how to format Date value?
 				value = rs.getDate(i);
 			}
+			else if(coltype.equals(Blob.class)) {
+				//XXX: do not dump Blobs this way
+				value = null;
+			}
 			else {
+				log.warn("unknown type: "+i+"/"+coltype);
 				if(!hasWarnedColType) {
 					log.debug("unknown type: "+i+"/"+coltype);
 					thisHasWarned = true;
@@ -135,7 +141,11 @@ public class SQLUtils {
 				return Date.class;
 			case Types.CHAR:
 			case Types.VARCHAR:
+				return String.class;
+			case Types.LONGVARBINARY:	
+				return Blob.class;
 			default:
+				log.info("unknown SQL type ["+type+"], defaulting to String");
 				return String.class;
 		}
 	}
