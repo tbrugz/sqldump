@@ -58,21 +58,22 @@ public class XMLDataDump extends DumpSyntax {
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
-				//flush...
-				out(sb.toString()+"\n", fos);
-				//dumping xml inside xml
-				sb = new StringBuffer();
 				ResultSet rsInt = (ResultSet) vals.get(i);
+				if(rsInt==null) {
+					continue;
+				}
+				
+				out(sb.toString()+"\n", fos);
+				sb = new StringBuffer();
+				
 				XMLDataDump xmldd = new XMLDataDump();
-				xmldd.padding = padding+"\t\t";
+				xmldd.padding = this.padding+"\t\t";
 				SQLUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
 				sb.append("\n\t");
 			}
 			else {
-
-			Object value = getValueNotNull( vals.get(i) );
-			sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
-			
+				Object value = getValueNotNull( vals.get(i) );
+				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
 			}
 		}
 		sb.append("</row>");

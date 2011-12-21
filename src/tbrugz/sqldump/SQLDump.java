@@ -60,7 +60,7 @@ import org.apache.log4j.Logger;
  * XXX: add junit tests for all "supported" databases (needs sqlregex first?)
  * XXXxx: error dumping blobs
  * XXX!: add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping
- * XXX!: add support for cursor in sql (ResultSet as a column type): xml, html, json dumpers
+ * ~XXX!: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, json dumpers
  */
 public class SQLDump {
 	
