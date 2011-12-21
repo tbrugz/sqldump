@@ -87,12 +87,14 @@ public class SQLQueries {
 			
 			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 
+			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
+			
 			try {
 				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
-				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, null);
+				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, keyCols);
 			} catch (Exception e) {
 				log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
-				log.debug("error on query "+qid+": "+e.getMessage(), e);
+				log.info("error on query "+qid+": "+e.getMessage(), e);
 			}
 			i++;
 		}

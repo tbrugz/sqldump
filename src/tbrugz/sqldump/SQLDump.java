@@ -58,7 +58,9 @@ import org.apache.log4j.Logger;
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
  * ~XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
  * XXX: add junit tests for all "supported" databases (needs sqlregex first?)
- * XXX: error dumping blobs / add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ?)
+ * XXXxx: error dumping blobs
+ * XXX!: add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping
+ * XXX!: add support for cursor in sql (ResultSet as a column type): xml, html, json dumpers
  */
 public class SQLDump {
 	

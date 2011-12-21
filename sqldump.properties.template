@@ -212,9 +212,11 @@ sqldump.datadump.orderbypk=true
 #select * from TABLE_X
 #sqldump.query.table_x.name=TABLE_X
 #sqldump.query.table_x.rowlimit=10000
+#sqldump.query.table_x.keycols=ID
 
 #sqldump.query.q2.sqlfile=c:/xxx/query2.sql
 #sqldump.query.q2.name=query_2
+#sqldump.query.q2.keycols=ID, PARENT_ID
 #sqldump.datadump.outfilepattern.id@q2=${outputdir}/data_q2_${tablename}.${syntaxfileext}
 
 #sqldump.query.partitiontest.name=partition_test

@@ -145,8 +145,10 @@ public class DataDump {
 		}
 		
 		List<String> ignoretablesregex = Utils.getStringListFromProp(prop, PROP_DATADUMP_IGNORETABLES, "\\|");
-		for(int i=0;i<ignoretablesregex.size();i++) {
-			ignoretablesregex.set(i, ignoretablesregex.get(i).trim());
+		if(ignoretablesregex!=null) {
+			for(int i=0;i<ignoretablesregex.size();i++) {
+				ignoretablesregex.set(i, ignoretablesregex.get(i).trim());
+			}
 		}
 		
 		LABEL_TABLE:
