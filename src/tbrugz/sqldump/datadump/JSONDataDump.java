@@ -30,6 +30,9 @@ public class JSONDataDump extends DumpSyntax {
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
 	
+	boolean usePK = false; //XXX: option to set prop usePK
+	List<String> pkCols;
+	
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
@@ -47,17 +50,33 @@ public class JSONDataDump extends DumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getScale(i+1)));
 		}
+		if(usePK) {
+			this.pkCols = pkCols;
+		}
+		//if(pkCols==null) { usePK = false; } else { usePK = true; }
 	}
 	
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
-		out("{ \""+tableName+"\": ["+"\n", fos);
+		out("{ \""+tableName+"\": "
+			+(this.pkCols!=null?"{":"[")
+			+"\n", fos);
 	}
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+(count==0?"":",")+"{");
+		sb.append("\t"+(count==0?"":","));
+		if(this.pkCols!=null) {
+			sb.append("\"");
+			for(int i=0;i<pkCols.size();i++) {
+				if(i>0) { sb.append("_"); }
+				sb.append(rs.getString(pkCols.get(i)));
+			}
+			sb.append("\": ");
+		}
+		sb.append("{");
+		
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColNames.size();i++) {
 			try {
@@ -74,7 +93,7 @@ public class JSONDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(Writer fos) throws Exception {
-		out("  ]\n}",fos);
+		out("  "+(usePK?"}":"]")+"\n}",fos);
 	}
 
 	void out(String s, Writer pw) throws IOException {
