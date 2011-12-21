@@ -9,9 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import tbrugz.sqldump.SQLUtils;
 
 public class XMLDataDump extends DumpSyntax {
+	
+	static Logger log = Logger.getLogger(XMLDataDump.class);
 
 	static final String XML_SYNTAX_ID = "xml";
 	
@@ -19,6 +23,8 @@ public class XMLDataDump extends DumpSyntax {
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
+	
+	String padding = "";
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -48,10 +54,26 @@ public class XMLDataDump extends DumpSyntax {
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t"+"<row>");
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
+			//XXX: prop for selecting ResultSet dumping or not?
+			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+				//flush...
+				out(sb.toString()+"\n", fos);
+				//dumping xml inside xml
+				sb = new StringBuffer();
+				ResultSet rsInt = (ResultSet) vals.get(i);
+				XMLDataDump xmldd = new XMLDataDump();
+				xmldd.padding = padding+"\t\t";
+				SQLUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				sb.append("\n\t");
+			}
+			else {
+
 			Object value = getValueNotNull( vals.get(i) );
 			sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
+			
+			}
 		}
 		sb.append("</row>");
 		out(sb.toString()+"\n", fos);
@@ -63,7 +85,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 
 	void out(String s, Writer pw) throws IOException {
-		pw.write(s);
+		pw.write(padding+s);
 	}
 	
 	@Override

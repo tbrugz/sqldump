@@ -55,7 +55,13 @@ public class SQLUtils {
 		return (l==Math.round(d*1000));
 	}
 
+	static boolean resultSetGetObjectExceptionWarned = false;
+	
 	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
+		return getRowObjectListFromRS(rs, colTypes, numCol, false);
+	}
+	
+	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol, boolean canReturnResultSet) throws SQLException {
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
@@ -90,10 +96,21 @@ public class SQLUtils {
 			}
 			else if(coltype.equals(Blob.class)) {
 				//XXX: do not dump Blobs this way
-				value = null;
+				//value = null; //already null, do nothing
 			}
 			else if(coltype.equals(ResultSet.class)) {
-				value = rs.getObject(i);
+				if(canReturnResultSet) {
+					try {
+						value = rs.getObject(i);
+					}
+					catch(SQLException e) {
+						if(!resultSetGetObjectExceptionWarned) {
+							log.warn("error loading ResultSet: "+e+" (you might not use multiple ResultSet dumpers)");
+							log.info("error loading ResultSet (you might not use multiple ResultSet dumpers)", e);
+							resultSetGetObjectExceptionWarned = true;
+						}
+					}
+				}
 				//log.info("obj/resultset: "+rs.getObject(i));
 			}
 			else {
@@ -130,7 +147,7 @@ public class SQLUtils {
 				return String.class;
 			case Types.LONGVARBINARY:
 				return Blob.class;
-			case -10: //ResultSet/Cursor
+			case -10: //XXX: ResultSet/Cursor ?
 				return ResultSet.class;
 			default:
 				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
@@ -194,9 +211,9 @@ public class SQLUtils {
 		return getColumnValues(dbmd.getSchemas(), "table_schem");
 	}
 
-	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, Writer writer) throws Exception {
+	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws Exception {
 		//int ncol = rsmd.getColumnCount();
-		ds.initDump(null, null, rsmd);
+		ds.initDump(tableName, null, rsmd);
 		ds.dumpHeader(writer);
 		int count = 0;
 		while(rs.next()) {
@@ -204,6 +221,14 @@ public class SQLUtils {
 			count++;
 		}
 		ds.dumpFooter(writer);
+		if(resetRS) {
+			try {
+				rs.first();
+			}
+			catch (SQLException e) {
+				rs.close();
+			}
+		}
 	}
 
 }

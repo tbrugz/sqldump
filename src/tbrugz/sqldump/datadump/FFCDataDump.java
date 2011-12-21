@@ -114,6 +114,8 @@ public class FFCDataDump extends DumpSyntax {
 		}
 	}
 
+	static boolean resultSetWarned = false;
+	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		//first count is equal 0
@@ -126,7 +128,18 @@ public class FFCDataDump extends DumpSyntax {
 		for(int i=0;i<lsColNames.size();i++) {
 			int max = colsMaxLenght.get(i);
 
-			String valueStr = getFormattedValue(vals.get(i));
+			String valueStr = null;
+			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+				if(!resultSetWarned) {
+					log.warn("can't dump ResultSet as column");
+					resultSetWarned = true;
+				}
+				valueStr = nullValueStr;
+			}
+			else {
+				valueStr = getFormattedValue(vals.get(i));
+			}
+			
 			if(max<valueStr.length()) {
 				max = valueStr.length();
 				colsMaxLenght.set(i, max);

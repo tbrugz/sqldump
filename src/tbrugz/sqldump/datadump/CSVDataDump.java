@@ -8,10 +8,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
 public class CSVDataDump extends DumpSyntax {
+	
+	static Logger log = Logger.getLogger(CSVDataDump.class);
 	
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";
@@ -95,12 +99,32 @@ public class CSVDataDump extends DumpSyntax {
 		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
 	}
 
+	static boolean resultSetWarned = false;
+	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
-			sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVValue(vals.get(i), floatFormatter, columnDelimiter, nullValueStr) );
+			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+				
+				/*out(sb.toString(), fos, recordDelimiter);
+				sb = new StringBuffer();
+				ResultSet rsInt = (ResultSet) vals.get(i);
+				CSVDataDump csvdd = new CSVDataDump();
+				csvdd.columnDelimiter = this.columnDelimiter;
+				csvdd.recordDelimiter = this.recordDelimiter; //change this?
+				SQLUtils.dumpRS(csvdd, rsInt.getMetaData(), rsInt, fos);*/
+				
+				if(!resultSetWarned) {
+					log.warn("can't dump ResultSet as column");
+					resultSetWarned = true;
+				}
+				sb.append( (i!=0?columnDelimiter:"") + nullValueStr);
+			}
+			else {
+				sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVValue(vals.get(i), floatFormatter, columnDelimiter, nullValueStr) );
+			}
 		}
 		out(sb.toString(), fos, recordDelimiter);
 	}
