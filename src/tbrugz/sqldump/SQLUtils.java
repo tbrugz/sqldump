@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.io.PrintStream;
+import java.io.Writer;
 import java.sql.Blob;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -9,9 +10,13 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
+
+import tbrugz.sqldump.datadump.DumpSyntax;
 
 public class SQLUtils {
 
@@ -50,26 +55,15 @@ public class SQLUtils {
 		return (l==Math.round(d*1000));
 	}
 
-	private static boolean hasWarnedColType = false;
-	
-	public static List getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
-		List ls = new ArrayList();
-		boolean thisHasWarned = false;
+	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
+		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
-			Class coltype = colTypes.get(i-1);
+			Class<?> coltype = colTypes.get(i-1);
 			if(coltype.equals(String.class)) {
-				if(!hasWarnedColType) {
-					log.debug("str type: "+i+"/"+coltype);
-					thisHasWarned = true;
-				}
 				value = rs.getString(i);
 			}
 			else if(coltype.equals(Integer.class)) {
-				if(!hasWarnedColType) {
-					log.debug("int type: "+i+"/"+coltype);
-					thisHasWarned = true;
-				}
 				value = rs.getDouble(i);
 				Double dValue = (Double) value;
 				if(isInt(dValue)) {
@@ -82,10 +76,6 @@ public class SQLUtils {
 				}
 			}
 			else if(coltype.equals(Double.class)) {
-				if(!hasWarnedColType) {
-					log.debug("double type: "+i+"/"+coltype);
-					thisHasWarned = true;
-				}
 				value = rs.getDouble(i);
 				Double dValue = (Double) value;
 				if(isInt(dValue)) {
@@ -95,10 +85,6 @@ public class SQLUtils {
 				else { value = rs.getDouble(i); }
 			}
 			else if(coltype.equals(Date.class)) {
-				if(!hasWarnedColType) {
-					log.debug("date type: "+i+"/"+coltype);
-					thisHasWarned = true;
-				}
 				//TODOne: how to format Date value?
 				value = rs.getDate(i);
 			}
@@ -106,22 +92,22 @@ public class SQLUtils {
 				//XXX: do not dump Blobs this way
 				value = null;
 			}
+			else if(coltype.equals(ResultSet.class)) {
+				value = rs.getObject(i);
+				//log.info("obj/resultset: "+rs.getObject(i));
+			}
 			else {
-				log.warn("unknown type: "+i+"/"+coltype);
-				if(!hasWarnedColType) {
-					log.debug("unknown type: "+i+"/"+coltype);
-					thisHasWarned = true;
-				}
+				log.warn("unknown type ["+coltype+"], defaulting to String");
 				value = rs.getString(i);
 			}
 			ls.add(value);
 		}
-		if(thisHasWarned) hasWarnedColType = true;
 		return ls;
 	}
 
+	static Set<Integer> unknownSQLTypes = new HashSet<Integer>(); 
 	//TODOne: Date class type for dump?
-	public static Class getClassFromSqlType(int type, int scale) {
+	public static Class<?> getClassFromSqlType(int type, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
 			case Types.TINYINT: 
@@ -142,10 +128,16 @@ public class SQLUtils {
 			case Types.CHAR:
 			case Types.VARCHAR:
 				return String.class;
-			case Types.LONGVARBINARY:	
+			case Types.LONGVARBINARY:
 				return Blob.class;
+			case -10: //ResultSet/Cursor
+				return ResultSet.class;
 			default:
-				log.info("unknown SQL type ["+type+"], defaulting to String");
+				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
+				if(!unknownSQLTypes.contains(type)) {
+					log.warn("unknown SQL type ["+type+"], defaulting to String");
+					unknownSQLTypes.add(type);
+				}
 				return String.class;
 		}
 	}
@@ -201,4 +193,17 @@ public class SQLUtils {
 	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
 		return getColumnValues(dbmd.getSchemas(), "table_schem");
 	}
+
+	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, Writer writer) throws Exception {
+		//int ncol = rsmd.getColumnCount();
+		ds.initDump(null, null, rsmd);
+		ds.dumpHeader(writer);
+		int count = 0;
+		while(rs.next()) {
+			ds.dumpRow(rs, count, writer);
+			count++;
+		}
+		ds.dumpFooter(writer);
+	}
+
 }

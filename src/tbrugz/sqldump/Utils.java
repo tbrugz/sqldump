@@ -5,10 +5,13 @@ import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -41,7 +44,9 @@ class RegularFileFilter implements FileFilter {
 	}
 }
 
-class BaseInputGUI extends JFrame implements KeyListener {
+class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
+	static Logger log = Logger.getLogger(BaseInputGUI.class);
+
 	static int width = 200;
 	static int height = 100;
 
@@ -57,6 +62,7 @@ class BaseInputGUI extends JFrame implements KeyListener {
 		getContentPane().add(new JLabel(message));
 		getContentPane().add(tf);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		addWindowListener(this);
 		setSize(200, 100);
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
@@ -75,6 +81,7 @@ class BaseInputGUI extends JFrame implements KeyListener {
 	public void keyTyped(KeyEvent e) {
 		if('\n'==e.getKeyChar()) {
 			value = tf.getText();
+			//removeWindowListener(this); //?
 			setVisible(false);
 			this.dispose();
 		}
@@ -98,6 +105,37 @@ class BaseInputGUI extends JFrame implements KeyListener {
 			}
 		}
 		return value;
+	}
+
+	@Override
+	public void windowOpened(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosing(WindowEvent e) {
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {
+		if(value!=null) { return; } 
+		log.warn("windowClosed: exiting sqldump");
+		System.exit(0);
+	}
+
+	@Override
+	public void windowIconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {
+	}
+
+	@Override
+	public void windowActivated(WindowEvent e) {
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {
 	}
 	
 }
@@ -223,6 +261,8 @@ public class Utils {
 		return buffer.toString();
 	}
 	
+	static boolean resultSetWarnedForSQLValue = false;
+	
 	public static String getFormattedSQLValue(Object elem, DateFormat df) {
 		if(elem == null) {
 			return null;
@@ -243,6 +283,13 @@ public class Utils {
 		else if(elem instanceof Double) {
 			//log.debug("format:: "+elem+" / "+floatFormatterSQL.format((Double)elem));
 			return floatFormatterSQL.format((Double)elem);
+		}
+		else if(elem instanceof ResultSet) {
+			if(!resultSetWarnedForSQLValue) {
+				log.warn("can't dump ResultSet as SQL type");
+				resultSetWarnedForSQLValue = true;
+			}
+			return null;
 		}
 		/*else if(elem instanceof Integer) {
 			return String.valueOf(elem);
@@ -278,7 +325,11 @@ public class Utils {
 		else if(elem instanceof Double) {
 			return floatFormatter.format((Double)elem);
 		}
+		else if(elem instanceof ResultSet) {
+			return nullValue;
+		}
 
+		// String output:
 		if(separator==null) {
 			return String.valueOf(elem);
 		}

@@ -12,8 +12,6 @@ import java.util.Properties;
 
 import tbrugz.sqldump.Utils;
 
-//TODOne: add syntax: html
-//TODOne: add syntax: 'formatted fixed column' (sqlplus-like) 
 public abstract class DumpSyntax {
 	
 	static final Class[] arr = {
@@ -57,6 +55,7 @@ public abstract class DumpSyntax {
 		floatFormatter = Utils.getFloatFormatter(floatLocale, getSyntaxId());
 	}
 	
+	//XXX: remove from here?
 	public Object getValueNotNull(Object o) {
 		if(o==null) { return nullValueStr; }
 		return o;
@@ -77,5 +76,15 @@ public abstract class DumpSyntax {
 	public abstract void dumpFooter(Writer fos) throws Exception;
 
 	public void flushBuffer(Writer fos) throws Exception {}
+	
+	/**
+	 * Should return true if responsable for creating output files
+	 * 
+	 * BlobDataDump will return true (writes 1 file per table row, partitioning doesn't make sense)
+	 * @return
+	 */
+	public boolean isWriterIndependent() {
+		return false;
+	}
 
 }
