@@ -24,7 +24,7 @@ public abstract class DumpSyntax {
 		UpdateByPKDataDump.class,
 	};
 	
-	public static String DEFAULT_NULL_VALUE = "";
+	public static final String DEFAULT_NULL_VALUE = "";
 	
 	public DateFormat dateFormatter;
 	//locales: http://www.loc.gov/standards/iso639-2/englangn.html
@@ -86,5 +86,8 @@ public abstract class DumpSyntax {
 	public boolean isWriterIndependent() {
 		return false;
 	}
+	
+	//XXX: method supportResultSetDump()?
+	//XXX> method cloneBaseProperties()? duplicateInstance(DumpSyntax)? clone()?
 
 }

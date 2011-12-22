@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
@@ -23,12 +25,16 @@ import tbrugz.sqldump.Utils;
  */
 public class JSONDataDump extends DumpSyntax {
 
+	static Logger log = Logger.getLogger(JSONDataDump.class);
+
 	static final String JSON_SYNTAX_ID = "json";
 	
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
+	
+	String padding = "";
 	
 	boolean usePK = false; //XXX: option to set prop usePK
 	List<String> pkCols;
@@ -58,9 +64,15 @@ public class JSONDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
-		out("{ \""+tableName+"\": "
-			+(this.pkCols!=null?"{":"[")
-			+"\n", fos);
+		if(tableName!=null) {
+			outNoPadding("{ \""+tableName+"\": "
+				+(this.pkCols!=null?"{":"[")
+				+"\n", fos);
+		}
+		else {
+			outNoPadding((this.pkCols!=null?"{":"[")
+				+"\n", fos);
+		}
 	}
 
 	@Override
@@ -77,26 +89,58 @@ public class JSONDataDump extends DumpSyntax {
 		}
 		sb.append("{");
 		
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
+			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+				ResultSet rsInt = (ResultSet) vals.get(i);
+				if(rsInt==null) {
+					continue;
+				}
+				
+				out(sb.toString()+",\n",fos);
+				out("\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
+				sb = new StringBuffer();
+				
+				JSONDataDump jsondd = new JSONDataDump();
+				jsondd.padding = this.padding+"\t\t";
+				jsondd.dateFormatter = this.dateFormatter;
+				jsondd.floatFormatter = this.floatFormatter;
+				jsondd.nullValueStr = this.nullValueStr;
+				SQLUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fos, true);
+				sb.append("\n\t");
+			}
+			else {
+				
 			try {
-				sb.append((i==0?"":", ") + "\"" + lsColNames.get(i) + "\"" + ": " + Utils.getFormattedJSONValue( vals.get(i), dateFormatter ));
+				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + Utils.getFormattedJSONValue( vals.get(i), dateFormatter ));
 			}
 			catch(Exception e) {
-				System.err.println(lsColNames+" / "+vals);
+				log.warn(lsColNames+" / "+vals+" / ex: "+e);
+				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + nullValueStr);
 				//e.printStackTrace();
 			}
+
+			}
 		}
-		sb.append("}");
+		sb.append(" }");
 		out(sb.toString()+"\n", fos);
 	}
 
 	@Override
 	public void dumpFooter(Writer fos) throws Exception {
-		out("  "+(usePK?"}":"]")+"\n}",fos);
+		if(tableName!=null) {
+			out((usePK?"}":"]")+"}",fos);
+		}
+		else {
+			out((usePK?"}":"]"),fos);
+		}
 	}
 
 	void out(String s, Writer pw) throws IOException {
+		pw.write(padding+s);
+	}
+
+	void outNoPadding(String s, Writer pw) throws IOException {
 		pw.write(s);
 	}
 	
