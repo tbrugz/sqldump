@@ -238,12 +238,15 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		select dbms_metadata.get_ddl('INDEX',index_name) from user_indexes
 		see: http://www.dba-oracle.com/concepts/creating_indexes.htm
 		*/
-			
-		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name "
-			+"from all_indexes ui, all_ind_columns uic "
+		
+		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uip.partitioning_type, uip.locality "
+			+"from all_indexes ui, all_ind_columns uic, all_part_indexes uip "
 			+"where UI.INDEX_NAME = UIC.INDEX_NAME "
 			+"and ui.table_name = uic.table_name "
 			+"and ui.table_owner = uic.table_owner "
+			+"and ui.index_name = uip.index_name (+) "
+			+"and ui.table_name = uip.table_name (+) "
+			+"and ui.table_owner = uip.owner (+) "
 			+"and ui.owner = '"+schemaPattern+"' "
 			+"order by ui.table_owner, ui.index_name, uic.column_position";
 		log.debug("sql: "+query);
@@ -270,6 +273,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				idx.schemaName = rs.getString(1);
 				setIndexType(idx, rs.getString(4));
 				idx.tableName = rs.getString(5);
+				if("LOCAL".equals(rs.getString("LOCALITY"))) {
+					idx.local = true;
+				}
 			}
 			idx.columns.add(rs.getString(6));
 			colCount++;

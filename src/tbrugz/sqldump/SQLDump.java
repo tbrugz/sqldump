@@ -60,7 +60,8 @@ import org.apache.log4j.Logger;
  * XXX: add junit tests for all "supported" databases (needs sqlregex first?)
  * XXXxx: error dumping blobs
  * XXX!: add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping
- * ~XXX!: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, json dumpers
+ * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
+ * XXX: option for queries (or specific queries) to have specific syntax-dumpers
  */
 public class SQLDump {
 	
@@ -221,21 +222,6 @@ public class SQLDump {
 			log.warn("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
-		//SchemaModelGrabber schemaJDBCGrabber = new JDBCSchemaGrabber();
-		//schemaJDBCGrabber.procProperties(sdd.papp);
-		//schemaJDBCGrabber.setConnection(sdd.conn);
-		//SchemaModel sm = schemaJDBCGrabber.grabSchema();
-
-		//serializer input
-		//SchemaModelGrabber schemaSerialGrabber = new SchemaSerializer();
-		//schemaSerialGrabber.procProperties(sdd.papp);
-		//SchemaModel sm = schemaSerialGrabber.grabSchema();
-
-		//xml serializer input
-		//SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
-		//schemaSerialGrabber.procProperties(sdd.papp);
-		//SchemaModel sm = schemaSerialGrabber.grabSchema();
-		
 		String dirToDeleteFiles = sdd.papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
 		if(dirToDeleteFiles!=null) {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
@@ -272,35 +258,6 @@ public class SQLDump {
 				log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 			}
 			
-			/*
-			//script dump
-			SchemaModelDumper schemaDumper = new SchemaModelScriptDumper();
-			schemaDumper.procProperties(sdd.papp);
-			schemaDumper.dumpSchema(sm);
-			
-			//TODOzzz prop doSerializeDump? doGraphMLDump?
-
-			//serialize
-			SchemaModelDumper schemaSerialDumper = new SchemaSerializer();
-			schemaSerialDumper.procProperties(sdd.papp);
-			schemaSerialDumper.dumpSchema(sm);
-			
-			//xml serializer (JAXB)
-			SchemaModelDumper schemaXMLDumper = new JAXBSchemaXMLSerializer();
-			schemaXMLDumper.procProperties(sdd.papp);
-			schemaXMLDumper.dumpSchema(sm);
-
-			//xml serializer (Castor)
-			SchemaModelDumper schemaCastorXMLDumper = new CastorSchemaXMLSerializer();
-			schemaCastorXMLDumper.procProperties(sdd.papp);
-			schemaCastorXMLDumper.dumpSchema(sm);
-			
-			//graphml dump
-			SchemaModelDumper s2gml = new Schema2GraphML();
-			s2gml.procProperties(sdd.papp);
-			s2gml.dumpSchema(sm);
-			
-			*/
 		}
 		
 		//dumping data

@@ -105,8 +105,8 @@ public class SQLUtils {
 					}
 					catch(SQLException e) {
 						if(!resultSetGetObjectExceptionWarned) {
-							log.warn("error loading ResultSet: "+e+" (you might not use multiple ResultSet dumpers)");
-							log.info("error loading ResultSet (you might not use multiple ResultSet dumpers)", e);
+							log.warn("error loading ResultSet: "+e+" (you might not use multiple ResultSet-able dumpers when dumping ResultSet/cursors)");
+							log.info("error loading ResultSet (you might not use multiple ResultSet-able dumpers when dumping ResultSet/cursors)", e);
 							resultSetGetObjectExceptionWarned = true;
 						}
 					}

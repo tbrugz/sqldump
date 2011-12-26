@@ -17,11 +17,13 @@ public class Index extends DBObject {
 	public String tableName;
 	public List<String> columns = new ArrayList<String>();
 	public String comment;
+	public Boolean local;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
 			+" ("+Utils.join(columns, ", ")+")"
+			+((local!=null && local)?" local":"")
 			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" --"+comment:"");
 	}
 	
