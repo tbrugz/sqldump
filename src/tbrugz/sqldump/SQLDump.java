@@ -52,7 +52,7 @@ import org.apache.log4j.Logger;
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
- * TODO: sqlregen // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
+ * ~TODO: sqlregen/sqlrun // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
  * XXXxx: default value for 'sqldump.dumpschemapattern'? user? upper(user)/(oracle)? public (postgresql)? only if contained in MetaData().getSchemas()
  * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
@@ -66,21 +66,21 @@ import org.apache.log4j.Logger;
 public class SQLDump {
 	
 	//connection props
-	static final String CONN_PROP_USER = "user";
-	static final String CONN_PROP_PASSWORD = "password";
+	public static final String CONN_PROP_USER = "user";
+	public static final String CONN_PROP_PASSWORD = "password";
 	
 	//connection properties
-	static final String PROP_DRIVERCLASS = "sqldump.driverclass";
-	static final String PROP_URL = "sqldump.dburl";
-	static final String PROP_USER = "sqldump.user";
-	static final String PROP_PASSWD = "sqldump.password";
-	static final String PROP_ASKFORUSERNAME = "sqldump.askforusername";
-	static final String PROP_ASKFORPASSWD = "sqldump.askforpassword";
-	static final String PROP_ASKFORUSERNAME_GUI = "sqldump.askforusernamegui";
-	static final String PROP_ASKFORPASSWD_GUI = "sqldump.askforpasswordgui";
+	public static final String PROP_DRIVERCLASS = "sqldump.driverclass";
+	public static final String PROP_URL = "sqldump.dburl";
+	public static final String PROP_USER = "sqldump.user";
+	public static final String PROP_PASSWD = "sqldump.password";
+	public static final String PROP_ASKFORUSERNAME = "sqldump.askforusername";
+	public static final String PROP_ASKFORPASSWD = "sqldump.askforpassword";
+	public static final String PROP_ASKFORUSERNAME_GUI = "sqldump.askforusernamegui";
+	public static final String PROP_ASKFORPASSWD_GUI = "sqldump.askforpasswordgui";
 	
 	//static/constant properties
-	static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
+	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
 		
 	//sqldump.properties
 	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
@@ -101,8 +101,8 @@ public class SQLDump {
 	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
 	
-	static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
-	static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
+	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
+	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
 	
 	static Logger log = Logger.getLogger(SQLDump.class);
 	
@@ -153,7 +153,7 @@ public class SQLDump {
 		doDataDump = Utils.getPropBool(papp, PROP_DO_DATADUMP, doDataDump); 
 	}
 
-	void initDBConnection(String[] args) throws Exception {
+	public static Connection initDBConnection(String[] args, Properties papp) throws Exception {
 		//init database
 		log.debug("initDBConnection...");
 		Class.forName(papp.getProperty(PROP_DRIVERCLASS));
@@ -176,7 +176,7 @@ public class SQLDump {
 			p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
 		}
 
-		conn = DriverManager.getConnection(papp.getProperty(PROP_URL), p);
+		return DriverManager.getConnection(papp.getProperty(PROP_URL), p);
 	}
 	
 	void end() throws Exception {
@@ -209,7 +209,7 @@ public class SQLDump {
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
-					sdd.initDBConnection(args);
+					sdd.conn = initDBConnection(args, sdd.papp);
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
@@ -228,12 +228,12 @@ public class SQLDump {
 		}
 
 		if(sdd.doTests) {
-			if(sdd.conn==null) { sdd.initDBConnection(args); }
+			if(sdd.conn==null) { sdd.conn = initDBConnection(args, sdd.papp); }
 			SQLTests.tests(sdd.conn);
 		}
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
-			if(sdd.conn==null) { sdd.initDBConnection(args); }
+			if(sdd.conn==null) { sdd.conn = initDBConnection(args, sdd.papp); }
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
