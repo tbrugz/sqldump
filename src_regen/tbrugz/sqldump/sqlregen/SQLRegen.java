@@ -97,6 +97,9 @@ public class SQLRegen {
 		//Collections.sort(procIds);
 		log.info("processing ids in exec order: "+Utils.join(procIds, ", "));
 		
+		StmtProc srproc = new StmtProc();
+		srproc.setConn(conn);
+		srproc.setPapp(papp);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			String procId = getExecId(key, PREFIX_EXEC);
@@ -106,7 +109,7 @@ public class SQLRegen {
 				//String execId = getExecId(key, PREFIX_EXEC, SUFFIX_FILE);
 				//log.info("processing: exec-id = "+execId);
 				try {
-					execFile(key, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+					srproc.execFile(key, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -118,9 +121,7 @@ public class SQLRegen {
 				log.info(">>> processing: id = '"+procId+"'");
 				String stmtStr = papp.getProperty(key);
 				try {
-					int urows = execStatement(stmtStr);
-					log.info("statement exec: updates = "+urows);
-					log.debug("statement: "+stmtStr);
+					int urows = srproc.execStatement(stmtStr);
 				}
 				catch(SQLException e) {
 					log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
@@ -138,87 +139,6 @@ public class SQLRegen {
 		long totalTime = System.currentTimeMillis() - initTime;
 		log.info("...end processing, total time = "+totalTime+"ms");
 	}
-
-	void execFile(String fileKey, String errorLogKey) throws IOException, SQLException {
-		String filePath = papp.getProperty(fileKey);
-		String errorLogFilePath = papp.getProperty(errorLogKey);
-		FileReader reader = new FileReader(filePath);
-		FileWriter logerror = null;
-		String fileStr = IOUtil.readFile(reader);
-		String[] statementStrs = fileStr.split(";");
-		reader.close();
-		
-		log.info("exec "+statementStrs.length+" statements from file '"+filePath+"'...");
-		long logEachXStmts = 1000;
-		long urowsTotal = 0;
-		long countOk = 0;
-		long countError = 0;
-		long countExec = 0;
-		long initTime = System.currentTimeMillis();
-		for(String stmtStr: statementStrs) {
-			if(stmtStr==null) { continue; }
-			stmtStr = stmtStr.trim();
-			if(stmtStr.equals("")) { continue; }
-			
-			try {
-				urowsTotal += execStatement(stmtStr);
-				countOk++;
-			}
-			catch(SQLException e) {
-				log.warn("error executing updates [stmt = "+stmtStr+"]: "+e);
-				if(logerror==null) {
-					try {
-						File f = new File(errorLogFilePath);
-						File dir = f.getParentFile();
-						if(!dir.isDirectory()) {
-							log.info("creating dir: "+dir);
-							dir.mkdirs();
-						}
-						logerror = new FileWriter(errorLogFilePath);
-					}
-					catch(FileNotFoundException fnfe) {
-						log.warn("error opening file '"+errorLogFilePath+"' for writing invalid statements. Ex: "+fnfe);
-					}
-				}
-				logerror.write(stmtStr+";\n");
-				countError++;
-				log.debug("error executing updates", e);
-			}
-			countExec++;
-			
-			if((countExec>0) && (countExec % logEachXStmts)==0) {
-				log.info(countExec+" statements processed");
-			}
-		}
-		long totalTime = System.currentTimeMillis() - initTime;
-		//commit?
-		double statementsPerSec = Double.NaN;
-		try {
-			statementsPerSec = ((double) countExec) / ( ((double) totalTime) / 1000 );
-		}
-		catch(ArithmeticException e) {}
-		
-		log.info("exec = "+countExec+" [ok = "+countOk+", error = "+countError+"], rows updated = "+urowsTotal
-				+", elapsed = "+totalTime+"ms, statements/sec = "+statementsPerSec
-				+" [file = '"+filePath+"']");
-		if(logerror!=null) {
-			logerror.close();
-			log.warn(""+countError+" erroneous statements in '"+errorLogFilePath+"'");
-		}
-	}
-	
-	int execStatement(String stmtStr) throws IOException, SQLException {
-		if(stmtStr==null) { throw new IllegalArgumentException("null parameter"); }
-		stmtStr = stmtStr.trim();
-		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
-		
-		Statement stmt = conn.createStatement();
-		log.debug("executing sql: "+stmtStr);
-		int urows = stmt.executeUpdate(stmtStr);
-		log.debug("updated "+urows+" rows");
-		return urows;
-	}
-	
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
