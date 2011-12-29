@@ -12,6 +12,8 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
@@ -23,9 +25,10 @@ import static tbrugz.sqldump.SQLDump.*;
 
 /*
  * TODO: cli (sqlplus-like)? continue/exit on error?
- * XXX: show/log ordered 'exec-ids' before executing
+ * XXXxx: show/log ordered 'exec-ids' before executing
  * XXX: option for numeric/alphanumeric proc-ids
- * XXX: log total running time
+ * TODO: one statement per file option
+ * XXX: statements 'split-by' option 
  */
 public class SQLRegen {
 	
@@ -84,9 +87,19 @@ public class SQLRegen {
 		List<String> execkeys = Utils.getKeysStartingWith(papp, PREFIX_EXEC);
 		Collections.sort(execkeys);
 		log.info("init processing...");
+		long initTime = System.currentTimeMillis();
+
+		Set<String> procIds = new TreeSet<String>();
 		for(String key: execkeys) {
 			String procId = getExecId(key, PREFIX_EXEC);
-			
+			procIds.add(procId);
+		}
+		//Collections.sort(procIds);
+		log.info("processing ids in exec order: "+Utils.join(procIds, ", "));
+		
+		//TODO: use procIds instead of execkeys (?)
+		for(String key: execkeys) {
+			String procId = getExecId(key, PREFIX_EXEC);
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
 				log.info(">>> processing: id = '"+procId+"'");
@@ -122,6 +135,8 @@ public class SQLRegen {
 				log.warn("unknown prop key format: '"+key+"'");
 			}
 		}
+		long totalTime = System.currentTimeMillis() - initTime;
+		log.info("...end processing, total time = "+totalTime+"ms");
 	}
 
 	void execFile(String fileKey, String errorLogKey) throws IOException, SQLException {
@@ -183,7 +198,7 @@ public class SQLRegen {
 		}
 		catch(ArithmeticException e) {}
 		
-		log.info("exec = "+countExec+", ok = "+countOk+", error = "+countError+", updates = "+urowsTotal
+		log.info("exec = "+countExec+" [ok = "+countOk+", error = "+countError+"], rows updated = "+urowsTotal
 				+", elapsed = "+totalTime+"ms, statements/sec = "+statementsPerSec
 				+" [file = '"+filePath+"']");
 		if(logerror!=null) {
