@@ -97,7 +97,7 @@ public class DataDump {
 			Utils.dateFormatter = new SimpleDateFormat(dateFormat);
 		}
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
-		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK);
+		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK, true);
 
 		List<String> tables4dump = getTables4dump(prop);
 		

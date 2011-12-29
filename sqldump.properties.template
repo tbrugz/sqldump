@@ -140,6 +140,9 @@ sqldump.dodatadump=false
 #sqldump.datadump.tables=TABLE_X, TABLE_Y, TABLE_Z
 #sqldump.datadump.tables=${sqldump.schemainfo.domaintables}, TABLE_Z
 
+# order table data by PK (dafault is true)
+#sqldump.datadump.orderbypk=true
+
 # ignore tables filter ("|" separated regexes)
 #sqldump.datadump.ignoretables=TABLE_ABC.* | TABLE_DEF.*
 
