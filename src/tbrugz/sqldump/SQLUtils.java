@@ -3,7 +3,9 @@ package tbrugz.sqldump;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.sql.Blob;
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -19,6 +22,50 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.datadump.DumpSyntax;
 
 public class SQLUtils {
+	
+	public static class ConnectionUtil {
+		
+		//connection props
+		public static final String CONN_PROP_USER = "user";
+		public static final String CONN_PROP_PASSWORD = "password";
+		
+		//connection properties
+		public static final String SUFFIX_DRIVERCLASS = ".driverclass";
+		public static final String SUFFIX_URL = ".dburl";
+		public static final String SUFFIX_USER = ".user";
+		public static final String SUFFIX_PASSWD = ".password";
+		public static final String SUFFIX_ASKFORUSERNAME = ".askforusername";
+		public static final String SUFFIX_ASKFORPASSWD = ".askforpassword";
+		public static final String SUFFIX_ASKFORUSERNAME_GUI = ".askforusernamegui";
+		public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
+
+		public static Connection initDBConnection(String[] args, String propsPrefix, Properties papp) throws Exception {
+			//init database
+			log.debug("initDBConnection...");
+			Class.forName(papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS));
+			
+			Properties p = new Properties();
+			p.setProperty(CONN_PROP_USER, papp.getProperty(propsPrefix+SUFFIX_USER, ""));
+			p.setProperty(CONN_PROP_PASSWORD, papp.getProperty(propsPrefix+SUFFIX_PASSWD, ""));
+			
+			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME)) {
+				p.setProperty(CONN_PROP_USER, Utils.readText("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': "));
+			}
+			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME_GUI)) {
+				p.setProperty(CONN_PROP_USER, Utils.readTextGUI("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': "));
+			}
+
+			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
+				p.setProperty(CONN_PROP_PASSWORD, Utils.readPassword("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
+			}
+			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD_GUI)) {
+				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
+			}
+
+			return DriverManager.getConnection(papp.getProperty(propsPrefix+SUFFIX_URL), p);
+		}
+		
+	}
 
 	static Logger log = Logger.getLogger(SQLUtils.class);
 	static StringBuffer sbTmp = new StringBuffer();

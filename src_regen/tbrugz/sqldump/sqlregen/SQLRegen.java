@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.ParametrizedProperties;
 import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
 import static tbrugz.sqldump.SQLDump.*; 
@@ -35,6 +36,7 @@ public class SQLRegen {
 	static Logger log = Logger.getLogger(SQLRegen.class);
 	
 	static final String PROPERTIES_FILENAME = "sqlregen.properties";
+	static final String CONN_PROPS_PREFIX = "sqlregen"; 
 	
 	//prefixes
 	static final String PREFIX_EXEC = "sqlregen.exec.";
@@ -160,7 +162,7 @@ public class SQLRegen {
 		
 		try {
 			sqlr.init(args);
-			sqlr.conn = SQLDump.initDBConnection(args, sqlr.papp);
+			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(args, CONN_PROPS_PREFIX, sqlr.papp);
 			sqlr.doIt();
 		}
 		finally {

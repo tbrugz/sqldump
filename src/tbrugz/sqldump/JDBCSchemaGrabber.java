@@ -129,7 +129,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(conn.getMetaData());
 			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
-			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.PROP_USER)); 
+			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + SQLUtils.ConnectionUtil.SUFFIX_USER)); 
 			if(schemaPattern==null) {
 				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, "public"); 
 			}
