@@ -1,59 +1,145 @@
 package tbrugz.sqldiff;
 
-import java.util.Arrays;
-import java.util.List;
+import static tbrugz.sqldump.SQLDump.PARAM_PROPERTIES_FILENAME;
+import static tbrugz.sqldump.SQLDump.PARAM_USE_SYSPROPERTIES;
+import static tbrugz.sqldump.SQLDump.PROP_PROPFILEBASEDIR;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.sql.Connection;
 import java.util.Properties;
 
+import org.apache.log4j.Logger;
+
 import tbrugz.sqldiff.model.SchemaDiff;
-import tbrugz.sqldump.JAXBSchemaXMLSerializer;
+import tbrugz.sqldump.ParametrizedProperties;
+import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelGrabber;
-import tbrugz.sqldump.dbmodel.DBObjectType;
 
+/*
+ * TODO: output diff by object type, change type
+ */
 public class SQLDiff {
 	
-	//pgsql: file:///D:/apps/PostgreSQL/9.0/doc/postgresql/html/sql-altertable.html
+	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
+	
+	public static final String PROP_FROM = "sqldiff.from";
+	public static final String PROP_TO = "sqldiff.to";
 
-	//add column, alter column, drop column
-	/*
-	Set<Table> tables = new TreeSet<Table>();
-	Set<Sequence> sequences = new TreeSet<Sequence>(); ??
-
-	Set<FK> foreignKeys = new TreeSet<FK>();
-	Set<View> views = new TreeSet<View>();
-	Set<Trigger> triggers = new TreeSet<Trigger>();
-	Set<ExecutableObject> executables = new TreeSet<ExecutableObject>();
-	Set<Synonym> synonyms = new TreeSet<Synonym>();
-	Set<Index> indexes = new TreeSet<Index>();
-	 */
+	static Logger log = Logger.getLogger(SQLDiff.class);
+	
+	Properties prop = new ParametrizedProperties();
+	
+	void init(String[] args) throws Exception {
+		log.info("init...");
+		//parse args
+		String propFilename = PROPERTIES_FILENAME;
+		for(String arg: args) {
+			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
+				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+			}
+			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
+				ParametrizedProperties.setUseSystemProperties(true);
+			}
+			else {
+				log.warn("unrecognized param '"+arg+"'. ignoring...");
+			}
+		}
+		File propFile = new File(propFilename);
+		
+		//init properties
+		log.info("loading properties: "+propFile);
+		prop.load(new FileInputStream(propFile));
+		
+		File propFileDir = propFile.getAbsoluteFile().getParentFile();
+		log.debug("propfile base dir: "+propFileDir);
+		prop.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+	}
 
 	void doIt() throws Exception {
-		//SQLDump sdd = new SQLDump();
-		//SchemaModel sm = sdd.grabSchema();
+		SchemaModelGrabber fromSchemaGrabber = null;
+		SchemaModelGrabber toSchemaGrabber = null;
 		
-		//xml serializer input Orig
-		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
-		Properties jaxbPropOrig = new Properties();
-		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model1.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropOrig);
-		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
-
-		//xml serializer input New
-		Properties jaxbPropNew = new Properties();
-		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model2.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropNew);
-		SchemaModel smNew = schemaSerialGrabber.grabSchema();
+		//from
+		fromSchemaGrabber = initGrabber("from", PROP_FROM, prop);
+		/*{
+		String fromId = prop.getProperty(PROP_FROM);
+		log.info("target 'from' ["+fromId+"] init");
+		String fromGrabClassName = prop.getProperty("sqldiff."+fromId+".grabclass");
+		fromSchemaGrabber = initModelGrabber(fromGrabClassName);
+		fromSchemaGrabber.setPropertiesPrefix("sqldiff."+fromId);
+		if(fromSchemaGrabber.needsConnection()) {
+			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+fromId, prop);
+			fromSchemaGrabber.setConnection(conn);
+		}
+		fromSchemaGrabber.procProperties(prop);
+		}*/
+		
+		//to
+		toSchemaGrabber = initGrabber("to", PROP_TO, prop);
+		/*{
+		String toId = prop.getProperty(PROP_TO);
+		log.info("target 'to' ["+toId+"] init");
+		String toGrabClassName = prop.getProperty("sqldiff."+toId+".grabclass");
+		toSchemaGrabber = initModelGrabber(toGrabClassName);
+		toSchemaGrabber.setPropertiesPrefix("sqldiff."+toId);
+		if(toSchemaGrabber.needsConnection()) {
+			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+toId, prop);
+			toSchemaGrabber.setConnection(conn);
+		}
+		toSchemaGrabber.procProperties(prop);
+		}*/
+		
+		//grab schemas
+		log.info("grabbing 'from' model");
+		SchemaModel fromSM = fromSchemaGrabber.grabSchema();
+		log.info("grabbing 'to' model");
+		SchemaModel toSM = toSchemaGrabber.grabSchema();
 		
 		//do diff
-		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
+		log.info("dumping diff");
+		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
-		List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
-		System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
+		
+		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
+		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
+	}
+	
+	static SchemaModelGrabber initModelGrabberInstance(String grabClassName) {
+		SchemaModelGrabber schemaGrabber = null;
+		if(grabClassName!=null) {
+			schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGE);
+			if(schemaGrabber==null) {
+				log.warn("schema grabber class '"+grabClassName+"' not found");
+			}
+		}
+		else {
+			log.warn("null grab class name!");
+		}
+		return schemaGrabber;
+	}
+	
+	static SchemaModelGrabber initGrabber(String targetName, String propKey, Properties prop) throws Exception {
+		String grabberId = prop.getProperty(propKey);
+		log.info("target '"+targetName+"' ["+grabberId+"] init");
+		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
+		SchemaModelGrabber schemaGrabber = initModelGrabberInstance(grabClassName);
+		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
+		if(schemaGrabber.needsConnection()) {
+			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
+			schemaGrabber.setConnection(conn);
+		}
+		schemaGrabber.procProperties(prop);
+		return schemaGrabber;
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new SQLDiff().doIt();
+		SQLDiff sqldiff = new SQLDiff();
+		sqldiff.init(args);
+		sqldiff.doIt();
 	}
 }

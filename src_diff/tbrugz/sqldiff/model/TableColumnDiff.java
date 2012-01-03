@@ -28,6 +28,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 			case ADD:
 				colChange = "ADD COLUMN "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
+				//XXX: option: rename old, create new, update new from old, drop old
 				colChange = "ALTER COLUMN "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type; break;
 			case RENAME:
 				colChange = "RENAME COLUMN "+renameFrom+" TO "+column.getName(); break;
