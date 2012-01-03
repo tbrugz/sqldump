@@ -615,4 +615,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		return excludeFilters;
 	}
+	
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
+	
 }

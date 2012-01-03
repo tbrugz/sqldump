@@ -171,7 +171,7 @@ public class SQLDump {
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
-					sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(args, CONN_PROPS_PREFIX, sdd.papp);
+					sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
@@ -190,12 +190,12 @@ public class SQLDump {
 		}
 
 		if(sdd.doTests) {
-			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(args, CONN_PROPS_PREFIX, sdd.papp); }
+			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
 			SQLTests.tests(sdd.conn);
 		}
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
-			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(args, CONN_PROPS_PREFIX, sdd.papp); }
+			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
 			SQLQueries.doQueries(sdd.conn, sdd.papp);
 		}
 		
@@ -237,7 +237,7 @@ public class SQLDump {
 		}
 	}
 	
-	static Object getClassInstance(String className, String... defaultPackages) {
+	public static Object getClassInstance(String className, String... defaultPackages) {
 		Object o = Utils.getClassInstance(className);
 		int countPack = 0;
 		while(o==null && defaultPackages!=null && defaultPackages.length > countPack) {

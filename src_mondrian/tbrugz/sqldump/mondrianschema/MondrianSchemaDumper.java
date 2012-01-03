@@ -505,4 +505,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		log.info("mondrian schema model dumped to '"+fileOutput+"'");
 	}
 
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
 }

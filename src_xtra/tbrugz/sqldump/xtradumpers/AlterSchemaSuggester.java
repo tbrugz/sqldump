@@ -329,4 +329,8 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		fos.write( s + "\n" );
 	}
 	
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
 }

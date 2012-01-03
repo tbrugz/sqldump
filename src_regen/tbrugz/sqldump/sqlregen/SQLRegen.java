@@ -3,12 +3,9 @@ package tbrugz.sqldump.sqlregen;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -18,7 +15,6 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.ParametrizedProperties;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
@@ -162,7 +158,7 @@ public class SQLRegen {
 		
 		try {
 			sqlr.init(args);
-			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(args, CONN_PROPS_PREFIX, sqlr.papp);
+			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sqlr.papp);
 			sqlr.doIt();
 		}
 		finally {

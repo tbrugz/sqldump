@@ -80,5 +80,9 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	public boolean needsConnection() {
 		return false;
 	}
-	
+
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
 }

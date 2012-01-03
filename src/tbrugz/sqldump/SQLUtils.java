@@ -39,7 +39,7 @@ public class SQLUtils {
 		public static final String SUFFIX_ASKFORUSERNAME_GUI = ".askforusernamegui";
 		public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
 
-		public static Connection initDBConnection(String[] args, String propsPrefix, Properties papp) throws Exception {
+		public static Connection initDBConnection(String propsPrefix, Properties papp) throws Exception {
 			//init database
 			log.debug("initDBConnection...");
 			Class.forName(papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS));
@@ -64,7 +64,6 @@ public class SQLUtils {
 
 			return DriverManager.getConnection(papp.getProperty(propsPrefix+SUFFIX_URL), p);
 		}
-		
 	}
 
 	static Logger log = Logger.getLogger(SQLUtils.class);

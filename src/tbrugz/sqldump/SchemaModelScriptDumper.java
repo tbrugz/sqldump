@@ -461,4 +461,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		return "";
 	}
+
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
 }

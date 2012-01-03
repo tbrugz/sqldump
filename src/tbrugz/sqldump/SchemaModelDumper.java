@@ -6,6 +6,8 @@ public interface SchemaModelDumper {
 
 	public void procProperties(Properties prop);
 	
+	public void setPropertiesPrefix(String propertiesPrefix);
+	
 	/*public boolean isDumpWithSchemaName() {
 		return false;
 	}

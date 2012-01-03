@@ -407,4 +407,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 			stereo.setStereotype(str);
 		}
 	}
+	
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		// TODO: properties-prefix setting
+	}
 }

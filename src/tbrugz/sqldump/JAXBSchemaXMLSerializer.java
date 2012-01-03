@@ -17,9 +17,12 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 
 	static Logger log = Logger.getLogger(JAXBSchemaXMLSerializer.class);
 	
-	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = "sqldump.xmlserialization.jaxb.outfile";
-	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = "sqldump.xmlserialization.jaxb.infile";
+	public static final String XMLSERIALIZATION_JAXB_DEFAULT_PREFIX = "sqldump.xmlserialization.jaxb";
+	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";
+	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
 
+	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
+	
 	String fileInput;
 	String fileOutput;
 	JAXBContext jc;
@@ -36,14 +39,14 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	
 	@Override
 	public void procProperties(Properties prop) {
-		fileOutput = prop.getProperty(PROP_XMLSERIALIZATION_JAXB_OUTFILE);
-		fileInput = prop.getProperty(PROP_XMLSERIALIZATION_JAXB_INFILE);
+		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
+		fileInput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
 	}
 	
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
-			log.warn("xml serialization output file ["+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
 			return;
 		}
 		if(schemaModel==null) {
@@ -68,7 +71,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	@Override
 	public SchemaModel grabSchema() {
 		if(fileInput==null) {
-			log.warn("xml serialization input file ["+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
+			log.warn("xml serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
 			return null;
 		}
 
@@ -98,6 +101,15 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	@Override
 	public boolean needsConnection() {
 		return false;
+	}
+
+	public String getPropertiesPrefix() {
+		return propertiesPrefix;
+	}
+
+	@Override
+	public void setPropertiesPrefix(String propertiesPrefix) {
+		this.propertiesPrefix = propertiesPrefix;
 	}
 
 }
