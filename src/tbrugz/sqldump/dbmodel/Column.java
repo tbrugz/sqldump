@@ -1,14 +1,45 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.ParametrizedProperties;
 import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.Utils;
 
 public class Column extends DBIdentifiable implements Serializable {
+	
+	public static class ColTypeUtil {
+		static Properties dbmsSpecificProps;
+		static List<String> doNotUsePrecision;
+		
+		static {
+			dbmsSpecificProps = new ParametrizedProperties();
+			try {
+				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
+				if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
+				dbmsSpecificProps.load(is);
+				
+				doNotUsePrecision = Utils.getStringListFromProp(dbmsSpecificProps, "type.donotuseprecision", ",");
+			}
+			catch(IOException e) {
+				log.warn("Error loading typeMapping from resource: "+SQLDump.DBMS_SPECIFIC_RESOURCE);
+				e.printStackTrace();
+			}
+		}
+		
+		public static boolean usePrecision(String colType) {
+			colType = colType.toUpperCase();
+			if(doNotUsePrecision.contains(colType)) { return false; }
+			return !"false".equals(dbmsSpecificProps.getProperty("type."+colType+".useprecision"));
+		}
+	}
+	
 	private static final long serialVersionUID = 1L;
 	static Logger log = Logger.getLogger(Column.class);
 	
@@ -21,23 +52,12 @@ public class Column extends DBIdentifiable implements Serializable {
 	String defaultValue;
 	String remarks;
 	
-	static Properties typeMapping = null;
-	{
-		typeMapping = new Properties();
-		try {
-			typeMapping.load(SQLDump.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
-		} catch (IOException e) {
-			log.warn("Error loading typeMapping from resource: "+SQLDump.DBMS_SPECIFIC_RESOURCE);
-			e.printStackTrace();
-		}
-	}
-	
 	public static String getColumnDesc(Column c) {
-		return getColumnDesc(c, typeMapping, null, null);
+		return getColumnDesc(c, ColTypeUtil.dbmsSpecificProps, null, null);
 	}
 	
 	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
-		return getColumnDesc(c, typeMapping, fromDbId, toDbId);
+		return getColumnDesc(c, ColTypeUtil.dbmsSpecificProps, fromDbId, toDbId);
 	}
 	
 	//XXX: should be 'default'?
@@ -56,10 +76,8 @@ public class Column extends DBIdentifiable implements Serializable {
 			}
 		}
 		
-		boolean usePrecision = true;
-		if(typeMapping!=null) {
-			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType.toUpperCase()+".useprecision"));
-		}
+		boolean usePrecision = ColTypeUtil.usePrecision(colType);
+
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(c.defaultValue!=null?" default "+c.defaultValue:"")

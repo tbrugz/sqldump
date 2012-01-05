@@ -49,7 +49,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	boolean dumpDropStatements = false;
 	boolean dumpWithCreateOrReplace = false;
 	
-	Properties columnTypeMapping;
+	Properties dbmsSpecificsProperties;
 	String fromDbId, toDbId;
 	
 	String mainOutputFilePattern;
@@ -121,11 +121,11 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			}
 		}
 		
-		columnTypeMapping = new ParametrizedProperties();
+		dbmsSpecificsProperties = new ParametrizedProperties();
 		try {
 			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
 			if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
-			columnTypeMapping.load(is);
+			dbmsSpecificsProperties.load(is);
 		}
 		catch(IOException ioe) {
 			log.warn("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
@@ -165,9 +165,8 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				log.info("equal origin and target DBMSs: no column type conversion");
 			}
 		}
-		log.debug("props->"+columnTypeMapping);
 		Properties colTypeConversionProp = new ParametrizedProperties();
-		colTypeConversionProp.putAll(columnTypeMapping);
+		
 		if(fromDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId ); }
 		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
@@ -391,7 +390,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		Set<String> privsToDump = new TreeSet<String>();
 		if(toDbId!=null && !toDbId.equals("")) {
-			String sPriv = columnTypeMapping.getProperty("privileges."+toDbId);
+			String sPriv = dbmsSpecificsProperties.getProperty("privileges."+toDbId);
 			if(sPriv!=null) {
 				String[] privs = sPriv.split(",");
 				for(String priv: privs) {
