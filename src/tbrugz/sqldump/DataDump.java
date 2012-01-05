@@ -51,7 +51,7 @@ import tbrugz.sqldump.dbmodel.TableType;
 public class DataDump {
 
 	//generic props
-	static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
+	public static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
 	//static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
 	static final String PROP_DATADUMP_SYNTAXES = "sqldump.datadump.dumpsyntaxes";
 	static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.charset";
@@ -66,9 +66,9 @@ public class DataDump {
 	static final String CHARSET_DEFAULT = "UTF-8";
 	
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
-	static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
+	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
 	//static final String FILENAME_PATTERN_QUERYNAME = "\\$\\{queryname\\}";
-	static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
+	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
 	static Logger log = Logger.getLogger(DataDump.class);
 	static Logger logDir = Logger.getLogger(DataDump.class.getName()+".datadump-dir");
@@ -274,6 +274,11 @@ public class DataDump {
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
 				
+				if(ds.isWriterIndependent()) { 
+					doSyntaxDumpList.set(i, true);
+					continue;
+				}
+				
 				//String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
 				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
 				
@@ -325,6 +330,11 @@ public class DataDump {
 				for(int i=0;i<syntaxList.size();i++) {
 					DumpSyntax ds = syntaxList.get(i);
 					if(doSyntaxDumpList.get(i)) {
+						if(ds.isWriterIndependent()) {
+							ds.dumpRow(rs, countInPartition, null);
+							continue;
+						}
+						
 						String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
 						//Writer w = getWriterForFilename(finalFilename, charset, true);
 						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);

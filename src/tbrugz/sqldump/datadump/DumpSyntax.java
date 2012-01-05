@@ -22,6 +22,7 @@ public abstract class DumpSyntax {
 		JSONDataDump.class,
 		FFCDataDump.class,
 		UpdateByPKDataDump.class,
+		BlobDataDump.class,
 	};
 	
 	public static final String DEFAULT_NULL_VALUE = "";

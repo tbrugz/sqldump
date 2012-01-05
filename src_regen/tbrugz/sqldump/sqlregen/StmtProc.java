@@ -12,6 +12,8 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.IOUtil;
+
 public class StmtProc {
 	static Logger log = Logger.getLogger(StmtProc.class);
 	static Logger logRow = Logger.getLogger(StmtProc.class.getName()+"-row");

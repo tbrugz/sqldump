@@ -59,7 +59,7 @@ import org.apache.log4j.Logger;
  * ~XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
  * XXX: add junit tests for all "supported" databases (needs sqlregen first?)
  * XXXxx: error dumping blobs
- * XXX!: add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping
+ * XXXxx: add support for blobs (BlobDataDump)
  * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
  * XXX: option for queries (or specific queries) to have specific syntax-dumpers
  * XXX: filter tables/executables (/index/view/mv ?) by name (include only/exclude)
