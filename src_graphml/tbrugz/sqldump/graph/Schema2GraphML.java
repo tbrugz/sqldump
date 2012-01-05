@@ -51,6 +51,7 @@ enum EdgeLabelType {
  * XXXdone: table name pattern as node stereotype
  * XXXdone: option to show only table names - see/use: /sqldump/src_graphml/graphml-snippets-simple.properties
  * XXX: node label: show table type (VIEW, EXTERNAL_TABLE, ...)?
+ * XXX: option to map one stereotype to another (schema@XXX -> schema@YYY; type@EXTERNAL_TABLE -> type@VIEW)
  */
 public class Schema2GraphML implements SchemaModelDumper {
 	
@@ -389,6 +390,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 		String snippetsFile = prop.getProperty(PROP_SNIPPETS_FILE);
 		if(snippetsFile!=null) {
 			DumpSchemaGraphMLModel.snippetsFile = snippetsFile;
+			log.debug("snippets-file is '"+DumpSchemaGraphMLModel.snippetsFile+"'");
 		}
 		
 		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, addTableTypeStereotype);

@@ -52,16 +52,17 @@ import org.apache.log4j.Logger;
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
- * ~TODO: sqlregen/sqlrun // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
+ * ~TODO: sqlregen/sqlrun/sqlexec/sqlcmd // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
  * XXXxx: default value for 'sqldump.dumpschemapattern'? user? upper(user)/(oracle)? public (postgresql)? only if contained in MetaData().getSchemas()
  * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
  * ~XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
- * XXX: add junit tests for all "supported" databases (needs sqlregex first?)
+ * XXX: add junit tests for all "supported" databases (needs sqlregen first?)
  * XXXxx: error dumping blobs
  * XXX!: add support for blobs (file: <tablename>_<columnname>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping
  * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
  * XXX: option for queries (or specific queries) to have specific syntax-dumpers
+ * XXX: filter tables/executables (/index/view/mv ?) by name (include only/exclude)
  */
 public class SQLDump {
 	

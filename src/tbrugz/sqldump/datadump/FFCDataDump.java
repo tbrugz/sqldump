@@ -233,7 +233,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	String getFormattedValue(Object o) {
 		//if(o==null) return nullValue;
-		return Utils.getFormattedCSVValue(o, floatFormatter, null, nullValueStr);
+		return DataDumpUtils.getFormattedCSVValue(o, floatFormatter, null, nullValueStr);
 	}
 
 	@Override

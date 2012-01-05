@@ -56,7 +56,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		out("insert into "+tableName+" "+
 			colNames+" values ("+
-			Utils.join4sql(vals, dateFormatter, ", ")+
+			DataDumpUtils.join4sql(vals, dateFormatter, ", ")+
 			");", fos);
 	}
 	

@@ -123,7 +123,7 @@ public class CSVDataDump extends DumpSyntax {
 				sb.append( (i!=0?columnDelimiter:"") + nullValueStr);
 			}
 			else {
-				sb.append( (i!=0?columnDelimiter:"") + Utils.getFormattedCSVValue(vals.get(i), floatFormatter, columnDelimiter, nullValueStr) );
+				sb.append( (i!=0?columnDelimiter:"") + DataDumpUtils.getFormattedCSVValue(vals.get(i), floatFormatter, columnDelimiter, nullValueStr) );
 			}
 		}
 		out(sb.toString(), fos, recordDelimiter);

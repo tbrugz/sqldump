@@ -44,7 +44,7 @@ public abstract class DumpSyntax {
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
 		else {
-			dateFormatter = Utils.dateFormatter;
+			dateFormatter = DataDumpUtils.dateFormatter;
 		}
 		
 		String nullValue = prop.getProperty("sqldump.datadump."+getSyntaxId()+".nullvalue");

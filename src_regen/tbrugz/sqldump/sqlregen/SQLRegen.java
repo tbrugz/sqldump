@@ -25,7 +25,8 @@ import static tbrugz.sqldump.SQLDump.*;
  * XXXxx: show/log ordered 'exec-ids' before executing
  * XXX: option for numeric/alphanumeric proc-ids
  * TODO: one statement per file option
- * XXX: statements 'split-by' option 
+ * XXX: statements 'split-by' option
+ * TODO: commit/autocommit? when? each X statements? config per processing?
  */
 public class SQLRegen {
 	

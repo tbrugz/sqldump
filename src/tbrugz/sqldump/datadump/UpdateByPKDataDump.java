@@ -52,7 +52,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		if(pkCols==null) { return; }
 		
-		List<String> vals = (List<String>) Utils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );
+		List<String> vals = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );
 		//StringBuffer sb = new StringBuffer();
 		//sb.append("update "+tableName+" set ");
 		List<String> sets = new ArrayList<String>();

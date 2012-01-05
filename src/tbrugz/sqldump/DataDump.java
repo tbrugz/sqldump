@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
@@ -94,7 +95,7 @@ public class DataDump {
 		
 		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
 		if(dateFormat!=null) {
-			Utils.dateFormatter = new SimpleDateFormat(dateFormat);
+			DataDumpUtils.dateFormatter = new SimpleDateFormat(dateFormat);
 		}
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK, true);

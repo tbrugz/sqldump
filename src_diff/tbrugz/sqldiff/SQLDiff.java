@@ -19,7 +19,9 @@ import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelGrabber;
 
 /*
- * TODO: output diff by object type, change type
+ * TODO: output diff to file
+ * XXX: output diff by object type, change type
+ * XXX: change: 'from'->'old', 'to'->'new' ?
  */
 public class SQLDiff {
 	
@@ -64,33 +66,9 @@ public class SQLDiff {
 		
 		//from
 		fromSchemaGrabber = initGrabber("from", PROP_FROM, prop);
-		/*{
-		String fromId = prop.getProperty(PROP_FROM);
-		log.info("target 'from' ["+fromId+"] init");
-		String fromGrabClassName = prop.getProperty("sqldiff."+fromId+".grabclass");
-		fromSchemaGrabber = initModelGrabber(fromGrabClassName);
-		fromSchemaGrabber.setPropertiesPrefix("sqldiff."+fromId);
-		if(fromSchemaGrabber.needsConnection()) {
-			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+fromId, prop);
-			fromSchemaGrabber.setConnection(conn);
-		}
-		fromSchemaGrabber.procProperties(prop);
-		}*/
 		
 		//to
 		toSchemaGrabber = initGrabber("to", PROP_TO, prop);
-		/*{
-		String toId = prop.getProperty(PROP_TO);
-		log.info("target 'to' ["+toId+"] init");
-		String toGrabClassName = prop.getProperty("sqldiff."+toId+".grabclass");
-		toSchemaGrabber = initModelGrabber(toGrabClassName);
-		toSchemaGrabber.setPropertiesPrefix("sqldiff."+toId);
-		if(toSchemaGrabber.needsConnection()) {
-			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+toId, prop);
-			toSchemaGrabber.setConnection(conn);
-		}
-		toSchemaGrabber.procProperties(prop);
-		}*/
 		
 		//grab schemas
 		log.info("grabbing 'from' model");
@@ -109,7 +87,7 @@ public class SQLDiff {
 		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
 	}
 	
-	static SchemaModelGrabber initModelGrabberInstance(String grabClassName) {
+	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {
 		SchemaModelGrabber schemaGrabber = null;
 		if(grabClassName!=null) {
 			schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGE);
@@ -127,7 +105,7 @@ public class SQLDiff {
 		String grabberId = prop.getProperty(propKey);
 		log.info("target '"+targetName+"' ["+grabberId+"] init");
 		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
-		SchemaModelGrabber schemaGrabber = initModelGrabberInstance(grabClassName);
+		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
 		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
 		if(schemaGrabber.needsConnection()) {
 			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
