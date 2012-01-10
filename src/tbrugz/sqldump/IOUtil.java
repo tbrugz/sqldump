@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -7,9 +8,13 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import org.apache.log4j.Logger;
+
 public class IOUtil {
 	
 	public static int BUFFER_SIZE = 1024*8;
+	
+	static Logger log = Logger.getLogger(IOUtil.class);
 	
 	static void writeFile(String contents, Writer writer) throws IOException {
 		writer.write(contents);
@@ -28,6 +33,15 @@ public class IOUtil {
 		}
 
 		return sw.toString();
+	}
+
+	public static String readFromFilename(String fileName) {
+		try {
+			return IOUtil.readFile(new FileReader(fileName));
+		} catch (IOException e) {
+			log.warn("error reading file "+fileName+": "+e.getMessage());
+		}
+		return null;
 	}
 	
 	public static void pipeStreams(InputStream is, OutputStream os) throws IOException {

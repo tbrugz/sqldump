@@ -1,7 +1,5 @@
 package tbrugz.sqldump.sqlregen;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,10 +13,9 @@ import java.util.TreeSet;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.ParametrizedProperties;
+import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
-
-import static tbrugz.sqldump.SQLDump.*; 
 
 /*
  * TODO: cli (sqlplus-like)? continue/exit on error?
@@ -48,32 +45,6 @@ public class SQLRegen {
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
 	
-	void init(String[] args) throws Exception {
-		log.info("init...");
-		//parse args
-		String propFilename = PROPERTIES_FILENAME;
-		for(String arg: args) {
-			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
-				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-			}
-			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				ParametrizedProperties.setUseSystemProperties(true);
-			}
-			else {
-				log.warn("unrecognized param '"+arg+"'. ignoring...");
-			}
-		}
-		File propFile = new File(propFilename);
-		
-		//init properties
-		log.info("loading properties: "+propFile);
-		papp.load(new FileInputStream(propFile));
-		
-		File propFileDir = propFile.getAbsoluteFile().getParentFile();
-		log.debug("propfile base dir: "+propFileDir);
-		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-	}
-
 	void end() throws Exception {
 		if(conn!=null) {
 			log.info("closing connection: "+conn);
@@ -158,7 +129,7 @@ public class SQLRegen {
 		SQLRegen sqlr = new SQLRegen();
 		
 		try {
-			sqlr.init(args);
+			SQLDump.init(args, sqlr.papp);
 			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sqlr.papp);
 			sqlr.doIt();
 		}

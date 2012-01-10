@@ -47,7 +47,7 @@ import org.apache.log4j.Logger;
  * XXXdone: new dumper: generate mondrian schema
  * XXXdone: test with sqlite - http://code.google.com/p/sqlite-jdbc/
  * XXX: luciddb?
- * XXX: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
+ * XXX!: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
  * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
@@ -62,7 +62,7 @@ import org.apache.log4j.Logger;
  * XXXxx: add support for blobs (BlobDataDump)
  * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
  * XXX: option for queries (or specific queries) to have specific syntax-dumpers
- * XXX: filter tables/executables (/index/view/mv ?) by name (include only/exclude)
+ * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  */
 public class SQLDump {
 	
@@ -76,6 +76,7 @@ public class SQLDump {
 	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
 	static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
+	static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
 	
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
@@ -103,7 +104,7 @@ public class SQLDump {
 			doSchemaDump = false, //XXX: default for doSchemaDump should be true?
 			doDataDump = false;
 	
-	void init(String[] args) throws Exception {
+	public static void init(String[] args, Properties papp) throws Exception {
 		log.info("init...");
 		//parse args
 		String propFilename = PROPERTIES_FILENAME;
@@ -127,15 +128,11 @@ public class SQLDump {
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
 		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+	}
 
-		/*try {
-			papp.load(new FileInputStream(propFilename));
-		}
-		catch(FileNotFoundException e) {
-			log.warn("file "+propFilename+" not found. loading "+PROPERTIES_FILENAME);			
-			papp.load(new FileInputStream(PROPERTIES_FILENAME));
-		}*/
-
+	void init(String[] args) throws Exception {
+		SQLDump.init(args, papp);
+		
 		//init control vars
 		doSchemaDump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP, doSchemaDump);
 		doTests = Utils.getPropBool(papp, PROP_DO_TESTS, doTests);
@@ -197,7 +194,29 @@ public class SQLDump {
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
 			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
-			SQLQueries.doQueries(sdd.conn, sdd.papp);
+			SQLQueries sqlq = new SQLQueries();
+			sqlq.setProperties(sdd.papp);
+			sqlq.setConnection(sdd.conn);
+			sqlq.process();
+		}
+		
+		//processing classes
+		//TODO: add tests, queries
+		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
+		if(processingClassesStr!=null) {
+			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
+			String processingClasses[] = processingClassesStr.split(",");
+			for(String procClass: processingClasses) {
+				AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGE);
+				if(sqlproc!=null) {
+					sqlproc.setProperties(sdd.papp);
+					sqlproc.setConnection(sdd.conn);
+					sqlproc.process();
+				}
+				else {
+					log.warn("Error initializing processing class: '"+procClass+"'");
+				}
+			}
 		}
 		
 		//dumping model

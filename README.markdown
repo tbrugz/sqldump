@@ -5,11 +5,11 @@ SQLDump
 Utility to dump schema and data from a RDBMS. Features:
 
 - Does schema-dumping, using (mainly) standard java API, by way of `java.sql.DatabaseMetaData`
-- Does data-dumping (formats: csv, xml, html, json, sql 'insert into', sql 'update by PK', fixed column size)
+- Does data-dumping (formats: csv, xml, html, json, sql 'insert into', sql 'update by PK', fixed column size, blob)
 - Can be used with any JDBC-compliant databases
 - Generates Entity-Relationship diagrams based on Tables and FKs (graphML output - [yEd](http://www.yworks.com/products/yed/) recommended)
 - Flexible schema output patterns (based on schema name, object type and object name)
-- Translation of metadata (column types, ...) between different RDBMS dialects/implementations (partial)
+- Translation of metadata (column types) between different RDBMS dialects/implementations (partial)
 
 Author: Telmo Brugnara <[tbrugz@gmail.com](mailto:tbrugz@gmail.com)>
 

@@ -1,12 +1,7 @@
 package tbrugz.sqldump;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
@@ -19,13 +14,14 @@ import tbrugz.sqldump.datadump.DumpSyntax;
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
 //XXX: option to log each 'n' rows dumped
-public class SQLQueries {
+public class SQLQueries extends AbstractSQLProc {
 	
 	static final String PROP_QUERIES = "sqldump.queries";
 
 	static Logger log = Logger.getLogger(SQLQueries.class);
 	
-	public static void doQueries(Connection conn, Properties prop) {
+	@Override
+	public void process() {
 		DataDump dd = new DataDump();
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
@@ -67,7 +63,7 @@ public class SQLQueries {
 				//load from file
 				String sqlfile = prop.getProperty("sqldump.query."+qid+".sqlfile");
 				if(sqlfile!=null) {
-					sql = readFile(sqlfile);
+					sql = IOUtil.readFromFilename(sqlfile);
 				}
 			}
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
@@ -99,27 +95,6 @@ public class SQLQueries {
 			i++;
 		}
 		log.info(i+" queries runned");
-	}
-	
-	static String readFile(String fileName) {
-		try {
-	
-			FileReader reader = new FileReader(fileName);			
-			StringWriter sw = new StringWriter();
-			char[] cbuf = new char[4096];
-			int iread = reader.read(cbuf);
-			
-			while(iread>0) {
-				sw.write(cbuf, 0, iread);
-				iread = reader.read(cbuf);
-			}
-	
-			return sw.toString();
-	
-		} catch (IOException e) {
-			log.warn("error reading file "+fileName+": "+e.getMessage());
-		}
-		return null;
 	}
 	
 }
