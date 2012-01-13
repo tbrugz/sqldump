@@ -1,10 +1,11 @@
 package tbrugz.sqldump;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
@@ -17,30 +18,34 @@ public class ParametrizedProperties extends Properties {
 
 	static boolean useSystemProperties = false;
 
-	List<String> loadedPropFiles = new ArrayList<String>();
+	//List<File> loadedPropFiles = new ArrayList<File>();
+	Map<File, Boolean> loadedPropFiles = new HashMap<File, Boolean>(); //boolean is: hasWarned
 	
 	@Override
 	public synchronized void load(InputStream inStream) throws IOException {
 		//TODO: load in temp Properties; load from @include directive; load from temp Properties
 		super.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
-
+		
 		String includes = getProperty(DIRECTIVE_INCLUDE);
 		if(includes!=null) {
 			String[] files = includes.split(",");
 			for(String f: files) {
-				f = f.trim();
-				if(loadedPropFiles.contains(f)) {
-					log.warn("already loaded prop file: "+f);
+				File ff = new File(f.trim());
+				if(loadedPropFiles.containsKey(ff)) {
+					if(loadedPropFiles.get(ff)) {
+						log.warn("already loaded prop file: "+ff.getAbsolutePath());
+					}
+					loadedPropFiles.put(ff, true);
 					continue;
 				}
-				loadedPropFiles.add(f);
+				loadedPropFiles.put(ff, false);
 				try {
-					log.debug("loading @include: "+f);
-					load(new FileInputStream(f));
-					log.info("loaded @include: "+f);
+					log.debug("loading @include: "+ff.getAbsolutePath());
+					this.load(new FileInputStream(ff));
+					log.info("loaded @include: "+ff.getAbsolutePath());
 				} catch (IOException e) {
-					log.warn("error loading @include '"+f+"': "+e.getMessage());
-					log.debug("error loading @include: "+f, e);
+					log.warn("error loading @include '"+ff.getAbsolutePath()+"': "+e.getMessage());
+					log.debug("error loading @include: "+ff.getAbsolutePath(), e);
 				}
 			}
 		}

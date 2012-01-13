@@ -122,12 +122,12 @@ public class SQLDump {
 		File propFile = new File(propFilename);
 		
 		//init properties
-		log.info("loading properties: "+propFile);
-		papp.load(new FileInputStream(propFile));
-		
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
 		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+
+		log.info("loading properties: "+propFile);
+		papp.load(new FileInputStream(propFile));
 	}
 
 	void init(String[] args) throws Exception {

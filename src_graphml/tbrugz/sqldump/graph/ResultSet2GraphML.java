@@ -43,6 +43,7 @@ class WeightedEdge extends Edge {
  *      new query: OBJECT, OBJECT_TYPE, OBJECT_LABEL; remove from current query: SOURCE_TYPE, TARGET_TYPE
  *      'label/title node'?
  * XXX: *_TYPE columns should be optional
+ * XXX: add optional OBJECT_WIDTH, OBJECT_HEIGHT
  */
 public class ResultSet2GraphML extends AbstractSQLProc {
 	
@@ -52,18 +53,19 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 
 	//node cols
 	static final String COL_OBJECT = "OBJECT";
-	static final String COL_OBJECT_TYPE = "OBJECT_TYPE";
+	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //maybe optional?
 	static final String COL_OBJECT_LABEL = "OBJECT_LABEL";
 	
 	//edge cols
 	static final String COL_SOURCE = "SOURCE";
 	static final String COL_TARGET = "TARGET";
-	static final String COL_EDGE_TYPE = "EDGE_TYPE";
-	static final String COL_EDGE_WIDTH = "EDGE_WIDTH";
+	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //maybe optional?
+	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //maybe optional?
 	
 	//edge-only cols
-	static final String COL_SOURCE_TYPE = "SOURCE_TYPE";
-	static final String COL_TARGET_TYPE = "TARGET_TYPE";
+	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //maybe optional?
+	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //maybe optional?
+	//XXX: COL_SOURCE_LABEL, COL_EDGE_LABEL //optional
 	
 	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_TYPE, COL_OBJECT_LABEL };
 	static final String[] EDGE_COLS = { COL_SOURCE, COL_TARGET, COL_EDGE_TYPE, COL_EDGE_WIDTH };
@@ -78,7 +80,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static boolean doNotDumpNonConnectedNodes = true;
 	
 	//TODO: add property for 'edgeMinWidth' & 'edgeMaxWidth'
-	static double edgeMinWidth = 1.0; 
+	static double edgeMinWidth = 0.1; //XXX: maybe 0?
 	static double edgeMaxWidth = 7.0; 
 	
 	File output;

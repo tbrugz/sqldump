@@ -24,6 +24,7 @@ import tbrugz.sqldump.Utils;
  * TODO: one statement per file option
  * XXX: statements 'split-by' option
  * TODO: commit/autocommit? when? each X statements? config per processing?
+ * XXX: CSV importer?
  */
 public class SQLRegen {
 	
