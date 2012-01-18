@@ -320,7 +320,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			//	categorizedOut(fk.fkTableSchemaName, fk.fkTable, DBObjectType.TABLE, fkscript);
 			//}
 			//else {
-			categorizedOut(fk.fkTableSchemaName, fk.getName(), DBObjectType.FK, fkscript);
+			categorizedOut(fk.getSchemaName(), fk.getName(), DBObjectType.FK, fkscript);
 			//}
 		}
 		//out(sb.toString());

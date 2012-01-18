@@ -305,8 +305,8 @@ public class Schema2GraphML implements SchemaModelDumper {
 		}
 		l.referencesPK = fk.fkReferencesPK;
 		l.composite = fk.fkColumns.size()>1;
-		l.setSource(fk.getSourceId());
-		l.setTarget(fk.getTargetId());
+		l.setSource(getSourceId(fk));
+		l.setTarget(getTargetId(fk));
 		
 		return l;
 	}
@@ -408,6 +408,14 @@ public class Schema2GraphML implements SchemaModelDumper {
 		else {
 			stereo.setStereotype(str);
 		}
+	}
+	
+	public static String getSourceId(FK fk) {
+		return fk.pkTableSchemaName+"."+fk.pkTable;
+	}
+
+	public static String getTargetId(FK fk) {
+		return fk.fkTableSchemaName+"."+fk.fkTable;
 	}
 	
 	@Override

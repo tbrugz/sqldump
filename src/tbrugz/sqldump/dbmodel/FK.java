@@ -38,14 +38,6 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		this.name = name;
 	}*/
 
-	public String getSourceId() {
-		return pkTableSchemaName+"."+pkTable;
-	}
-
-	public String getTargetId() {
-		return fkTableSchemaName+"."+fkTable;
-	}
-
 	public int compareTo(FK o) {
 		int fkCompare = fkTable.compareTo(o.fkTable);
 		if(fkCompare==0) { //if same FK Table, compare FK Name
@@ -77,4 +69,8 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		return false;
 	}
 	
+	@Override
+	public String getSchemaName() {
+		return fkTableSchemaName;
+	}
 }

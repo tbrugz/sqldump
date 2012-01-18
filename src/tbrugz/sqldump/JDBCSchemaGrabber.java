@@ -510,6 +510,13 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fk.fkTable = fkrs.getString("FKTABLE_NAME");
 				fk.pkTableSchemaName = fkrs.getString("PKTABLE_SCHEM");
 				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
+				String pkTableCatalog = fkrs.getString("PKTABLE_CAT");
+				String fkTableCatalog = fkrs.getString("FKTABLE_CAT");
+				
+				//for MySQL
+				if(fk.pkTableSchemaName==null && pkTableCatalog!=null) { fk.pkTableSchemaName = pkTableCatalog; }
+				if(fk.fkTableSchemaName==null && fkTableCatalog!=null) { fk.fkTableSchemaName = fkTableCatalog; }
+				
 				if(askForUkType) {
 					try {
 						fk.fkReferencesPK = "P".equals(fkrs.getString("UK_CONSTRAINT_TYPE"));

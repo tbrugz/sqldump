@@ -14,6 +14,7 @@ import tbrugz.sqldump.datadump.DumpSyntax;
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
 //XXX: option to log each 'n' rows dumped
+//XXX: option to dump schema corresponding to queries data
 public class SQLQueries extends AbstractSQLProc {
 	
 	static final String PROP_QUERIES = "sqldump.queries";
