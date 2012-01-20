@@ -3,7 +3,6 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +27,9 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
+/*
+ * TODO: quote object names when they contain strange symbols (like "-")
+ */
 public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
 	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
@@ -49,7 +51,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	boolean dumpDropStatements = false;
 	boolean dumpWithCreateOrReplace = false;
 	
-	Properties dbmsSpecificsProperties;
+	//Properties dbmsSpecificsProperties;
 	String fromDbId, toDbId;
 	
 	String mainOutputFilePattern;
@@ -92,7 +94,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 
 		//dumpPKs = doSchemaDumpPKs;
-		fromDbId = prop.getProperty(SQLDump.PROP_FROM_DB_ID);
+		fromDbId = DBMSResources.instance().dbid();
 		toDbId = prop.getProperty(SQLDump.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
@@ -121,7 +123,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			}
 		}
 		
-		dbmsSpecificsProperties = new ParametrizedProperties();
+		/*dbmsSpecificsProperties = new ParametrizedProperties();
 		try {
 			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
 			if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
@@ -129,7 +131,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		catch(IOException ioe) {
 			log.warn("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
-		}
+		}*/
 		
 		for(DBObjectType dbtype: DBObjectType.values()) {
 			DBObjectType typeMappedTo = null;
@@ -167,7 +169,8 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		
-		if(fromDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId ); }
+		//if(fromDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId ); }
+		colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, DBMSResources.instance().dbid());
 		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
@@ -390,7 +393,8 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		Set<String> privsToDump = new TreeSet<String>();
 		if(toDbId!=null && !toDbId.equals("")) {
-			String sPriv = dbmsSpecificsProperties.getProperty("privileges."+toDbId);
+			String sPriv = DBMSResources.instance().getPrivileges(toDbId);
+			//dbmsSpecificsProperties.getProperty("privileges."+toDbId);
 			if(sPriv!=null) {
 				String[] privs = sPriv.split(",");
 				for(String priv: privs) {

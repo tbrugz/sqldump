@@ -63,6 +63,7 @@ import org.apache.log4j.Logger;
  * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
  * XXX: option for queries (or specific queries) to have specific syntax-dumpers
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
+ * TODO: output ffc with optional trimming
  */
 public class SQLDump {
 	
@@ -133,6 +134,8 @@ public class SQLDump {
 	void init(String[] args) throws Exception {
 		SQLDump.init(args, papp);
 		
+		DBMSResources.instance().setup(papp);
+		
 		//init control vars
 		doSchemaDump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP, doSchemaDump);
 		doTests = Utils.getPropBool(papp, PROP_DO_TESTS, doTests);
@@ -170,6 +173,7 @@ public class SQLDump {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
 					sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
+					DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
@@ -193,7 +197,10 @@ public class SQLDump {
 		}
 		
 		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
-			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
+			if(sdd.conn==null) {
+				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
+				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
+			}
 			SQLQueries sqlq = new SQLQueries();
 			sqlq.setProperties(sdd.papp);
 			sqlq.setConnection(sdd.conn);
@@ -204,7 +211,10 @@ public class SQLDump {
 		//TODO: add tests, queries
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
 		if(processingClassesStr!=null) {
-			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
+			if(sdd.conn==null) {
+				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
+				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
+			}
 			String processingClasses[] = processingClassesStr.split(",");
 			for(String procClass: processingClasses) {
 				AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGE);
@@ -245,6 +255,10 @@ public class SQLDump {
 		//dumping data
 		//if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
 		if(sdd.doDataDump && schemaGrabber!=null) {
+			if(sdd.conn==null) {
+				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
+				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
+			}
 			DataDump dd = new DataDump();
 			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
 			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);

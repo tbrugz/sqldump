@@ -51,7 +51,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	Properties papp = new ParametrizedProperties();
 	Properties propOriginal;
-	Properties dbmsSpecificResource = new ParametrizedProperties();
+	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
 	boolean doSchemaGrabPKs = true, 
 			doSchemaGrabFKs = true, 
@@ -75,11 +75,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 
-		try {
+		/*try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	public void setConnection(Connection conn) {
@@ -109,7 +109,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	public SchemaModel grabSchema() {
 		try {
 		
-		if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
+		/*if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
 			String dbid = detectDbId(conn.getMetaData());
 			if(dbid!=null) {
 				log.info("database type identifier: "+dbid);
@@ -117,9 +117,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				propOriginal.setProperty(SQLDump.PROP_FROM_DB_ID, dbid);
 			}
 			else { log.warn("can't detect database type"); }
-		}
+		}*/
 
-		DBMSFeatures feats = grabDbSpecificFeaturesClass();
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		showDBInfo(conn.getMetaData());
 		
@@ -404,30 +404,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		DBMSFeatures feats = grabDbSpecificFeaturesClass();
-		if(feats!=null) feats.grabDBObjects(model, schemaPattern, conn);
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		if(feats!=null) { feats.grabDBObjects(model, schemaPattern, conn); }
 	}
 
-	DBMSFeatures grabDbSpecificFeaturesClass() {
-		String dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+papp.getProperty(SQLDump.PROP_FROM_DB_ID)+".specificgrabclass");
-		if(dbSpecificFeaturesClass!=null) {
-			//XXX: call Utils.getClassByName()
-			try {
-				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				of.procProperties(papp);
-				return of;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-		return new DefaultDBMSFeatures();
-	}
-	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
@@ -557,41 +537,22 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				boolean bNonUnique = indexesrs.getBoolean("NON_UNIQUE");
 				idx.unique = !bNonUnique;
 				
-				/*String nonUnique = indexesrs.getString("NON_UNIQUE");
-				if("false".equalsIgnoreCase(nonUnique) || "f".equalsIgnoreCase(nonUnique) || "0".equalsIgnoreCase(nonUnique)) {
-					idx.unique = true;
-				}
-				else {
-					idx.unique = false;
-				}
-				log.debug("index: '"+idx.name+"', non-unique: "+nonUnique+" // "+bNonUnique);
-				//idx.unique = indexesrs.getInt("NON_UNIQUE")==0;*/
-				
 				idx.schemaName = indexesrs.getString("TABLE_SCHEM");
 				idx.tableName = indexesrs.getString("TABLE_NAME");
+				String catName = indexesrs.getString("TABLE_CAT");
+
+				//for MySQL
+				if(idx.schemaName==null && catName!=null) { idx.schemaName = catName; }
+				if(idx.name.equals("PRIMARY")) {
+					idx.name = "PK_"+idx.tableName;
+				}
+				
 			}
 			idx.columns.add(indexesrs.getString("COLUMN_NAME"));
 		}
 		if(idx!=null) {
 			indexes.add(idx);
 		}
-	}
-	
-	String detectDbId(DatabaseMetaData dbmd) {
-		try {
-			String dbProdName = dbmd.getDatabaseProductName();
-			String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
-			String[] dbIds = dbIdsProp.split(",");
-			for(String dbid: dbIds) {
-				String regex = dbmsSpecificResource.getProperty("dbid."+dbid.trim()+".detectregex");
-				if(regex==null) { continue; }
-				if(dbProdName.matches(regex)) { return dbid.trim(); }
-			}
-		} catch (SQLException e) {
-			log.warn("Error detecting database type: "+e);
-			log.debug("Error detecting database type",e);
-		}
-		return null;
 	}
 	
 	static void closeResultSetAndStatement(ResultSet rs) {

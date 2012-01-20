@@ -194,8 +194,10 @@ public class DataDump {
 
 			log.debug("dumping data/inserts from table: "+tableName);
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
+			String quote = DBMSResources.instance().getSQLQuoteString();
+			
 			String sql = "select "+selectColumns
-					+" from "+(table.schemaName!=null?table.schemaName+".":"")+tableName
+					+" from "+(table.schemaName!=null?table.schemaName+".":"")+quote+tableName+quote
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);

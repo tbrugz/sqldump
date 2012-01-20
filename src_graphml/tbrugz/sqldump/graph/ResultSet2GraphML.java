@@ -174,7 +174,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		}
 		for(WeightedEdge e: edges) {
 			if(!nodeSet.contains(e.getSource())) { log.warn("node source '"+e.getSource()+"' not found"); continue; }
-			if(!nodeSet.contains(e.getTarget())) { log.warn("node target '"+e.getSource()+"' not found"); continue; }
+			if(!nodeSet.contains(e.getTarget())) { log.warn("node target '"+e.getTarget()+"' not found"); continue; }
 			
 			log.debug("edge '"+e+"' ["+e.getName()+"] has stereotype: "+e.getStereotype()+"; oldW: "+e.getWidth()+", newW: "+getNewWidth(e.getWidth(), minWidth, maxWidth));
 			e.setWidth(getNewWidth(e.getWidth(), minWidth, maxWidth));

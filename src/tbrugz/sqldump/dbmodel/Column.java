@@ -43,9 +43,8 @@ public class Column extends DBIdentifiable implements Serializable {
 	private static final long serialVersionUID = 1L;
 	static Logger log = Logger.getLogger(Column.class);
 	
-	//public String name;
 	public String type;
-	public int columSize;
+	public int columSize; //XXX: should be Integer? for columns that doesn't have precision could be null
 	public Integer decimalDigits;
 	transient boolean pk; //XXXdone: should be transient? add PK info into constraint? yes, yes
 	public boolean nullable;

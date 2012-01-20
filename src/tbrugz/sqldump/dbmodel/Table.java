@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.DBMSResources;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
@@ -72,7 +73,7 @@ public class Table extends DBObject {
 		for(Column c: columns) {
 			String colDesc = null;
 			if(colTypeConversionProp!=null) {
-				colDesc = Column.getColumnDesc(c, colTypeConversionProp, colTypeConversionProp.getProperty(SQLDump.PROP_FROM_DB_ID), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+				colDesc = Column.getColumnDesc(c, colTypeConversionProp, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
 			}
 			else {
 				colDesc = Column.getColumnDesc(c, null, null, null);
