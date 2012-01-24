@@ -61,6 +61,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
 	public static final String PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY = "sqldump.mondrianschema.adddimforeachhierarchy";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREDIMS = "sqldump.mondrianschema.ignoredims";
+	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE = "sqldump.mondrianschema.ignorecubewithnomeasure";
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -73,6 +74,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	List<String> ignoreDims = new ArrayList<String>();
 	boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
 	boolean addDimForEachHierarchy = false;
+	boolean ignoreCubesWithNoMeasure = true;
 	
 	{
 		try {
@@ -80,7 +82,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("/mondrianxsd.properties"));
 			String[] ntypes = mondrianProp.getProperty("type.numeric").split(",");
 			for(String s: ntypes) {
-				numericTypes.add(s.trim());
+				numericTypes.add(s.toUpperCase().trim());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -120,6 +122,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		
 		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
+		ignoreCubesWithNoMeasure = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE, ignoreCubesWithNoMeasure);
 	}
 
 	@Override
@@ -186,7 +189,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					}
 				}
 
-				if(!numericTypes.contains(c.type)) {
+				if(!numericTypes.contains(c.type.toUpperCase())) {
 					log.debug("not a measure column type: "+c.type);
 					ok = false;
 				}
@@ -206,6 +209,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			if(cube.getMeasure().size()==0) {
+				if(ignoreCubesWithNoMeasure) {
+					log.info("cube '"+cube.getName()+"' has no measure: ignoring");
+					continue;
+				}
 				log.warn("cube '"+cube.getName()+"' has no measure...");
 			}
 			
