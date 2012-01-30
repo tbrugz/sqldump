@@ -5,8 +5,7 @@ import java.util.Collection;
 import javax.xml.bind.annotation.XmlTransient;
 
 public abstract class DBIdentifiable {
-	@XmlTransient
-	public String schemaName;
+	String schemaName;
 
 	@XmlTransient
 	public String name;

@@ -38,7 +38,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			case RENAME:
 				return "ALTER TABLE "+renameFrom+" RENAME TO "+table.name;
 			case DROP:
-				return "DROP table "+(table.schemaName!=null?table.schemaName+".":"")+table.name;
+				return "DROP table "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+table.name;
 		}
 		return null;
 	}

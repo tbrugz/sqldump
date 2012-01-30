@@ -197,7 +197,7 @@ public class DataDump {
 			String quote = DBMSResources.instance().getSQLQuoteString();
 			
 			String sql = "select "+selectColumns
-					+" from "+(table.schemaName!=null?table.schemaName+".":"")+quote+tableName+quote
+					+" from "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+quote+tableName+quote
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);

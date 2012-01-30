@@ -69,7 +69,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			v.name = rs.getString(3);
 			v.query = rs.getString(4);
 			v.query = v.query.substring(0, v.query.length()-2);
-			v.schemaName = schemaPattern;
+			v.setSchemaName( schemaPattern );
 			v.checkOption = View.CheckOptionType.valueOf(rs.getString(5)); //"YES".equalsIgnoreCase(rs.getString(5));
 			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));
 			model.getViews().add(v);
@@ -105,7 +105,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				model.getTriggers().add(t);
 				count++;
 			}
-			t.schemaName = schemaName;
+			t.setSchemaName( schemaName );
 			t.name = name;
 			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
@@ -135,7 +135,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			InformationSchemaRoutine eo = new InformationSchemaRoutine();
-			eo.schemaName = schemaPattern;
+			eo.setSchemaName( schemaPattern );
 			eo.name = rs.getString(1);
 			try {
 				eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
@@ -167,7 +167,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			Sequence s = new Sequence();
-			s.schemaName = schemaPattern;
+			s.setSchemaName( schemaPattern );
 			s.name = rs.getString(1);
 			s.minValue = rs.getLong(2);
 			s.incrementBy = 1; //rs.getLong(3);

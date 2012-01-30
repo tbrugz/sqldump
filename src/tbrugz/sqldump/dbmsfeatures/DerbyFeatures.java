@@ -58,7 +58,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			v.name = rs.getString(1);
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
 			v.query = rs.getString(3);
-			v.schemaName = schemaPattern;
+			v.setSchemaName( schemaPattern );
 			model.getViews().add(v);
 			count++;
 		}
@@ -83,7 +83,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			InformationSchemaTrigger t = new InformationSchemaTrigger();
 			//t.addSplitter = true;
 			t.name = rs.getString(1);
-			t.schemaName = schemaPattern;
+			t.setSchemaName( schemaPattern );
 			//t.tableName = rs.getString(3);
 			//t.description = rs.getString(4);
 			//t.description = t.schemaName+"."+t.name+" as";
@@ -122,7 +122,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			Sequence s = new Sequence();
-			s.schemaName = schemaPattern;
+			s.setSchemaName( schemaPattern );
 			s.name = rs.getString(1);
 			s.minValue = rs.getLong(2);
 			s.maxValue = rs.getLong(3);

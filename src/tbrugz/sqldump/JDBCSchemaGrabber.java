@@ -263,7 +263,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			//defining model
 			Table table = dbmsfeatures.getTableObject();
 			table.name = tableName;
-			table.schemaName = schemaName;
+			table.setSchemaName(schemaName);
 			table.setType(ttype);
 			table.setRemarks(rs.getString("REMARKS"));
 			if(domainTables!=null && domainTables.contains(table.name)) {
@@ -273,11 +273,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {
-				String fullTablename = (schemaPattern==null?"":table.schemaName+".")+tableName;
+				String fullTablename = (schemaPattern==null?"":table.getSchemaName()+".")+tableName;
 				log.debug("getting columns from "+fullTablename);
 
 				//columns
-				ResultSet cols = dbmd.getColumns(null, table.schemaName, tableName, null);
+				ResultSet cols = dbmd.getColumns(null, table.getSchemaName(), tableName, null);
 				int numCol = 0;
 				while(cols.next()) {
 					Column c = retrieveColumn(cols);
@@ -295,7 +295,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//PKs
 				if(doSchemaGrabPKs) {
 					log.debug("getting PKs from "+fullTablename);
-					ResultSet pks = dbmd.getPrimaryKeys(null, table.schemaName, tableName);
+					ResultSet pks = dbmd.getPrimaryKeys(null, table.getSchemaName(), tableName);
 					grabSchemaPKs(pks, table);
 					closeResultSetAndStatement(pks);
 				}
@@ -303,7 +303,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//FKs
 				if(doSchemaGrabFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting FKs from "+fullTablename);
-					ResultSet fkrs = dbmd.getImportedKeys(null, table.schemaName, tableName);
+					ResultSet fkrs = dbmd.getImportedKeys(null, table.getSchemaName(), tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					closeResultSetAndStatement(fkrs);
 				}
@@ -311,7 +311,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//FKs "exported"
 				if(doSchemaGrabExportedFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting 'exported' FKs from "+fullTablename);
-					ResultSet fkrs = dbmd.getExportedKeys(null, table.schemaName, tableName);
+					ResultSet fkrs = dbmd.getExportedKeys(null, table.getSchemaName(), tableName);
 					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
 					closeResultSetAndStatement(fkrs);
 				}
@@ -319,7 +319,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//GRANTs
 				if(doSchemaGrabGrants) {
 					log.debug("getting grants from "+fullTablename);
-					ResultSet grantrs = dbmd.getTablePrivileges(null, table.schemaName, tableName);
+					ResultSet grantrs = dbmd.getTablePrivileges(null, table.getSchemaName(), tableName);
 					table.setGrants( grabSchemaGrants(grantrs, tableName) );
 					closeResultSetAndStatement(grantrs);
 				}
@@ -327,7 +327,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//INDEXes
 				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.getType()) && !tableOnly) {
 					log.debug("getting indexes from "+fullTablename);
-					ResultSet indexesrs = dbmd.getIndexInfo(null, table.schemaName, tableName, false, false);
+					ResultSet indexesrs = dbmd.getIndexInfo(null, table.getSchemaName(), tableName, false, false);
 					grabSchemaIndexes(indexesrs, schemaModel.indexes);
 					closeResultSetAndStatement(indexesrs);
 				}
@@ -398,7 +398,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
 		for(Table t: tables) {
-			if(t.name.equals(tableName) && t.schemaName.equals(schemaName)) return true;
+			if(t.name.equals(tableName) && t.getSchemaName().equals(schemaName)) return true;
 		}
 		return false;
 	}
@@ -537,12 +537,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				boolean bNonUnique = indexesrs.getBoolean("NON_UNIQUE");
 				idx.unique = !bNonUnique;
 				
-				idx.schemaName = indexesrs.getString("TABLE_SCHEM");
+				idx.setSchemaName( indexesrs.getString("TABLE_SCHEM") );
 				idx.tableName = indexesrs.getString("TABLE_NAME");
 				String catName = indexesrs.getString("TABLE_CAT");
 
 				//for MySQL
-				if(idx.schemaName==null && catName!=null) { idx.schemaName = catName; }
+				if(idx.getSchemaName()==null && catName!=null) { idx.setSchemaName( catName ); }
 				if(idx.name.equals("PRIMARY")) {
 					idx.name = "PK_"+idx.tableName;
 				}

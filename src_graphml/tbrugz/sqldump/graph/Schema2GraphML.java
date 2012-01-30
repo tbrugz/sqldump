@@ -182,14 +182,14 @@ public class Schema2GraphML implements SchemaModelDumper {
 				}
 			}
 			
-			if(t.schemaName!=null && schemaNamesList.contains(t.schemaName)) {
+			if(t.getSchemaName()!=null && schemaNamesList.contains(t.getSchemaName())) {
 				if(addSchemaStereotype) {
-					addStereotype(n, "schema@"+t.schemaName);
+					addStereotype(n, "schema@"+t.getSchemaName());
 				}
 			}
 			else {
 				if(addSchemaStereotype) {
-					addStereotype(n, "otherschema.schema@"+t.schemaName);
+					addStereotype(n, "otherschema.schema@"+t.getSchemaName());
 				}
 				else {
 					addStereotype(n, "otherschema");

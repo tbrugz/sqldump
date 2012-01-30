@@ -85,7 +85,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			View v = new View();
 			v.name = rs.getString(2);
 			v.query = rs.getString(4);
-			v.schemaName = schemaPattern;
+			v.setSchemaName(schemaPattern);
 			model.getViews().add(v);
 			count++;
 		}
@@ -108,7 +108,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			MaterializedView v = new MaterializedView();
 			v.name = rs.getString(2);
 			v.query = rs.getString(4);
-			v.schemaName = schemaPattern;
+			v.setSchemaName(schemaPattern);
 			//v.materialized = true;
 			model.getViews().add(v);
 			count++;
@@ -131,7 +131,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		while(rs.next()) {
 			Trigger t = new Trigger();
 			t.name = rs.getString(1);
-			t.schemaName = rs.getString(2);
+			t.setSchemaName(rs.getString(2));
 			t.tableName = rs.getString(3);
 			t.description = rs.getString(4);
 			t.body = rs.getString(5);
@@ -180,7 +180,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					eo.type = DBObjectType.EXECUTABLE;
 				}
 				
-				eo.schemaName = schemaPattern;
+				eo.setSchemaName(schemaPattern);
 			}
 			sb.append(rs.getString(4)); //+"\n"
 			count++;
@@ -208,7 +208,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		while(rs.next()) {
 			Synonym s = new Synonym();
 			s.name = rs.getString(1);
-			s.schemaName = schemaPattern;
+			s.setSchemaName(schemaPattern);
 			s.objectOwner = rs.getString(2);
 			s.referencedObject = rs.getString(3);
 			s.dbLink = rs.getString(4);
@@ -270,7 +270,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				idx = new Index();
 				idx.name = idxName;
 				idx.unique = rs.getString(3).equals("UNIQUE");
-				idx.schemaName = rs.getString(1);
+				idx.setSchemaName(rs.getString(1));
 				setIndexType(idx, rs.getString(4));
 				idx.tableName = rs.getString(5);
 				if("LOCAL".equals(rs.getString("LOCALITY"))) {
@@ -311,7 +311,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		while(rs.next()) {
 			Sequence s = new Sequence();
 			s.name = rs.getString(1);
-			s.schemaName = schemaPattern;
+			s.setSchemaName(schemaPattern);
 			s.minValue = rs.getLong(2);
 			s.incrementBy = rs.getLong(3);
 			s.lastNumber = rs.getLong(4);
@@ -468,7 +468,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		String query = "select column_name, column_position "
 				+"from all_part_key_columns "
 				+"where object_type = 'TABLE' "
-				+"and owner = '"+ot.schemaName+"' "
+				+"and owner = '"+ot.getSchemaName()+"' "
 				+"and name = '"+ot.name+"' "
 				+"order by name, column_position ";
 		
@@ -487,7 +487,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	void getPartitions(OracleTable ot, Connection conn) throws SQLException {
 		String query = "select table_owner, table_name, partition_name, partition_position, tablespace_name, high_value, high_value_length "
 				+"from all_tab_partitions "
-				+"where table_owner = '"+ot.schemaName+"' "
+				+"where table_owner = '"+ot.getSchemaName()+"' "
 				+"and table_name = '"+ot.name+"' "
 				+"order by table_name, partition_position ";
 		

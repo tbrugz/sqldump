@@ -80,6 +80,11 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	 */
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
+		if(schemaModel==null) {
+			log.warn("schemaModel null, nothing to dump");
+			return;
+		}
+		
 		try {
 
 		if(fileOutput==null) {
@@ -159,7 +164,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			if(!pkTableHasIndex) {
 				Index idx = new Index();
 				idx.tableName = fk.pkTable;
-				idx.schemaName = fk.pkTableSchemaName;
+				idx.setSchemaName(fk.pkTableSchemaName);
 				idx.unique = false;
 				idx.columns.addAll(fk.pkColumns);
 				idx.name = fk.pkTable + "_" + suggestAcronym(idx.columns) + "_UKI"; //_" + (indexes.size()+1);
@@ -169,7 +174,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			if(!fkTableHasIndex) {
 				Index idx = new Index();
 				idx.tableName = fk.fkTable;
-				idx.schemaName = fk.fkTableSchemaName;
+				idx.setSchemaName(fk.fkTableSchemaName);
 				idx.unique = false;
 				idx.columns.addAll(fk.fkColumns);
 				idx.name = fk.fkTable + "_" + suggestAcronym(idx.columns) + "_FKI";
@@ -237,10 +242,10 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 						//Create FK
 						FK fk = new FK();
 						fk.pkTable = table.name;
-						fk.pkTableSchemaName = table.schemaName;
+						fk.pkTableSchemaName = table.getSchemaName();
 						fk.pkColumns.addAll(cons.uniqueColumns);
 						fk.fkTable = otherT.name;
-						fk.fkTableSchemaName = otherT.schemaName;
+						fk.fkTableSchemaName = otherT.getSchemaName();
 						fk.fkColumns.addAll(cons.uniqueColumns);
 						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
 						fk.name = suggestAcronym(fk.fkTable) + "_" + suggestAcronym(fk.pkTable) + "_FK";
@@ -285,7 +290,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	int writeIndexes(Set<Index> indexes, FileWriter fos) throws IOException {
 		int dumpCounter = 0;
 		for(Index idx: indexes) {
-			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(idx.schemaName))) {
+			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(idx.getSchemaName()))) {
 				fos.write( idx.getDefinition(true)+";\n\n" );
 				dumpCounter++;
 			}
