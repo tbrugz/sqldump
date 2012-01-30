@@ -49,6 +49,7 @@ public abstract class DBIdentifiable {
 		if(ident instanceof Index) { return DBObjectType.INDEX; }
 		if(ident instanceof Sequence) { return DBObjectType.SEQUENCE; }
 		if(ident instanceof Synonym) { return DBObjectType.SYNONYM; }
+		if(ident instanceof Table) { return DBObjectType.TABLE; }
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
 		if(ident instanceof View) { return DBObjectType.VIEW; }
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());

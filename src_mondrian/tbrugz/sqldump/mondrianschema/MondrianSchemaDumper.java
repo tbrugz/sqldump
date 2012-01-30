@@ -21,6 +21,8 @@ import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -62,6 +64,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY = "sqldump.mondrianschema.adddimforeachhierarchy";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREDIMS = "sqldump.mondrianschema.ignoredims";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE = "sqldump.mondrianschema.ignorecubewithnomeasure";
+	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION = "sqldump.mondrianschema.ignorecubewithnodimension";
+	public static final String PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS = "sqldump.mondrianschema.preferedlevelnamecolumns"; // { "label", "name" };
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -75,6 +79,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
 	boolean addDimForEachHierarchy = false;
 	boolean ignoreCubesWithNoMeasure = true;
+	boolean ignoreCubesWithNoDimension = true;
+	
+	//FIXedME: property for it, and list of possible column names
+	List<String> preferredLevelNameColumns = new ArrayList<String>();
 	
 	{
 		try {
@@ -120,9 +128,12 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 		}
 		
+		preferredLevelNameColumns = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS, ",");
+		
 		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
 		ignoreCubesWithNoMeasure = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE, ignoreCubesWithNoMeasure);
+		ignoreCubesWithNoDimension = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION, ignoreCubesWithNoDimension);
 	}
 
 	@Override
@@ -163,7 +174,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			cube.setName(t.name);
 			tbrugz.mondrian.xsdmodel.Table xt = new tbrugz.mondrian.xsdmodel.Table();
 			xt.setName(t.name);
-			xt.setSchema(t.schemaName);
+			xt.setSchema(t.getSchemaName());
 			cube.setTable(xt);
 
 			List<String> measureCols = new ArrayList<String>();
@@ -235,20 +246,6 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				if(ignoreDims.contains(dimName)) {
 					continue;
 				}
-				/*Level level = new Level();
-				level.setName(dimName);
-				String levelName = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.getName()+".levelnamecol");
-				if(levelName!=null) {
-					level.setNameColumn(levelName);
-				}
-				level.setColumn(fk.pkColumns.iterator().next());
-				level.setLevelType("Regular");
-				
-				Hierarchy hier = new Hierarchy();
-				hier.setName(dimName);
-				hier.setPrimaryKey(fk.pkColumns.iterator().next());
-				hier.setTable(pkTable);
-				hier.getLevel().add(level);*/
 
 				procHierRecursiveInit(schemaModel, cube, fk, dimName);
 				
@@ -262,7 +259,6 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				
 				if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
 					for(int i=0; i < dim.getHierarchy().size() ; i++) {
-						//XXX one hierarchy per dimension (keep first? last? longest? preferwithtable[X]?)
 						if(i!=0) { //first
 							log.debug("[one hierarchy per dimension; dim='"+dim.getName()+"'] removing hierarchy: "+dim.getHierarchy().get(i).getName());
 							dim.getHierarchy().remove(i);
@@ -306,6 +302,14 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
+			if(cube.getDimensionUsageOrDimension().size()==0) {
+				if(ignoreCubesWithNoDimension) {
+					log.info("cube '"+cube.getName()+"' has no dimension: ignoring");
+					continue;
+				}
+				log.warn("cube '"+cube.getName()+"' has no dimensions");
+			}
+			
 			schema.getCube().add(cube);
 		}
 		
@@ -335,7 +339,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		dim.setType("StandardDimension");
 		
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
-		procHierRecursive(schemaModel, cube, dim, fk, fk.schemaName, fk.pkTable, levels);
+		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.pkTable, levels);
 		
 		if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
 			for(int i=dim.getHierarchy().size()-1; i >= 0; i--) {
@@ -361,9 +365,25 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 
 		HierarchyLevelData level = new HierarchyLevelData();
 		level.levelName = pkTableName;
-		String levelName = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.levelName+".levelnamecol");
-		if(levelName!=null) {
-			level.levelNameColumn = levelName;
+		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.levelName+".levelnamecol");
+		if(levelNameColumn!=null) {
+			level.levelNameColumn = levelNameColumn;
+		}
+		else if(preferredLevelNameColumns!=null) {
+			Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.pkTable);
+			if(pkTable!=null) {
+				//checking if column exists
+				for(String colName: preferredLevelNameColumns) {
+					if(pkTable.getColumn(colName)!=null) {
+						log.debug("level column name: "+colName);
+						level.levelNameColumn = colName;
+						break;
+					}
+				}
+			}
+			else {
+				log.warn("table not found: "+schemaName+"."+fk.pkTable);
+			}
 		}
 		level.levelColumn = fk.pkColumns.iterator().next();
 		level.levelType = "Regular";
