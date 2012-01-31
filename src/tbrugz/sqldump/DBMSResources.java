@@ -11,6 +11,8 @@ public class DBMSResources {
 
 	static Logger log = Logger.getLogger(DBMSResources.class);
 	
+	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
+	
 	String dbId;
 	Properties papp;
 	Properties dbmsSpecificResource = new ParametrizedProperties();
@@ -33,7 +35,7 @@ public class DBMSResources {
 	}*/
 	
 	void updateMetaData(DatabaseMetaData dbmd) {
-		if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT) && dbmd !=null) {
+		if(Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) && dbmd !=null) {
 			String dbid = detectDbId(dbmd);
 			if(dbid!=null) {
 				log.info("database type identifier: "+dbid);
@@ -55,9 +57,24 @@ public class DBMSResources {
 			String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
 			String[] dbIds = dbIdsProp.split(",");
 			for(String dbid: dbIds) {
-				String regex = dbmsSpecificResource.getProperty("dbid."+dbid.trim()+".detectregex");
+				dbid = dbid.trim();
+				String regex = dbmsSpecificResource.getProperty("dbid."+dbid+".detectregex");
 				if(regex==null) { continue; }
-				if(dbProdName.matches(regex)) { return dbid.trim(); }
+				if(!dbProdName.matches(regex)) { continue; }
+				
+				Long majorVersionEQorLess = Utils.getPropLong(dbmsSpecificResource, "dbid."+dbid+".detectversion.major.equalorless");
+
+				if(majorVersionEQorLess==null) { return dbid; }
+				if(dbmd.getDatabaseMajorVersion() < majorVersionEQorLess) { return dbid; }
+				if(dbmd.getDatabaseMajorVersion() > majorVersionEQorLess) { continue; }
+
+				//equal major version...
+				Long minorVersionEQorLess = Utils.getPropLong(dbmsSpecificResource, "dbid."+dbid+".detectversion.minor.equalorless");
+				if(minorVersionEQorLess==null) { return dbid; }
+				//if(dbmd.getDatabaseMinorVersion() <= minorVersionEQorLess) { return dbid; }
+				if(dbmd.getDatabaseMinorVersion() > minorVersionEQorLess) { continue; }
+				
+				return dbid;
 			}
 		} catch (SQLException e) {
 			log.warn("Error detecting database type: "+e);
@@ -101,6 +118,8 @@ public class DBMSResources {
 
 	static String DEFAULT_QUOTE_STRING = "\"";
 	
+	/* DatabaseMetaData.getIdentifierQuoteString() already does it */
+	@Deprecated
 	public String getSQLQuoteString() {
 		//log.debug("quote ["+dbId+"]: "+dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring"));
 		return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);

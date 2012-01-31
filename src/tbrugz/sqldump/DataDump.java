@@ -194,7 +194,15 @@ public class DataDump {
 
 			log.debug("dumping data/inserts from table: "+tableName);
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
-			String quote = DBMSResources.instance().getSQLQuoteString();
+			String quoteold = DBMSResources.instance().getSQLQuoteString();
+			String quote = null;
+			try {
+				quote = conn.getMetaData().getIdentifierQuoteString();
+			}
+			catch(SQLException e) {
+				log.warn("sqlexception: "+e);
+			}
+			log.debug("quotes: ["+quoteold+"]["+quote+"]");
 			
 			String sql = "select "+selectColumns
 					+" from "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+quote+tableName+quote
