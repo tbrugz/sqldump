@@ -53,12 +53,12 @@ Usage (without sources)
 -----------------------
 - Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
 - Download all jars from [sqldump/lib](https://bitbucket.org/tbrugz/sqldump/src/tip/lib/) (hint: download all into a `lib` subfolder)
-- (windows) Download latest version of [sqldump.bat](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) template as `sqldump.bat`
+- (windows) Download latest version of [sqldump.bat](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) template as `sqldump.bat` or (unix-like) download latest version of [sqldump.sh](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) template as `sqldump.sh`
 - Download latest version of [sqldump.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) template as `sqldump.properties`
 - Download jdbc jars for your database of choice
-- Edit `sqldump.properties` and (windows) `sqldump.bat` (you may include command-line options at end)
+- Edit `sqldump.properties` and (windows) `sqldump.bat` or (unix-like) `sqldump.sh` (you may include command-line options at end)
 - (windows) Run `sqldump.bat`
-- (unix-like) Run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
+- (unix-like) Run `sqldump.sh` or run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
 Command-line options
