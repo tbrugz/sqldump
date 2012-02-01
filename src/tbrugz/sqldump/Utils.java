@@ -237,13 +237,17 @@ public class Utils {
 	}
 	
 	public static Long getPropLong(Properties prop, String key) {
+		return getPropLong(prop, key, null);
+	}
+	
+	public static Long getPropLong(Properties prop, String key, Long defaultValue) {
 		String str = prop.getProperty(key);
 		try {
 			long l = Long.parseLong(str);
 			return l;
 		}
 		catch(Exception e) {
-			return null;
+			return defaultValue;
 		}
 	}
 

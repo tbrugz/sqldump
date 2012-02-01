@@ -61,9 +61,11 @@ public class DataDump {
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
+	static final String PROP_DATADUMP_LOG_EACH_X_ROWS = "sqldump.datadump.logeachxrows";
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
+	static final long LOG_EACH_X_ROWS_DEFAULT = 10000;
 	
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
 	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
@@ -194,15 +196,18 @@ public class DataDump {
 
 			log.debug("dumping data/inserts from table: "+tableName);
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
-			String quoteold = DBMSResources.instance().getSQLQuoteString();
 			String quote = null;
 			try {
 				quote = conn.getMetaData().getIdentifierQuoteString();
 			}
 			catch(SQLException e) {
-				log.warn("sqlexception: "+e);
+				log.warn("MetaData.getIdentifierQuoteString(): sqlexception: "+e);
+				log.info("MetaData.getIdentifierQuoteString(): sqlexception", e);
 			}
-			log.debug("quotes: ["+quoteold+"]["+quote+"]");
+			if(quote==null) {
+				quote = DBMSResources.instance().getSQLQuoteString();
+				log.debug("MetaData.getIdentifierQuoteString() returned null, quote is ["+quote+"]");
+			}
 			
 			String sql = "select "+selectColumns
 					+" from "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+quote+tableName+quote
@@ -275,7 +280,7 @@ public class DataDump {
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
 			//XXX: prop for setting 'logEachXRows'
-			long logEachXRows = 10000;
+			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 
 			//header
 			for(int i=0;i<syntaxList.size();i++) {

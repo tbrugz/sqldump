@@ -64,6 +64,7 @@ import org.apache.log4j.Logger;
  * XXX: option for queries (or specific queries) to have specific syntax-dumpers
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
+ * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
  */
 public class SQLDump {
 	

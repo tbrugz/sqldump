@@ -7,13 +7,13 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
 
-//XXX: partition over (columnX) - different outputfiles for different values of columnX
+//XXXdone: partition over (columnX) - different outputfiles for different values of columnX
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql
-//XXXxxx: add prop: sqldump.query.<x>.params=1,23,111
-//XXX: add prop: sqldump.query.<x>.param.pid_xx=1
+//XXXxxx: add prop: sqldump.query.<x>.params=1,23,111 ; sqldump.query.<x>.param.pid_xx=1
+//XXX: option to define bind parameters, eg., 'sqldump.query.<xxx>.bind.<yyy>=<zzz>'
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
-//XXX: option to log each 'n' rows dumped
+//XXXdone: option to log each 'n' rows dumped
 //XXX: option to dump schema corresponding to queries data
 public class SQLQueries extends AbstractSQLProc {
 	
