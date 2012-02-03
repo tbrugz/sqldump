@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="src_graphml"/>
 	<classpathentry kind="src" path="src_diff"/>
 	<classpathentry kind="src" path="src_xtra"/>
-	<classpathentry kind="src" path="src_regen"/>
+	<classpathentry kind="src" path="src_run"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>

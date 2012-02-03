@@ -40,9 +40,6 @@ public class DBMSResources {
 			if(dbid!=null) {
 				log.info("database type identifier: "+dbid);
 				this.dbId = dbid;
-				//FIXME: 
-				//papp.setProperty(SQLDump.PROP_FROM_DB_ID, dbid);
-				//propOriginal.setProperty(SQLDump.PROP_FROM_DB_ID, dbid);
 			}
 			else { log.warn("can't detect database type"); }
 		}

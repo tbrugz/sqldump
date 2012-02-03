@@ -1,7 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
 /*
- * XXX: materialized views should subclass 'View'?
  * TODO: comments on view and columns
  * 
  * XXXxx: check option: LOCAL, CASCADED, NONE

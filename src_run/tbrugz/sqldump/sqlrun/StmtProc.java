@@ -1,4 +1,4 @@
-package tbrugz.sqldump.sqlregen;
+package tbrugz.sqldump.sqlrun;
 
 import java.io.File;
 import java.io.FileNotFoundException;

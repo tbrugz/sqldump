@@ -42,7 +42,19 @@ public class SQLUtils {
 		public static Connection initDBConnection(String propsPrefix, Properties papp) throws Exception {
 			//init database
 			log.debug("initDBConnection...");
-			Class.forName(papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS));
+			
+			String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
+			if(driverClass==null) {
+				log.error("driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed");
+				return null;
+			}
+			String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
+			if(dbUrl==null) {
+				log.error("db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed");
+				return null;
+			}
+
+			Class.forName(driverClass);
 			
 			Properties p = new Properties();
 			p.setProperty(CONN_PROP_USER, papp.getProperty(propsPrefix+SUFFIX_USER, ""));
@@ -62,7 +74,7 @@ public class SQLUtils {
 				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
 			}
 
-			return DriverManager.getConnection(papp.getProperty(propsPrefix+SUFFIX_URL), p);
+			return DriverManager.getConnection(dbUrl, p);
 		}
 	}
 

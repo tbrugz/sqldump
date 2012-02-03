@@ -33,8 +33,10 @@ import tbrugz.sqldump.dbmodel.Table;
  * - XXX: test if FK is possible (all values in fkTable exists in pkTable) - needs connection, can be very time consuming
  * - XXX: test column types
  * 
- * XXX: suggest PKs/UKs for tables [that doesn't have one?]
- * - if count(*) == select count(*) from (select distinct colX) - good candidate
+ * XXX: suggest PKs/UKs for tables [that doesn't have one?] - needs connection, can be time-consuming
+ * -> if count(*) == select count(*) from (select distinct colX) - good candidate
+ * - do not suggest if table has 0 or 1 rows 
+ * - [optional] do not suggest if table has less than X rows
  * -- 1st: test for each column; 
  * -- 2nd: test for each 2-col combination that doesn't include known PK/UK
  * -- 3rd+: test for each [2+]-col combination ...
@@ -94,6 +96,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		
 		FileWriter fos = new FileWriter(fileOutput, false);
 		
+		//XXX: do not dump suggested indexes if indexes hasn't been grabbed
 		Set<Index> addIndexes = dumpCreateIndexes(schemaModel, schemaModel.getForeignKeys());
 		if(addIndexes.size()>0) {
 			simpleOut("-- indexes", fos);

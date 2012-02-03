@@ -1,4 +1,4 @@
-package tbrugz.sqldump.sqlregen;
+package tbrugz.sqldump.sqlrun;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,15 +26,15 @@ import tbrugz.sqldump.Utils;
  * TODO: commit/autocommit? when? each X statements? config per processing?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
 */
-public class SQLRegen {
+public class SQLRun {
 	
-	static Logger log = Logger.getLogger(SQLRegen.class);
+	static Logger log = Logger.getLogger(SQLRun.class);
 	
-	static final String PROPERTIES_FILENAME = "sqlregen.properties";
-	static final String CONN_PROPS_PREFIX = "sqlregen"; 
+	static final String PROPERTIES_FILENAME = "sqlrun.properties";
+	static final String CONN_PROPS_PREFIX = "sqlrun"; 
 	
 	//prefixes
-	static final String PREFIX_EXEC = "sqlregen.exec.";
+	static final String PREFIX_EXEC = "sqlrun.exec.";
 
 	//sufixes
 	static String SUFFIX_FILE = ".file";
@@ -127,7 +127,7 @@ public class SQLRegen {
 	 * @throws Exception 
 	 */
 	public static void main(String[] args) throws Exception {
-		SQLRegen sqlr = new SQLRegen();
+		SQLRun sqlr = new SQLRun();
 		
 		try {
 			SQLDump.init(args, sqlr.papp);
