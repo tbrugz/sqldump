@@ -22,6 +22,8 @@ import tbrugz.sqldump.SchemaModelGrabber;
  * TODO: output diff to file
  * XXX: output diff by object type, change type
  * XXX: change: 'from'->'old', 'to'->'new' ?
+ * 
+ * XXX: option: [ignore|do not ignore] case; ignore schema name 
  */
 public class SQLDiff {
 	

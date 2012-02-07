@@ -49,7 +49,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		List<Diff> diffs = new ArrayList<Diff>();
 		
 		//rename
-		if(!origTable.getName().equals(newTable.getName())) {
+		if(!origTable.getName().equalsIgnoreCase(newTable.getName())) {
 			TableDiff td = new TableDiff(ChangeType.RENAME, newTable);
 			diffs.add(td);
 		}
@@ -58,7 +58,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		//XXX: use diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origPrepend, String newPrepend)??
 		Set<Column> newColumnsThatExistsInOrigModel = new HashSet<Column>();
 		for(Column cOrig: origTable.getColumns()) {
-			Column cNew = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(newTable.getColumns(), DBObjectType.COLUMN, origTable.getSchemaName(), cOrig.getName());
+			Column cNew = SchemaDiff.getDBIdentifiableByTypeSchemaAndName(newTable.getColumns(), DBObjectType.COLUMN, origTable.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newColumnsThatExistsInOrigModel.add(cNew);
 				boolean equal = cNew.equals(cOrig);
@@ -85,6 +85,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			diffs.add(tcd);
 		}
 		
+		//XXX: constraints should be dumper in defined order (FKs at end)
 		//constraints
 		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
 		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getName(), newTable.getName());
@@ -102,7 +103,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName) {
 		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
 		for(DBIdentifiable cOrig: listOrig) {
-			DBIdentifiable cNew = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType4Diff(cOrig), cOrig.getSchemaName(), cOrig.getName());
+			DBIdentifiable cNew = SchemaDiff.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType4Diff(cOrig), cOrig.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {

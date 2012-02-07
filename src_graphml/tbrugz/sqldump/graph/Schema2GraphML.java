@@ -249,7 +249,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 		StringBuffer sbCols = new StringBuffer();
 		int colCount = 0;
 		for(Column c: t.getColumns()) {
-			sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
+			sbCols.append(Column.getColumnDesc(c, null, null)+"\n");
 			colCount++;
 		}
 		n.setColumnsDesc(sbCols.toString());
@@ -351,10 +351,13 @@ public class Schema2GraphML implements SchemaModelDumper {
 		
 		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
 		
-		String[] schemasArr = schemaPattern.split(",");
 		schemaNamesList = new ArrayList<String>();
-		for(String schemaName: schemasArr) {
-			schemaNamesList.add(schemaName.trim());
+		
+		if(schemaPattern!=null) { 
+			String[] schemasArr = schemaPattern.split(",");
+			for(String schemaName: schemasArr) {
+				schemaNamesList.add(schemaName.trim());
+			}
 		}
 		
 		//sqldump.graphmldump.edgelabel=FK|FKANDCOLUMNS|COLUMNS|NONE

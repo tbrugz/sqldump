@@ -169,8 +169,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		
-		//if(fromDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, fromDbId ); }
-		colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, DBMSResources.instance().dbid());
+		if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
 		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		

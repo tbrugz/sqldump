@@ -440,9 +440,17 @@ public class Utils {
 	
 	public static String getEqualIgnoreCaseFromList(Collection<String> col, String str) {
 		for(String s: col) {
-			if(str.equalsIgnoreCase(s)) { return s; }
+			if(s.equalsIgnoreCase(str)) { return s; }
 		}
 		return null;
+	}
+
+	public static boolean stringListEqualIgnoreCase(List<String> l1, List<String> l2) {
+		if(l1.size()!=l2.size()) return false;
+		for(int i=0;i<l1.size();i++) {
+			if(! l1.get(i).equalsIgnoreCase(l2.get(i))) { return false; }
+		}
+		return true;
 	}
 	
 	public static void main(String[] args) {

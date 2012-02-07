@@ -52,15 +52,15 @@ public class Column extends DBIdentifiable implements Serializable {
 	String remarks;
 	
 	public static String getColumnDesc(Column c) {
-		return getColumnDesc(c, ColTypeUtil.dbmsSpecificProps, null, null);
+		return getColumnDesc(c, null, null);
 	}
 	
-	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
-		return getColumnDesc(c, ColTypeUtil.dbmsSpecificProps, fromDbId, toDbId);
-	}
+	/*public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
+		return getColumnDesc(c, fromDbId, toDbId);
+	}*/
 	
 	//XXX: should be 'default'?
-	public static String getColumnDesc(Column c, Properties typeMapping, String fromDbId, String toDbId) {
+	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
 		String colType = c.type.trim();
 		
 		if(fromDbId!=null && toDbId!=null) {
@@ -68,10 +68,26 @@ public class Column extends DBIdentifiable implements Serializable {
 				//no conversion
 			}
 			else {
-				String ansiColType = typeMapping.getProperty("from."+fromDbId+"."+colType);
-				if(ansiColType!=null) { colType = ansiColType; }
-				String newColType = typeMapping.getProperty("to."+toDbId+"."+colType);
-				if(newColType!=null) { colType = newColType; }
+				colType = colType.toUpperCase();
+				String ansiColType = ColTypeUtil.dbmsSpecificProps.getProperty("from."+fromDbId+"."+colType);
+				String newColType = null;
+				if(ansiColType!=null) {
+					ansiColType = ansiColType.toUpperCase();
+					newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDbId+"."+ansiColType);
+				}
+				
+				if(newColType!=null) {
+					//log.debug("new col: "+newColType+"; old: "+colType);
+					colType = newColType;
+				}
+				else if(ansiColType!=null) {
+					//log.debug("ansi new col: "+ansiColType+"; old: "+colType);
+					colType = ansiColType;
+				}
+				else {
+					//log.debug("old col type: "+colType);
+					colType = c.type.trim();
+				}
 			}
 		}
 		
@@ -83,13 +99,13 @@ public class Column extends DBIdentifiable implements Serializable {
 			+(!c.nullable?" not null":"");
 	}
 	
-	public static String getColumnDescFull(Column c, Properties typeMapping, String fromDbId, String toDbId) {
-		return getColumnDesc(c, typeMapping, fromDbId, toDbId)+(c.pk?" primary key":"");
+	public static String getColumnDescFull(Column c, String fromDbId, String toDbId) {
+		return getColumnDesc(c, fromDbId, toDbId)+(c.pk?" primary key":"");
 	}
 
 	//XXX: should be 'default'?
-	public static String getColumnDesc(Column c, Properties typeMapping) {
-		return getColumnDesc(c, typeMapping, null, null);
+	//public static String getColumnDesc(Column c) {
+		//return getColumnDesc(c, null, null);
 		/*String colType = c.type;
 		
 		boolean usePrecision = true;
@@ -100,7 +116,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		return c.name+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(!c.nullable?" not null":"");*/
-	}
+	//}
 	
 	@Override
 	public boolean equals(Object obj) {

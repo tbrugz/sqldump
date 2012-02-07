@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
 import tbrugz.sqldump.SchemaModel;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
@@ -28,13 +29,32 @@ public class SchemaDiff implements Diff {
 	Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
 	Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 
+	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
+		for(DBObject obj: col) {
+			if(schemaName.equalsIgnoreCase(obj.getSchemaName()) && name.equalsIgnoreCase(obj.name)) return obj;
+		}
+		return null;
+	}
+
+	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
+		for(DBIdentifiable d: dbids) {
+			if(type.equals(DBIdentifiable.getType4Diff(d)) 
+					&& (d.getSchemaName()!=null?d.getSchemaName().equalsIgnoreCase(schemaName):true) 
+					&& d.getName().equalsIgnoreCase(name)) return (T) d;
+		}
+		return null;
+	}
+
+
+	//-----------------------
+	
 	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
 		SchemaDiff diff = new SchemaDiff();
 		
 		//tables
 		Set<Table> newTablesThatExistsInOrigModel = new HashSet<Table>();
 		for(Table tOrig: modelOrig.getTables()) {
-			Table tNew = (Table) DBObject.findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
+			Table tNew = (Table) findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
 				//if new table doesn't exist, drop old
 				TableDiff td = new TableDiff(ChangeType.DROP, tOrig);

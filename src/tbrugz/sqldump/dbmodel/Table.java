@@ -57,7 +57,7 @@ public class Table extends DBObject {
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
 		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
-		
+
 		StringBuffer sb = new StringBuffer();
 		//Table
 		if(dumpDropStatements) {
@@ -73,10 +73,10 @@ public class Table extends DBObject {
 		for(Column c: columns) {
 			String colDesc = null;
 			if(colTypeConversionProp!=null) {
-				colDesc = Column.getColumnDesc(c, colTypeConversionProp, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+				colDesc = Column.getColumnDesc(c, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
 			}
 			else {
-				colDesc = Column.getColumnDesc(c, null, null, null);
+				colDesc = Column.getColumnDesc(c, null, null);
 			}
 			//if(c.pk) { pkCols.add(c.name); }
 			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);

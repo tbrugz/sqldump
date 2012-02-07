@@ -44,6 +44,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	static Logger log = Logger.getLogger(JDBCSchemaGrabber.class);
 	
+	static String[] DEFAULT_SCHEMA_NAMES = {
+		"public", //postgresql
+		"APP",    //derby
+	};
+	
 	Connection conn;
 	
 	//tables OK for data dump
@@ -129,13 +134,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(conn.getMetaData());
 			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
-			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + SQLUtils.ConnectionUtil.SUFFIX_USER)); 
-			if(schemaPattern==null) {
-				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, "public"); 
+			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + SQLUtils.ConnectionUtil.SUFFIX_USER));
+			boolean equalsUsername = false;
+			if(schemaPattern!=null) { equalsUsername = true; }
+			
+			int counter = 0;
+			while(schemaPattern==null && DEFAULT_SCHEMA_NAMES.length>counter) {
+				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[counter]);
+				if(schemaPattern!=null) { break; }
+				counter++;
 			}
 			
 			if(schemaPattern!=null) {
-				log.info("setting suggested schema: "+schemaPattern);
+				log.info("setting suggested schema: "+schemaPattern+(equalsUsername?" (same as username)":""));
 				papp.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
 				propOriginal.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
 			}

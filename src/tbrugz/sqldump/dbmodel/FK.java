@@ -1,8 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import tbrugz.sqldump.Utils;
 
@@ -17,8 +17,8 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	public String fkTableSchemaName;
 	public Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
 
-	public Set<String> pkColumns = new TreeSet<String>(); //XXX: should be List<String>?
-	public Set<String> fkColumns = new TreeSet<String>(); //should be List<String>?
+	public List<String> pkColumns = new ArrayList<String>();
+	public List<String> fkColumns = new ArrayList<String>();
 	
 	@Override
 	public String toString() {
@@ -63,8 +63,8 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	public boolean equals(Object obj) {
 		if(obj instanceof FK) {
 			FK fk = (FK) obj;
-			return pkTable.equals(fk.pkTable) && fkTable.equals(fk.fkTable) 
-					&& pkColumns.equals(fk.pkColumns) && fkColumns.equals(fk.fkColumns);
+			return pkTable.equalsIgnoreCase(fk.pkTable) && fkTable.equalsIgnoreCase(fk.fkTable) 
+					&& Utils.stringListEqualIgnoreCase(pkColumns, fk.pkColumns) && Utils.stringListEqualIgnoreCase(fkColumns, fk.fkColumns);
 		}
 		return false;
 	}

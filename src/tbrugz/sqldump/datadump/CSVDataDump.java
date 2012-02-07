@@ -13,6 +13,9 @@ import org.apache.log4j.Logger;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.Utils;
 
+/*
+ * CSV RFC: http://tools.ietf.org/html/rfc4180 / http://tools.ietf.org/pdf/rfc4180.pdf
+ */
 public class CSVDataDump extends DumpSyntax {
 	
 	static Logger log = Logger.getLogger(CSVDataDump.class);

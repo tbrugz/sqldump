@@ -61,14 +61,15 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 	public boolean equals(Object obj) {
 		if(obj instanceof Constraint) {
 			Constraint cc = (Constraint) obj;
-			if(!name.equals(cc.name)) { return false; }
+			if(!name.equalsIgnoreCase(cc.name)) { return false; }
 			if(type.equals(cc.type)) {
 				switch (type) {
 				case CHECK:
-					return checkDescription.equals(cc.checkDescription);
+					return checkDescription.equalsIgnoreCase(cc.checkDescription);
 				case UNIQUE:
 				case PK:
-					return uniqueColumns.equals(cc.uniqueColumns);
+					//return uniqueColumns.equals(cc.uniqueColumns);
+					return Utils.stringListEqualIgnoreCase(uniqueColumns, cc.uniqueColumns);
 				}
 			}
 			else return false;

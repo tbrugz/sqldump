@@ -5,7 +5,10 @@
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="javadoc.dir" value="dist/javadoc"/>
-	<property name="sqldump.main.class" value="tbrugz.sqldump.SQLDump"/>
+	
+	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
+	<property name="sqldump.sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
+	<property name="sqldump.sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 	
 	<property file="build.properties"/>
 
@@ -21,6 +24,16 @@
 		<pathelement location="${run.xtralib}"/>
 	</path>
 
+	<path id="classpath.run.jaxb">
+		<path refid="classpath.run"/>
+		<pathelement location="${jaxb.lib}"/>
+	</path>
+
+	<path id="classpath.run.derby">
+		<path refid="classpath.run"/>
+		<pathelement location="${derby.lib}"/>
+	</path>
+	
 	<target name="prepare">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${dist.dir}"/>
@@ -47,14 +60,32 @@
 	</target>
 
 	<target name="run">
-		<java classpathref="classpath.run" classname="${sqldump.main.class}">
+		<java classpathref="classpath.run" classname="${sqldump.mainclass}">
 			<arg value="${run.arg}"/>
 		</java>
 	</target>
 	
-	<target name="test">
-		<java classpathref="classpath.run" classname="${sqldump.main.class}">
-			<arg value="-propfile=test/sqldump-jaxb-test.properties"/>
+	<!-- full test: 
+		1- dump jaxb model
+		2- load into different databases (sqlrun)
+		3- dump from all databases
+		4- compare with original (sqldiff) --> 
+	<target name="test-roundtrip1">
+		<!-- 1 -->
+		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}">
+			<arg value="-propfile=test/r1-sqldump-jaxb-test.properties"/>
+		</java>
+		<!-- 2 -->
+		<java classpathref="classpath.run.derby" classname="${sqldump.sqlrun.mainclass}" fork="true">
+			<arg value="-propfile=test/r2-sqlrun-derby-test.properties"/>
+		</java>
+		<!-- 3 -->
+		<java classpathref="classpath.run.derby" classname="${sqldump.mainclass}" fork="true">
+			<arg value="-propfile=test/r3-sqldump-derby-test.properties"/>
+		</java>
+		<!-- 4 -->
+		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
+			<arg value="-propfile=test/r4-sqldiff-test.properties"/>
 		</java>
 	</target>
 	
@@ -63,7 +94,7 @@
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties, **/jaxb.index">
 			<manifest>
-				<attribute name="Main-Class" value="${sqldump.main.class}"/>
+				<attribute name="Main-Class" value="${sqldump.mainclass}"/>
 			</manifest>
 		</jar>
 	</target>
