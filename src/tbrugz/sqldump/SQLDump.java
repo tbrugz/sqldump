@@ -257,6 +257,7 @@ public class SQLDump {
 		}
 	}
 	
+	@Deprecated
 	void addLegacyProcessors() {
 		if(doTests) {
 			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLTests.class.getName());
