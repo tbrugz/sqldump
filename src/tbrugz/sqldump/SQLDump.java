@@ -191,25 +191,10 @@ public class SQLDump {
 		if(dirToDeleteFiles!=null) {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
 		}
+		
+		sdd.addLegacyProcessors();
 
-		if(sdd.doTests) {
-			if(sdd.conn==null) { sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp); }
-			SQLTests.tests(sdd.conn);
-		}
-		
-		if(Utils.getPropBool(sdd.papp, PROP_DO_QUERIESDUMP)) {
-			if(sdd.conn==null) {
-				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
-				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
-			}
-			SQLQueries sqlq = new SQLQueries();
-			sqlq.setProperties(sdd.papp);
-			sqlq.setConnection(sdd.conn);
-			sqlq.process();
-		}
-		
 		//processing classes
-		//TODO: add tests, queries
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
 		if(processingClassesStr!=null) {
 			if(sdd.conn==null) {
@@ -269,6 +254,15 @@ public class SQLDump {
 		finally {
 			log.info("closing connection: "+sdd.conn);
 			sdd.end();
+		}
+	}
+	
+	void addLegacyProcessors() {
+		if(doTests) {
+			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLTests.class.getName());
+		}
+		if(Utils.getPropBool(papp, PROP_DO_QUERIESDUMP)) {
+			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLQueries.class.getName());
 		}
 	}
 	

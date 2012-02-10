@@ -5,12 +5,11 @@ import java.sql.DatabaseMetaData;
 
 import org.apache.log4j.Logger;
 
-/*
- * note: was part of SQLDump.java
- */
-public class SQLTests {
+public class SQLTests extends AbstractSQLProc {
 
 	static Logger log = Logger.getLogger(SQLTests.class);
+	
+	Connection conn;
 	
 	public static void tests(Connection conn) {
 		try {
@@ -50,6 +49,16 @@ public class SQLTests {
 		//Statement st = conn.createStatement();
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
+	}
+	
+	@Override
+	public void setConnection(Connection conn) {
+		this.conn = conn;
+	}
+
+	@Override
+	public void process() {
+		tests(conn);
 	}
 	
 }
