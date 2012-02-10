@@ -47,6 +47,8 @@ class HierarchyLevelData {
  * ~XXX: snowflake: option to dump only one hierarchy per dimension: first? last? longest? preferwithtable[X]?
  * XXXdone: addDimForEachHierarchy
  * XXX: level properties
+ * XXX: add props: 'sqldump.mondrianschema.cube@<cube>.measurecolsregex=measure_.* | amount_.*'
+ *      'sqldump.mondrianschema(.cubes(?)).measurecolsregex=measure_.* | amount_.*'
  * 
  * XXX: new dumper: suggestions for aggregate tables. for each fact table with X dimensions:
  * - for Y := X-1 to 0
@@ -65,7 +67,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREDIMS = "sqldump.mondrianschema.ignoredims";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE = "sqldump.mondrianschema.ignorecubewithnomeasure";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION = "sqldump.mondrianschema.ignorecubewithnodimension";
-	public static final String PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS = "sqldump.mondrianschema.preferedlevelnamecolumns"; // { "label", "name" };
+	public static final String PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS = "sqldump.mondrianschema.preferredlevelnamecolumns"; // { "label", "name" };
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -534,6 +536,5 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
-		// TODO: properties-prefix setting
 	}
 }

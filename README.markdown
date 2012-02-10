@@ -46,7 +46,8 @@ SQLDump processing consists of:
 
 - `SchemaModelScriptDumper` - Dumps schema model in SQL-script format (DDL)  
 - `JAXBSchemaXMLSerializer` - Dumps a XML representation of the schema model 
-- `graph.Schema2GraphML` - Generates a Entity-Relationship diagram based on schema model 
+- `graph.Schema2GraphML` - Generates a Entity-Relationship diagram based on schema model
+- `mondrianschema.MondrianSchemaDumper` - Generates a Star/Snowflake [Mondrian Schema](http://mondrian.pentaho.com/) based on schema model
 - `xtradumpers.AlterSchemaSuggester` - Generates suggestions of SQL-scripts for altering the schema model (beta)
 
 All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties)
@@ -57,7 +58,6 @@ Dependencies
 ------------
 - apache-commons-logging
 - log4j
-- [kmlutils](https://bitbucket.org/tbrugz/kmlutils) (for graphML output)
 - database-dependent JDBC jars (e.g. 
 	[PostgreSQL](http://jdbc.postgresql.org/download.html), 
 	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), 
@@ -65,6 +65,8 @@ Dependencies
 	[Derby](http://db.apache.org/derby/derby_downloads.html),
 	[HSQLDB](http://hsqldb.org/),
 	[SQLite](http://code.google.com/p/sqlite-jdbc/))
+- [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - for graphML output
+- [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - for Mondrian Schema output
 - ant (recommended)
 
 
@@ -73,7 +75,7 @@ Usage (with sources & ant)
 - Run `ant compile`
 - Copy `sqldump.template.properties` to `sqldump.properties`
 - Edit `sqldump.properties`
-- Copy `build.properties.template` to `build.properties`
+- Copy `build.template.properties` to `build.properties`
 - Edit `build.properties`
 - Run `ant run`
 
@@ -90,8 +92,8 @@ Usage (without sources)
 -----------------------
 - Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
 - Download all jars from [sqldump/lib](https://bitbucket.org/tbrugz/sqldump/src/tip/lib/) (hint: download all into a `lib` subfolder)
-- (windows) Download latest version of [sqldump.bat](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) template as `sqldump.bat` or (unix-like) download latest version of [sqldump.sh](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) template as `sqldump.sh`
-- Download latest version of [sqldump.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) template as `sqldump.properties`
+- (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat` or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
+- Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
 - Download jdbc jars for your database of choice
 - Edit `sqldump.properties` and (windows) `sqldump.bat` or (unix-like) `sqldump.sh` (you may include command-line options at end)
 - (windows) Run `sqldump.bat`
