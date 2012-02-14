@@ -1,0 +1,9 @@
+<ivy-module version="2.0">
+	<!-- see: http://mvnrepository.com/ -->
+	<info organisation="tbrugz" module="sqldump"/>
+	<dependencies>
+		<dependency org="commons-logging" name="commons-logging" rev="1.1.1"/>
+		<dependency org="log4j" name="log4j" rev="1.2.16"/>
+		<!-- TODO: add kmlutils, mondrianschema2graphml -->
+	</dependencies>
+</ivy-module>

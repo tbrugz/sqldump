@@ -1,9 +1,10 @@
-<project name="sqldump">
+<project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<property name="src.dir" value="src"/>
 	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
+	<property name="lib.dir" value="lib"/>
 	<property name="javadoc.dir" value="dist/javadoc"/>
 	
 	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
@@ -13,9 +14,10 @@
 	<property file="build.properties"/>
 
 	<path id="classpath.compile">
-		<pathelement location="lib/commons-logging-1.1.1.jar"/>
-		<pathelement location="lib/log4j-1.2.15.jar"/>
-		<pathelement location="lib/kmlutils.jar"/>
+		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
+		<pathelement location="${lib.dir}/log4j-1.2.15.jar"/>
+		<pathelement location="${lib.dir}/kmlutils.jar"/>
+		<pathelement location="${lib.dir}/mondrianschema2graphml.jar"/>
 	</path>
 	
 	<path id="classpath.run">
@@ -59,7 +61,7 @@
 		</copy>
 	</target>
 
-	<target name="run">
+	<target name="run" depends="compile">
 		<java classpathref="classpath.run" classname="${sqldump.mainclass}">
 			<arg value="${run.arg}"/>
 		</java>
@@ -70,7 +72,7 @@
 		2- load into different databases (sqlrun)
 		3- dump from all databases
 		4- compare with original (sqldiff) --> 
-	<target name="test-roundtrip1">
+	<target name="test-roundtrip1" depends="compile">
 		<!-- 1 -->
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}">
 			<arg value="-propfile=test/r1-sqldump-jaxb-test.properties"/>
@@ -103,8 +105,47 @@
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
 	</target>
 	
-	<target name="all" depends="javadoc, jar">
+	<target name="all" depends="compile, javadoc, jar">
 		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
 	</target>
+
+	<!-- ========= dependencies tasks ========== -->
+	<!-- use: resolve-ivy OR resolve-get -->
+	<!-- hint: ant -autoproxy -lib <ivy-dir> resolve -->
+	
+	<target name="check-kmlutils" description="checks existence of kmlutils.jar">
+	    <available file="${lib.dir}/kmlutils.jar" property="kmlutils.present"/>
+	</target>
+
+	<target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
+	    <available file="${lib.dir}/mondrianschema2graphml.jar" property="mondrianschema2graphml.present"/>
+	</target>
+	
+	<target name="resolve-kmlutils" depends="check-kmlutils" description="retrieve kmlutils dependency" unless="kmlutils.present">
+		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
+	</target>
+
+	<target name="resolve-mondrianschema2graphml" depends="check-mondrianschema2graphml" description="retrieve kmlutils dependency" unless="mondrianschema2graphml.present">
+		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/mondrianschema2graphml/downloads/mondrianschema2graphml.jar" verbose="true"/>
+	</target>
+	
+	<target name="resolve-base" depends="resolve-kmlutils, resolve-mondrianschema2graphml">
+	</target>
+
+	<target name="resolve-ivy" description="retrieve dependencies with ivy" depends="resolve-base">
+		<ivy:retrieve />
+		<!--ivy:report todir="${dist.dir}" /-->
+	</target>	
+
+	<target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
+		<get dest="${lib.dir}">
+			<url url="http://repo1.maven.org/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
+			<url url="http://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar"/>
+		</get>
+		<!-- markdownj: markdown testing -->
+		<get dest="${lib.dir}/markdownj-1.0.2b4-0.3.0.jar" src="http://code.google.com/p/markdownj/downloads/detail?name=markdownj-1.0.2b4-0.3.0.jar&amp;can=2&amp;q=" verbose="true"/>
+	</target>	
+
+	<!-- ========= /dependencies tasks ========== -->
 	
 </project>
