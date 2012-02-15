@@ -2,6 +2,11 @@
 	
 	<property name="src.dir" value="src"/>
 	<property name="src.graphml.dir" value="src_graphml"/>
+	<property name="src.diff.dir" value="src_diff"/>
+	<property name="src.run.dir" value="src_run"/>
+	<property name="src.mondrian.dir" value="src_mondrian"/>
+	<property name="src.xtra.dir" value="src_xtra"/>
+	
 	<property name="bin.dir"  value="bin"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="lib.dir" value="lib"/>
@@ -15,7 +20,7 @@
 
 	<path id="classpath.compile">
 		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
-		<pathelement location="${lib.dir}/log4j-1.2.15.jar"/>
+		<pathelement location="${lib.dir}/log4j-1.2.16.jar"/>
 		<pathelement location="${lib.dir}/kmlutils.jar"/>
 		<pathelement location="${lib.dir}/mondrianschema2graphml.jar"/>
 	</path>
@@ -33,11 +38,17 @@
 
 	<path id="classpath.run.derby">
 		<path refid="classpath.run"/>
-		<pathelement location="${derby.lib}"/>
+		<pathelement location="${lib.dir}/derby-10.8.2.2.jar"/>
+	</path>
+
+	<path id="classpath.run.hsqldb">
+		<path refid="classpath.run"/>
+		<pathelement location="${lib.dir}/hsqldb-2.2.8.jar"/>
 	</path>
 	
 	<target name="prepare">
 		<mkdir dir="${bin.dir}"/>
+		<mkdir dir="${lib.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${javadoc.dir}"/>
 		<!--if>
@@ -53,9 +64,20 @@
 		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on">
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
+			<src path="${src.diff.dir}"/>
+			<src path="${src.run.dir}"/>
+			<src path="${src.mondrian.dir}"/>
+			<src path="${src.xtra.dir}"/>
 		</javac>
 		<copy todir="${bin.dir}" >
 			<fileset dir="${src.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/jaxb.index"/>
+			</fileset>
+			<fileset dir="${src.graphml.dir}">
+				<include name="**/*.properties"/>
+			</fileset>
+			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.properties"/>
 			</fileset>
 		</copy>
@@ -74,24 +96,44 @@
 		4- compare with original (sqldiff) --> 
 	<target name="test-roundtrip1" depends="compile">
 		<!-- 1 -->
+		<echo message="roundtrip1: phase 1: dump [jaxb]" />
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}">
 			<arg value="-propfile=test/r1-sqldump-jaxb-test.properties"/>
 		</java>
 		<!-- 2 -->
+		<echo message="roundtrip1: phase 2: run [derby]" />
 		<java classpathref="classpath.run.derby" classname="${sqldump.sqlrun.mainclass}" fork="true">
 			<arg value="-propfile=test/r2-sqlrun-derby-test.properties"/>
 		</java>
+		<echo message="roundtrip1: phase 2: run [hsqldb]" />
+		<java classpathref="classpath.run.hsqldb" classname="${sqldump.sqlrun.mainclass}" fork="true">
+			<arg value="-propfile=test/r2-sqlrun-hsqldb-test.properties"/>
+		</java>
 		<!-- 3 -->
+		<echo message="roundtrip1: phase 3: dump [derby]" />
 		<java classpathref="classpath.run.derby" classname="${sqldump.mainclass}" fork="true">
 			<arg value="-propfile=test/r3-sqldump-derby-test.properties"/>
 		</java>
+		<echo message="roundtrip1: phase 3: dump [hsqldb]" />
+		<java classpathref="classpath.run.hsqldb" classname="${sqldump.mainclass}" fork="true">
+			<arg value="-propfile=test/r3-sqldump-hsqldb-test.properties"/>
+		</java>
 		<!-- 4 -->
+		<echo message="roundtrip1: phase 4: diff [jaxb/jaxb-derby]" />
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
-			<arg value="-propfile=test/r4-sqldiff-test.properties"/>
+			<arg value="-propfile=test/r4-sqldiff-test1.properties"/>
+		</java>
+		<echo message="roundtrip1: phase 4: diff [jaxb/jaxb-hsqldb]" />
+		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
+			<arg value="-propfile=test/r4-sqldiff-test2.properties"/>
+		</java>
+		<echo message="roundtrip1: phase 4: diff [jaxb-derby/jaxb-hsqldb]" />
+		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
+			<arg value="-propfile=test/r4-sqldiff-test3.properties"/>
 		</java>
 	</target>
 	
-	<target name="jar" depends="prepare">
+	<target name="jar" depends="compile">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties, **/jaxb.index">
@@ -105,13 +147,26 @@
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
 	</target>
 	
-	<target name="all" depends="compile, javadoc, jar">
+	<target name="all" depends="javadoc,jar">
 		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
 	</target>
 
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${dist.dir}"/>
+		<delete dir="output"/>
+		<!-- for testing ivy -->
+		<!--delete>
+			<fileset dir="${lib.dir}">
+				<include name="**"/>
+			</fileset>
+		</delete-->
+	</target>
+	
 	<!-- ========= dependencies tasks ========== -->
 	<!-- use: resolve-ivy OR resolve-get -->
 	<!-- hint: ant -autoproxy -lib <ivy-dir> resolve -->
+	<!-- XXX: install ivy? see: ivy/example/go-ivy -->
 	
 	<target name="check-kmlutils" description="checks existence of kmlutils.jar">
 	    <available file="${lib.dir}/kmlutils.jar" property="kmlutils.present"/>
@@ -129,7 +184,7 @@
 		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/mondrianschema2graphml/downloads/mondrianschema2graphml.jar" verbose="true"/>
 	</target>
 	
-	<target name="resolve-base" depends="resolve-kmlutils, resolve-mondrianschema2graphml">
+	<target name="resolve-base" depends="resolve-kmlutils,resolve-mondrianschema2graphml">
 	</target>
 
 	<target name="resolve-ivy" description="retrieve dependencies with ivy" depends="resolve-base">
@@ -148,4 +203,5 @@
 
 	<!-- ========= /dependencies tasks ========== -->
 	
+	<!-- http://cruisecontrol.sourceforge.net/ ? jenkins? -->
 </project>

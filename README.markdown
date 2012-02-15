@@ -67,11 +67,13 @@ Dependencies
 	[SQLite](http://code.google.com/p/sqlite-jdbc/))
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - for graphML output
 - [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - for Mondrian Schema output
-- ant (recommended)
+- [ant](http://ant.apache.org/) (recommended)
+- [ivy](http://ant.apache.org/ivy/) (recommended)
 
 
 Usage (with sources & ant)
 --------------------------
+- Run (with ivy) `ant resolve-ivy` or (without ivy) `ant resolve-get`
 - Run `ant compile`
 - Copy `sqldump.template.properties` to `sqldump.properties`
 - Edit `sqldump.properties`
@@ -82,6 +84,7 @@ Usage (with sources & ant)
 
 Usage (with sources, without ant)
 ---------------------------------
+- Download dependencies to `/lib`
 - Copy `sqldump.template.properties` to `sqldump.properties`
 - Edit `sqldump.properties`
 - Compile sources into `bin`
@@ -91,7 +94,7 @@ Usage (with sources, without ant)
 Usage (without sources)
 -----------------------
 - Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
-- Download all jars from [sqldump/lib](https://bitbucket.org/tbrugz/sqldump/src/tip/lib/) (hint: download all into a `lib` subfolder)
+- Download all jars from [sqldump/lib](https://bitbucket.org/tbrugz/sqldump/src/tip/lib/) to `lib`
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat` or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
 - Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
 - Download jdbc jars for your database of choice
