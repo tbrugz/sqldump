@@ -64,6 +64,7 @@ Dependencies
 	[Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html),
 	[Derby](http://db.apache.org/derby/derby_downloads.html),
 	[HSQLDB](http://hsqldb.org/),
+	[H2](http://www.h2database.com/),
 	[SQLite](http://code.google.com/p/sqlite-jdbc/))
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - for graphML output
 - [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - for Mondrian Schema output
