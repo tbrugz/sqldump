@@ -47,13 +47,18 @@ class HierarchyLevelData {
  * ~XXX: snowflake: option to dump only one hierarchy per dimension: first? last? longest? preferwithtable[X]?
  * XXXdone: addDimForEachHierarchy
  * XXX: level properties
- * XXX: add props: 'sqldump.mondrianschema.cube@<cube>.measurecolsregex=measure_.* | amount_.*'
- *      'sqldump.mondrianschema(.cubes(?)).measurecolsregex=measure_.* | amount_.*'
+ * XXXdone: add props: 'sqldump.mondrianschema.cube@<cube>.measurecolsregex=measure_.* | amount_.*'
+ * XXX: add props: 'sqldump.mondrianschema.measurecolsregex=measure_.* | amount_.*'
  * 
  * XXX: new dumper: suggestions for aggregate tables. for each fact table with X dimensions:
  * - for Y := X-1 to 0
  * -- one aggregate for each combination of (X minus Y) dimensions
  * ? similar to PAD - Pentaho Aggregate Designer ?
+ * TODO: equals/contains: equalsIgnoreCase (as option?)
+ * TODO: warning for unused properties
+ * XXX: tell mondrian to generate sql without quotes? maybe not... http://docs.huihoo.com/mondrian/3.0.4/faq.html#case_sensitive_table_names
+ * TODO: sqldump.mondrianschema.ignorefks=table.fk1, table.fk2
+ * TODO: option to lowercase column name on Measure.setName(), ... (also dim, cube)
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -195,6 +200,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					measureCols.add(c.trim());
 				}
 			}
+			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+t.name+".measurecolsregex", "\\|");
 			
 			List<String> degenerateDimCandidates = new ArrayList<String>();
 			//columnloop:
@@ -220,6 +226,16 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					if(measureCols.contains(c.name)) { ok = true; }
 					else { ok = false; }
 				}
+
+				if(measureColsRegexes!=null) {
+					ok = false;
+					for(String regex: measureColsRegexes) {
+						if(c.name.matches(regex.trim())) {
+							ok = true; break;
+						}
+					}
+				}
+				
 				if(!ok) {
 					degenerateDimCandidates.add(c.name);
 					continue;

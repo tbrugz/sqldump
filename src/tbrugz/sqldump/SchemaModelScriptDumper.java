@@ -29,6 +29,7 @@ import tbrugz.sqldump.dbmodel.View;
 
 /*
  * TODO: quote object names when they contain strange symbols (like "-")
+ * TODO: option to output object name with toLowerCase() or toUpperCase()
  */
 public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
