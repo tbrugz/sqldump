@@ -3,8 +3,10 @@ package tbrugz.sqldump.mondrianschema;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -25,6 +27,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.StringDecorator;
 
 class HierarchyLevelData {
 	String levelName;
@@ -59,6 +62,7 @@ class HierarchyLevelData {
  * XXX: tell mondrian to generate sql without quotes? maybe not... http://docs.huihoo.com/mondrian/3.0.4/faq.html#case_sensitive_table_names
  * TODO: sqldump.mondrianschema.ignorefks=table.fk1, table.fk2
  * TODO: option to lowercase column name on Measure.setName(), ... (also dim, cube)
+ * TODO: more than 1 aggregator per measure: amount_sum, amount_count, ...
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -94,6 +98,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	boolean hierarchyHasAll = true;
 	boolean addAllDegenerateDimCandidates = false;
 	
+	boolean equalsShouldIgnoreCase = false;
+	StringDecorator stringDecorator = new StringDecorator(); //does nothing (for now?)
+	
 	//FIXedME: property for it, and list of possible column names
 	List<String> preferredLevelNameColumns = new ArrayList<String>();
 	
@@ -125,9 +132,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 		}
 		
-		String extraDimTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES);
-		if(extraDimTablesStr!=null) {
-			String[] strs = extraDimTablesStr.split(",");
+		String extraFactTablesStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES);
+		if(extraFactTablesStr!=null) {
+			String[] strs = extraFactTablesStr.split(",");
 			for(String s: strs) {
 				extraFactTables.add(s.trim());
 			}
@@ -179,9 +186,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
-			if(!isRoot && !extraFactTables.contains(t.name)) { continue; } 
+			if(!isRoot && !listContains(extraFactTables, t.name)) { continue; } 
 			if(factTables!=null) {
-				if(!factTables.contains(t.name)) { continue; }
+				if(!listContains(factTables,t.name)) { continue; }
 				else { factTables.remove(t.name); }
 			}
 
@@ -193,60 +200,20 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			cube.setTable(xt);
 
 			List<String> measureCols = new ArrayList<String>();
-			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+t.name+".measurecols");
+			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".measurecols");
 			if(measureColsStr!=null) {
 				String[] cols = measureColsStr.split(",");
 				for(String c: cols) {
 					measureCols.add(c.trim());
 				}
 			}
-			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+t.name+".measurecolsregex", "\\|");
+			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".measurecolsregex", "\\|");
 			
 			List<String> degenerateDimCandidates = new ArrayList<String>();
 			//columnloop:
 			//measures
 			for(Column c: t.getColumns()) {
-				//XXXxx: if column is FK, do not add to measures
-				boolean ok = true;
-				
-				for(FK fk: fks) {
-					if(fk.fkColumns.contains(c.name)) {
-						log.debug("column '"+c.name+"' belongs to FK. ignoring (as measure)");
-						ok = false; break;
-						//continue columnloop;
-					}
-				}
-
-				if(!numericTypes.contains(c.type.toUpperCase())) {
-					log.debug("not a measure column type: "+c.type);
-					ok = false;
-				}
-
-				if(measureCols.size()!=0) {
-					if(measureCols.contains(c.name)) { ok = true; }
-					else { ok = false; }
-				}
-
-				if(measureColsRegexes!=null) {
-					ok = false;
-					for(String regex: measureColsRegexes) {
-						if(c.name.matches(regex.trim())) {
-							ok = true; break;
-						}
-					}
-				}
-				
-				if(!ok) {
-					degenerateDimCandidates.add(c.name);
-					continue;
-				}
-
-				Schema.Cube.Measure measure = new Schema.Cube.Measure();
-				measure.setName(c.name);
-				measure.setColumn(c.name);
-				measure.setAggregator("sum");
-				measure.setVisible(true);
-				cube.getMeasure().add(measure);
+				procMeasure(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
 			if(cube.getMeasure().size()==0) {
@@ -259,63 +226,26 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			
 			//dimensions
 			for(FK fk: fks) {
-				if(fk.fkColumns.size()>1) {
-					log.debug("fk "+fk+" is composite. ignoring");
-					continue;
-				}
-				
-				//tbrugz.mondrian.xsdmodel.Table pkTable = new tbrugz.mondrian.xsdmodel.Table();
-				//pkTable.setSchema(fk.schemaName);
-				//pkTable.setName(fk.pkTable);
-				
-				String dimName = fk.pkTable;
-				if(false) {
-					dimName = fk.name;
-				}
-				
-				if(ignoreDims.contains(dimName)) {
-					continue;
-				}
-
-				degenerateDimCandidates.remove(fk.fkColumns.get(0));
-				procHierRecursiveInit(schemaModel, cube, fk, dimName);
-				
-				/*PrivateDimension dim = new PrivateDimension();
-				dim.setName(dimName);
-				dim.setForeignKey(fk.fkColumns.iterator().next());
-				dim.setType("StandardDimension");
-				
-				List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
-				procHierRecursive(schemaModel, dim, fk, fk.schemaName, fk.pkTable, levels);
-				
-				if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
-					for(int i=0; i < dim.getHierarchy().size() ; i++) {
-						if(i!=0) { //first
-							log.debug("[one hierarchy per dimension; dim='"+dim.getName()+"'] removing hierarchy: "+dim.getHierarchy().get(i).getName());
-							dim.getHierarchy().remove(i);
-						}
-					}	
-				}
-				//dim.getHierarchy().add(hier);
-				
-				cube.getDimensionUsageOrDimension().add(dim);*/
+				procDimension(cube, fk, degenerateDimCandidates, schemaModel);
 			}
+			
 			//degenerate dimensions - see: http://mondrian.pentaho.com/documentation/schema.php#Degenerate_dimensions
-			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+t.name+".degeneratedims");
+			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".degeneratedims");
 			if(degenerateDimColsStr!=null) {
 				String[] cols = degenerateDimColsStr.split(",");
 				for(String c: cols) {
 					c = c.trim();
+					String colname = c;
 					boolean containsCol = false;
 					for(Column cc: t.getColumns()) {
-						if(cc.name.equals(c)) { containsCol = true; }
+						if(stringEquals(cc.name, c)) { containsCol = true; colname = cc.name; break; }
 					}
 					if(!containsCol) {
 						log.warn("column for degenerate dimension '"+c+"' not present in table "+t.name);
 					}
 
 					degenerateDimCandidates.remove(c);
-					cube.getDimensionUsageOrDimension().add(genDegeneratedDim(c, c));
+					cube.getDimensionUsageOrDimension().add(genDegeneratedDim(colname, c));
 				}
 			}
 			
@@ -347,12 +277,104 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			log.warn("fact tables not found: "+Utils.join(factTables, ", "));
 		}
 		
+		//validade '.level' properties
+		validateProperties(schemaModel, ".level@", "level table not found: %s");
+		//validade '.cube' properties
+		validateProperties(schemaModel, ".cube@", "fact table not found: %s");
+		
 		try {
 			jaxbOutput(schema, new File(fileOutput));
 		} catch (JAXBException e) {
 			log.warn("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 		}
+	}
+	
+	void procMeasure(Schema.Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) {
+		//XXXxx: if column is FK, do not add to measures
+		boolean ok = true;
+		
+		for(FK fk: fks) {
+			if(fk.fkColumns.contains(c.name)) {
+				log.debug("column '"+c.name+"' belongs to FK. ignoring (as measure)");
+				ok = false; break;
+				//continue columnloop;
+			}
+		}
+
+		if(!numericTypes.contains(c.type.toUpperCase())) {
+			log.debug("not a measure column type: "+c.type);
+			ok = false;
+		}
+
+		if(measureCols.size()!=0) {
+			if(listContains(measureCols, c.name)) { ok = true; }
+			else { ok = false; }
+		}
+
+		if(measureColsRegexes!=null) {
+			ok = false;
+			for(String regex: measureColsRegexes) {
+				if(c.name.matches(regex.trim())) {
+					ok = true; break;
+				}
+			}
+		}
+		
+		if(!ok) {
+			degenerateDimCandidates.add(c.name);
+			return;
+		}
+
+		Schema.Cube.Measure measure = new Schema.Cube.Measure();
+		measure.setName(c.name);
+		measure.setColumn(c.name);
+		measure.setAggregator("sum");
+		measure.setVisible(true);
+		cube.getMeasure().add(measure);
+	}
+	
+	void procDimension(Schema.Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) {
+		if(fk.fkColumns.size()>1) {
+			log.debug("fk "+fk+" is composite. ignoring");
+			return;
+		}
+		
+		//tbrugz.mondrian.xsdmodel.Table pkTable = new tbrugz.mondrian.xsdmodel.Table();
+		//pkTable.setSchema(fk.schemaName);
+		//pkTable.setName(fk.pkTable);
+		
+		String dimName = fk.pkTable;
+		if(false) {
+			dimName = fk.name;
+		}
+		
+		if(listContains(ignoreDims, dimName)) {
+			return;
+		}
+
+		degenerateDimCandidates.remove(fk.fkColumns.get(0));
+		procHierRecursiveInit(schemaModel, cube, fk, dimName);
+		
+		/*PrivateDimension dim = new PrivateDimension();
+		dim.setName(dimName);
+		dim.setForeignKey(fk.fkColumns.iterator().next());
+		dim.setType("StandardDimension");
+		
+		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
+		procHierRecursive(schemaModel, dim, fk, fk.schemaName, fk.pkTable, levels);
+		
+		if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
+			for(int i=0; i < dim.getHierarchy().size() ; i++) {
+				if(i!=0) { //first
+					log.debug("[one hierarchy per dimension; dim='"+dim.getName()+"'] removing hierarchy: "+dim.getHierarchy().get(i).getName());
+					dim.getHierarchy().remove(i);
+				}
+			}	
+		}
+		//dim.getHierarchy().add(hier);
+		
+		cube.getDimensionUsageOrDimension().add(dim);*/
 	}
 	
 	PrivateDimension genDegeneratedDim(String column, String dimName) {
@@ -412,14 +434,23 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		thisLevels.addAll(levelsData);
 		boolean isLevelLeaf = true;
 
+		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.pkTable);
+		if(pkTable==null) {
+			log.warn("table not found: "+schemaName+"."+fk.pkTable);
+		}
+		
 		HierarchyLevelData level = new HierarchyLevelData();
 		level.levelName = pkTableName;
-		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+level.levelName+".levelnamecol");
+		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+stringDecorator.get(level.levelName)+".levelnamecol");
 		if(levelNameColumn!=null) {
-			level.levelNameColumn = levelNameColumn;
+			if(pkTable.getColumn(levelNameColumn)!=null) {
+				level.levelNameColumn = levelNameColumn;
+			}
+			else {
+				log.warn("levelName column not found: "+levelNameColumn+" [table = "+schemaName+"."+fk.pkTable+"]");
+			}
 		}
 		else if(preferredLevelNameColumns!=null) {
-			Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.pkTable);
 			if(pkTable!=null) {
 				//checking if column exists
 				for(String colName: preferredLevelNameColumns) {
@@ -431,7 +462,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			else {
-				log.warn("table not found: "+schemaName+"."+fk.pkTable);
+				log.warn("table not found [2]: "+schemaName+"."+fk.pkTable);
 			}
 		}
 		level.levelColumn = fk.pkColumns.iterator().next();
@@ -464,11 +495,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			
 			//Table / Join
 			if(thisLevels.size()==1) {
-				tbrugz.mondrian.xsdmodel.Table pkTable = new tbrugz.mondrian.xsdmodel.Table();
-				pkTable.setSchema(schemaName);
-				pkTable.setName(pkTableName);
+				tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
+				table.setSchema(schemaName);
+				table.setName(pkTableName);
 				
-				hier.setTable(pkTable);
+				hier.setTable(table);
 			}
 			else {
 				//hier.setPrimaryKeyTable(fk.pkTable); //FIXedME!
@@ -551,7 +582,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	}
 	
 	void createLevels(Hierarchy hier, String levelTable) {
-		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+levelTable+".parentLevels");
+		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+stringDecorator.get(levelTable)+".parentLevels");
 		if(parentLevels==null) {
 			return;
 		}
@@ -573,6 +604,25 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 	}
 	
+	void validateProperties(SchemaModel schemaModel, String appendStr, String messageFormat) {
+		List<String> list = Utils.getKeysStartingWith(prop, PROP_MONDRIAN_SCHEMA+appendStr);
+		int len = (PROP_MONDRIAN_SCHEMA+appendStr).length();
+		Set<String> declaredProps = new HashSet<String>();
+
+		for(String s: list) {
+			s = s.substring(len);
+			s = s.substring(0, s.indexOf("."));
+			log.debug("add prop: "+s);
+			declaredProps.add(s);
+		}
+		for(String s: declaredProps) {
+			Table table = DBIdentifiable.getDBIdentifiableByTypeAndName(schemaModel.getTables(), DBObjectType.TABLE, s);
+			if(table==null) {
+				log.warn(String.format(messageFormat, s));
+			}
+		}
+	}
+	
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance( "tbrugz.mondrian.xsdmodel" );
 		Marshaller m = jc.createMarshaller();
@@ -580,7 +630,18 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		m.marshal(o, fileOutput);
 		log.info("mondrian schema model dumped to '"+fileOutput+"'");
 	}
+	
+	boolean stringEquals(String s1, String s2) {
+		return equalsShouldIgnoreCase?s1.equalsIgnoreCase(s2):s1.equals(s2);
+	}
 
+	boolean listContains(List<String> list, String s) {
+		for(String ss: list) {
+			if(equalsShouldIgnoreCase?ss.equalsIgnoreCase(s):ss.equals(s)) { return true; }
+		}
+		return false;
+	}
+	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
 	}

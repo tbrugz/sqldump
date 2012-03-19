@@ -65,6 +65,7 @@ import org.apache.log4j.Logger;
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
+ * XXX: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties 
  */
 public class SQLDump {
 	
