@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 public class Constraint extends DBIdentifiable implements Comparable<Constraint>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -36,10 +37,10 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 		switch (type) {
 			//XXX: use literal type (CHECK, UNIQUE) instead of variable 'type'?
 			case CHECK:
-				return "constraint "+name+" "+type+" "+checkDescription;
+				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type+" "+checkDescription;
 			case UNIQUE:
 			case PK:
-				return "constraint "+name+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ")+")";
+				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
 		}
 		throw new RuntimeException("unknown constraint type: "+type);
 	}

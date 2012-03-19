@@ -93,7 +93,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 
-		return c.name+" "+colType
+		return DBObject.getFinalIdentifier(c.name)+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(c.defaultValue!=null?" default "+c.defaultValue:"")
 			+(!c.nullable?" not null":"");

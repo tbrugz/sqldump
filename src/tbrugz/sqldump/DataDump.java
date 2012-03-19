@@ -205,7 +205,7 @@ public class DataDump {
 				log.info("MetaData.getIdentifierQuoteString(): sqlexception", e);
 			}
 			if(quote==null) {
-				quote = DBMSResources.instance().getSQLQuoteString();
+				quote = DBMSResources.instance().getIdentifierQuoteString();
 				log.debug("MetaData.getIdentifierQuoteString() returned null, quote is ["+quote+"]");
 			}
 			

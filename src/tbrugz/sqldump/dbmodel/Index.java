@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 /*
  * see: http://download.oracle.com/docs/cd/B19306_01/server.102/b14200/statements_5010.htm
@@ -21,8 +22,9 @@ public class Index extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+(dumpSchemaName?schemaName+".":"")+name+" on "+(dumpSchemaName?schemaName+".":"")+tableName
-			+" ("+Utils.join(columns, ", ")+")"
+		String objectNamePrepend = (dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"");
+		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+objectNamePrepend+DBObject.getFinalIdentifier(name)+" on "+objectNamePrepend+DBObject.getFinalIdentifier(tableName)
+			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+((local!=null && local)?" local":"")
 			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" --"+comment:"");
 	}

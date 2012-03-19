@@ -7,6 +7,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
+
 public class DBMSResources {
 
 	static Logger log = Logger.getLogger(DBMSResources.class);
@@ -16,6 +19,7 @@ public class DBMSResources {
 	String dbId;
 	Properties papp;
 	Properties dbmsSpecificResource = new ParametrizedProperties();
+	String identifierQuoteString = "\"";
 	
 	{
 		try {
@@ -46,6 +50,16 @@ public class DBMSResources {
 		else {
 			this.dbId = papp.getProperty(SQLDump.PROP_FROM_DB_ID);
 		}
+		
+		if(dbmd!=null) {
+			try {
+				identifierQuoteString = dbmd.getIdentifierQuoteString();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
 	
 	String detectDbId(DatabaseMetaData dbmd) {
@@ -116,10 +130,10 @@ public class DBMSResources {
 	static String DEFAULT_QUOTE_STRING = "\"";
 	
 	/* DatabaseMetaData.getIdentifierQuoteString() already does it */
-	@Deprecated
-	public String getSQLQuoteString() {
+	public String getIdentifierQuoteString() {
+		return identifierQuoteString;
 		//log.debug("quote ["+dbId+"]: "+dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring"));
-		return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);
+		//return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);
 	}
 	
 	public String dbid() {

@@ -26,9 +26,11 @@ import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 /*
  * TODO: quote object names when they contain strange symbols (like "-")
+ * ~TODO: quote all object names (not done: View, MV, Sequence, Synonym)
  * TODO: option to output object name with toLowerCase() or toUpperCase()
  */
 public class SchemaModelScriptDumper implements SchemaModelDumper {
@@ -76,6 +78,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
 	static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
+	static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
@@ -93,6 +96,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
 		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
+		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = DBMSResources.instance().dbid();
@@ -303,15 +307,11 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	}
 	
 	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {
-		//TODOne: generate (or not) drop command
+		String fkTableName = (dumpWithSchemaName?DBObject.getFinalIdentifier(fk.fkTableSchemaName)+".":"")+DBObject.getFinalIdentifier(fk.fkTable);
 		return
-			(dumpDropStatements?"--alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable+" drop constraint "+fk.getName()+";\n":"")
-			+"alter table "+(dumpWithSchemaName?fk.fkTableSchemaName+".":"")+fk.fkTable
+			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
+			+"alter table "+fkTableName
 			+"\n\tadd "+FK.fkSimpleScript(fk, "\n\t", dumpWithSchemaName)+";\n";
-			
-			//"add constraint "+fk.getName()
-			//+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
-			//")\n\treferences "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+");\n";
 	}
 
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
@@ -432,7 +432,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			Set<PrivilegeType> privs = mapWithGrant.get(grantee);
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
-					+" on "+tableName
+					+" on "+DBObject.getFinalIdentifier(tableName)
 					+" to "+grantee
 					+" WITH GRANT OPTION"+";\n\n");
 			/*for(PrivilegeType priv: privs) {
@@ -447,7 +447,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			Set<PrivilegeType> privs = mapWOGrant.get(grantee);
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
-					+" on "+tableName
+					+" on "+DBObject.getFinalIdentifier(tableName)
 					+" to "+grantee
 					+";\n\n");
 			/*for(PrivilegeType priv: privs) {

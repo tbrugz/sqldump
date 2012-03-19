@@ -31,6 +31,8 @@ import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.util.StringDecorator;
+
 class RegularFileFilter implements FileFilter {
 	
 	@Override
@@ -177,9 +179,10 @@ public class Utils {
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
 	 */
 	public static String join(Collection<?> s, String delimiter) {
-		return join(s, delimiter, null, false);
+		return join(s, delimiter, StringDecorator.getInstance());
 	}
 	
+	/*@Deprecated
 	public static String join(Collection<?> s, String delimiter, String enclosing, boolean enclosingJustForNonNulls) {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();
@@ -196,6 +199,20 @@ public class Utils {
 			else {
 				buffer.append(elem);
 			}
+
+			if (iter.hasNext()) {
+				buffer.append(delimiter);
+			}
+		}
+		return buffer.toString();
+	}*/
+
+	public static String join(Collection<?> s, String delimiter, StringDecorator decorator) {
+		StringBuffer buffer = new StringBuffer();
+		Iterator<?> iter = s.iterator();
+		while (iter.hasNext()) {
+			Object elem = iter.next();
+			buffer.append(decorator.get(elem.toString()));
 
 			if (iter.hasNext()) {
 				buffer.append(delimiter);

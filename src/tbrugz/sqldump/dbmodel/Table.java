@@ -56,7 +56,7 @@ public class Table extends DBObject {
 	
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
-		String tableName = (dumpWithSchemaName?schemaName+".":"")+name;
+		String tableName = (dumpWithSchemaName?getFinalIdentifier(schemaName)+".":"")+getFinalIdentifier(name);
 
 		StringBuffer sb = new StringBuffer();
 		//Table

@@ -3,9 +3,17 @@ package tbrugz.sqldump.dbmodel;
 import java.io.Serializable;
 import java.util.Collection;
 
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
+
 public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	//dumping parameters
+	//XXX: add dumpWithSchemaName to DBObject ?
 	public static transient boolean dumpCreateOrReplace = false;
+	public static transient SQLIdentifierDecorator sqlIddecorator = new SQLIdentifierDecorator();
+	//public static transient boolean dumpQuoteAll = true;
+	//public static transient String dumpIdentifierQuoteString = "\"";
 
 	public static class DBObjectId implements Comparable<DBObjectId> {
 		public String schemaName;
@@ -49,6 +57,11 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 			if(schemaName.equals(obj.schemaName) && name.equals(obj.name)) return obj;
 		}
 		return null;
+	}
+	
+	public static String getFinalIdentifier(String id) {
+		//return (dumpQuoteAll?dumpIdentifierQuoteString:"")+id+(dumpQuoteAll?dumpIdentifierQuoteString:"");
+		return sqlIddecorator.get(id);
 	}
 	
 }

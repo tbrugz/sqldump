@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 //XXX~: extends DBObject?
 //XXX: should be constraint?
@@ -49,9 +50,10 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 
 	public static String fkSimpleScript(FK fk, String whitespace, boolean dumpWithSchemaName) {
 		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
-		return "constraint "+fk.getName()
-			+" foreign key ("+Utils.join(fk.fkColumns, ", ")+
-			")"+whitespace+"references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+")";
+		return "constraint "+DBObject.getFinalIdentifier(fk.getName())
+			+" foreign key ("+Utils.join(fk.fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
+			+whitespace+"references "+(dumpWithSchemaName?DBObject.getFinalIdentifier(fk.pkTableSchemaName)+".":"")
+			+DBObject.getFinalIdentifier(fk.pkTable)+" ("+Utils.join(fk.pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
 	}
 
 	@Override
