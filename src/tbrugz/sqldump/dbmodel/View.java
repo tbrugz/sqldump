@@ -22,7 +22,7 @@ public class View extends DBObject {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
-				+ (dumpSchemaName && schemaName!=null?schemaName+".":"") + name + " as\n" + query
+				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name) + " as\n" + query
 				+ (withReadOnly?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
 						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""

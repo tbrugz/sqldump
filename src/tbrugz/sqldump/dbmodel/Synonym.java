@@ -11,7 +11,7 @@ public class Synonym extends DBObject {
 		//XXX: option to use "create or replace" for synonym?
 		//return "create "
 		return (dumpCreateOrReplace?"create or replace ":"create ") 
-			+(publik?"public ":"")+"synonym "+(dumpSchemaName?schemaName+".":"")+name
+			+(publik?"public ":"")+"synonym "+(dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"")+DBObject.getFinalIdentifier(name)
 			+" for "+objectOwner+"."+referencedObject
 			+(dbLink!=null?"@"+dbLink:"");
 	}

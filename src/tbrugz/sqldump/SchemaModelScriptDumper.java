@@ -30,7 +30,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 /*
  * TODO: quote object names when they contain strange symbols (like "-")
- * ~TODO: quote all object names (not done: View, MV, Sequence, Synonym)
+ * TODOne: quote all object names
  * TODO: option to output object name with toLowerCase() or toUpperCase()
  */
 public class SchemaModelScriptDumper implements SchemaModelDumper {

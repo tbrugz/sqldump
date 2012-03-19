@@ -17,7 +17,7 @@ public class Sequence extends DBObject {
 		//XXX: option to use "create or replace" for sequence?
 		//return (dumpCreateOrReplace?"create or replace ":"create ") 
 		return "create " 
-			+"sequence "+(dumpSchemaName?schemaName+".":"")+name
+			+"sequence "+(dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"")+DBObject.getFinalIdentifier(name)
 			+" minvalue "+minValue
 			+(dumpStartWith?" start with "+lastNumber:"")
 			+" increment by "+incrementBy;
