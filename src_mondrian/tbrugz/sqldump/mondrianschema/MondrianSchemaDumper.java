@@ -3,6 +3,7 @@ package tbrugz.sqldump.mondrianschema;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -58,11 +59,13 @@ class HierarchyLevelData {
  * -- one aggregate for each combination of (X minus Y) dimensions
  * ? similar to PAD - Pentaho Aggregate Designer ?
  * TODO: equals/contains: equalsIgnoreCase (as option?)
- * TODO: warning for unused properties
- * XXX: tell mondrian to generate sql without quotes? maybe not... http://docs.huihoo.com/mondrian/3.0.4/faq.html#case_sensitive_table_names
+ * TODOne: warning for unused properties
+ * ~XXX: tell mondrian to generate sql without quotes? maybe not... http://docs.huihoo.com/mondrian/3.0.4/faq.html#case_sensitive_table_names
  * TODO: sqldump.mondrianschema.ignorefks=table.fk1, table.fk2
  * TODO: option to lowercase column name on Measure.setName(), ... (also dim, cube)
- * TODO: more than 1 aggregator per measure: amount_sum, amount_count, ...
+ * ~TODO: more than 1 aggregator per measure: amount_sum, amount_count, ...
+ * XXXxx: Level uniqueMembers="true": when?
+ * -- If you know that the values of a given level column in the dimension table are unique across all the other values in that column across the parent levels, then set uniqueMembers="true", otherwise, set to "false". / At the top level, this will always be uniqueMembers="true", as there is no parent level.
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	
@@ -79,8 +82,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS = "sqldump.mondrianschema.preferredlevelnamecolumns"; // { "label", "name" };
 	public static final String PROP_MONDRIAN_SCHEMA_HIERHASALL = "sqldump.mondrianschema.hierarchyhasall";
 	public static final String PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES = "sqldump.mondrianschema.addalldegeneratedimcandidates";
+	public static final String PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS = "sqldump.mondrianschema.defaultaggregators";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
+	
+	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
 	
 	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
 	
@@ -103,6 +109,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	
 	//FIXedME: property for it, and list of possible column names
 	List<String> preferredLevelNameColumns = new ArrayList<String>();
+	List<String> defaultAggregators = new ArrayList<String>();
 	
 	{
 		try {
@@ -156,6 +163,16 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		ignoreCubesWithNoDimension = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION, ignoreCubesWithNoDimension);
 		hierarchyHasAll = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_HIERHASALL, hierarchyHasAll);
 		addAllDegenerateDimCandidates = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES, addAllDegenerateDimCandidates);
+
+		List<String> defaultAggTmp = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS, ",");
+		if(defaultAggTmp==null) {
+			for(String agg: DEFAULT_MEASURE_AGGREGATORS) {
+				defaultAggregators.add(agg);
+			}
+		}
+		else {
+			defaultAggregators = defaultAggTmp;
+		}
 	}
 
 	@Override
@@ -326,10 +343,24 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			return;
 		}
 
+		if(defaultAggregators==null || defaultAggregators.size()==0) {
+			log.warn("no measure aggregators defined [cube = "+cube+"]");
+			return;
+		}
+		if(defaultAggregators.size()==1) {
+			addMeasure(cube, c.name, c.name, defaultAggregators.get(0));
+			return;
+		}
+		for(String agg: defaultAggregators) {
+			addMeasure(cube, c.name, c.name+"_"+agg, agg);
+		}
+	}
+	
+	void addMeasure(Schema.Cube cube, String column, String name, String aggregator) {
 		Schema.Cube.Measure measure = new Schema.Cube.Measure();
-		measure.setName(c.name);
-		measure.setColumn(c.name);
-		measure.setAggregator("sum");
+		measure.setName(name);
+		measure.setColumn(column);
+		measure.setAggregator(aggregator);
 		measure.setVisible(true);
 		cube.getMeasure().add(measure);
 	}
@@ -541,11 +572,19 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			//Levels
+			int levelCounter = 0;
 			for(int i = thisLevels.size()-1; i>=0; i--) {
+				levelCounter++;
 				//HierarchyLevelData xlevel = thisLevels.get(i);
 				Level l = cloneAsLevel(thisLevels.get(i));
 				log.debug("add level: "+l.getName());
-				createLevels(hier, thisLevels.get(i).levelTable);
+				int numOfParentLevels = 0;
+				if(levelCounter == 1) {
+					numOfParentLevels = createParentLevels(hier, thisLevels.get(i).levelTable);
+				}
+				if((numOfParentLevels==0) && (levelCounter == 1)) {
+					l.setUniqueMembers(true);
+				}
 				hier.getLevel().add(l);
 				if(hierName.length() > 0) {
 					hierName += "+";
@@ -581,13 +620,16 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		return lret;
 	}
 	
-	void createLevels(Hierarchy hier, String levelTable) {
+	//TODO: test column existence
+	int createParentLevels(Hierarchy hier, String levelTable) {
 		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+stringDecorator.get(levelTable)+".parentLevels");
 		if(parentLevels==null) {
-			return;
+			return 0;
 		}
 		String[] levelPairs = parentLevels.split(",");
+		int count = 0;
 		for(String pair: levelPairs) {
+			count++;
 			String[] tuple = pair.split(":");
 			String column = tuple[0].trim();
 
@@ -599,9 +641,13 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				String nameColumn = tuple[1].trim();
 				level.setNameColumn(nameColumn);
 			}
+			if(count==1) {
+				level.setUniqueMembers(true);
+			}
 			//level.setUniqueMembers(true);
 			hier.getLevel().add(level);
 		}
+		return count;
 	}
 	
 	void validateProperties(SchemaModel schemaModel, String appendStr, String messageFormat) {
