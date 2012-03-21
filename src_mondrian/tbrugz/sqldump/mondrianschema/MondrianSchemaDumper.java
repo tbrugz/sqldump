@@ -66,6 +66,8 @@ class HierarchyLevelData {
  * ~TODO: more than 1 aggregator per measure: amount_sum, amount_count, ...
  * XXXxx: Level uniqueMembers="true": when?
  * -- If you know that the values of a given level column in the dimension table are unique across all the other values in that column across the parent levels, then set uniqueMembers="true", otherwise, set to "false". / At the top level, this will always be uniqueMembers="true", as there is no parent level.
+ * XXX: uniqueMembers="true": maybe on 1st level of 1st dim table also... 
+ * XXX: show parentLevel candidates
  */
 public class MondrianSchemaDumper implements SchemaModelDumper {
 	

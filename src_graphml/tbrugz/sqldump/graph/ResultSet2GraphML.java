@@ -91,7 +91,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		Set<Node> nodes = new HashSet<Node>();
 		Set<WeightedEdge> edges = new HashSet<WeightedEdge>();
 		
-		boolean edgeOnlyStrategy = rsNodes==null;
+		boolean edgeOnlyStrategy = isEdgeOnlyStrategy(rsEdges, rsNodes);
 		
 		Set<String> nodeSet = new HashSet<String>();
 		Set<String> edgeEndSet = new HashSet<String>();
@@ -153,6 +153,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			
 			WeightedEdge edge = new WeightedEdge();
+			if(source==null || target==null) {
+				log.warn("null source/target: "+source+"/"+target);
+				continue;
+			}
 			edge.setSource(source);
 			edge.setTarget(target);
 			edge.setName(nf.format(edgeWidth));
@@ -189,7 +193,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		int colCount = rsmd.getColumnCount();
 		List<String> allRSCols = new ArrayList<String>();
 		for(int i=0;i<colCount; i++) {
-			allRSCols.add(rsmd.getColumnName(i+1));
+			allRSCols.add(rsmd.getColumnLabel(i+1));
 		}
 		if(!allRSCols.containsAll(allCols)) {
 			log.warn("query doesn't contain all required columns [required cols are: "+allCols+"; avaiable cols are: "+allRSCols+"]");
@@ -209,7 +213,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	}
 	
 	boolean dumpSchema(ResultSet rsEdges, ResultSet rsNodes) throws Exception {
-		log.info("dumping graphML: translating model");
+		log.info("dumping graphML: translating model [edgeonly="+isEdgeOnlyStrategy(rsEdges, rsNodes)+"]");
 		if(rsEdges==null) {
 			log.warn("resultSet is null!");
 			return false;
@@ -219,7 +223,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			log.warn("null model: nothing to dump");
 			return false;
 		}
-		log.info("dumping model...");
+		log.info("dumping model... [graph size = "+r.getChildren().size()+"]");
 		DumpGraphMLModel dg = new DumpResultSetGraphMLModel();
 		dg.loadSnippets(DEFAULT_SNIPPETS);
 		if(snippets!=null) {
@@ -302,6 +306,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			if(dumped) { i++; }
 		}
 		log.info(i+" [of "+queriesArr.length+"] graphmlqueries dumped");
+	}
+	
+	static boolean isEdgeOnlyStrategy(ResultSet rsEdges, ResultSet rsNodes) {
+		return rsNodes==null;
 	}
 
 }
