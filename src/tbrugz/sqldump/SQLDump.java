@@ -208,6 +208,7 @@ public class SQLDump {
 				if(sqlproc!=null) {
 					sqlproc.setProperties(sdd.papp);
 					sqlproc.setConnection(sdd.conn);
+					sqlproc.setSchemaModel(sm);
 					sqlproc.process();
 				}
 				else {
