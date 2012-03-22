@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Node;
+import tbrugz.graphml.model.NodeXYWH;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
 import tbrugz.sqldump.AbstractSQLProc;
@@ -48,13 +49,15 @@ class WeightedEdge extends Edge {
 public class ResultSet2GraphML extends AbstractSQLProc {
 	
 	static Log log = LogFactory.getLog(ResultSet2GraphML.class);
+	static Log logsql = LogFactory.getLog(ResultSet2GraphML.class.getName()+".sql");
 	
 	static final String DEFAULT_SNIPPETS = "graphml-snippets-rs.properties";
 
 	//node cols
 	static final String COL_OBJECT = "OBJECT";
-	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //maybe optional?
+	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //optional!
 	static final String COL_OBJECT_LABEL = "OBJECT_LABEL";
+	static final String COL_OBJECT_SIZE = "OBJECT_SIZE"; //optional!
 	
 	//edge cols
 	static final String COL_SOURCE = "SOURCE";
@@ -63,13 +66,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //maybe optional?
 	
 	//edge-only cols
-	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //maybe optional?
-	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //maybe optional?
+	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional!
+	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //optional!
 	//XXX: COL_SOURCE_LABEL, COL_EDGE_LABEL //optional
 	
-	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_TYPE, COL_OBJECT_LABEL };
+	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_LABEL };
 	static final String[] EDGE_COLS = { COL_SOURCE, COL_TARGET, COL_EDGE_TYPE, COL_EDGE_WIDTH };
-	static final String[] EDGEONLY_XTRA_COLS = { COL_SOURCE_TYPE, COL_TARGET_TYPE };
+	//static final String[] EDGEONLY_XTRA_COLS = { COL_SOURCE_TYPE, COL_TARGET_TYPE };
 	
 	//NumberFormat nf = NumberFormat.getInstance();
 	static NumberFormat nf = new DecimalFormat(",###.00");
@@ -86,7 +89,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	File output;
 	String snippets;
 	
-	Root getGraphMlModel(ResultSet rsEdges, ResultSet rsNodes) throws SQLException {
+	Root getGraphMlModel(String qid, ResultSet rsEdges, ResultSet rsNodes) throws SQLException {
 		Root graphModel = new Root();
 		Set<Node> nodes = new HashSet<Node>();
 		Set<WeightedEdge> edges = new HashSet<WeightedEdge>();
@@ -102,15 +105,24 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			List<String> allNodeCols = Arrays.asList(NODE_COLS);
 			if(!hasAllColumns(rsNodes.getMetaData(), allNodeCols)) { return null; }
 			
+			boolean hasObjectSize = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_SIZE, qid);
+			boolean hasObjectType = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_TYPE, qid);
+			
 			while(rsNodes.next()) {
 				String object = rsNodes.getString(COL_OBJECT);
-				String objectType = rsNodes.getString(COL_OBJECT_TYPE);
 				String objectLabel = rsNodes.getString(COL_OBJECT_LABEL);
 
-				Node node = new Node();
+				NodeXYWH node = newNode();
 				node.setId(object);
 				node.setLabel(objectLabel);
-				node.setStereotype(normalize(objectType));
+				if(hasObjectType) {
+					String objectType = rsNodes.getString(COL_OBJECT_TYPE);
+					node.setStereotype(normalize(objectType));
+				}
+				if(hasObjectSize) {
+					String objectSize = rsNodes.getString(COL_OBJECT_SIZE);
+					node.setHeight(Float.parseFloat(objectSize));
+				}
 				nodes.add(node);
 				nodeSet.add(node.getId());
 				log.debug("node "+object+" of stereotype "+node.getStereotype());
@@ -118,10 +130,14 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		}
 		
 		List<String> allCols = Arrays.asList(EDGE_COLS);
+		boolean hasSourceType = false;
+		boolean hasTargetType = false;
 		if(edgeOnlyStrategy) {
-			List<String> newAllCols = new ArrayList<String>();
-			newAllCols.addAll(allCols); newAllCols.addAll(Arrays.asList(EDGEONLY_XTRA_COLS));
-			allCols = newAllCols;
+			//List<String> newAllCols = new ArrayList<String>();
+			//newAllCols.addAll(allCols); newAllCols.addAll(Arrays.asList(EDGEONLY_XTRA_COLS));
+			//allCols = newAllCols;
+			hasSourceType = hasOptionalColumn(rsEdges.getMetaData(), COL_SOURCE_TYPE, qid);
+			hasTargetType = hasOptionalColumn(rsEdges.getMetaData(), COL_TARGET_TYPE, qid);
 		}
 		if(!hasAllColumns(rsEdges.getMetaData(), allCols)) { return null; }
 		
@@ -132,21 +148,24 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			String edgeType = rsEdges.getString(COL_EDGE_TYPE);
 
 			if(edgeOnlyStrategy) {
-				String sourceType = rsEdges.getString(COL_SOURCE_TYPE);
-				String targetType = rsEdges.getString(COL_TARGET_TYPE);
-				
-				Node sourceNode = new Node();
+				Node sourceNode = newNode();
 				sourceNode.setId(source);
 				sourceNode.setLabel(source);
-				sourceNode.setStereotype(normalize(sourceType));
+				if(hasSourceType) {
+					String sourceType = rsEdges.getString(COL_SOURCE_TYPE);
+					sourceNode.setStereotype(normalize(sourceType));
+				}
 				nodes.add(sourceNode);
 				nodeSet.add(sourceNode.getId());
 				log.debug("source node "+source+" of stereotype "+sourceNode.getStereotype());
 	
-				Node targetNode = new Node();
+				Node targetNode = newNode();
 				targetNode.setId(target);
 				targetNode.setLabel(target);
-				targetNode.setStereotype(normalize(targetType));
+				if(hasTargetType) {
+					String targetType = rsEdges.getString(COL_TARGET_TYPE);
+					targetNode.setStereotype(normalize(targetType));
+				}
 				nodes.add(targetNode);
 				nodeSet.add(targetNode.getId());
 				log.debug("target node "+target+" of stereotype "+targetNode.getStereotype());
@@ -202,6 +221,31 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return true;
 	}
 	
+	static boolean hasOptionalColumn(ResultSetMetaData rsmd, String column, String qid) throws SQLException {
+		boolean hasit = hasColumn(rsmd, column);
+		if(!hasit) {
+			log.info("doesn't have optional column '"+column+"' [qid = "+qid+"]");
+			return false;
+		}
+		log.info("has optional column '"+column+"' [qid = "+qid+"]");
+		return true;
+	}
+
+	static boolean hasColumn(ResultSetMetaData rsmd, String column) throws SQLException {
+		//test columns
+		int colCount = rsmd.getColumnCount();
+		List<String> allRSCols = new ArrayList<String>();
+		for(int i=0;i<colCount; i++) {
+			allRSCols.add(rsmd.getColumnLabel(i+1));
+		}
+		if(!allRSCols.contains(column)) {
+			//log.info("doesn't have optional column '"+column+"'");
+			return false;
+		}
+		//log.info("has optional column '"+column+"'");
+		return true;
+	}
+	
 	static double getNewWidth(double oldWidht, double minWidth, double maxWidth) {
 		double norm = ((useAbsolute?Math.abs(oldWidht):oldWidht) - minWidth) / (maxWidth - minWidth);
 		return norm * (edgeMaxWidth - edgeMinWidth) + edgeMinWidth;
@@ -212,13 +256,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return s.replaceAll(" ", "_");
 	}
 	
-	boolean dumpSchema(ResultSet rsEdges, ResultSet rsNodes) throws Exception {
+	boolean dumpSchema(String qid, ResultSet rsEdges, ResultSet rsNodes) throws Exception {
 		log.info("dumping graphML: translating model [edgeonly="+isEdgeOnlyStrategy(rsEdges, rsNodes)+"]");
 		if(rsEdges==null) {
 			log.warn("resultSet is null!");
 			return false;
 		}
-		Root r = getGraphMlModel(rsEdges, rsNodes);
+		Root r = getGraphMlModel(qid, rsEdges, rsNodes);
 		if(r==null) {
 			log.warn("null model: nothing to dump");
 			return false;
@@ -288,20 +332,20 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			
 			String outputfile = prop.getProperty("sqldump.graphmlquery."+qid+".outputfile");
 			
-			log.debug("edges sql: "+sqlEdges);
+			logsql.info("edges sql: "+sqlEdges);
 			Statement st = conn.createStatement();
 			ResultSet rsEdges = st.executeQuery(sqlEdges);
 			ResultSet rsNodes = null;
 
 			if(sqlNodes!=null) {
-				log.debug("nodes sql: "+sqlNodes);
+				logsql.info("nodes sql: "+sqlNodes);
 				st = conn.createStatement();
 				rsNodes = st.executeQuery(sqlNodes);
 			}
 			
 			output = new File(outputfile);
 			snippets = prop.getProperty("sqldump.graphmlquery."+qid+".snippetsfile");
-			boolean dumped = dumpSchema(rsEdges, rsNodes);
+			boolean dumped = dumpSchema(qid, rsEdges, rsNodes);
 			
 			if(dumped) { i++; }
 		}
@@ -310,6 +354,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	
 	static boolean isEdgeOnlyStrategy(ResultSet rsEdges, ResultSet rsNodes) {
 		return rsNodes==null;
+	}
+	
+	static NodeXYWH newNode() {
+		NodeXYWH node = new NodeXYWH();
+		node.setHeight(50f);
+		node.setStereotype(null);
+		return node;
 	}
 
 }
