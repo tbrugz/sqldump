@@ -6,7 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -19,7 +20,7 @@ import tbrugz.sqldump.def.DefaultDBMSFeatures;
 import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
-	static Logger log = Logger.getLogger(InformationSchemaFeatures.class);
+	static Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;
 	

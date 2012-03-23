@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public enum TableType {
 	TABLE, SYNONYM, SYSTEM_TABLE,
@@ -9,7 +10,7 @@ public enum TableType {
 	//XXXdone: temporary table, materialized view?
 	//TODOne: external table?
 	
-	static Logger log = Logger.getLogger(TableType.class);
+	static Log log = LogFactory.getLog(TableType.class);
 	
 	public static TableType getTableType(String tableType, String tableName) {
 		if(tableType.equals("TABLE")) {

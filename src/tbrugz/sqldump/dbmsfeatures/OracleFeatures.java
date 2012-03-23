@@ -10,9 +10,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -30,7 +30,7 @@ import tbrugz.sqldump.def.AbstractDBMSFeatures;
 import tbrugz.sqldump.util.Utils;
 
 public class OracleFeatures extends AbstractDBMSFeatures {
-	static Logger log = Logger.getLogger(OracleFeatures.class);
+	static Log log = LogFactory.getLog(OracleFeatures.class);
 
 	boolean dumpSequenceStartWith = true;
 	

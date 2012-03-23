@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -34,7 +35,7 @@ public class FFCDataDump extends DumpSyntax {
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	//static final String DEFAULT_NULL_VALUE = "";
-	static Logger log = Logger.getLogger(FFCDataDump.class);
+	static Log log = LogFactory.getLog(FFCDataDump.class);
 	
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();

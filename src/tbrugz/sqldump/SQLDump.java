@@ -4,7 +4,8 @@ import java.util.*;
 import java.sql.*;
 import java.io.*;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.AbstractSQLProc;
@@ -73,7 +74,9 @@ import tbrugz.sqldump.util.Utils;
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
- * XXX: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties 
+ * XXXdone: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties
+ * TODO: add SQLDialectTransformer
+ * XXXdone: log4j -> commons logging ( static Log log = LogFactory.getLog(XXX.class) )
  */
 public class SQLDump {
 	
@@ -97,7 +100,7 @@ public class SQLDump {
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
 	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
 	
-	static Logger log = Logger.getLogger(SQLDump.class);
+	static Log log = LogFactory.getLog(SQLDump.class);
 	
 	Connection conn;
 

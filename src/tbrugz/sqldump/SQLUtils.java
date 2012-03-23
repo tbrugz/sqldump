@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.Utils;
 
@@ -77,7 +78,7 @@ public class SQLUtils {
 		}
 	}
 
-	static Logger log = Logger.getLogger(SQLUtils.class);
+	static Log log = LogFactory.getLog(SQLUtils.class);
 	static StringBuffer sbTmp = new StringBuffer();
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {

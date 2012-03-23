@@ -9,13 +9,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
 
 public class XMLDataDump extends DumpSyntax {
 	
-	static Logger log = Logger.getLogger(XMLDataDump.class);
+	static Log log = LogFactory.getLog(XMLDataDump.class);
 
 	static final String XML_SYNTAX_ID = "xml";
 	

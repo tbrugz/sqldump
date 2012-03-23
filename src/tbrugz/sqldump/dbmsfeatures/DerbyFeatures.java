@@ -9,7 +9,8 @@ import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -17,7 +18,7 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DefaultDBMSFeatures;
 
 public class DerbyFeatures extends DefaultDBMSFeatures {
-	static Logger log = Logger.getLogger(DerbyFeatures.class);
+	static Log log = LogFactory.getLog(DerbyFeatures.class);
 
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {

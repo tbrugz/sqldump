@@ -10,7 +10,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
@@ -28,7 +29,7 @@ import tbrugz.sqldump.util.Utils;
 */
 public class SQLRun {
 	
-	static Logger log = Logger.getLogger(SQLRun.class);
+	static Log log = LogFactory.getLog(SQLRun.class);
 	
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
 	static final String CONN_PROPS_PREFIX = "sqlrun"; 

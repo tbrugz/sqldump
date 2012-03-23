@@ -3,13 +3,14 @@ package tbrugz.sqldump;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
 
 public class SQLTests extends AbstractSQLProc {
 
-	static Logger log = Logger.getLogger(SQLTests.class);
+	static Log log = LogFactory.getLog(SQLTests.class);
 	
 	Connection conn;
 	

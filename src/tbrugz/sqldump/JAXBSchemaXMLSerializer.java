@@ -9,7 +9,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -18,7 +19,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGrabber {
 
-	static Logger log = Logger.getLogger(JAXBSchemaXMLSerializer.class);
+	static Log log = LogFactory.getLog(JAXBSchemaXMLSerializer.class);
 	
 	public static final String XMLSERIALIZATION_JAXB_DEFAULT_PREFIX = "sqldump.xmlserialization.jaxb";
 	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";

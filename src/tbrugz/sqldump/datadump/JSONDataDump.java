@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date
@@ -25,7 +25,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class JSONDataDump extends DumpSyntax {
 
-	static Logger log = Logger.getLogger(JSONDataDump.class);
+	static Log log = LogFactory.getLog(JSONDataDump.class);
 
 	static final String JSON_SYNTAX_ID = "json";
 	

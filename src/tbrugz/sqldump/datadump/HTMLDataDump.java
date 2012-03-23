@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
 
@@ -17,7 +18,7 @@ import tbrugz.sqldump.SQLUtils;
 //XXX: should extend XMLDataDump?
 public class HTMLDataDump extends DumpSyntax {
 
-	static Logger log = Logger.getLogger(HTMLDataDump.class);
+	static Log log = LogFactory.getLog(HTMLDataDump.class);
 
 	static final String HTML_SYNTAX_ID = "html";
 	

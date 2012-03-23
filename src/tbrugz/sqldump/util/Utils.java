@@ -29,8 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.apache.log4j.Logger;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 class RegularFileFilter implements FileFilter {
 	
@@ -42,7 +42,7 @@ class RegularFileFilter implements FileFilter {
 }
 
 class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
-	static Logger log = Logger.getLogger(BaseInputGUI.class);
+	static Log log = LogFactory.getLog(BaseInputGUI.class);
 
 	static int width = 200;
 	static int height = 100;
@@ -171,7 +171,7 @@ class PasswordInputGUI extends BaseInputGUI {
 
 public class Utils {
 	
-	static Logger log = Logger.getLogger(Utils.class);
+	static Log log = LogFactory.getLog(Utils.class);
 	
 	/*
 	 * http://snippets.dzone.com/posts/show/91

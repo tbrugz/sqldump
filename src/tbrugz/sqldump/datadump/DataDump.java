@@ -24,7 +24,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
@@ -73,9 +74,9 @@ public class DataDump extends AbstractSQLProc {
 	//static final String FILENAME_PATTERN_QUERYNAME = "\\$\\{queryname\\}";
 	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
-	static Logger log = Logger.getLogger(DataDump.class);
-	static Logger logDir = Logger.getLogger(DataDump.class.getName()+".datadump-dir");
-	static Logger logRow = Logger.getLogger(DataDump.class.getName()+".datadump-row");
+	static Log log = LogFactory.getLog(DataDump.class);
+	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
+	static Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
 	
 	/*
 	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html

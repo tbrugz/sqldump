@@ -8,13 +8,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
 	public static final String DIRECTIVE_INCLUDE = "@includes";
-	static Logger log = Logger.getLogger(ParametrizedProperties.class);
+	static Log log = LogFactory.getLog(ParametrizedProperties.class);
 
 	static boolean useSystemProperties = false;
 

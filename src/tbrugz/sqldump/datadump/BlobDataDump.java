@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.util.IOUtil;
@@ -23,7 +24,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class BlobDataDump extends DumpSyntax {
 
-	static Logger log = Logger.getLogger(BlobDataDump.class);
+	static Log log = LogFactory.getLog(BlobDataDump.class);
 	
 	static final String BLOB_SYNTAX_ID = "blob";
 	static final String PROP_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern";

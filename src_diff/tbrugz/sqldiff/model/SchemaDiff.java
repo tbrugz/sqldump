@@ -8,7 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -20,7 +21,7 @@ import tbrugz.sqldump.dbmodel.Table;
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
 public class SchemaDiff implements Diff {
-	static Logger log = Logger.getLogger(SchemaDiff.class);
+	static Log log = LogFactory.getLog(SchemaDiff.class);
 
 	//XXX: should be List<>?
 	Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();

@@ -9,7 +9,8 @@ import java.io.FileInputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.SQLDump;
@@ -32,7 +33,7 @@ public class SQLDiff {
 	public static final String PROP_FROM = "sqldiff.from";
 	public static final String PROP_TO = "sqldiff.to";
 
-	static Logger log = Logger.getLogger(SQLDiff.class);
+	static Log log = LogFactory.getLog(SQLDiff.class);
 	
 	Properties prop = new ParametrizedProperties();
 	

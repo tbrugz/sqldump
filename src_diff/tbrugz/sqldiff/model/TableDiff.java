@@ -6,7 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -14,7 +15,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class TableDiff implements Diff, Comparable<TableDiff> {
-	static Logger log = Logger.getLogger(TableDiff.class);
+	static Log log = LogFactory.getLog(TableDiff.class);
 
 	ChangeType diffType; //ADD, ALTER, RENAME, DROP;
 	String renameFrom;

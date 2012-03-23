@@ -3,7 +3,8 @@ package tbrugz.sqldump.datadump;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
@@ -21,7 +22,7 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	static final String PROP_QUERIES = "sqldump.queries";
 
-	static Logger log = Logger.getLogger(SQLQueries.class);
+	static Log log = LogFactory.getLog(SQLQueries.class);
 	
 	@Override
 	public void process() {

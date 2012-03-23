@@ -3,7 +3,6 @@ package tbrugz.sqldump.mondrianschema;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -13,7 +12,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.mondrian.xsdmodel.Hierarchy;
 import tbrugz.mondrian.xsdmodel.Hierarchy.Join;
@@ -90,7 +90,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	
 	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
 	
-	static Logger log = Logger.getLogger(MondrianSchemaDumper.class);
+	static Log log = LogFactory.getLog(MondrianSchemaDumper.class);
 	
 	Properties prop;
 	List<String> numericTypes = new ArrayList<String>();

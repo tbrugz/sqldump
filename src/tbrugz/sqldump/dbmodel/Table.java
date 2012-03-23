@@ -5,7 +5,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.def.DBMSResources;
@@ -19,7 +20,7 @@ public class Table extends DBObject {
 	String remarks;	//e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	Boolean domainTable;
 	
-	static Logger log = Logger.getLogger(Table.class);
+	static Log log = LogFactory.getLog(Table.class);
 	
 	public Column getColumn(String name) {
 		if(name==null) return null;

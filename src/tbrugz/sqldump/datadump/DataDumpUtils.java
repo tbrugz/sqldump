@@ -15,11 +15,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class DataDumpUtils {
 
-	static Logger log = Logger.getLogger(DataDumpUtils.class);
+	static Log log = LogFactory.getLog(DataDumpUtils.class);
 	
 	static String DEFAULT_ENCLOSING = "'";
 	static String DOUBLEQUOTE = "\"";

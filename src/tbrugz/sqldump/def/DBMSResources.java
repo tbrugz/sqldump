@@ -5,7 +5,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
@@ -13,7 +14,7 @@ import tbrugz.sqldump.util.Utils;
 
 public class DBMSResources {
 
-	static Logger log = Logger.getLogger(DBMSResources.class);
+	static Log log = LogFactory.getLog(DBMSResources.class);
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	

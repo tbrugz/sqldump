@@ -8,7 +8,8 @@ import java.io.ObjectOutputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelDumper;
@@ -16,7 +17,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 
-	static Logger log = Logger.getLogger(SchemaSerializer.class);
+	static Log log = LogFactory.getLog(SchemaSerializer.class);
 	
 	public static final String PROP_SERIALIZATION_OUTFILE = "sqldump.serialization.outfile";
 	public static final String PROP_SERIALIZATION_INFILE = "sqldump.serialization.infile";

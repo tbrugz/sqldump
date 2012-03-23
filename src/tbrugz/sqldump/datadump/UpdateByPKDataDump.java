@@ -7,7 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -19,7 +20,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	static final String UPDATEBYPK_SYNTAX_ID = "updatebypk";
 	static final String UPDATEBYPK_EXT = "ubpk.sql";
 	
-	static Logger log = Logger.getLogger(UpdateByPKDataDump.class);
+	static Log log = LogFactory.getLog(UpdateByPKDataDump.class);
 	
 	List<String> pkCols = null; 
 	

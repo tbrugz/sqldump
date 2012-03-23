@@ -6,7 +6,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -41,7 +42,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	}
 	
 	private static final long serialVersionUID = 1L;
-	static Logger log = Logger.getLogger(Column.class);
+	static Log log = LogFactory.getLog(Column.class);
 	
 	public String type;
 	public int columSize; //XXX: should be Integer? for columns that doesn't have precision could be null

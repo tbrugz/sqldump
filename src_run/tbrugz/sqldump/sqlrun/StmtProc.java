@@ -10,14 +10,15 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.IOUtil;
 
 public class StmtProc {
-	static Logger log = Logger.getLogger(StmtProc.class);
-	static Logger logRow = Logger.getLogger(StmtProc.class.getName()+"-row");
-	static Logger logStmt = Logger.getLogger(StmtProc.class.getName()+"-stmt");
+	static Log log = LogFactory.getLog(StmtProc.class);
+	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
+	static Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
 	
 	Connection conn;
 	Properties papp;

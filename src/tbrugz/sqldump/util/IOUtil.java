@@ -8,13 +8,14 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class IOUtil {
 	
 	public static int BUFFER_SIZE = 1024*8;
 	
-	static Logger log = Logger.getLogger(IOUtil.class);
+	static Log log = LogFactory.getLog(IOUtil.class);
 	
 	static void writeFile(String contents, Writer writer) throws IOException {
 		writer.write(contents);

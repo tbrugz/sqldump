@@ -10,7 +10,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.Column;
@@ -51,7 +52,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS = "sqldump.alterschemasuggester.alterobjectsfromschemas";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY = "sqldump.alterschemasuggester.simplefksonly";
 	
-	static Logger log = Logger.getLogger(AlterSchemaSuggester.class);
+	static Log log = LogFactory.getLog(AlterSchemaSuggester.class);
 	
 	String fileOutput;
 	List<String> schemasToAlter;

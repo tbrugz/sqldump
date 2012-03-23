@@ -12,7 +12,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -41,7 +42,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
-	static Logger log = Logger.getLogger(SchemaModelScriptDumper.class);
+	static Log log = LogFactory.getLog(SchemaModelScriptDumper.class);
 
 	//File fileOutput;
 	

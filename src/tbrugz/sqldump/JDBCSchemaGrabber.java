@@ -5,7 +5,8 @@ import java.util.regex.Pattern;
 import java.sql.*;
 import java.io.*;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -48,7 +49,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
-	static Logger log = Logger.getLogger(JDBCSchemaGrabber.class);
+	static Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
 	static String[] DEFAULT_SCHEMA_NAMES = {
 		"public", //postgresql
