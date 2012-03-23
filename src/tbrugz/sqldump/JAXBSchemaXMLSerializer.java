@@ -33,7 +33,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	public JAXBSchemaXMLSerializer() {
 		try {
 			//jc = JAXBContext.newInstance( "tbrugz.sqldump" );
-			jc = JAXBContext.newInstance( "tbrugz.sqldump:tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
+			jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
 		} catch (JAXBException e) {
 			log.warn("impossible to create JAXBContext: "+e);
 			e.printStackTrace();

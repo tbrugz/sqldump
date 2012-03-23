@@ -6,8 +6,6 @@ import java.io.*;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.DataDump;
-import tbrugz.sqldump.datadump.SQLQueries;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
@@ -98,7 +96,7 @@ public class SQLDump {
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
+	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump" }; 
 	
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
 	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
@@ -145,6 +143,7 @@ public class SQLDump {
 		DBMSResources.instance().setup(papp);
 		
 		//init control vars
+		//TODO: remove control vars
 		doSchemaDump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP, doSchemaDump);
 		doTests = Utils.getPropBool(papp, PROP_DO_TESTS, doTests);
 		doDataDump = Utils.getPropBool(papp, PROP_DO_DATADUMP, doDataDump); 
@@ -177,7 +176,7 @@ public class SQLDump {
 		//grabbing model
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGE);
+			schemaGrabber = (SchemaModelGrabber) getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
@@ -212,7 +211,7 @@ public class SQLDump {
 			}
 			String processingClasses[] = processingClassesStr.split(",");
 			for(String procClass: processingClasses) {
-				AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGE);
+				AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 				if(sqlproc!=null) {
 					sqlproc.setProperties(sdd.papp);
 					sqlproc.setConnection(sdd.conn);
@@ -232,7 +231,7 @@ public class SQLDump {
 			if(dumpSchemaClasses!=null) {
 				String dumpClasses[] = dumpSchemaClasses.split(",");
 				for(String dumpClass: dumpClasses) {
-					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGE);
+					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 					if(schemaDumper!=null) {
 						schemaDumper.procProperties(sdd.papp);
 						schemaDumper.dumpSchema(sm);

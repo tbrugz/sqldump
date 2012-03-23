@@ -72,13 +72,13 @@ public class Table extends DBObject {
 		//Columns
 		for(Column c: columns) {
 			String colDesc = null;
-			if(colTypeConversionProp!=null) {
+			/*if(colTypeConversionProp!=null) {
 				//FIXME: column conversion 
 				//colDesc = Column.getColumnDesc(c, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(Defs.PROP_TO_DB_ID));
 			}
-			else {
+			else {*/
 				colDesc = Column.getColumnDesc(c, null, null);
-			}
+			//}
 			//if(c.pk) { pkCols.add(c.name); }
 			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);
 			countTabElements++;
