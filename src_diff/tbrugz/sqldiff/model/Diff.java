@@ -1,4 +1,4 @@
-package tbrugz.sqldiff;
+package tbrugz.sqldiff.model;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
 

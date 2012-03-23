@@ -10,8 +10,6 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldiff.ChangeType;
-import tbrugz.sqldiff.Diff;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;

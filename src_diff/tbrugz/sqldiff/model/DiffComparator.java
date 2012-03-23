@@ -2,7 +2,6 @@ package tbrugz.sqldiff.model;
 
 import java.util.Comparator;
 
-import tbrugz.sqldiff.Diff;
 
 public class DiffComparator implements Comparator<Diff> {
 

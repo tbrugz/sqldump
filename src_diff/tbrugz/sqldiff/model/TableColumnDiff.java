@@ -1,7 +1,5 @@
 package tbrugz.sqldiff.model;
 
-import tbrugz.sqldiff.ChangeType;
-import tbrugz.sqldiff.Diff;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
