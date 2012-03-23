@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
 import java.util.Set;
@@ -8,19 +8,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import tbrugz.sqldump.dbmodel.ExecutableObject;
-import tbrugz.sqldump.dbmodel.FK;
-import tbrugz.sqldump.dbmodel.Index;
-import tbrugz.sqldump.dbmodel.Sequence;
-import tbrugz.sqldump.dbmodel.Synonym;
-import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.dbmodel.Trigger;
-import tbrugz.sqldump.dbmodel.View;
-
 @XmlRootElement
 @XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms"})
 public class SchemaModel implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	String sqlDialect;
 
 	Set<Table> tables = new TreeSet<Table>();
 	Set<FK> foreignKeys = new TreeSet<FK>();
@@ -93,6 +86,13 @@ public class SchemaModel implements Serializable {
 	}
 	public void setSequences(Set<Sequence> sequences) {
 		this.sequences = sequences;
+	}
+	
+	public String getSqlDialect() {
+		return sqlDialect;
+	}
+	public void setSqlDialect(String sqlDialect) {
+		this.sqlDialect = sqlDialect;
 	}
 	
 }

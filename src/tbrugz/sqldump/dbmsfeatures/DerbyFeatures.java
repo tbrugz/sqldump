@@ -11,10 +11,10 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DefaultDBMSFeatures;
-import tbrugz.sqldump.SchemaModel;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DefaultDBMSFeatures;
 
 public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Logger log = Logger.getLogger(DerbyFeatures.class);

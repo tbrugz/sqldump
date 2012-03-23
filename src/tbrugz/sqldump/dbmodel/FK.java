@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.Utils;
 
 //XXX~: extends DBObject?
 //XXX: should be constraint?

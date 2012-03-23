@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.util;
 
 import java.io.FileReader;
 import java.io.IOException;

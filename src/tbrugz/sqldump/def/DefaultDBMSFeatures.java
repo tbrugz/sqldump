@@ -1,9 +1,10 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {

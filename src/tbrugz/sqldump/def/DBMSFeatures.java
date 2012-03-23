@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 public interface DBMSFeatures {

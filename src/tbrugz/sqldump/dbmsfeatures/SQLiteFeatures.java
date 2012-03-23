@@ -3,7 +3,7 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import tbrugz.sqldump.SchemaModel;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 
 /*
  * using: http://code.google.com/p/sqlite-jdbc/ 

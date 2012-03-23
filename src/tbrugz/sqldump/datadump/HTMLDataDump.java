@@ -78,7 +78,7 @@ public class HTMLDataDump extends DumpSyntax {
 				HTMLDataDump htmldd = new HTMLDataDump();
 				htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
-				SQLUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
 				sb.append("\n\t</td>");
 			}
 			else {

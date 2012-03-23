@@ -6,6 +6,16 @@ import java.io.*;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.datadump.SQLQueries;
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
+
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
  * XXXxxx: detach main (SQLDataDump) from data dump
@@ -81,8 +91,6 @@ public class SQLDump {
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
 	
-	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
-	public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	static final String PROP_DO_TESTS = "sqldump.dotests";
 	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
@@ -90,7 +98,6 @@ public class SQLDump {
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	public static final String DEFAULT_CLASSLOADING_PACKAGE = "tbrugz.sqldump"; 
 	
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
@@ -193,7 +200,8 @@ public class SQLDump {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
 		}
 		
-		sdd.addLegacyProcessors();
+		//FIXME: addLegacyProcessors()
+		//sdd.addLegacyProcessors();
 
 		//processing classes
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
@@ -240,6 +248,8 @@ public class SQLDump {
 			
 		}
 		
+		//FIXME: datadump working?
+		/*
 		//dumping data
 		//if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
 		if(sdd.doDataDump && schemaGrabber!=null) {
@@ -251,6 +261,7 @@ public class SQLDump {
 			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
 			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);
 		}
+		*/
 
 		}
 		finally {
@@ -259,6 +270,7 @@ public class SQLDump {
 		}
 	}
 	
+	/*
 	@Deprecated
 	void addLegacyProcessors() {
 		if(doTests) {
@@ -268,6 +280,7 @@ public class SQLDump {
 			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLQueries.class.getName());
 		}
 	}
+	*/
 	
 	public static Object getClassInstance(String className, String... defaultPackages) {
 		Object o = Utils.getClassInstance(className);

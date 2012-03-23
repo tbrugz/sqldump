@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.util;
 
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -31,7 +31,6 @@ import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.util.StringDecorator;
 
 class RegularFileFilter implements FileFilter {
 	

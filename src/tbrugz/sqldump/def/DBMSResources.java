@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
@@ -7,8 +7,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.Utils;
 
 public class DBMSResources {
 
@@ -23,7 +24,7 @@ public class DBMSResources {
 	
 	{
 		try {
-			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
+			dbmsSpecificResource.load(DBMSResources.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -38,7 +39,7 @@ public class DBMSResources {
 		updateMetaData(dbmd);
 	}*/
 	
-	void updateMetaData(DatabaseMetaData dbmd) {
+	public void updateMetaData(DatabaseMetaData dbmd) {
 		if(Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) && dbmd !=null) {
 			String dbid = detectDbId(dbmd);
 			if(dbid!=null) {
@@ -48,7 +49,7 @@ public class DBMSResources {
 			else { log.warn("can't detect database type"); }
 		}
 		else {
-			this.dbId = papp.getProperty(SQLDump.PROP_FROM_DB_ID);
+			this.dbId = papp.getProperty(Defs.PROP_FROM_DB_ID);
 		}
 		
 		if(dbmd!=null) {

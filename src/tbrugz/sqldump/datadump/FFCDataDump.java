@@ -12,7 +12,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * XXXdone: left-align for strings & right-align for numbers

@@ -12,11 +12,11 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldiff.model.SchemaDiff;
-import tbrugz.sqldump.ParametrizedProperties;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.SchemaModelGrabber;
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.ParametrizedProperties;
 
 /*
  * TODO: output diff to file

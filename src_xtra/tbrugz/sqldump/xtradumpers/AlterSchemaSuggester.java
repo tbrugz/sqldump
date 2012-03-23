@@ -12,16 +12,16 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.SchemaModelDumper;
 import tbrugz.sqldump.SchemaModelScriptDumper;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * currently suggests:

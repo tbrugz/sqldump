@@ -20,15 +20,15 @@ import tbrugz.mondrian.xsdmodel.Hierarchy.Join;
 import tbrugz.mondrian.xsdmodel.Hierarchy.Level;
 import tbrugz.mondrian.xsdmodel.PrivateDimension;
 import tbrugz.mondrian.xsdmodel.Schema;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.SchemaModelDumper;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.StringDecorator;
+import tbrugz.sqldump.util.Utils;
 
 class HierarchyLevelData {
 	String levelName;

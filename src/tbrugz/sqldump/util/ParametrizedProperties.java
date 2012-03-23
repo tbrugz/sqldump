@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.util;
 
 import java.io.File;
 import java.io.FileInputStream;

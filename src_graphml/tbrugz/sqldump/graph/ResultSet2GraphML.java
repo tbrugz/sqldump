@@ -23,9 +23,9 @@ import tbrugz.graphml.model.Node;
 import tbrugz.graphml.model.NodeXYWH;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
-import tbrugz.sqldump.AbstractSQLProc;
-import tbrugz.sqldump.IOUtil;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.Utils;
 
 class WeightedEdge extends Edge {
 	Double width = 0.0;

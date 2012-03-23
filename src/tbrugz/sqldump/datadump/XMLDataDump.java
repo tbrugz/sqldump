@@ -68,7 +68,7 @@ public class XMLDataDump extends DumpSyntax {
 				
 				XMLDataDump xmldd = new XMLDataDump();
 				xmldd.padding = this.padding+"\t\t";
-				SQLUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
 				sb.append("\n\t");
 			}
 			else {

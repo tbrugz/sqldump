@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -6,6 +6,7 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.Utils;
 
 public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 

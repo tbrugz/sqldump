@@ -12,11 +12,11 @@ import org.apache.log4j.Logger;
 
 import tbrugz.sqldiff.ChangeType;
 import tbrugz.sqldiff.Diff;
-import tbrugz.sqldump.SchemaModel;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 //XXX: should SchemaDiff implement Diff?

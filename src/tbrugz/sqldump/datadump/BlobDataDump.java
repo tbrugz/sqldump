@@ -14,10 +14,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DataDump;
-import tbrugz.sqldump.IOUtil;
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * add support for blobs (file: <tablename>_<pkcolumns>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping (?)

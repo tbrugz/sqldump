@@ -21,12 +21,18 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODO: quote object names when they contain strange symbols (like "-")
@@ -100,7 +106,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = DBMSResources.instance().dbid();
-		toDbId = prop.getProperty(SQLDump.PROP_TO_DB_ID);
+		toDbId = prop.getProperty(Defs.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
 		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
@@ -174,23 +180,23 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		
-		if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(SQLDump.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
-		if(toDbId!=null) { colTypeConversionProp.put(SQLDump.PROP_TO_DB_ID, toDbId); }
+		if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
+		if(toDbId!=null) { colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId); }
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
-		if(schemaModel==null || schemaModel.tables==null) {
+		if(schemaModel==null || schemaModel.getTables()==null) {
 			log.warn("no tables grabbed! terminating dumpSchema()");
 			return;
 		}
 		
-		for(Table table: schemaModel.tables) {
+		for(Table table: schemaModel.getTables()) {
 			switch(table.getType()) {
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
 			}
 			
-			categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.foreignKeys)+";\n");
+			categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
 			String afterTableScript = table.getAfterCreateTableScript();
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, afterTableScript);
@@ -201,7 +207,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 			//FK outside table, with referencing table
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
-				for(FK fk: schemaModel.foreignKeys) {
+				for(FK fk: schemaModel.getForeignKeys()) {
 					if(fk.fkTable.equals(table.name)) {
 						String fkscript = fkScriptWithAlterTable(fk, dumpDropStatements, dumpWithSchemaName);
 						categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, fkscript);
@@ -211,7 +217,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			
 			//Indexes
 			if(dumpIndexesWithReferencingTable) {
-				for(Index idx: schemaModel.indexes) {
+				for(Index idx: schemaModel.getIndexes()) {
 					//option for index output inside table
 					if(table==null || idx==null) {
 						log.warn("index null? table: "+table+" / idx: "+idx);
@@ -235,7 +241,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			
 			//Triggers
 			if(dumpTriggersWithReferencingTable) {
-				for(Trigger tr: schemaModel.triggers) {
+				for(Trigger tr: schemaModel.getTriggers()) {
 					//option for trigger output inside table
 					if(table.name.equals(tr.tableName)) {
 						categorizedOut(tr.getSchemaName(), tr.tableName, DBObjectType.TABLE, tr.getDefinition(dumpWithSchemaName)+"\n");
@@ -246,23 +252,23 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		//FKs
 		if(!dumpFKsInsideTable && !dumpFKsWithReferencingTable) {
-			dumpFKsOutsideTable(schemaModel.foreignKeys);
+			dumpFKsOutsideTable(schemaModel.getForeignKeys());
 		}
 		
 		//Views
-		for(View v: schemaModel.views) {
+		for(View v: schemaModel.getViews()) {
 			categorizedOut(v.getSchemaName(), v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Triggers
-		for(Trigger t: schemaModel.triggers) {
+		for(Trigger t: schemaModel.getTriggers()) {
 			if(!dumpTriggersWithReferencingTable || t.tableName==null) {
 				categorizedOut(t.getSchemaName(), t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
 			}
 		}
 
 		//ExecutableObjects
-		for(ExecutableObject eo: schemaModel.executables) {
+		for(ExecutableObject eo: schemaModel.getExecutables()) {
 			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
 			categorizedOut(eo.getSchemaName(), eo.name, eo.type, 
 				"-- Executable: "+eo.type+" "+eo.name+"\n"
@@ -270,20 +276,20 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 
 		//Synonyms
-		for(Synonym s: schemaModel.synonyms) {
+		for(Synonym s: schemaModel.getSynonyms()) {
 			categorizedOut(s.getSchemaName(), s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Indexes
 		if(!dumpIndexesWithReferencingTable) {
-			for(Index idx: schemaModel.indexes) {
+			for(Index idx: schemaModel.getIndexes()) {
 				categorizedOut(idx.getSchemaName(), idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+";\n");
 			}
 		}
 		
 		//Grants
 		if(!dumpGrantsWithReferencingTable) {
-			for(Table table: schemaModel.tables) {
+			for(Table table: schemaModel.getTables()) {
 				String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.name;
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
@@ -293,7 +299,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		}
 
 		//Sequences
-		for(Sequence s: schemaModel.sequences) {
+		for(Sequence s: schemaModel.getSequences()) {
 			categorizedOut(s.getSchemaName(), s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 

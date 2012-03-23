@@ -2,8 +2,8 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.util.List;
 
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODO: property for selecting dump (true/false) of extra fields on script output?

@@ -3,8 +3,8 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.util.Set;
 import java.util.TreeSet;
 
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Trigger;
+import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaTrigger extends Trigger {
 	public Set<String> eventsManipulation = new TreeSet<String>();

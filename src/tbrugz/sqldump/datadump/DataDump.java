@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.datadump;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,11 +26,12 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODOne: prop for selecting which tables to dump data from
@@ -48,7 +49,7 @@ import tbrugz.sqldump.dbmodel.TableType;
  * TODO: floatFormatter!
  * TODO: option to include, or not, partition columns in output
  */
-public class DataDump {
+public class DataDump extends AbstractSQLProc {
 
 	//generic props
 	public static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
@@ -89,6 +90,11 @@ public class DataDump {
 	 * XXX: use java.nio.charset.Charset.availableCharsets() ?
 	 *  
 	 */
+	
+	@Override
+	public void process() {
+		dumpData(conn, model.getTables(), prop);
+	}
 
 	//TODOne: filter tables by table type (table, view, ...)
 	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {

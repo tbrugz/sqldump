@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.AbstractDatabaseMetaDataDecorator;
+import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
 
 public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	

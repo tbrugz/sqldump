@@ -3,8 +3,8 @@ package tbrugz.sqldump.dbmodel;
 import java.util.ArrayList;
 import java.util.List;
 
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * see: http://download.oracle.com/docs/cd/B19306_01/server.102/b14200/statements_5010.htm

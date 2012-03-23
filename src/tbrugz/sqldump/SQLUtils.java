@@ -1,7 +1,6 @@
 package tbrugz.sqldump;
 
 import java.io.PrintStream;
-import java.io.Writer;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -19,7 +18,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.util.Utils;
 
 public class SQLUtils {
 	
@@ -267,26 +266,6 @@ public class SQLUtils {
 
 	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
 		return getColumnValues(dbmd.getSchemas(), "table_schem");
-	}
-
-	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws Exception {
-		//int ncol = rsmd.getColumnCount();
-		ds.initDump(tableName, null, rsmd);
-		ds.dumpHeader(writer);
-		int count = 0;
-		while(rs.next()) {
-			ds.dumpRow(rs, count, writer);
-			count++;
-		}
-		ds.dumpFooter(writer);
-		if(resetRS) {
-			try {
-				rs.first();
-			}
-			catch (SQLException e) {
-				rs.close();
-			}
-		}
 	}
 
 }

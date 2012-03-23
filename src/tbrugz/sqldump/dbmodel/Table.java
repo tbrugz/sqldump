@@ -7,9 +7,9 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DBMSResources;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 
 public class Table extends DBObject {
 	TableType type;
@@ -73,7 +73,8 @@ public class Table extends DBObject {
 		for(Column c: columns) {
 			String colDesc = null;
 			if(colTypeConversionProp!=null) {
-				colDesc = Column.getColumnDesc(c, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(SQLDump.PROP_TO_DB_ID));
+				//FIXME: column conversion 
+				//colDesc = Column.getColumnDesc(c, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(Defs.PROP_TO_DB_ID));
 			}
 			else {
 				colDesc = Column.getColumnDesc(c, null, null);

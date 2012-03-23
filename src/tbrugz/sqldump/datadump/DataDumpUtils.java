@@ -1,6 +1,9 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -146,6 +149,26 @@ public class DataDumpUtils {
 			}
 		}
 		return buffer.toString();
+	}
+
+	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws Exception {
+		//int ncol = rsmd.getColumnCount();
+		ds.initDump(tableName, null, rsmd);
+		ds.dumpHeader(writer);
+		int count = 0;
+		while(rs.next()) {
+			ds.dumpRow(rs, count, writer);
+			count++;
+		}
+		ds.dumpFooter(writer);
+		if(resetRS) {
+			try {
+				rs.first();
+			}
+			catch (SQLException e) {
+				rs.close();
+			}
+		}
 	}
 	
 }

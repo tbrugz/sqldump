@@ -8,15 +8,15 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.DefaultDBMSFeatures;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.DefaultDBMSFeatures;
+import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	static Logger log = Logger.getLogger(InformationSchemaFeatures.class);

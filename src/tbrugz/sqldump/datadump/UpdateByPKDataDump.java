@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: do not create output file if pkCols==null

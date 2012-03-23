@@ -12,10 +12,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.AbstractDBMSFeatures;
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -23,11 +20,14 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.MaterializedView;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.AbstractDBMSFeatures;
+import tbrugz.sqldump.util.Utils;
 
 public class OracleFeatures extends AbstractDBMSFeatures {
 	static Logger log = Logger.getLogger(OracleFeatures.class);
@@ -351,11 +351,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				}
 			}
 			catch(SQLException e) {
-				try {
-					log.warn("OracleSpecific: "+e+"; col names: ("+SQLUtils.getColumnNames(rs.getMetaData())+")");
-				} catch (SQLException e1) {
+				//try {
+					//log.warn("OracleSpecific: "+e+"; col names: ("+SQLUtils.getColumnNames(rs.getMetaData())+")");
+					log.warn("OracleSpecific: "+e);
+				/*} catch (SQLException e1) {
 					e1.printStackTrace();
-				}
+				}*/
 				//e.printStackTrace();
 			}
 		}

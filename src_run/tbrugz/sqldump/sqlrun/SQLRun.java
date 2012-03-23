@@ -12,10 +12,10 @@ import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.ParametrizedProperties;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODO: cli (sqlplus-like)? continue/exit on error?

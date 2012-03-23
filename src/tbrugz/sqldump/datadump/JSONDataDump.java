@@ -12,7 +12,7 @@ import java.util.Properties;
 import org.apache.log4j.Logger;
 
 import tbrugz.sqldump.SQLUtils;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date
@@ -106,7 +106,7 @@ public class JSONDataDump extends DumpSyntax {
 				jsondd.dateFormatter = this.dateFormatter;
 				jsondd.floatFormatter = this.floatFormatter;
 				jsondd.nullValueStr = this.nullValueStr;
-				SQLUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fos, true);
+				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fos, true);
 				sb.append("\n\t");
 			}
 			else {

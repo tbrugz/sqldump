@@ -8,9 +8,9 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.ParametrizedProperties;
-import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 public class Column extends DBIdentifiable implements Serializable {
 	
@@ -21,14 +21,14 @@ public class Column extends DBIdentifiable implements Serializable {
 		static {
 			dbmsSpecificProps = new ParametrizedProperties();
 			try {
-				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
-				if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
+				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE);
+				if(is==null) throw new IOException("resource "+Defs.DBMS_SPECIFIC_RESOURCE+" not found");
 				dbmsSpecificProps.load(is);
 				
 				doNotUsePrecision = Utils.getStringListFromProp(dbmsSpecificProps, "type.donotuseprecision", ",");
 			}
 			catch(IOException e) {
-				log.warn("Error loading typeMapping from resource: "+SQLDump.DBMS_SPECIFIC_RESOURCE);
+				log.warn("Error loading typeMapping from resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 				e.printStackTrace();
 			}
 		}

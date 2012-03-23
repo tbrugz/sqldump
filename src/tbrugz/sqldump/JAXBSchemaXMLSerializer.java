@@ -11,7 +11,10 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGrabber {
 

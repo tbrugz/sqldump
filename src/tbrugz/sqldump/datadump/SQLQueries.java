@@ -1,11 +1,13 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.datadump;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.Utils;
 
 //XXXdone: partition over (columnX) - different outputfiles for different values of columnX
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql

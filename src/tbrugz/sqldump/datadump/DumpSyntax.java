@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import tbrugz.sqldump.Utils;
+import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax {
 	

@@ -12,7 +12,7 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
-import tbrugz.sqldump.IOUtil;
+import tbrugz.sqldump.util.IOUtil;
 
 public class StmtProc {
 	static Logger log = Logger.getLogger(StmtProc.class);

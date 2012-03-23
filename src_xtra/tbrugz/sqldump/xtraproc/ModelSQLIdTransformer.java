@@ -5,12 +5,12 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.AbstractSQLProc;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.StringDecorator;
 
 public class ModelSQLIdTransformer extends AbstractSQLProc {

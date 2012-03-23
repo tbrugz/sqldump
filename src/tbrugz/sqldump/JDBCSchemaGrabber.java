@@ -13,10 +13,16 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
+import tbrugz.sqldump.def.DBMSFeatures;
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODOne: accept list of schemas to grab/dump
@@ -179,21 +185,21 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
 			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
-			int lastTableCount = schemaModel.tables.size();
+			int lastTableCount = schemaModel.getTables().size();
 			log.info("grabbing tables recursively: #ini:"+lastTableCount);
 			while(true) {
 				grabTablesRecursivebasedOnFKs(dbmd, feats, schemaModel, schemaPattern, grabExportedFKsAlso);
-				int newTableCount = schemaModel.tables.size();
+				int newTableCount = schemaModel.getTables().size();
 				if(newTableCount <= lastTableCount) { break; }
 				log.info("grabbing tables recursively: #last:"+lastTableCount+" #now:"+newTableCount);
 				lastTableCount = newTableCount;
 			}
 		}
 		
-		log.info(schemaModel.tables.size()+" tables grabbed ["+tableStats()+"]");
-		log.info(schemaModel.foreignKeys.size()+" FKs grabbed");
+		log.info(schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
+		log.info(schemaModel.getForeignKeys().size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
-			log.info(schemaModel.indexes.size()+" indexes grabbed");
+			log.info(schemaModel.getIndexes().size()+" indexes grabbed");
 		}
 			
 		if(doSchemaGrabDbSpecific) {
@@ -315,7 +321,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getImportedKeys(null, table.getSchemaName(), tableName);
-					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
+					grabSchemaFKs(fkrs, table, schemaModel.getForeignKeys());
 					closeResultSetAndStatement(fkrs);
 				}
 
@@ -323,7 +329,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabExportedFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting 'exported' FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getExportedKeys(null, table.getSchemaName(), tableName);
-					grabSchemaFKs(fkrs, table, schemaModel.foreignKeys);
+					grabSchemaFKs(fkrs, table, schemaModel.getForeignKeys());
 					closeResultSetAndStatement(fkrs);
 				}
 				
@@ -339,7 +345,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabIndexes && TableType.TABLE.equals(table.getType()) && !tableOnly) {
 					log.debug("getting indexes from "+fullTablename);
 					ResultSet indexesrs = dbmd.getIndexInfo(null, table.getSchemaName(), tableName, false, false);
-					grabSchemaIndexes(indexesrs, schemaModel.indexes);
+					grabSchemaIndexes(indexesrs, schemaModel.getIndexes());
 					closeResultSetAndStatement(indexesrs);
 				}
 				
@@ -357,7 +363,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			
 			table.validateConstraints();
 
-			schemaModel.tables.add(table);
+			schemaModel.getTables().add(table);
 		}
 		closeResultSetAndStatement(rs);
 		
@@ -379,7 +385,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern, boolean grabExportedFKsAlso) throws Exception { //, String padding
 		log.debug("recursivegrab: "+schemaPattern);
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
-		for(FK fk: schemaModel.foreignKeys) {
+		for(FK fk: schemaModel.getForeignKeys()) {
 			DBObjectId dbid = new DBObjectId();
 			dbid.name = fk.pkTable;
 			dbid.schemaName = fk.pkTableSchemaName;
@@ -400,7 +406,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		for(DBObjectId id: ids) {
 			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
-			if(!containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
+			if(!containsTableWithSchemaAndName(schemaModel.getTables(), id.schemaName, id.name)) {
 				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
 				grabSchema(schemaModel, dbmd, dbmsfeatures, id.schemaName, id.name, true);				
 			}

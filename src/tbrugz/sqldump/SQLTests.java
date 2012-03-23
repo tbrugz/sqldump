@@ -5,6 +5,8 @@ import java.sql.DatabaseMetaData;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.def.AbstractSQLProc;
+
 public class SQLTests extends AbstractSQLProc {
 
 	static Logger log = Logger.getLogger(SQLTests.class);

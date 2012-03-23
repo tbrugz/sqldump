@@ -10,6 +10,10 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.def.SchemaModelGrabber;
+
 public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 
 	static Logger log = Logger.getLogger(SchemaSerializer.class);

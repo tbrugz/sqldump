@@ -20,14 +20,14 @@ import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.SchemaModelDumper;
-import tbrugz.sqldump.Utils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.util.Utils;
 
 enum EdgeLabelType {
 	FK, FKANDCOLUMNS, COLUMNS, NONE;

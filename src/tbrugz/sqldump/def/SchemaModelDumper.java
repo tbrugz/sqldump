@@ -1,6 +1,8 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 import java.util.Properties;
+
+import tbrugz.sqldump.dbmodel.SchemaModel;
 
 public interface SchemaModelDumper {
 

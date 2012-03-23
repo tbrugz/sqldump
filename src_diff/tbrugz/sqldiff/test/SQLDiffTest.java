@@ -6,9 +6,9 @@ import java.util.Properties;
 
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
-import tbrugz.sqldump.SchemaModel;
-import tbrugz.sqldump.SchemaModelGrabber;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class SQLDiffTest {
 	
