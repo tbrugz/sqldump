@@ -83,16 +83,12 @@ public class SQLDump {
 	static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
-	static final String PROP_DO_SCHEMADUMP = "sqldump.doschemadump";
 	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
 	static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
 	
-	static final String PROP_DO_TESTS = "sqldump.dotests";
-	static final String PROP_DO_DATADUMP = "sqldump.dodatadump";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
-	static final String PROP_DO_QUERIESDUMP = "sqldump.doqueriesdump";
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
@@ -106,10 +102,6 @@ public class SQLDump {
 	Connection conn;
 
 	Properties papp = new ParametrizedProperties();
-	
-	boolean doTests = false, 
-			doSchemaDump = false, //XXX: default for doSchemaDump should be true?
-			doDataDump = false;
 	
 	public static void init(String[] args, Properties papp) throws Exception {
 		log.info("init...");
@@ -141,12 +133,6 @@ public class SQLDump {
 		SQLDump.init(args, papp);
 		
 		DBMSResources.instance().setup(papp);
-		
-		//init control vars
-		//TODO: remove control vars
-		doSchemaDump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP, doSchemaDump);
-		doTests = Utils.getPropBool(papp, PROP_DO_TESTS, doTests);
-		doDataDump = Utils.getPropBool(papp, PROP_DO_DATADUMP, doDataDump); 
 	}
 
 	void end() throws Exception {
@@ -225,26 +211,22 @@ public class SQLDump {
 		}
 		
 		//dumping model
-		if(sdd.doSchemaDump) {
-			
-			String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
-			if(dumpSchemaClasses!=null) {
-				String dumpClasses[] = dumpSchemaClasses.split(",");
-				for(String dumpClass: dumpClasses) {
-					SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
-					if(schemaDumper!=null) {
-						schemaDumper.procProperties(sdd.papp);
-						schemaDumper.dumpSchema(sm);
-					}
-					else {
-						log.warn("Error initializing dump class: '"+dumpClass+"'");
-					}
+		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+		if(dumpSchemaClasses!=null) {
+			String dumpClasses[] = dumpSchemaClasses.split(",");
+			for(String dumpClass: dumpClasses) {
+				SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+				if(schemaDumper!=null) {
+					schemaDumper.procProperties(sdd.papp);
+					schemaDumper.dumpSchema(sm);
+				}
+				else {
+					log.warn("Error initializing dump class: '"+dumpClass+"'");
 				}
 			}
-			else {
-				log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
-			}
-			
+		}
+		else {
+			log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 		}
 		
 		//FIXME: datadump working?

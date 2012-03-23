@@ -39,8 +39,9 @@ SQLDump processing consists of:
 
 *Processors* can be:
 
-- `SQLQueries` - Dumps data based on SQL-queries (can partition data from 1 query in different files, can dump in different formats) 
-- `graph.ResultSet2GraphML` - Dumps a graphML diagram based on a SQL-queries
+- `DataDump` - Dumps data based on grabbed schema (can partition data from 1 table in different files, can dump in different formats) 
+- `SQLQueries` - Dumps data based on SQL-queries (same as `DataDump` - for each query) 
+- `graph.ResultSet2GraphML` - Dumps a graphML diagram based on a SQL-query
 
 *Dumpers* can be:
 
