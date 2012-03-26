@@ -9,8 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
-import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.Defs;
 
 public class Table extends DBObject {
 	TableType type;
