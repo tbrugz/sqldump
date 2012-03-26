@@ -73,8 +73,14 @@ public class StmtProc {
 							errorFileNotFoundWarned = true;
 						}
 					}
+					catch (NullPointerException npe) {
+						log.warn("error log file not defined. Ex: "+npe);
+						errorFileNotFoundWarned = true;
+					}
 				}
-				logerror.write(stmtStr+";\n");
+				if(logerror!=null) {
+					logerror.write(stmtStr+";\n");
+				}
 				countError++;
 				logStmt.debug("error executing updates", e);
 			}

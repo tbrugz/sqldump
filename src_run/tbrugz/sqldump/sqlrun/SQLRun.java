@@ -27,6 +27,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX: statements 'split-by' option
  * TODO: commit/autocommit? when? each X statements? config per processing?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
+ * TODO: add 'global' props: sqlrun.exec.dir / sqlrun.exec.loginvalidstatments
 */
 public class SQLRun {
 	
