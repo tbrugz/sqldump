@@ -33,11 +33,11 @@ public class StmtProc {
 		FileReader reader = new FileReader(filePath);
 		FileWriter logerror = null;
 		String fileStr = IOUtil.readFile(reader);
-		//TODO: ignore ';' inside strings (like comments)
-		String[] statementStrs = fileStr.split(";");
+		//TODOne: ignore ';' inside strings (like comments)
+		SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
 		reader.close();
 		
-		log.info("file exec: "+statementStrs.length+" statements from file '"+filePath+"'...");
+		log.info("file exec: statements from file '"+filePath+"'...");
 		long logEachXStmts = 1000;
 		long urowsTotal = 0;
 		long countOk = 0;
@@ -46,7 +46,7 @@ public class StmtProc {
 		boolean errorFileNotFoundWarned = false;
 		long initTime = System.currentTimeMillis();
 		
-		for(String stmtStr: statementStrs) {
+		for(String stmtStr: stmtTokenizer) {
 			if(stmtStr==null) { continue; }
 			stmtStr = stmtStr.trim();
 			if(stmtStr.equals("")) { continue; }
