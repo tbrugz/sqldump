@@ -23,12 +23,17 @@ public class StmtProc {
 	Connection conn;
 	Properties papp;
 	
-	public void execFile(String fileKey, String errorLogKey) throws IOException, SQLException {
+	public void execFileFromKey(String fileKey, String errorLogKey) throws IOException, SQLException {
 		String filePath = papp.getProperty(fileKey);
+		execFile(filePath, errorLogKey);
+	}
+
+	public void execFile(String filePath, String errorLogKey) throws IOException, SQLException {
 		String errorLogFilePath = papp.getProperty(errorLogKey);
 		FileReader reader = new FileReader(filePath);
 		FileWriter logerror = null;
 		String fileStr = IOUtil.readFile(reader);
+		//TODO: ignore ';' inside strings (like comments)
 		String[] statementStrs = fileStr.split(";");
 		reader.close();
 		
@@ -57,10 +62,10 @@ public class StmtProc {
 						File f = new File(errorLogFilePath);
 						File dir = f.getParentFile();
 						if(!dir.isDirectory()) {
-							log.info("creating dir: "+dir);
+							log.debug("creating dir: "+dir);
 							dir.mkdirs();
 						}
-						logerror = new FileWriter(errorLogFilePath);
+						logerror = new FileWriter(errorLogFilePath, true);
 					}
 					catch(FileNotFoundException fnfe) {
 						if(!errorFileNotFoundWarned) {

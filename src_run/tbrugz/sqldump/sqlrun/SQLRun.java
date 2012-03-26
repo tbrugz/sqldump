@@ -1,5 +1,6 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -37,12 +38,17 @@ public class SQLRun {
 	//prefixes
 	static final String PREFIX_EXEC = "sqlrun.exec.";
 
-	//sufixes
+	//suffixes
 	static String SUFFIX_FILE = ".file";
+	static String SUFFIX_FILES = ".files";
 	static String SUFFIX_STATEMENT = ".statement";
+
+	//aux suffixes
+	static String SUFFIX_DIR = ".dir";
 	static String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
 	
-	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_STATEMENT };
+	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT };
+	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS };
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
@@ -75,13 +81,36 @@ public class SQLRun {
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			String procId = getExecId(key, PREFIX_EXEC);
+			if(endsWithAny(key, PROC_SUFFIXES)) {
+				log.info(">>> processing: id = '"+procId+"'");
+			}
+			
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
-				log.info(">>> processing: id = '"+procId+"'");
-				//String execId = getExecId(key, PREFIX_EXEC, SUFFIX_FILE);
-				//log.info("processing: exec-id = "+execId);
 				try {
-					srproc.execFile(key, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+					srproc.execFileFromKey(key, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+				}
+				catch(FileNotFoundException e) {
+					log.warn("file not found: "+e);
+					log.debug("file not found", e);
+				}
+			}
+			// .files
+			else if(key.endsWith(SUFFIX_FILES)) {
+				try {
+					String dir = papp.getProperty(PREFIX_EXEC+procId+SUFFIX_DIR);
+					if(dir==null) {
+						log.warn("no '.dir' property...");
+						continue;
+					}
+					File fdir = new File(dir);
+					String[] files = fdir.list();
+					String fileRegex = papp.getProperty(key);
+					for(String file: files) {
+						if(file.matches(fileRegex)) {
+							srproc.execFile(fdir.getAbsolutePath()+File.separator+file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+						}
+					}
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -90,7 +119,6 @@ public class SQLRun {
 			}
 			// .statement
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
-				log.info(">>> processing: id = '"+procId+"'");
 				String stmtStr = papp.getProperty(key);
 				try {
 					int urows = srproc.execStatement(stmtStr);
@@ -101,7 +129,7 @@ public class SQLRun {
 				}
 			}
 			// ...else
-			else if(key.endsWith(SUFFIX_LOGINVALIDSTATEMENTS)) {
+			else if(endsWithAny(key, AUX_SUFFIXES)) {
 				//do nothing here
 			}
 			else {
@@ -114,6 +142,13 @@ public class SQLRun {
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
+	
+	static boolean endsWithAny(String key, String[] suffixes) {
+		for(String suf: suffixes) {
+			if(key.endsWith(suf)) { return true; }
+		}
+		return false;
+	}
 
 	static String getExecId(String key, String prefix) {
 		int preflen = prefix.length();
@@ -133,6 +168,7 @@ public class SQLRun {
 		try {
 			SQLDump.init(args, sqlr.papp);
 			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sqlr.papp);
+			if(sqlr.conn==null) { return; }
 			sqlr.doIt();
 		}
 		finally {
