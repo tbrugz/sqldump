@@ -42,6 +42,7 @@ SQLDump processing consists of:
 - `DataDump` - Dumps data based on grabbed schema (can partition data from 1 table in different files, can dump in different formats) 
 - `SQLQueries` - Dumps data based on SQL-queries (same as `DataDump` - for each query) 
 - `graph.ResultSet2GraphML` - Dumps a graphML diagram based on a SQL-query
+- `SQLDialectTransformer` - Transforms schema models between different sql-dialects 
 
 *Dumpers* can be:
 

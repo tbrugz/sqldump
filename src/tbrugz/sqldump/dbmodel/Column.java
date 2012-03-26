@@ -64,7 +64,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
 		String colType = c.type.trim();
 		
-		if(fromDbId!=null && toDbId!=null) {
+		/*if(fromDbId!=null && toDbId!=null) {
 			if(fromDbId.equals(toDbId)) {
 				//no conversion
 			}
@@ -90,7 +90,7 @@ public class Column extends DBIdentifiable implements Serializable {
 					colType = c.type.trim();
 				}
 			}
-		}
+		}*/
 		
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 

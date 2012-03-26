@@ -95,7 +95,7 @@ public class SQLDump {
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump" }; 
+	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 	
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
 	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 

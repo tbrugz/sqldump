@@ -3,6 +3,8 @@ package tbrugz.sqldump.def;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -23,9 +25,12 @@ public class DBMSResources {
 	Properties dbmsSpecificResource = new ParametrizedProperties();
 	String identifierQuoteString = "\"";
 	
+	List<String> dbIds = new ArrayList<String>();
+	
 	{
 		try {
 			dbmsSpecificResource.load(DBMSResources.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE));
+			dbIds = Utils.getStringListFromProp(dbmsSpecificResource, "dbids", ",");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -67,8 +72,8 @@ public class DBMSResources {
 	String detectDbId(DatabaseMetaData dbmd) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
-			String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
-			String[] dbIds = dbIdsProp.split(",");
+			//String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
+			//String[] dbIds = dbIdsProp.split(",");
 			for(String dbid: dbIds) {
 				dbid = dbid.trim();
 				String regex = dbmsSpecificResource.getProperty("dbid."+dbid+".detectregex");
@@ -165,4 +170,17 @@ public class DBMSResources {
 	public String getPrivileges(String dbId) {
 		return dbmsSpecificResource.getProperty("privileges."+dbId);
 	}
+	
+	public String toANSIType(String sqlDialect, String columnType) {
+		return dbmsSpecificResource.getProperty("from."+sqlDialect+"."+columnType);
+	}
+
+	public String toSQLDialectType(String sqlDialect, String ansiColumnType) {
+		return dbmsSpecificResource.getProperty("to."+sqlDialect+"."+ansiColumnType);
+	}
+
+	public List<String> getDbIds() {
+		return dbIds;
+	}
+	
 }

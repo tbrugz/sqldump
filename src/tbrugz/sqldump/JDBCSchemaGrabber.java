@@ -178,6 +178,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		for(String schemaName: schemasArr) {
 			schemasList.add(schemaName.trim());
 		}
+		
+		schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 
 		for(String schemaName: schemasList) {
 			grabSchema(schemaModel, dbmd, feats, schemaName, null, false);
