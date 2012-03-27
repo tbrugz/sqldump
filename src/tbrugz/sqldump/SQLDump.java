@@ -234,21 +234,6 @@ public class SQLDump {
 			log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 		}
 		
-		//FIXME: datadump working?
-		/*
-		//dumping data
-		//if(sdd.doDataDump && schemaJDBCGrabber!=null && schemaJDBCGrabber.tableNamesForDataDump!=null) {
-		if(sdd.doDataDump && schemaGrabber!=null) {
-			if(sdd.conn==null) {
-				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
-				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
-			}
-			DataDump dd = new DataDump();
-			//dd.dumpData(sdd.conn, schemaJDBCGrabber.tableNamesForDataDump, sdd.papp);
-			dd.dumpData(sdd.conn, sm.getTables(), sdd.papp);
-		}
-		*/
-
 		}
 		finally {
 			log.info("closing connection: "+sdd.conn);

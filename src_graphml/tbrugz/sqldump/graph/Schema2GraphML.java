@@ -249,7 +249,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 		StringBuffer sbCols = new StringBuffer();
 		int colCount = 0;
 		for(Column c: t.getColumns()) {
-			sbCols.append(Column.getColumnDesc(c, null, null)+"\n");
+			sbCols.append(Column.getColumnDesc(c)+"\n");
 			colCount++;
 		}
 		n.setColumnsDesc(sbCols.toString());

@@ -70,14 +70,7 @@ public class Table extends DBObject {
 		
 		//Columns
 		for(Column c: columns) {
-			String colDesc = null;
-			/*if(colTypeConversionProp!=null) {
-				//FIXME: column conversion 
-				//colDesc = Column.getColumnDesc(c, DBMSResources.instance().dbid(), colTypeConversionProp.getProperty(Defs.PROP_TO_DB_ID));
-			}
-			else {*/
-				colDesc = Column.getColumnDesc(c, null, null);
-			//}
+			String colDesc = Column.getColumnDesc(c);
 			//if(c.pk) { pkCols.add(c.name); }
 			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);
 			countTabElements++;

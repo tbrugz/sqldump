@@ -52,16 +52,8 @@ public class Column extends DBIdentifiable implements Serializable {
 	String defaultValue;
 	String remarks;
 	
-	public static String getColumnDesc(Column c) {
-		return getColumnDesc(c, null, null);
-	}
-	
-	/*public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
-		return getColumnDesc(c, fromDbId, toDbId);
-	}*/
-	
 	//XXX: should be 'default'?
-	public static String getColumnDesc(Column c, String fromDbId, String toDbId) {
+	public static String getColumnDesc(Column c) {
 		String colType = c.type.trim();
 		
 		/*if(fromDbId!=null && toDbId!=null) {
@@ -100,8 +92,8 @@ public class Column extends DBIdentifiable implements Serializable {
 			+(!c.nullable?" not null":"");
 	}
 	
-	public static String getColumnDescFull(Column c, String fromDbId, String toDbId) {
-		return getColumnDesc(c, fromDbId, toDbId)+(c.pk?" primary key":"");
+	public static String getColumnDescFull(Column c) {
+		return getColumnDesc(c)+(c.pk?" primary key":"");
 	}
 
 	//XXX: should be 'default'?
