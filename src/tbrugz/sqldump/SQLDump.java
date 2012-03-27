@@ -75,8 +75,10 @@ import tbrugz.sqldump.util.Utils;
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
  * XXXdone: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties
- * TODO: add SQLDialectTransformer
+ * TODOne: add SQLDialectTransformer
  * XXXdone: log4j -> commons logging ( static Log log = LogFactory.getLog(XXX.class) )
+ * TODO: sqldump.schemagrab.tables=<schema>.<table>, <table2>
+ * TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
  */
 public class SQLDump {
 	

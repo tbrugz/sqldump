@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -29,9 +30,9 @@ public class StmtProc {
 	}
 
 	public void execFile(String filePath, String errorLogKey) throws IOException, SQLException {
-		String errorLogFilePath = papp.getProperty(errorLogKey);
+		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		FileReader reader = new FileReader(filePath);
-		FileWriter logerror = null;
+		Writer logerror = null;
 		String fileStr = IOUtil.readFile(reader);
 		//TODOne: ignore ';' inside strings (like comments)
 		SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
@@ -43,7 +44,7 @@ public class StmtProc {
 		long countOk = 0;
 		long countError = 0;
 		long countExec = 0;
-		boolean errorFileNotFoundWarned = false;
+		//boolean errorFileNotFoundWarned = false;
 		long initTime = System.currentTimeMillis();
 		
 		for(String stmtStr: stmtTokenizer) {
@@ -58,25 +59,7 @@ public class StmtProc {
 			catch(SQLException e) {
 				logStmt.warn("error executing updates [stmt = "+stmtStr+"]: "+e);
 				if(logerror==null) {
-					try {
-						File f = new File(errorLogFilePath);
-						File dir = f.getParentFile();
-						if(!dir.isDirectory()) {
-							log.debug("creating dir: "+dir);
-							dir.mkdirs();
-						}
-						logerror = new FileWriter(errorLogFilePath, true);
-					}
-					catch(FileNotFoundException fnfe) {
-						if(!errorFileNotFoundWarned) {
-							log.warn("error opening file '"+errorLogFilePath+"' for writing invalid statements. Ex: "+fnfe);
-							errorFileNotFoundWarned = true;
-						}
-					}
-					catch (NullPointerException npe) {
-						log.warn("error log file not defined. Ex: "+npe);
-						errorFileNotFoundWarned = true;
-					}
+					logerror = getErrorLogHandler(errorLogKey);
 				}
 				if(logerror!=null) {
 					logerror.write(stmtStr+";\n");
@@ -103,8 +86,43 @@ public class StmtProc {
 				+" [file = '"+filePath+"']");
 		if(logerror!=null) {
 			logerror.close();
-			log.warn(""+countError+" erroneous statements in '"+errorLogFilePath+"'");
+			log.warn(""+countError+" erroneous statements logged");
+			//log.warn(""+countError+" erroneous statements in '"+errorLogFilePath+"'");
 		}
+	}
+	
+	boolean errorFileNotFoundWarned = false;
+	
+	Writer getErrorLogHandler(String errorLogKey) {
+		String errorLogFilePath = papp.getProperty(errorLogKey);
+		if(errorLogFilePath==null) {
+			errorLogFilePath = papp.getProperty(SQLRun.PROP_LOGINVALIDSTATEMENTS);
+		}
+		
+		FileWriter logerror = null;
+		try {
+			File f = new File(errorLogFilePath);
+			File dir = f.getParentFile();
+			if(!dir.isDirectory()) {
+				log.debug("creating dir: "+dir);
+				dir.mkdirs();
+			}
+			logerror = new FileWriter(errorLogFilePath, true);
+		}
+		catch(FileNotFoundException fnfe) {
+			if(!errorFileNotFoundWarned) {
+				log.warn("error opening file '"+errorLogFilePath+"' for writing invalid statements. Ex: "+fnfe);
+				errorFileNotFoundWarned = true;
+			}
+		}
+		catch (NullPointerException npe) {
+			log.warn("error log file not defined. Ex: "+npe);
+			errorFileNotFoundWarned = true;
+		} catch (IOException e) {
+			log.warn("ioexception when opening error log file. Ex: "+e);
+			errorFileNotFoundWarned = true;
+		}
+		return logerror;
 	}
 	
 	public int execStatement(String stmtStr) throws IOException, SQLException {

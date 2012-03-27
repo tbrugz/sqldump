@@ -27,14 +27,15 @@ import tbrugz.sqldump.util.Utils;
  * XXX: statements 'split-by' option
  * TODO: commit/autocommit? when? each X statements? config per processing?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
- * TODO: add 'global' props: sqlrun.exec.dir / sqlrun.exec.loginvalidstatments
+ * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
 */
 public class SQLRun {
 	
 	static Log log = LogFactory.getLog(SQLRun.class);
 	
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
-	static final String CONN_PROPS_PREFIX = "sqlrun"; 
+	static final String SQLRUN_PROPS_PREFIX = "sqlrun"; 
+	static final String CONN_PROPS_PREFIX = SQLRUN_PROPS_PREFIX; 
 	
 	//prefixes
 	static final String PREFIX_EXEC = "sqlrun.exec.";
@@ -48,6 +49,10 @@ public class SQLRun {
 	static String SUFFIX_DIR = ".dir";
 	static String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
 	
+	//properties
+	static String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
+
+	//suffix groups
 	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT };
 	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS };
 	
@@ -99,7 +104,7 @@ public class SQLRun {
 			// .files
 			else if(key.endsWith(SUFFIX_FILES)) {
 				try {
-					String dir = papp.getProperty(PREFIX_EXEC+procId+SUFFIX_DIR);
+					String dir = getDir(procId);
 					if(dir==null) {
 						log.warn("no '.dir' property...");
 						continue;
@@ -143,6 +148,13 @@ public class SQLRun {
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
+
+	String getDir(String procId) {
+		String dir = papp.getProperty(PREFIX_EXEC+procId+SUFFIX_DIR);
+		if(dir!=null) { return dir; }
+		dir = papp.getProperty(SQLRUN_PROPS_PREFIX+SUFFIX_DIR);
+		return dir;
+	}
 	
 	static boolean endsWithAny(String key, String[] suffixes) {
 		for(String suf: suffixes) {
