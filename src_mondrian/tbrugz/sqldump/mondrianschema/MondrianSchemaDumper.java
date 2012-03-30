@@ -252,19 +252,25 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".degeneratedims");
 			if(degenerateDimColsStr!=null) {
 				String[] cols = degenerateDimColsStr.split(",");
-				for(String c: cols) {
-					c = c.trim();
-					String colname = c;
+				for(String col: cols) {
+					col = col.trim();
+					String nameColumn = null;
+					String[] colAndColName = col.split(":");
+					if(colAndColName.length>1) {
+						col = colAndColName[0];
+						nameColumn = colAndColName[1];
+					}
 					boolean containsCol = false;
 					for(Column cc: t.getColumns()) {
-						if(stringEquals(cc.name, c)) { containsCol = true; colname = cc.name; break; }
+						if(stringEquals(cc.name, col)) { containsCol = true; break; }
 					}
 					if(!containsCol) {
-						log.warn("column for degenerate dimension '"+c+"' not present in table "+t.name);
+						log.warn("column for degenerate dimension '"+col+"' not present in table "+t.name);
 					}
 
-					degenerateDimCandidates.remove(c);
-					cube.getDimensionUsageOrDimension().add(genDegeneratedDim(colname, c));
+					degenerateDimCandidates.remove(col);
+					if(nameColumn!=null) { degenerateDimCandidates.remove(nameColumn); }
+					cube.getDimensionUsageOrDimension().add(genDegeneratedDim(col, nameColumn, col));
 				}
 			}
 			
@@ -281,7 +287,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					log.info("adding degenerated dim candidates for cube '"+cube.getName()+"': "+degenerateDimCandidates);
 					for(String c: degenerateDimCandidates) {
 						//log.debug("adding degeneraded dim '"+c+" for cube '"+cube.getName()+"'");
-						cube.getDimensionUsageOrDimension().add(genDegeneratedDim(c, "degenerate_dim_"+c));
+						cube.getDimensionUsageOrDimension().add(genDegeneratedDim(c, null, "degenerate_dim_"+c));
 					}
 				}
 				else {
@@ -410,10 +416,13 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		cube.getDimensionUsageOrDimension().add(dim);*/
 	}
 	
-	PrivateDimension genDegeneratedDim(String column, String dimName) {
+	PrivateDimension genDegeneratedDim(String column, String nameColumn, String dimName) {
 		Level level = new Level();
 		level.setName(column);
 		level.setColumn(column);
+		if(nameColumn!=null) {
+			level.setNameColumn(nameColumn);
+		}
 		level.setUniqueMembers(true);
 
 		Hierarchy hier = new Hierarchy();
