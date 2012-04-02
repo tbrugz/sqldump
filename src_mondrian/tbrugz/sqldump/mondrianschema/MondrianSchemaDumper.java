@@ -191,6 +191,35 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//XXX: virtual cubes / shared dimensions
 		//XXXdone: degenerate dimensions
 		
+		//add FKs to model based on properties (experimental)
+		for(Table t: schemaModel.getTables()) {
+			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+stringDecorator.get(t.name)+".xtrafk", ",");
+			if(xtraFKs==null) { continue; }
+			
+			for(String newfkstr: xtraFKs) {
+				String[] parts = newfkstr.split(":");
+				if(parts.length!=3) {
+					log.warn("wrong number of FK parts: "+parts.length+"; should be 3 [fkstr='"+newfkstr+"']");
+					continue;
+				}
+				FK fk = new FK();
+				log.info("new FK: "+newfkstr+"; parts.len: "+parts.length);
+				fk.fkTable = t.name;
+				fk.fkTableSchemaName = t.getSchemaName();
+				fk.fkColumns = newStringList(parts[0]);
+				if(parts[1].contains(".")) {
+					String[] pkTableParts = parts[1].split("\\.");
+					log.info("FKschema: "+parts[1]+"; pkTable.len: "+pkTableParts.length);
+					fk.pkTableSchemaName = pkTableParts[0];
+					parts[1] = pkTableParts[1];
+				}
+				fk.pkTable = parts[1];
+				fk.pkColumns = newStringList(parts[2]);
+				//TODO: changing model... should clone() first
+				schemaModel.getForeignKeys().add(fk);
+			}
+		}
+		
 		for(Table t: schemaModel.getTables()) {
 			List<FK> fks = new ArrayList<FK>();
 			boolean isRoot = true;
@@ -697,6 +726,14 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			if(equalsShouldIgnoreCase?ss.equalsIgnoreCase(s):ss.equals(s)) { return true; }
 		}
 		return false;
+	}
+	
+	List<String> newStringList(String... strings) {
+		List<String> ret = new ArrayList<String>();
+		for(String s: strings) {
+			ret.add(s);
+		}
+		return ret;
 	}
 	
 	@Override
