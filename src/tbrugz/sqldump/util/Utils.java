@@ -171,7 +171,9 @@ class PasswordInputGUI extends BaseInputGUI {
 
 public class Utils {
 	
-	static Log log = LogFactory.getLog(Utils.class);
+	static final Log log = LogFactory.getLog(Utils.class);
+	
+	static final Locale localeEN = new Locale("en");
 	
 	/*
 	 * http://snippets.dzone.com/posts/show/91
@@ -438,10 +440,11 @@ public class Utils {
 		}
 	}
 	
+	//XXX: remove 'syntax' param?
 	public static NumberFormat getFloatFormatter(String floatLocale, String syntax) {
 		NumberFormat floatFormatter = null;
 		if(floatLocale==null) {
-			floatFormatter = NumberFormat.getNumberInstance();
+			floatFormatter = NumberFormat.getNumberInstance(localeEN);
 		}
 		else {
 			Locale locale = new Locale(floatLocale);

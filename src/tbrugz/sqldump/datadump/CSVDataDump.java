@@ -28,7 +28,7 @@ public class CSVDataDump extends DumpSyntax {
 	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
-	static final String DELIM_COLUMN_DEFAULT = ";";
+	static final String DELIM_COLUMN_DEFAULT = ",";
 
 	static final String CSV_SYNTAX_ID = "csv";
 	
