@@ -34,8 +34,9 @@ public class StmtProc {
 		FileReader reader = new FileReader(filePath);
 		Writer logerror = null;
 		String fileStr = IOUtil.readFile(reader);
-		//TODOne: ignore ';' inside strings (like comments)
-		SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
+		//FIXME: SQLStmtTokenizer not working (on big files?)
+		//SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
+		String[] stmtTokenizer = fileStr.split(";");
 		reader.close();
 		
 		log.info("file exec: statements from file '"+filePath+"'...");

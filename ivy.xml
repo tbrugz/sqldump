@@ -9,6 +9,7 @@
 	<dependencies>
 		<dependency org="commons-logging" name="commons-logging" rev="1.1.1"/>
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>
+		<dependency org="junit" name="junit" rev="4.10"/>
 		<!-- TODO: add kmlutils, mondrianschema2graphml -->
 		<dependency org="org.apache.derby" name="derby" rev="10.8.2.2" conf="test->default"/>
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="test->default"/>

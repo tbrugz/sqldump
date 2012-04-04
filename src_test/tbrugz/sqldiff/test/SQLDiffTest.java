@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Test;
+
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -27,7 +29,8 @@ public class SQLDiffTest {
 	Set<Index> indexes = new TreeSet<Index>();
 	 */
 
-	void doIt() throws Exception {
+	@Test
+	public void doIt() throws Exception {
 		//SQLDump sdd = new SQLDump();
 		//SchemaModel sm = sdd.grabSchema();
 		
@@ -52,8 +55,5 @@ public class SQLDiffTest {
 		List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
 		System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
 	}
-	
-	public static void main(String[] args) throws Exception {
-		new SQLDiffTest().doIt();
-	}
+
 }

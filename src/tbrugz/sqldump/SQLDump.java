@@ -79,6 +79,7 @@ import tbrugz.sqldump.util.Utils;
  * XXXdone: log4j -> commons logging ( static Log log = LogFactory.getLog(XXX.class) )
  * TODO: sqldump.schemagrab.tables=<schema>.<table>, <table2>
  * TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
+ * TODO: warnings: grabber with no dumper or processor || dumper with no grabber || no dumper, no grabber, no processor
  */
 public class SQLDump {
 	

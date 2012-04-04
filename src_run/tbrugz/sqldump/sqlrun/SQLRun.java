@@ -28,6 +28,7 @@ import tbrugz.sqldump.util.Utils;
  * TODO: commit/autocommit? when? each X statements? config per processing?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
+ * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
 public class SQLRun {
 	

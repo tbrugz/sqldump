@@ -64,14 +64,4 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 	public Iterator<String> iterator() {
 		return this;
 	}
-	
-	public static void main(String[] args) {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc;cde'';eee';'");
-		int count = 0;
-		for(String s: p) {
-			System.out.println("s: "+s);
-			count++;
-			if(count==10) { break; }
-		}
-	}
 }
