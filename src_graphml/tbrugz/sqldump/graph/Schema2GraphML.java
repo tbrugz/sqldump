@@ -69,6 +69,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	public static final String PROP_STEREOTYPE_ADD_VERTEXTYPE = "sqldump.graphmldump.addvertextypestereotype";
 	
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
+	public static final String PROP_NODESTEREOTYPECONTAINS_PREFIX = "sqldump.graphmldump.nodestereotypecontains.";
 
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
@@ -82,6 +83,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 	boolean addVertexTypeStereotype = false;
 	
 	Map<String, List<Pattern>> stereotypeRegexes = new HashMap<String, List<Pattern>>();
+	Map<String, List<String>> stereotypeNodenames = new HashMap<String, List<String>>();
 	
 	//String defaultSchemaName;
 	
@@ -173,6 +175,16 @@ public class Schema2GraphML implements SchemaModelDumper {
 						break;
 				}
 			}
+			
+			for(String key: stereotypeNodenames.keySet()) {
+				//List<Pattern> patterns = stereotypeRegexes.get(key);
+				for(String nodename: stereotypeNodenames.get(key)) {
+					if(nodename.equals(t.getName())) {
+						addStereotype(n, "nodename@"+key);
+					}
+				}
+			}
+
 			for(String key: stereotypeRegexes.keySet()) {
 				//List<Pattern> patterns = stereotypeRegexes.get(key);
 				for(Pattern pat: stereotypeRegexes.get(key)) {
@@ -382,6 +394,22 @@ public class Schema2GraphML implements SchemaModelDumper {
 					stereotypeRegexes.put(stereotype, patterns);
 				}
 				patterns.add(Pattern.compile(regex));
+			}
+		}
+
+		//node stereotype contains
+		for(String key: Utils.getKeysStartingWith(prop, PROP_NODESTEREOTYPECONTAINS_PREFIX)) {
+			String stereotype = key.substring(PROP_NODESTEREOTYPECONTAINS_PREFIX.length());
+			String[] nodenames = prop.getProperty(key).split(",");
+			for(String nodename: nodenames) {
+				nodename = nodename.trim();
+				log.debug("added stereotype table name: stereotype: '"+stereotype+"', name: '"+nodename+"'");
+				List<String> patterns = stereotypeNodenames.get(stereotype);
+				if(patterns==null) {
+					patterns = new ArrayList<String>();
+					stereotypeNodenames.put(stereotype, patterns);
+				}
+				patterns.add(nodename);
 			}
 		}
 		
