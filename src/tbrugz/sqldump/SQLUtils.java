@@ -217,15 +217,15 @@ public class SQLUtils {
 		}
 	}
 	
-	static void dumpRS(ResultSet rs) throws SQLException {
+	public static void dumpRS(ResultSet rs) throws SQLException {
 		dumpRS(rs, rs.getMetaData(), System.out);
 	}
 
-	static void dumpRS(ResultSet rs, PrintStream out) throws SQLException {
+	public static void dumpRS(ResultSet rs, PrintStream out) throws SQLException {
 		dumpRS(rs, rs.getMetaData(), out);
 	}
 
-	static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
+	public static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
 		int ncol = rsmd.getColumnCount();
 		StringBuffer sb = new StringBuffer();
 		//System.out.println(ncol);

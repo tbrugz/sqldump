@@ -290,11 +290,23 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		//Grants
 		if(!dumpGrantsWithReferencingTable) {
+			//tables
 			for(Table table: schemaModel.getTables()) {
 				String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.name;
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.getSchemaName(), table.name, DBObjectType.GRANT, grantOutput);
+				}
+			}
+			//executables
+			//TODO: how to dump exec grants if 'dumpGrantsWithReferencingTable' is true?
+			//XXX: compactGrantDump for Executable's Grants doesn't make sense, since there is only one type of privilege for Executables (EXECUTE) (for now?)
+			for(ExecutableObject eo: schemaModel.getExecutables()) {
+				String eoName = (dumpWithSchemaName?eo.getSchemaName()+".":"")+eo.name;
+				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
+				String grantOutput = compactGrantDump(eo.grants, eoName, toDbId);
+				if(grantOutput!=null && !"".equals(grantOutput)) {
+					categorizedOut(eo.getSchemaName(), eo.name, DBObjectType.GRANT, grantOutput);
 				}
 			}
 		}
@@ -393,8 +405,24 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		fos.write(message+"\n");
 		fos.close();
 	}
+
+	String simpleGrantDump(Collection<Grant> grants, String tableName, String toDbId) {
+		StringBuffer sb = new StringBuffer();
+		
+		for(Grant grant: grants) {
+			sb.append("grant "+grant.privilege
+					+" on "+DBObject.getFinalIdentifier(tableName)
+					+" to "+grant.grantee
+					+(grant.withGrantOption?" WITH GRANT OPTION":"")
+					+";\n\n");
+		}
+		if(sb.length()>2) {
+			return sb.substring(0, sb.length()-1);
+		}
+		return "";
+	}
 	
-	String compactGrantDump(List<Grant> grants, String tableName, String toDbId) {
+	String compactGrantDump(Collection<Grant> grants, String tableName, String toDbId) {
 		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
 		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
 		

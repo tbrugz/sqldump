@@ -8,4 +8,9 @@ public class Grant implements Serializable {
 	public PrivilegeType privilege;
 	public String grantee;
 	public boolean withGrantOption;
+	
+	@Override
+	public String toString() {
+		return "["+table+";priv="+privilege+";to:"+grantee+(withGrantOption?";GO!":"")+"]";
+	}
 }

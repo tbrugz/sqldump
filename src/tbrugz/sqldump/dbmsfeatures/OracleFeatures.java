@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,8 +19,10 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.MaterializedView;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
@@ -33,6 +36,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	static Log log = LogFactory.getLog(OracleFeatures.class);
 
 	boolean dumpSequenceStartWith = true;
+	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
 	
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
@@ -181,6 +185,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				}
 				
 				eo.setSchemaName(schemaPattern);
+				
+				if(grabExecutablePrivileges && !eo.type.equals(DBObjectType.PACKAGE_BODY)) {
+					grabExecutablePrivileges(eo, schemaPattern, conn);
+				}
 			}
 			sb.append(rs.getString(4)); //+"\n"
 			count++;
@@ -194,6 +202,28 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+count+"]");
+	}
+	
+	void grabExecutablePrivileges(ExecutableObject executable, String schemaPattern, Connection conn) throws SQLException {
+		String sql = "SELECT grantee, grantable FROM all_tab_privs WHERE table_schema = ? AND table_name = ? AND privilege = 'EXECUTE'";
+		log.debug("sql: "+sql);
+		PreparedStatement st = conn.prepareStatement(sql);
+		st.setString(1, schemaPattern);
+		st.setString(2, executable.name);
+		ResultSet rs = st.executeQuery();
+		
+		while(rs.next()) {
+			String grantee = rs.getString(1);
+			boolean grantable = "YES".equals(rs.getString(2));
+			
+			Grant grant = new Grant();
+			grant.grantee = grantee;
+			grant.privilege = PrivilegeType.EXECUTE;
+			grant.table = executable.name;
+			grant.withGrantOption = grantable;
+			
+			executable.grants.add(grant);
+		}
 	}
 
 	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
