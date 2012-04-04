@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CodingErrorAction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -324,7 +327,7 @@ public class DataDump extends AbstractSQLProc {
 					Writer w = writersOpened.get(finalFilename);
 					if(newFilename) {
 						//should always be true
-						log.debug("new filename="+finalFilename);
+						log.debug("new filename="+finalFilename+" [charset="+charset+"]");
 					}
 					else {
 						log.warn("filename '"+finalFilename+"' shouldn't have been already opened...");
@@ -372,7 +375,7 @@ public class DataDump extends AbstractSQLProc {
 						}
 						
 						if(newFilename) {
-							log.debug("new filename="+finalFilename);
+							log.debug("new filename="+finalFilename+" [charset="+charset+"]");
 							ds.dumpHeader(w);
 							writersSyntaxes.put(finalFilename, ds);
 						}
@@ -435,7 +438,7 @@ public class DataDump extends AbstractSQLProc {
 			rs.close();
 	}
 	
-	void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
+	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
 		Writer w = writersOpened.get(filename);
 		DumpSyntax ds = writersSyntaxes.get(filename);
 		try {
@@ -448,14 +451,14 @@ public class DataDump extends AbstractSQLProc {
 		w.close();
 	}
 	
-	void removeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
+	static void removeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String filename) throws IOException {
 		Writer writerRemoved = writersOpened.remove(filename);
 		if(writerRemoved==null) { log.warn("writer for file '"+filename+"' not found"); }
 		DumpSyntax syntaxRemoved = writersSyntaxes.remove(filename);
 		if(syntaxRemoved==null) { log.warn("syntax for file '"+filename+"' not found"); }
 	}
 	
-	String getDynamicFileName(Properties prop, String tableOrQueryId, String syntaxId) {
+	static String getDynamicFileName(Properties prop, String tableOrQueryId, String syntaxId) {
 		log.debug("getDynamicOutFileName: id="+tableOrQueryId+"; syntax="+syntaxId);
 		String filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN+".id@"+tableOrQueryId+".syntax@"+syntaxId);
 		if(filename!=null) { return filename; }
@@ -473,7 +476,7 @@ public class DataDump extends AbstractSQLProc {
 		return null;
 	}
 	
-	String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
+	static String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
 		return filenameAbstract.replaceAll("\\$\\{partitionby\\}", partitionByStr);
 	}
 	
@@ -489,7 +492,7 @@ public class DataDump extends AbstractSQLProc {
 		return w;
 	}*/
 	
-	boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset) throws UnsupportedEncodingException, FileNotFoundException {
+	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset) throws UnsupportedEncodingException, FileNotFoundException {
 		if(! writersOpened.containsKey(fname)) {
 			File f = new File(fname);
 			File parent = f.getParentFile();
@@ -497,7 +500,14 @@ public class DataDump extends AbstractSQLProc {
 				logDir.debug("creating dir: "+parent);
 				parent.mkdirs();
 			}
-			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), charset); //XXX: false: never append
+
+			//see: http://stackoverflow.com/questions/9852978/write-a-file-in-utf-8-using-filewriter-java
+			// http://stackoverflow.com/questions/1001540/how-to-write-a-utf-8-file-with-java
+			CharsetEncoder encoder = Charset.forName(charset).newEncoder();
+			encoder.onMalformedInput(CodingErrorAction.REPLACE);
+			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
+			
+			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), encoder); //XXX: false: never append
 			writersOpened.put(fname, w);
 			//filesOpened.add(fname);
 			return true;
