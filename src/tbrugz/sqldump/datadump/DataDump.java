@@ -67,6 +67,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
 	static final String PROP_DATADUMP_LOG_EACH_X_ROWS = "sqldump.datadump.logeachxrows";
+	static final String PROP_DATADUMP_LOG_1ST_ROW = "sqldump.datadump.log1strow";
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
@@ -289,7 +290,8 @@ public class DataDump extends AbstractSQLProc {
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
-			//XXX: prop for setting 'logEachXRows'
+			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
+			//XXXdone: prop for setting 'logEachXRows'
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 
 			//header
@@ -387,6 +389,9 @@ public class DataDump extends AbstractSQLProc {
 				count++;
 				countInPartition++;
 				
+				if(log1stRow && count==1) {
+					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped");
+				}
 				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
 					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped");
 				}
@@ -508,6 +513,7 @@ public class DataDump extends AbstractSQLProc {
 			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), encoder); //XXX: false: never append
+			//TODO: option to output BOM (http://en.wikipedia.org/wiki/Byte_order_mark) in accordance with charset
 			writersOpened.put(fname, w);
 			//filesOpened.add(fname);
 			return true;

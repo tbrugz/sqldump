@@ -192,6 +192,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//XXXdone: degenerate dimensions
 		
 		//add FKs to model based on properties (experimental)
+		List<FK> addFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
 			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+stringDecorator.get(t.name)+".xtrafk", ",");
 			if(xtraFKs==null) { continue; }
@@ -216,9 +217,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				fk.pkTable = parts[1];
 				fk.pkColumns = newStringList(parts[2]);
 				//TODO: changing model... should clone() first
-				schemaModel.getForeignKeys().add(fk);
+				addFKs.add(fk);
 			}
 		}
+		schemaModel.getForeignKeys().addAll(addFKs);
 		
 		for(Table t: schemaModel.getTables()) {
 			List<FK> fks = new ArrayList<FK>();
@@ -335,6 +337,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		validateProperties(schemaModel, ".level@", "level table not found: %s");
 		//validade '.cube' properties
 		validateProperties(schemaModel, ".cube@", "fact table not found: %s");
+
+		//so that schema isn't modified
+		schemaModel.getForeignKeys().removeAll(addFKs);
 		
 		try {
 			jaxbOutput(schema, new File(fileOutput));
