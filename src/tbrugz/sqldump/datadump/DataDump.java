@@ -68,6 +68,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
 	static final String PROP_DATADUMP_LOG_EACH_X_ROWS = "sqldump.datadump.logeachxrows";
 	static final String PROP_DATADUMP_LOG_1ST_ROW = "sqldump.datadump.log1strow";
+	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
@@ -290,6 +291,8 @@ public class DataDump extends AbstractSQLProc {
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
+			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
+			
 			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			//XXXdone: prop for setting 'logEachXRows'
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
@@ -325,7 +328,7 @@ public class DataDump extends AbstractSQLProc {
 					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
 					String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
 					//Writer w = getWriterForFilename(finalFilename, charset, false);
-					boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);
+					boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset, writeBOM);
 					Writer w = writersOpened.get(finalFilename);
 					if(newFilename) {
 						//should always be true
@@ -364,7 +367,7 @@ public class DataDump extends AbstractSQLProc {
 						
 						String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
 						//Writer w = getWriterForFilename(finalFilename, charset, true);
-						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset);
+						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset, writeBOM);
 						Writer w = writersOpened.get(finalFilename);
 						if(partitionChanged) {
 							//for DumpSyntaxes that have buffer (like FFC)
@@ -497,7 +500,7 @@ public class DataDump extends AbstractSQLProc {
 		return w;
 	}*/
 	
-	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset) throws UnsupportedEncodingException, FileNotFoundException {
+	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String charset, Boolean writeBOM) throws UnsupportedEncodingException, FileNotFoundException {
 		if(! writersOpened.containsKey(fname)) {
 			File f = new File(fname);
 			File parent = f.getParentFile();
@@ -513,12 +516,37 @@ public class DataDump extends AbstractSQLProc {
 			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), encoder); //XXX: false: never append
-			//TODO: option to output BOM (http://en.wikipedia.org/wiki/Byte_order_mark) in accordance with charset
+			writeBOMifNeeded(w, charset, writeBOM);
 			writersOpened.put(fname, w);
 			//filesOpened.add(fname);
 			return true;
 		}
 		return false;
+	}
+	
+	/*
+	 * see:
+	 * http://en.wikipedia.org/wiki/Byte_order_mark
+	 * http://stackoverflow.com/questions/4389005/how-to-add-a-utf-8-bom-in-java
+	 */
+	static void writeBOMifNeeded(Writer w, String charset, Boolean doWrite) {
+		try {
+			if("UTF-8".equalsIgnoreCase(charset)) {
+				if(doWrite==null || doWrite==true) {
+					w.write('\ufeff');
+				}
+			}
+			/*else if("ISO-8859-1".equalsIgnoreCase(charset)) {
+				//do nothing
+			}*/
+			else {
+				if(doWrite!=null && doWrite==true) {
+					log.warn("unknown BOM for charset '"+charset+"'");
+				}
+			}
+		} catch (IOException e) {
+			log.warn("error writing BOM [charset="+charset+"]: "+e);
+		}
 	}
 	
 	static List<String> getPartitionCols(String partitionByPattern) {

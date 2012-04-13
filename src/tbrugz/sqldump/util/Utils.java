@@ -116,6 +116,7 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 	public void windowClosed(WindowEvent e) {
 		if(value!=null) { return; } 
 		log.warn("windowClosed: exiting sqldump");
+		//XXX: check for permission (java.lang.RuntimePermission exitVM)? exception during ant invocation...
 		System.exit(0);
 	}
 
@@ -249,6 +250,13 @@ public class Utils {
 	}
 
 	public static boolean getPropBool(Properties prop, String key, boolean defaultValue) {
+		String value = prop.getProperty(key);
+		if(value==null) { return defaultValue; }
+		return "true".equals(value.trim());
+	}
+
+	/** returns Boolean, so that return can be null */
+	public static Boolean getPropBoolean(Properties prop, String key, Boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
 		return "true".equals(value.trim());
