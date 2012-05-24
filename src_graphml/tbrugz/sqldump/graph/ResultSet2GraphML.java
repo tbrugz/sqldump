@@ -27,6 +27,32 @@ import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
+class RSNode extends NodeXYWH {
+	String description;
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	
+	@Override
+	public String getStereotypeParam(int i) {
+		switch (i) {
+			case 5:
+				return description;
+		}
+		return super.getStereotypeParam(i);
+	}
+	
+	@Override
+	public int getStereotypeParamCount() {
+		return 6;
+	}
+}
+
 class WeightedEdge extends Edge {
 	Double width = 0.0;
 
@@ -58,6 +84,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //optional!
 	static final String COL_OBJECT_LABEL = "OBJECT_LABEL";
 	static final String COL_OBJECT_SIZE = "OBJECT_SIZE"; //optional!
+	static final String COL_OBJECT_DESCRIPTION = "OBJECT_DESC"; //optional!
 	
 	//edge cols
 	static final String COL_SOURCE = "SOURCE";
@@ -107,12 +134,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			
 			boolean hasObjectSize = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_SIZE, qid);
 			boolean hasObjectType = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_TYPE, qid);
+			boolean hasObjectDesc = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_DESCRIPTION, qid);
 			
 			while(rsNodes.next()) {
 				String object = rsNodes.getString(COL_OBJECT);
 				String objectLabel = rsNodes.getString(COL_OBJECT_LABEL);
 
-				NodeXYWH node = newNode();
+				RSNode node = newNode();
 				node.setId(object);
 				node.setLabel(objectLabel);
 				if(hasObjectType) {
@@ -122,6 +150,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				if(hasObjectSize) {
 					String objectSize = rsNodes.getString(COL_OBJECT_SIZE);
 					node.setHeight(Float.parseFloat(objectSize));
+				}
+				if(hasObjectDesc) {
+					String desc = rsNodes.getString(COL_OBJECT_DESCRIPTION);
+					node.setDescription(desc);
 				}
 				nodes.add(node);
 				nodeSet.add(node.getId());
@@ -356,8 +388,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return rsNodes==null;
 	}
 	
-	static NodeXYWH newNode() {
-		NodeXYWH node = new NodeXYWH();
+	static RSNode newNode() {
+		RSNode node = new RSNode();
 		node.setHeight(50f);
 		node.setStereotype(null);
 		return node;
