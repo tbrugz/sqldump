@@ -54,7 +54,7 @@ class RSNode extends NodeXYWH {
 }
 
 class WeightedEdge extends Edge {
-	Double width = 0.0;
+	Double width;
 
 	public Double getWidth() {
 		return width;
@@ -83,23 +83,24 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static final String COL_OBJECT = "OBJECT";
 	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //optional!
 	static final String COL_OBJECT_LABEL = "OBJECT_LABEL";
-	static final String COL_OBJECT_SIZE = "OBJECT_SIZE"; //optional!
+	static final String COL_OBJECT_X = "OBJECT_X";
+	static final String COL_OBJECT_Y = "OBJECT_Y";
+	static final String COL_OBJECT_WIDTH = "OBJECT_WIDTH";
+	static final String COL_OBJECT_HEIGHT = "OBJECT_HEIGHT";
 	static final String COL_OBJECT_DESCRIPTION = "OBJECT_DESC"; //optional!
 	
 	//edge cols
 	static final String COL_SOURCE = "SOURCE";
 	static final String COL_TARGET = "TARGET";
-	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //maybe optional?
-	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //maybe optional?
+	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //TODOne should be optional
+	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //TODOne should be optional
 	
 	//edge-only cols
 	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional!
 	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //optional!
-	//XXX: COL_SOURCE_LABEL, COL_EDGE_LABEL //optional
 	
 	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_LABEL };
-	static final String[] EDGE_COLS = { COL_SOURCE, COL_TARGET, COL_EDGE_TYPE, COL_EDGE_WIDTH };
-	//static final String[] EDGEONLY_XTRA_COLS = { COL_SOURCE_TYPE, COL_TARGET_TYPE };
+	static final String[] EDGE_COLS = { COL_SOURCE, COL_TARGET };
 	
 	//NumberFormat nf = NumberFormat.getInstance();
 	static NumberFormat nf = new DecimalFormat(",###.00");
@@ -132,7 +133,11 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			List<String> allNodeCols = Arrays.asList(NODE_COLS);
 			if(!hasAllColumns(rsNodes.getMetaData(), allNodeCols)) { return null; }
 			
-			boolean hasObjectSize = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_SIZE, qid);
+			boolean hasObjectX = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_X, qid);
+			boolean hasObjectY = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_Y, qid);
+			boolean hasObjectWidth = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_WIDTH, qid);
+			boolean hasObjectHeight = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_HEIGHT, qid);
+			
 			boolean hasObjectType = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_TYPE, qid);
 			boolean hasObjectDesc = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_DESCRIPTION, qid);
 			
@@ -147,13 +152,24 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 					String objectType = rsNodes.getString(COL_OBJECT_TYPE);
 					node.setStereotype(normalize(objectType));
 				}
-				if(hasObjectSize) {
-					String objectSize = rsNodes.getString(COL_OBJECT_SIZE);
-					node.setHeight(Float.parseFloat(objectSize));
+				if(hasObjectX) {
+					node.setX(Float.parseFloat(rsNodes.getString(COL_OBJECT_X)));
+				}
+				if(hasObjectY) {
+					node.setY(Float.parseFloat(rsNodes.getString(COL_OBJECT_Y)));
+				}
+				if(hasObjectWidth) {
+					node.setWidth(Float.parseFloat(rsNodes.getString(COL_OBJECT_WIDTH)));
+				}
+				if(hasObjectHeight) {
+					node.setHeight(Float.parseFloat(rsNodes.getString(COL_OBJECT_HEIGHT)));
 				}
 				if(hasObjectDesc) {
 					String desc = rsNodes.getString(COL_OBJECT_DESCRIPTION);
 					node.setDescription(desc);
+				}
+				else {
+					node.setDescription("");
 				}
 				nodes.add(node);
 				nodeSet.add(node.getId());
@@ -164,6 +180,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		List<String> allCols = Arrays.asList(EDGE_COLS);
 		boolean hasSourceType = false;
 		boolean hasTargetType = false;
+		boolean hasEdgeWidth = false;
+		boolean hasEdgeType = false;
 		if(edgeOnlyStrategy) {
 			//List<String> newAllCols = new ArrayList<String>();
 			//newAllCols.addAll(allCols); newAllCols.addAll(Arrays.asList(EDGEONLY_XTRA_COLS));
@@ -171,13 +189,15 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			hasSourceType = hasOptionalColumn(rsEdges.getMetaData(), COL_SOURCE_TYPE, qid);
 			hasTargetType = hasOptionalColumn(rsEdges.getMetaData(), COL_TARGET_TYPE, qid);
 		}
+		hasEdgeWidth = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_WIDTH, qid);
+		hasEdgeType = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_TYPE, qid);
 		if(!hasAllColumns(rsEdges.getMetaData(), allCols)) { return null; }
 		
 		while(rsEdges.next()) {
 			String source = rsEdges.getString(COL_SOURCE);
 			String target = rsEdges.getString(COL_TARGET);
-			Double edgeWidth = rsEdges.getDouble(COL_EDGE_WIDTH);
-			String edgeType = rsEdges.getString(COL_EDGE_TYPE);
+			Double edgeWidth = null;
+			String edgeType = "";
 
 			if(edgeOnlyStrategy) {
 				Node sourceNode = newNode();
@@ -208,19 +228,24 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				log.warn("null source/target: "+source+"/"+target);
 				continue;
 			}
+			if(hasEdgeWidth) {
+				edgeWidth = rsEdges.getDouble(COL_EDGE_WIDTH);
+				edge.setName(nf.format(edgeWidth));
+				edge.setWidth(edgeWidth);
+
+				double width = useAbsolute? Math.abs(edgeWidth) : edgeWidth;
+				if(width>maxWidth) { maxWidth = width; }
+				if(width<minWidth) { minWidth = width; }
+			}
+			if(hasEdgeType) {
+				edgeType = rsEdges.getString(COL_EDGE_TYPE);
+			}
 			edge.setSource(source);
 			edge.setTarget(target);
-			edge.setName(nf.format(edgeWidth));
-			edge.setWidth(edgeWidth);
 			edge.setStereotype(edgeType);
 			edges.add(edge);
 			edgeEndSet.add(source);
 			edgeEndSet.add(target);
-
-			double width = useAbsolute? Math.abs(edgeWidth) : edgeWidth;
-			
-			if(width>maxWidth) { maxWidth = width; }
-			if(width<minWidth) { minWidth = width; }
 		}
 		
 		for(Node n: nodes) {
@@ -278,8 +303,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return true;
 	}
 	
-	static double getNewWidth(double oldWidht, double minWidth, double maxWidth) {
-		double norm = ((useAbsolute?Math.abs(oldWidht):oldWidht) - minWidth) / (maxWidth - minWidth);
+	static Double getNewWidth(Double oldWidth, double minWidth, double maxWidth) {
+		if(oldWidth==null) { return null; }
+		double norm = ((useAbsolute?Math.abs(oldWidth):oldWidth) - minWidth) / (maxWidth - minWidth);
 		return norm * (edgeMaxWidth - edgeMinWidth) + edgeMinWidth;
 	}
 	
