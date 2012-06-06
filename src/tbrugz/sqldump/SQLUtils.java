@@ -38,6 +38,7 @@ public class SQLUtils {
 		public static final String SUFFIX_ASKFORPASSWD = ".askforpassword";
 		public static final String SUFFIX_ASKFORUSERNAME_GUI = ".askforusernamegui";
 		public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
+		public static final String SUFFIX_INITSQL = ".initsql";
 
 		public static Connection initDBConnection(String propsPrefix, Properties papp) throws Exception {
 			//init database
@@ -74,7 +75,18 @@ public class SQLUtils {
 				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
 			}
 
-			return DriverManager.getConnection(dbUrl, p);
+			Connection conn = DriverManager.getConnection(dbUrl, p);
+			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
+			if(dbInitSql!=null) {
+				try {
+					int count = conn.createStatement().executeUpdate(dbInitSql);
+					log.info("init sql [count="+count+"]: "+dbInitSql);
+				}
+				catch(SQLException e) {
+					log.warn("error in init sql: "+dbInitSql);
+				}
+			}
+			return conn;
 		}
 	}
 
