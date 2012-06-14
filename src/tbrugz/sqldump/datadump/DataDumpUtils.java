@@ -18,6 +18,8 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
+
 public class DataDumpUtils {
 
 	static Log log = LogFactory.getLog(DataDumpUtils.class);
@@ -55,6 +57,7 @@ public class DataDumpUtils {
 		df.applyPattern("###0");//87612933000118
 	}
 	
+	//dumpers: CSV, FFC
 	public static String getFormattedCSVValue(Object elem, NumberFormat floatFormatter, String separator, String nullValue) {
 		if(elem == null) {
 			return nullValue;
@@ -75,6 +78,7 @@ public class DataDumpUtils {
 		}
 	} 
 
+	//dumpers: JSON
 	public static String getFormattedJSONValue(Object elem, DateFormat df) {
 		if(elem == null) {
 			return null;
@@ -95,6 +99,7 @@ public class DataDumpUtils {
 		return String.valueOf(elem);
 	}
 
+	//dumpers: insertinto, updatebypk
 	public static String getFormattedSQLValue(Object elem, DateFormat df) {
 		if(elem == null) {
 			return null;
@@ -126,6 +131,22 @@ public class DataDumpUtils {
 		/*else if(elem instanceof Integer) {
 			return String.valueOf(elem);
 		}*/
+
+		return String.valueOf(elem);
+	} 
+
+	//dumpers: XML, HTML
+	//XXX: XML format: translate '<', '>', '&'?
+	public static String getFormattedXMLValue(Object elem, NumberFormat floatFormatter, String nullValue) {
+		if(elem == null) {
+			return nullValue;
+		}
+		else if(elem instanceof Double) {
+			return floatFormatter.format((Double)elem);
+		}
+		else if(elem instanceof ResultSet) {
+			return nullValue;
+		}
 
 		return String.valueOf(elem);
 	} 
@@ -170,6 +191,23 @@ public class DataDumpUtils {
 				rs.close();
 			}
 		}
+	}
+	
+	static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName) throws SQLException {
+		int numCol = md.getColumnCount();		
+		List<String> lsColNames = new ArrayList<String>();
+		List<Class> lsColTypes = new ArrayList<Class>();
+		for(int i=0;i<numCol;i++) {
+			lsColNames.add(md.getColumnName(i+1));
+		}
+		for(int i=0;i<numCol;i++) {
+			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
+		}
+		StringBuffer sb = new StringBuffer();
+		for(int i=0;i<numCol;i++) {
+			sb.append("\n\t"+lsColNames.get(i)+" ["+lsColTypes.get(i).getSimpleName()+"/t:"+md.getColumnType(i+1)+"/p:"+md.getPrecision(i+1)+"/s:"+md.getScale(i+1)+"]; ");
+		}
+		DataDump.log.debug("dump columns ["+tableName+"]: "+sb);
 	}
 	
 }

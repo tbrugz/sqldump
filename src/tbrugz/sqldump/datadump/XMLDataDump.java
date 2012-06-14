@@ -42,7 +42,7 @@ public class XMLDataDump extends DumpSyntax {
 			lsColNames.add(md.getColumnName(i+1));
 		}
 		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getScale(i+1)));
+			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 	}
 	
@@ -73,7 +73,8 @@ public class XMLDataDump extends DumpSyntax {
 				sb.append("\n\t");
 			}
 			else {
-				Object value = getValueNotNull( vals.get(i) );
+				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), floatFormatter, nullValueStr);
+				//Object value = getValueNotNull( vals.get(i) );
 				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
 			}
 		}

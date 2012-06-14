@@ -68,7 +68,7 @@ public class FFCDataDump extends DumpSyntax {
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getScale(i+1)));
+			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 			
 			if(Number.class.isAssignableFrom(lsColTypes.get(i))) {
 				leftAlignField.add(false);

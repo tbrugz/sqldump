@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -72,7 +73,7 @@ public class DataDump extends AbstractSQLProc {
 
 	//defaults
 	static final String CHARSET_DEFAULT = "UTF-8";
-	static final long LOG_EACH_X_ROWS_DEFAULT = 10000;
+	static final long LOG_EACH_X_ROWS_DEFAULT = 50000;
 	
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
 	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
@@ -271,6 +272,10 @@ public class DataDump extends AbstractSQLProc {
 			}
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
+			
+			if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
+				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName);
+			}
 
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files

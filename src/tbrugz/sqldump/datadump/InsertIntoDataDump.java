@@ -46,7 +46,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 			lsColNames.add(md.getColumnName(i+1));
 		}
 		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getScale(i+1)));
+			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 		colNames = "("+Utils.join(lsColNames, ", ")+")";
 	}

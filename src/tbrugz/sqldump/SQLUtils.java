@@ -194,7 +194,7 @@ public class SQLUtils {
 
 	static Set<Integer> unknownSQLTypes = new HashSet<Integer>(); 
 	//TODOne: Date class type for dump?
-	public static Class<?> getClassFromSqlType(int type, int scale) {
+	public static Class<?> getClassFromSqlType(int type, int precision, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
 			case Types.TINYINT: 
@@ -204,7 +204,7 @@ public class SQLUtils {
 				return Integer.class;
 			case Types.DECIMAL:
 			case Types.NUMERIC:
-				return (scale>0)?Double.class:Integer.class; //XXX: doesnt seems to work
+				return (scale>0)?Double.class:((precision==0)&&(scale==0))?Double.class:Integer.class; //XXX: doesnt seems to work
 			case Types.REAL:
 			case Types.FLOAT:
 			case Types.DOUBLE:
