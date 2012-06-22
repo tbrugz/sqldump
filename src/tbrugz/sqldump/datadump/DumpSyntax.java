@@ -52,8 +52,10 @@ public abstract class DumpSyntax {
 		if(nullValue!=null) {
 			nullValueStr = nullValue;
 		}
+		//XXX: test for 'global' properties, like 'sqldump.datadump.floatformat'?
 		String floatLocale = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatlocale");
-		floatFormatter = Utils.getFloatFormatter(floatLocale, getSyntaxId());
+		String floatFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatformat");
+		floatFormatter = Utils.getFloatFormatter(floatLocale, floatFormat, getSyntaxId());
 	}
 	
 	//XXX: remove from here?

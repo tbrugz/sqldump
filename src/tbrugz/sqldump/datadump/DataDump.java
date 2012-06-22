@@ -270,6 +270,8 @@ public class DataDump extends AbstractSQLProc {
 					st.setString(i+1, params.get(i));
 				}
 			}
+			
+			long initTime = System.currentTimeMillis();
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
 			
@@ -407,7 +409,8 @@ public class DataDump extends AbstractSQLProc {
 			}
 			while(rs.next());
 			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
-				(rs.next()?" (more rows exists)":"") );
+				(rs.next()?" (more rows exists)":"") + 
+				" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
 
 			//footer
 			Set<String> filenames = writersOpened.keySet();

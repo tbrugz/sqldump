@@ -449,7 +449,7 @@ public class Utils {
 	}
 	
 	//XXX: remove 'syntax' param?
-	public static NumberFormat getFloatFormatter(String floatLocale, String syntax) {
+	public static NumberFormat getFloatFormatter(String floatLocale, String floatFormat, String syntax) {
 		NumberFormat floatFormatter = null;
 		if(floatLocale==null) {
 			floatFormatter = NumberFormat.getNumberInstance(localeEN);
@@ -461,7 +461,10 @@ public class Utils {
 		}
 		DecimalFormat df = (DecimalFormat) floatFormatter;
 		df.setGroupingUsed(false);
-		df.applyPattern("###0.000");
+		if(floatFormat==null) {
+			floatFormat = "###0.000"; 
+		}
+		df.applyPattern(floatFormat);
 		return floatFormatter;
 	}
 	
