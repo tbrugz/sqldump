@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.io.PrintStream;
+import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -168,10 +169,13 @@ public class SQLUtils {
 				//XXX: do not dump Blobs this way
 				//value = null; //already null, do nothing
 			}
-			else if(coltype.equals(ResultSet.class)) {
+			else if(coltype.equals(ResultSet.class) || coltype.equals(Array.class)) {
 				if(canReturnResultSet) {
 					try {
 						value = rs.getObject(i);
+						if(value instanceof Array) {
+							value = ((Array)value).getResultSet();
+						}
 					}
 					catch(SQLException e) {
 						if(!resultSetGetObjectExceptionWarned) {
@@ -183,6 +187,9 @@ public class SQLUtils {
 				}
 				//log.info("obj/resultset: "+rs.getObject(i));
 			}
+			/*else if(coltype.equals(Object.class)) {
+				value = rs.getObject(i);
+			}*/
 			else {
 				log.warn("unknown type ["+coltype+"], defaulting to String");
 				value = rs.getString(i);
@@ -191,7 +198,7 @@ public class SQLUtils {
 		}
 		return ls;
 	}
-
+	
 	static Set<Integer> unknownSQLTypes = new HashSet<Integer>(); 
 	//TODOne: Date class type for dump?
 	public static Class<?> getClassFromSqlType(int type, int precision, int scale) {
@@ -217,8 +224,12 @@ public class SQLUtils {
 				return String.class;
 			case Types.LONGVARBINARY:
 				return Blob.class;
+			case Types.ARRAY:
+				//return Array.class;
 			case -10: //XXX: ResultSet/Cursor ?
 				return ResultSet.class;
+			//case Types.OTHER:
+				//return Object.class;
 			default:
 				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
 				if(!unknownSQLTypes.contains(type)) {
@@ -255,7 +266,7 @@ public class SQLUtils {
 		}
 		out.println("\n"+sb.toString()+"\n");
 	}
-
+	
 	public static String getColumnNames(ResultSetMetaData md) throws SQLException {
 		int numCol = md.getColumnCount();
 		List<String> lsColNames = new ArrayList<String>();

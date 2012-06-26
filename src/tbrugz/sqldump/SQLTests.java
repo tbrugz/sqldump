@@ -19,7 +19,7 @@ public class SQLTests extends AbstractSQLProc {
 			testsInternal(conn);
 		} catch (Exception e) {
 			log.warn("SQL error: "+e);
-			//e.printStackTrace();
+			log.info("stack...",e);
 		}
 	}
 

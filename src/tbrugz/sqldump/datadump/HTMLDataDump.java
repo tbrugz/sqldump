@@ -67,6 +67,17 @@ public class HTMLDataDump extends DumpSyntax {
 		for(int i=0;i<lsColNames.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				ResultSet rsInt = (ResultSet) vals.get(i);
+			/*if(ResultSet.class.isAssignableFrom(lsColTypes.get(i)) || Array.class.isAssignableFrom(lsColTypes.get(i))) {
+				ResultSet rsInt = null;
+				//log.info("colname: "+lsColNames.get(i)+":: "+lsColTypes.get(i));
+				if(Array.class.isAssignableFrom(lsColTypes.get(i))) {
+					Array arr = (Array) vals.get(i);
+					rsInt = (ResultSet) arr.getResultSet();
+				}
+				else {
+					rsInt = (ResultSet) vals.get(i);
+				}*/
+				
 				if(rsInt==null) {
 					//log.warn("ResultSet is null");
 					sb.append("<td></td>");
