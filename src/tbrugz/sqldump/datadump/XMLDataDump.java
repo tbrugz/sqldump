@@ -54,6 +54,7 @@ public class XMLDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
 		StringBuffer sb = new StringBuffer();
+		//XXX: option to define 'row' xml-element
 		sb.append("\t"+"<row>");
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {

@@ -56,6 +56,7 @@ public class DBMSResources {
 		}
 		else {
 			this.dbId = papp.getProperty(Defs.PROP_FROM_DB_ID);
+			log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId);
 		}
 		
 		if(dbmd!=null) {

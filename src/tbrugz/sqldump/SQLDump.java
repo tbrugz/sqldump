@@ -163,7 +163,7 @@ public class SQLDump {
 		
 		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;
-		DBMSResources.instance().updateMetaData(null);
+		//DBMSResources.instance().updateMetaData(null);
 		
 		//grabbing model
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
