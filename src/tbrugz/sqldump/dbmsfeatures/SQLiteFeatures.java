@@ -24,7 +24,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 public class SQLiteFeatures extends InformationSchemaFeatures {
 	
 	@Override
-	String grabDBViewsQuery() {
+	String grabDBViewsQuery(String schemaPattern) {
 		//return "select 'main' as table_catalog, 'sqlite' as table_schema, tbl_name as table_name, sql as view_definition "
 		return "select null as table_catalog, null as table_schema, tbl_name as table_name, sql as view_definition "
 				+"from sqlite_master "

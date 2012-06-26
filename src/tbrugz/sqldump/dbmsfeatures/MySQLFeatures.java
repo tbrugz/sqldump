@@ -8,7 +8,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 public class MySQLFeatures extends InformationSchemaFeatures {
 
 	@Override
-	String grabDBRoutinesQuery() {
+	String grabDBRoutinesQuery(String schemaPattern) {
 		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
@@ -39,7 +39,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	) ENGINE=MEMORY DEFAULT CHARSET=utf8
 	 */
 	@Override
-	String grabDBUniqueConstraintsQuery() {
+	String grabDBUniqueConstraintsQuery(String schemaPattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name "
 			+"from information_schema.table_constraints tc, information_schema.key_column_usage ccu "
 			+"where tc.constraint_name = ccu.constraint_name "

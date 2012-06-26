@@ -36,7 +36,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBUniqueConstraintsQuery() {
+	String grabDBUniqueConstraintsQuery(String schemaPattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
 				+"from information_schema.constraints tc "
 				+"where constraint_type = 'UNIQUE' "
@@ -46,7 +46,7 @@ public class H2Features extends InformationSchemaFeatures {
 	@Override
 	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery();
+		String query = grabDBUniqueConstraintsQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

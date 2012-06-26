@@ -51,7 +51,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 	}
 	
-	String grabDBViewsQuery() {
+	String grabDBViewsQuery(String schemaPattern) {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
@@ -60,7 +60,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		String query = grabDBViewsQuery();
+		String query = grabDBViewsQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -82,7 +82,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" views grabbed");
 	}
 
-	String grabDBTriggersQuery() {
+	String grabDBTriggersQuery(String schemaPattern) {
 		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing "
 			+"from information_schema.triggers "
 			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
@@ -90,7 +90,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery();
+		String query = grabDBTriggersQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
@@ -120,7 +120,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" triggers grabbed");
 	}
 
-	String grabDBRoutinesQuery() {
+	String grabDBRoutinesQuery(String schemaPattern) {
 		return "select routine_name, routine_type, data_type, external_language, routine_definition "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
@@ -129,7 +129,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBRoutinesQuery();
+		String query = grabDBRoutinesQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -217,7 +217,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" check constraints grabbed");
 	}
 
-	String grabDBUniqueConstraintsQuery() {
+	String grabDBUniqueConstraintsQuery(String schemaPattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
@@ -229,7 +229,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
-		String query = grabDBUniqueConstraintsQuery();
+		String query = grabDBUniqueConstraintsQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
