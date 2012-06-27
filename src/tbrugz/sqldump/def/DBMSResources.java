@@ -46,7 +46,8 @@ public class DBMSResources {
 	}*/
 	
 	public void updateMetaData(DatabaseMetaData dbmd) {
-		if(Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) && dbmd !=null) {
+		String dbIdTmp = papp.getProperty(Defs.PROP_FROM_DB_ID);
+		if( (Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) || dbIdTmp==null) && dbmd != null) {
 			String dbid = detectDbId(dbmd);
 			if(dbid!=null) {
 				log.info("database type identifier: "+dbid);
@@ -55,7 +56,7 @@ public class DBMSResources {
 			else { log.warn("can't detect database type"); }
 		}
 		else {
-			this.dbId = papp.getProperty(Defs.PROP_FROM_DB_ID);
+			this.dbId = dbIdTmp;
 			log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId);
 		}
 		

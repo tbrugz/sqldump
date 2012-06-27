@@ -100,7 +100,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			conn.setReadOnly(true);
 		} catch (SQLException e) {
 			log.warn("error setting props [readonly=true] for db connection");
-			e.printStackTrace();
+			log.debug("stack...", e);
+			//e.printStackTrace();
 		}
 	}
 	
