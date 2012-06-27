@@ -23,20 +23,21 @@ public class StmtProc {
 	
 	Connection conn;
 	Properties papp;
-	
-	public void execFileFromKey(String fileKey, String errorLogKey) throws IOException, SQLException {
-		String filePath = papp.getProperty(fileKey);
-		execFile(filePath, errorLogKey);
-	}
 
-	public void execFile(String filePath, String errorLogKey) throws IOException, SQLException {
+	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException, SQLException {
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		FileReader reader = new FileReader(filePath);
 		Writer logerror = null;
 		String fileStr = IOUtil.readFile(reader);
 		//FIXME: SQLStmtTokenizer not working (on big files?)
 		//SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
-		String[] stmtTokenizer = fileStr.split(";");
+		String[] stmtTokenizer = { null };
+		if(split) {
+			stmtTokenizer = fileStr.split(";");
+		}
+		else {
+			stmtTokenizer[0] = fileStr;
+		}
 		reader.close();
 		
 		log.info("file exec: statements from file '"+filePath+"'...");
@@ -140,9 +141,15 @@ public class StmtProc {
 		
 		Statement stmt = conn.createStatement();
 		logStmt.debug("executing sql: "+stmtStr);
-		int urows = stmt.executeUpdate(stmtStr);
-		logStmt.debug("updated "+urows+" rows");
-		return urows;
+		try {
+			int urows = stmt.executeUpdate(stmtStr);
+			logStmt.debug("updated "+urows+" rows");
+			return urows;
+		}
+		catch(SQLException e) {
+			conn.rollback();
+			throw e;
+		}
 	}
 	
 	public Connection getConn() {

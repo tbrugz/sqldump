@@ -49,13 +49,14 @@ public class SQLRun {
 	//aux suffixes
 	static String SUFFIX_DIR = ".dir";
 	static String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
+	static String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
 	
 	//properties
 	static String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 
 	//suffix groups
 	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT };
-	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS };
+	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT };
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
@@ -92,10 +93,12 @@ public class SQLRun {
 				log.info(">>> processing: id = '"+procId+"'");
 			}
 			
+			boolean splitBySemicolon = Utils.getPropBool(papp, PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
+			
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
 				try {
-					srproc.execFileFromKey(key, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+					srproc.execFile(papp.getProperty(key), PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -115,7 +118,7 @@ public class SQLRun {
 					String fileRegex = papp.getProperty(key);
 					for(String file: files) {
 						if(file.matches(fileRegex)) {
-							srproc.execFile(fdir.getAbsolutePath()+File.separator+file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS);
+							srproc.execFile(fdir.getAbsolutePath()+File.separator+file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 						}
 					}
 				}
