@@ -77,6 +77,10 @@ public class SQLUtils {
 			}
 
 			Connection conn = DriverManager.getConnection(dbUrl, p);
+			// setAutoCommit(false): needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
+			// anyway, i think this should be default
+			conn.setAutoCommit(false);
+			
 			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
 			if(dbInitSql!=null) {
 				try {
@@ -187,9 +191,14 @@ public class SQLUtils {
 				}
 				//log.info("obj/resultset: "+rs.getObject(i));
 			}
-			/*else if(coltype.equals(Object.class)) {
+			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
-			}*/
+				log.info("generic type ["+value.getClass().getSimpleName()+"/"+coltype.getSimpleName()+"] grabbed");
+				if(canReturnResultSet && ResultSet.class.isAssignableFrom(value.getClass())) {
+					log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
+					colTypes.set(i-1, ResultSet.class);					
+				}
+			}
 			else {
 				log.warn("unknown type ["+coltype+"], defaulting to String");
 				value = rs.getString(i);
@@ -228,8 +237,8 @@ public class SQLUtils {
 				//return Array.class;
 			case -10: //XXX: ResultSet/Cursor ?
 				return ResultSet.class;
-			//case Types.OTHER:
-				//return Object.class;
+			case Types.OTHER:
+				return Object.class;
 			default:
 				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
 				if(!unknownSQLTypes.contains(type)) {
