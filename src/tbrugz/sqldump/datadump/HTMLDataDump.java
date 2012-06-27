@@ -22,6 +22,9 @@ public class HTMLDataDump extends DumpSyntax {
 
 	static final String HTML_SYNTAX_ID = "html";
 	
+	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
+	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
+	
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
@@ -29,9 +32,14 @@ public class HTMLDataDump extends DumpSyntax {
 
 	String padding = "";
 	
+	String prepend = null;
+	String append = null;
+	
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
+		prepend = prop.getProperty(PROP_HTML_PREPEND);
+		append = prop.getProperty(PROP_HTML_APPEND);
 	}
 
 	@Override
@@ -50,7 +58,8 @@ public class HTMLDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
-		out("<table id='"+tableName+"'>\n", fos);
+		if(prepend!=null) { out(prepend, fos); }
+		out("<table class='"+tableName+"'>\n", fos);
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
@@ -106,6 +115,7 @@ public class HTMLDataDump extends DumpSyntax {
 	@Override
 	public void dumpFooter(Writer fos) throws Exception {
 		out("</table>", fos);
+		if(append!=null) { out(append, fos); }
 	}
 
 	void out(String s, Writer pw) throws IOException {
