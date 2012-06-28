@@ -52,7 +52,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
 	static String[] DEFAULT_SCHEMA_NAMES = {
-		"public", //postgresql
+		"public", //postgresql, h2, hsqldb
 		"APP",    //derby
 	};
 	
@@ -101,9 +101,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		} catch (SQLException e) {
 			log.warn("error setting props [readonly=true] for db connection");
 			log.debug("stack...", e);
-			try {
-				conn.rollback();
-			} catch (SQLException e2) {}
+			try { conn.rollback(); }
+			catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
 		}
 	}
 	

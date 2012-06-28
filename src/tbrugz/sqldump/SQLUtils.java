@@ -89,6 +89,8 @@ public class SQLUtils {
 				}
 				catch(SQLException e) {
 					log.warn("error in init sql: "+dbInitSql);
+					try { conn.rollback(); }
+					catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
 				}
 			}
 			return conn;

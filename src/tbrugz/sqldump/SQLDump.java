@@ -144,6 +144,7 @@ public class SQLDump {
 	void end() throws Exception {
 		log.info("...done");
 		if(conn!=null) {
+			conn.rollback();
 			conn.close();
 		}
 	}
