@@ -20,7 +20,8 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern) {
 		return "select routine_name, routine_type, data_type, external_language, routine_definition "
-				+" ,(select array_agg(parameter_name||' '||data_type order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
+				+" , (select array_agg(parameter_name::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
+				+" , (select array_agg(data_type::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_types "
 				+"from information_schema.routines r "
 				+"where routine_definition is not null "
 				+"and specific_schema = '"+schemaPattern+"' "
@@ -53,7 +54,9 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 			
 			//parameters!
 			String[] params = (String[]) rs.getArray(6).getArray();
-			eo.parameters = Arrays.asList(params);
+			eo.parameterNames = Arrays.asList(params);
+			String[] paramTypes = (String[]) rs.getArray(7).getArray();
+			eo.parameterTypes = Arrays.asList(paramTypes);
 			
 			model.getExecutables().add(eo);
 			count++;

@@ -123,7 +123,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern) {
-		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name||' '||p.data_type as parameter "
+		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type "
 				+"from information_schema.routines r, information_schema.parameters p "
 				+"where r.specific_name = p.specific_name and r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
@@ -164,7 +164,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.body = rs.getString(5);
 				count++;
 			}
-			eo.parameters.add(rs.getString(6));
+			eo.parameterNames.add(rs.getString(6));
+			eo.parameterTypes.add(rs.getString(7));
 		}
 		if(eo!=null) {
 			model.getExecutables().add(eo);
