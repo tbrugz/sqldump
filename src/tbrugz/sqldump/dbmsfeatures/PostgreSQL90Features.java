@@ -1,6 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-public class PostgreSQL90Features extends PostgreSQLFeatures {
+public class PostgreSQL90Features extends InformationSchemaFeatures {
 
 	@Override
 	String grabDBTriggersQuery(String schemaPattern) {

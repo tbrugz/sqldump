@@ -10,15 +10,6 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.Utils;
 
 public class PostgreSQLFeatures extends InformationSchemaFeatures {
-	
-	@Override
-	String grabDBViewsQuery(String schemaPattern) {
-		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
-			+"from information_schema.views "
-			+"where view_definition is not null "
-			+"and table_name = '"+schemaPattern+"' "
-			+"order by table_catalog, table_schema, table_name ";
-	}
 
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern) {

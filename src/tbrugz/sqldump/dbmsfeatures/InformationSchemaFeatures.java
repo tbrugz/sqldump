@@ -55,6 +55,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
+			+"and table_name = '"+schemaPattern+"' "
 			+"order by table_catalog, table_schema, table_name ";
 	}
 
@@ -124,6 +125,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		return "select routine_name, routine_type, data_type, external_language, routine_definition "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
+				+"and specific_schema = '"+schemaPattern+"' "
 				+"order by routine_catalog, routine_schema, routine_name ";
 	}
 	

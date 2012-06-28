@@ -101,7 +101,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		} catch (SQLException e) {
 			log.warn("error setting props [readonly=true] for db connection");
 			log.debug("stack...", e);
-			//e.printStackTrace();
+			try {
+				conn.rollback();
+			} catch (SQLException e2) {}
 		}
 	}
 	
