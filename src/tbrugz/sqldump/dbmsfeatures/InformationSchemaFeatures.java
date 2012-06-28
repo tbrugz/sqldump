@@ -55,7 +55,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
-			+"and table_name = '"+schemaPattern+"' "
+			+"and table_schema = '"+schemaPattern+"' "
 			+"order by table_catalog, table_schema, table_name ";
 	}
 
@@ -86,6 +86,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	String grabDBTriggersQuery(String schemaPattern) {
 		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing "
 			+"from information_schema.triggers "
+			+"where trigger_schema = '"+schemaPattern+"' "
 			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
 	}
 	
@@ -122,36 +123,51 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern) {
-		return "select routine_name, routine_type, data_type, external_language, routine_definition "
-				+"from information_schema.routines "
-				+"where routine_definition is not null "
-				+"and specific_schema = '"+schemaPattern+"' "
-				+"order by routine_catalog, routine_schema, routine_name ";
+		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name||' '||p.data_type as parameter "
+				+"from information_schema.routines r, information_schema.parameters p "
+				+"where r.specific_name = p.specific_name and r.routine_definition is not null "
+				+"and r.specific_schema = '"+schemaPattern+"' "
+				+"order by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
 	}
 	
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern);
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		InformationSchemaRoutine eo = null;
 		while(rs.next()) {
-			InformationSchemaRoutine eo = new InformationSchemaRoutine();
-			eo.setSchemaName( schemaPattern );
-			eo.name = rs.getString(1);
-			try {
-				eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
+
+			String routineName = rs.getString(1);
+			if(eo==null || !routineName.equals(eo.name)) {
+				//end last object
+				if(eo!=null) {
+					model.getExecutables().add(eo);
+				}
+
+				//new object
+				eo = new InformationSchemaRoutine();
+				eo.setSchemaName( schemaPattern );
+				eo.name = routineName;
+				try {
+					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
+				}
+				catch(IllegalArgumentException iae) {
+					log.warn("unknown object type: "+rs.getString(2));
+					eo.type = DBObjectType.EXECUTABLE;
+				}
+				eo.returnType = rs.getString(3);
+				eo.externalLanguage = rs.getString(4);
+				eo.body = rs.getString(5);
+				count++;
 			}
-			catch(IllegalArgumentException iae) {
-				log.warn("unknown object type: "+rs.getString(2));
-				eo.type = DBObjectType.EXECUTABLE;
-			}
-			eo.returnType = rs.getString(3);
-			eo.externalLanguage = rs.getString(4);
-			eo.body = rs.getString(5);
+			eo.parameters.add(rs.getString(6));
+		}
+		if(eo!=null) {
 			model.getExecutables().add(eo);
-			count++;
 		}
 		
 		rs.close();
@@ -163,6 +179,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.debug("grabbing sequences");
 		String query = "select sequence_name, minimum_value, increment, maximum_value " // increment_by, last_number?
 				+"from information_schema.sequences "
+				+"where sequence_schema = '"+schemaPattern+"' "
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -190,6 +207,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
+				+"and cc.constraint_schema = '"+schemaPattern+"' "
 				+"order by table_name, constraint_name ";
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
@@ -223,6 +241,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
+				+"and tc.constraint_schema = '"+schemaPattern+"' "
 				+"and constraint_type = 'UNIQUE' "
 				+"order by table_name, constraint_name, column_name ";
 	}

@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -11,6 +15,8 @@ import tbrugz.sqldump.util.Utils;
 
 public class PostgreSQLFeatures extends InformationSchemaFeatures {
 
+	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
+	
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern) {
 		return "select routine_name, routine_type, data_type, external_language, routine_definition "
@@ -25,6 +31,7 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern);
+		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -46,12 +53,7 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 			
 			//parameters!
 			String[] params = (String[]) rs.getArray(6).getArray();
-			StringBuffer sb = new StringBuffer();
-			for(int i=0;i<params.length;i++) {
-				if(i>0) { sb.append(", "); }
-				sb.append(params[i]);
-			}
-			eo.parameters = sb.toString();
+			eo.parameters = Arrays.asList(params);
 			
 			model.getExecutables().add(eo);
 			count++;
