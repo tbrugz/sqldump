@@ -34,6 +34,8 @@ public class HTMLDataDump extends DumpSyntax {
 	
 	String prepend = null;
 	String append = null;
+	//TODO: prop for 'dumpColElement'
+	boolean dumpColElement = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -59,9 +61,14 @@ public class HTMLDataDump extends DumpSyntax {
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
 		if(prepend!=null) { out(prepend, fos); }
-		out("<table class='"+tableName+"'>\n", fos);
+		out("<table class='"+tableName+"'>", fos);
 		StringBuffer sb = new StringBuffer();
-		sb.append("\t<tr>");
+		if(dumpColElement) {
+			for(int i=0;i<lsColNames.size();i++) {
+				sb.append("\n\t<col class=\"type_"+lsColTypes.get(i).getSimpleName()+"\"/>");
+			}
+		}
+		sb.append("\n\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
 			sb.append("<th>"+lsColNames.get(i)+"</th>");
 		}
@@ -76,16 +83,6 @@ public class HTMLDataDump extends DumpSyntax {
 		for(int i=0;i<lsColNames.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				ResultSet rsInt = (ResultSet) vals.get(i);
-			/*if(ResultSet.class.isAssignableFrom(lsColTypes.get(i)) || Array.class.isAssignableFrom(lsColTypes.get(i))) {
-				ResultSet rsInt = null;
-				//log.info("colname: "+lsColNames.get(i)+":: "+lsColTypes.get(i));
-				if(Array.class.isAssignableFrom(lsColTypes.get(i))) {
-					Array arr = (Array) vals.get(i);
-					rsInt = (ResultSet) arr.getResultSet();
-				}
-				else {
-					rsInt = (ResultSet) vals.get(i);
-				}*/
 				
 				if(rsInt==null) {
 					//log.warn("ResultSet is null");
@@ -103,7 +100,7 @@ public class HTMLDataDump extends DumpSyntax {
 				sb.append("\n\t</td>");
 			}
 			else {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), floatFormatter, nullValueStr);
+				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
 				//Object value = getValueNotNull( vals.get(i) );
 				sb.append( "<td>"+ value +"</td>");
 			}

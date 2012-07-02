@@ -58,14 +58,14 @@ public class DataDumpUtils {
 	}
 	
 	//dumpers: CSV, FFC
-	public static String getFormattedCSVValue(Object elem, NumberFormat floatFormatter, String separator, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, Class type, NumberFormat floatFormatter, String separator, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
-		else if(elem instanceof Double) {
-			return floatFormatter.format((Double)elem);
+		else if(Double.class.isAssignableFrom(type)) {
+			return floatFormatter.format(elem);
 		}
-		else if(elem instanceof ResultSet) {
+		else if(ResultSet.class.isAssignableFrom(type)) {
 			return nullValue;
 		}
 
@@ -79,19 +79,19 @@ public class DataDumpUtils {
 	} 
 
 	//dumpers: JSON
-	public static String getFormattedJSONValue(Object elem, DateFormat df) {
+	public static String getFormattedJSONValue(Object elem, Class type, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
-		else if(elem instanceof String) {
+		else if(String.class.isAssignableFrom(type)) {
 			elem = ((String) elem).replaceAll(DOUBLEQUOTE, "&quot;");
 			return DOUBLEQUOTE+elem+DOUBLEQUOTE;
 		}
-		else if(elem instanceof Date) {
+		else if(Date.class.isAssignableFrom(type)) {
 			//XXXdone: JSON dateFormatter?
 			return df.format((Date)elem);
 		}
-		else if(elem instanceof Long) {
+		else if(Long.class.isAssignableFrom(type)) {
 			//log.warn("long: "+(Long)elem+"; "+longFormatter.format((Long)elem));
 			return longFormatter.format((Long)elem);
 		}
@@ -137,14 +137,14 @@ public class DataDumpUtils {
 
 	//dumpers: XML, HTML
 	//XXX: XML format: translate '<', '>', '&'?
-	public static String getFormattedXMLValue(Object elem, NumberFormat floatFormatter, String nullValue) {
+	public static String getFormattedXMLValue(Object elem, Class type, NumberFormat floatFormatter, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
-		else if(elem instanceof Double) {
-			return floatFormatter.format((Double)elem);
+		else if(Double.class.isAssignableFrom(type)) {
+			return floatFormatter.format(elem);
 		}
-		else if(elem instanceof ResultSet) {
+		else if(ResultSet.class.isAssignableFrom(type)) {
 			return nullValue;
 		}
 

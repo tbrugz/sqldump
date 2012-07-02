@@ -138,7 +138,7 @@ public class FFCDataDump extends DumpSyntax {
 				valueStr = nullValueStr;
 			}
 			else {
-				valueStr = getFormattedValue(vals.get(i));
+				valueStr = getFormattedValue(vals.get(i), lsColTypes.get(i));
 			}
 			
 			if(max<valueStr.length()) {
@@ -232,9 +232,9 @@ public class FFCDataDump extends DumpSyntax {
 		sb.append(separator);
 	}
 	
-	String getFormattedValue(Object o) {
+	String getFormattedValue(Object o, Class c) {
 		//if(o==null) return nullValue;
-		return DataDumpUtils.getFormattedCSVValue(o, floatFormatter, null, nullValueStr);
+		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, null, nullValueStr);
 	}
 
 	@Override

@@ -112,7 +112,7 @@ public class JSONDataDump extends DumpSyntax {
 			else {
 				
 			try {
-				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( vals.get(i), dateFormatter ));
+				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( vals.get(i), lsColTypes.get(i), dateFormatter ));
 			}
 			catch(Exception e) {
 				log.warn(lsColNames+" / "+vals+" / ex: "+e);
