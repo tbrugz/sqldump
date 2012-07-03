@@ -70,6 +70,10 @@ public class ParametrizedProperties extends Properties {
 			return s;
 		}
 		
+		return replaceProps(s, this);
+	}
+
+	public static String replaceProps(String s, Properties p) {
 		StringBuffer sb = new StringBuffer(s);
 		//s.replaceAll("\\$\\{(.*?)\\}", );
 		int count = 0;
@@ -79,7 +83,7 @@ public class ParametrizedProperties extends Properties {
 			if(pos2<0) { break; }
 			count = pos1+1;
 			String prop = sb.substring(pos1+2, pos2);
-			String propSuperValue = getProperty(prop);
+			String propSuperValue = p.getProperty(prop);
 			
 			if(useSystemProperties && propSuperValue==null) {
 				propSuperValue = System.getProperty(prop);

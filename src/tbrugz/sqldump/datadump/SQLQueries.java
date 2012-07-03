@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
 //XXXdone: partition over (columnX) - different outputfiles for different values of columnX
@@ -69,6 +70,8 @@ public class SQLQueries extends AbstractSQLProc {
 				if(sqlfile!=null) {
 					sql = IOUtil.readFromFilename(sqlfile);
 				}
+				//replace props! XXX: replaceProps(): should be activated by a prop?
+				sql = ParametrizedProperties.replaceProps(sql, prop);
 			}
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
 			if(sql==null || queryName==null) { break; }
