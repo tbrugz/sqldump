@@ -31,9 +31,9 @@ SQLDump processing consists of:
 1. 1 Grabber (implementation of `SchemaModelGrabber`, grabs a `SchemaModel`)
 2. 'n' Processors (implementation of `AbstractSQLProc`, usually uses a `Connection`)
 3. 'n' Dumpers (implementation of `SchemaModelDumper`, dumps a `SchemaModel`)
- 
+
 *Grabber* can be:
- 
+
 - `JDBCSchemaGrabber` - Grabs schema metadata from a JDBC connection 
 - `JAXBSchemaXMLSerializer` - Grabs schema metadata from a XML file 
 
@@ -54,12 +54,12 @@ SQLDump processing consists of:
 
 All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties)
 for more info.
- 
+
 
 Dependencies
 ------------
-- apache-commons-logging
-- log4j
+- [apache-commons-logging](http://commons.apache.org/logging/)
+- [log4j](http://logging.apache.org/log4j/1.2/) (recommended)
 - database-dependent JDBC jars (e.g. 
 	[PostgreSQL](http://jdbc.postgresql.org/download.html), 
 	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), 
@@ -68,8 +68,8 @@ Dependencies
 	[HSQLDB](http://hsqldb.org/),
 	[H2](http://www.h2database.com/),
 	[SQLite](http://code.google.com/p/sqlite-jdbc/))
-- [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - for graphML output
-- [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - for Mondrian Schema output
+- [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
+- [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - optional, for Mondrian Schema output
 - [ant](http://ant.apache.org/) (recommended)
 - [ivy](http://ant.apache.org/ivy/) (recommended)
 
@@ -97,7 +97,7 @@ Usage (with sources, without ant)
 Usage (without sources)
 -----------------------
 - Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
-- Download all jars from [sqldump/lib](https://bitbucket.org/tbrugz/sqldump/src/tip/lib/) to `lib`
+- Download jar dependencies, especially `apache-commons-logging`, to `lib`
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat` or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
 - Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
 - Download jdbc jars for your database of choice
