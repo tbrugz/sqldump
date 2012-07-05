@@ -48,6 +48,9 @@ public class XMLDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws Exception {
+		//XXX: add xml declaration? optional? e.g.: <?xml version="1.0" encoding="UTF-8" ?>
+		//see http://www.w3.org/TR/REC-xml/#NT-XMLDecl
+		//    http://www.ibm.com/developerworks/xml/library/x-tipdecl/index.html
 		out("<"+tableName+">\n", fos);
 	}
 

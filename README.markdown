@@ -55,6 +55,8 @@ SQLDump processing consists of:
 All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties)
 for more info.
 
+Usage examples can be found at [doc/examples](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/examples).
+
 
 Dependencies
 ------------
@@ -97,7 +99,7 @@ Usage (with sources, without ant)
 Usage (without sources)
 -----------------------
 - Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
-- Download jar dependencies, especially `apache-commons-logging`, to `lib`
+- Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat` or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
 - Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
 - Download jdbc jars for your database of choice
