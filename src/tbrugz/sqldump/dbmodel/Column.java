@@ -16,6 +16,9 @@ import tbrugz.sqldump.util.Utils;
 public class Column extends DBIdentifiable implements Serializable {
 	
 	public static class ColTypeUtil {
+		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
+		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
+		
 		static Properties dbmsSpecificProps;
 		static List<String> doNotUsePrecision;
 		
@@ -31,6 +34,27 @@ public class Column extends DBIdentifiable implements Serializable {
 			catch(IOException e) {
 				log.warn("Error loading typeMapping from resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 				e.printStackTrace();
+			}
+		}
+		
+		public static void setProperties(Properties prop) {
+			//ignoreprecision
+			{
+				List<String> sqlTypesIgnorePrecision = Utils.getStringListFromProp(prop, PROP_IGNOREPRECISION, ",");
+				if(sqlTypesIgnorePrecision!=null) {
+					doNotUsePrecision.addAll(sqlTypesIgnorePrecision);
+				}
+			}
+			
+			//useprecision
+			{
+				List<String> sqlTypesUsePrecision = Utils.getStringListFromProp(prop, PROP_USEPRECISION, ",");
+				if(sqlTypesUsePrecision!=null) {
+					doNotUsePrecision.removeAll(sqlTypesUsePrecision);
+					for(String ctype: sqlTypesUsePrecision) {
+						dbmsSpecificProps.remove("type."+ctype+".useprecision");
+					}
+				}
 			}
 		}
 		
@@ -56,34 +80,6 @@ public class Column extends DBIdentifiable implements Serializable {
 	public static String getColumnDesc(Column c) {
 		String colType = c.type.trim();
 		
-		/*if(fromDbId!=null && toDbId!=null) {
-			if(fromDbId.equals(toDbId)) {
-				//no conversion
-			}
-			else {
-				colType = colType.toUpperCase();
-				String ansiColType = ColTypeUtil.dbmsSpecificProps.getProperty("from."+fromDbId+"."+colType);
-				String newColType = null;
-				if(ansiColType!=null) {
-					ansiColType = ansiColType.toUpperCase();
-					newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDbId+"."+ansiColType);
-				}
-				
-				if(newColType!=null) {
-					//log.debug("new col: "+newColType+"; old: "+colType);
-					colType = newColType;
-				}
-				else if(ansiColType!=null) {
-					//log.debug("ansi new col: "+ansiColType+"; old: "+colType);
-					colType = ansiColType;
-				}
-				else {
-					//log.debug("old col type: "+colType);
-					colType = c.type.trim();
-				}
-			}
-		}*/
-		
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 
 		return DBObject.getFinalIdentifier(c.name)+" "+colType
@@ -96,20 +92,6 @@ public class Column extends DBIdentifiable implements Serializable {
 		return getColumnDesc(c)+(c.pk?" primary key":"");
 	}
 
-	//XXX: should be 'default'?
-	//public static String getColumnDesc(Column c) {
-		//return getColumnDesc(c, null, null);
-		/*String colType = c.type;
-		
-		boolean usePrecision = true;
-		if(typeMapping!=null) {
-			usePrecision = !"false".equals(typeMapping.getProperty("type."+colType+".useprecision"));
-		}
-		
-		return c.name+" "+colType
-			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
-			+(!c.nullable?" not null":"");*/
-	//}
 	
 	@Override
 	public boolean equals(Object obj) {

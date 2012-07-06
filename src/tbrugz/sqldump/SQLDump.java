@@ -7,6 +7,7 @@ import java.io.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
@@ -133,6 +134,8 @@ public class SQLDump {
 
 		log.info("loading properties: "+propFile);
 		papp.load(new FileInputStream(propFile));
+		
+		ColTypeUtil.setProperties(papp);
 	}
 
 	void init(String[] args) throws Exception {
