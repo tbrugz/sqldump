@@ -23,14 +23,23 @@ import tbrugz.sqldump.util.Utils;
  * TODO: cli (sqlplus-like)? continue/exit on error?
  * XXXxx: show/log ordered 'exec-ids' before executing
  * XXX: option for numeric/alphanumeric proc-ids
- * TODO: one statement per file option
- * XXX: statements 'split-by' option
- * TODO: commit/autocommit? when? each X statements? config per processing?
+ * TODOne: one statement per file option -> split-true|false
+ * XXXxx: statements 'split-by' option
+ * TODO: commit/autocommit? when? each X statements? config per processing? (autocommit|statement|file|execid|run)?
+ * XXX: rollback strategy? savepoint(s)?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
 public class SQLRun {
+	
+	public static enum CommitStrategy {
+		//AUTO_COMMIT, //not implemented yet
+		//STATEMENT, //not implemented yet
+		//FILE, //not implemented yet
+		EXEC_ID,
+		RUN
+	} 
 	
 	static Log log = LogFactory.getLog(SQLRun.class);
 	
@@ -52,6 +61,7 @@ public class SQLRun {
 	static String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
 	
 	//properties
+	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
 	static String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 
 	//suffix groups
@@ -60,6 +70,7 @@ public class SQLRun {
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
+	CommitStrategy commitStrategty = CommitStrategy.RUN;
 	
 	void end() throws Exception {
 		if(conn!=null) {
@@ -74,6 +85,7 @@ public class SQLRun {
 		Collections.sort(execkeys);
 		log.info("init processing...");
 		long initTime = System.currentTimeMillis();
+		commitStrategty = getCommitStratefy( papp.getProperty(PROP_COMMIT_STATEGY) );
 
 		Set<String> procIds = new TreeSet<String>();
 		for(String key: execkeys) {
@@ -88,9 +100,11 @@ public class SQLRun {
 		srproc.setPapp(papp);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
+			boolean isExecId = false;
 			String procId = getExecId(key, PREFIX_EXEC);
 			if(endsWithAny(key, PROC_SUFFIXES)) {
 				log.info(">>> processing: id = '"+procId+"'");
+				isExecId = true;
 			}
 			
 			boolean splitBySemicolon = Utils.getPropBool(papp, PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
@@ -145,9 +159,15 @@ public class SQLRun {
 			else {
 				log.warn("unknown prop key format: '"+key+"'");
 			}
+			
+			if(isExecId) {
+				if(commitStrategty==CommitStrategy.EXEC_ID) { doCommit(); }
+			}
 		}
 		long totalTime = System.currentTimeMillis() - initTime;
 		log.info("...end processing, total time = "+totalTime+"ms");
+		
+		if(commitStrategty==CommitStrategy.RUN) { doCommit(); }
 	}
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
@@ -166,6 +186,11 @@ public class SQLRun {
 		}
 		return false;
 	}
+	
+	void doCommit() throws SQLException {
+		log.debug("committing...");
+		conn.commit();
+	}
 
 	static String getExecId(String key, String prefix) {
 		int preflen = prefix.length();
@@ -173,6 +198,18 @@ public class SQLRun {
 		//log.debug("k: "+key+", p: "+preflen+", e: "+end);
 		if(end==-1) { return key.substring(preflen); }
 		else { return key.substring(preflen, end); }
+	}
+	
+	static CommitStrategy getCommitStratefy(String commit) {
+		CommitStrategy cs = CommitStrategy.RUN;
+		if(commit==null) {}
+		else if(commit.equals("execid")) { cs = CommitStrategy.EXEC_ID; }
+		else if(commit.equals("run")) { cs = CommitStrategy.RUN; }
+		else {
+			log.warn("unknown commit strategy: "+commit);
+		}
+		log.info("setting "+(commit==null?"default ":"")+"commit strategy ["+cs+"]");
+		return cs;
 	}
 	
 	/**
