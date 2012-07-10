@@ -23,6 +23,7 @@ import tbrugz.mondrian.xsdmodel.Hierarchy.Level;
 import tbrugz.mondrian.xsdmodel.PrivateDimension;
 import tbrugz.mondrian.xsdmodel.Schema;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
@@ -277,6 +278,18 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				procMeasure(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
+			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".factcountmeasure");
+			if(descFactCountMeasure!=null) {
+				Constraint c = t.getPKConstraint();
+				if(c==null) {
+					log.warn("table '"+t.name+"' has no PK for fact count measure");
+				}
+				else {
+					String pk1stCol = c.uniqueColumns.get(0);
+					addMeasure(cube, pk1stCol, descFactCountMeasure, "count");
+				}
+			}
+			
 			if(cube.getMeasure().size()==0) {
 				if(ignoreCubesWithNoMeasure) {
 					log.info("cube '"+cube.getName()+"' has no measure: ignoring");
@@ -402,16 +415,19 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			degenerateDimCandidates.add(c.name);
 			return;
 		}
+		
+		List<String> aggs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".aggregators", ",");
+		if(aggs==null || aggs.size()==0) { aggs = defaultAggregators; }
 
-		if(defaultAggregators==null || defaultAggregators.size()==0) {
+		if(aggs==null || aggs.size()==0) {
 			log.warn("no measure aggregators defined [cube = "+cube+"]");
 			return;
 		}
-		if(defaultAggregators.size()==1) {
+		if(aggs.size()==1) {
 			addMeasure(cube, c.name, c.name, defaultAggregators.get(0));
 			return;
 		}
-		for(String agg: defaultAggregators) {
+		for(String agg: aggs) {
 			addMeasure(cube, c.name, c.name+"_"+agg, agg);
 		}
 	}
