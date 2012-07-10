@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -85,6 +87,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_HIERHASALL = "sqldump.mondrianschema.hierarchyhasall";
 	public static final String PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES = "sqldump.mondrianschema.addalldegeneratedimcandidates";
 	public static final String PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS = "sqldump.mondrianschema.defaultaggregators";
+	public static final String PROP_MONDRIAN_SCHEMA_SQLID_DECORATOR = "sqldump.mondrianschema.sqliddecorator";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
 	
@@ -107,7 +110,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	boolean addAllDegenerateDimCandidates = false;
 	
 	boolean equalsShouldIgnoreCase = false;
-	StringDecorator stringDecorator = new StringDecorator(); //does nothing (for now?)
+	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
+	StringDecorator sqlIdDecorator = null;
 	
 	//FIXedME: property for it, and list of possible column names
 	List<String> preferredLevelNameColumns = new ArrayList<String>();
@@ -175,6 +179,12 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		else {
 			defaultAggregators = defaultAggTmp;
 		}
+		
+		{
+			String decoratorStr = prop.getProperty(PROP_MONDRIAN_SCHEMA_SQLID_DECORATOR);
+			sqlIdDecorator = StringDecorator.getDecorator(decoratorStr);
+			log.debug("sql id decorator: "+sqlIdDecorator.getClass().getSimpleName());
+		}
 	}
 
 	@Override
@@ -194,7 +204,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//add FKs to model based on properties (experimental)
 		List<FK> addFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
-			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+stringDecorator.get(t.name)+".xtrafk", ",");
+			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+propIdDecorator.get(t.name)+".xtrafk", ",");
 			if(xtraFKs==null) { continue; }
 			
 			for(String newfkstr: xtraFKs) {
@@ -245,19 +255,20 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			Schema.Cube cube = new Schema.Cube();
 			cube.setName(t.name);
 			tbrugz.mondrian.xsdmodel.Table xt = new tbrugz.mondrian.xsdmodel.Table();
-			xt.setName(t.name);
+			xt.setName(sqlIdDecorator.get( t.name ));
 			xt.setSchema(t.getSchemaName());
 			cube.setTable(xt);
 
 			List<String> measureCols = new ArrayList<String>();
-			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".measurecols");
+			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".measurecols");
 			if(measureColsStr!=null) {
 				String[] cols = measureColsStr.split(",");
 				for(String c: cols) {
 					measureCols.add(c.trim());
+					log.debug("cube "+cube.getName()+": add measure: "+c.trim());
 				}
 			}
-			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".measurecolsregex", "\\|");
+			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".measurecolsregex", "\\|");
 			
 			List<String> degenerateDimCandidates = new ArrayList<String>();
 			//columnloop:
@@ -280,7 +291,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			//degenerate dimensions - see: http://mondrian.pentaho.com/documentation/schema.php#Degenerate_dimensions
-			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+stringDecorator.get(t.name)+".degeneratedims");
+			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".degeneratedims");
 			if(degenerateDimColsStr!=null) {
 				String[] cols = degenerateDimColsStr.split(",");
 				for(String col: cols) {
@@ -349,6 +360,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 	}
 	
+	Set<String> noMeasureTypeWarned = new TreeSet<String>();
+	
 	void procMeasure(Schema.Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) {
 		//XXXxx: if column is FK, do not add to measures
 		boolean ok = true;
@@ -362,7 +375,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 
 		if(!numericTypes.contains(c.type.toUpperCase())) {
-			log.debug("not a measure column type: "+c.type);
+			if(noMeasureTypeWarned.contains(c.type.toUpperCase())) {}
+			else {
+				log.debug("not a measure column type: "+c.type);
+				noMeasureTypeWarned.add(c.type.toUpperCase());
+			}
 			ok = false;
 		}
 
@@ -374,7 +391,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		if(measureColsRegexes!=null) {
 			ok = false;
 			for(String regex: measureColsRegexes) {
-				if(c.name.matches(regex.trim())) {
+				if(Pattern.compile(regex.trim(), Pattern.CASE_INSENSITIVE).matcher(c.name).matches()) {
+				//if(c.name.matches(regex.trim())) {
 					ok = true; break;
 				}
 			}
@@ -401,7 +419,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	void addMeasure(Schema.Cube cube, String column, String name, String aggregator) {
 		Schema.Cube.Measure measure = new Schema.Cube.Measure();
 		measure.setName(name);
-		measure.setColumn(column);
+		measure.setColumn(sqlIdDecorator.get(column));
 		measure.setAggregator(aggregator);
 		measure.setVisible(true);
 		cube.getMeasure().add(measure);
@@ -453,9 +471,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	PrivateDimension genDegeneratedDim(String column, String nameColumn, String dimName) {
 		Level level = new Level();
 		level.setName(column);
-		level.setColumn(column);
+		level.setColumn(sqlIdDecorator.get(column));
 		if(nameColumn!=null) {
-			level.setNameColumn(nameColumn);
+			level.setNameColumn(sqlIdDecorator.get(nameColumn));
 		}
 		level.setUniqueMembers(true);
 
@@ -482,7 +500,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	void procHierRecursiveInit(SchemaModel schemaModel, Schema.Cube cube, FK fk, String dimName) {
 		PrivateDimension dim = new PrivateDimension();
 		dim.setName(dimName);
-		dim.setForeignKey(fk.fkColumns.iterator().next());
+		dim.setForeignKey(sqlIdDecorator.get( fk.fkColumns.iterator().next() ));
 		dim.setType("StandardDimension");
 		
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
@@ -517,7 +535,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		
 		HierarchyLevelData level = new HierarchyLevelData();
 		level.levelName = pkTableName;
-		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+stringDecorator.get(level.levelName)+".levelnamecol");
+		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnamecol");
 		if(levelNameColumn!=null) {
 			if(pkTable.getColumn(levelNameColumn)!=null) {
 				level.levelNameColumn = levelNameColumn;
@@ -566,20 +584,20 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			Hierarchy hier = new Hierarchy();
 			String hierName = "";
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
-			hier.setPrimaryKey(thisLevels.get(0).levelColumn);
+			hier.setPrimaryKey(sqlIdDecorator.get( thisLevels.get(0).levelColumn ));
 			hier.setHasAll(hierarchyHasAll);
 			
 			//Table / Join
 			if(thisLevels.size()==1) {
 				tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
 				table.setSchema(schemaName);
-				table.setName(pkTableName);
+				table.setName(sqlIdDecorator.get( pkTableName ));
 				
 				hier.setTable(table);
 			}
 			else {
 				//hier.setPrimaryKeyTable(fk.pkTable); //FIXedME!
-				hier.setPrimaryKeyTable(thisLevels.get(0).levelTable);
+				hier.setPrimaryKeyTable(sqlIdDecorator.get( thisLevels.get(0).levelTable ));
 				
 				Join lastJoin = null;
 				for(int i=0; i < thisLevels.size(); i++) {
@@ -587,7 +605,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 
 					tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
 					table.setSchema(schemaName);
-					table.setName(l.levelName);
+					table.setName(sqlIdDecorator.get( l.levelName ));
 
 					Join join = new Join();
 					join.getRelation().add(table);
@@ -597,8 +615,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					}
 					else {
 						HierarchyLevelData nextl = thisLevels.get(i+1);
-						join.setLeftKey(nextl.joinLeftKey);
-						join.setRightKey(nextl.joinRightKey);
+						join.setLeftKey(sqlIdDecorator.get( nextl.joinLeftKey ));
+						join.setRightKey(sqlIdDecorator.get( nextl.joinRightKey ));
 					}
 
 					//if(i!=0) {
@@ -642,7 +660,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			if(addDimForEachHierarchy) {
 				PrivateDimension newDim = new PrivateDimension();
 				//dim.setName(dimName);
-				newDim.setForeignKey(dim.getForeignKey());
+				newDim.setForeignKey(sqlIdDecorator.get( dim.getForeignKey() ));
 				newDim.setType(dim.getType());
 				newDim.getHierarchy().add(hier);
 				newDim.setName(hier.getName());
@@ -654,20 +672,20 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 	}
 	
-	static Level cloneAsLevel(HierarchyLevelData l) {
+	Level cloneAsLevel(HierarchyLevelData l) {
 		Level lret = new Level();
-		lret.setColumn(l.levelColumn);
+		lret.setColumn(sqlIdDecorator.get( l.levelColumn ));
 		lret.setName(l.levelName);
-		lret.setNameColumn(l.levelNameColumn);
+		lret.setNameColumn(sqlIdDecorator.get( l.levelNameColumn ));
 		lret.setLevelType(l.levelType);
-		lret.setTable(l.levelTable);
+		lret.setTable(sqlIdDecorator.get( l.levelTable ));
 		//XXX: lret.setNameExpression(value)
 		return lret;
 	}
 	
 	//TODO: test column existence
 	int createParentLevels(Hierarchy hier, String levelTable) {
-		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+stringDecorator.get(levelTable)+".parentLevels");
+		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
 		if(parentLevels==null) {
 			return 0;
 		}
@@ -680,8 +698,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 
 			Level level = new Level();
 			level.setName(column);
-			level.setColumn(column);
-			level.setTable(levelTable);
+			level.setColumn(sqlIdDecorator.get( column ));
+			level.setTable(sqlIdDecorator.get( levelTable ));
 			if(tuple[1]!=null) {
 				String nameColumn = tuple[1].trim();
 				level.setNameColumn(nameColumn);
@@ -707,7 +725,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			declaredProps.add(s);
 		}
 		for(String s: declaredProps) {
-			Table table = DBIdentifiable.getDBIdentifiableByTypeAndName(schemaModel.getTables(), DBObjectType.TABLE, s);
+			Table table = DBIdentifiable.getDBIdentifiableByTypeAndNameIgnoreCase(schemaModel.getTables(), DBObjectType.TABLE, s);
 			if(table==null) {
 				log.warn(String.format(messageFormat, s));
 			}

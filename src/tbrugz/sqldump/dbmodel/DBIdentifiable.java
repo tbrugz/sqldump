@@ -48,6 +48,14 @@ public abstract class DBIdentifiable {
 		return null;
 	}
 	
+	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
+		for(DBIdentifiable d: dbids) {
+			if(type.equals(getType4Diff(d)) 
+					&& d.getName().equalsIgnoreCase(name)) return (T) d;
+		}
+		return null;
+	}
+	
 	public static DBObjectType getType(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }
 		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }

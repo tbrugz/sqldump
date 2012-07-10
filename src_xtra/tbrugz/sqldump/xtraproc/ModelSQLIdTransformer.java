@@ -1,6 +1,7 @@
 package tbrugz.sqldump.xtraproc;
 
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,8 +18,24 @@ public class ModelSQLIdTransformer extends AbstractSQLProc {
 
 	static Log log = LogFactory.getLog(ModelSQLIdTransformer.class);
 
-	StringDecorator identifierDecorator = new StringDecorator.StringToLowerDecorator();
-	StringDecorator colTypeDecorator = new StringDecorator.StringToLowerDecorator();
+	StringDecorator identifierDecorator;
+	StringDecorator colTypeDecorator;
+	
+	static final String SQLIDTRANSF_PREFFIX = "sqldump.proc.sqlidtransformer";
+	
+	@Override
+	public void setProperties(Properties prop) {
+		super.setProperties(prop);
+		String defaultDec = prop.getProperty(SQLIDTRANSF_PREFFIX+".decorator");
+		{
+			String identifierDec = prop.getProperty(SQLIDTRANSF_PREFFIX+".iddecorator", defaultDec);
+			identifierDecorator = StringDecorator.getDecorator(identifierDec);
+		}
+		{
+			String colTypeDec = prop.getProperty(SQLIDTRANSF_PREFFIX+".coltypedecorator", defaultDec);
+			colTypeDecorator = StringDecorator.getDecorator(colTypeDec);
+		}
+	}
 	
 	@Override
 	public void process() {
