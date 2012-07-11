@@ -89,6 +89,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES = "sqldump.mondrianschema.addalldegeneratedimcandidates";
 	public static final String PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS = "sqldump.mondrianschema.defaultaggregators";
 	public static final String PROP_MONDRIAN_SCHEMA_SQLID_DECORATOR = "sqldump.mondrianschema.sqliddecorator";
+	public static final String PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE = "sqldump.mondrianschema.factcountmeasure";
+
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
 	
@@ -278,11 +280,22 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				procMeasure(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
-			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".factcountmeasure");
+			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".factcountmeasure",
+					prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
 			if(descFactCountMeasure!=null) {
 				Constraint c = t.getPKConstraint();
 				if(c==null) {
-					log.warn("table '"+t.name+"' has no PK for fact count measure");
+					List<Column> cols = t.getColumns();
+					Column notNullCol = null;
+					for(Column col: cols) {
+						if(!col.nullable) { notNullCol = col; }
+					}
+					if(notNullCol!=null) {
+						addMeasure(cube, notNullCol.name, descFactCountMeasure, "count");
+					}
+					else {
+						log.warn("table '"+t.name+"' has no PK nor not-null-column for fact count measure");
+					}
 				}
 				else {
 					String pk1stCol = c.uniqueColumns.get(0);
