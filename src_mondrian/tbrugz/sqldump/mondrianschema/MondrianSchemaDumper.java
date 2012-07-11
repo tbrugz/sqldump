@@ -303,6 +303,19 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
+			List<String> addMeasures = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
+			if(addMeasures!=null) {
+				for(String addM: addMeasures) {
+					String[] parts = addM.split(":");
+					if(parts.length<2) {
+						log.warn("addmeasures for cube '"+cube.getName()+"' not well defined: "+addM);
+						continue;
+					}
+					String label = parts.length>=3?parts[2]:parts[0]+"_"+parts[1]; 
+					addMeasure(cube, parts[0], label, parts[1]);
+				}
+			}
+			
 			if(cube.getMeasure().size()==0) {
 				if(ignoreCubesWithNoMeasure) {
 					log.info("cube '"+cube.getName()+"' has no measure: ignoring");
