@@ -143,37 +143,9 @@ public class SQLUtils {
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
 			Class<?> coltype = colTypes.get(i-1);
-			if(coltype.equals(String.class)) {
-				value = rs.getString(i);
-			}
-			else if(coltype.equals(Integer.class)) {
-				value = rs.getDouble(i);
-				Double dValue = (Double) value;
-				if(isInt(dValue)) {
-					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i)+"/"+rs.getDouble(i));
-					value = rs.getLong(i);
-				}
-				else { 
-					//log.warn("double type: "+i+"/"+coltype+"/"+rs.getDouble(i));
-					value = rs.getDouble(i);
-				}
-			}
-			else if(coltype.equals(Double.class)) {
-				value = rs.getDouble(i);
-				Double dValue = (Double) value;
-				if(isInt(dValue)) {
-					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i));
-					value = rs.getLong(i);
-				}
-				else { value = rs.getDouble(i); }
-			}
-			else if(coltype.equals(Date.class)) {
-				//TODOne: how to format Date value?
-				value = rs.getDate(i);
-			}
-			else if(coltype.equals(Blob.class)) {
+			if(coltype.equals(Blob.class)) {
 				//XXX: do not dump Blobs this way
-				//value = null; //already null, do nothing
+				//value = null; //Blob and ResultSet should be tested first? yes!
 			}
 			else if(coltype.equals(ResultSet.class) || coltype.equals(Array.class)) {
 				if(canReturnResultSet) {
@@ -193,8 +165,42 @@ public class SQLUtils {
 				}
 				//log.info("obj/resultset: "+rs.getObject(i));
 			}
+			else {
+
+			value = rs.getString(i);
+			if(value==null) {}
+			else if(coltype.equals(String.class)) {
+				//value = rs.getString(i);
+				//do nothing (value already setted)
+			}
+			else if(coltype.equals(Integer.class)) {
+				value = rs.getDouble(i);
+				Double dValue = (Double) value;
+				if(isInt(dValue)) {
+					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i)+"/"+rs.getDouble(i));
+					value = rs.getLong(i);
+				}
+				else { 
+					//log.warn("double type: "+i+"/"+coltype+"/"+rs.getDouble(i));
+					//value = rs.getDouble(i); //no need for doing again
+				}
+			}
+			else if(coltype.equals(Double.class)) {
+				value = rs.getDouble(i);
+				Double dValue = (Double) value;
+				if(isInt(dValue)) {
+					//log.warn("long type: "+i+"/"+coltype+"/"+rs.getLong(i));
+					value = rs.getLong(i);
+				}
+				else { value = rs.getDouble(i); }
+			}
+			else if(coltype.equals(Date.class)) {
+				//TODOne: how to format Date value?
+				value = rs.getDate(i);
+			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
+				//XXX: show log.info on 1st time only?
 				log.info("generic type ["+value.getClass().getSimpleName()+"/"+coltype.getSimpleName()+"] grabbed");
 				if(canReturnResultSet && ResultSet.class.isAssignableFrom(value.getClass())) {
 					log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
@@ -202,9 +208,13 @@ public class SQLUtils {
 				}
 			}
 			else {
+				//XXX: show log.warn on 1st time only?
 				log.warn("unknown type ["+coltype+"], defaulting to String");
-				value = rs.getString(i);
+				//value = rs.getString(i); // no need to get value again
 			}
+			
+			}
+			
 			ls.add(value);
 		}
 		return ls;
@@ -237,7 +247,7 @@ public class SQLUtils {
 				return Blob.class;
 			case Types.ARRAY:
 				//return Array.class;
-			case -10: //XXX: ResultSet/Cursor ?
+			case -10: //XXX: ResultSet/Cursor (Oracle)?
 				return ResultSet.class;
 			case Types.OTHER:
 				return Object.class;

@@ -392,7 +392,15 @@ public class DataDump extends AbstractSQLProc {
 							writersSyntaxes.put(finalFilename, ds);
 						}
 						//TODOne: count should be total count or file count? i vote on file count :) (FFC uses it for buffering)
-						ds.dumpRow(rs, countInPartition, w);
+						try {
+							ds.dumpRow(rs, countInPartition, w);
+						}
+						catch(SQLException e) {
+							log.warn("error dumping row "+(count+1)+" from query '"+tableOrQueryId+"/"+tableOrQueryName+"': syntax "+ds.getSyntaxId()+" disabled");
+							log.info("stack...",e);
+							syntaxList.remove(i); i--;
+							conn.rollback();
+						}
 						//ds.dumpRow(rs, count, writerList.get(i));
 					}
 				}
