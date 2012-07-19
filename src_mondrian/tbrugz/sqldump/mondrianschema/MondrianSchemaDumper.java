@@ -220,7 +220,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				log.info("new FK: "+newfkstr+"; parts.len: "+parts.length);
 				fk.fkTable = t.name;
 				fk.fkTableSchemaName = t.getSchemaName();
-				fk.fkColumns = newStringList(parts[0]);
+				fk.fkColumns = Utils.newStringList(parts[0]);
 				if(parts[1].contains(".")) {
 					String[] pkTableParts = parts[1].split("\\.");
 					log.info("FKschema: "+parts[1]+"; pkTable.len: "+pkTableParts.length);
@@ -228,7 +228,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					parts[1] = pkTableParts[1];
 				}
 				fk.pkTable = parts[1];
-				fk.pkColumns = newStringList(parts[2]);
+				fk.pkColumns = Utils.newStringList(parts[2]);
 				//TODO: changing model... should clone() first
 				addFKs.add(fk);
 			}
@@ -791,14 +791,6 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			if(equalsShouldIgnoreCase?ss.equalsIgnoreCase(s):ss.equals(s)) { return true; }
 		}
 		return false;
-	}
-	
-	List<String> newStringList(String... strings) {
-		List<String> ret = new ArrayList<String>();
-		for(String s: strings) {
-			ret.add(s);
-		}
-		return ret;
 	}
 	
 	@Override

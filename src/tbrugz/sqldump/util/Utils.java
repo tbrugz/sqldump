@@ -483,6 +483,14 @@ public class Utils {
 		return true;
 	}
 	
+	public static List<String> newStringList(String... strings) {
+		List<String> ret = new ArrayList<String>();
+		for(String s: strings) {
+			ret.add(s);
+		}
+		return ret;
+	}
+	
 	public static void main(String[] args) {
 		//String value = PasswordInputGUI.getPassword("pass: ");
 		
