@@ -66,9 +66,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	String mainOutputFilePattern;
 	Properties prop;
 	
-	static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
-	static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
-	static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
+	public static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
+	public static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
+	public static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
 	
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
