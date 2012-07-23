@@ -205,6 +205,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//XXXdone: degenerate dimensions
 		
 		//add FKs to model based on properties (experimental)
+		//TODO: remove & use SchemaModelTransformer
 		List<FK> addFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
 			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+propIdDecorator.get(t.name)+".xtrafk", ",");
@@ -212,23 +213,30 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			
 			for(String newfkstr: xtraFKs) {
 				String[] parts = newfkstr.split(":");
-				if(parts.length!=3) {
-					log.warn("wrong number of FK parts: "+parts.length+"; should be 3 [fkstr='"+newfkstr+"']");
+				if(parts.length<3) {
+					log.warn("wrong number of FK parts: "+parts.length+"; should be 3 or 4 [fkstr='"+newfkstr+"']");
 					continue;
 				}
 				FK fk = new FK();
-				log.info("new FK: "+newfkstr+"; parts.len: "+parts.length);
+				log.debug("new FK: "+newfkstr+"; parts.len: "+parts.length);
 				fk.fkTable = t.name;
 				fk.fkTableSchemaName = t.getSchemaName();
 				fk.fkColumns = Utils.newStringList(parts[0]);
 				if(parts[1].contains(".")) {
 					String[] pkTableParts = parts[1].split("\\.");
-					log.info("FKschema: "+parts[1]+"; pkTable.len: "+pkTableParts.length);
+					log.debug("FKschema: "+parts[1]+"; pkTable.len: "+pkTableParts.length);
 					fk.pkTableSchemaName = pkTableParts[0];
 					parts[1] = pkTableParts[1];
 				}
 				fk.pkTable = parts[1];
 				fk.pkColumns = Utils.newStringList(parts[2]);
+				if(parts.length>3) {
+					fk.name = parts[3];
+				}
+				else {
+					fk.name = fk.fkTable + "_" + fk.pkTable + "_FK"; //XXX: suggestAcronym?
+				}
+				
 				//TODO: changing model... should clone() first
 				addFKs.add(fk);
 			}
