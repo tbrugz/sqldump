@@ -22,6 +22,7 @@ import tbrugz.sqldump.util.Utils;
  * XXXdone: prop for showing or not column names
  * 
  * XXX: problem with 'partitionby' and column of partition is null
+ * XXX: add prop for 'recordDemimiter' ?
  */
 /**
  * FFC: Formatted Fixed Column
@@ -36,6 +37,8 @@ public class FFCDataDump extends DumpSyntax {
 	static final String FFC_SYNTAX_ID = "ffc";
 	//static final String DEFAULT_NULL_VALUE = "";
 	static Log log = LogFactory.getLog(FFCDataDump.class);
+	
+	static final String recordDemimiter = "\n";
 	
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
@@ -180,7 +183,7 @@ public class FFCDataDump extends DumpSyntax {
 					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
 					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
 				}
-				sb.append("\n");
+				sb.append(recordDemimiter);
 			}
 	
 			//col names
@@ -188,7 +191,7 @@ public class FFCDataDump extends DumpSyntax {
 				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
 				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
 			}
-			sb.append("\n");
+			sb.append(recordDemimiter);
 	
 			if(showColNamesLines) {
 				//lower line
@@ -196,7 +199,7 @@ public class FFCDataDump extends DumpSyntax {
 					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
 					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
 				}
-				sb.append("\n");
+				sb.append(recordDemimiter);
 			}
 		}
 		
@@ -205,7 +208,7 @@ public class FFCDataDump extends DumpSyntax {
 			for(int j=0;j<lsColNames.size();j++) {
 				appendString(sb, colsMaxLenght.get(j), vals.get(j), j );
 			}
-			sb.append("\n");
+			sb.append(recordDemimiter);
 		}
 		out(sb.toString(), fos); //+"\n"
 		
@@ -234,7 +237,7 @@ public class FFCDataDump extends DumpSyntax {
 	
 	String getFormattedValue(Object o, Class c) {
 		//if(o==null) return nullValue;
-		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, null, nullValueStr);
+		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, null, recordDemimiter, null, nullValueStr);
 	}
 
 	@Override

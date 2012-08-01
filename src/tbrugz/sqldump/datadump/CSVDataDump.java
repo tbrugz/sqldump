@@ -38,12 +38,14 @@ public class CSVDataDump extends DumpSyntax {
 	
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";
+	static final String PROP_DATADUMP_ENCLOSING = "sqldump.datadump.csv.enclosing";
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.csv.tablenameheader";
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
 	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ",";
+	static final String ENCLOSING_DEFAULT = null; //XXX: should be '"'?
 
 	static final String CSV_SYNTAX_ID = "csv";
 	
@@ -57,12 +59,14 @@ public class CSVDataDump extends DumpSyntax {
 	boolean doColumnNamesHeaderDump = true;
 	String columnDelimiter;
 	String recordDelimiter;
+	String enclosing;
 	
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
 		recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
 		columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
+		enclosing = prop.getProperty(PROP_DATADUMP_ENCLOSING, ENCLOSING_DEFAULT);
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
 		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, doColumnNamesHeaderDump);
 	}
@@ -143,7 +147,7 @@ public class CSVDataDump extends DumpSyntax {
 				sb.append( (i!=0?columnDelimiter:"") + nullValueStr);
 			}
 			else {
-				sb.append( (i!=0?columnDelimiter:"") + DataDumpUtils.getFormattedCSVValue(vals.get(i), lsColTypes.get(i), floatFormatter, columnDelimiter, nullValueStr) );
+				sb.append( (i!=0?columnDelimiter:"") + DataDumpUtils.getFormattedCSVValue(vals.get(i), lsColTypes.get(i), floatFormatter, columnDelimiter, recordDelimiter, enclosing, nullValueStr) );
 			}
 		}
 		out(sb.toString(), fos, recordDelimiter);

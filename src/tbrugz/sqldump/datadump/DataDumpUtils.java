@@ -58,7 +58,7 @@ public class DataDumpUtils {
 	}
 	
 	//dumpers: CSV, FFC
-	public static String getFormattedCSVValue(Object elem, Class type, NumberFormat floatFormatter, String separator, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, Class type, NumberFormat floatFormatter, String separator, String lineSeparator, String enclosing, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
@@ -70,11 +70,26 @@ public class DataDumpUtils {
 		}
 
 		// String output:
+		if(enclosing!=null) {
+			return enclosing+String.valueOf(elem).replaceAll(enclosing, enclosing+enclosing)+enclosing;
+		}
+		
 		if(separator==null) {
-			return String.valueOf(elem);
+			//return String.valueOf(elem);
+			if(lineSeparator==null) {
+				return String.valueOf(elem);
+			}
+			else {
+				return String.valueOf(elem).replaceAll(lineSeparator, "");
+			}
 		}
 		else {
-			return String.valueOf(elem).replaceAll(separator, "");
+			if(lineSeparator==null) {
+				return String.valueOf(elem).replaceAll(separator, "");
+			}
+			else {
+				return String.valueOf(elem).replaceAll(separator, "").replaceAll(lineSeparator, "");
+			}
 		}
 	} 
 
