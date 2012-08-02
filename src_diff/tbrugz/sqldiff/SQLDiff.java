@@ -17,12 +17,16 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 /*
- * TODO: output diff to file
+ * TODOne: output diff to file
+ * 
+ * TODO: CategorizedOut: split by objecttype, schemaname, ...
+ * 
  * XXX: output diff by object type, change type
- * XXX: change: 'from'->'old', 'to'->'new' ?
+ * XXX: change: 'from'->'old', 'to'->'new' ? or older/newer?
  * 
  * XXX: option: [ignore|do not ignore] case; ignore schema name 
  */
@@ -30,12 +34,15 @@ public class SQLDiff {
 	
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
 	
-	public static final String PROP_FROM = "sqldiff.from";
-	public static final String PROP_TO = "sqldiff.to";
+	public static final String PROP_PREFIX = "sqldiff";
+	public static final String PROP_FROM = PROP_PREFIX+".from";
+	public static final String PROP_TO = PROP_PREFIX+".to";
+	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 
 	static Log log = LogFactory.getLog(SQLDiff.class);
 	
 	Properties prop = new ParametrizedProperties();
+	String outfilePattern = null;
 	
 	void init(String[] args) throws Exception {
 		log.info("init...");
@@ -61,9 +68,17 @@ public class SQLDiff {
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
 		prop.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+		
+		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
+		if(outfilePattern==null) {
+			log.warn("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script");
+			return;
+		}
 	}
 
 	void doIt() throws Exception {
+		if(outfilePattern==null) { return; }
+		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
 		
@@ -79,12 +94,21 @@ public class SQLDiff {
 		log.info("grabbing 'to' model");
 		SchemaModel toSM = toSchemaGrabber.grabSchema();
 		
+		CategorizedOut co = new CategorizedOut();
+		String finalPattern = outfilePattern;
+		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
+				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
+		co.setFilePathPattern(finalPattern);
+
 		//do diff
 		log.info("dumping diff");
 		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
+		co.categorizedOut(diff.getDiff());
+		/*
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
+		*/
 		
 		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
 		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));

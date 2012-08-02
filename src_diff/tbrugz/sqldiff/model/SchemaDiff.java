@@ -47,11 +47,12 @@ public class SchemaDiff implements Diff {
 
 	//-----------------------
 	
-	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
-		SchemaDiff diff = new SchemaDiff();
-		
+	void diffTable(SchemaModel modelOrig, SchemaModel modelNew) {
+		SchemaDiff diff = this;
 		//tables
 		Set<Table> newTablesThatExistsInOrigModel = new HashSet<Table>();
+		if(modelOrig.getTables().size()>0) {
+			
 		for(Table tOrig: modelOrig.getTables()) {
 			Table tNew = (Table) findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
@@ -93,6 +94,8 @@ public class SchemaDiff implements Diff {
 			}
 		}
 		
+		}
+		
 		/*Set<Table> newTables = new HashSet<Table>();
 		newTables.addAll(modelNew.getTables());
 		newTables.removeAll(newTablesThatExistsInOrigModel);
@@ -110,7 +113,14 @@ public class SchemaDiff implements Diff {
 			TableDiff td = new TableDiff(ChangeType.ADD, t);
 			diff.tableDiffs.add(td);
 		}
-
+	}	
+		
+	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
+		SchemaDiff diff = new SchemaDiff();
+		
+		//Tables
+		diff.diffTable(modelOrig, modelNew);
+		
 		//TODO: Table: grants, table.type?
 		
 		//Views
