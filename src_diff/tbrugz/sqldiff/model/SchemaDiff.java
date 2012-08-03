@@ -246,7 +246,14 @@ public class SchemaDiff implements Diff {
 		//TODO: executables: do not dump extra ";"
 		log.info("output other diffs...");
 		for(DBIdentifiableDiff dbid: dbidDiffs) {
-			out.categorizedOut(dbid.getDiff()+";\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+			switch(DBIdentifiable.getType(dbid.ident)) {
+			case EXECUTABLE:
+			case TRIGGER:
+				out.categorizedOut(dbid.getDiff()+"\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+				break;
+			default:
+				out.categorizedOut(dbid.getDiff()+";\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+			}
 		}
 	} 
 	

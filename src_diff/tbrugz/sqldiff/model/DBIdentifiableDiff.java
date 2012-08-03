@@ -26,10 +26,10 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	@Override
 	public String getDiff() {
 		switch(changeType) {
-			case ADD: return (ownerTableName!=null?"alter table "+ownerTableName+" ADD ":"")+ident.getDefinition(true).trim();
+			case ADD: return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")+ident.getDefinition(true).trim();
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"DROP "+DBIdentifiable.getType4Diff(ident)+" "+(ident.getSchemaName()!=null?ident.getSchemaName()+".":"")+ident.getName();
+			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"drop "+DBIdentifiable.getType4Diff(ident)+" "+(ident.getSchemaName()!=null?ident.getSchemaName()+".":"")+ident.getName();
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBId.getDiff()");
 	}

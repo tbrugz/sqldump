@@ -24,21 +24,21 @@ public class TableColumnDiff extends DBObject implements Diff {
 		String colChange = null;
 		switch(type) {
 			case ADD:
-				colChange = "ADD COLUMN "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
+				colChange = "add column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				//XXX: option: rename old, create new, update new from old, drop old
-				colChange = "ALTER COLUMN "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type; break;
+				colChange = "alter column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type; break;
 			case RENAME:
-				colChange = "RENAME COLUMN "+renameFrom+" TO "+column.getName(); break;
+				colChange = "rename column "+renameFrom+" TO "+column.getName(); break;
 			case DROP:
-				colChange = "DROP COLUMN "+column.getName(); break;
+				colChange = "drop column "+column.getName(); break;
 		}
-		return "ALTER TABLE "+(getSchemaName()!=null?getSchemaName()+".":"")+name+" "+colChange;
+		return "alter table "+(getSchemaName()!=null?getSchemaName()+".":"")+name+" "+colChange;
 	}
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "ALTER TABLE "+(dumpSchemaName?getSchemaName()+".":"")+name
+		return "alter table "+(dumpSchemaName?getSchemaName()+".":"")+name
 				+getDiff();
 	}
 	
