@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -95,15 +96,20 @@ public class SQLDiff {
 		SchemaModel toSM = toSchemaGrabber.grabSchema();
 		
 		CategorizedOut co = new CategorizedOut();
-		String finalPattern = outfilePattern;
+		//String finalPattern = outfilePattern;
 		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
 				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
+		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA,SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE);
+		log.debug("final pattern: "+finalPattern);
+		
 		co.setFilePathPattern(finalPattern);
 
 		//do diff
 		log.info("dumping diff");
 		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
-		co.categorizedOut(diff.getDiff());
+		//co.categorizedOut(diff.getDiff());
+		diff.outDiffs(co);
+		
 		/*
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());

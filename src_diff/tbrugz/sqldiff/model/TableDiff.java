@@ -84,10 +84,14 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			diffs.add(tcd);
 		}
 		
-		//XXX: constraints should be dumper in defined order (FKs at end)
 		//constraints
+		//XXX: constraints should be dumper in defined order (FKs at end)
 		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
 		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getName(), newTable.getName());
+		//FIXedME: schemaname dumps as null
+		for(int i=0;i<dbiddiffs.size();i++) {
+			dbiddiffs.get(i).ident.setSchemaName(newTable.getSchemaName());
+		}
 		diffs.addAll(dbiddiffs);
 		
 		return diffs;

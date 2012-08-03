@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.CategorizedOut;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
@@ -226,6 +228,27 @@ public class SchemaDiff implements Diff {
 		Collections.sort(diffs, new DiffComparator());
 		return diffs;
 	}
+	
+	public void outDiffs(CategorizedOut out) throws IOException {
+		//table
+		log.info("output table diffs...");
+		for(TableDiff td: tableDiffs) {
+			out.categorizedOut(td.getDiff()+";\n", td.table.getSchemaName(), DBObjectType.TABLE.toString());
+		}
+
+		//column
+		log.info("output column diffs...");
+		for(TableColumnDiff tcd: columnDiffs) {
+			out.categorizedOut(tcd.getDiff()+";\n", tcd.getSchemaName(), DBObjectType.COLUMN.toString());
+		}
+
+		//other
+		//TODO: executables: do not dump extra ";"
+		log.info("output other diffs...");
+		for(DBIdentifiableDiff dbid: dbidDiffs) {
+			out.categorizedOut(dbid.getDiff()+";\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+		}
+	} 
 	
 	@Override
 	public String getDiff() {
