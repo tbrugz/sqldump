@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
@@ -28,6 +30,8 @@ import tbrugz.sqldump.util.Utils;
  * TODO: commit/autocommit? when? each X statements? config per processing? (autocommit|statement|file|execid|run)?
  * XXX: rollback strategy? savepoint(s)?
  * XXX: CSV importer? Fixed Column importer? FC importer with spec...
+ * XXX: Regex importer (parses log lines, ...)
+ * XXX: remove dependency from CSVImporter
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
@@ -48,12 +52,13 @@ public class SQLRun {
 	static final String CONN_PROPS_PREFIX = SQLRUN_PROPS_PREFIX; 
 	
 	//prefixes
-	static final String PREFIX_EXEC = "sqlrun.exec.";
+	static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
 
-	//suffixes
+	//exec suffixes
 	static String SUFFIX_FILE = ".file";
 	static String SUFFIX_FILES = ".files";
 	static String SUFFIX_STATEMENT = ".statement";
+	static String SUFFIX_IMPORT = ".import";
 
 	//aux suffixes
 	static String SUFFIX_DIR = ".dir";
@@ -65,8 +70,9 @@ public class SQLRun {
 	static String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 
 	//suffix groups
-	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT };
+	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT };
 	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT };
+	List<String> allAuxSuffixes = new ArrayList<String>();
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
@@ -85,7 +91,7 @@ public class SQLRun {
 		Collections.sort(execkeys);
 		log.info("init processing...");
 		long initTime = System.currentTimeMillis();
-		commitStrategty = getCommitStratefy( papp.getProperty(PROP_COMMIT_STATEGY) );
+		commitStrategty = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY) );
 
 		Set<String> procIds = new TreeSet<String>();
 		for(String key: execkeys) {
@@ -152,8 +158,25 @@ public class SQLRun {
 					log.debug("error executing statement", e);
 				}
 			}
+			else if(key.endsWith(SUFFIX_IMPORT)) {
+				String importType = papp.getProperty(key);
+				if("CSV".equalsIgnoreCase(importType)) {
+					CSVImporter importer = new CSVImporter();
+					importer.setExecId(procId);
+					importer.setProperties(papp);
+					importer.setConnection(conn);
+					try {
+						importer.importData();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				else {
+					log.warn("unknown import type: "+importType);
+				}
+			}
 			// ...else
-			else if(endsWithAny(key, AUX_SUFFIXES)) {
+			else if(endsWithAny(key, allAuxSuffixes)) {
 				//do nothing here
 			}
 			else {
@@ -186,6 +209,13 @@ public class SQLRun {
 		}
 		return false;
 	}
+
+	static boolean endsWithAny(String key, List<String> suffixes) {
+		for(String suf: suffixes) {
+			if(key.endsWith(suf)) { return true; }
+		}
+		return false;
+	}
 	
 	void doCommit() throws SQLException {
 		log.debug("committing...");
@@ -200,7 +230,7 @@ public class SQLRun {
 		else { return key.substring(preflen, end); }
 	}
 	
-	static CommitStrategy getCommitStratefy(String commit) {
+	static CommitStrategy getCommitStrategy(String commit) {
 		CommitStrategy cs = CommitStrategy.RUN;
 		if(commit==null) {}
 		else if(commit.equals("execid")) { cs = CommitStrategy.EXEC_ID; }
@@ -212,6 +242,12 @@ public class SQLRun {
 		return cs;
 	}
 	
+	void init(String args[]) throws Exception {
+		SQLDump.init(args, papp);
+		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
+		allAuxSuffixes.addAll(Arrays.asList((new CSVImporter()).getAuxSuffixes()));
+	}
+	
 	/**
 	 * @param args
 	 * @throws Exception 
@@ -220,7 +256,8 @@ public class SQLRun {
 		SQLRun sqlr = new SQLRun();
 		
 		try {
-			SQLDump.init(args, sqlr.papp);
+			//SQLDump.init(args, sqlr.papp);
+			sqlr.init(args);
 			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sqlr.papp);
 			if(sqlr.conn==null) { return; }
 			sqlr.doIt();
