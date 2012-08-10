@@ -19,7 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.Utils;
 
 public class CSVImporter {
-	static Log log = LogFactory.getLog(CSVImporter.class);
+	static final Log log = LogFactory.getLog(CSVImporter.class);
 
 	Properties prop;
 	Connection conn;
@@ -37,6 +37,7 @@ public class CSVImporter {
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;
+	PreparedStatement stmt = null;
 	
 	static String SUFFIX_IMPORTFILE = ".importfile";
 	//XXX: static String SUFFIX_IMPORTFILES //??
@@ -49,7 +50,7 @@ public class CSVImporter {
 	static String SUFFIX_SKIP_N = ".skipnlines";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
-	static String[] CSV_AUX_SUFFIXES = {
+	static final String[] CSV_AUX_SUFFIXES = {
 		SUFFIX_COLUMNDELIMITER,
 		SUFFIX_ENCLOSING,
 		SUFFIX_ENCODING,
@@ -57,7 +58,8 @@ public class CSVImporter {
 		SUFFIX_IMPORTFILE,
 		SUFFIX_INSERTTABLE,
 		SUFFIX_RECORDDELIMITER,
-		SUFFIX_SKIP_N
+		SUFFIX_SKIP_N,
+		SUFFIX_X_COMMIT_EACH_X_ROWS
 	};
 	
 	public void setExecId(String execId) {
@@ -96,7 +98,7 @@ public class CSVImporter {
 		log.debug("scan delimiter pattern: "+p);
 		log.info("input file: "+importFile);
 		
-		PreparedStatement stmt = null;
+		//PreparedStatement stmt = null;
 		//String stmtStrPrep = null;
 		//String stmtStr = null;
 		
@@ -125,18 +127,7 @@ public class CSVImporter {
 		while(scan.hasNext()) {
 			String line = scan.next();
 			//log.info("line["+processedLines+"]: "+line);
-			String[] parts = line.split(columnDelimiter);
-			//log.info("parts: "+Arrays.asList(parts));
-			if(processedLines==0) {
-				StringBuffer sb = new StringBuffer();
-				sb.append("insert into "+insertTable+ " values (");
-				for(int i=0;i<parts.length;i++) {
-					sb.append((i==0?"":", ")+"?");
-				}
-				sb.append(")");
-				stmt = conn.prepareStatement(sb.toString());
-				//stmtStrPrep = sb.toString();
-			}
+			String[] parts = procLine(line, processedLines);
 			if(is1stloop && skipHeaderN>processedLines) {
 				processedLines++;
 				continue;
@@ -168,6 +159,22 @@ public class CSVImporter {
 		log.info("processedLines: "+processedLines+" ; importedRows: "+importedLines);
 		
 		return processedLines;
+	}
+
+	String[] procLine(String line, long processedLines) throws SQLException {
+		String[] parts = line.split(columnDelimiter);
+		log.debug("parts["+parts.length+"]: "+Arrays.asList(parts));
+		if(processedLines==0) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("insert into "+insertTable+ " values (");
+			for(int i=0;i<parts.length;i++) {
+				sb.append((i==0?"":", ")+"?");
+			}
+			sb.append(")");
+			stmt = conn.prepareStatement(sb.toString());
+			//stmtStrPrep = sb.toString();
+		}
+		return parts;
 	}
 	
 	Scanner createScanner() throws FileNotFoundException {

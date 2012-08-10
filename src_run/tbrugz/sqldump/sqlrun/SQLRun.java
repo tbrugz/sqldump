@@ -161,10 +161,24 @@ public class SQLRun {
 					log.debug("error executing statement", e);
 				}
 			}
+			// .import
 			else if(key.endsWith(SUFFIX_IMPORT)) {
 				String importType = papp.getProperty(key);
+				//csv
 				if("CSV".equalsIgnoreCase(importType)) {
 					CSVImporter importer = new CSVImporter();
+					importer.setExecId(procId);
+					importer.setProperties(papp);
+					importer.setConnection(conn);
+					try {
+						importer.importData();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+				//regex
+				else if("REGEX".equalsIgnoreCase(importType)) {
+					RegexImporter importer = new RegexImporter();
 					importer.setExecId(procId);
 					importer.setProperties(papp);
 					importer.setConnection(conn);
@@ -249,6 +263,7 @@ public class SQLRun {
 		SQLDump.init(args, papp);
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(Arrays.asList((new CSVImporter()).getAuxSuffixes()));
+		allAuxSuffixes.addAll(Arrays.asList((new RegexImporter()).getAuxSuffixes()));
 	}
 	
 	/**
