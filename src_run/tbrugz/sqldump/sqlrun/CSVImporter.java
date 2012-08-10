@@ -1,13 +1,16 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +35,9 @@ public class CSVImporter {
 	long skipHeaderN = 0;
 	Long commitEachXrows = 100l;
 
+	//needed as a property for 'follow' mode
+	InputStream fileIS = null;
+	
 	static String SUFFIX_IMPORTFILE = ".importfile";
 	//XXX: static String SUFFIX_IMPORTFILES //??
 	static String SUFFIX_FOLLOW = ".follow";
@@ -41,6 +47,7 @@ public class CSVImporter {
 	static String SUFFIX_INSERTTABLE = ".inserttable";
 	static String SUFFIX_ENCODING = ".encoding";
 	static String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static String[] CSV_AUX_SUFFIXES = {
 		SUFFIX_COLUMNDELIMITER,
@@ -66,6 +73,7 @@ public class CSVImporter {
 		columnDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_COLUMNDELIMITER, columnDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
+		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, commitEachXrows);
 	}
 	
 	public void setConnection(Connection conn) {
@@ -76,22 +84,13 @@ public class CSVImporter {
 		return CSV_AUX_SUFFIXES;
 	}
 
-	public long importData() throws FileNotFoundException, SQLException, InterruptedException {
+	public long importData() throws SQLException, InterruptedException, IOException {
 		long processedLines = 0;
 		long importedLines = 0;
 		//assume all lines of same size (in number of columns?)
 		//FileReader fr = new FileReader(importFile);
 		
-		Scanner scan = null;
-		if(SQLRun.STDIN.equals(importFile)) {
-			scan = new Scanner(System.in, inputEncoding);
-		}
-		else {
-			scan = new Scanner(new File(importFile), inputEncoding);
-		}
-		//default scanner delimiter pattern: \p{javaWhitespace}+
-		//scan.useDelimiter("\\n");
-		scan.useDelimiter(Matcher.quoteReplacement(recordDelimiter));
+		Scanner scan = createScanner();
 		
 		Pattern p = scan.delimiter();
 		log.debug("scan delimiter pattern: "+p);
@@ -120,12 +119,14 @@ public class CSVImporter {
 			});
 		}
 		
+		boolean is1stloop = true;
 		do {
 			
 		while(scan.hasNext()) {
 			String line = scan.next();
 			//log.info("line["+processedLines+"]: "+line);
 			String[] parts = line.split(columnDelimiter);
+			//log.info("parts: "+Arrays.asList(parts));
 			if(processedLines==0) {
 				StringBuffer sb = new StringBuffer();
 				sb.append("insert into "+insertTable+ " values (");
@@ -136,8 +137,7 @@ public class CSVImporter {
 				stmt = conn.prepareStatement(sb.toString());
 				//stmtStrPrep = sb.toString();
 			}
-			//log.info("parts: "+Arrays.asList(parts));
-			if(skipHeaderN>processedLines) {
+			if(is1stloop && skipHeaderN>processedLines) {
 				processedLines++;
 				continue;
 			}
@@ -157,12 +157,33 @@ public class CSVImporter {
 		}
 		//XXX: commit in follow mode? here?
 		Thread.sleep(sleepMilis);
+		if(fileIS!=null && fileIS.available()>0) {
+			//log.debug("avaiable: "+fileIS.available());
+			scan = createScanner(); 
+		}
+		is1stloop = false;
 		}
 		while(follow);
 		
 		log.info("processedLines: "+processedLines+" ; importedRows: "+importedLines);
 		
 		return processedLines;
+	}
+	
+	Scanner createScanner() throws FileNotFoundException {
+		Scanner scan = null;
+		if(SQLRun.STDIN.equals(importFile)) {
+			scan = new Scanner(System.in, inputEncoding);
+		}
+		else {
+			if(fileIS==null) {
+				fileIS = new BufferedInputStream(new FileInputStream(importFile));
+			}
+			scan = new Scanner(fileIS, inputEncoding);
+			//scan = new Scanner(new File(importFile), inputEncoding);
+		}
+		scan.useDelimiter(Pattern.quote(recordDelimiter));
+		return scan;
 	}
 	
 	static void doCommit(Connection conn) {
