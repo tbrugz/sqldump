@@ -1,7 +1,5 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,22 +36,13 @@ public class RegexImporter extends CSVImporter {
 	String[] procLine(String line, long processedLines) throws java.sql.SQLException {
 		Matcher matcher = pattern.matcher(line);
 
-		List<String> parts = new ArrayList<String>();
+		String[] parts = null;
 		if(matcher.find()) {
+			parts = new String[matcher.groupCount()];
 			for(int ii=1;ii<=matcher.groupCount();ii++) {
-				parts.add(matcher.group(ii));
+				parts[ii-1] = matcher.group(ii);
 			}
 		}
-		log.debug("parts["+matcher.groupCount()+"/"+parts.size()+"]:: "+parts);
-		if(processedLines==0) {
-			StringBuffer sb = new StringBuffer();
-			sb.append("insert into "+insertTable+ " values (");
-			for(int i=0;i<parts.size();i++) {
-				sb.append((i==0?"":", ")+"?");
-			}
-			sb.append(")");
-			stmt = conn.prepareStatement(sb.toString());
-		}
-		return parts.toArray(NULL_STR_ARRAY);
-	};
+		return parts;
+	}
 }

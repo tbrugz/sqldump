@@ -128,6 +128,17 @@ public class CSVImporter {
 			String line = scan.next();
 			//log.info("line["+processedLines+"]: "+line);
 			String[] parts = procLine(line, processedLines);
+			log.debug("parts["+parts.length+"]: "+Arrays.asList(parts));
+			if(processedLines==0) {
+				StringBuffer sb = new StringBuffer();
+				sb.append("insert into "+insertTable+ " values (");
+				for(int i=0;i<parts.length;i++) {
+					sb.append((i==0?"":", ")+"?");
+				}
+				sb.append(")");
+				stmt = conn.prepareStatement(sb.toString());
+				//stmtStrPrep = sb.toString();
+			}
 			if(is1stloop && skipHeaderN>processedLines) {
 				processedLines++;
 				continue;
@@ -163,17 +174,6 @@ public class CSVImporter {
 
 	String[] procLine(String line, long processedLines) throws SQLException {
 		String[] parts = line.split(columnDelimiter);
-		log.debug("parts["+parts.length+"]: "+Arrays.asList(parts));
-		if(processedLines==0) {
-			StringBuffer sb = new StringBuffer();
-			sb.append("insert into "+insertTable+ " values (");
-			for(int i=0;i<parts.length;i++) {
-				sb.append((i==0?"":", ")+"?");
-			}
-			sb.append(")");
-			stmt = conn.prepareStatement(sb.toString());
-			//stmtStrPrep = sb.toString();
-		}
 		return parts;
 	}
 	
