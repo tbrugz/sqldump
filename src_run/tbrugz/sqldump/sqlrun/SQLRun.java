@@ -46,6 +46,8 @@ public class SQLRun {
 	} 
 	
 	static Log log = LogFactory.getLog(SQLRun.class);
+
+	public static final String STDIN = "<stdin>"; 
 	
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
 	static final String SQLRUN_PROPS_PREFIX = "sqlrun"; 

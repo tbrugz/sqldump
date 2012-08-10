@@ -30,6 +30,7 @@ public class CSVImporter {
 	String inputEncoding = "UTF-8";
 	long sleepMilis = 1000; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
+	Long commitEachXrows = 100l;
 
 	static String SUFFIX_IMPORTFILE = ".importfile";
 	//XXX: static String SUFFIX_IMPORTFILES //??
@@ -81,7 +82,13 @@ public class CSVImporter {
 		//assume all lines of same size (in number of columns?)
 		//FileReader fr = new FileReader(importFile);
 		
-		Scanner scan = new Scanner(new File(importFile), inputEncoding);
+		Scanner scan = null;
+		if(SQLRun.STDIN.equals(importFile)) {
+			scan = new Scanner(System.in, inputEncoding);
+		}
+		else {
+			scan = new Scanner(new File(importFile), inputEncoding);
+		}
 		//default scanner delimiter pattern: \p{javaWhitespace}+
 		//scan.useDelimiter("\\n");
 		scan.useDelimiter(Matcher.quoteReplacement(recordDelimiter));
@@ -93,6 +100,25 @@ public class CSVImporter {
 		PreparedStatement stmt = null;
 		//String stmtStrPrep = null;
 		//String stmtStr = null;
+		
+		if(follow) {
+			//add shutdown hook
+			log.info("adding shutdown hook...");
+			Runtime.getRuntime().addShutdownHook(new Thread(){
+				public void run() {
+					log.info("commiting & shutting down...");
+					System.err.println("commiting & shutting down...");
+					try {
+						conn.commit();
+					} catch (SQLException e) {
+						log.warn("error commiting: "+e);
+						System.err.println("error commiting: "+e);
+					}
+					log.info("shutting down");
+					System.err.println("shutting down");
+				}
+			});
+		}
 		
 		do {
 			
@@ -125,6 +151,9 @@ public class CSVImporter {
 			int changedRows = stmt.executeUpdate();
 			processedLines++;
 			importedLines += changedRows;
+			if(commitEachXrows!=null && commitEachXrows>0 && (importedLines%commitEachXrows==0)) {
+				doCommit(conn);
+			}
 		}
 		//XXX: commit in follow mode? here?
 		Thread.sleep(sleepMilis);
@@ -134,5 +163,13 @@ public class CSVImporter {
 		log.info("processedLines: "+processedLines+" ; importedRows: "+importedLines);
 		
 		return processedLines;
+	}
+	
+	static void doCommit(Connection conn) {
+		try {
+			conn.commit();
+		} catch (SQLException e) {
+			log.warn("error commiting: "+e);
+		}
 	}
 }
