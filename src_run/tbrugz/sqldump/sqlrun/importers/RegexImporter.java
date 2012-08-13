@@ -1,5 +1,7 @@
-package tbrugz.sqldump.sqlrun;
+package tbrugz.sqldump.sqlrun.importers;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -7,7 +9,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class RegexImporter extends CSVImporter {
+import tbrugz.sqldump.sqlrun.SQLRun;
+
+public class RegexImporter extends AbstractImporter {
 	static final Log log = LogFactory.getLog(RegexImporter.class);
 	
 	static final String SUFFIX_PATTERN = ".pattern";
@@ -28,8 +32,10 @@ public class RegexImporter extends CSVImporter {
 	}
 	
 	@Override
-	public String[] getAuxSuffixes() {
-		return REGEX_AUX_SUFFIXES;
+	public List<String> getAuxSuffixes() {
+		List<String> ret = super.getAuxSuffixes();
+		ret.addAll(Arrays.asList(REGEX_AUX_SUFFIXES));
+		return ret;
 	}
 	
 	@Override

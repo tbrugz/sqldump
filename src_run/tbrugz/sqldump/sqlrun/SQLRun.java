@@ -18,6 +18,8 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.sqlrun.importers.CSVImporter;
+import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
@@ -55,7 +57,7 @@ public class SQLRun {
 	static final String CONN_PROPS_PREFIX = SQLRUN_PROPS_PREFIX; 
 	
 	//prefixes
-	static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
+	public static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
 
 	//exec suffixes
 	static String SUFFIX_FILE = ".file";
@@ -262,8 +264,8 @@ public class SQLRun {
 	void init(String args[]) throws Exception {
 		SQLDump.init(args, papp);
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
-		allAuxSuffixes.addAll(Arrays.asList((new CSVImporter()).getAuxSuffixes()));
-		allAuxSuffixes.addAll(Arrays.asList((new RegexImporter()).getAuxSuffixes()));
+		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
+		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
 	}
 	
 	/**

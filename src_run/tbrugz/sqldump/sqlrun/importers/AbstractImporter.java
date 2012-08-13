@@ -1,4 +1,4 @@
-package tbrugz.sqldump.sqlrun;
+package tbrugz.sqldump.sqlrun.importers;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -8,7 +8,9 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -16,10 +18,11 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.Utils;
 
-public class CSVImporter {
-	static final Log log = LogFactory.getLog(CSVImporter.class);
+public abstract class AbstractImporter {
+	static final Log log = LogFactory.getLog(AbstractImporter.class);
 
 	Properties prop;
 	Connection conn;
@@ -27,7 +30,6 @@ public class CSVImporter {
 	String execId = null;
 	String importFile = null;
 	boolean follow = false;
-	String columnDelimiter = ",";
 	String recordDelimiter = "\n";
 	String insertTable = null;
 	String inputEncoding = "UTF-8";
@@ -42,7 +44,6 @@ public class CSVImporter {
 	static String SUFFIX_IMPORTFILE = ".importfile";
 	//XXX: static String SUFFIX_IMPORTFILES //??
 	static String SUFFIX_FOLLOW = ".follow";
-	static String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
 	static String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
 	static String SUFFIX_ENCLOSING = ".enclosing";
 	static String SUFFIX_INSERTTABLE = ".inserttable";
@@ -50,8 +51,7 @@ public class CSVImporter {
 	static String SUFFIX_SKIP_N = ".skipnlines";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
-	static final String[] CSV_AUX_SUFFIXES = {
-		SUFFIX_COLUMNDELIMITER,
+	static final String[] AUX_SUFFIXES = {
 		SUFFIX_ENCLOSING,
 		SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
@@ -72,7 +72,6 @@ public class CSVImporter {
 		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
 		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
-		columnDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_COLUMNDELIMITER, columnDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, commitEachXrows);
@@ -82,8 +81,10 @@ public class CSVImporter {
 		this.conn = conn;
 	}
 	
-	public String[] getAuxSuffixes() {
-		return CSV_AUX_SUFFIXES;
+	public List<String> getAuxSuffixes() {
+		List<String> ret = new ArrayList<String>();
+		ret.addAll(Arrays.asList(AUX_SUFFIXES));
+		return ret;
 	}
 
 	public long importData() throws SQLException, InterruptedException, IOException {
@@ -172,10 +173,7 @@ public class CSVImporter {
 		return processedLines;
 	}
 
-	String[] procLine(String line, long processedLines) throws SQLException {
-		String[] parts = line.split(columnDelimiter);
-		return parts;
-	}
+	abstract String[] procLine(String line, long processedLines) throws SQLException;
 	
 	Scanner createScanner() throws FileNotFoundException {
 		Scanner scan = null;
