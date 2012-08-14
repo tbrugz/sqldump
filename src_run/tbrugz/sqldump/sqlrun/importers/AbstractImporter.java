@@ -32,6 +32,7 @@ public abstract class AbstractImporter {
 	boolean follow = false;
 	String recordDelimiter = "\n";
 	String insertTable = null;
+	String insertSQL = null;
 	String inputEncoding = "UTF-8";
 	long sleepMilis = 1000; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
@@ -41,14 +42,15 @@ public abstract class AbstractImporter {
 	InputStream fileIS = null;
 	PreparedStatement stmt = null;
 	
-	static String SUFFIX_IMPORTFILE = ".importfile";
+	static final String SUFFIX_IMPORTFILE = ".importfile";
 	//XXX: static String SUFFIX_IMPORTFILES //??
-	static String SUFFIX_FOLLOW = ".follow";
-	static String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
-	static String SUFFIX_ENCLOSING = ".enclosing";
-	static String SUFFIX_INSERTTABLE = ".inserttable";
-	static String SUFFIX_ENCODING = ".encoding";
-	static String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_FOLLOW = ".follow";
+	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
+	static final String SUFFIX_ENCLOSING = ".enclosing";
+	static final String SUFFIX_INSERTTABLE = ".inserttable";
+	static final String SUFFIX_INSERTSQL = ".insertsql";
+	static final String SUFFIX_ENCODING = ".encoding";
+	static final String SUFFIX_SKIP_N = ".skipnlines";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static final String[] AUX_SUFFIXES = {
@@ -57,6 +59,7 @@ public abstract class AbstractImporter {
 		SUFFIX_FOLLOW,
 		SUFFIX_IMPORTFILE,
 		SUFFIX_INSERTTABLE,
+		SUFFIX_INSERTSQL,
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
 		SUFFIX_X_COMMIT_EACH_X_ROWS
@@ -69,6 +72,7 @@ public abstract class AbstractImporter {
 	public void setProperties(Properties prop) {
 		this.prop = prop;
 		insertTable = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_INSERTTABLE);
+		insertSQL = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_INSERTSQL);
 		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
 		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
@@ -123,20 +127,48 @@ public abstract class AbstractImporter {
 		}
 		
 		boolean is1stloop = true;
+		//int[] filecol2tabcolMap = null;
+		List<Integer> filecol2tabcolMap = null;
 		do {
 			
 		while(scan.hasNext()) {
 			String line = scan.next();
 			//log.info("line["+processedLines+"]: "+line);
 			String[] parts = procLine(line, processedLines);
-			log.debug("parts["+parts.length+"]: "+Arrays.asList(parts));
+			log.debug("parts["+processedLines+"; l="+parts.length+"]: "+Arrays.asList(parts));
 			if(processedLines==0) {
 				StringBuffer sb = new StringBuffer();
-				sb.append("insert into "+insertTable+ " values (");
-				for(int i=0;i<parts.length;i++) {
-					sb.append((i==0?"":", ")+"?");
+				if(insertSQL!=null) {
+					log.debug("original insert sql: "+insertSQL);
+					filecol2tabcolMap = new ArrayList<Integer>();
+					int fromIndex = 0;
+					while(true) {
+						int ind1 = insertSQL.indexOf("${", fromIndex);
+						//int indQuestion = insertSQL.indexOf("?", fromIndex);
+						if(ind1<0) { break; }
+						int ind2 = insertSQL.indexOf("}", ind1);
+						//log.debug("ind/2: "+ind+" / "+ind2);
+						int number = Integer.parseInt(insertSQL.substring(ind1+2, ind2));
+						fromIndex = ind2;
+						filecol2tabcolMap.add(number);
+					}
+					//XXX: mix ? and ${number} ?
+					//filecol2tabcolMap = new int[parts.length];
+					//for(int i=0;i<intl.size();i++) { filecol2tabcolMap[i] = intl.get(0); }
+					insertSQL = insertSQL.replaceAll("\\$\\{[0-9]+\\}", "?");
+					if(filecol2tabcolMap.size()>0) {
+						log.debug("mapper: "+filecol2tabcolMap);
+					}
+					sb.append(insertSQL);
 				}
-				sb.append(")");
+				else {
+					sb.append("insert into "+insertTable+ " values (");
+					for(int i=0;i<parts.length;i++) {
+						sb.append((i==0?"":", ")+"?");
+					}
+					sb.append(")");
+				}
+				log.info("insert sql: "+sb.toString());
 				stmt = conn.prepareStatement(sb.toString());
 				//stmtStrPrep = sb.toString();
 			}
@@ -146,7 +178,17 @@ public abstract class AbstractImporter {
 			}
 			
 			for(int i=0;i<parts.length;i++) {
-				stmt.setString(i+1, parts[i]);
+				if(filecol2tabcolMap!=null) {
+					//log.info("v: "+i);
+					if(filecol2tabcolMap.contains(i)) {
+						int index = filecol2tabcolMap.indexOf(i);
+						stmt.setString(index+1, parts[i]);
+						//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);						
+					}
+				}
+				else {
+					stmt.setString(i+1, parts[i]);
+				}
 				//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
 			}
 			//log.info("insert["+processedLines+"/"+importedLines+"]: "+stmtStr);
