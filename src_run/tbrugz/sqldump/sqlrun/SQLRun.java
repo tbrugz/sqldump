@@ -134,7 +134,12 @@ public class SQLRun {
 			else if(key.endsWith(SUFFIX_FILES)) {
 				try {
 					String dir = getDir(procId);
-					if(dir==null) {
+					String fileRegex = papp.getProperty(key);
+					List<String> files = getFiles(dir, fileRegex);
+					for(String file: files) {
+						srproc.execFile(file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+					}
+					/*if(dir==null) {
 						log.warn("no '.dir' property...");
 						continue;
 					}
@@ -145,7 +150,7 @@ public class SQLRun {
 						if(file.matches(fileRegex)) {
 							srproc.execFile(fdir.getAbsolutePath()+File.separator+file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 						}
-					}
+					}*/
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -166,6 +171,7 @@ public class SQLRun {
 			// .import
 			else if(key.endsWith(SUFFIX_IMPORT)) {
 				String importType = papp.getProperty(key);
+				long imported = 0;
 				//csv
 				if("CSV".equalsIgnoreCase(importType)) {
 					CSVImporter importer = new CSVImporter();
@@ -173,7 +179,7 @@ public class SQLRun {
 					importer.setProperties(papp);
 					importer.setConnection(conn);
 					try {
-						importer.importData();
+						imported = importer.importData();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -185,7 +191,7 @@ public class SQLRun {
 					importer.setProperties(papp);
 					importer.setConnection(conn);
 					try {
-						importer.importData();
+						imported = importer.importData();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
@@ -266,6 +272,22 @@ public class SQLRun {
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
+	}
+	
+	public static List<String> getFiles(String dir, String fileRegex) {
+		List<String> ret = new ArrayList<String>();
+		if(dir==null) {
+			log.warn("dir '"+dir+"' not found...");
+			return null;
+		}
+		File fdir = new File(dir);
+		String[] files = fdir.list();
+		for(String file: files) {
+			if(file.matches(fileRegex)) {
+				ret.add(fdir.getAbsolutePath()+File.separator+file);
+			}
+		}
+		return ret;
 	}
 	
 	/**

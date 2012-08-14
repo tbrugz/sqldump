@@ -29,12 +29,14 @@ public abstract class AbstractImporter {
 	
 	String execId = null;
 	String importFile = null;
+	String importDir = null;
+	String importFiles = null;
 	boolean follow = false;
 	String recordDelimiter = "\n";
 	String insertTable = null;
 	String insertSQL = null;
 	String inputEncoding = "UTF-8";
-	long sleepMilis = 1000; //XXX: prop for sleepMilis (used in follow mode)?
+	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
 	Long commitEachXrows = 100l;
 
@@ -43,6 +45,8 @@ public abstract class AbstractImporter {
 	PreparedStatement stmt = null;
 	
 	static final String SUFFIX_IMPORTFILE = ".importfile";
+	static final String SUFFIX_IMPORTDIR = ".importdir";
+	static final String SUFFIX_IMPORTFILES = ".importfiles";
 	//XXX: static String SUFFIX_IMPORTFILES //??
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
@@ -58,6 +62,8 @@ public abstract class AbstractImporter {
 		SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
 		SUFFIX_IMPORTFILE,
+		SUFFIX_IMPORTDIR,
+		SUFFIX_IMPORTFILES,
 		SUFFIX_INSERTTABLE,
 		SUFFIX_INSERTSQL,
 		SUFFIX_RECORDDELIMITER,
@@ -74,6 +80,8 @@ public abstract class AbstractImporter {
 		insertTable = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_INSERTSQL);
 		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
+		importDir = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
+		importFiles = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
 		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
@@ -92,6 +100,30 @@ public abstract class AbstractImporter {
 	}
 
 	public long importData() throws SQLException, InterruptedException, IOException {
+		long ret = 0;
+		if(importFile!=null) {
+			ret = importFile();
+		}
+		else if(importFiles!=null) {
+			if(importDir==null) {
+				importDir = System.getProperty("user.dir");
+			}
+			log.info("importing files from dir: "+importDir);
+			List<String> files = SQLRun.getFiles(importDir, importFiles);
+			for(String file: files) {
+				importFile = file;
+				log.info("importing file: "+importFile);
+				ret += importFile();
+			}
+		}
+		else {
+			log.warn("neither '"+SUFFIX_IMPORTFILE+"' nor '"+SUFFIX_IMPORTFILES+"' suffix specified...");
+		}
+		log.info("imported lines = "+ret);
+		return ret;
+	}
+	
+	long importFile() throws SQLException, InterruptedException, IOException {
 		long processedLines = 0;
 		long importedLines = 0;
 		//assume all lines of same size (in number of columns?)
@@ -135,6 +167,10 @@ public abstract class AbstractImporter {
 			String line = scan.next();
 			//log.info("line["+processedLines+"]: "+line);
 			String[] parts = procLine(line, processedLines);
+			if(parts==null) {
+				log.warn("line could not be processed: "+line);
+				break;
+			}
 			log.debug("parts["+processedLines+"; l="+parts.length+"]: "+Arrays.asList(parts));
 			if(processedLines==0) {
 				StringBuffer sb = new StringBuffer();
@@ -155,11 +191,11 @@ public abstract class AbstractImporter {
 					//XXX: mix ? and ${number} ?
 					//filecol2tabcolMap = new int[parts.length];
 					//for(int i=0;i<intl.size();i++) { filecol2tabcolMap[i] = intl.get(0); }
-					insertSQL = insertSQL.replaceAll("\\$\\{[0-9]+\\}", "?");
+					String thisInsertSQL = insertSQL.replaceAll("\\$\\{[0-9]+\\}", "?");
 					if(filecol2tabcolMap.size()>0) {
 						log.debug("mapper: "+filecol2tabcolMap);
 					}
-					sb.append(insertSQL);
+					sb.append(thisInsertSQL);
 				}
 				else {
 					sb.append("insert into "+insertTable+ " values (");
@@ -201,7 +237,8 @@ public abstract class AbstractImporter {
 			}
 		}
 		//XXX: commit in follow mode? here?
-		Thread.sleep(sleepMilis);
+		//XXX: sleep only in follow mode?
+		if(follow) { Thread.sleep(sleepMilis); }
 		if(fileIS!=null && fileIS.available()>0) {
 			//log.debug("avaiable: "+fileIS.available());
 			scan = createScanner(); 
@@ -210,6 +247,7 @@ public abstract class AbstractImporter {
 		}
 		while(follow);
 		
+		fileIS.close(); fileIS = null;
 		log.info("processedLines: "+processedLines+" ; importedRows: "+importedLines);
 		
 		return processedLines;
