@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
-public class Table extends DBObject {
+public class Table extends DBObject implements Relation {
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
@@ -268,6 +268,15 @@ public class Table extends DBObject {
 	//public boolean isDomainTable() - jaxb is not happy with this - conflicts with get/set
 	public boolean isTableADomainTable() {
 		return domainTable!=null && domainTable;
+	}
+
+	@Override
+	public List<String> getColumnNames() {
+		List<String> ret = new ArrayList<String>();
+		for(Column c: columns) {
+			ret.add(c.getName());
+		}
+		return ret;
 	}
 	
 }
