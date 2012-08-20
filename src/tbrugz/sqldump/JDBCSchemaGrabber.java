@@ -318,7 +318,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabPKs) {
 					log.debug("getting PKs from "+fullTablename);
 					ResultSet pks = dbmd.getPrimaryKeys(null, table.getSchemaName(), tableName);
-					grabSchemaPKs(pks, table);
+					Constraint pk = grabSchemaPKs(pks, table);
+					if(pk!=null) { table.getConstraints().add(pk); }
 					closeResultSetAndStatement(pks);
 				}
 
@@ -326,7 +327,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getImportedKeys(null, table.getSchemaName(), tableName);
-					grabSchemaFKs(fkrs, table, schemaModel.getForeignKeys());
+					schemaModel.getForeignKeys().addAll(grabSchemaFKs(fkrs, table));
 					closeResultSetAndStatement(fkrs);
 				}
 
@@ -334,7 +335,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				if(doSchemaGrabExportedFKs && (!tableOnly || deeprecursivedump)) {
 					log.debug("getting 'exported' FKs from "+fullTablename);
 					ResultSet fkrs = dbmd.getExportedKeys(null, table.getSchemaName(), tableName);
-					grabSchemaFKs(fkrs, table, schemaModel.getForeignKeys());
+					schemaModel.getForeignKeys().addAll(grabSchemaFKs(fkrs, table));
 					closeResultSetAndStatement(fkrs);
 				}
 				
@@ -466,7 +467,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		return grantsList;
 	}
 	
-	void grabSchemaPKs(ResultSet pks, Table table) throws SQLException {
+	Constraint grabSchemaPKs(ResultSet pks, Table table) throws SQLException {
 		Map<Integer, String> pkCols = new TreeMap<Integer, String>();
 		String pkName = null;
 		
@@ -479,16 +480,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
 			count++;
 		}
-		if(count==0) return; //no PK
+		if(count==0) return null; //no PK
 
 		Constraint cPK = new Constraint();
 		cPK.type = ConstraintType.PK;
 		cPK.setName(pkName);
 		cPK.uniqueColumns.addAll( pkCols.values() );
-		table.getConstraints().add(cPK);
+		return cPK;
 	}
 
-	void grabSchemaFKs(ResultSet fkrs, Table table, Set<FK> foreignKeys) throws SQLException, IOException {
+	List<FK> grabSchemaFKs(ResultSet fkrs, Table table) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;
@@ -532,9 +533,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
 			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
 		}
+		List<FK> ret = new ArrayList<FK>();
 		for(String key: fks.keySet()) {
-			foreignKeys.add(fks.get(key));
+			ret.add(fks.get(key));
 		}
+		return ret;
 	}
 	
 	void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
