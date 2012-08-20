@@ -8,6 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,9 +23,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Log log = LogFactory.getLog(DerbyFeatures.class);
 
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		if(grabViews) {
+		/*if(grabViews) {
 			grabDBViews(model, schemaPattern, conn);
-		}
+		}*/
 		if(grabTriggers) {
 			grabDBTriggers(model, schemaPattern, conn);
 		}
@@ -41,7 +43,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		//XXX: derby: add procedures/functions? synonyms? check/unique constraints?
 	}
 
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public List<View> grabDBViews(SchemaModel model, String schemaPattern, String tablePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		//String query = "select tableid, viewdefinition "
 		//		+"from sys.sysviews "
@@ -49,9 +52,11 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		String query = "select st.tablename, sv.tableid, sv.viewdefinition "
 				+"from sys.systables as st, sys.sysviews as sv "
 				+"where st.tableid = sv.tableid "
+				+(tablePattern!=null?"and st.tablename = '"+tablePattern+"' ":"")
 				+"order by tablename ";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
+		List<View> ret = new ArrayList<View>();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -60,13 +65,14 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
 			v.query = rs.getString(3);
 			v.setSchemaName( schemaPattern );
-			model.getViews().add(v);
+			ret.add(v);
 			count++;
 		}
 		
 		rs.close();
 		st.close();
 		log.info(count+" views grabbed");
+		return ret;
 	}
 
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {

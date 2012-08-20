@@ -15,7 +15,6 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabSequences = true;
 	protected boolean grabSynonyms = true;
 	protected boolean grabTriggers = true;
-	protected boolean grabViews = true;
 	protected boolean grabExtraConstraints = true;
 
 	public void procProperties(Properties prop) {
@@ -24,7 +23,6 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		grabSequences = Utils.getPropBool(prop, PROP_GRAB_SEQUENCES, grabSequences);
 		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, grabSynonyms);
 		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, grabTriggers);
-		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, grabViews);
 		grabExtraConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, grabExtraConstraints);
 	}
 	

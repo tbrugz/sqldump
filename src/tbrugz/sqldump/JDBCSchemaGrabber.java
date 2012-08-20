@@ -10,15 +10,19 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
@@ -63,6 +67,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 	Properties papp = new ParametrizedProperties();
 	Properties propOriginal;
+	DBMSFeatures feats = null;
+	
 	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
 	boolean doSchemaGrabPKs = true, 
@@ -71,10 +77,13 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			doSchemaGrabGrants = false, 
 			doSchemaGrabIndexes = false,
 			doSchemaGrabDbSpecific = false;
+
+	protected boolean grabViews = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
+		
 		propOriginal = prop;
 		//papp = prop;
 		papp.putAll(prop);
@@ -87,6 +96,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 
+		grabViews = Utils.getPropBool(prop, DBMSFeatures.PROP_GRAB_VIEWS, grabViews);
+		//XXX: put prop for grab indexes here?
+		
 		/*try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
@@ -121,6 +133,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	@Override
 	public SchemaModel grabSchema() {
+		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		try {
 		
 		/*if(Utils.getPropBool(papp, SQLDump.PROP_FROM_DB_ID_AUTODETECT)) {
@@ -133,7 +146,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			else { log.warn("can't detect database type"); }
 		}*/
 
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		//DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		showDBInfo(conn.getMetaData());
 		
@@ -184,7 +197,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 
 		for(String schemaName: schemasList) {
-			grabSchema(schemaModel, dbmd, feats, schemaName, null, false);
+			grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
 		}
 		
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
@@ -247,10 +260,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 	}
 	
-	//private static String PADDING = "  ";
-	
-	void grabSchema(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
-		log.debug("grabSchema()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
+	//shoud it be "grabRelations"?
+	void grabRelations(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
+		log.debug("grabRelations()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
 		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_DOMAINTABLES, ",");
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
@@ -315,28 +327,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				}
 				
 				//PKs
-				if(doSchemaGrabPKs) {
-					log.debug("getting PKs from "+fullTablename);
-					ResultSet pks = dbmd.getPrimaryKeys(null, table.getSchemaName(), tableName);
-					Constraint pk = grabSchemaPKs(pks, table);
-					if(pk!=null) { table.getConstraints().add(pk); }
-					closeResultSetAndStatement(pks);
-				}
+				table.getConstraints().addAll(grabRelationPKs(dbmd, table));
 
 				//FKs
-				if(doSchemaGrabFKs && (!tableOnly || deeprecursivedump)) {
-					log.debug("getting FKs from "+fullTablename);
-					ResultSet fkrs = dbmd.getImportedKeys(null, table.getSchemaName(), tableName);
-					schemaModel.getForeignKeys().addAll(grabSchemaFKs(fkrs, table));
-					closeResultSetAndStatement(fkrs);
-				}
-
-				//FKs "exported"
-				if(doSchemaGrabExportedFKs && (!tableOnly || deeprecursivedump)) {
-					log.debug("getting 'exported' FKs from "+fullTablename);
-					ResultSet fkrs = dbmd.getExportedKeys(null, table.getSchemaName(), tableName);
-					schemaModel.getForeignKeys().addAll(grabSchemaFKs(fkrs, table));
-					closeResultSetAndStatement(fkrs);
+				if(!tableOnly || deeprecursivedump) {
+					schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, table));
 				}
 				
 				//GRANTs
@@ -373,6 +368,27 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		closeResultSetAndStatement(rs);
 		
+		if(grabViews) {
+			List<View> viewList = grabSchemaViews(schemaModel, schemaPattern, tablePattern);
+			if(viewList!=null) {
+				for(View view: viewList) {
+					//PKs
+					view.getConstraints().addAll(grabRelationPKs(dbmd, view));
+					
+					//FKs
+					if(!tableOnly || deeprecursivedump) {
+						schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, view));
+					}
+					
+					//Columns
+					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
+					view.getColumnNames().addAll( t.getColumnNames() );
+					
+					schemaModel.getViews().add(view);
+				}
+			}
+		}
+		
 		/*if(recursivedump && (!tableOnly || deeprecursivedump)) {
 			grabTablesRecursivebasedOnFKs(dbmd, dbmsfeatures, schemaModel, schemaPattern);
 		}*/
@@ -386,6 +402,47 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}*/
 		
 		//return schemaModel;
+	}
+
+	List<FK> grabRelationFKs(DatabaseMetaData dbmd, Relation relation) throws SQLException, IOException {
+		String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
+		List<FK> ret = new ArrayList<FK>();
+		
+		//FKs
+		if(doSchemaGrabFKs) {
+			log.debug("getting FKs from "+fullTablename);
+			ResultSet fkrs = dbmd.getImportedKeys(null, relation.getSchemaName(), relation.getName());
+			ret.addAll(grabSchemaFKs(fkrs, relation));
+			closeResultSetAndStatement(fkrs);
+		}
+
+		//FKs "exported"
+		if(doSchemaGrabExportedFKs) {
+			log.debug("getting 'exported' FKs from "+fullTablename);
+			ResultSet fkrs = dbmd.getExportedKeys(null, relation.getSchemaName(), relation.getName());
+			ret.addAll(grabSchemaFKs(fkrs, relation));
+			closeResultSetAndStatement(fkrs);
+		}
+		
+		return ret;
+	}
+
+	List<Constraint> grabRelationPKs(DatabaseMetaData dbmd, Relation relation) throws SQLException, IOException {
+		//String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
+		List<Constraint> ret = new ArrayList<Constraint>();
+		
+		if(doSchemaGrabPKs) {
+			//log.debug("getting PKs from "+fullTablename);
+			ResultSet pks = dbmd.getPrimaryKeys(null, relation.getSchemaName(), relation.getName());
+			Constraint pk = grabSchemaPKs(pks, relation);
+			if(pk!=null) {
+				ret.add(pk);
+				//relation.getConstraints().add(pk);
+			}
+			closeResultSetAndStatement(pks);
+		}
+
+		return ret;
 	}
 	
 	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern, boolean grabExportedFKsAlso) throws Exception { //, String padding
@@ -414,7 +471,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
 			if(!containsTableWithSchemaAndName(schemaModel.getTables(), id.schemaName, id.name)) {
 				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
-				grabSchema(schemaModel, dbmd, dbmsfeatures, id.schemaName, id.name, true);				
+				grabRelations(schemaModel, dbmd, dbmsfeatures, id.schemaName, id.name, true);				
 			}
 		}
 	}
@@ -427,10 +484,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 	
 	void grabDbSpecific(SchemaModel model, String schemaPattern) throws SQLException {
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		//DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		if(feats!=null) { feats.grabDBObjects(model, schemaPattern, conn); }
+		//log.debug("features: "+feats);
 	}
 
+	List<View> grabSchemaViews(SchemaModel model, String schemaPattern, String tablePattern) throws SQLException {
+		if(feats!=null) { return feats.grabDBViews(model, schemaPattern, tablePattern, conn); }
+		return null;
+	}
+	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
@@ -467,7 +530,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		return grantsList;
 	}
 	
-	Constraint grabSchemaPKs(ResultSet pks, Table table) throws SQLException {
+	Constraint grabSchemaPKs(ResultSet pks, Relation relation) throws SQLException {
 		Map<Integer, String> pkCols = new TreeMap<Integer, String>();
 		String pkName = null;
 		
@@ -475,7 +538,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		while(pks.next()) {
 			pkName = pks.getString("PK_NAME");
 			if(pkName==null || pkName.equals("PRIMARY")) { //equals("PRIMARY"): for MySQL
-				pkName = "PK_"+table.name;
+				pkName = "PK_"+relation.getName();
 			}
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
 			count++;
@@ -489,7 +552,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		return cPK;
 	}
 
-	List<FK> grabSchemaFKs(ResultSet fkrs, Table table) throws SQLException, IOException {
+	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;
@@ -502,7 +565,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				count++;
 			}
 			FK fk = fks.get(fkName);
-			log.debug("fk: "+fkName+" - "+fk);
 			if(fk==null) {
 				fk = new FK();
 				fk.setName(fkName);
@@ -532,6 +594,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
 			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
+			log.debug("fk: "+fkName+" - "+fk);
 		}
 		List<FK> ret = new ArrayList<FK>();
 		for(String key: fks.keySet()) {

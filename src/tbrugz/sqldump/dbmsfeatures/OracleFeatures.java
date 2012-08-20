@@ -38,6 +38,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
 	
+	@Override
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
@@ -50,11 +51,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.DbmgrFeatures#grabDBObjects(tbrugz.sqldump.SchemaModel, java.lang.String, java.sql.Connection)
 	 */
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		if(grabViews) {
+		/*if(grabViews) {
 			grabDBViews(model, schemaPattern, conn);
 			grabDBMaterializedViews(model, schemaPattern, conn);
-		}
+		}*/
 		if(grabTriggers) {
 			grabDBTriggers(model, schemaPattern, conn);
 		}
@@ -76,13 +78,17 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 	}
 	
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public List<View> grabDBViews(SchemaModel model, String schemaPattern, String tablePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		String query = "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT FROM ALL_VIEWS "
-				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
+				+"where owner = '"+schemaPattern+"' "
+				+(tablePattern!=null?" and view_name = '"+tablePattern+"' ":"")
+				+"ORDER BY VIEW_NAME";
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
+		List<View> ret = new ArrayList<View>();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -90,22 +96,33 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			v.name = rs.getString(2);
 			v.query = rs.getString(4);
 			v.setSchemaName(schemaPattern);
-			model.getViews().add(v);
+			ret.add(v);
 			count++;
 		}
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
+		if(tablePattern==null) {
+			log.info("["+schemaPattern+"]: "+count+" views grabbed");
+		}
+		else {
+			log.debug("["+schemaPattern+"/"+tablePattern+"]: "+count+" views grabbed");
+		}
+		List<View> mvs = grabDBMaterializedViews(model, schemaPattern, tablePattern, conn);
+		ret.addAll(mvs);
+		return ret;
 	}
 
-	void grabDBMaterializedViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	List<View> grabDBMaterializedViews(SchemaModel model, String schemaPattern, String tablePattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
 		String query = "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query from all_mviews "
-				+" where owner = '"+schemaPattern+"' ORDER BY MVIEW_NAME";
+				+"where owner = '"+schemaPattern+"' "
+				+(tablePattern!=null?" and mview_name = '"+tablePattern+"' ":"")
+				+"ORDER BY MVIEW_NAME";
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
+		List<View> ret = new ArrayList<View>();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -114,13 +131,19 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			v.query = rs.getString(4);
 			v.setSchemaName(schemaPattern);
 			//v.materialized = true;
-			model.getViews().add(v);
+			ret.add(v);
 			count++;
 		}
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+count+" materialized views grabbed");
+		if(tablePattern==null) {
+			log.info("["+schemaPattern+"]: "+count+" materialized views grabbed");
+		}
+		else {
+			log.debug("["+schemaPattern+(tablePattern!=null?"/"+tablePattern:"")+"]: "+count+" materialized views grabbed");
+		}
+		return ret;
 	}
 	
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {

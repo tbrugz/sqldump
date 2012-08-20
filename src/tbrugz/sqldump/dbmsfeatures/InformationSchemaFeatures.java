@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -30,9 +32,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		if(grabViews) {
+		/*if(grabViews) {
 			grabDBViews(model, schemaPattern, conn);
-		}
+		}*/
 		if(grabTriggers) {
 			grabDBTriggers(model, schemaPattern, conn);
 		}
@@ -51,19 +53,22 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 	}
 	
-	String grabDBViewsQuery(String schemaPattern) {
+	String grabDBViewsQuery(String schemaPattern, String tablePattern) {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
 			+"and table_schema = '"+schemaPattern+"' "
+			+(tablePattern!=null?"and table_name = '"+tablePattern+"' ":"")
 			+"order by table_catalog, table_schema, table_name ";
 	}
 
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public List<View> grabDBViews(SchemaModel model, String schemaPattern, String tablePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		String query = grabDBViewsQuery(schemaPattern);
+		String query = grabDBViewsQuery(schemaPattern, tablePattern);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
+		List<View> ret = new ArrayList<View>();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -74,13 +79,14 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			v.setSchemaName( schemaPattern );
 			v.checkOption = View.CheckOptionType.valueOf(rs.getString(5)); //"YES".equalsIgnoreCase(rs.getString(5));
 			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));
-			model.getViews().add(v);
+			ret.add(v);
 			count++;
 		}
 		
 		rs.close();
 		st.close();
 		log.info(count+" views grabbed");
+		return ret;
 	}
 
 	String grabDBTriggersQuery(String schemaPattern) {
