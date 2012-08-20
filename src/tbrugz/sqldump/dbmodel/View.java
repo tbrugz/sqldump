@@ -8,6 +8,9 @@ import tbrugz.sqldump.util.Utils;
 /*
  * TODO: comments on view and columns
  * 
+ * XXX: option to always dump column names?
+ * XXX: option to dump FKs inside view?
+ * 
  * XXXxx: check option: LOCAL, CASCADED, NONE
  * see: http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Fsqlp%2Frbafywcohdg.htm
  */
@@ -36,7 +39,7 @@ public class View extends DBObject implements Relation {
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
 				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name)
-				+ (constraints.size()>0?"(\n\t"+Utils.join(columnNames, ", ")+sb.toString()+")":"")
+				+ (constraints.size()>0?" (\n\t"+Utils.join(columnNames, ", ")+sb.toString()+"\n)":"")
 				+ " as\n" + query
 				+ (withReadOnly?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
