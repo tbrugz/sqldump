@@ -1,5 +1,6 @@
 package tbrugz.sqldump.sqlrun.importers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -8,8 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import tbrugz.sqldump.sqlrun.SQLRun;
 
 public class RegexImporter extends AbstractImporter {
 	static final Log log = LogFactory.getLog(RegexImporter.class);
@@ -24,13 +23,20 @@ public class RegexImporter extends AbstractImporter {
 	String patternStr = null;
 	Pattern pattern = null;
 	
+	List<Integer> loggedPatternFailoverIds = new ArrayList<Integer>();
+
 	@Override
-	public void setProperties(Properties prop) {
-		super.setProperties(prop);
-		patternStr = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_PATTERN);
+	public void setImporterProperties(Properties prop, String importerPrefix) {
+		super.setImporterProperties(prop, importerPrefix);
+		patternStr = prop.getProperty(importerPrefix+SUFFIX_PATTERN, patternStr);
 		pattern = Pattern.compile(patternStr);
+		
+		if(!loggedPatternFailoverIds.contains(failoverId)) {
+			log.info("pattern"+(failoverId>0?"[failover="+failoverId+"]":"")+": "+patternStr);
+			loggedPatternFailoverIds.add(failoverId);
+		}
 	}
-	
+
 	@Override
 	public List<String> getAuxSuffixes() {
 		List<String> ret = super.getAuxSuffixes();
