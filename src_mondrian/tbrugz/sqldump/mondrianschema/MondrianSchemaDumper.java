@@ -296,7 +296,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					List<Column> cols = t.getColumns();
 					Column notNullCol = null;
 					for(Column col: cols) {
-						if(!col.nullable) { notNullCol = col; }
+						if(col.nullable!=null && !col.nullable) { notNullCol = col; }
 					}
 					if(notNullCol!=null) {
 						addMeasure(cube, notNullCol.name, descFactCountMeasure, "count");

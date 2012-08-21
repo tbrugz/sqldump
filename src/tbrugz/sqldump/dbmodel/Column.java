@@ -69,10 +69,10 @@ public class Column extends DBIdentifiable implements Serializable {
 	static Log log = LogFactory.getLog(Column.class);
 	
 	public String type;
-	public int columSize; //XXX: should be Integer? for columns that doesn't have precision could be null
+	public Integer columSize; //XXXdone: should be Integer? for columns that doesn't have precision could be null. yes!
 	public Integer decimalDigits;
 	transient boolean pk; //XXXdone: should be transient? add PK info into constraint? yes, yes
-	public boolean nullable;
+	public Boolean nullable;
 	String defaultValue;
 	String remarks;
 	
@@ -85,7 +85,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		return DBObject.getFinalIdentifier(c.name)+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(c.defaultValue!=null?" default "+c.defaultValue:"")
-			+(!c.nullable?" not null":"");
+			+(c.nullable!=null && !c.nullable?" not null":"");
 	}
 	
 	public static String getColumnDescFull(Column c) {
