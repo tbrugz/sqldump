@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
@@ -181,6 +182,7 @@ public class SQLDump {
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
+				DBMSResources.updateDbId(sm.getSqlDialect());
 			}
 			else {
 				log.warn("schema grabber class '"+grabClassName+"' not found");
@@ -198,6 +200,10 @@ public class SQLDump {
 		//FIXME: addLegacyProcessors()
 		//sdd.addLegacyProcessors();
 
+		//inits DBMSFeatures if not already initted
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		log.debug("DBMSFeatures: "+feats);
+		
 		//processing classes
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
 		if(processingClassesStr!=null) {
