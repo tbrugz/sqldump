@@ -19,5 +19,7 @@ public interface Relation {
 	public List<String> getColumnNames();
 
 	public List<Constraint> getConstraints();
+	
+	public String getRemarks();
 
 }

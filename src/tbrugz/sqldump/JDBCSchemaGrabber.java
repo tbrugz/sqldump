@@ -222,12 +222,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			//add constraints to views
 			if(schemaModel.getViews().size()>0) {
 				for(View view: schemaModel.getViews()) {
+					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
+					
 					//PKs
 					view.getConstraints().addAll(grabRelationPKs(dbmd, view));
 					
 					//Columns
-					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
 					view.getColumnNames().addAll( t.getColumnNames() );
+					
+					//Remarks
+					view.setRemarks(t.getRemarks());
 				}
 			}
 		}

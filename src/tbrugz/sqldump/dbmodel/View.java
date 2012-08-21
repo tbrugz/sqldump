@@ -27,6 +27,8 @@ public class View extends DBObject implements Relation {
 	public boolean withReadOnly;
 	List<String> columnNames = new ArrayList<String>();
 	List<Constraint> constraints = new ArrayList<Constraint>();
+	String remarks;
+	List<String> columnRemarks = new ArrayList<String>();
 	
 	//public String checkOptionConstraintName;
 	
@@ -35,6 +37,18 @@ public class View extends DBObject implements Relation {
 		StringBuffer sb = new StringBuffer();
 		for(Constraint cons: constraints) {
 			sb.append(",\n\t"+cons.getDefinition(false));
+		}
+
+		StringBuffer sbRemarks = new StringBuffer();
+		if(remarks!=null) {
+			sbRemarks.append("\n\ncomment on table "+schemaName+"."+name+" is '"+remarks+"'");
+		}
+		if(columnRemarks!=null && columnRemarks.size()>0) {
+			if(sbRemarks.length()>0) { sbRemarks.append(";"); }
+			sbRemarks.append("\n");
+			for(int i=0;i<columnRemarks.size();i++) {
+				sbRemarks.append((i==0?"":";")+"\ncomment on column "+schemaName+"."+name+"."+columnNames.get(i)+" is '"+columnRemarks.get(i)+"'");
+			}
 		}
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
@@ -45,7 +59,8 @@ public class View extends DBObject implements Relation {
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
 						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""
 					)
-				  );
+				  )
+				+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
 	}
 	
 	@Override
@@ -71,4 +86,18 @@ public class View extends DBObject implements Relation {
 	public List<String> getColumnNames() {
 		return columnNames;
 	}
+
+	@Override
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
+
+	/*@Override
+	public String getAfterCreateScript() {
+		return null;
+	}*/
 }
