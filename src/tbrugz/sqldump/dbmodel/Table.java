@@ -294,8 +294,8 @@ public class Table extends DBObject implements Relation {
 			if(comment!=null && !comment.trim().equals("")) {
 				//XXXdone: escape comment
 				comment = comment.replaceAll("'", "''");
-				sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
 				if(commentCount>0) { sb.append(";\n"); }
+				sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
 				commentCount++;
 			}
 		}

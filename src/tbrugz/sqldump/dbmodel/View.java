@@ -25,8 +25,8 @@ public class View extends DBObject implements Relation {
 	
 	public CheckOptionType checkOption;
 	public boolean withReadOnly;
-	List<Column> columns = new ArrayList<Column>();
-	List<Constraint> constraints = new ArrayList<Constraint>();
+	List<Column> columns = null;
+	List<Constraint> constraints = null;
 	String remarks;
 	
 	//public String checkOptionConstraintName;
@@ -34,8 +34,10 @@ public class View extends DBObject implements Relation {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		StringBuffer sbConstraints = new StringBuffer();
-		for(Constraint cons: constraints) {
-			sbConstraints.append(",\n\t"+cons.getDefinition(false));
+		if(constraints!=null) {
+			for(Constraint cons: constraints) {
+				sbConstraints.append(",\n\t"+cons.getDefinition(false));
+			}
 		}
 
 		StringBuffer sbRemarks = new StringBuffer();
@@ -54,7 +56,7 @@ public class View extends DBObject implements Relation {
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
 				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name)
-				+ (constraints.size()>0?" (\n\t"+Utils.join(getColumnNames(), ", ")+sbConstraints.toString()+"\n)":"")
+				+ (sbConstraints.length()>0?" (\n\t"+Utils.join(getColumnNames(), ", ")+sbConstraints.toString()+"\n)":"")
 				+ " as\n" + query
 				+ (withReadOnly?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
@@ -102,6 +104,10 @@ public class View extends DBObject implements Relation {
 	}
 
 	public void setColumns(List<Column> columns) {
+		this.columns = columns;
+	}
+	
+	public void setSimpleColumns(List<Column> columns) {
 		if(columns==null) {
 			this.columns = null;
 			return;
@@ -115,6 +121,10 @@ public class View extends DBObject implements Relation {
 			c.setRemarks(tcol.getRemarks());
 			this.columns.add(c);
 		}
+	}
+
+	public void setConstraints(List<Constraint> constraints) {
+		this.constraints = constraints;
 	}
 
 	/*@Override

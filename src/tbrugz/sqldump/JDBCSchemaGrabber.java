@@ -225,10 +225,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
 					
 					//PKs
-					view.getConstraints().addAll(grabRelationPKs(dbmd, view));
+					view.setConstraints(grabRelationPKs(dbmd, view));
 					
 					//Columns
-					view.setColumns(t.getColumns());
+					view.setSimpleColumns(t.getColumns());
 					
 					//Remarks
 					view.setRemarks(t.getRemarks());
