@@ -1,7 +1,7 @@
 package tbrugz.sqldump.util;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -44,8 +44,8 @@ class RegularFileFilter implements FileFilter {
 class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 	static Log log = LogFactory.getLog(BaseInputGUI.class);
 
-	static int width = 200;
-	static int height = 100;
+	static int width = 500;
+	static int height = 80;
 
 	JTextField tf;
 	String value;
@@ -55,21 +55,25 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 	
 	public void doGUI(String message) {
 		setTitle("sqldump");
-		getContentPane().setLayout(new FlowLayout());
-		getContentPane().add(new JLabel(message));
-		getContentPane().add(tf);
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(new JLabel(message), BorderLayout.NORTH);
+		getContentPane().add(tf, BorderLayout.CENTER);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		addWindowListener(this);
-		setSize(200, 100);
+		setSize(width, height);
+		pack(); //?
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenSize = tk.getScreenSize();
 		final int WIDTH = screenSize.width;
 		final int HEIGHT = screenSize.height;
+		int actualWidth = getWidth();
+		int actualHeight = getHeight();
+
 		// Setup the frame accordingly
 		// This is assuming you are extending the JFrame //class
 		//this.setSize(WIDTH / 2, HEIGHT / 2);
-		this.setLocation((WIDTH - width)/ 2, (HEIGHT - height) / 2);
+		this.setLocation((WIDTH - actualWidth)/ 2, (HEIGHT - actualHeight) / 2);
 		
 		setVisible(true);
 	}
