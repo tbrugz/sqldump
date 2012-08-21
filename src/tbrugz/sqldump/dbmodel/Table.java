@@ -176,20 +176,12 @@ public class Table extends DBObject implements Relation {
 	public String getAfterCreateTableScript() {
 		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
 		StringBuffer sb = new StringBuffer();
-		String tableComment = getRemarks();
-		if(tableComment!=null && !tableComment.trim().equals("")) {
-			tableComment = tableComment.replaceAll("'", "''");
-			sb.append("comment on table "+schemaName+"."+name+" is '"+tableComment+"';\n");
-		}
-		//XXX: column comments should be ordered by col name?
-		for(Column c: getColumns()) {
-			String comment = c.getRemarks();
-			if(comment!=null && !comment.trim().equals("")) {
-				//XXXdone: escape comment
-				comment = comment.replaceAll("'", "''");
-				sb.append("comment on column "+schemaName+"."+name+"."+c.name+" is '"+comment+"';\n");
-			}
-		}
+		String stmp = getRelationRemarks(this);
+		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
+
+		stmp = getColumnRemarks(columns, this);
+		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
+
 		return sb.toString();
 	}
 	
@@ -272,6 +264,10 @@ public class Table extends DBObject implements Relation {
 
 	@Override
 	public List<String> getColumnNames() {
+		return getColumnNames(columns);
+	}
+
+	static List<String> getColumnNames(List<Column> columns) {
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {
 			ret.add(c.getName());
@@ -279,4 +275,30 @@ public class Table extends DBObject implements Relation {
 		return ret;
 	}
 	
+	static String getRelationRemarks(Relation rel) {
+		StringBuffer sb = new StringBuffer();
+		String tableComment = rel.getRemarks();
+		if(tableComment!=null && !tableComment.trim().equals("")) {
+			tableComment = tableComment.replaceAll("'", "''");
+			sb.append("comment on table "+rel.getSchemaName()+"."+rel.getName()+" is '"+tableComment+"'"); //;\n
+		}
+		return sb.toString();
+	}
+	
+	static String getColumnRemarks(List<Column> columns, Relation rel) {
+		StringBuffer sb = new StringBuffer();
+		//XXX: column comments should be ordered by col name?
+		int commentCount = 0;
+		for(Column c: columns) {
+			String comment = c.getRemarks();
+			if(comment!=null && !comment.trim().equals("")) {
+				//XXXdone: escape comment
+				comment = comment.replaceAll("'", "''");
+				sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
+				if(commentCount>0) { sb.append(";\n"); }
+				commentCount++;
+			}
+		}
+		return sb.toString();
+	}
 }

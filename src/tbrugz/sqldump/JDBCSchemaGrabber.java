@@ -228,7 +228,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					view.getConstraints().addAll(grabRelationPKs(dbmd, view));
 					
 					//Columns
-					view.getColumnNames().addAll( t.getColumnNames() );
+					view.setColumns(t.getColumns());
 					
 					//Remarks
 					view.setRemarks(t.getRemarks());

@@ -6,7 +6,7 @@ import java.util.List;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * TODO: comments on view and columns
+ * TODOne: comments on view and columns
  * 
  * XXX: option to always dump column names?
  * XXX: option to dump FKs inside view?
@@ -25,35 +25,36 @@ public class View extends DBObject implements Relation {
 	
 	public CheckOptionType checkOption;
 	public boolean withReadOnly;
-	List<String> columnNames = new ArrayList<String>();
+	List<Column> columns = new ArrayList<Column>();
 	List<Constraint> constraints = new ArrayList<Constraint>();
 	String remarks;
-	List<String> columnRemarks = new ArrayList<String>();
 	
 	//public String checkOptionConstraintName;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		StringBuffer sb = new StringBuffer();
+		StringBuffer sbConstraints = new StringBuffer();
 		for(Constraint cons: constraints) {
-			sb.append(",\n\t"+cons.getDefinition(false));
+			sbConstraints.append(",\n\t"+cons.getDefinition(false));
 		}
 
 		StringBuffer sbRemarks = new StringBuffer();
-		if(remarks!=null) {
-			sbRemarks.append("\n\ncomment on table "+schemaName+"."+name+" is '"+remarks+"'");
-		}
-		if(columnRemarks!=null && columnRemarks.size()>0) {
-			if(sbRemarks.length()>0) { sbRemarks.append(";"); }
-			sbRemarks.append("\n");
-			for(int i=0;i<columnRemarks.size();i++) {
-				sbRemarks.append((i==0?"":";")+"\ncomment on column "+schemaName+"."+name+"."+columnNames.get(i)+" is '"+columnRemarks.get(i)+"'");
-			}
+
+		String stmp1 = Table.getRelationRemarks(this);
+		String stmp2 = Table.getColumnRemarks(columns, this);
+		
+		if(stmp1!=null && stmp1.length()>0 && stmp2!=null && stmp2.length()>0) { sbRemarks.append("\n\n"); }
+		if(stmp1!=null && stmp1.length()>0) { sbRemarks.append(stmp1+";\n"); }
+
+		if(stmp2!=null && stmp2.length()>0) { sbRemarks.append(stmp2+";\n"); }
+		int len = sbRemarks.length();
+		if(len>0) {
+			sbRemarks.delete(len-2, len);
 		}
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
 				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name)
-				+ (constraints.size()>0?" (\n\t"+Utils.join(columnNames, ", ")+sb.toString()+"\n)":"")
+				+ (constraints.size()>0?" (\n\t"+Utils.join(getColumnNames(), ", ")+sbConstraints.toString()+"\n)":"")
 				+ " as\n" + query
 				+ (withReadOnly?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
@@ -84,7 +85,7 @@ public class View extends DBObject implements Relation {
 
 	@Override
 	public List<String> getColumnNames() {
-		return columnNames;
+		return Table.getColumnNames(columns);
 	}
 
 	@Override
@@ -94,6 +95,26 @@ public class View extends DBObject implements Relation {
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	public List<Column> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<Column> columns) {
+		if(columns==null) {
+			this.columns = null;
+			return;
+		}
+		
+		this.columns = new ArrayList<Column>();
+		for(int i=0;i<columns.size();i++) {
+			Column tcol = columns.get(i);
+			Column c = new Column();
+			c.setName(tcol.getName());
+			c.setRemarks(tcol.getRemarks());
+			this.columns.add(c);
+		}
 	}
 
 	/*@Override
