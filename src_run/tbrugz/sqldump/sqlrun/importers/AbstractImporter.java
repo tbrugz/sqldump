@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -153,7 +154,7 @@ public abstract class AbstractImporter {
 	//TODOne: show processedLines by failoverId?
 	long importFile() throws SQLException, InterruptedException, IOException {
 		//init counters
-		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(IOCounter.class);
+		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		IOCounter counter = countsByFailoverId.get(failoverId);
 
 		//assume all lines of same size (in number of columns?)
