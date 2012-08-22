@@ -28,6 +28,11 @@ public abstract class AbstractImporter {
 	public static class IOCounter {
 		long input = 0;
 		long output = 0;
+		
+		@Override
+		public String toString() {
+			return "IOCounter[i="+input+";o="+output+"]";
+		}
 	}
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
@@ -219,7 +224,7 @@ public abstract class AbstractImporter {
 							mustSetupSQLStatement = true;
 						}
 						else {
-							log.warn("error processing line "+counter.input+": "+e.getMessage());
+							log.warn("error processing line "+countsByFailoverId.get(0).input+": "+e.getMessage());
 							importthisline = false;
 							break;
 						}
