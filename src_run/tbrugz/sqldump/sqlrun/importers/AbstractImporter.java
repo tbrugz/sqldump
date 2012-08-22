@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -20,8 +21,14 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.util.NonNullGetMap;
 
 public abstract class AbstractImporter {
+	public static class IOCounter {
+		long input = 0;
+		long output = 0;
+	}
+
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
 
 	Properties prop;
@@ -113,6 +120,7 @@ public abstract class AbstractImporter {
 		return ret;
 	}
 
+	//XXX add countsByFailoverId for all files?
 	public long importData() throws SQLException, InterruptedException, IOException {
 		long ret = 0;
 		if(importFile!=null) {
@@ -136,17 +144,18 @@ public abstract class AbstractImporter {
 		log.info("imported lines = "+ret);
 		return ret;
 	}
-	
-	long processedLinesFromFile = 0;
-	long importedLinesFromFile = 0;
+
+	Map<Integer, IOCounter> countsByFailoverId;
 	List<Integer> filecol2tabcolMap = null;
 	boolean mustSetupSQLStatement = false;
 	int failoverId = 0;
 	
-	//TODO: show processedLines by failoverId?
+	//TODOne: show processedLines by failoverId?
 	long importFile() throws SQLException, InterruptedException, IOException {
-		processedLinesFromFile = 0;
-		importedLinesFromFile = 0;		
+		//init counters
+		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(IOCounter.class);
+		IOCounter counter = countsByFailoverId.get(failoverId);
+
 		//assume all lines of same size (in number of columns?)
 		//FileReader fr = new FileReader(importFile);
 		
@@ -186,6 +195,7 @@ public abstract class AbstractImporter {
 				boolean importthisline = true;
 				if(failoverId>0) {
 					failoverId = 0;
+					counter = countsByFailoverId.get(failoverId);
 					setDefaultImporterProperties(prop);
 					mustSetupSQLStatement = true;
 				}
@@ -197,7 +207,9 @@ public abstract class AbstractImporter {
 						importthisline = false;
 					}
 					catch(Exception e) {
+						counter.input++;
 						failoverId++;
+						counter = countsByFailoverId.get(failoverId);
 						String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
 						List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
 						if(foids!=null && foids.size()>0) {
@@ -206,8 +218,7 @@ public abstract class AbstractImporter {
 							mustSetupSQLStatement = true;
 						}
 						else {
-							processedLinesFromFile++;
-							log.warn("error processing line "+processedLinesFromFile+": "+e.getMessage());
+							log.warn("error processing line "+counter.input+": "+e.getMessage());
 							importthisline = false;
 							break;
 						}
@@ -227,29 +238,39 @@ public abstract class AbstractImporter {
 		while(follow);
 		
 		fileIS.close(); fileIS = null;
-		log.info("processedLines: "+processedLinesFromFile+" ; importedRows: "+importedLinesFromFile);
+
+		//show counters
+		long countAll = 0;
+		for(Integer id: countsByFailoverId.keySet()) {
+			IOCounter cc = countsByFailoverId.get(id);
+			if(cc.input>0 || cc.output>0) {
+				log.info((id==0?"":"[failover="+id+"] ")+"processedLines: "+cc.input+" ; importedRows: "+cc.output);
+				countAll += cc.output;
+			}
+		}
 		
-		return processedLinesFromFile;
+		return countAll;
 	}
 	
 	void procLineInternal(String line, boolean is1stloop) throws SQLException {
 		//log.info("line["+processedLines+"]: "+line);
-		String[] parts = procLine(line, processedLinesFromFile);
+		IOCounter counter = countsByFailoverId.get(failoverId);
+		String[] parts = procLine(line, counter.input);
 		if(parts==null) {
 			log.debug("line could not be understood: "+line);
 			throw new RuntimeException("line could not be processed: "+line);
 		}
 		
 		if(log.isDebugEnabled()) {
-			log.debug("parts["+processedLinesFromFile+"; l="+parts.length+"]: "+Arrays.asList(parts));
+			log.debug("parts["+counter.input+"; l="+parts.length+"]: "+Arrays.asList(parts));
 		}
 		
-		if(processedLinesFromFile==0 || mustSetupSQLStatement ) {
+		if(counter.input==0 || mustSetupSQLStatement ) {
 			setupSQLStatement(parts);
 			mustSetupSQLStatement = false;
 		}
-		if(is1stloop && skipHeaderN>processedLinesFromFile) {
-			processedLinesFromFile++;
+		if(is1stloop && skipHeaderN>counter.input) {
+			counter.input++;
 			return;
 		}
 		
@@ -270,9 +291,9 @@ public abstract class AbstractImporter {
 		//log.info("insert["+processedLines+"/"+importedLines+"]: "+stmtStr);
 		//stmt.addBatch(); //XXX: batch insert?
 		int changedRows = stmt.executeUpdate();
-		processedLinesFromFile++;
-		importedLinesFromFile += changedRows;
-		if(commitEachXrows!=null && commitEachXrows>0 && (importedLinesFromFile%commitEachXrows==0)) {
+		counter.input++;
+		counter.output += changedRows;
+		if(commitEachXrows!=null && commitEachXrows>0 && (counter.output%commitEachXrows==0)) {
 			doCommit(conn);
 		}
 	}
