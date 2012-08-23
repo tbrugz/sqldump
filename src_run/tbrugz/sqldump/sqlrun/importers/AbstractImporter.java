@@ -28,6 +28,11 @@ public abstract class AbstractImporter {
 	public static class IOCounter {
 		long input = 0;
 		long output = 0;
+
+		void add(IOCounter other) {
+			input += other.input;
+			output += other.output;
+		}
 		
 		@Override
 		public String toString() {
@@ -127,10 +132,14 @@ public abstract class AbstractImporter {
 	}
 
 	//XXX add countsByFailoverId for all files?
+	Map<Integer, IOCounter> aggCountsByFailoverId;
+	
 	public long importData() throws SQLException, InterruptedException, IOException {
+		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;
 		if(importFile!=null) {
 			ret = importFile();
+			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
 		else if(importFiles!=null) {
 			if(importDir==null) {
@@ -142,13 +151,22 @@ public abstract class AbstractImporter {
 				importFile = file;
 				//log.info("importing file: "+importFile);
 				ret += importFile();
+				addMapCount(aggCountsByFailoverId, countsByFailoverId);
 			}
 		}
 		else {
 			log.warn("neither '"+SUFFIX_IMPORTFILE+"' nor '"+SUFFIX_IMPORTFILES+"' suffix specified...");
 		}
-		log.info("imported lines = "+ret);
+		log.info("imported lines by failover id [all="+ret+"]:");//"imported lines = "+ret);
+		logCounts(aggCountsByFailoverId, true);
+		
 		return ret;
+	}
+	
+	void addMapCount(Map<Integer, IOCounter> agg, Map<Integer, IOCounter> cc) {
+		for(Integer i: cc.keySet()) {
+			agg.get(i).add(cc.get(i));
+		}
 	}
 
 	Map<Integer, IOCounter> countsByFailoverId;
@@ -246,15 +264,20 @@ public abstract class AbstractImporter {
 		fileIS.close(); fileIS = null;
 
 		//show counters
+		long countAll = logCounts(countsByFailoverId, false);
+		
+		return countAll;
+	}
+	
+	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) {
 		long countAll = 0;
-		for(Integer id: countsByFailoverId.keySet()) {
-			IOCounter cc = countsByFailoverId.get(id);
+		for(Integer id: ccMap.keySet()) {
+			IOCounter cc = ccMap.get(id);
 			if(cc.input>0 || cc.output>0) {
-				log.info((id==0?"":"[failover="+id+"] ")+"processedLines: "+cc.input+" ; importedRows: "+cc.output);
+				log.info( ((id==0&&!alwaysShowId)?"":"[failover="+id+"] ") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
 				countAll += cc.output;
 			}
 		}
-		
 		return countAll;
 	}
 	
