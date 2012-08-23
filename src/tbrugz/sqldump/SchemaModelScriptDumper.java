@@ -329,7 +329,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		return
 			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
 			+"alter table "+fkTableName
-			+"\n\tadd "+FK.fkSimpleScript(fk, "\n\t", dumpWithSchemaName)+";\n";
+			+"\n\tadd "+fk.fkSimpleScript("\n\t", dumpWithSchemaName)+";\n";
 	}
 
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {

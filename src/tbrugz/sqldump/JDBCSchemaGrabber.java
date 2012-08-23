@@ -222,15 +222,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			//add constraints to views
 			if(schemaModel.getViews().size()>0) {
 				for(View view: schemaModel.getViews()) {
-					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
-					
 					//PKs
 					view.setConstraints(grabRelationPKs(dbmd, view));
-					
-					//Columns
+
+					//Columns & Remarks
+					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
+					if(t==null) {
+						log.warn("table not found: "+view.getSchemaName()+"."+view.getName());
+						continue;
+					}
 					view.setSimpleColumns(t.getColumns());
-					
-					//Remarks
 					view.setRemarks(t.getRemarks());
 				}
 			}
@@ -341,7 +342,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 				//FKs
 				if(!tableOnly || deeprecursivedump) {
-					schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, table));
+					schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, dbmsfeatures, table));
 				}
 				
 				//GRANTs
@@ -393,7 +394,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		//return schemaModel;
 	}
 
-	List<FK> grabRelationFKs(DatabaseMetaData dbmd, Relation relation) throws SQLException, IOException {
+	List<FK> grabRelationFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, Relation relation) throws SQLException, IOException {
 		String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<FK> ret = new ArrayList<FK>();
 		
@@ -401,7 +402,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(doSchemaGrabFKs) {
 			log.debug("getting FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getImportedKeys(null, relation.getSchemaName(), relation.getName());
-			ret.addAll(grabSchemaFKs(fkrs, relation));
+			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
 			closeResultSetAndStatement(fkrs);
 		}
 
@@ -409,7 +410,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(doSchemaGrabExportedFKs) {
 			log.debug("getting 'exported' FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getExportedKeys(null, relation.getSchemaName(), relation.getName());
-			ret.addAll(grabSchemaFKs(fkrs, relation));
+			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
 			closeResultSetAndStatement(fkrs);
 		}
 		
@@ -535,7 +536,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		return cPK;
 	}
 
-	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table) throws SQLException, IOException {
+	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException, IOException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;
@@ -549,7 +550,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 			FK fk = fks.get(fkName);
 			if(fk==null) {
-				fk = new FK();
+				fk = dbmsfeatures.getForeignKeyObject();
 				fk.setName(fkName);
 				fks.put(fkName, fk);
 			}
@@ -574,6 +575,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 						log.debug("resultset has no 'UK_CONSTRAINT_TYPE' column [fkTable='"+fk.fkTable+"'; ukTable='"+fk.pkTable+"']");
 					}
 				}
+				dbmsfeatures.addFKSpecificFeatures(fk, fkrs);
 			}
 			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
 			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));

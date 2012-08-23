@@ -109,7 +109,7 @@ public class Table extends DBObject implements Relation {
 			//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
 			for(FK fk: foreignKeys) {
 				if((schemaName==null || fk.fkTableSchemaName==null || schemaName.equals(fk.fkTableSchemaName)) && name.equals(fk.fkTable)) {
-					sb.append((countTabElements==0?"":",")+"\n\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName));
+					sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
 				}
 				countTabElements++;
 			}
@@ -268,6 +268,7 @@ public class Table extends DBObject implements Relation {
 	}
 
 	static List<String> getColumnNames(List<Column> columns) {
+		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {
 			ret.add(c.getName());
@@ -289,14 +290,16 @@ public class Table extends DBObject implements Relation {
 		StringBuffer sb = new StringBuffer();
 		//XXX: column comments should be ordered by col name?
 		int commentCount = 0;
-		for(Column c: columns) {
-			String comment = c.getRemarks();
-			if(comment!=null && !comment.trim().equals("")) {
-				//XXXdone: escape comment
-				comment = comment.replaceAll("'", "''");
-				if(commentCount>0) { sb.append(";\n"); }
-				sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
-				commentCount++;
+		if(columns!=null) {
+			for(Column c: columns) {
+				String comment = c.getRemarks();
+				if(comment!=null && !comment.trim().equals("")) {
+					//XXXdone: escape comment
+					comment = comment.replaceAll("'", "''");
+					if(commentCount>0) { sb.append(";\n"); }
+					sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
+					commentCount++;
+				}
 			}
 		}
 		return sb.toString();

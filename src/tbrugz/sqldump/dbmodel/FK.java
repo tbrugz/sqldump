@@ -48,17 +48,17 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		// return name.compareTo(o.name);
 	}
 
-	public static String fkSimpleScript(FK fk, String whitespace, boolean dumpWithSchemaName) {
+	public String fkSimpleScript(String whitespace, boolean dumpWithSchemaName) {
 		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
-		return "constraint "+DBObject.getFinalIdentifier(fk.getName())
-			+" foreign key ("+Utils.join(fk.fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
-			+whitespace+"references "+(dumpWithSchemaName?DBObject.getFinalIdentifier(fk.pkTableSchemaName)+".":"")
-			+DBObject.getFinalIdentifier(fk.pkTable)+" ("+Utils.join(fk.pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
+		return "constraint "+DBObject.getFinalIdentifier(getName())
+			+" foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
+			+whitespace+"references "+(dumpWithSchemaName?DBObject.getFinalIdentifier(pkTableSchemaName)+".":"")
+			+DBObject.getFinalIdentifier(pkTable)+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
 	}
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return fkSimpleScript(this, " ", true);
+		return fkSimpleScript(" ", true);
 	}
 	
 	@Override

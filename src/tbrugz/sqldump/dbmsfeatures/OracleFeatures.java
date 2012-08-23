@@ -19,6 +19,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.MaterializedView;
@@ -38,6 +39,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
 	
+	@Override
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		//dumpSequenceStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
@@ -50,6 +52,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	/* (non-Javadoc)
 	 * @see tbrugz.sqldump.DbmgrFeatures#grabDBObjects(tbrugz.sqldump.SchemaModel, java.lang.String, java.sql.Connection)
 	 */
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
 			grabDBViews(model, schemaPattern, conn);
@@ -354,10 +357,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" sequences grabbed");
 	}
 	
+	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
 		return new OracleDatabaseMetaData(metadata);
 	}
 	
+	@Override
 	public Table getTableObject() {
 		return new OracleTable();
 	}
@@ -557,4 +562,36 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		ot.partitions = parts;
 	}
 	
+	@Override
+	public FK getForeignKeyObject() {
+		return new OracleFK();
+	}
+	
+	@Override
+	public void addFKSpecificFeatures(FK fk, ResultSet rs) {
+		if(fk instanceof OracleFK) {
+			OracleFK ofk = (OracleFK) fk;
+			try {
+				// acfk.status, acfk.validated, acfk.rely "
+				String status = rs.getString("STATUS");
+				if(status!=null && status.equals("DISABLED")) {
+					ofk.enabled = false; 
+				}
+				String validated = rs.getString("VALIDATED");
+				if(validated!=null && validated.equals("NOT VALIDATED")) {
+					ofk.validated = false; 
+				}
+				String rely = rs.getString("RELY");
+				if(rely!=null && !rely.equals("")) {
+					ofk.rely = false; 
+				}
+			} catch (SQLException e) {
+				log.warn("sql exception:", e);
+			}
+			//log.info("OracleFK: "+ofk);
+		}
+		else {
+			log.warn("FK "+fk+" should be instance of "+OracleFK.class.getSimpleName());
+		}
+	}
 }

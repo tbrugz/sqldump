@@ -215,6 +215,7 @@ public class Utils {
 
 	public static String join(Collection<?> s, String delimiter, StringDecorator decorator) {
 		StringBuffer buffer = new StringBuffer();
+		if(s==null) { return null; }
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
 			Object elem = iter.next();

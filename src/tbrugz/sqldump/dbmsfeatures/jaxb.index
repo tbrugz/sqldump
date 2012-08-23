@@ -4,3 +4,4 @@ InformationSchemaRoutine
 InformationSchemaTrigger
 OracleTable
 OracleTablePartition
+OracleFK

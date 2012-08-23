@@ -116,9 +116,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		String sql = "select * from (";
 		sql += "select '' as PKTABLE_CAT, acuk.owner as PKTABLE_SCHEM, acuk.table_name as PKTABLE_NAME, accuk.column_name as PKCOLUMN_NAME, \n"
 				+"       '' as FKTABLE_CAT, acfk.owner as FKTABLE_SCHEM, acfk.table_name as FKTABLE_NAME, accfk.column_name as FKCOLUMN_NAME, \n"
-				+"       accuk.position as KEY_SEQ, '' as UPDATE_RULE, '' as DELETE_RULE, \n"
-				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY \n"
-				+"       ,acuk.constraint_type as UK_CONSTRAINT_TYPE " //returns type of unique key: P - primary, U - unique
+				+"       accuk.position as KEY_SEQ, '' as UPDATE_RULE, acfk.DELETE_RULE as DELETE_RULE, \n"
+				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY, \n"
+				+"       acuk.constraint_type as UK_CONSTRAINT_TYPE, " //returns type of unique key: P - primary, U - unique
+				+"       acfk.status, acfk.validated, acfk.rely "
 				+"from all_constraints acfk, all_cons_columns accfk, \n"
 				+" all_constraints acuk, all_cons_columns accuk \n"
 				+"where acfk.owner = accfk.owner and acfk.constraint_name = accfk.constraint_name and acfk.constraint_type = 'R' \n"

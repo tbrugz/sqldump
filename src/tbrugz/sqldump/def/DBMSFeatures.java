@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -27,8 +28,12 @@ public interface DBMSFeatures {
 	void procProperties(Properties prop);
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
+	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
 	void addColumnSpecificFeatures(Column c, ResultSet rs);
+	void addFKSpecificFeatures(FK fk, ResultSet rs);
+	
 	Table getTableObject();
+	FK getForeignKeyObject();
 	//XXX: should DBMS's Features return getDefaultDateFormat?
 }
