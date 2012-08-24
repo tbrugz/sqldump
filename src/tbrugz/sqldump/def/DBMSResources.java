@@ -73,6 +73,8 @@ public class DBMSResources {
 	
 	public static void updateDbId(String newid) {
 		DBMSResources res = instance();
+		if( (newid!=null && newid.equals(res.dbId)) || (newid==res.dbId) ) { return; }
+		
 		log.info("updating dbid: '"+newid+"' [old="+res.dbId+"]");
 		if(res.dbIds.contains(newid)) {	res.dbId = newid; }
 		else {
