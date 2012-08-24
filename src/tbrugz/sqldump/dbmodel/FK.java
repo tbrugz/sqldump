@@ -10,6 +10,37 @@ import tbrugz.sqldump.util.Utils;
 //XXX~: extends DBObject?
 //XXX: should be constraint?
 public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
+	
+	public static enum UpdateRule {
+		NO_ACTION,
+		CASCADE,
+		SET_NULL,
+		SET_DEFAULT;
+		
+		public String toString() {
+			switch (this) {
+			case NO_ACTION:
+				return null;
+			case CASCADE:
+				return "cascade";
+			case SET_NULL:
+				return "set null";
+			case SET_DEFAULT:
+				return "set null";
+			}
+			return "unknown";
+		};
+		
+		public static UpdateRule getUpdateRule(String s) {
+			if(s==null) return null;
+			if("NO ACTION".equals(s)) return null; //XXX return NO_ACTION; ?
+			if("CASCADE".equals(s)) return CASCADE;
+			if("SET NULL".equals(s)) return SET_NULL;
+			if("SET DEFAULT".equals(s)) return SET_DEFAULT;
+			return null;
+		}
+	}
+	
 	private static final long serialVersionUID = 1L;
 	//String name;
 	public String pkTable;
@@ -17,6 +48,8 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	public String pkTableSchemaName;
 	public String fkTableSchemaName;
 	public Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
+	public UpdateRule updateRule;
+	public UpdateRule deleteRule;
 
 	public List<String> pkColumns = new ArrayList<String>();
 	public List<String> fkColumns = new ArrayList<String>();
@@ -53,7 +86,10 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		return "constraint "+DBObject.getFinalIdentifier(getName())
 			+" foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+whitespace+"references "+(dumpWithSchemaName?DBObject.getFinalIdentifier(pkTableSchemaName)+".":"")
-			+DBObject.getFinalIdentifier(pkTable)+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
+			+DBObject.getFinalIdentifier(pkTable)+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
+			+(updateRule!=null && updateRule!=UpdateRule.NO_ACTION?" on update "+updateRule:"")
+			+(deleteRule!=null && deleteRule!=UpdateRule.NO_ACTION?" on delete "+deleteRule:"")
+			;
 	}
 
 	@Override

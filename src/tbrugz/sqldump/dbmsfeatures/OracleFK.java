@@ -3,9 +3,9 @@ package tbrugz.sqldump.dbmsfeatures;
 import tbrugz.sqldump.dbmodel.FK;
 
 public class OracleFK extends FK {
-	Boolean enabled; // enabled | disabled
-	Boolean validated;
-	Boolean rely;
+	public Boolean enabled; // enabled | disabled
+	public Boolean validated;
+	public Boolean rely;
 	
 	@Override
 	public String fkSimpleScript(String whitespace, boolean dumpWithSchemaName) {

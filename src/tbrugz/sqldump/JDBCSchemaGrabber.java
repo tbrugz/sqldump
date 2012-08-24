@@ -13,6 +13,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.FK.UpdateRule;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
@@ -561,6 +562,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
 				String pkTableCatalog = fkrs.getString("PKTABLE_CAT");
 				String fkTableCatalog = fkrs.getString("FKTABLE_CAT");
+				String updateRule = fkrs.getString("UPDATE_RULE");
+				String deleteRule = fkrs.getString("DELETE_RULE");
+				fk.updateRule = UpdateRule.getUpdateRule(updateRule);
+				fk.deleteRule = UpdateRule.getUpdateRule(deleteRule);
+				//log.debug("fk: "+fkName+" :: rules: "+updateRule+"|"+fk.updateRule+" / "+deleteRule+"|"+fk.deleteRule+"");
 				
 				//for MySQL
 				if(fk.pkTableSchemaName==null && pkTableCatalog!=null) { fk.pkTableSchemaName = pkTableCatalog; }
