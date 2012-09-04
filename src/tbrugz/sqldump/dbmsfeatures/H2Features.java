@@ -26,8 +26,11 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.warn("grab sequences: not implemented");
+	String grabDBSequencesQuery(String schemaPattern) {
+		return "select sequence_name, null as minimum_value, increment, null as maximum_value "
+				+"from information_schema.sequences "
+				+"where sequence_schema = '"+schemaPattern+"' "
+				+"order by sequence_catalog, sequence_schema, sequence_name ";
 	}
 	
 	@Override

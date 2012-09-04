@@ -176,13 +176,17 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" executable objects/routines grabbed");
 	}
 
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing sequences");
-		String query = "select sequence_name, minimum_value, increment, maximum_value " // increment_by, last_number?
+	String grabDBSequencesQuery(String schemaPattern) {
+		return "select sequence_name, minimum_value, increment, maximum_value " // increment_by, last_number?
 				+"from information_schema.sequences "
 				+"where sequence_schema = '"+schemaPattern+"' "
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
+	}
+	
+	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing sequences");
 		Statement st = conn.createStatement();
+		String query = grabDBSequencesQuery(schemaPattern);
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
@@ -190,7 +194,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			Sequence s = new Sequence();
 			s.setSchemaName( schemaPattern );
 			s.name = rs.getString(1);
-			s.minValue = rs.getLong(2);
+			String minvalueStr = rs.getString(2);
+			if(minvalueStr!=null) {
+				s.minValue = rs.getLong(2);
+			}
 			s.incrementBy = 1; //rs.getLong(3);
 			//s.lastNumber = rs.getLong(4);
 			model.getSequences().add(s);

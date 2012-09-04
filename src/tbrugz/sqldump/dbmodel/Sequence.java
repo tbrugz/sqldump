@@ -5,8 +5,8 @@ package tbrugz.sqldump.dbmodel;
  */
 public class Sequence extends DBObject {
 	
-	public long minValue;
-	public long maxValue; //XXX: not used yet
+	public Long minValue;
+	public Long maxValue; //XXX: not used yet
 	public long incrementBy;
 	public transient long lastNumber;
 	
@@ -18,7 +18,7 @@ public class Sequence extends DBObject {
 		//return (dumpCreateOrReplace?"create or replace ":"create ") 
 		return "create " 
 			+"sequence "+(dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"")+DBObject.getFinalIdentifier(name)
-			+" minvalue "+minValue
+			+(minValue!=null?" minvalue "+minValue:"")
 			+(dumpStartWith?" start with "+lastNumber:"")
 			+" increment by "+incrementBy;
 	}
