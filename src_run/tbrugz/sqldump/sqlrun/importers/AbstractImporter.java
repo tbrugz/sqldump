@@ -147,11 +147,16 @@ public abstract class AbstractImporter {
 			}
 			log.info("importing files from dir: "+importDir);
 			List<String> files = SQLRun.getFiles(importDir, importFiles);
-			for(String file: files) {
-				importFile = file;
-				//log.info("importing file: "+importFile);
-				ret += importFile();
-				addMapCount(aggCountsByFailoverId, countsByFailoverId);
+			if(files==null) {
+				log.warn("no files in dir '"+importDir+"'...");
+			}
+			else {
+				for(String file: files) {
+					importFile = file;
+					//log.info("importing file: "+importFile);
+					ret += importFile();
+					addMapCount(aggCountsByFailoverId, countsByFailoverId);
+				}
 			}
 		}
 		else {

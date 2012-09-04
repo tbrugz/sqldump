@@ -282,6 +282,9 @@ public class SQLRun {
 		}
 		File fdir = new File(dir);
 		String[] files = fdir.list();
+		if(files==null) {
+			return null;
+		}
 		for(String file: files) {
 			if(file.matches(fileRegex)) {
 				ret.add(fdir.getAbsolutePath()+File.separator+file);

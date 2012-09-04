@@ -750,7 +750,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			level.setName(column);
 			level.setColumn(sqlIdDecorator.get( column ));
 			level.setTable(sqlIdDecorator.get( levelTable ));
-			if(tuple[1]!=null) {
+			if(tuple.length>1) {
 				String nameColumn = tuple[1].trim();
 				level.setNameColumn(nameColumn);
 			}
