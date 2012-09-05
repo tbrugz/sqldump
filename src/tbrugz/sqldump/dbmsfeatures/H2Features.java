@@ -34,9 +34,14 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.warn("grab check constraints: not implemented");
+	String grabDBCheckConstraintsQuery(String schemaPattern) {
+		return "select cc.constraint_schema, table_name, cc.constraint_name, check_expression as check_clause " 
+			+ "from information_schema.constraints cc "
+			+ "where cc.constraint_schema = '"+schemaPattern+"'"
+			+ "and constraint_type = 'CHECK'"
+			+ "order by table_name, constraint_name";
 	}
+	
 	
 	@Override
 	String grabDBUniqueConstraintsQuery(String schemaPattern) {

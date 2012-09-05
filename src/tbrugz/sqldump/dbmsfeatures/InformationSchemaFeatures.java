@@ -209,14 +209,18 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" sequences grabbed");
 	}
 
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing check constraints");
-		
-		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
+	String grabDBCheckConstraintsQuery(String schemaPattern) {
+		return "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
 				+"and cc.constraint_schema = '"+schemaPattern+"' "
 				+"order by table_name, constraint_name ";
+	}
+	
+	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		log.debug("grabbing check constraints");
+		
+		String query = grabDBCheckConstraintsQuery(schemaPattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
