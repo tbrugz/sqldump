@@ -486,6 +486,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
 		c.columSize = cols.getInt("COLUMN_SIZE");
 		c.setRemarks(cols.getString("REMARKS"));
+		boolean autoInc = cols.getBoolean("IS_AUTOINCREMENT");
+		if(autoInc) { c.autoIncrement = true; }
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
 			int iDecimalDigits = ((Number) decimalDigits).intValue();

@@ -14,6 +14,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
@@ -182,6 +183,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
 		if(toDbId!=null) { colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId); }
+		
+		setupScriptDumpSpecificFeatures(toDbId!=null?toDbId:fromDbId);
+		
 		//XXX: order of objects within table: FK, index, grants? grant, fk, index?
 		
 		if(schemaModel==null || schemaModel.getTables()==null) {
@@ -503,4 +507,15 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	public void setPropertiesPrefix(String propertiesPrefix) {
 		// TODO: properties-prefix setting
 	}
+
+	//XXX: move to DBMSResources?
+	static final String DBPROP_COLUMN_USEAUTOINCREMENT = "column.useautoincrement";
+	
+	void setupScriptDumpSpecificFeatures(String toDbId) {
+		Properties p = DBMSResources.instance().getProperties();
+		if(Utils.getStringListFromProp(p, DBPROP_COLUMN_USEAUTOINCREMENT, ",").contains(toDbId)) {
+			Column.useAutoIncrement = true;
+		}
+	}
+
 }

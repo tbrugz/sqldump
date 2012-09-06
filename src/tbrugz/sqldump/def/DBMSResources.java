@@ -196,4 +196,9 @@ public class DBMSResources {
 		return dbIds;
 	}
 	
+	//XXX: getProperties(): not a good idea?
+	public Properties getProperties() {
+		return dbmsSpecificResource;
+	}
+	
 }

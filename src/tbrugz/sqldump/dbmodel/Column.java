@@ -75,6 +75,9 @@ public class Column extends DBIdentifiable implements Serializable {
 	public Boolean nullable;
 	String defaultValue;
 	String remarks;
+	public Boolean autoIncrement;
+
+	public static transient boolean useAutoIncrement = false;
 	
 	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c) {
@@ -85,7 +88,10 @@ public class Column extends DBIdentifiable implements Serializable {
 		return DBObject.getFinalIdentifier(c.name)+" "+colType
 			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
 			+(c.defaultValue!=null?" default "+c.defaultValue:"")
-			+(c.nullable!=null && !c.nullable?" not null":"");
+			+(c.nullable!=null && !c.nullable?" not null":"")
+			+(useAutoIncrement?
+				((c.autoIncrement!=null && c.autoIncrement)?" auto_increment":"")
+			 :"");
 	}
 	
 	public static String getColumnDescFull(Column c) {
