@@ -525,7 +525,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		while(pks.next()) {
 			pkName = pks.getString("PK_NAME");
 			if(pkName==null || pkName.equals("PRIMARY")) { //equals("PRIMARY"): for MySQL
-				pkName = "PK_"+relation.getName();
+				pkName = newNameFromTableName(relation.getName(), pkNamePattern);
 			}
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
 			count++;
@@ -625,7 +625,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//for MySQL
 				if(idx.getSchemaName()==null && catName!=null) { idx.setSchemaName( catName ); }
 				if(idx.name.equals("PRIMARY")) {
-					idx.name = "PK_"+idx.tableName;
+					idx.name = newNameFromTableName(idx.tableName, pkiNamePattern);
 				}
 				
 			}
@@ -664,6 +664,14 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		return excludeFilters;
 	}
+	
+	//XXX: props for setting pk(i)NamePatterns?
+	String pkNamePattern = "${tablename}_pk";
+	String pkiNamePattern = "${tablename}_pki";
+	
+	String newNameFromTableName(String tableName, String pattern) {
+		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
+	} 
 	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
