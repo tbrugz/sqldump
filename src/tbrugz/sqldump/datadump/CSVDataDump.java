@@ -45,7 +45,7 @@ public class CSVDataDump extends DumpSyntax {
 
 	static final String DELIM_RECORD_DEFAULT = "\n";
 	static final String DELIM_COLUMN_DEFAULT = ",";
-	static final String ENCLOSING_DEFAULT = null; //XXX: should be '"'?
+	static final String ENCLOSING_DEFAULT = "\""; //XXXxx: should be '"'? yes!
 
 	static final String CSV_SYNTAX_ID = "csv";
 	

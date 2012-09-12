@@ -671,7 +671,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	String newNameFromTableName(String tableName, String pattern) {
 		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
-	} 
+	}
 	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {

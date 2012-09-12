@@ -24,8 +24,9 @@ public class DataDumpUtils {
 
 	static Log log = LogFactory.getLog(DataDumpUtils.class);
 	
-	static String DEFAULT_ENCLOSING = "'";
-	static String DOUBLEQUOTE = "\"";
+	static final String DEFAULT_SQL_STRING_ENCLOSING = "'";
+	static final String DOUBLEQUOTE = "\"";
+	static final String EMPTY_STRING = "";
 
 	static boolean resultSetWarnedForSQLValue = false;
 	
@@ -34,6 +35,7 @@ public class DataDumpUtils {
 	public static NumberFormat floatFormatterSQL = null;
 	//public static NumberFormat floatFormatterBR = null;
 	public static NumberFormat longFormatter = null;
+	public static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
 	
 	static {
 		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");
@@ -70,25 +72,40 @@ public class DataDumpUtils {
 		}
 
 		// String output:
-		if(enclosing!=null) {
-			return enclosing+String.valueOf(elem).replaceAll(enclosing, enclosing+enclosing)+enclosing;
-		}
 		
+		if(enclosing!=null) {
+			if(csvWriteEnclosingAllFields) {
+				return enclosing+String.valueOf(elem).replaceAll(enclosing, enclosing+enclosing)+enclosing;
+			}
+			else {
+				//return String.valueOf(elem).replaceAll(enclosing, EMPTY_STRING); //XXX: replace by "'"?
+				String val = String.valueOf(elem);
+				if(val.contains(enclosing)) {
+					return enclosing+val.replaceAll(enclosing, enclosing+enclosing)+enclosing;
+				}
+				else if(val.contains(separator) || val.contains(lineSeparator)) {
+					return enclosing+val+enclosing;
+				}
+				else {
+					return val;
+				}
+			}
+		}
 		if(separator==null) {
 			//return String.valueOf(elem);
 			if(lineSeparator==null) {
 				return String.valueOf(elem);
 			}
 			else {
-				return String.valueOf(elem).replaceAll(lineSeparator, "");
+				return String.valueOf(elem).replaceAll(lineSeparator, EMPTY_STRING);
 			}
 		}
 		else {
 			if(lineSeparator==null) {
-				return String.valueOf(elem).replaceAll(separator, "");
+				return String.valueOf(elem).replaceAll(separator, EMPTY_STRING);
 			}
 			else {
-				return String.valueOf(elem).replaceAll(separator, "").replaceAll(lineSeparator, "");
+				return String.valueOf(elem).replaceAll(separator, EMPTY_STRING).replaceAll(lineSeparator, EMPTY_STRING);
 			}
 		}
 	} 
@@ -124,7 +141,7 @@ public class DataDumpUtils {
 			 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
 			 */
 			elem = ((String) elem).replaceAll("'", "''");
-			return DEFAULT_ENCLOSING+elem+DEFAULT_ENCLOSING;
+			return DEFAULT_SQL_STRING_ENCLOSING+elem+DEFAULT_SQL_STRING_ENCLOSING;
 		}
 		else if(elem instanceof Date) {
 			return df.format((Date)elem);
