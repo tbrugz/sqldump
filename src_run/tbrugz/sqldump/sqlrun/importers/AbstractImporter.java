@@ -50,7 +50,7 @@ public abstract class AbstractImporter {
 	String importDir = null;
 	String importFiles = null;
 	boolean follow = false;
-	String recordDelimiter = "\n";
+	String recordDelimiter = "\r?\n";
 	String insertTable = null;
 	String insertSQL = null;
 	String inputEncoding = "UTF-8";
@@ -229,6 +229,11 @@ public abstract class AbstractImporter {
 					mustSetupSQLStatement = true;
 				}
 				String line = scan.next();
+				/*if(line.endsWith(recordDelimiter)) {
+					log.info("line1["+line.length()+"]: ["+line+"]");
+					line = line.substring(0,line.length()-recordDelimiter.length()-1);
+					log.info("line2["+line.length()+"]: ["+line+"]");
+				}*/
 				
 				while(importthisline) {
 					try {
@@ -389,7 +394,7 @@ public abstract class AbstractImporter {
 			scan = new Scanner(fileIS, inputEncoding);
 			//scan = new Scanner(new File(importFile), inputEncoding);
 		}
-		scan.useDelimiter(Pattern.quote(recordDelimiter));
+		scan.useDelimiter(recordDelimiter);
 		return scan;
 	}
 	
