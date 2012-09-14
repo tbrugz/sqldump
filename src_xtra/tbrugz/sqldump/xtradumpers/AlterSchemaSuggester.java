@@ -43,25 +43,50 @@ import tbrugz.sqldump.util.Utils;
  * -- 2nd: test for each 2-col combination that doesn't include known PK/UK
  * -- 3rd+: test for each [2+]-col combination ...
  * 
- * XXX: output warn for tables that doesn't have PK
+ * XXXdone: output warn for tables that doesn't have PK
  * 
  * XXX: option to ignore tables by regex pattern
  * 
  * TODOne: use tbrugz.sqldump.util.CategorizedOut
  */
 public class AlterSchemaSuggester implements SchemaModelDumper {
+	
+	public static class Warning implements Comparable<Warning> {
+		DBObjectType type;
+		String warning;
+		String schemaName; 
+		
+		public Warning(DBObjectType type, String warning, String schemaName) {
+			this.type = type;
+			this.warning = warning;
+			this.schemaName = schemaName;
+		}
+
+		@Override
+		public int compareTo(Warning o) {
+			int comp = type.compareTo(o.type);
+			if(comp!=0) { return comp; }
+			
+			comp = schemaName.compareTo(o.schemaName);
+			if(comp!=0) { return comp; }
+			
+			return warning.compareTo(o.warning);
+		}
+	}
 
 	static final String PROP_PREFIX = "sqldump.alterschemasuggester";
 	
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS = PROP_PREFIX+".alterobjectsfromschemas";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY = PROP_PREFIX+".simplefksonly";
+	public static final String PROP_ALTER_SCHEMA_SUGGESTER_FKINDEXESSONLY = PROP_PREFIX+".fkindexessonly";
 	
 	static Log log = LogFactory.getLog(AlterSchemaSuggester.class);
 	
 	String fileOutput;
 	List<String> schemasToAlter;
 	boolean dumpSimpleFKsOnly = false; //XXXdone: add prop for dumpSimpleFKsOnly
+	boolean dumpFKIndexesOnly = true;
 	CategorizedOut cout;
 
 	@Override
@@ -76,6 +101,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			}
 		}
 		dumpSimpleFKsOnly = Utils.getPropBool(prop, PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY, dumpSimpleFKsOnly);
+		dumpFKIndexesOnly = Utils.getPropBool(prop, PROP_ALTER_SCHEMA_SUGGESTER_FKINDEXESSONLY, dumpFKIndexesOnly);
 	}
 
 	/*
@@ -132,6 +158,13 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			log.info("dumped "+count+" 'create index' statements for generated FKs");
 		}
 		
+		Set<Warning> noPKWarnings = dumpTablesWithNoPK(schemaModel);
+		if(noPKWarnings.size()>0) {
+			simpleOut("-- tables with no PK:", cout, null, DBObjectType.CONSTRAINT);
+			int count = writeWarnings(noPKWarnings, cout);
+			log.info("dumped "+count+" warnings for tables with no PKs");
+		}
+		
 		//fos.close();
 		
 		} catch (IOException e) {
@@ -168,17 +201,21 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 					Set<String> cols = new HashSet<String>();
 					cols.addAll(idx.columns);
 					if(idx.tableName.equals(fk.pkTable)) {
-						if(cols.equals(fk.pkColumns)) { pkTableHasIndex = true; }
+						if(stringCollectionEquals(cols,fk.pkColumns)) { pkTableHasIndex = true; }
+						//if(cols.equals(fk.pkColumns)) { pkTableHasIndex = true; }
+						//log.info("cols["+idx.tableName+"/pkt]: "+cols+" fk.pkCols: "+fk.pkColumns+"; hasI: "+pkTableHasIndex+"/"+stringCollectionEquals(cols, fk.pkColumns));
 					}
 					if(idx.tableName.equals(fk.fkTable)) { 
-						if(cols.equals(fk.fkColumns)) { fkTableHasIndex = true; }
+						if(stringCollectionEquals(cols,fk.fkColumns)) { fkTableHasIndex = true; }
+						//if(cols.equals(fk.fkColumns)) { fkTableHasIndex = true; }
+						//log.info("cols["+idx.tableName+"/fkt]: "+cols+" fk.fkCols: "+fk.fkColumns+"; hasI: "+fkTableHasIndex+"/"+stringCollectionEquals(cols, fk.fkColumns));
 					}
 				}
 			}
 			
 			//if(pkTableHasIndex && fkTableHasIndex) { continue; }
 			
-			if(!pkTableHasIndex) {
+			if(!pkTableHasIndex && !dumpFKIndexesOnly) {
 				Index idx = new Index();
 				idx.tableName = fk.pkTable;
 				idx.setSchemaName(fk.pkTableSchemaName);
@@ -290,6 +327,19 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		
 		return fks;
 	}
+
+	Set<Warning> dumpTablesWithNoPK(SchemaModel schemaModel) {
+		Set<Warning> warnings = new TreeSet<Warning>();
+		
+		for(Table t: schemaModel.getTables()) {
+			Constraint c = t.getPKConstraint();
+			if(c==null) {
+				warnings.add(new Warning(DBObjectType.CONSTRAINT, "-- table "+t.getSchemaName()+"."+t.getName()+" has no primary key", t.getSchemaName()));
+			}
+		}
+		
+		return warnings;
+	}
 	
 	/*static boolean containsBasedOnEquals(Collection col, Object o) {
 		for(Object co: col) {
@@ -326,6 +376,17 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		}
 		return dumpCounter;
 	}
+
+	int writeWarnings(Set<Warning> warnings, CategorizedOut fos) throws IOException {
+		int dumpCounter = 0;
+		for(Warning w: warnings) {
+			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(w.schemaName))) {
+				fos.categorizedOut( w.warning, w.schemaName, DBObjectType.CONSTRAINT.toString());
+				dumpCounter++;
+			}
+		}
+		return dumpCounter;
+	}
 	
 	static String suggestAcronym(Collection<String> strings) {
 		StringBuffer sb = new StringBuffer();
@@ -349,6 +410,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	
 	static void simpleOut(String s, CategorizedOut fos, String schemaName, DBObjectType ot) throws IOException {
 		fos.categorizedOut( s + "\n", schemaName, ot.toString() );
+	}
+	
+	static boolean stringCollectionEquals(Collection<String> s1, Collection<String> s2) {
+		if(s1==null && s2==null) { return true; }
+		if(s1==null || s2==null) { return false; }
+		
+		if(s1.containsAll(s2) && s2.containsAll(s1)) { return true; }
+		return false;
 	}
 	
 	@Override
