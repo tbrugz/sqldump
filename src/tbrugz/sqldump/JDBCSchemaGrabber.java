@@ -370,7 +370,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 			catch(SQLException sqle) {
 				log.warn("exception in table: "+tableName+" ["+sqle+"]");
-				log.debug("exception in table: "+tableName+" ["+sqle.getMessage()+"]", sqle);
+				log.info("exception in table: "+tableName+" ["+sqle.getMessage()+"]", sqle);
 				//tableNamesForDataDump.remove(tableName);
 			}
 			
@@ -479,6 +479,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(feats!=null) { feats.grabDBObjects(model, schemaPattern, conn); }
 	}
 
+	static boolean grabColumnIsAutoincrement = true;
+	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
@@ -486,7 +488,16 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
 		c.columSize = cols.getInt("COLUMN_SIZE");
 		c.setRemarks(cols.getString("REMARKS"));
-		boolean autoInc = cols.getBoolean("IS_AUTOINCREMENT");
+		boolean autoInc = false;
+		if(grabColumnIsAutoincrement) {
+			try {
+				cols.getBoolean("IS_AUTOINCREMENT");
+			}
+			catch(SQLException e) {
+				grabColumnIsAutoincrement = false;
+				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not avaiable");
+			}
+		}
 		if(autoInc) { c.autoIncrement = true; }
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
