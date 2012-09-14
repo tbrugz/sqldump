@@ -578,7 +578,14 @@ public class DataDump extends AbstractSQLProc {
 	static String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
 		//XXX: numberformatter (leading 0s) for partitionId?
 		for(String c: cols) {
-			String replacement = rs.getString(c);
+			String replacement = null;
+			try {
+				replacement = rs.getString(c);
+			}
+			catch(SQLException e) {
+				log.warn("getPartitionByStr(): column '"+c+"' not found in result set");
+				throw e;
+			}
 			if(replacement==null) { replacement = ""; }
 			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement);
 		}
