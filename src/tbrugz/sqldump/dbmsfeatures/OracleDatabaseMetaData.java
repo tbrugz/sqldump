@@ -97,18 +97,32 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		return st.executeQuery(sql);
 	}
 	
-	static boolean grabFKFromUK = false;
+	static boolean grabFKFromUK = true;
 	
 	/**
 	 * added a UK_CONSTRAINT_TYPE column, which returns: P - primary key, U - unique key
 	 */
 	@Override
-	public ResultSet getImportedKeys(String catalog, String schema, String table)
-			throws SQLException {
+	public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
+		return getKeys(catalog, schema, table, true);
+	}
+	
+	@Override
+	public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
+		return getKeys(catalog, schema, table, false);
+	}
+	
+	public ResultSet getKeys(String catalog, String schema, String table, boolean imported) throws SQLException {
 		//TODOne: do not grab FKs that do not reference a PK
-		
+
+		//TODO: if(grabFKFromUK==true) -> status, validated, rely are not returned! 
 		if(!grabFKFromUK) {
-			return super.getImportedKeys(catalog, schema, table);
+			if(imported) {
+				return super.getImportedKeys(catalog, schema, table);
+			}
+			else {
+				return super.getExportedKeys(catalog, schema, table);
+			}
 		}
 		
 		//XXX: this makes grabbing slower. prop option to use default method
@@ -130,7 +144,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+") ";
 
 		if(schema!=null) {
-			sql += "where FKTABLE_SCHEM = '"+schema+"' \n";
+			sql += "where "+(imported?"FKTABLE_SCHEM":"PKTABLE_SCHEM")+" = '"+schema+"' \n";
 		}
 		if(table!=null) {
 			if(schema!=null) {
@@ -139,7 +153,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			else {
 				sql += "where ";
 			}
-			sql += "FKTABLE_NAME = '"+table+"' ";
+			sql += (imported?"FKTABLE_NAME":"PKTABLE_NAME")+" = '"+table+"' ";
 		}
 		sql += "order by PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ";
 		Statement st = conn.createStatement();

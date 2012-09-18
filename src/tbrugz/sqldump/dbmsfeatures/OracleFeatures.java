@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -567,28 +568,37 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return new OracleFK();
 	}
 	
+	boolean grabXtraFKColumns = true;
+	
 	@Override
 	public void addFKSpecificFeatures(FK fk, ResultSet rs) {
 		if(fk instanceof OracleFK) {
-			OracleFK ofk = (OracleFK) fk;
 			try {
-				// acfk.status, acfk.validated, acfk.rely "
-				String status = rs.getString("STATUS");
-				if(status!=null && status.equals("DISABLED")) {
-					ofk.enabled = false; 
+				OracleFK ofk = (OracleFK) fk;
+				if(grabXtraFKColumns) {
+					// acfk.status, acfk.validated, acfk.rely
+					String status = rs.getString("STATUS");
+					if(status!=null && status.equals("DISABLED")) {
+						ofk.enabled = false; 
+					}
+					String validated = rs.getString("VALIDATED");
+					if(validated!=null && validated.equals("NOT VALIDATED")) {
+						ofk.validated = false; 
+					}
+					String rely = rs.getString("RELY");
+					if(rely!=null && !rely.equals("")) {
+						ofk.rely = false; 
+					}
 				}
-				String validated = rs.getString("VALIDATED");
-				if(validated!=null && validated.equals("NOT VALIDATED")) {
-					ofk.validated = false; 
-				}
-				String rely = rs.getString("RELY");
-				if(rely!=null && !rely.equals("")) {
-					ofk.rely = false; 
-				}
+				//log.info("OracleFK: "+ofk);
 			} catch (SQLException e) {
-				log.warn("sql exception:", e);
+				grabXtraFKColumns = false;
+				log.warn("addFKSpecificFeatures: column 'STATUS', 'VALIDATED' or 'RELY' not avaiable [ex: "+e+"]");
+				if(log.isDebugEnabled()) {
+					try { log.debug("rowlist: "+SQLUtils.getColumnNames(rs.getMetaData()));	}
+					catch(SQLException ee) { ee.printStackTrace(); }
+				}
 			}
-			//log.info("OracleFK: "+ofk);
 		}
 		else {
 			log.warn("FK "+fk+" should be instance of "+OracleFK.class.getSimpleName());
