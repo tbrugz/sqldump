@@ -47,9 +47,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 
 	static final String PROP_SCHEMADUMP_DOMAINTABLES = "sqldump.schemainfo.domaintables";
+	static final String PROP_SCHEMADUMP_TABLEFILTER = "sqldump.schemagrab.tablefilter";
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
@@ -79,6 +81,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			doSchemaGrabIndexes = false,
 			doSchemaGrabDbSpecific = false;
 	
+	Long maxLevel = null;
+	
 	@Override
 	public void procProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
@@ -94,6 +98,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		doSchemaGrabGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabGrants);
 		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
+		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
 
 		/*try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
@@ -191,20 +196,37 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		
 		schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 
+		List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_TABLEFILTER, ","); 
 		for(String schemaName: schemasList) {
-			grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
+			if(tablePatterns==null) {
+				grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
+			}
+			else {
+				for(String tableName: tablePatterns) {
+					grabRelations(schemaModel, dbmd, feats, schemaName, tableName, false);
+				}
+			}
 		}
 		
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
 			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
 			int lastTableCount = schemaModel.getTables().size();
-			log.info("grabbing tables recursively: #ini:"+lastTableCount);
+			int level = 0;
+			log.info("grabbing tables recursively["+level+"]: #ini:"+lastTableCount
+					+(maxLevel!=null?" [maxlevel="+maxLevel+"]":" [maxlevel not defined]"));
 			while(true) {
+				level++;
 				grabTablesRecursivebasedOnFKs(dbmd, feats, schemaModel, schemaPattern, grabExportedFKsAlso);
+				
 				int newTableCount = schemaModel.getTables().size();
-				if(newTableCount <= lastTableCount) { break; }
-				log.info("grabbing tables recursively: #last:"+lastTableCount+" #now:"+newTableCount);
+				boolean wontGrowMore = (newTableCount <= lastTableCount);
+				boolean maxLevelReached = (maxLevel!=null && level>=maxLevel);
+				log.info("grabbing tables recursively["+level+"]: #last:"+lastTableCount+" #now:"+newTableCount
+						+(wontGrowMore?" [won't grow more]":"")
+						+(maxLevelReached?" [maxlevel reached]":"")
+						);
+				if(wontGrowMore || maxLevelReached) { break; }
 				lastTableCount = newTableCount;
 			}
 		}
