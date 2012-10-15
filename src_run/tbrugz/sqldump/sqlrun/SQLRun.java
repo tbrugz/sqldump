@@ -41,11 +41,12 @@ import tbrugz.sqldump.util.Utils;
 public class SQLRun {
 	
 	public static enum CommitStrategy {
-		//AUTO_COMMIT, //not implemented yet
+		AUTO_COMMIT,
 		//STATEMENT, //not implemented yet
 		//FILE, //not implemented yet
 		EXEC_ID,
-		RUN
+		RUN,
+		NONE
 	} 
 	
 	static Log log = LogFactory.getLog(SQLRun.class);
@@ -69,6 +70,7 @@ public class SQLRun {
 	static String SUFFIX_DIR = ".dir";
 	static String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
 	static String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
+	static String SUFFIX_PARAM = ".param";
 	
 	//properties
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
@@ -76,8 +78,11 @@ public class SQLRun {
 
 	//suffix groups
 	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT };
-	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT };
+	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM };
 	List<String> allAuxSuffixes = new ArrayList<String>();
+	
+	//other/reserved props
+	static final String PROP_PROCID = "_procid";
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
@@ -96,7 +101,6 @@ public class SQLRun {
 		Collections.sort(execkeys);
 		log.info("init processing...");
 		long initTime = System.currentTimeMillis();
-		commitStrategty = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY) );
 
 		Set<String> procIds = new TreeSet<String>();
 		for(String key: execkeys) {
@@ -113,10 +117,12 @@ public class SQLRun {
 		for(String key: execkeys) {
 			boolean isExecId = false;
 			String procId = getExecId(key, PREFIX_EXEC);
+			String action = key.substring((PREFIX_EXEC+procId).length());
 			if(endsWithAny(key, PROC_SUFFIXES)) {
-				log.info(">>> processing: id = '"+procId+"'");
+				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"'");
 				isExecId = true;
 			}
+			papp.setProperty(PROP_PROCID, procId);
 			
 			boolean splitBySemicolon = Utils.getPropBool(papp, PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
 			
@@ -204,6 +210,9 @@ public class SQLRun {
 			else if(endsWithAny(key, allAuxSuffixes)) {
 				//do nothing here
 			}
+			else if(startsWithAny(action, allAuxSuffixes)) {
+				//do nothing here
+			}
 			else {
 				log.warn("unknown prop key format: '"+key+"'");
 			}
@@ -241,6 +250,13 @@ public class SQLRun {
 		}
 		return false;
 	}
+
+	static boolean startsWithAny(String key, List<String> prefixes) {
+		for(String pre: prefixes) {
+			if(key.startsWith(pre)) { return true; }
+		}
+		return false;
+	}
 	
 	void doCommit() throws SQLException {
 		log.debug("committing...");
@@ -258,8 +274,10 @@ public class SQLRun {
 	static CommitStrategy getCommitStrategy(String commit) {
 		CommitStrategy cs = CommitStrategy.RUN;
 		if(commit==null) {}
+		else if(commit.equals("autocommit")) { cs = CommitStrategy.AUTO_COMMIT; }
 		else if(commit.equals("execid")) { cs = CommitStrategy.EXEC_ID; }
 		else if(commit.equals("run")) { cs = CommitStrategy.RUN; }
+		else if(commit.equals("none")) { cs = CommitStrategy.NONE; }
 		else {
 			log.warn("unknown commit strategy: "+commit);
 		}
@@ -272,6 +290,9 @@ public class SQLRun {
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
+		
+		commitStrategty = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY) );
+		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategty==CommitStrategy.AUTO_COMMIT);
 	}
 	
 	public static List<String> getFiles(String dir, String fileRegex) {
@@ -301,9 +322,7 @@ public class SQLRun {
 		SQLRun sqlr = new SQLRun();
 		
 		try {
-			//SQLDump.init(args, sqlr.papp);
 			sqlr.init(args);
-			sqlr.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sqlr.papp);
 			if(sqlr.conn==null) { return; }
 			sqlr.doIt();
 		}

@@ -42,6 +42,10 @@ public class SQLUtils {
 		public static final String SUFFIX_INITSQL = ".initsql";
 
 		public static Connection initDBConnection(String propsPrefix, Properties papp) throws Exception {
+			return initDBConnection(propsPrefix, papp, false);
+		}
+
+		public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws Exception {
 			//init database
 			log.debug("initDBConnection...");
 			
@@ -79,7 +83,7 @@ public class SQLUtils {
 			Connection conn = DriverManager.getConnection(dbUrl, p);
 			// setAutoCommit(false): needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
 			// anyway, i think this should be default
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(autoCommit);
 			
 			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
 			if(dbInitSql!=null) {

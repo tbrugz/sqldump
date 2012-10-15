@@ -7,8 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -119,6 +119,7 @@ public class StmtProc {
 		}
 		catch (NullPointerException npe) {
 			log.warn("error log file not defined. Ex: "+npe);
+			//npe.printStackTrace();
 			errorFileNotFoundWarned = true;
 		} catch (IOException e) {
 			log.warn("ioexception when opening error log file. Ex: "+e);
@@ -139,16 +140,31 @@ public class StmtProc {
 		stmtStr = stmtStr.trim();
 		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
 		
-		Statement stmt = conn.createStatement();
 		logStmt.debug("executing sql: "+stmtStr);
 		try {
-			int urows = stmt.executeUpdate(stmtStr);
+			PreparedStatement stmt = conn.prepareStatement(stmtStr);
+			setParameters(stmt);
+			int urows = stmt.executeUpdate();
 			logStmt.debug("updated "+urows+" rows");
 			return urows;
 		}
 		catch(SQLException e) {
 			conn.rollback();
 			throw e;
+		}
+	}
+	
+	void setParameters(PreparedStatement stmt) throws SQLException {
+		int i=1;
+		while(true) {
+			String key = SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String param = papp.getProperty(key);
+			log.debug("param #"+i+"/"+key+": "+param);
+			if(param!=null) {
+				stmt.setString(i, param);
+			}
+			else { return; }
+			i++;
 		}
 	}
 	
