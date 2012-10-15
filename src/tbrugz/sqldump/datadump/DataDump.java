@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -272,6 +271,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			long initTime = System.currentTimeMillis();
+			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
 			

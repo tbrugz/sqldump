@@ -63,6 +63,17 @@ public class SQLQueries extends AbstractSQLProc {
 		int i=0;
 		for(String qid: queriesArr) {
 			qid = qid.trim();
+			//replace strings
+			int replaceCount = 1;
+			//List<String> replacers = new ArrayList<String>();
+			while(true) {
+				String paramStr = prop.getProperty("sqldump.query."+qid+".replace."+replaceCount);
+				if(paramStr==null) { break; }
+				prop.setProperty("sqldump.query.replace."+replaceCount, paramStr);
+				//replacers.add(paramStr);
+				replaceCount++;
+			}
+			//sql string
 			String sql = prop.getProperty("sqldump.query."+qid+".sql");
 			if(sql==null) {
 				//load from file
