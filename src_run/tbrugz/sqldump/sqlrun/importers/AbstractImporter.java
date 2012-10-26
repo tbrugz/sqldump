@@ -57,6 +57,7 @@ public abstract class AbstractImporter {
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
 	Long commitEachXrows = 100l;
+	Long logEachXrows = 10000l; //XXX: prop for logEachXrows
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;
@@ -334,6 +335,9 @@ public abstract class AbstractImporter {
 		counter.output += changedRows;
 		if(commitEachXrows!=null && commitEachXrows>0 && (counter.output%commitEachXrows==0)) {
 			doCommit(conn);
+		}
+		if(logEachXrows!=null && logEachXrows>0 && (counter.output%logEachXrows==0)) {
+			log.info("[exec-id="+execId+"] "+counter.output+" rows imported");
 		}
 	}
 	

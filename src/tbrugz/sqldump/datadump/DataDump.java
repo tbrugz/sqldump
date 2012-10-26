@@ -408,7 +408,8 @@ public class DataDump extends AbstractSQLProc {
 				countInPartition++;
 				
 				if(log1stRow && count==1) {
-					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped");
+					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
+						" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
 				}
 				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
 					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped");

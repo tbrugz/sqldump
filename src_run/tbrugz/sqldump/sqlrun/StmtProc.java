@@ -111,7 +111,7 @@ public class StmtProc {
 			}
 			logerror = new FileWriter(errorLogFilePath, true);
 		}
-		catch(FileNotFoundException fnfe) {
+		catch (FileNotFoundException fnfe) {
 			if(!errorFileNotFoundWarned) {
 				log.warn("error opening file '"+errorLogFilePath+"' for writing invalid statements. Ex: "+fnfe);
 				errorFileNotFoundWarned = true;
@@ -121,7 +121,8 @@ public class StmtProc {
 			log.warn("error log file not defined. Ex: "+npe);
 			//npe.printStackTrace();
 			errorFileNotFoundWarned = true;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			log.warn("ioexception when opening error log file. Ex: "+e);
 			errorFileNotFoundWarned = true;
 		}
