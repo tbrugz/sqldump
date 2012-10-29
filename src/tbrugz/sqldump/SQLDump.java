@@ -72,7 +72,8 @@ import tbrugz.sqldump.util.Utils;
  * XXXxx: error dumping blobs
  * XXXxx: add support for blobs (BlobDataDump)
  * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
- * XXX: option for queries (or specific queries) to have specific syntax-dumpers
+ * XXX: option for queries to have specific syntax-dumpers
+ * XXXdone: option for specific queries to have specific syntax-dumpers
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
