@@ -148,7 +148,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
-		showDBInfo(conn.getMetaData());
+		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 		
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
@@ -282,16 +282,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		return sb.toString();
 		
-	}
-	
-	static void showDBInfo(DatabaseMetaData dbmd) {
-		try {
-			log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
-			log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
-		} catch (Exception e) {
-			log.warn("error grabbing database/jdbc driver info: "+e);
-			//e.printStackTrace();
-		}
 	}
 	
 	//XXX shoud it be "grabTables"?

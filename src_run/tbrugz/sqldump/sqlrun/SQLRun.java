@@ -293,6 +293,7 @@ public class SQLRun {
 		
 		commitStrategty = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY) );
 		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategty==CommitStrategy.AUTO_COMMIT);
+		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 	}
 	
 	public static List<String> getFiles(String dir, String fileRegex) {

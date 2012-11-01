@@ -5,6 +5,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -62,6 +63,14 @@ public class SQLUtils {
 
 			Class.forName(driverClass);
 			
+			Driver driver = DriverManager.getDriver(dbUrl);
+			if(driver!=null) {
+				log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
+			}
+			else {
+				log.warn("jdbc driver not found [url: "+dbUrl+"]");
+			} 
+			
 			Properties p = new Properties();
 			p.setProperty(CONN_PROP_USER, papp.getProperty(propsPrefix+SUFFIX_USER, ""));
 			p.setProperty(CONN_PROP_PASSWORD, papp.getProperty(propsPrefix+SUFFIX_PASSWD, ""));
@@ -98,6 +107,17 @@ public class SQLUtils {
 				}
 			}
 			return conn;
+		}
+		
+		public static void showDBInfo(DatabaseMetaData dbmd) {
+			try {
+				log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
+				log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
+				log.debug("jdbc version: "+dbmd.getJDBCMajorVersion()+"."+dbmd.getJDBCMinorVersion());
+			} catch (Exception e) {
+				log.warn("error grabbing database/jdbc driver info: "+e);
+				//e.printStackTrace();
+			}
 		}
 	}
 
