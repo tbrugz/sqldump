@@ -150,7 +150,12 @@ public class StmtProc {
 			return urows;
 		}
 		catch(SQLException e) {
-			conn.rollback();
+			try {
+				conn.rollback();
+			}
+			catch(SQLException e2) {
+				log.warn("error in rollback: "+e2);
+			}
 			throw e;
 		}
 	}
@@ -160,8 +165,8 @@ public class StmtProc {
 		while(true) {
 			String key = SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
 			String param = papp.getProperty(key);
-			log.debug("param #"+i+"/"+key+": "+param);
 			if(param!=null) {
+				log.debug("param #"+i+"/"+key+": "+param);
 				stmt.setString(i, param);
 			}
 			else { return; }
