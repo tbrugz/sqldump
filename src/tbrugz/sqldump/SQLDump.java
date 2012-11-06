@@ -171,8 +171,21 @@ public class SQLDump {
 		SchemaModelGrabber schemaGrabber = null;
 		//DBMSResources.instance().updateMetaData(null);
 		
-		//grabbing model
+		//class names
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
+		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
+		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+		if(grabClassName!=null && dumpSchemaClasses==null) {
+			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
+		}
+		if(grabClassName==null && dumpSchemaClasses!=null) {
+			log.warn("dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined but no grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
+		}
+		if(grabClassName==null && dumpSchemaClasses==null && processingClassesStr==null) {
+			log.warn("no grabber [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'], dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
+		}
+		
+		//grabbing model
 		if(grabClassName!=null) {
 			schemaGrabber = (SchemaModelGrabber) getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
@@ -190,7 +203,7 @@ public class SQLDump {
 			}
 		}
 		else {
-			log.warn("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
+			log.debug("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
 		String dirToDeleteFiles = sdd.papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
@@ -206,7 +219,6 @@ public class SQLDump {
 		log.debug("DBMSFeatures: "+feats);
 		
 		//processing classes
-		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
 		if(processingClassesStr!=null) {
 			if(sdd.conn==null) {
 				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
@@ -228,7 +240,6 @@ public class SQLDump {
 		}
 		
 		//dumping model
-		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
 		if(dumpSchemaClasses!=null) {
 			String dumpClasses[] = dumpSchemaClasses.split(",");
 			for(String dumpClass: dumpClasses) {
@@ -243,7 +254,7 @@ public class SQLDump {
 			}
 		}
 		else {
-			log.warn("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
+			log.debug("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 		}
 		
 		}
@@ -271,6 +282,9 @@ public class SQLDump {
 		while(o==null && defaultPackages!=null && defaultPackages.length > countPack) {
 			o = Utils.getClassInstance(defaultPackages[countPack]+"."+className);
 			countPack++;
+		}
+		if(o==null) {
+			log.debug("class not found: "+className);
 		}
 		return o;
 	}

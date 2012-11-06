@@ -117,6 +117,8 @@ public class SQLUtils {
 			} catch (Exception e) {
 				log.warn("error grabbing database/jdbc driver info: "+e);
 				//e.printStackTrace();
+			} catch (AbstractMethodError e) {
+				log.warn("error grabbing database/jdbc driver info: "+e);
 			}
 		}
 	}
