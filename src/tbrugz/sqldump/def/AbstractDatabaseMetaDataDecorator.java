@@ -755,5 +755,19 @@ public abstract class AbstractDatabaseMetaDataDecorator implements DatabaseMetaD
 		return metadata.getFunctionColumns(catalog, schemaPattern,
 				functionNamePattern, columnNamePattern);
 	}
+
+	//since 1.7
+	@Override
+	public ResultSet getPseudoColumns(String catalog, String schemaPattern,
+			String tableNamePattern, String columnNamePattern)
+			throws SQLException {
+		return metadata.getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+	}
+
+	//since 1.7
+	@Override
+	public boolean generatedKeyAlwaysReturned() throws SQLException {
+		return metadata.generatedKeyAlwaysReturned();
+	}
 	
 }

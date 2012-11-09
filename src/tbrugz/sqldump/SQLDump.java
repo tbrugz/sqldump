@@ -92,11 +92,11 @@ public class SQLDump {
 	static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
-	static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
-	static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
+	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
+	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
+	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
+
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
-	static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
-	
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	
 	//properties files filenames
