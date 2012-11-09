@@ -1,8 +1,10 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -70,15 +72,15 @@ public abstract class DumpSyntax {
 		return getSyntaxId();
 	}
 	
-	public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws Exception;
+	public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
 	
-	public abstract void dumpHeader(Writer fos) throws Exception;
+	public abstract void dumpHeader(Writer fos) throws IOException;
 
-	public abstract void dumpRow(ResultSet rs, long count, Writer fos) throws Exception;
+	public abstract void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
 
-	public abstract void dumpFooter(Writer fos) throws Exception;
+	public abstract void dumpFooter(Writer fos) throws IOException;
 
-	public void flushBuffer(Writer fos) throws Exception {}
+	public void flushBuffer(Writer fos) throws IOException {}
 	
 	/**
 	 * Should return true if responsable for creating output files

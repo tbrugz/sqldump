@@ -1,5 +1,6 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -50,7 +51,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	}
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		if(pkCols==null) { return; }
 		
 		List<String> vals = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );

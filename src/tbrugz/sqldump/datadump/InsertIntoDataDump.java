@@ -52,7 +52,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		out("insert into "+tableName+" "+
 			colNames+" values ("+
@@ -65,12 +65,12 @@ public class InsertIntoDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) {
 		//do nothing
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) {
 		//do nothing
 	}
 

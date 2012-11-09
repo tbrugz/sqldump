@@ -1,5 +1,6 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -205,7 +206,7 @@ public class DataDumpUtils {
 		return buffer.toString();
 	}
 
-	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws Exception {
+	public static void dumpRS(DumpSyntax ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
 		//int ncol = rsmd.getColumnCount();
 		ds.initDump(tableName, null, rsmd);
 		ds.dumpHeader(writer);

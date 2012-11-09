@@ -59,7 +59,7 @@ public class HTMLDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) throws IOException {
 		if(prepend!=null) { out(prepend, fos); }
 		out("<table class='"+tableName+"'>", fos);
 		StringBuffer sb = new StringBuffer();
@@ -76,7 +76,7 @@ public class HTMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t"+"<tr>");
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
@@ -110,7 +110,7 @@ public class HTMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) throws IOException {
 		out("</table>", fos);
 		if(append!=null) { out(append, fos); }
 	}

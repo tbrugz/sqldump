@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -72,7 +73,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws Exception {
+	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.md = md;
 		numCol = md.getColumnCount();		
@@ -92,7 +93,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) throws IOException {
 		//headers
 		if(doTableNameHeaderDump) {
 			out("[table "+tableName+"]", fos, recordDelimiter);
@@ -100,7 +101,7 @@ public class CSVDataDump extends DumpSyntax {
 		if(doColumnNamesHeaderDump) {
 			StringBuffer sb = new StringBuffer();
 			for(int i=0;i<numCol;i++) {
-				sb.append( (i!=0?columnDelimiter:"") + md.getColumnName(i+1));
+				sb.append( (i!=0?columnDelimiter:"") + lsColNames.get(i));
 			}
 			out(sb.toString(), fos, recordDelimiter);
 		}
@@ -126,7 +127,7 @@ public class CSVDataDump extends DumpSyntax {
 	static boolean resultSetWarned = false;
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
 		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
@@ -154,7 +155,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) {
 		//do nothing
 	}
 	

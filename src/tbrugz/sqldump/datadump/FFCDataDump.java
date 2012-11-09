@@ -98,7 +98,7 @@ public class FFCDataDump extends DumpSyntax {
 	List<Boolean> leftAlignField = new ArrayList<Boolean>();
 	
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) {
 		setColMaxLenghtForColNames();
 	}
 	
@@ -121,7 +121,7 @@ public class FFCDataDump extends DumpSyntax {
 	static boolean resultSetWarned = false;
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		//first count is equal 0
 		if(count%lineGroupSize==0) {
 			dumpBuffer(fos);
@@ -241,13 +241,13 @@ public class FFCDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
 	}
 	
 	@Override
-	public void flushBuffer(Writer fos) throws Exception {
+	public void flushBuffer(Writer fos) throws IOException {
 		if(valuesBuffer.size()<=0) { return; } //not needed now: dumpBuffer() already does it
 		dumpBuffer(fos);
 	}

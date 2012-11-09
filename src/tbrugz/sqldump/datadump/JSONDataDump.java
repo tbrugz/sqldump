@@ -22,6 +22,7 @@ import tbrugz.sqldump.SQLUtils;
  *      http://msdn.microsoft.com/en-us/library/bb299886.aspx 
  *      
  * TODO: option to output as hash (using pkcols)
+ * TODO: add prepend/append (JSONP option) / ?callback=xxx
  */
 public class JSONDataDump extends DumpSyntax {
 
@@ -63,7 +64,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) throws IOException {
 		if(tableName!=null) {
 			outNoPadding("{ \""+tableName+"\": "
 				+(this.pkCols!=null?"{":"[")
@@ -76,7 +77,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t"+(count==0?"":","));
 		if(this.pkCols!=null) {
@@ -127,7 +128,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) throws IOException {
 		if(tableName!=null) {
 			out((usePK?"}":"]")+"}",fos);
 		}

@@ -47,7 +47,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) throws IOException {
 		//XXX: add xml declaration? optional? e.g.: <?xml version="1.0" encoding="UTF-8" ?>
 		//see http://www.w3.org/TR/REC-xml/#NT-XMLDecl
 		//    http://www.ibm.com/developerworks/xml/library/x-tipdecl/index.html
@@ -55,7 +55,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
 		//XXX: option to define 'row' xml-element
 		sb.append("\t"+"<row>");
@@ -87,7 +87,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) throws IOException {
 		out("</"+tableName+">", fos);
 	}
 

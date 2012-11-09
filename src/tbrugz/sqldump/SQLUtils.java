@@ -42,11 +42,11 @@ public class SQLUtils {
 		public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
 		public static final String SUFFIX_INITSQL = ".initsql";
 
-		public static Connection initDBConnection(String propsPrefix, Properties papp) throws Exception {
+		public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException {
 			return initDBConnection(propsPrefix, papp, false);
 		}
 
-		public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws Exception {
+		public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException {
 			//init database
 			log.debug("initDBConnection...");
 			

@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.sql.Blob;
@@ -55,7 +56,7 @@ public class BlobDataDump extends DumpSyntax {
 
 	@Override
 	public void initDump(String tableName, List<String> pkCols,
-			ResultSetMetaData md) throws Exception {
+			ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.pkCols = pkCols;
 		
@@ -77,14 +78,14 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) throws Exception {
+	public void dumpHeader(Writer fos) {
 	}
 	
 	//XX: prop for setting ROWID_JOINER
 	public static String ROWID_JOINER = "_";
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer writer) throws Exception {
+	public void dumpRow(ResultSet rs, long count, Writer writer) throws IOException, SQLException {
 		if(pkCols==null) { return; }
 		
 		List<String> pkVals = new ArrayList<String>();
@@ -121,7 +122,7 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws Exception {
+	public void dumpFooter(Writer fos) {
 	}
 	
 	@Override
