@@ -22,13 +22,19 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
-import tbrugz.sqldump.dbmodel.DBObject.DBObjectId;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
+
+class DBObjectId extends DBIdentifiable {
+	@Override
+	public String getDefinition(boolean dumpSchemaName) {
+		return null;
+	}
+}
 
 /*
  * TODOne: accept list of schemas to grab/dump
@@ -453,15 +459,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.getForeignKeys()) {
 			DBObjectId dbid = new DBObjectId();
-			dbid.name = fk.pkTable;
-			dbid.schemaName = fk.pkTableSchemaName;
+			dbid.setName(fk.pkTable);
+			dbid.setSchemaName(fk.pkTableSchemaName);
 			ids.add(dbid);
 	
 			//Exported FKs
 			if(grabExportedFKsAlso) {
 				DBObjectId dbidFk = new DBObjectId();
-				dbidFk.name = fk.fkTable;
-				dbidFk.schemaName = fk.fkTableSchemaName;
+				dbidFk.setName(fk.fkTable);
+				dbidFk.setSchemaName(fk.fkTableSchemaName);
 				ids.add(dbidFk);
 			}
 			
@@ -472,9 +478,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		for(DBObjectId id: ids) {
 			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
-			if(!containsTableWithSchemaAndName(schemaModel.getTables(), id.schemaName, id.name)) {
-				log.debug("recursivegrab-grabschema: "+id.schemaName+"."+id.name);
-				grabRelations(schemaModel, dbmd, dbmsfeatures, id.schemaName, id.name, true);				
+			if(!containsTableWithSchemaAndName(schemaModel.getTables(), id.getSchemaName(), id.getName())) {
+				log.debug("recursivegrab-grabschema: "+id.getSchemaName()+"."+id.getName());
+				grabRelations(schemaModel, dbmd, dbmsfeatures, id.getSchemaName(), id.getName(), true);				
 			}
 		}
 	}

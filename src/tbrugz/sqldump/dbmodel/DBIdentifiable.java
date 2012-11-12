@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlTransient;
 
+//XXX implement Comparable<DBIdentifiable>? 
 public abstract class DBIdentifiable {
 	String schemaName;
 
