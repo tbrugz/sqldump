@@ -15,7 +15,7 @@ public class InformationSchemaTrigger extends Trigger {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create trigger "+name
+		return "create trigger "+getName()
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
 				+"\n  on "+tableName
 				+"\n  for each "+actionOrientation
@@ -25,7 +25,7 @@ public class InformationSchemaTrigger extends Trigger {
 	
 	@Override
 	public String toString() {
-		return "[ISTrigger:"+name+"/"+tableName+":"+conditionTiming+","+actionOrientation+","+eventsManipulation+"]";
+		return "[ISTrigger:"+getName()+"/"+tableName+":"+conditionTiming+","+actionOrientation+","+eventsManipulation+"]";
 	}
 
 	@Override

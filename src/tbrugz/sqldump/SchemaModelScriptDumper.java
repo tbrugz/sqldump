@@ -200,10 +200,10 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
 			}
 			
-			categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
+			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
 			String afterTableScript = table.getAfterCreateTableScript();
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
-				categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, afterTableScript);
+				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);
 			}
 			
 			//table end: ';'
@@ -212,9 +212,9 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			//FK outside table, with referencing table
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
 				for(FK fk: schemaModel.getForeignKeys()) {
-					if(fk.fkTable.equals(table.name)) {
+					if(fk.fkTable.equals(table.getName())) {
 						String fkscript = fkScriptWithAlterTable(fk, dumpDropStatements, dumpWithSchemaName);
-						categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, fkscript);
+						categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, fkscript);
 					}
 				}
 			}
@@ -227,19 +227,19 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 						log.warn("index null? table: "+table+" / idx: "+idx);
 						continue;
 					}
-					if(table.name.equals(idx.tableName)) {
+					if(table.getName().equals(idx.tableName)) {
 						categorizedOut(idx.getSchemaName(), idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+";\n");
 					}
 				}
 			}
 
-			String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.name;
+			String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.getName();
 			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
-					categorizedOut(table.getSchemaName(), table.name, DBObjectType.TABLE, grantOutput);
+					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, grantOutput);
 				}
 			}
 			
@@ -247,7 +247,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			if(dumpTriggersWithReferencingTable) {
 				for(Trigger tr: schemaModel.getTriggers()) {
 					//option for trigger output inside table
-					if(table.name.equals(tr.tableName)) {
+					if(table.getName().equals(tr.tableName)) {
 						categorizedOut(tr.getSchemaName(), tr.tableName, DBObjectType.TABLE, tr.getDefinition(dumpWithSchemaName)+"\n");
 					}
 				}
@@ -261,33 +261,33 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		
 		//Views
 		for(View v: schemaModel.getViews()) {
-			categorizedOut(v.getSchemaName(), v.name, DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+";\n");
+			categorizedOut(v.getSchemaName(), v.getName(), DBObjectType.VIEW, v.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Triggers
 		for(Trigger t: schemaModel.getTriggers()) {
 			if(!dumpTriggersWithReferencingTable || t.tableName==null) {
-				categorizedOut(t.getSchemaName(), t.name, DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
+				categorizedOut(t.getSchemaName(), t.getName(), DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
 			}
 		}
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.getExecutables()) {
 			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
-			categorizedOut(eo.getSchemaName(), eo.name, eo.type, 
-				"-- Executable: "+eo.type+" "+eo.name+"\n"
+			categorizedOut(eo.getSchemaName(), eo.getName(), eo.type, 
+				"-- Executable: "+eo.type+" "+eo.getName()+"\n"
 				+eo.getDefinition(dumpWithSchemaName)+"\n");
 		}
 
 		//Synonyms
 		for(Synonym s: schemaModel.getSynonyms()) {
-			categorizedOut(s.getSchemaName(), s.name, DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+";\n");
+			categorizedOut(s.getSchemaName(), s.getName(), DBObjectType.SYNONYM, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		//Indexes
 		if(!dumpIndexesWithReferencingTable) {
 			for(Index idx: schemaModel.getIndexes()) {
-				categorizedOut(idx.getSchemaName(), idx.name, DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+";\n");
+				categorizedOut(idx.getSchemaName(), idx.getName(), DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+";\n");
 			}
 		}
 		
@@ -295,28 +295,28 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(!dumpGrantsWithReferencingTable) {
 			//tables
 			for(Table table: schemaModel.getTables()) {
-				String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.name;
+				String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.getName();
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
-					categorizedOut(table.getSchemaName(), table.name, DBObjectType.GRANT, grantOutput);
+					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.GRANT, grantOutput);
 				}
 			}
 			//executables
 			//TODO: how to dump exec grants if 'dumpGrantsWithReferencingTable' is true?
 			//XXX: compactGrantDump for Executable's Grants doesn't make sense, since there is only one type of privilege for Executables (EXECUTE) (for now?)
 			for(ExecutableObject eo: schemaModel.getExecutables()) {
-				String eoName = (dumpWithSchemaName?eo.getSchemaName()+".":"")+eo.name;
+				String eoName = (dumpWithSchemaName?eo.getSchemaName()+".":"")+eo.getName();
 				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
 				String grantOutput = compactGrantDump(eo.grants, eoName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
-					categorizedOut(eo.getSchemaName(), eo.name, DBObjectType.GRANT, grantOutput);
+					categorizedOut(eo.getSchemaName(), eo.getName(), DBObjectType.GRANT, grantOutput);
 				}
 			}
 		}
 
 		//Sequences
 		for(Sequence s: schemaModel.getSequences()) {
-			categorizedOut(s.getSchemaName(), s.name, DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+";\n");
+			categorizedOut(s.getSchemaName(), s.getName(), DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
 		log.info("...schema dumped");

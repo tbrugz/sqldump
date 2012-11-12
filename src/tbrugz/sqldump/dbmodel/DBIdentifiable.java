@@ -2,15 +2,10 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.Collection;
 
-import javax.xml.bind.annotation.XmlTransient;
-
 //XXX implement Comparable<DBIdentifiable>? 
 public abstract class DBIdentifiable {
 	String schemaName;
-
-	@XmlTransient
-	public String name;
-	//DBObjectType objtype;
+	String name;
 
 	public String getName() {
 		return name;

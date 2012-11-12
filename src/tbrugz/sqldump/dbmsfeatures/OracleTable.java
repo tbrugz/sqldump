@@ -71,7 +71,7 @@ public class OracleTable extends Table {
 					footer += "partitions "+numberOfPartitions;
 				}
 				else {
-					throw new RuntimeException("inconsistent partition info [table = "+name+"]");
+					throw new RuntimeException("inconsistent partition info [table = "+getName()+"]");
 				}
 			}
 		}

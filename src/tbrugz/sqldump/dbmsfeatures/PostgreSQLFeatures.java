@@ -40,7 +40,7 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 		while(rs.next()) {
 			InformationSchemaRoutine eo = new InformationSchemaRoutine();
 			eo.setSchemaName( schemaPattern );
-			eo.name = rs.getString(1);
+			eo.setName( rs.getString(1) );
 			try {
 				eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
 			}

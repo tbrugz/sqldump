@@ -168,7 +168,7 @@ public class DataDump extends AbstractSQLProc {
 		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
-			String tableName = table.name;
+			String tableName = table.getName();
 			if(tables4dump!=null) {
 				if(!tables4dump.contains(tableName)) { continue; }
 				else { tables4dump.remove(tableName); }

@@ -326,12 +326,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			
 			//defining model
 			Table table = dbmsfeatures.getTableObject();
-			table.name = tableName;
+			table.setName( tableName );
 			table.setSchemaName(schemaName);
 			table.setType(ttype);
 			table.setRemarks(rs.getString("REMARKS"));
-			if(domainTables!=null && domainTables.contains(table.name)) {
-				log.debug("domain table: "+table.name);
+			if(domainTables!=null && domainTables.contains(table.getName())) {
+				log.debug("domain table: "+table.getName());
 				table.setDomainTable(true);
 			}
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
@@ -487,7 +487,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
 		for(Table t: tables) {
-			if(t.name.equals(tableName) && t.getSchemaName().equals(schemaName)) return true;
+			if(t.getName().equals(tableName) && t.getSchemaName().equals(schemaName)) return true;
 		}
 		return false;
 	}
@@ -636,14 +636,14 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				log.debug("nameless index: "+indexesrs.getString("TABLE_NAME"));
 				continue; 
 			}
-			if(idx==null || !idxName.equals(idx.name)) {
+			if(idx==null || !idxName.equals(idx.getName())) {
 				//end last object
 				if(idx!=null) {
 					indexes.add(idx);
 				}
 				//new object
 				idx = new Index();
-				idx.name = idxName;
+				idx.setName(idxName);
 				boolean bNonUnique = indexesrs.getBoolean("NON_UNIQUE");
 				idx.unique = !bNonUnique;
 				
@@ -653,8 +653,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 				//for MySQL
 				if(idx.getSchemaName()==null && catName!=null) { idx.setSchemaName( catName ); }
-				if(idx.name.equals("PRIMARY")) {
-					idx.name = newNameFromTableName(idx.tableName, pkiNamePattern);
+				if(idx.getName().equals("PRIMARY")) {
+					idx.setName( newNameFromTableName(idx.tableName, pkiNamePattern) );
 				}
 				
 			}

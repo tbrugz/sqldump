@@ -56,7 +56,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			View v = new DerbyView();
-			v.name = rs.getString(1);
+			v.setName( rs.getString(1) );
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
 			v.query = rs.getString(3);
 			v.setSchemaName( schemaPattern );
@@ -83,7 +83,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			InformationSchemaTrigger t = new InformationSchemaTrigger();
 			//t.addSplitter = true;
-			t.name = rs.getString(1);
+			t.setName( rs.getString(1) );
 			t.setSchemaName( schemaPattern );
 			//t.tableName = rs.getString(3);
 			//t.description = rs.getString(4);
@@ -124,7 +124,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			Sequence s = new Sequence();
 			s.setSchemaName( schemaPattern );
-			s.name = rs.getString(1);
+			s.setName( rs.getString(1) );
 			s.minValue = rs.getLong(2);
 			s.maxValue = rs.getLong(3);
 			s.lastNumber = rs.getLong(4);

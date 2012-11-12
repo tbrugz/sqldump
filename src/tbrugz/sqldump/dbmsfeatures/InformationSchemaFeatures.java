@@ -68,7 +68,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			View v = new View();
-			v.name = rs.getString(3);
+			v.setName( rs.getString(3) );
 			v.query = rs.getString(4);
 			v.query = v.query.substring(0, v.query.length()-2);
 			v.setSchemaName( schemaPattern );
@@ -109,7 +109,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				count++;
 			}
 			t.setSchemaName( schemaName );
-			t.name = name;
+			t.setName( name );
 			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
 			t.actionStatement = rs.getString(7);
@@ -142,7 +142,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 
 			String routineName = rs.getString(1);
-			if(eo==null || !routineName.equals(eo.name)) {
+			if(eo==null || !routineName.equals(eo.getName())) {
 				//end last object
 				if(eo!=null) {
 					model.getExecutables().add(eo);
@@ -151,7 +151,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				//new object
 				eo = new InformationSchemaRoutine();
 				eo.setSchemaName( schemaPattern );
-				eo.name = routineName;
+				eo.setName( routineName );
 				try {
 					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
 				}
@@ -193,7 +193,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			Sequence s = new Sequence();
 			s.setSchemaName( schemaPattern );
-			s.name = rs.getString(1);
+			s.setName( rs.getString(1) );
 			String minvalueStr = rs.getString(2);
 			if(minvalueStr!=null) {
 				s.minValue = rs.getLong(2);

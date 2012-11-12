@@ -91,7 +91,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			View v = new View();
-			v.name = rs.getString(2);
+			v.setName( rs.getString(2) );
 			v.query = rs.getString(4);
 			v.setSchemaName(schemaPattern);
 			model.getViews().add(v);
@@ -114,7 +114,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			MaterializedView v = new MaterializedView();
-			v.name = rs.getString(2);
+			v.setName( rs.getString(2) );
 			v.query = rs.getString(4);
 			v.setSchemaName(schemaPattern);
 			//v.materialized = true;
@@ -138,7 +138,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			Trigger t = new Trigger();
-			t.name = rs.getString(1);
+			t.setName( rs.getString(1) );
 			t.setSchemaName(rs.getString(2));
 			t.tableName = rs.getString(3);
 			t.description = rs.getString(4);
@@ -179,7 +179,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//new object
 				eo = new ExecutableObject();
 				sb = new StringBuffer();
-				eo.name = rs.getString(1);
+				eo.setName( rs.getString(1) );
 				try {
 					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
 				}
@@ -213,7 +213,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, schemaPattern);
-		st.setString(2, executable.name);
+		st.setString(2, executable.getName());
 		ResultSet rs = st.executeQuery();
 		
 		while(rs.next()) {
@@ -223,7 +223,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			Grant grant = new Grant();
 			grant.grantee = grantee;
 			grant.privilege = PrivilegeType.EXECUTE;
-			grant.table = executable.name;
+			grant.table = executable.getName();
 			grant.withGrantOption = grantable;
 			
 			executable.grants.add(grant);
@@ -241,7 +241,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			Synonym s = new Synonym();
-			s.name = rs.getString(1);
+			s.setName( rs.getString(1) );
 			s.setSchemaName(schemaPattern);
 			s.objectOwner = rs.getString(2);
 			s.referencedObject = rs.getString(3);
@@ -294,7 +294,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		while(rs.next()) {
 			String idxName = rs.getString(2);
 			//if first (idx==null) or new index
-			if(idx==null || !idxName.equals(idx.name)) {
+			if(idx==null || !idxName.equals(idx.getName())) {
 				//end last object
 				if(idx!=null) {
 					model.getIndexes().add(idx);
@@ -302,7 +302,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				}
 				//new object
 				idx = new Index();
-				idx.name = idxName;
+				idx.setName( idxName );
 				idx.unique = rs.getString(3).equals("UNIQUE");
 				idx.setSchemaName(rs.getString(1));
 				setIndexType(idx, rs.getString(4));
@@ -344,7 +344,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int count = 0;
 		while(rs.next()) {
 			Sequence s = new Sequence();
-			s.name = rs.getString(1);
+			s.setName( rs.getString(1) );
 			s.setSchemaName(schemaPattern);
 			s.minValue = rs.getLong(2);
 			s.incrementBy = rs.getLong(3);
@@ -506,7 +506,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"from all_part_key_columns "
 				+"where object_type = 'TABLE' "
 				+"and owner = '"+ot.getSchemaName()+"' "
-				+"and name = '"+ot.name+"' "
+				+"and name = '"+ot.getName()+"' "
 				+"order by name, column_position ";
 		
 		Statement st = conn.createStatement();
@@ -525,7 +525,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		String query = "select table_owner, table_name, partition_name, partition_position, tablespace_name, high_value, high_value_length "
 				+"from all_tab_partitions "
 				+"where table_owner = '"+ot.getSchemaName()+"' "
-				+"and table_name = '"+ot.name+"' "
+				+"and table_name = '"+ot.getName()+"' "
 				+"order by table_name, partition_position ";
 		
 		Statement st = conn.createStatement();

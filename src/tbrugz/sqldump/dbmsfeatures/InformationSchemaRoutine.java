@@ -24,7 +24,7 @@ public class InformationSchemaRoutine extends ExecutableObject {
 			}
 		}
 		
-		return "create or replace "+type+" "+name+"("
+		return "create or replace "+type+" "+getName()+"("
 				+(sb!=null?sb.toString():"")
 				+")\n  returns "+returnType+" as \n$BODY$"
 				+body+"$BODY$"

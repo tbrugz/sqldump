@@ -291,7 +291,7 @@ public class Schema2GraphML implements SchemaModelDumper {
 			StringBuffer sbIndexes = new StringBuffer();
 			for(Index idx: schemaModel.getIndexes()) {
 				//log.debug("idx: "+idx+" / t: "+t.name);
-				if(idx.tableName.equals(t.name)) {
+				if(idx.tableName.equals(t.getName())) {
 					sbIndexes.append(idx.getDefinition(false)+"\n");
 					indexCount++;
 				}

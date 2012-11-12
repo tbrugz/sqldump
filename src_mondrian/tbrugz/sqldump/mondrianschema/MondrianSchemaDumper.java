@@ -208,7 +208,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//TODO: remove & use SchemaModelTransformer
 		List<FK> addFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
-			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+propIdDecorator.get(t.name)+".xtrafk", ",");
+			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+propIdDecorator.get(t.getName())+".xtrafk", ",");
 			if(xtraFKs==null) { continue; }
 			
 			for(String newfkstr: xtraFKs) {
@@ -219,7 +219,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 				FK fk = new FK();
 				log.debug("new FK: "+newfkstr+"; parts.len: "+parts.length);
-				fk.fkTable = t.name;
+				fk.fkTable = t.getName();
 				fk.fkTableSchemaName = t.getSchemaName();
 				fk.fkColumns = Utils.newStringList(parts[0]);
 				if(parts[1].contains(".")) {
@@ -231,10 +231,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				fk.pkTable = parts[1];
 				fk.pkColumns = Utils.newStringList(parts[2]);
 				if(parts.length>3) {
-					fk.name = parts[3];
+					fk.setName(parts[3]);
 				}
 				else {
-					fk.name = fk.fkTable + "_" + fk.pkTable + "_FK"; //XXX: suggestAcronym?
+					fk.setName(fk.fkTable + "_" + fk.pkTable + "_FK"); //XXX: suggestAcronym?
 				}
 				
 				//TODO: changing model... should clone() first
@@ -257,21 +257,21 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			
-			if(!isRoot && !listContains(extraFactTables, t.name)) { continue; } 
+			if(!isRoot && !listContains(extraFactTables, t.getName())) { continue; } 
 			if(factTables!=null) {
-				if(!listContains(factTables,t.name)) { continue; }
-				else { factTables.remove(t.name); }
+				if(!listContains(factTables,t.getName())) { continue; }
+				else { factTables.remove(t.getName()); }
 			}
 
 			Schema.Cube cube = new Schema.Cube();
-			cube.setName(t.name);
+			cube.setName(t.getName());
 			tbrugz.mondrian.xsdmodel.Table xt = new tbrugz.mondrian.xsdmodel.Table();
-			xt.setName(sqlIdDecorator.get( t.name ));
+			xt.setName(sqlIdDecorator.get( t.getName() ));
 			xt.setSchema(t.getSchemaName());
 			cube.setTable(xt);
 
 			List<String> measureCols = new ArrayList<String>();
-			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".measurecols");
+			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecols");
 			if(measureColsStr!=null) {
 				String[] cols = measureColsStr.split(",");
 				for(String c: cols) {
@@ -279,7 +279,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					log.debug("cube "+cube.getName()+": add measure: "+c.trim());
 				}
 			}
-			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".measurecolsregex", "\\|");
+			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecolsregex", "\\|");
 			
 			List<String> degenerateDimCandidates = new ArrayList<String>();
 			//columnloop:
@@ -299,10 +299,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 						if(col.nullable!=null && !col.nullable) { notNullCol = col; }
 					}
 					if(notNullCol!=null) {
-						addMeasure(cube, notNullCol.name, descFactCountMeasure, "count");
+						addMeasure(cube, notNullCol.getName(), descFactCountMeasure, "count");
 					}
 					else {
-						log.warn("table '"+t.name+"' has no PK nor not-null-column for fact count measure");
+						log.warn("table '"+t.getName()+"' has no PK nor not-null-column for fact count measure");
 					}
 				}
 				else {
@@ -338,7 +338,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			}
 			
 			//degenerate dimensions - see: http://mondrian.pentaho.com/documentation/schema.php#Degenerate_dimensions
-			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.name)+".degeneratedims");
+			String degenerateDimColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".degeneratedims");
 			if(degenerateDimColsStr!=null) {
 				String[] cols = degenerateDimColsStr.split(",");
 				for(String col: cols) {
@@ -351,10 +351,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					}
 					boolean containsCol = false;
 					for(Column cc: t.getColumns()) {
-						if(stringEquals(cc.name, col)) { containsCol = true; break; }
+						if(stringEquals(cc.getName(), col)) { containsCol = true; break; }
 					}
 					if(!containsCol) {
-						log.warn("column for degenerate dimension '"+col+"' not present in table "+t.name);
+						log.warn("column for degenerate dimension '"+col+"' not present in table "+t.getName());
 					}
 
 					degenerateDimCandidates.remove(col);
@@ -414,8 +414,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		boolean ok = true;
 		
 		for(FK fk: fks) {
-			if(fk.fkColumns.contains(c.name)) {
-				log.debug("column '"+c.name+"' belongs to FK. ignoring (as measure)");
+			if(fk.fkColumns.contains(c.getName())) {
+				log.debug("column '"+c.getName()+"' belongs to FK. ignoring (as measure)");
 				ok = false; break;
 				//continue columnloop;
 			}
@@ -431,14 +431,14 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 
 		if(measureCols.size()!=0) {
-			if(listContains(measureCols, c.name)) { ok = true; }
+			if(listContains(measureCols, c.getName())) { ok = true; }
 			else { ok = false; }
 		}
 
 		if(measureColsRegexes!=null) {
 			ok = false;
 			for(String regex: measureColsRegexes) {
-				if(Pattern.compile(regex.trim(), Pattern.CASE_INSENSITIVE).matcher(c.name).matches()) {
+				if(Pattern.compile(regex.trim(), Pattern.CASE_INSENSITIVE).matcher(c.getName()).matches()) {
 				//if(c.name.matches(regex.trim())) {
 					ok = true; break;
 				}
@@ -446,7 +446,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 		
 		if(!ok) {
-			degenerateDimCandidates.add(c.name);
+			degenerateDimCandidates.add(c.getName());
 			return;
 		}
 		
@@ -458,11 +458,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			return;
 		}
 		if(aggs.size()==1) {
-			addMeasure(cube, c.name, c.name, defaultAggregators.get(0));
+			addMeasure(cube, c.getName(), c.getName(), defaultAggregators.get(0));
 			return;
 		}
 		for(String agg: aggs) {
-			addMeasure(cube, c.name, c.name+"_"+agg, agg);
+			addMeasure(cube, c.getName(), c.getName()+"_"+agg, agg);
 		}
 	}
 	
@@ -487,7 +487,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		
 		String dimName = fk.pkTable;
 		if(false) {
-			dimName = fk.name;
+			dimName = fk.getName();
 		}
 		
 		if(listContains(ignoreDims, dimName)) {

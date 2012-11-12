@@ -190,8 +190,8 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			for(Table t: schemaModel.getTables()) {
 				boolean pkTable = false;
 				boolean fkTable = false;
-				if(t.name.equals(fk.pkTable)) {	pkTable = true;	}
-				if(t.name.equals(fk.fkTable)) {	fkTable = true;	}
+				if(t.getName().equals(fk.pkTable)) { pkTable = true; }
+				if(t.getName().equals(fk.fkTable)) { fkTable = true; }
 				if(! (pkTable || fkTable)) { continue; }
 				
 				//Index
@@ -221,7 +221,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				idx.setSchemaName(fk.pkTableSchemaName);
 				idx.unique = false;
 				idx.columns.addAll(fk.pkColumns);
-				idx.name = fk.pkTable + "_" + suggestAcronym(idx.columns) + "_UKI"; //_" + (indexes.size()+1);
+				idx.setName(fk.pkTable + "_" + suggestAcronym(idx.columns) + "_UKI"); //_" + (indexes.size()+1);
 				addIndex(indexes, idx);
 			}
 
@@ -231,7 +231,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				idx.setSchemaName(fk.fkTableSchemaName);
 				idx.unique = false;
 				idx.columns.addAll(fk.fkColumns);
-				idx.name = fk.fkTable + "_" + suggestAcronym(idx.columns) + "_FKI";
+				idx.setName(fk.fkTable + "_" + suggestAcronym(idx.columns) + "_FKI");
 				//idx.name = fk.fkTable + "_FKI";
 				//idx.name = fk.fkTable + "_FKI_" + idx.hashCode();
 				//idx.name = fk.fkTable + "_FKI_" + (++fkIndexCounter);
@@ -281,13 +281,13 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 				
 				//Tables
 				for(Table otherT: schemaModel.getTables()) {
-					if(table.name.equals(otherT.name)) { continue; }
+					if(table.getName().equals(otherT.getName())) { continue; }
 					//if(otherT.getDomainTable() && !table.getDomainTable()) { continue; }
 					if(otherT.isTableADomainTable() && !table.isTableADomainTable()) { continue; } //can't have FK from non-domain table to domain table
 					
 					List<String> otherTCols = new ArrayList<String>();
 					for(Column c: otherT.getColumns()) {
-						otherTCols.add(c.name);
+						otherTCols.add(c.getName());
 					}
 					//log.debug("pk.cols: "+cons.uniqueColumns+" ; other.cols: "+otherTCols);
 					//log.debug("pk.cols: "+cons.uniqueColumns+" ; other.cols: "+otherT.getColumns());
@@ -295,14 +295,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 						
 						//Create FK
 						FK fk = new FK();
-						fk.pkTable = table.name;
+						fk.pkTable = table.getName();
 						fk.pkTableSchemaName = table.getSchemaName();
 						fk.pkColumns.addAll(cons.uniqueColumns);
-						fk.fkTable = otherT.name;
+						fk.fkTable = otherT.getName();
 						fk.fkTableSchemaName = otherT.getSchemaName();
 						fk.fkColumns.addAll(cons.uniqueColumns);
 						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
-						fk.name = suggestAcronym(fk.fkTable) + "_" + suggestAcronym(fk.pkTable) + "_FK";
+						fk.setName(suggestAcronym(fk.fkTable) + "_" + suggestAcronym(fk.pkTable) + "_FK");
 
 						//Test if FK already exists
 						boolean fkAlreadyExists = false;

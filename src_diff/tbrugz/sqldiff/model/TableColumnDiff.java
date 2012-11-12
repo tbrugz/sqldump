@@ -14,7 +14,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 
 	public TableColumnDiff(ChangeType changeType, Table table, Column newColumn) {
 		this.type = changeType;
-		this.name = table.name;
+		this.setName(table.getName());
 		this.setSchemaName(table.getSchemaName());
 		this.column = newColumn;
 	}
@@ -33,12 +33,12 @@ public class TableColumnDiff extends DBObject implements Diff {
 			case DROP:
 				colChange = "drop column "+column.getName(); break;
 		}
-		return "alter table "+(getSchemaName()!=null?getSchemaName()+".":"")+name+" "+colChange;
+		return "alter table "+(getSchemaName()!=null?getSchemaName()+".":"")+getName()+" "+colChange;
 	}
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "alter table "+(dumpSchemaName?getSchemaName()+".":"")+name
+		return "alter table "+(dumpSchemaName?getSchemaName()+".":"")+getName()
 				+getDiff();
 	}
 	
@@ -78,7 +78,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 	
 	@Override
 	public String toString() {
-		return "[ColDiff:"+name+","+type+","+column+"]";
+		return "[ColDiff:"+getName()+","+type+","+column+"]";
 	}
 
 	@Override
