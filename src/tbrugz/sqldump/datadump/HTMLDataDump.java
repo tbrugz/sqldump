@@ -123,4 +123,9 @@ public class HTMLDataDump extends DumpSyntax {
 	public String getSyntaxId() {
 		return HTML_SYNTAX_ID;
 	}
+
+	@Override
+	public String getMimeType() {
+		return "text/html";
+	}
 }

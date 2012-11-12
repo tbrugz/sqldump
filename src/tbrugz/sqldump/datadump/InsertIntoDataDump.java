@@ -78,4 +78,9 @@ public class InsertIntoDataDump extends DumpSyntax {
 	public String getSyntaxId() {
 		return INSERTINTO_SYNTAX_ID;
 	}
+
+	@Override
+	public String getMimeType() {
+		return "text/plain";
+	}
 }

@@ -149,4 +149,10 @@ public class JSONDataDump extends DumpSyntax {
 	public String getSyntaxId() {
 		return JSON_SYNTAX_ID;
 	}
+
+	// http://stackoverflow.com/questions/477816/the-right-json-content-type / http://www.ietf.org/rfc/rfc4627.txt
+	@Override
+	public String getMimeType() {
+		return "application/json";
+	}
 }

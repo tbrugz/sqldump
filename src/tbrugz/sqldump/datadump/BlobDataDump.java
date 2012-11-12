@@ -130,4 +130,10 @@ public class BlobDataDump extends DumpSyntax {
 		return true;
 	}
 
+	// http://en.wikipedia.org/wiki/Internet_media_type / http://stackoverflow.com/questions/6783921/which-mime-type-to-use-for-a-binary-file-thats-specific-to-my-program
+	@Override
+	public String getMimeType() {
+		return "application/octet-stream";
+	}
+
 }

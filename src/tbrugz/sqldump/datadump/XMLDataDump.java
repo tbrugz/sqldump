@@ -99,4 +99,10 @@ public class XMLDataDump extends DumpSyntax {
 	public String getSyntaxId() {
 		return XML_SYNTAX_ID;
 	}
+
+	// http://annevankesteren.nl/2004/08/mime-types
+	@Override
+	public String getMimeType() {
+		return "application/xml";
+	}
 }

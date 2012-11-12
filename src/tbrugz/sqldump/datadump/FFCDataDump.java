@@ -265,4 +265,9 @@ public class FFCDataDump extends DumpSyntax {
 	public String getDefaultFileExtension() {
 		return "ffc.txt";
 	}
+
+	@Override
+	public String getMimeType() {
+		return "text/plain";
+	}
 }

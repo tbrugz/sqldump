@@ -167,5 +167,10 @@ public class CSVDataDump extends DumpSyntax {
 	public String getSyntaxId() {
 		return CSV_SYNTAX_ID;
 	}
+
+	@Override
+	public String getMimeType() {
+		return "text/csv";
+	}
 	
 }

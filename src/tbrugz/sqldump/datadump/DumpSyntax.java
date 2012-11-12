@@ -68,6 +68,8 @@ public abstract class DumpSyntax {
 	
 	public abstract String getSyntaxId();
 
+	public abstract String getMimeType();
+	
 	public String getDefaultFileExtension() {
 		return getSyntaxId();
 	}
