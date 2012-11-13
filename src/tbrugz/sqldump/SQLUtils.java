@@ -18,6 +18,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +37,7 @@ public class SQLUtils {
 		public static final String CONN_PROP_PASSWORD = "password";
 		
 		//connection properties
+		public static final String SUFFIX_CONNECTION_POOL_NAME = ".connectionpool"; //.(conn(ection))pool(name)
 		public static final String SUFFIX_DRIVERCLASS = ".driverclass";
 		public static final String SUFFIX_URL = ".dburl";
 		public static final String SUFFIX_USER = ".user";
@@ -42,20 +48,49 @@ public class SQLUtils {
 		public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
 		public static final String SUFFIX_INITSQL = ".initsql";
 
-		public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException {
+		public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException, NamingException {
+			// AutoCommit==false: needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
+			// anyway, i think 'false' should be default
 			return initDBConnection(propsPrefix, papp, false);
 		}
 
-		public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException {
+		public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
 			//init database
 			log.debug("initDBConnection...");
 			
+			String connectionPoolName = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_POOL_NAME);
 			String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
+			String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
+			Connection conn = null;
+			if(connectionPoolName!=null) {
+				conn = getConnectionFromPool(connectionPoolName);
+			}
+			else {
+				conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
+			}
+			
+			conn.setAutoCommit(autoCommit);
+			
+			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
+			if(dbInitSql!=null) {
+				try {
+					int count = conn.createStatement().executeUpdate(dbInitSql);
+					log.info("init sql [count="+count+"]: "+dbInitSql);
+				}
+				catch(SQLException e) {
+					log.warn("error in init sql: "+dbInitSql);
+					try { conn.rollback(); }
+					catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
+				}
+			}
+			return conn;
+		}
+		
+		static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 			if(driverClass==null) {
 				log.error("driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed");
 				return null;
 			}
-			String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
 			if(dbUrl==null) {
 				log.error("db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed");
 				return null;
@@ -89,24 +124,17 @@ public class SQLUtils {
 				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
 			}
 
-			Connection conn = DriverManager.getConnection(dbUrl, p);
-			// setAutoCommit(false): needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
-			// anyway, i think this should be default
-			conn.setAutoCommit(autoCommit);
-			
-			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
-			if(dbInitSql!=null) {
-				try {
-					int count = conn.createStatement().executeUpdate(dbInitSql);
-					log.info("init sql [count="+count+"]: "+dbInitSql);
-				}
-				catch(SQLException e) {
-					log.warn("error in init sql: "+dbInitSql);
-					try { conn.rollback(); }
-					catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
-				}
-			}
-			return conn;
+			return DriverManager.getConnection(dbUrl, p);
+		}
+		
+		// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
+		//XXX: prop for initial context lookup? like "java:/comp/env"...
+		static Connection getConnectionFromPool(String poolName) throws SQLException, NamingException {
+			log.debug("getting connection from pool: "+poolName);
+			Context initContext = new InitialContext();
+			Context envContext  = (Context) initContext.lookup("java:/comp/env");
+			DataSource datasource = (DataSource) envContext.lookup(poolName);
+			return datasource.getConnection();
 		}
 		
 		public static void showDBInfo(DatabaseMetaData dbmd) {
