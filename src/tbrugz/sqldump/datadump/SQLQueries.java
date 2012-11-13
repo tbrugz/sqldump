@@ -6,6 +6,9 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -18,16 +21,23 @@ import tbrugz.sqldump.util.Utils;
 //XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
 //XXXdone: option to log each 'n' rows dumped
-//XXX: option to dump schema corresponding to queries data
+//XXXdone: option to grab/dump schema corresponding to queries data -> dbmodel.Query
 public class SQLQueries extends AbstractSQLProc {
 	
 	static final String PROP_QUERIES = "sqldump.queries";
+	static final String PROP_QUERIES_RUN = PROP_QUERIES+".runqueries";
+	static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
 
 	static Log log = LogFactory.getLog(SQLQueries.class);
 	
 	@Override
 	public void process() {
 		DataDump dd = new DataDump();
+		boolean runQueries = true;
+		boolean addQueriesToModel = false;
+		
+		runQueries = Utils.getPropBool(prop, PROP_QUERIES_RUN, runQueries);
+		addQueriesToModel = Utils.getPropBool(prop, PROP_QUERIES_ADD_TO_MODEL, addQueriesToModel);
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
@@ -40,6 +50,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		String[] queriesArr = queriesStr.split(",");
 		int i=0;
+		//List<Query> queries = new ArrayList<Query>(); 
 		for(String qid: queriesArr) {
 			qid = qid.trim();
 			
@@ -70,7 +81,10 @@ public class SQLQueries extends AbstractSQLProc {
 				//replace props! XXX: replaceProps(): should be activated by a prop?
 				sql = ParametrizedProperties.replaceProps(sql, prop);
 			}
-			if(sql==null || queryName==null) { break; }
+			if(sql==null || queryName==null) {
+				log.warn("no SQL or name defined for query [id="+qid+"]");
+				continue;
+			}
 			//params
 			int paramCount = 1;
 			List<String> params = new ArrayList<String>();
@@ -87,7 +101,30 @@ public class SQLQueries extends AbstractSQLProc {
 			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
+
+			// adding query to model
+			Query query = new Query();
+			query.id = qid;
+			query.setName(queryName);
+			query.query = sql;
+			query.parameterValues = params;
+			if(keyCols!=null) {
+				Constraint cpk = new Constraint();
+				cpk.type = ConstraintType.PK;
+				cpk.uniqueColumns = keyCols;
+				List<Constraint> lc = query.getConstraints(); 
+				if(lc==null) {
+					lc = new ArrayList<Constraint>();
+					query.setConstraints(lc);
+				}	
+				lc.add(cpk);
+			}
+			//queries.add(query);
+			if(addQueriesToModel) { model.getViews().add(query); }
+			// added query to model
 			
+			if(runQueries) {
+				
 			try {
 				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, keyCols);
@@ -95,9 +132,15 @@ public class SQLQueries extends AbstractSQLProc {
 				log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 				log.info("error on query "+qid+": "+e.getMessage(), e);
 			}
+			
+			}
 			i++;
 		}
-		log.info(i+" queries runned");
+		log.info(i+" queries "
+				+(runQueries?"runned":"")
+				+(addQueriesToModel && !runQueries?"grabbed from properties":"")
+				+(!runQueries && !addQueriesToModel?"not runned nor grabbed":"")
+				);
 	}
 	
 	List<DumpSyntax> getQuerySyntexes(String qid) {
