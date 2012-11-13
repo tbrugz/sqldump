@@ -24,10 +24,11 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	public static final String XMLSERIALIZATION_JAXB_DEFAULT_PREFIX = "sqldump.xmlserialization.jaxb";
 	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
+	public static final String PROP_XMLSERIALIZATION_JAXB_INRESOURCE = ".inresource";
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
-	String fileInput;
+	File fileInput;
 	String fileOutput;
 	JAXBContext jc;
 	
@@ -44,7 +45,14 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	@Override
 	public void procProperties(Properties prop) {
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
-		fileInput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
+		String fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
+		if(fileInputStr==null) {
+			fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
+			fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+		}
+		else {
+			fileInput = new File(fileInputStr);
+		}
 	}
 	
 	@Override
@@ -81,7 +89,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 
 		try {
 			Unmarshaller u = jc.createUnmarshaller();
-			SchemaModel sm = (SchemaModel) u.unmarshal(new File(fileInput));
+			SchemaModel sm = (SchemaModel) u.unmarshal(fileInput);
 			//use Unmarshaller.afterUnmarshal()?
 			for(Table t: sm.getTables()) {
 				t.validateConstraints();

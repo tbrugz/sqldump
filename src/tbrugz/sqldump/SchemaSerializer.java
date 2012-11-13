@@ -1,5 +1,6 @@
 package tbrugz.sqldump;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,16 +20,25 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 
 	static Log log = LogFactory.getLog(SchemaSerializer.class);
 	
-	public static final String PROP_SERIALIZATION_OUTFILE = "sqldump.serialization.outfile";
-	public static final String PROP_SERIALIZATION_INFILE = "sqldump.serialization.infile";
+	public static final String SERIALIZATION_DEFAULT_PREFIX = "sqldump.serialization";
+	public static final String PROP_SERIALIZATION_OUTFILE = SERIALIZATION_DEFAULT_PREFIX + ".outfile";
+	public static final String PROP_SERIALIZATION_INFILE = SERIALIZATION_DEFAULT_PREFIX + ".infile";
+	public static final String PROP_SERIALIZATION_INRESOURCE = SERIALIZATION_DEFAULT_PREFIX + ".inresource";
 
-	String fileInput;
+	File fileInput;
 	String fileOutput;
 	
 	@Override
 	public void procProperties(Properties prop) {
 		fileOutput = prop.getProperty(PROP_SERIALIZATION_OUTFILE);
-		fileInput = prop.getProperty(PROP_SERIALIZATION_INFILE);
+		String fileInputStr = prop.getProperty(PROP_SERIALIZATION_INFILE);
+		if(fileInputStr==null) {
+			fileInputStr = prop.getProperty(PROP_SERIALIZATION_INRESOURCE);
+			fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+		}
+		else {
+			fileInput = new File(fileInputStr);
+		}
 	}
 	
 	@Override
