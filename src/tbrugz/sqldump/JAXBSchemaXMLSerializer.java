@@ -48,7 +48,9 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		String fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
 		if(fileInputStr==null) {
 			fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
-			fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+			if(fileInputStr!=null) {
+				fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+			}
 		}
 		else {
 			fileInput = new File(fileInputStr);

@@ -34,7 +34,9 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		String fileInputStr = prop.getProperty(PROP_SERIALIZATION_INFILE);
 		if(fileInputStr==null) {
 			fileInputStr = prop.getProperty(PROP_SERIALIZATION_INRESOURCE);
-			fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+			if(fileInputStr!=null) {
+				fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+			}
 		}
 		else {
 			fileInput = new File(fileInputStr);
