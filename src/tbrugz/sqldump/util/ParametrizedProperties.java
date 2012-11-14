@@ -62,6 +62,7 @@ public class ParametrizedProperties extends Properties {
 	
 	@Override
 	public String getProperty(String key) {
+		log.debug("getp: "+key);
 		String s = super.getProperty(key);
 		if(s==null) {
 			return null;
