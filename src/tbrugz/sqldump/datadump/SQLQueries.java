@@ -103,36 +103,41 @@ public class SQLQueries extends AbstractSQLProc {
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
 
 			// adding query to model
-			Query query = new Query();
-			query.id = qid;
-			query.setName(queryName);
-			query.query = sql;
-			query.parameterValues = params;
-			if(keyCols!=null) {
-				Constraint cpk = new Constraint();
-				cpk.type = ConstraintType.PK;
-				cpk.uniqueColumns = keyCols;
-				List<Constraint> lc = query.getConstraints(); 
-				if(lc==null) {
-					lc = new ArrayList<Constraint>();
-					query.setConstraints(lc);
-				}	
-				lc.add(cpk);
+			ADD_QUERY_TO_MODEL:
+			if(addQueriesToModel) {
+				if(model==null) {
+					log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
+					break ADD_QUERY_TO_MODEL;
+				}
+				Query query = new Query();
+				query.id = qid;
+				query.setName(queryName);
+				query.query = sql;
+				query.parameterValues = params;
+				if(keyCols!=null) {
+					Constraint cpk = new Constraint();
+					cpk.type = ConstraintType.PK;
+					cpk.uniqueColumns = keyCols;
+					List<Constraint> lc = query.getConstraints(); 
+					if(lc==null) {
+						lc = new ArrayList<Constraint>();
+						query.setConstraints(lc);
+					}	
+					lc.add(cpk);
+				}
+				//queries.add(query);
+				model.getViews().add(query);
 			}
-			//queries.add(query);
-			if(addQueriesToModel) { model.getViews().add(query); }
-			// added query to model
+			// added query to model, or not
 			
 			if(runQueries) {
-				
-			try {
-				log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
-				dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, keyCols);
-			} catch (Exception e) {
-				log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
-				log.info("error on query "+qid+": "+e.getMessage(), e);
-			}
-			
+				try {
+					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
+					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, keyCols);
+				} catch (Exception e) {
+					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
+					log.info("error on query "+qid+": "+e.getMessage(), e);
+				}
 			}
 			i++;
 		}

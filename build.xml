@@ -1,10 +1,11 @@
 <project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant">
 	
 	<property name="src.dir" value="src"/>
-	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="src.diff.dir" value="src_diff"/>
-	<property name="src.run.dir" value="src_run"/>
+	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="src.mondrian.dir" value="src_mondrian"/>
+	<property name="src.run.dir" value="src_run"/>
+	<property name="src.test.dir" value="src_test"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
 	
 	<property name="bin.dir"  value="bin"/>
@@ -141,6 +142,10 @@
 				<attribute name="Main-Class" value="${sqldump.mainclass}"/>
 			</manifest>
 		</jar>
+		<!--jar destfile="${dist.dir}/sqldump-jaxb.jar"
+			basedir="${src.test.dir}"
+			includes="**/jaxb.properties">
+		</jar-->
 	</target>
 
 	<target name="javadoc" depends="prepare">
