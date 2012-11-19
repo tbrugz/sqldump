@@ -296,7 +296,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			ep.position = rs.getInt(9);
 			String inout = rs.getString(12);
 			if(inout!=null) {
-				ep.inout = INOUT.valueOf(inout);
+				try {
+					ep.inout = INOUT.getValue(inout);
+				}
+				catch(IllegalArgumentException e) {
+					log.warn("illegal INOUT value: "+inout);
+				}
 			}
 			//log.info("parameter: "+ep);
 			if(ep.position==0) {

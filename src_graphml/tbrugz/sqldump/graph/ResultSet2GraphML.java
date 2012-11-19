@@ -329,7 +329,12 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		DumpGraphMLModel dg = new DumpResultSetGraphMLModel();
 		dg.loadSnippets(DEFAULT_SNIPPETS);
 		if(snippets!=null) {
-			dg.loadSnippets(snippets);
+			try {
+				dg.loadSnippets(snippets);
+			}
+			catch(NullPointerException e) {
+				log.warn("error opening snippets file: "+snippets);
+			}
 		}
 		Utils.prepareDir(output);
 		dg.dumpModel(r, new PrintStream(output));

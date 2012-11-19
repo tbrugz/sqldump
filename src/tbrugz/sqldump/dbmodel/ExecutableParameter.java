@@ -6,7 +6,12 @@ public class ExecutableParameter implements Serializable {
 	public enum INOUT {
 		IN,
 		OUT,
-		INOUT
+		INOUT;
+		
+		public static INOUT getValue(String s) {
+			if("IN/OUT".equals(s)) { return INOUT; }
+			return valueOf(s);
+		}
 	}
 	
 	public String name;
