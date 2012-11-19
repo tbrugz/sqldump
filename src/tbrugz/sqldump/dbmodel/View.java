@@ -35,8 +35,9 @@ public class View extends DBObject implements Relation {
 	public String getDefinition(boolean dumpSchemaName) {
 		StringBuffer sbConstraints = new StringBuffer();
 		if(constraints!=null) {
-			for(Constraint cons: constraints) {
-				sbConstraints.append(",\n\t"+cons.getDefinition(false));
+			for(int i=0;i<constraints.size();i++) {
+				Constraint cons = constraints.get(i);
+				sbConstraints.append((i==0?"":",\n\t")+cons.getDefinition(false));
 			}
 		}
 
@@ -56,7 +57,9 @@ public class View extends DBObject implements Relation {
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
 				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name)
-				+ (sbConstraints.length()>0?" (\n\t"+Utils.join(getColumnNames(), ", ")+sbConstraints.toString()+"\n)":"")
+				+ (sbConstraints.length()>0?" (\n\t"
+						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
+						+ sbConstraints.toString()+"\n)":"")
 				+ " as\n" + query
 				+ (withReadOnly?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?

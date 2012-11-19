@@ -80,7 +80,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
-	boolean doSchemaGrabPKs = true, 
+	boolean doSchemaGrabTables = true, //TODO: add prop for doSchemaGrabTables
+			doSchemaGrabPKs = true, 
 			doSchemaGrabFKs = true, 
 			doSchemaGrabExportedFKs = false, 
 			doSchemaGrabGrants = false, 
@@ -202,6 +203,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		
 		schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 
+		if(doSchemaGrabTables) {
+			
 		List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_TABLEFILTER, ","); 
 		for(String schemaName: schemasList) {
 			if(tablePatterns==null) {
@@ -212,6 +215,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					grabRelations(schemaModel, dbmd, feats, schemaName, tableName, false);
 				}
 			}
+		}
+		
 		}
 		
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
@@ -257,7 +262,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					//Columns & Remarks
 					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
 					if(t==null) {
-						log.warn("table not found: "+view.getSchemaName()+"."+view.getName());
+						log.warn("view not found in grabbed tables' list: "+view.getSchemaName()+"."+view.getName());
 						continue;
 					}
 					view.setSimpleColumns(t.getColumns());
@@ -695,10 +700,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 	
 	//XXX: props for setting pk(i)NamePatterns?
-	String pkNamePattern = "${tablename}_pk";
-	String pkiNamePattern = "${tablename}_pki";
+	public static final String pkNamePattern = "${tablename}_pk";
+	public static final String pkiNamePattern = "${tablename}_pki";
 	
-	String newNameFromTableName(String tableName, String pattern) {
+	public static String newNameFromTableName(String tableName, String pattern) {
 		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
 	}
 	

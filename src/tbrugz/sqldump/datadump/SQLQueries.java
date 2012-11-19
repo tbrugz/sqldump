@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
@@ -27,7 +28,10 @@ public class SQLQueries extends AbstractSQLProc {
 	static final String PROP_QUERIES = "sqldump.queries";
 	static final String PROP_QUERIES_RUN = PROP_QUERIES+".runqueries";
 	static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
+	static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
 
+	static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY";
+	
 	static Log log = LogFactory.getLog(SQLQueries.class);
 	
 	@Override
@@ -42,6 +46,8 @@ public class SQLQueries extends AbstractSQLProc {
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
 		//boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpXMLSyntax = false, dumpJSONSyntax = false;
+		
+		String defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, DEFAULT_QUERIES_SCHEMA);
 		
 		String queriesStr = prop.getProperty(PROP_QUERIES);
 		if(queriesStr==null) {
@@ -112,12 +118,17 @@ public class SQLQueries extends AbstractSQLProc {
 				Query query = new Query();
 				query.id = qid;
 				query.setName(queryName);
+				//add schemaName
+				query.setSchemaName(prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName));
+				
 				query.query = sql;
 				query.parameterValues = params;
+				//XXX: add columns? query.setColumns(columns)...
 				if(keyCols!=null) {
 					Constraint cpk = new Constraint();
 					cpk.type = ConstraintType.PK;
 					cpk.uniqueColumns = keyCols;
+					cpk.setName(JDBCSchemaGrabber.newNameFromTableName(queryName, JDBCSchemaGrabber.pkNamePattern));
 					List<Constraint> lc = query.getConstraints(); 
 					if(lc==null) {
 						lc = new ArrayList<Constraint>();
