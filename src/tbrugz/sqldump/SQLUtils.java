@@ -37,7 +37,7 @@ public class SQLUtils {
 		public static final String CONN_PROP_PASSWORD = "password";
 		
 		//connection properties
-		public static final String SUFFIX_CONNECTION_POOL_NAME = ".connectionpool"; //.(conn(ection))pool(name)
+		public static final String SUFFIX_CONNECTION_DATASOURCE = ".datasource"; //.(conn(ection))pool(name)
 		public static final String SUFFIX_DRIVERCLASS = ".driverclass";
 		public static final String SUFFIX_URL = ".dburl";
 		public static final String SUFFIX_USER = ".user";
@@ -58,12 +58,12 @@ public class SQLUtils {
 			//init database
 			log.debug("initDBConnection...");
 			
-			String connectionPoolName = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_POOL_NAME);
+			String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 			String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
 			String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
 			Connection conn = null;
-			if(connectionPoolName!=null) {
-				conn = getConnectionFromPool(connectionPoolName);
+			if(connectionDataSource!=null) {
+				conn = getConnectionFromDataSource(connectionDataSource);
 			}
 			else {
 				conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
@@ -129,11 +129,11 @@ public class SQLUtils {
 		
 		// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 		//XXX: prop for initial context lookup? like "java:/comp/env"...
-		static Connection getConnectionFromPool(String poolName) throws SQLException, NamingException {
-			log.debug("getting connection from pool: "+poolName);
+		static Connection getConnectionFromDataSource(String dataSource) throws SQLException, NamingException {
+			log.debug("getting connection from datasource: "+dataSource);
 			Context initContext = new InitialContext();
 			Context envContext  = (Context) initContext.lookup("java:/comp/env");
-			DataSource datasource = (DataSource) envContext.lookup(poolName);
+			DataSource datasource = (DataSource) envContext.lookup(dataSource);
 			return datasource.getConnection();
 		}
 		
