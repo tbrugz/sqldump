@@ -12,6 +12,12 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.MapEntryValueComparator;
 
+/*
+ * should this be a "data profiler"? 
+ * see: http://wiki.pentaho.com/display/EAI/Kettle+Data+Profiling+with+DataCleaner
+ * 
+ * TODO: use tbrugz.sqldump.util.CategorizedOut ?
+ */
 public class StatsProc extends AbstractSQLProc {
 
 	static Log log = LogFactory.getLog(StatsProc.class);

@@ -1,9 +1,10 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.io.Serializable;
 import java.util.List;
 
 // http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/statements_7002.htm#i2125922
-public class OracleTablePartition {
+public class OracleTablePartition implements Serializable {
 	public String name;
 	public String tableSpace;
 

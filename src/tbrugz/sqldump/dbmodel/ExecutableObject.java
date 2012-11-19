@@ -26,7 +26,9 @@ public class ExecutableObject extends DBObject {
 	
 	@Override
 	public String toString() {
-		return "[Executable:"+type+":"+schemaName+"."+name+"]";
+		return "[Executable:"+type+":"+schemaName+"."+name+
+				(packageName!=null?";pkg="+packageName:"")
+				+"]";
 	}
 	
 	@Override
