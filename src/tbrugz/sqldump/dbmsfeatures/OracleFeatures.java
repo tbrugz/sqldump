@@ -17,9 +17,12 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.ExecutableParameter.INOUT;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
@@ -191,6 +194,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				eo.setSchemaName(schemaPattern);
 				
 				if(grabExecutablePrivileges && !eo.type.equals(DBObjectType.PACKAGE_BODY)) {
+					//XXX: optimize it: make one query instead of many
 					grabExecutablePrivileges(eo, schemaPattern, conn);
 				}
 			}
@@ -206,6 +210,108 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+count+"]");
+		
+		//grabs metadata
+		grabDBExecutablesMetadata(model, schemaPattern, conn);
+	}
+	
+	void grabDBExecutablesMetadata(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
+				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
+				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
+				+"  from all_procedures p "
+				+"  left outer join all_arguments aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
+				+" where p.owner = '"+schemaPattern+"' "
+				//+"   and p.object_type = 'PACKAGE' "
+				//+"   and p.procedure_name is not null "
+				+"   and aa.position is not null "
+				+" order by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
+		log.debug("sql: "+query);
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+
+		ExecutableObject eo = null;
+		//int executablesCount = 0;
+		int newExecutablesCount = 0;
+		int paramCount = 0;
+		
+		while(rs.next()) {
+			String objectName = rs.getString(3);
+			String subprogramName = rs.getString(5);
+			String objectType = rs.getString(6);
+			String subprogramType = rs.getString(7);
+			log.debug("subprogram: "+subprogramName+" ; type="+subprogramType+" -- objName/package="+objectName+" ; objType="+objectType);
+			
+			//is a procedure?
+			eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, schemaPattern, objectName);
+			if(eo==null) { //not a procedure, maybe a function
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, schemaPattern, objectName);
+			}
+			//not a top-level procedure or function, maybe declared inside a package
+			if(eo==null) {
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, schemaPattern, subprogramName);
+			}
+			if(eo==null) {
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, schemaPattern, subprogramName);
+			}
+			
+			//not a procedure or function, maybe a package (remember packages have no parameters)
+			/*if(eo==null) {
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PACKAGE, schemaPattern, objectName);
+				log.info("searching for package: "+subprogramName+" / type="+subprogramType+" /// objName="+objectName+" / objType="+objectType+" --> "+eo);
+			}*/
+			
+			//not found, let's create it
+			if(eo==null) {
+				if(subprogramName==null) {
+					log.warn("subprogram is null. object="+objectName+" / type="+objectType+" / schema="+schemaPattern);
+					continue;
+				}
+				log.debug("new Executable: subprogram: "+subprogramName+" / type="+subprogramType+" /// objName="+objectName+" / objType="+objectType);
+				
+				eo = new ExecutableObject();
+				eo.setSchemaName(schemaPattern);
+				
+				DBObjectType otype = DBObjectType.valueOf(objectType);
+				switch(otype) {
+				case PACKAGE:
+					eo.packageName = objectName;
+					eo.setName(subprogramName);
+					eo.type = DBObjectType.valueOf(subprogramType);
+					break;
+				default: //top-level procedure or function
+					eo.setName(objectName);
+					eo.type = otype;
+				}
+				
+				model.getExecutables().add(eo);
+				newExecutablesCount++;
+			}
+			else {
+				log.debug("procedure or function found: "+objectName+" / "+subprogramName+" / "+objectType+" / eo="+eo);
+			}
+			ExecutableParameter ep = new ExecutableParameter();
+			ep.name = rs.getString(8);
+			ep.dataType = rs.getString(11);
+			ep.position = rs.getInt(9);
+			String inout = rs.getString(12);
+			if(inout!=null) {
+				ep.inout = INOUT.valueOf(inout);
+			}
+			//log.info("parameter: "+ep);
+			if(ep.position==0) {
+				eo.returnParam = ep;
+			}
+			else {
+				if(eo.params==null) {
+					eo.params = new ArrayList<ExecutableParameter>();
+				}
+				eo.params.add(ep);
+			}
+			paramCount++;
+		}
+
+		log.info("["+schemaPattern+"]: "+newExecutablesCount+" xtra executables grabbed (metadata); "+paramCount+" executable's parameters grabbed");
 	}
 	
 	void grabExecutablePrivileges(ExecutableObject executable, String schemaPattern, Connection conn) throws SQLException {

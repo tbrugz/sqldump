@@ -13,6 +13,10 @@ public class ExecutableObject extends DBObject {
 	public DBObjectType type;
 	public String body;
 	public List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
+
+	public String packageName;
+	public List<ExecutableParameter> params;
+	public ExecutableParameter returnParam;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

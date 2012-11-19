@@ -273,10 +273,15 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.getExecutables()) {
-			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE, 
-			categorizedOut(eo.getSchemaName(), eo.getName(), eo.type, 
-				"-- Executable: "+eo.type+" "+eo.getName()+"\n"
-				+eo.getDefinition(dumpWithSchemaName)+"\n");
+			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE,
+			if(eo.body!=null) {
+				categorizedOut(eo.getSchemaName(), eo.getName(), eo.type, 
+					"-- Executable: "+eo.type+" "+eo.getName()+"\n"
+					+eo.getDefinition(dumpWithSchemaName)+"\n");
+			}
+			else {
+				log.debug("executable with no body (not dumped) ["+eo.getSchemaName()+"."+eo.getName()+"::"+eo.type+" ; package="+eo.packageName+"]");
+			}
 		}
 
 		//Synonyms
