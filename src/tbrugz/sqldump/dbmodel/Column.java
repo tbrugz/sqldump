@@ -59,6 +59,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		}
 		
 		public static boolean usePrecision(String colType) {
+			if(colType==null) { return false; }
 			colType = colType.toUpperCase();
 			if(doNotUsePrecision.contains(colType)) { return false; }
 			return !"false".equals(dbmsSpecificProps.getProperty("type."+colType+".useprecision"));
@@ -81,7 +82,7 @@ public class Column extends DBIdentifiable implements Serializable {
 	
 	//XXX: should be 'default'?
 	public static String getColumnDesc(Column c) {
-		String colType = c.type.trim();
+		String colType = c.type!=null ? c.type.trim() : null;
 		
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 
