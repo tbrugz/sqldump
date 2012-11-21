@@ -44,6 +44,7 @@ class DBObjectId extends DBIdentifiable {
 public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	//sqldump.properties
+	static final String PROP_SCHEMAGRAB_TABLES = "sqldump.schemagrab.tables";
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
@@ -80,7 +81,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
-	boolean doSchemaGrabTables = true, //TODO: add prop for doSchemaGrabTables
+	boolean doSchemaGrabTables = true, //TODOne: add prop for doSchemaGrabTables
 			doSchemaGrabPKs = true, 
 			doSchemaGrabFKs = true, 
 			doSchemaGrabExportedFKs = false, 
@@ -99,6 +100,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		papp.putAll(prop);
 		
 		//inicializa variaveis controle
+		doSchemaGrabTables = Utils.getPropBool(papp, PROP_SCHEMAGRAB_TABLES, doSchemaGrabTables);
 		doSchemaGrabPKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
 		doSchemaGrabFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
 		doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
