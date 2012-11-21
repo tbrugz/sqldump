@@ -543,6 +543,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		int countNotAdded = 0;
 		while(rs.next()) {
 			Constraint c = new Constraint();
 			String tableName = rs.getString(2);
@@ -556,16 +557,24 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
+				count++;
 			}
 			else {
-				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
+				countNotAdded++;
+				if(c.getName()==null || c.getName().startsWith("BIN$")) {
+					log.debug("deleted chack constraint "+c+" can't be added to table '"+tableName+"': table not found");
+				}
+				else {
+					log.warn("check constraint "+c+" can't be added to table '"+tableName+"': table not found");
+				}
 			}
-			count++;
 		}
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+count+" check constraints grabbed");
+		log.info("["+schemaPattern+"]: "+count+" check constraints grabbed"+
+				(countNotAdded>0?" ["+countNotAdded+" constraints ignored]":"")
+				);
 	}
 
 	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -582,7 +591,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
 		
-		int count = 0;
+		int colCount = 0;
+		int countNotAdded = 0;
 		int countUniqueConstraints = 0;
 		String previousConstraint = null;
 		Constraint c = null;
@@ -594,22 +604,31 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
+					countUniqueConstraints++;
 				}
 				else {
-					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
+					if(c.getName()==null || c.getName().startsWith("BIN$")) {
+						log.debug("deleted unique constraint "+c+" can't be added to table '"+tableName+"': table not found");
+					}
+					else {
+						log.warn("unique constraint "+c+" can't be added to table '"+tableName+"': table not found");
+					}
+					countNotAdded++;
 				}
 				c.type = Constraint.ConstraintType.UNIQUE;
 				c.setName( constraintName );
-				countUniqueConstraints++;
 			}
 			c.uniqueColumns.add(rs.getString(4));
 			previousConstraint = constraintName;
-			count++;
+			colCount++;
 		}
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed"+
+				(countNotAdded>0?" ["+countNotAdded+" constraints ignored]":"")+
+				" [colcount="+colCount+"]"
+				);
 	}
 	
 	void getPartitionColumns(OracleTable ot, Connection conn) throws SQLException {

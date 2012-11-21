@@ -56,6 +56,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		String[] queriesArr = queriesStr.split(",");
 		int i=0;
+		int queriesGrabbed=0;
 		//List<Query> queries = new ArrayList<Query>(); 
 		for(String qid: queriesArr) {
 			qid = qid.trim();
@@ -137,6 +138,7 @@ public class SQLQueries extends AbstractSQLProc {
 					lc.add(cpk);
 				}
 				//queries.add(query);
+				queriesGrabbed++;
 				model.getViews().add(query);
 			}
 			// added query to model, or not
@@ -152,11 +154,16 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 			i++;
 		}
-		log.info(i+" queries "
-				+(runQueries?"runned":"")
-				+(addQueriesToModel && !runQueries?"grabbed from properties":"")
-				+(!runQueries && !addQueriesToModel?"not runned nor grabbed":"")
-				);
+		
+		if(runQueries) {
+			log.info(i+" queries runned");
+		}
+		if(addQueriesToModel) {
+			log.info(queriesGrabbed+" queries grabbed from properties");
+		}
+		if(!runQueries && !addQueriesToModel) {
+			log.warn("no queries runned or grabbed");
+		}
 	}
 	
 	List<DumpSyntax> getQuerySyntexes(String qid) {
