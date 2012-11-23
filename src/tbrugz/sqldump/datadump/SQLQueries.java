@@ -30,7 +30,7 @@ public class SQLQueries extends AbstractSQLProc {
 	static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
 	static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
 
-	static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY";
+	static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
 	
 	static Log log = LogFactory.getLog(SQLQueries.class);
 	

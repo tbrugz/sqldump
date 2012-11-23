@@ -31,7 +31,8 @@ public class ParametrizedProperties extends Properties {
 		if(includes!=null) {
 			String[] files = includes.split(",");
 			for(String f: files) {
-				File ff = new File(f.trim());
+				f = f.trim();
+				File ff = new File(f);
 				if(loadedPropFiles.containsKey(ff)) {
 					if(loadedPropFiles.get(ff)) {
 						log.warn("already loaded prop file: "+ff.getAbsolutePath());
@@ -45,8 +46,15 @@ public class ParametrizedProperties extends Properties {
 					this.load(new FileInputStream(ff));
 					log.info("loaded @include: "+ff.getAbsolutePath());
 				} catch (IOException e) {
-					log.warn("error loading @include '"+ff.getAbsolutePath()+"': "+e.getMessage());
-					log.debug("error loading @include: "+ff.getAbsolutePath(), e);
+					InputStream is = ParametrizedProperties.class.getResourceAsStream(f);
+					try {
+						this.load(is);
+						log.info("loaded @include resource: "+f);
+					}
+					catch(IOException e2) {
+						log.warn("error loading @include '"+ff.getAbsolutePath()+"': "+e.getMessage());
+						log.debug("error loading @include: "+ff.getAbsolutePath(), e);
+					}
 				}
 			}
 		}
