@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -313,6 +314,14 @@ public class DataDump extends AbstractSQLProc {
 				}
 				
 				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
+
+				//TODO: remove when multiple partition-patterns for stateful syntaxes is implemented
+				if(ds.isStateful()) {
+					if(partitionByPatterns.length>1) {
+						log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
+						continue;
+					}
+				}
 				
 				if(filename==null) {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
@@ -349,6 +358,8 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
+			//Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
+			Set<DumpSyntax> hasWarnedAboutNonimplementedStatefulness = new HashSet<DumpSyntax>();
 			
 			//rows
 			long countInPartition = 0;
@@ -369,6 +380,21 @@ public class DataDump extends AbstractSQLProc {
 								continue;
 							}
 							
+							if(ds.isStateful()) {
+								//TODO: implement dumping queries with multiple partition-patterns for stateful syntaxes 
+								if(partitionByPatterns.length>1) {
+									if(!hasWarnedAboutNonimplementedStatefulness.contains(ds)) {
+										log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
+										hasWarnedAboutNonimplementedStatefulness.add(ds);
+									}
+									continue;
+								}
+								/*DumpSyntax ds2 = statefulDumpSyntaxes.get(ds.getSyntaxId()+"$"+partitionByPattern);
+								if(ds2==null) {
+									//create/clone dumper... what abount header line?
+								}*/
+							}
+							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
 							//Writer w = getWriterForFilename(finalFilename, charset, true);
 							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
@@ -383,8 +409,9 @@ public class DataDump extends AbstractSQLProc {
 							if(lastPartitionId!=null && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
 								//log.info("partid>> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename);
-								closeWriter(writersOpened, writersSyntaxes, getWriterMapKey(lastFinalFilename, partitionByPattern));
-								removeWriter(writersOpened, writersSyntaxes, getWriterMapKey(lastFinalFilename, partitionByPattern));
+								String lastWriterMapKey = getWriterMapKey(lastFinalFilename, partitionByPattern);
+								closeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
+								removeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
 							}
 							
 							if(newFilename) {

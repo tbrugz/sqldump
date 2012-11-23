@@ -108,7 +108,7 @@ public class SQLQueries extends AbstractSQLProc {
 			//String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
 			//if(partitionsBy==null) { partitionsBy = new ArrayList<String>(); }
-			log.info("partitions: "+partitionsBy);
+			log.info("partition-patterns: "+partitionsBy); //XXX: move log into DataDump
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
 

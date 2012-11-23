@@ -93,6 +93,15 @@ public abstract class DumpSyntax {
 	public boolean isWriterIndependent() {
 		return false;
 	}
+
+	/**
+	 * Should return true if dumpsyntax has buffer
+	 * 
+	 * FFCDataDump is stateful
+	 */
+	public boolean isStateful() {
+		return false;
+	}
 	
 	//XXX: method supportResultSetDump()?
 	//XXX> method cloneBaseProperties()? duplicateInstance(DumpSyntax)? clone()?

@@ -257,6 +257,11 @@ public class FFCDataDump extends DumpSyntax {
 	}
 	
 	@Override
+	public boolean isStateful() {
+		return true;
+	}
+	
+	@Override
 	public String getSyntaxId() {
 		return FFC_SYNTAX_ID;
 	}
