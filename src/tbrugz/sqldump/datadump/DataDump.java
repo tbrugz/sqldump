@@ -284,25 +284,19 @@ public class DataDump extends AbstractSQLProc {
 			if(!hasData) return;
 			long count = 0;
 			
-			//String defaultFilename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN);
-
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
-			//String partitionBy = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
 			if(partitionByPatterns==null) { partitionByPatterns = new String[]{ "" }; }
 			
 			List<String> filenameList = new ArrayList<String>();
 			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
-			//List<String> partitionByCols = getPartitionCols(partitionByPattern);
 			
 			String partitionByStrId = "";
-			//String partitionByStrIdOld = "";
 			
 			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
 			
 			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
-			//XXXdone: prop for setting 'logEachXRows'
 			boolean logNumberOfOpenedWriters = true;
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 
@@ -318,7 +312,6 @@ public class DataDump extends AbstractSQLProc {
 					continue;
 				}
 				
-				//String filename = prop.getProperty("sqldump.datadump."+ds.getSyntaxId()+".filepattern", defaultFilename);
 				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
 				
 				if(filename==null) {
@@ -330,7 +323,6 @@ public class DataDump extends AbstractSQLProc {
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
 					
 					doSyntaxDumpList.set(i, true);
-					//writerList.set(i, new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset));
 					filenameList.set(i, filename);
 
 					//for each partitionBy...
@@ -338,14 +330,11 @@ public class DataDump extends AbstractSQLProc {
 						//log.info("header:: partitionby:: "+partitionByPattern);
 						List<String> partitionByCols = getPartitionCols(partitionByPattern);
 					
-						//partitionByStrIdOld = partitionByStrId; 
 						partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
 						String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
-						//Writer w = getWriterForFilename(finalFilename, charset, false);
 						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
 						Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 						if(newFilename) {
-							//should always be true
 							log.debug("new filename="+finalFilename+" [charset="+charset+"]");
 						}
 						else {
@@ -370,33 +359,26 @@ public class DataDump extends AbstractSQLProc {
 					//log.info("row:: partitionby:: "+partitionByPattern);
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
 					
-				//partitionByStrIdOld = partitionByStrId; 
-				partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
-				//boolean partitionChanged = false;
-				/*if(!partitionByStrId.equals(partitionByStrIdOld)) {
-					partitionChanged = true;
-					countInPartition = 0;
-					log.debug("partitionId changed: from='"+partitionByStrIdOld+"' to='"+partitionByStrId+"'");
-				}*/
-				
-				for(int i=0;i<syntaxList.size();i++) {
-					DumpSyntax ds = syntaxList.get(i);
-					if(doSyntaxDumpList.get(i)) {
-						if(ds.isWriterIndependent()) {
-							ds.dumpRow(rs, countInPartition, null);
-							continue;
-						}
-						
-						String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
-						//Writer w = getWriterForFilename(finalFilename, charset, true);
-						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
-						Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
-						//if(partitionChanged) {
+					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+					
+					for(int i=0;i<syntaxList.size();i++) {
+						DumpSyntax ds = syntaxList.get(i);
+						if(doSyntaxDumpList.get(i)) {
+							if(ds.isWriterIndependent()) {
+								ds.dumpRow(rs, countInPartition, null);
+								continue;
+							}
+							
+							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
+							//Writer w = getWriterForFilename(finalFilename, charset, true);
+							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
+							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
+							//if(partitionChanged) {
 							//for DumpSyntaxes that have buffer (like FFC)
 							//XXX String finalFilenameOld = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrIdOld);
 							//ds.flushBuffer(writersOpened.get(getWriterMapKey(finalFilenameOld, partitionByPattern)));
 							//XXX: write footer & close file here? (less simultaneous open-files)
-							
+								
 							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
 							if(lastPartitionId!=null && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
@@ -405,31 +387,24 @@ public class DataDump extends AbstractSQLProc {
 								removeWriter(writersOpened, writersSyntaxes, getWriterMapKey(lastFinalFilename, partitionByPattern));
 							}
 							
-							//closeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
-							//removeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
-							//w.flush();
-						//}
-						
-						if(newFilename) {
-							log.debug("new filename="+finalFilename+" [charset="+charset+"]");
-							ds.dumpHeader(w);
-							writersSyntaxes.put(finalFilename, ds);
+							if(newFilename) {
+								log.debug("new filename="+finalFilename+" [charset="+charset+"]");
+								ds.dumpHeader(w);
+								writersSyntaxes.put(finalFilename, ds);
+							}
+							//TODOne: count should be total count or file count? i vote on file count :) (FFC uses it for buffering)
+							try {
+								ds.dumpRow(rs, countInPartition, w);
+							}
+							catch(SQLException e) {
+								log.warn("error dumping row "+(count+1)+" from query '"+tableOrQueryId+"/"+tableOrQueryName+"': syntax "+ds.getSyntaxId()+" disabled");
+								log.info("stack...",e);
+								syntaxList.remove(i); i--;
+								conn.rollback();
+							}
 						}
-						//TODOne: count should be total count or file count? i vote on file count :) (FFC uses it for buffering)
-						try {
-							ds.dumpRow(rs, countInPartition, w);
-						}
-						catch(SQLException e) {
-							log.warn("error dumping row "+(count+1)+" from query '"+tableOrQueryId+"/"+tableOrQueryName+"': syntax "+ds.getSyntaxId()+" disabled");
-							log.info("stack...",e);
-							syntaxList.remove(i); i--;
-							conn.rollback();
-						}
-						//ds.dumpRow(rs, count, writerList.get(i));
 					}
-				}
-				//lastPartitionByPattern = partitionByPattern;
-				lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
+					lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
 				}
 				count++;
 				countInPartition++;
@@ -448,8 +423,6 @@ public class DataDump extends AbstractSQLProc {
 			}
 			while(rs.next());
 			
-			//} //end for partitionby
-			
 			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
 				(rs.next()?" (more rows exists)":"") + 
 				" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
@@ -459,49 +432,17 @@ public class DataDump extends AbstractSQLProc {
 			for(String filename: filenames) {
 				//for(String partitionByPattern: partitionByPatterns) {
 				closeWriter(writersOpened, writersSyntaxes, filename);
-					//removeWriter(writersOpened, writersSyntaxes, filename);
-				//}
-				/*Writer w = writersOpened.get(filename);
-				DumpSyntax ds = writersSyntaxes.get(filename);
-				try {
-					ds.dumpFooter(w);
-				}
-				catch(Exception e) {
-					log.warn("error closing stream: "+w+"; filename: "+filename);
-					log.debug("error closing stream: ", e);
-				}
-				w.close();*/
 			}
 			writersOpened.clear();
 			writersSyntaxes.clear();
 			log.debug("wrote all footers for table/query: "+tableOrQueryName);
-			
-			/*
-			for(int i=0;i<syntaxList.size();i++) {
-				DumpSyntax ds = syntaxList.get(i);
-				if(doSyntaxDumpList.get(i)) {
-					//partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
-					String finalFilename = getFinalFilenameForAbstractFilename(writerList.get(i), partitionByStrId);
-					//Writer w = getWriterForFilename(finalFilename, charset);
-					Writer w = writersOpened.get(finalFilename);
-					ds.dumpFooter(w);
-					//ds.dumpFooter(writerList.get(i));
-					
-					//writerList.get(i).close();
-				}
-			}
-			
-			for(String s: writersOpened.keySet()) {
-				writersOpened.get(s).close();
-			}
-			*/
 			
 			rs.close();
 	}
 	
 	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key) throws IOException {
 		Writer w = writersOpened.get(key);
-		String filename = key.substring(0, key.indexOf("$$"));
+		String filename = getFilenameFromWriterMapKey(key);
 		//String key = getWriterMapKey(filename, partitionByPattern);
 		
 		DumpSyntax ds = writersSyntaxes.get(filename);
@@ -517,7 +458,7 @@ public class DataDump extends AbstractSQLProc {
 	}
 	
 	static void removeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key) throws IOException {
-		String filename = key.substring(0, key.indexOf("$$"));
+		String filename = getFilenameFromWriterMapKey(key);
 		
 		Writer writerRemoved = writersOpened.remove(key);
 		if(writerRemoved==null) { log.warn("writer for file '"+filename+"' not found"); }
@@ -561,6 +502,10 @@ public class DataDump extends AbstractSQLProc {
 	
 	static String getWriterMapKey(String fname, String partitionBy) {
 		return fname+"$$"+partitionBy;
+	}
+
+	static String getFilenameFromWriterMapKey(String key) {
+		return key.substring(0, key.indexOf("$$"));
 	}
 	
 	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM) throws UnsupportedEncodingException, FileNotFoundException {
