@@ -105,7 +105,10 @@ public class SQLQueries extends AbstractSQLProc {
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
-			String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
+			//String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
+			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
+			//if(partitionsBy==null) { partitionsBy = new ArrayList<String>(); }
+			log.info("partitions: "+partitionsBy);
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
 
@@ -146,7 +149,9 @@ public class SQLQueries extends AbstractSQLProc {
 			if(runQueries) {
 				try {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
-					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, partitionBy, keyCols);
+					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
+							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
+							keyCols);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.info("error on query "+qid+": "+e.getMessage(), e);

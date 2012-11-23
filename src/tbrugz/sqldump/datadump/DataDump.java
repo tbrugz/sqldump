@@ -258,7 +258,7 @@ public class DataDump extends AbstractSQLProc {
 			String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
-			String partitionByPattern,
+			String[] partitionByPatterns,
 			List<String> keyColumns
 			) throws Exception {
 		
@@ -282,26 +282,28 @@ public class DataDump extends AbstractSQLProc {
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
 			if(!hasData) return;
+			long count = 0;
 			
 			//String defaultFilename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN);
 
-			List<String> filenameList = new ArrayList<String>();
-			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
+			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
+			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
 			//String partitionBy = prop.getProperty(PROP_DATADUMP_FILEPATTERN);
-			if(partitionByPattern==null) { partitionByPattern = ""; }
-			List<String> partitionByCols = getPartitionCols(partitionByPattern);
+			if(partitionByPatterns==null) { partitionByPatterns = new String[]{ "" }; }
+			
+			List<String> filenameList = new ArrayList<String>();
+			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
+			//List<String> partitionByCols = getPartitionCols(partitionByPattern);
 			
 			String partitionByStrId = "";
 			String partitionByStrIdOld = "";
-			
-			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
-			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
 			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
 			
 			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			//XXXdone: prop for setting 'logEachXRows'
+			boolean logNumberOfOpenedWriters = true;
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 
 			//header
@@ -331,30 +333,39 @@ public class DataDump extends AbstractSQLProc {
 					//writerList.set(i, new OutputStreamWriter(new FileOutputStream(filename, alreadyOpened), charset));
 					filenameList.set(i, filename);
 
-					partitionByStrIdOld = partitionByStrId; 
-					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
-					String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
-					//Writer w = getWriterForFilename(finalFilename, charset, false);
-					boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset, writeBOM);
-					Writer w = writersOpened.get(finalFilename);
-					if(newFilename) {
-						//should always be true
-						log.debug("new filename="+finalFilename+" [charset="+charset+"]");
+					//for each partitionBy...
+					for(String partitionByPattern: partitionByPatterns) {
+						//log.info("header:: partitionby:: "+partitionByPattern);
+						List<String> partitionByCols = getPartitionCols(partitionByPattern);
+					
+						partitionByStrIdOld = partitionByStrId; 
+						partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+						String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
+						//Writer w = getWriterForFilename(finalFilename, charset, false);
+						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, charset, writeBOM);
+						Writer w = writersOpened.get(finalFilename);
+						if(newFilename) {
+							//should always be true
+							log.debug("new filename="+finalFilename+" [charset="+charset+"]");
+						}
+						else {
+							log.warn("filename '"+finalFilename+"' shouldn't have been already opened...");
+						}
+	
+						writersSyntaxes.put(finalFilename, ds);
+						ds.dumpHeader(w);
 					}
-					else {
-						log.warn("filename '"+finalFilename+"' shouldn't have been already opened...");
-					}
-
-					writersSyntaxes.put(finalFilename, ds);
-					ds.dumpHeader(w);
 					//ds.dumpHeader(writerList.get(i));
 				}
 			}
 			
 			//rows
-			long count = 0;
 			long countInPartition = 0;
 			do {
+				for(String partitionByPattern: partitionByPatterns) {
+					//log.info("row:: partitionby:: "+partitionByPattern);
+					List<String> partitionByCols = getPartitionCols(partitionByPattern);
+					
 				partitionByStrIdOld = partitionByStrId; 
 				partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
 				boolean partitionChanged = false;
@@ -381,8 +392,8 @@ public class DataDump extends AbstractSQLProc {
 							String finalFilenameOld = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrIdOld);
 							ds.flushBuffer(writersOpened.get(finalFilenameOld));
 							//XXX: write footer & close file here? (less simultaneous open-files)
-							closeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
-							removeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
+							//closeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
+							//removeWriter(writersOpened, writersSyntaxes, finalFilenameOld);
 							//w.flush();
 						}
 						
@@ -404,19 +415,26 @@ public class DataDump extends AbstractSQLProc {
 						//ds.dumpRow(rs, count, writerList.get(i));
 					}
 				}
+				}
 				count++;
 				countInPartition++;
+				
+				//XXX: too many opened writers? maybe they should be divided by 'partitionBy' and cleaned each time
 				
 				if(log1stRow && count==1) {
 					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
 						" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
 				}
 				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
-					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped");
+					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped"
+							+(logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"") );
 				}
 				if(rowlimit<=count) { break; }
 			}
 			while(rs.next());
+			
+			//} //end for partitionby
+			
 			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
 				(rs.next()?" (more rows exists)":"") + 
 				" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
