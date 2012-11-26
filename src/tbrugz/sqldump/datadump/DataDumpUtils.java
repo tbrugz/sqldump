@@ -118,6 +118,10 @@ public class DataDumpUtils {
 		}
 		else if(String.class.isAssignableFrom(type)) {
 			elem = ((String) elem).replaceAll(DOUBLEQUOTE, "&quot;");
+			elem = ((String) elem).replaceAll("\\\\", "\\\\\\\\");
+			elem = ((String) elem).replaceAll("\r\n", "\n");
+			elem = ((String) elem).replaceAll("\r", " ");
+			elem = ((String) elem).replaceAll("\n", "\\\\n");
 			return DOUBLEQUOTE+elem+DOUBLEQUOTE;
 		}
 		else if(Date.class.isAssignableFrom(type)) {

@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -42,6 +43,7 @@ public class JSONDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		dateFormatter = new SimpleDateFormat("\"yyyy-MM-dd\"");
 		procStandardProperties(prop);
 	}
 

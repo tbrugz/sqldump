@@ -46,7 +46,7 @@ public abstract class DumpSyntax {
 		if(dateFormat!=null) {
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
-		else {
+		else if(dateFormatter==null){
 			dateFormatter = DataDumpUtils.dateFormatter;
 		}
 		
@@ -103,7 +103,9 @@ public abstract class DumpSyntax {
 		return false;
 	}
 	
+	//XXX: methods dumpDocHeader, dumpDocFooter -- before dumpHeader/Footer, for dumps with multiple ResultSet
+	
 	//XXX: method supportResultSetDump()?
-	//XXX> method cloneBaseProperties()? duplicateInstance(DumpSyntax)? clone()?
+	//XXX: method cloneBaseProperties()? duplicateInstance(DumpSyntax)? clone()?
 
 }
