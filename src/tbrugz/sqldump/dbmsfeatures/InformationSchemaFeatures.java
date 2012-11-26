@@ -153,11 +153,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.setSchemaName( schemaPattern );
 				eo.setName( routineName );
 				try {
-					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
+					eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));
-					eo.type = DBObjectType.EXECUTABLE;
+					eo.setType( DBObjectType.EXECUTABLE );
 				}
 				eo.returnType = rs.getString(3);
 				eo.externalLanguage = rs.getString(4);

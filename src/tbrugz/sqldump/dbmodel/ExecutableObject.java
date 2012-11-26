@@ -10,13 +10,13 @@ import java.util.List;
 public class ExecutableObject extends DBObject {
 
 	//public String type;
-	public DBObjectType type;
+	DBObjectType type;
 	public String body;
 	public List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
 
-	public String packageName;
-	public List<ExecutableParameter> params;
-	public ExecutableParameter returnParam;
+	String packageName;
+	List<ExecutableParameter> params;
+	ExecutableParameter returnParam;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
@@ -62,6 +62,38 @@ public class ExecutableObject extends DBObject {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+
+	public DBObjectType getType() {
+		return type;
+	}
+
+	public void setType(DBObjectType type) {
+		this.type = type;
+	}
+
+	public String getPackageName() {
+		return packageName;
+	}
+
+	public void setPackageName(String packageName) {
+		this.packageName = packageName;
+	}
+
+	public List<ExecutableParameter> getParams() {
+		return params;
+	}
+
+	public void setParams(List<ExecutableParameter> params) {
+		this.params = params;
+	}
+
+	public ExecutableParameter getReturnParam() {
+		return returnParam;
+	}
+
+	public void setReturnParam(ExecutableParameter returnParam) {
+		this.returnParam = returnParam;
 	}
 	
 }

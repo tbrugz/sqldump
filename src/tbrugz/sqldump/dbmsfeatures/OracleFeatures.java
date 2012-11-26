@@ -184,16 +184,16 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				sb = new StringBuffer();
 				eo.setName( rs.getString(1) );
 				try {
-					eo.type = DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2)));
+					eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));
-					eo.type = DBObjectType.EXECUTABLE;
+					eo.setType( DBObjectType.EXECUTABLE );
 				}
 				
 				eo.setSchemaName(schemaPattern);
 				
-				if(grabExecutablePrivileges && !eo.type.equals(DBObjectType.PACKAGE_BODY)) {
+				if(grabExecutablePrivileges && !eo.getType().equals(DBObjectType.PACKAGE_BODY)) {
 					//XXX: optimize it: make one query instead of many
 					grabExecutablePrivileges(eo, schemaPattern, conn);
 				}
@@ -275,13 +275,13 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				DBObjectType otype = DBObjectType.valueOf(objectType);
 				switch(otype) {
 				case PACKAGE:
-					eo.packageName = objectName;
+					eo.setPackageName(objectName);
 					eo.setName(subprogramName);
-					eo.type = DBObjectType.valueOf(subprogramType);
+					eo.setType(DBObjectType.valueOf(subprogramType));
 					break;
 				default: //top-level procedure or function
 					eo.setName(objectName);
-					eo.type = otype;
+					eo.setType(otype);
 				}
 				
 				model.getExecutables().add(eo);
@@ -305,13 +305,13 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			}
 			//log.info("parameter: "+ep);
 			if(ep.position==0) {
-				eo.returnParam = ep;
+				eo.setReturnParam(ep);
 			}
 			else {
-				if(eo.params==null) {
-					eo.params = new ArrayList<ExecutableParameter>();
+				if(eo.getParams()==null) {
+					eo.setParams(new ArrayList<ExecutableParameter>());
 				}
-				eo.params.add(ep);
+				eo.getParams().add(ep);
 			}
 			paramCount++;
 		}
