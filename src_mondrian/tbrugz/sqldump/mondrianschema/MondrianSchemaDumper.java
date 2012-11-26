@@ -219,22 +219,22 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 				FK fk = new FK();
 				log.debug("new FK: "+newfkstr+"; parts.len: "+parts.length);
-				fk.fkTable = t.getName();
-				fk.fkTableSchemaName = t.getSchemaName();
-				fk.fkColumns = Utils.newStringList(parts[0]);
+				fk.setFkTable(t.getName());
+				fk.setFkTableSchemaName(t.getSchemaName());
+				fk.setFkColumns(Utils.newStringList(parts[0]));
 				if(parts[1].contains(".")) {
 					String[] pkTableParts = parts[1].split("\\.");
 					log.debug("FKschema: "+parts[1]+"; pkTable.len: "+pkTableParts.length);
-					fk.pkTableSchemaName = pkTableParts[0];
+					fk.setPkTableSchemaName(pkTableParts[0]);
 					parts[1] = pkTableParts[1];
 				}
-				fk.pkTable = parts[1];
-				fk.pkColumns = Utils.newStringList(parts[2]);
+				fk.setPkTable(parts[1]);
+				fk.setPkColumns(Utils.newStringList(parts[2]));
 				if(parts.length>3) {
 					fk.setName(parts[3]);
 				}
 				else {
-					fk.setName(fk.fkTable + "_" + fk.pkTable + "_FK"); //XXX: suggestAcronym?
+					fk.setName(fk.getFkTable() + "_" + fk.getPkTable() + "_FK"); //XXX: suggestAcronym?
 				}
 				
 				//TODO: changing model... should clone() first
@@ -248,10 +248,10 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			boolean isRoot = true;
 			boolean isLeaf = true;
 			for(FK fk: schemaModel.getForeignKeys()) {
-				if(fk.pkTable.equals(t.getName())) {
+				if(fk.getPkTable().equals(t.getName())) {
 					isRoot = false;
 				}
-				if(fk.fkTable.equals(t.getName())) {
+				if(fk.getFkTable().equals(t.getName())) {
 					isLeaf = false;
 					fks.add(fk);
 				}
@@ -414,7 +414,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		boolean ok = true;
 		
 		for(FK fk: fks) {
-			if(fk.fkColumns.contains(c.getName())) {
+			if(fk.getFkColumns().contains(c.getName())) {
 				log.debug("column '"+c.getName()+"' belongs to FK. ignoring (as measure)");
 				ok = false; break;
 				//continue columnloop;
@@ -476,7 +476,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	}
 	
 	void procDimension(Schema.Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) {
-		if(fk.fkColumns.size()>1) {
+		if(fk.getFkColumns().size()>1) {
 			log.debug("fk "+fk+" is composite. ignoring");
 			return;
 		}
@@ -485,7 +485,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//pkTable.setSchema(fk.schemaName);
 		//pkTable.setName(fk.pkTable);
 		
-		String dimName = fk.pkTable;
+		String dimName = fk.getPkTable();
 		if(false) {
 			dimName = fk.getName();
 		}
@@ -494,7 +494,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			return;
 		}
 
-		degenerateDimCandidates.remove(fk.fkColumns.get(0));
+		degenerateDimCandidates.remove(fk.getFkColumns().get(0));
 		procHierRecursiveInit(schemaModel, cube, fk, dimName);
 		
 		/*PrivateDimension dim = new PrivateDimension();
@@ -550,11 +550,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	void procHierRecursiveInit(SchemaModel schemaModel, Schema.Cube cube, FK fk, String dimName) {
 		PrivateDimension dim = new PrivateDimension();
 		dim.setName(dimName);
-		dim.setForeignKey(sqlIdDecorator.get( fk.fkColumns.iterator().next() ));
+		dim.setForeignKey(sqlIdDecorator.get( fk.getFkColumns().iterator().next() ));
 		dim.setType("StandardDimension");
 		
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
-		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.pkTable, levels);
+		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.getPkTable(), levels);
 		
 		if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
 			for(int i=dim.getHierarchy().size()-1; i >= 0; i--) {
@@ -578,9 +578,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		thisLevels.addAll(levelsData);
 		boolean isLevelLeaf = true;
 
-		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.pkTable);
+		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
 		if(pkTable==null) {
-			log.warn("table not found: "+schemaName+"."+fk.pkTable);
+			log.warn("table not found: "+schemaName+"."+fk.getPkTable());
 		}
 		
 		HierarchyLevelData level = new HierarchyLevelData();
@@ -591,7 +591,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				level.levelNameColumn = levelNameColumn;
 			}
 			else {
-				log.warn("levelName column not found: "+levelNameColumn+" [table = "+schemaName+"."+fk.pkTable+"]");
+				log.warn("levelName column not found: "+levelNameColumn+" [table = "+schemaName+"."+fk.getPkTable()+"]");
 			}
 		}
 		else if(preferredLevelNameColumns!=null) {
@@ -606,15 +606,15 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 				}
 			}
 			else {
-				log.warn("table not found [2]: "+schemaName+"."+fk.pkTable);
+				log.warn("table not found [2]: "+schemaName+"."+fk.getPkTable());
 			}
 		}
-		level.levelColumn = fk.pkColumns.iterator().next();
+		level.levelColumn = fk.getPkColumns().iterator().next();
 		level.levelType = "Regular";
-		level.joinLeftKey = fk.fkColumns.iterator().next();
-		level.joinRightKey = fk.pkColumns.iterator().next();
+		level.joinLeftKey = fk.getFkColumns().iterator().next();
+		level.joinRightKey = fk.getPkColumns().iterator().next();
 		//level.joinPKTable = fk.pkTable;
-		level.levelTable = fk.pkTable;
+		level.levelTable = fk.getPkTable();
 		
 		log.debug("fkk: "+fk.toStringFull());
 		
@@ -622,9 +622,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		//levels.add(level);
 
 		for(FK fkInt: schemaModel.getForeignKeys()) {
-			if(fkInt.fkTable.equals(pkTableName) && (fkInt.fkColumns.size()==1)) {
+			if(fkInt.getFkTable().equals(pkTableName) && (fkInt.getFkColumns().size()==1)) {
 				isLevelLeaf = false;
-				procHierRecursive(schemaModel, cube, dim, fkInt, schemaName, fkInt.pkTable, thisLevels);
+				procHierRecursive(schemaModel, cube, dim, fkInt, schemaName, fkInt.getPkTable(), thisLevels);
 				//isLeaf = false;
 				//fks.add(fkInt);
 			}

@@ -190,23 +190,23 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			for(Table t: schemaModel.getTables()) {
 				boolean pkTable = false;
 				boolean fkTable = false;
-				if(t.getName().equals(fk.pkTable)) { pkTable = true; }
-				if(t.getName().equals(fk.fkTable)) { fkTable = true; }
+				if(t.getName().equals(fk.getPkTable())) { pkTable = true; }
+				if(t.getName().equals(fk.getFkTable())) { fkTable = true; }
 				if(! (pkTable || fkTable)) { continue; }
 				
 				//Index
 				for(Index idx: schemaModel.getIndexes()) {
-					if(! (idx.tableName.equals(fk.pkTable) || idx.tableName.equals(fk.fkTable))) { continue; }
+					if(! (idx.tableName.equals(fk.getPkTable()) || idx.tableName.equals(fk.getFkTable()))) { continue; }
 
 					Set<String> cols = new HashSet<String>();
 					cols.addAll(idx.columns);
-					if(idx.tableName.equals(fk.pkTable)) {
-						if(stringCollectionEquals(cols,fk.pkColumns)) { pkTableHasIndex = true; }
+					if(idx.tableName.equals(fk.getPkTable())) {
+						if(stringCollectionEquals(cols,fk.getPkColumns())) { pkTableHasIndex = true; }
 						//if(cols.equals(fk.pkColumns)) { pkTableHasIndex = true; }
 						//log.info("cols["+idx.tableName+"/pkt]: "+cols+" fk.pkCols: "+fk.pkColumns+"; hasI: "+pkTableHasIndex+"/"+stringCollectionEquals(cols, fk.pkColumns));
 					}
-					if(idx.tableName.equals(fk.fkTable)) { 
-						if(stringCollectionEquals(cols,fk.fkColumns)) { fkTableHasIndex = true; }
+					if(idx.tableName.equals(fk.getFkTable())) { 
+						if(stringCollectionEquals(cols,fk.getFkColumns())) { fkTableHasIndex = true; }
 						//if(cols.equals(fk.fkColumns)) { fkTableHasIndex = true; }
 						//log.info("cols["+idx.tableName+"/fkt]: "+cols+" fk.fkCols: "+fk.fkColumns+"; hasI: "+fkTableHasIndex+"/"+stringCollectionEquals(cols, fk.fkColumns));
 					}
@@ -217,21 +217,21 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 			
 			if(!pkTableHasIndex && !dumpFKIndexesOnly) {
 				Index idx = new Index();
-				idx.tableName = fk.pkTable;
-				idx.setSchemaName(fk.pkTableSchemaName);
+				idx.tableName = fk.getPkTable();
+				idx.setSchemaName(fk.getPkTableSchemaName());
 				idx.unique = false;
-				idx.columns.addAll(fk.pkColumns);
-				idx.setName(fk.pkTable + "_" + suggestAcronym(idx.columns) + "_UKI"); //_" + (indexes.size()+1);
+				idx.columns.addAll(fk.getPkColumns());
+				idx.setName(fk.getPkTable() + "_" + suggestAcronym(idx.columns) + "_UKI"); //_" + (indexes.size()+1);
 				addIndex(indexes, idx);
 			}
 
 			if(!fkTableHasIndex) {
 				Index idx = new Index();
-				idx.tableName = fk.fkTable;
-				idx.setSchemaName(fk.fkTableSchemaName);
+				idx.tableName = fk.getFkTable();
+				idx.setSchemaName(fk.getFkTableSchemaName());
 				idx.unique = false;
-				idx.columns.addAll(fk.fkColumns);
-				idx.setName(fk.fkTable + "_" + suggestAcronym(idx.columns) + "_FKI");
+				idx.columns.addAll(fk.getFkColumns());
+				idx.setName(fk.getFkTable() + "_" + suggestAcronym(idx.columns) + "_FKI");
 				//idx.name = fk.fkTable + "_FKI";
 				//idx.name = fk.fkTable + "_FKI_" + idx.hashCode();
 				//idx.name = fk.fkTable + "_FKI_" + (++fkIndexCounter);
@@ -295,14 +295,14 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 						
 						//Create FK
 						FK fk = new FK();
-						fk.pkTable = table.getName();
-						fk.pkTableSchemaName = table.getSchemaName();
-						fk.pkColumns.addAll(cons.uniqueColumns);
-						fk.fkTable = otherT.getName();
-						fk.fkTableSchemaName = otherT.getSchemaName();
-						fk.fkColumns.addAll(cons.uniqueColumns);
+						fk.setPkTable( table.getName() );
+						fk.setPkTableSchemaName( table.getSchemaName() );
+						fk.getPkColumns().addAll(cons.uniqueColumns);
+						fk.setFkTable( otherT.getName() );
+						fk.setFkTableSchemaName( otherT.getSchemaName() );
+						fk.getFkColumns().addAll(cons.uniqueColumns);
 						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
-						fk.setName(suggestAcronym(fk.fkTable) + "_" + suggestAcronym(fk.pkTable) + "_FK");
+						fk.setName(suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getFkTable()) + "_FK");
 
 						//Test if FK already exists
 						boolean fkAlreadyExists = false;
@@ -368,7 +368,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	int writeFKs(Set<FK> fks, CategorizedOut fos) throws IOException {
 		int dumpCounter = 0;
 		for(FK fk: fks) {
-			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.fkTableSchemaName))) {
+			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.getFkTableSchemaName()))) {
 				fos.categorizedOut(SchemaModelScriptDumper.fkScriptWithAlterTable(fk, false, true), fk.getSchemaName(), DBObjectType.FK.toString() );
 				//fos.write( fk.getDefinition(true)+";\n\n" );
 				dumpCounter++;

@@ -212,7 +212,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			//FK outside table, with referencing table
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
 				for(FK fk: schemaModel.getForeignKeys()) {
-					if(fk.fkTable.equals(table.getName())) {
+					if(fk.getFkTable().equals(table.getName())) {
 						String fkscript = fkScriptWithAlterTable(fk, dumpDropStatements, dumpWithSchemaName);
 						categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, fkscript);
 					}
@@ -334,7 +334,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	}
 	
 	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {
-		String fkTableName = (dumpWithSchemaName?DBObject.getFinalIdentifier(fk.fkTableSchemaName)+".":"")+DBObject.getFinalIdentifier(fk.fkTable);
+		String fkTableName = (dumpWithSchemaName?DBObject.getFinalIdentifier(fk.getFkTableSchemaName())+".":"")+DBObject.getFinalIdentifier(fk.getFkTable());
 		return
 			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
 			+"alter table "+fkTableName

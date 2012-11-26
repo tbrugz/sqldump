@@ -68,7 +68,7 @@ public class DropScriptDumper implements SchemaModelDumper {
 	public void dumpDropFKs(SchemaModel schemaModel, CategorizedOut co) throws IOException {
 		String fkcat = DBObjectType.FK.toString();
 		for(FK fk: schemaModel.getForeignKeys()) {
-			String script = "alter table "+fk.fkTable+" drop constraint "+fk.getName()+";\n";
+			String script = "alter table "+fk.getFkTable()+" drop constraint "+fk.getName()+";\n";
 			co.categorizedOut(script, fk.getSchemaName(), fkcat);
 		}
 	}

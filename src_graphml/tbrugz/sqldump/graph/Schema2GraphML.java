@@ -148,10 +148,10 @@ public class Schema2GraphML implements SchemaModelDumper {
 			boolean isRoot = true;
 			boolean isLeaf = true;
 			for(FK fk: schemaModel.getForeignKeys()) {
-				if(fk.pkTable.equals(t.getName())) {
+				if(fk.getPkTable().equals(t.getName())) {
 					isRoot = false;
 				}
-				if(fk.fkTable.equals(t.getName())) {
+				if(fk.getFkTable().equals(t.getName())) {
 					isLeaf = false;
 				}
 			}
@@ -307,16 +307,16 @@ public class Schema2GraphML implements SchemaModelDumper {
 			case FK: 
 				l.setName(fk.getName()); break;
 			case COLUMNS: 
-				l.setName("("+fk.fkColumns+" -> "+fk.pkColumns+")"); break;
+				l.setName("("+fk.getFkColumns()+" -> "+fk.getPkColumns()+")"); break;
 			case FKANDCOLUMNS:
 				//fk label: fk name + columns involved
-				l.setName(fk.getName()+" ("+fk.fkColumns+" -> "+fk.pkColumns+")"); break;
+				l.setName(fk.getName()+" ("+fk.getFkColumns()+" -> "+fk.getPkColumns()+")"); break;
 			case NONE:
 			default:
 				l.setName(""); break;
 		}
 		l.referencesPK = fk.fkReferencesPK;
-		l.composite = fk.fkColumns.size()>1;
+		l.composite = fk.getFkColumns().size()>1;
 		l.setSource(getSourceId(fk));
 		l.setTarget(getTargetId(fk));
 		
@@ -442,11 +442,11 @@ public class Schema2GraphML implements SchemaModelDumper {
 	}
 	
 	public static String getSourceId(FK fk) {
-		return fk.pkTableSchemaName+"."+fk.pkTable;
+		return fk.getPkTableSchemaName()+"."+fk.getPkTable();
 	}
 
 	public static String getTargetId(FK fk) {
-		return fk.fkTableSchemaName+"."+fk.fkTable;
+		return fk.getFkTableSchemaName()+"."+fk.getFkTable();
 	}
 	
 	@Override

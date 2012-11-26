@@ -214,7 +214,7 @@ public class SchemaDiff implements Diff {
 	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
 		Set<FK> retfks = new HashSet<FK>();
 		for(FK fk: fks) {
-			if(fk.fkTable.equals(table)) { retfks.add(fk); }
+			if(fk.getFkTable().equals(table)) { retfks.add(fk); }
 		}
 		return retfks;
 	}

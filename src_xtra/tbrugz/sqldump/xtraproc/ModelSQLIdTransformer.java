@@ -52,10 +52,10 @@ public class ModelSQLIdTransformer extends AbstractSQLProc {
 		}
 		for(FK fk: model.getForeignKeys()) {
 			fk.setName( identifierDecorator.get(fk.getName()) );
-			fk.pkTable = identifierDecorator.get( fk.pkTable );
-			fk.fkTable = identifierDecorator.get( fk.fkTable );
-			procList(fk.fkColumns, identifierDecorator);
-			procList(fk.pkColumns, identifierDecorator);
+			fk.setPkTable( identifierDecorator.get( fk.getPkTable() ) );
+			fk.setFkTable( identifierDecorator.get( fk.getFkTable() ) );
+			procList(fk.getFkColumns(), identifierDecorator);
+			procList(fk.getPkColumns(), identifierDecorator);
 		}
 		for(Index i: model.getIndexes()) {
 			i.setName( identifierDecorator.get(i.getName()) );

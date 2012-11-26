@@ -43,16 +43,16 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	//String name;
-	public String pkTable;
-	public String fkTable;
-	public String pkTableSchemaName;
-	public String fkTableSchemaName;
+	String pkTable;
+	String fkTable;
+	String pkTableSchemaName;
+	String fkTableSchemaName;
 	public Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
 	public UpdateRule updateRule;
 	public UpdateRule deleteRule;
 
-	public List<String> pkColumns = new ArrayList<String>();
-	public List<String> fkColumns = new ArrayList<String>();
+	List<String> pkColumns = new ArrayList<String>();
+	List<String> fkColumns = new ArrayList<String>();
 	
 	@Override
 	public String toString() {
@@ -97,6 +97,54 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		return fkSimpleScript(" ", true);
 	}
 	
+	public String getPkTable() {
+		return pkTable;
+	}
+
+	public void setPkTable(String pkTable) {
+		this.pkTable = pkTable;
+	}
+
+	public String getFkTable() {
+		return fkTable;
+	}
+
+	public void setFkTable(String fkTable) {
+		this.fkTable = fkTable;
+	}
+
+	public String getPkTableSchemaName() {
+		return pkTableSchemaName;
+	}
+
+	public void setPkTableSchemaName(String pkTableSchemaName) {
+		this.pkTableSchemaName = pkTableSchemaName;
+	}
+
+	public String getFkTableSchemaName() {
+		return fkTableSchemaName;
+	}
+
+	public void setFkTableSchemaName(String fkTableSchemaName) {
+		this.fkTableSchemaName = fkTableSchemaName;
+	}
+
+	public List<String> getPkColumns() {
+		return pkColumns;
+	}
+
+	public void setPkColumns(List<String> pkColumns) {
+		this.pkColumns = pkColumns;
+	}
+
+	public List<String> getFkColumns() {
+		return fkColumns;
+	}
+
+	public void setFkColumns(List<String> fkColumns) {
+		this.fkColumns = fkColumns;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof FK) {

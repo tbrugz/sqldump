@@ -466,15 +466,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.getForeignKeys()) {
 			DBObjectId dbid = new DBObjectId();
-			dbid.setName(fk.pkTable);
-			dbid.setSchemaName(fk.pkTableSchemaName);
+			dbid.setName(fk.getPkTable());
+			dbid.setSchemaName(fk.getPkTableSchemaName());
 			ids.add(dbid);
 	
 			//Exported FKs
 			if(grabExportedFKsAlso) {
 				DBObjectId dbidFk = new DBObjectId();
-				dbidFk.setName(fk.fkTable);
-				dbidFk.setSchemaName(fk.fkTableSchemaName);
+				dbidFk.setName(fk.getFkTable());
+				dbidFk.setSchemaName(fk.getFkTableSchemaName());
 				ids.add(dbidFk);
 			}
 			
@@ -593,11 +593,11 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fk.setName(fkName);
 				fks.put(fkName, fk);
 			}
-			if(fk.pkTable==null) {
-				fk.pkTable = fkrs.getString("PKTABLE_NAME");
-				fk.fkTable = fkrs.getString("FKTABLE_NAME");
-				fk.pkTableSchemaName = fkrs.getString("PKTABLE_SCHEM");
-				fk.fkTableSchemaName = fkrs.getString("FKTABLE_SCHEM");
+			if(fk.getPkTable()==null) {
+				fk.setPkTable(fkrs.getString("PKTABLE_NAME"));
+				fk.setFkTable(fkrs.getString("FKTABLE_NAME"));
+				fk.setPkTableSchemaName(fkrs.getString("PKTABLE_SCHEM"));
+				fk.setFkTableSchemaName(fkrs.getString("FKTABLE_SCHEM"));
 				String pkTableCatalog = fkrs.getString("PKTABLE_CAT");
 				String fkTableCatalog = fkrs.getString("FKTABLE_CAT");
 				String updateRule = fkrs.getString("UPDATE_RULE");
@@ -607,8 +607,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//log.debug("fk: "+fkName+" :: rules: "+updateRule+"|"+fk.updateRule+" / "+deleteRule+"|"+fk.deleteRule+"");
 				
 				//for MySQL
-				if(fk.pkTableSchemaName==null && pkTableCatalog!=null) { fk.pkTableSchemaName = pkTableCatalog; }
-				if(fk.fkTableSchemaName==null && fkTableCatalog!=null) { fk.fkTableSchemaName = fkTableCatalog; }
+				if(fk.getPkTableSchemaName()==null && pkTableCatalog!=null) { fk.setPkTableSchemaName(pkTableCatalog); }
+				if(fk.getFkTableSchemaName()==null && fkTableCatalog!=null) { fk.setFkTableSchemaName(fkTableCatalog); }
 				
 				if(askForUkType) {
 					try {
@@ -616,13 +616,13 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 					}
 					catch(SQLException e) {
 						askForUkType = false;
-						log.debug("resultset has no 'UK_CONSTRAINT_TYPE' column [fkTable='"+fk.fkTable+"'; ukTable='"+fk.pkTable+"']");
+						log.debug("resultset has no 'UK_CONSTRAINT_TYPE' column [fkTable='"+fk.getFkTable()+"'; ukTable='"+fk.getPkTable()+"']");
 					}
 				}
 				dbmsfeatures.addFKSpecificFeatures(fk, fkrs);
 			}
-			fk.fkColumns.add(fkrs.getString("FKCOLUMN_NAME"));
-			fk.pkColumns.add(fkrs.getString("PKCOLUMN_NAME"));
+			fk.getFkColumns().add(fkrs.getString("FKCOLUMN_NAME"));
+			fk.getPkColumns().add(fkrs.getString("PKCOLUMN_NAME"));
 			log.debug("fk: "+fkName+" - "+fk);
 		}
 		List<FK> ret = new ArrayList<FK>();
