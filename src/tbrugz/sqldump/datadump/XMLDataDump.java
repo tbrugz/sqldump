@@ -23,7 +23,7 @@ public class XMLDataDump extends DumpSyntax {
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	String padding = "";
 	
@@ -59,7 +59,7 @@ public class XMLDataDump extends DumpSyntax {
 		StringBuffer sb = new StringBuffer();
 		//XXX: option to define 'row' xml-element
 		sb.append("\t"+"<row>");
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {

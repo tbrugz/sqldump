@@ -188,11 +188,11 @@ public class SQLUtils {
 
 	static boolean resultSetGetObjectExceptionWarned = false;
 	
-	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol) throws SQLException {
+	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol) throws SQLException {
 		return getRowObjectListFromRS(rs, colTypes, numCol, false);
 	}
 	
-	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class> colTypes, int numCol, boolean canReturnResultSet) throws SQLException {
+	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol, boolean canReturnResultSet) throws SQLException {
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;

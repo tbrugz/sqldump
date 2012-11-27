@@ -557,6 +557,7 @@ public class DataDump extends AbstractSQLProc {
 	
 	static String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
 		//XXX: numberformatter (leading 0s) for partitionId?
+		//XXX: add dataformatter? useful for partitioning by year, year-month, ... 
 		for(String c: cols) {
 			String replacement = null;
 			try {

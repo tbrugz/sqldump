@@ -38,7 +38,7 @@ public class BlobDataDump extends DumpSyntax {
 	String outFilePattern;
 	
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -94,7 +94,7 @@ public class BlobDataDump extends DumpSyntax {
 		}
 		String rowid = Utils.join(pkVals, ROWID_JOINER);
 		for(int i=0;i<lsColNames.size();i++) {
-			Class c = lsColTypes.get(i);
+			Class<?> c = lsColTypes.get(i);
 			if(! c.equals(Blob.class)) { continue; }
 			
 			String filename = outFilePattern.replaceAll(DataDump.FILENAME_PATTERN_TABLENAME, tableName)

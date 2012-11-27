@@ -42,7 +42,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	
 	transient int numCol;
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	boolean showColNames = true, showColNamesLines = true;
 	
 	@Override
@@ -127,7 +127,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 			dumpBuffer(fos);
 		}
 
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		List<String> valsStr = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) {
 			int max = colsMaxLenght.get(i);
@@ -235,7 +235,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		sb.append(separator);
 	}
 	
-	String getFormattedValue(Object o, Class c) {
+	String getFormattedValue(Object o, Class<?> c) {
 		//if(o==null) return nullValue;
 		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, null, recordDemimiter, null, nullValueStr);
 	}

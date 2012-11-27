@@ -53,7 +53,7 @@ public class CSVDataDump extends DumpSyntax {
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	ResultSetMetaData md;
 	
 	boolean doTableNameHeaderDump = false;
@@ -129,7 +129,7 @@ public class CSVDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List<?> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		for(int i=0;i<lsColTypes.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				

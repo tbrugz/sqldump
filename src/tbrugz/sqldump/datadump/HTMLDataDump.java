@@ -28,7 +28,7 @@ public class HTMLDataDump extends DumpSyntax {
 	String tableName;
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 
 	String padding = "";
 	
@@ -79,7 +79,7 @@ public class HTMLDataDump extends DumpSyntax {
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
 		sb.append("\t"+"<tr>");
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				ResultSet rsInt = (ResultSet) vals.get(i);

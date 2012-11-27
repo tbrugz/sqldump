@@ -21,7 +21,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	int numCol;
 	String colNames;
 	List<String> lsColNames = new ArrayList<String>();
-	List<Class> lsColTypes = new ArrayList<Class>();
+	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	boolean doColumnNamesDump = true;
 	
 	@Override
@@ -53,7 +53,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		List vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
 		out("insert into "+tableName+" "+
 			colNames+" values ("+
 			DataDumpUtils.join4sql(vals, dateFormatter, ", ")+

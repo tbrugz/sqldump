@@ -61,7 +61,7 @@ public class DataDumpUtils {
 	}
 	
 	//dumpers: CSV, FFC
-	public static String getFormattedCSVValue(Object elem, Class type, NumberFormat floatFormatter, String separator, String lineSeparator, String enclosing, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, Class<?> type, NumberFormat floatFormatter, String separator, String lineSeparator, String enclosing, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
@@ -112,7 +112,7 @@ public class DataDumpUtils {
 	} 
 
 	//dumpers: JSON
-	public static String getFormattedJSONValue(Object elem, Class type, DateFormat df) {
+	public static String getFormattedJSONValue(Object elem, Class<?> type, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
@@ -174,7 +174,7 @@ public class DataDumpUtils {
 
 	//dumpers: XML, HTML
 	//XXX: XML format: translate '<', '>', '&'?
-	public static String getFormattedXMLValue(Object elem, Class type, NumberFormat floatFormatter, String nullValue) {
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
@@ -233,7 +233,7 @@ public class DataDumpUtils {
 	static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName) throws SQLException {
 		int numCol = md.getColumnCount();		
 		List<String> lsColNames = new ArrayList<String>();
-		List<Class> lsColTypes = new ArrayList<Class>();
+		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
 		}

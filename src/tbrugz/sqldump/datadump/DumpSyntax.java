@@ -16,7 +16,7 @@ import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax {
 	
-	static final Class[] arr = {
+	static final Class<?>[] arr = {
 		InsertIntoDataDump.class,
 		CSVDataDump.class,
 		XMLDataDump.class,
@@ -35,8 +35,8 @@ public abstract class DumpSyntax {
 	
 	public String nullValueStr = DEFAULT_NULL_VALUE;
 	
-	public static List<Class> getSyntaxes() {
-		return Arrays.asList(arr);
+	public static List<Class<? extends DumpSyntax>> getSyntaxes() {
+		return Arrays.asList((Class<? extends DumpSyntax>[])arr);
 	}
 	
 	public abstract void procProperties(Properties prop);
