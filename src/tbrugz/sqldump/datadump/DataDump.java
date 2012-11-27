@@ -316,12 +316,12 @@ public class DataDump extends AbstractSQLProc {
 				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
 
 				//TODO: remove when multiple partition-patterns for stateful syntaxes is implemented
-				if(ds.isStateful()) {
+				/*if(ds.isStateful()) {
 					if(partitionByPatterns.length>1) {
 						log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
 						continue;
 					}
-				}
+				}*/
 				
 				if(filename==null) {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
@@ -358,8 +358,8 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
-			//Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
-			Set<DumpSyntax> hasWarnedAboutNonimplementedStatefulness = new HashSet<DumpSyntax>();
+			Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
+			//Set<DumpSyntax> hasWarnedAboutNonimplementedStatefulness = new HashSet<DumpSyntax>();
 			Map<String, Long> countInPartitionByPattern = new HashMap<String, Long>();
 			for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
 				countInPartitionByPattern.put(partitionByPatterns[partIndex], 0l);
@@ -386,17 +386,20 @@ public class DataDump extends AbstractSQLProc {
 							
 							if(ds.isStateful()) {
 								//TODO: implement dumping queries with multiple partition-patterns for stateful syntaxes 
-								if(partitionByPatterns.length>1) {
+								/*if(partitionByPatterns.length>1) {
 									if(!hasWarnedAboutNonimplementedStatefulness.contains(ds)) {
 										log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
 										hasWarnedAboutNonimplementedStatefulness.add(ds);
 									}
 									continue;
-								}
-								/*DumpSyntax ds2 = statefulDumpSyntaxes.get(ds.getSyntaxId()+"$"+partitionByPattern);
-								if(ds2==null) {
-									//create/clone dumper... what abount header line?
 								}*/
+								String dskey = ds.getSyntaxId()+"$"+partitionByPattern;
+								DumpSyntax ds2 = statefulDumpSyntaxes.get(dskey);
+								if(ds2==null) {
+									ds2 = (DumpSyntax) ds.clone();
+									statefulDumpSyntaxes.put(dskey, ds2);
+								}
+								ds = ds2;
 							}
 							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);

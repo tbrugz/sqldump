@@ -103,6 +103,17 @@ public abstract class DumpSyntax {
 		return false;
 	}
 	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+	
+	public void copyPropsTo(DumpSyntax ds) {
+		ds.dateFormatter = this.dateFormatter;
+		ds.floatFormatter = this.floatFormatter;
+		ds.nullValueStr = this.nullValueStr;
+	}
+	
 	//XXX: methods dumpDocHeader, dumpDocFooter -- before dumpHeader/Footer, for dumps with multiple ResultSet
 	
 	//XXX: method supportResultSetDump()?

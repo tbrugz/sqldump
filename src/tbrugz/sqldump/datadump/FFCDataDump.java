@@ -27,7 +27,7 @@ import tbrugz.sqldump.util.Utils;
 /**
  * FFC: Formatted Fixed Column
  */
-public class FFCDataDump extends DumpSyntax {
+public class FFCDataDump extends DumpSyntax implements Cloneable {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
 	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
@@ -36,11 +36,11 @@ public class FFCDataDump extends DumpSyntax {
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	//static final String DEFAULT_NULL_VALUE = "";
-	static Log log = LogFactory.getLog(FFCDataDump.class);
+	static final Log log = LogFactory.getLog(FFCDataDump.class);
 	
 	static final String recordDemimiter = "\n";
 	
-	int numCol;
+	transient int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class> lsColTypes = new ArrayList<Class>();
 	boolean showColNames = true, showColNamesLines = true;
@@ -90,12 +90,12 @@ public class FFCDataDump extends DumpSyntax {
 	
 	int lineGroupSize = 20;
 	String separator = " | ";
-	//String nullValue = DEFAULT_NULL_VALUE;
-
-	//List<Integer> headersColsMaxLenght = new ArrayList<Integer>();
+	List<Boolean> leftAlignField = new ArrayList<Boolean>();
+	
+	//"stateful" props
 	List<Integer> colsMaxLenght = new ArrayList<Integer>();
 	List<List<String>> valuesBuffer = new ArrayList<List<String>>();
-	List<Boolean> leftAlignField = new ArrayList<Boolean>();
+	//end stateful props
 	
 	@Override
 	public void dumpHeader(Writer fos) {
@@ -269,6 +269,27 @@ public class FFCDataDump extends DumpSyntax {
 	@Override
 	public String getDefaultFileExtension() {
 		return "ffc.txt";
+	}
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		FFCDataDump newffc = new FFCDataDump();
+		super.copyPropsTo(newffc);
+		
+		//procproperties props
+		newffc.lineGroupSize = this.lineGroupSize;
+		newffc.separator = this.separator;
+		newffc.showColNames = this.showColNames;
+		newffc.showColNamesLines = this.showColNamesLines;
+		//initDump props
+		newffc.numCol = this.numCol;
+		newffc.lsColNames = this.lsColNames;
+		newffc.lsColTypes = this.lsColTypes;
+		newffc.leftAlignField = this.leftAlignField;
+		//setup
+		newffc.clearBuffer();
+		
+		return newffc;
 	}
 
 	@Override
