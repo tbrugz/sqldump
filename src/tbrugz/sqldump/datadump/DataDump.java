@@ -334,7 +334,7 @@ public class DataDump extends AbstractSQLProc {
 					doSyntaxDumpList.set(i, true);
 					filenameList.set(i, filename);
 
-					//for each partitionBy...
+					/* //for each partitionBy...
 					for(String partitionByPattern: partitionByPatterns) {
 						//log.info("header:: partitionby:: "+partitionByPattern);
 						List<String> partitionByCols = getPartitionCols(partitionByPattern);
@@ -352,7 +352,7 @@ public class DataDump extends AbstractSQLProc {
 	
 						writersSyntaxes.put(finalFilename, ds);
 						ds.dumpHeader(w);
-					}
+					}*/
 					//ds.dumpHeader(writerList.get(i));
 				}
 			}
@@ -360,15 +360,19 @@ public class DataDump extends AbstractSQLProc {
 			Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
 			//Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
 			Set<DumpSyntax> hasWarnedAboutNonimplementedStatefulness = new HashSet<DumpSyntax>();
+			Map<String, Long> countInPartitionByPattern = new HashMap<String, Long>();
+			for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
+				countInPartitionByPattern.put(partitionByPatterns[partIndex], 0l);
+			}
 			
 			//rows
-			long countInPartition = 0;
 			do {
 				//String lastPartitionByPattern = null;
 				for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
 					String partitionByPattern = partitionByPatterns[partIndex];
 					//log.info("row:: partitionby:: "+partitionByPattern);
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
+					long countInPartition = countInPartitionByPattern.get(partitionByPattern);
 					
 					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
 					
@@ -408,13 +412,15 @@ public class DataDump extends AbstractSQLProc {
 							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
 							if(lastPartitionId!=null && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
-								//log.info("partid>> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename);
+								//log.info("partid>> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename+" // "+countInPartition);
+								countInPartition = 0;
 								String lastWriterMapKey = getWriterMapKey(lastFinalFilename, partitionByPattern);
 								closeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
 								removeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
 							}
 							
 							if(newFilename) {
+								//if(lastWriterMapKey!=null) { ds.flushBuffer(writersOpened.get(lastWriterMapKey)); }
 								log.debug("new filename="+finalFilename+" [charset="+charset+"]");
 								ds.dumpHeader(w);
 								writersSyntaxes.put(finalFilename, ds);
@@ -432,9 +438,9 @@ public class DataDump extends AbstractSQLProc {
 						}
 					}
 					lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
+					countInPartitionByPattern.put(partitionByPattern, ++countInPartition);
 				}
 				count++;
-				countInPartition++;
 				
 				//XXX: too many opened writers? maybe they should be divided by 'partitionBy' and cleaned each time
 				
