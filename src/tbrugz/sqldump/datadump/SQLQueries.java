@@ -105,10 +105,8 @@ public class SQLQueries extends AbstractSQLProc {
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
-			//String partitionBy = prop.getProperty("sqldump.query."+qid+".partitionby");
 			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
-			//if(partitionsBy==null) { partitionsBy = new ArrayList<String>(); }
-			log.info("partition-patterns: "+partitionsBy); //XXX: move log into DataDump
+			log.info("partitionby-patterns: "+partitionsBy); //XXX: move log into DataDump?
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
 

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -314,14 +313,6 @@ public class DataDump extends AbstractSQLProc {
 				}
 				
 				String filename = getDynamicFileName(prop, tableOrQueryId, ds.getSyntaxId());
-
-				//TODO: remove when multiple partition-patterns for stateful syntaxes is implemented
-				/*if(ds.isStateful()) {
-					if(partitionByPatterns.length>1) {
-						log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
-						continue;
-					}
-				}*/
 				
 				if(filename==null) {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
@@ -333,33 +324,11 @@ public class DataDump extends AbstractSQLProc {
 					
 					doSyntaxDumpList.set(i, true);
 					filenameList.set(i, filename);
-
-					/* //for each partitionBy...
-					for(String partitionByPattern: partitionByPatterns) {
-						//log.info("header:: partitionby:: "+partitionByPattern);
-						List<String> partitionByCols = getPartitionCols(partitionByPattern);
-					
-						partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
-						String finalFilename = getFinalFilenameForAbstractFilename(filename, partitionByStrId);
-						boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
-						Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
-						if(newFilename) {
-							log.debug("new filename="+finalFilename+" [charset="+charset+"]");
-						}
-						else {
-							log.warn("filename '"+finalFilename+"' shouldn't have been already opened...");
-						}
-	
-						writersSyntaxes.put(finalFilename, ds);
-						ds.dumpHeader(w);
-					}*/
-					//ds.dumpHeader(writerList.get(i));
 				}
 			}
 			
 			Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
 			Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
-			//Set<DumpSyntax> hasWarnedAboutNonimplementedStatefulness = new HashSet<DumpSyntax>();
 			Map<String, Long> countInPartitionByPattern = new HashMap<String, Long>();
 			for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
 				countInPartitionByPattern.put(partitionByPatterns[partIndex], 0l);
@@ -367,7 +336,6 @@ public class DataDump extends AbstractSQLProc {
 			
 			//rows
 			do {
-				//String lastPartitionByPattern = null;
 				for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
 					String partitionByPattern = partitionByPatterns[partIndex];
 					//log.info("row:: partitionby:: "+partitionByPattern);
@@ -385,14 +353,6 @@ public class DataDump extends AbstractSQLProc {
 							}
 							
 							if(ds.isStateful()) {
-								//TODO: implement dumping queries with multiple partition-patterns for stateful syntaxes 
-								/*if(partitionByPatterns.length>1) {
-									if(!hasWarnedAboutNonimplementedStatefulness.contains(ds)) {
-										log.warn("syntax "+ds.getSyntaxId()+" is stateful and not ready for dumping queries with multiple partition-patterns");
-										hasWarnedAboutNonimplementedStatefulness.add(ds);
-									}
-									continue;
-								}*/
 								String dskey = ds.getSyntaxId()+"$"+partitionByPattern;
 								DumpSyntax ds2 = statefulDumpSyntaxes.get(dskey);
 								if(ds2==null) {
@@ -403,14 +363,8 @@ public class DataDump extends AbstractSQLProc {
 							}
 							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
-							//Writer w = getWriterForFilename(finalFilename, charset, true);
 							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
 							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
-							//if(partitionChanged) {
-							//for DumpSyntaxes that have buffer (like FFC)
-							//XXX String finalFilenameOld = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrIdOld);
-							//ds.flushBuffer(writersOpened.get(getWriterMapKey(finalFilenameOld, partitionByPattern)));
-							//XXX: write footer & close file here? (less simultaneous open-files)
 								
 							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
 							if(lastPartitionId!=null && !partitionByStrId.equals(lastPartitionId)) {
@@ -428,7 +382,6 @@ public class DataDump extends AbstractSQLProc {
 								ds.dumpHeader(w);
 								writersSyntaxes.put(finalFilename, ds);
 							}
-							//TODOne: count should be total count or file count? i vote on file count :) (FFC uses it for buffering)
 							try {
 								ds.dumpRow(rs, countInPartition, w);
 							}
@@ -444,8 +397,6 @@ public class DataDump extends AbstractSQLProc {
 					countInPartitionByPattern.put(partitionByPattern, ++countInPartition);
 				}
 				count++;
-				
-				//XXX: too many opened writers? maybe they should be divided by 'partitionBy' and cleaned each time
 				
 				if(log1stRow && count==1) {
 					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
