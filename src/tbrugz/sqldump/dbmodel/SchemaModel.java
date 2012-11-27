@@ -23,6 +23,8 @@ public class SchemaModel implements Serializable {
 	Set<Synonym> synonyms = new TreeSet<Synonym>();
 	Set<Index> indexes = new TreeSet<Index>();
 	Set<Sequence> sequences = new TreeSet<Sequence>();
+	
+	//XXX: add List<String>(?) schemasGrabbed? may be used by Schema2GraphML
 
 	@XmlElement(name="table")
 	public Set<Table> getTables() {

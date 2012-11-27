@@ -196,7 +196,15 @@ public class SQLUtils {
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
-			Class<?> coltype = colTypes.get(i-1);
+			Class<?> coltype = null;
+			try {
+				coltype = colTypes.get(i-1);
+			}
+			catch(IndexOutOfBoundsException e) {
+				e.printStackTrace();
+				coltype = String.class;
+			}
+			
 			if(coltype.equals(Blob.class)) {
 				//XXX: do not dump Blobs this way
 				//value = null; //Blob and ResultSet should be tested first? yes!

@@ -62,6 +62,9 @@ public class JSONDataDump extends DumpSyntax {
 		if(usePK) {
 			this.pkCols = pkCols;
 		}
+		if(lsColNames.size()!=lsColTypes.size()) {
+			log.warn("diff lsColNames/lsColTypes sizes: "+lsColNames.size()+" ; "+lsColTypes.size());
+		}
 		//if(pkCols==null) { usePK = false; } else { usePK = true; }
 	}
 	
