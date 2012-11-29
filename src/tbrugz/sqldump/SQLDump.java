@@ -104,7 +104,7 @@ public class SQLDump {
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 	
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
-	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop"; 
+	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop="; 
 	
 	static Log log = LogFactory.getLog(SQLDump.class);
 	
@@ -114,6 +114,7 @@ public class SQLDump {
 	
 	public static void init(String[] args, Properties papp) throws Exception {
 		log.info("init...");
+		boolean useSysPropSetted = false;
 		//parse args
 		String propFilename = PROPERTIES_FILENAME;
 		for(String arg: args) {
@@ -121,11 +122,17 @@ public class SQLDump {
 				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
 			}
 			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				ParametrizedProperties.setUseSystemProperties(true);
+				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
+				ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
+				useSysPropSetted = true;
 			}
 			else {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
 			}
+		}
+		if(!useSysPropSetted) {
+			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
+			useSysPropSetted = true;
 		}
 		File propFile = new File(propFilename);
 		

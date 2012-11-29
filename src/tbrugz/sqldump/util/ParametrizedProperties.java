@@ -73,6 +73,9 @@ public class ParametrizedProperties extends Properties {
 		log.debug("getp: "+key);
 		String s = super.getProperty(key);
 		if(s==null) {
+			if(useSystemProperties) {
+				return System.getProperty(key);
+			}
 			return null;
 		}
 		if(s.indexOf("${")<0) {
@@ -111,6 +114,7 @@ public class ParametrizedProperties extends Properties {
 	}
 
 	public static void setUseSystemProperties(boolean useSystemPropertiesParam) {
+		log.debug("using system properties: "+useSystemPropertiesParam);
 		useSystemProperties = useSystemPropertiesParam;
 	}
 	

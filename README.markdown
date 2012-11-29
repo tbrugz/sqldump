@@ -111,4 +111,4 @@ Usage (without sources)
 Command-line options
 --------------------
 - `-propfile=<path-to-prop-file>`: loads a different config properties file
-- `-usesysprop`: loads system properties besides the config file properties
+- `-usesysprop=<true|false>`: loads system properties besides the config file properties (default is true)
