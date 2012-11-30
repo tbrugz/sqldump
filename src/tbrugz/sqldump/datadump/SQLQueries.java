@@ -99,6 +99,7 @@ public class SQLQueries extends AbstractSQLProc {
 				String paramStr = prop.getProperty("sqldump.query."+qid+".param."+paramCount);
 				if(paramStr==null) { break; }
 				params.add(paramStr);
+				log.debug("added bind param #"+paramCount+": "+paramStr);
 				paramCount++;
 			}
 
@@ -106,7 +107,9 @@ public class SQLQueries extends AbstractSQLProc {
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
 			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
-			log.info("partitionby-patterns: "+partitionsBy); //XXX: move log into DataDump?
+			if(partitionsBy!=null) {
+				log.info("partitionby-patterns: "+partitionsBy); //XXX: move log into DataDump?
+			}
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
 

@@ -134,7 +134,7 @@
 		</java>
 	</target>
 	
-	<target name="jar" depends="compile">
+	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/sqldump.jar"
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties, **/jaxb.index">
@@ -152,7 +152,7 @@
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
 	</target>
 	
-	<target name="all" depends="javadoc,jar">
+	<target name="all" depends="javadoc,jar" description="builds project">
 		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
 	</target>
 

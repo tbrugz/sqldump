@@ -271,6 +271,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			long initTime = System.currentTimeMillis();
+			long dump1stRowTime = -1;
 			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
 			ResultSetMetaData md = rs.getMetaData();
@@ -398,9 +399,12 @@ public class DataDump extends AbstractSQLProc {
 				}
 				count++;
 				
-				if(log1stRow && count==1) {
-					logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
-						" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
+				if(count==1) {
+					dump1stRowTime = System.currentTimeMillis();
+					if(log1stRow) {
+						logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
+							" ["+(dump1stRowTime-initTime)+"ms elapsed]");
+					}
 				}
 				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
 					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped"
@@ -410,9 +414,13 @@ public class DataDump extends AbstractSQLProc {
 			}
 			while(rs.next());
 			
+			long elapsedMilis = System.currentTimeMillis()-initTime;
+			
 			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
 				(rs.next()?" (more rows exists)":"") + 
-				" ["+(System.currentTimeMillis()-initTime)+"ms elapsed]");
+				" ["+elapsedMilis+"ms elapsed]" +
+				(elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
+				);
 
 			//footer
 			Set<String> filenames = writersOpened.keySet();
