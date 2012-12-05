@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
@@ -120,6 +121,7 @@ public class SQLQueries extends AbstractSQLProc {
 					log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
 					break ADD_QUERY_TO_MODEL;
 				}
+				
 				Query query = new Query();
 				query.id = qid;
 				query.setName(queryName);
@@ -141,6 +143,28 @@ public class SQLQueries extends AbstractSQLProc {
 					}	
 					lc.add(cpk);
 				}
+				
+				List<String> allCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".cols", ",");
+				if(allCols!=null) {
+					List<Column> cols = new ArrayList<Column>();
+					for(String colspec: allCols) {
+						String[] colparts = colspec.split(":");
+						Column c = new Column();
+						c.setName(colparts[0]);
+						if(colparts.length>1) {
+							c.type = colparts[1];
+						}
+						cols.add(c);
+					}
+					
+					if(cols.size()>0) {
+						query.setColumns(cols);
+					}
+					else {
+						log.warn("error setting cols for query [id="+qid+"; name="+queryName+"]");
+					}
+				}
+
 				//queries.add(query);
 				queriesGrabbed++;
 				model.getViews().add(query);
