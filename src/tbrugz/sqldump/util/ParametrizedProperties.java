@@ -23,11 +23,12 @@ public class ParametrizedProperties extends Properties {
 	Map<File, Boolean> loadedPropFiles = new HashMap<File, Boolean>(); //boolean is: hasWarned
 	
 	@Override
-	public synchronized void load(InputStream inStream) throws IOException {
-		//TODO: load in temp Properties; load from @include directive; load from temp Properties
-		super.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
+	public synchronized void load(final InputStream inStream) throws IOException {
+		//TODOne: load in temp Properties; load from @include directive; load from temp Properties
+		Properties ptmp = new Properties();
+		ptmp.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
 		
-		String includes = getProperty(DIRECTIVE_INCLUDE);
+		String includes = ptmp.getProperty(DIRECTIVE_INCLUDE);
 		if(includes!=null) {
 			String[] files = includes.split(",");
 			for(String f: files) {
@@ -59,7 +60,7 @@ public class ParametrizedProperties extends Properties {
 			}
 		}
 		
-		//add another super.load(inStream), so 'main' props are prefered?
+		super.putAll(ptmp); //'main' props are prefered (loaded at end)!
 	}
 	
 	@Override
@@ -71,11 +72,15 @@ public class ParametrizedProperties extends Properties {
 	@Override
 	public String getProperty(String key) {
 		log.debug("getp: "+key);
-		String s = super.getProperty(key);
+		String s = null;
+		if(useSystemProperties) {
+			s = System.getProperty(key);
+		}
 		if(s==null) {
-			if(useSystemProperties) {
-				return System.getProperty(key);
-			}
+			s = super.getProperty(key);
+		}
+		
+		if(s==null) {
 			return null;
 		}
 		if(s.indexOf("${")<0) {
@@ -109,10 +114,12 @@ public class ParametrizedProperties extends Properties {
 		return sb.toString();
 	}
 	
+	//XXX: make non-static?
 	public static boolean isUseSystemProperties() {
 		return useSystemProperties;
 	}
 
+	//XXX: make non-static? add useSystemPropertiesParam to constructor?
 	public static void setUseSystemProperties(boolean useSystemPropertiesParam) {
 		log.debug("using system properties: "+useSystemPropertiesParam);
 		useSystemProperties = useSystemPropertiesParam;

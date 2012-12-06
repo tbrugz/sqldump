@@ -1,5 +1,6 @@
 glob:bin/*
 glob:dist/*
+glob:lib/*
 glob:tmp/*
 glob:output/*
 glob:sqldump.properties
