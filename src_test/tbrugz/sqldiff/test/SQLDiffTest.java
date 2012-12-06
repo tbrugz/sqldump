@@ -37,13 +37,13 @@ public class SQLDiffTest {
 		//xml serializer input Orig
 		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
-		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model1.jaxb.xml");
+		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model1.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropOrig);
 		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
 
 		//xml serializer input New
 		Properties jaxbPropNew = new Properties();
-		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model2.jaxb.xml");
+		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model2.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropNew);
 		SchemaModel smNew = schemaSerialGrabber.grabSchema();
 		
