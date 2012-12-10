@@ -134,6 +134,7 @@ public class SQLDump {
 			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
 			useSysPropSetted = true;
 		}
+		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
 		File propFile = new File(propFilename);
 		
 		//init properties
@@ -142,7 +143,12 @@ public class SQLDump {
 		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
 
 		log.info("loading properties: "+propFile);
-		papp.load(new FileInputStream(propFile));
+		try {
+			papp.load(new FileInputStream(propFile));
+		}
+		catch(FileNotFoundException e) {
+			log.warn("prop file not found: "+propFile);
+		}
 		
 		ColTypeUtil.setProperties(papp);
 	}

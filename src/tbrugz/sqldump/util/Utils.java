@@ -422,6 +422,9 @@ public class Utils {
 	
 	public static List<String> getKeysStartingWith(Properties prop, String startStr) {
 		List<String> ret = new ArrayList<String>();
+		if(ParametrizedProperties.isUseSystemProperties()) {
+			prop.putAll(System.getProperties());
+		}
 		for(Object o: prop.keySet()) {
 			String s = (String) o;
 			if(s.startsWith(startStr)) {
@@ -494,6 +497,15 @@ public class Utils {
 			ret.add(s);
 		}
 		return ret;
+	}
+	
+	static boolean equalsConsiderNull(String s1, String s2) {
+		if(s1==null) {
+			if(s2==null) { return true; }
+			else { return false; }
+		}
+		else if(s2==null) { return false; }
+		return s1.equals(s2);
 	}
 	
 	public static void main(String[] args) {
