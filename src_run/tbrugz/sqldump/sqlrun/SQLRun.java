@@ -13,6 +13,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.naming.NamingException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -88,7 +90,7 @@ public class SQLRun {
 	Connection conn;
 	CommitStrategy commitStrategty = CommitStrategy.RUN;
 	
-	void end() throws Exception {
+	void end() throws SQLException {
 		if(conn!=null) {
 			log.info("closing connection: "+conn);
 			conn.close();
@@ -285,7 +287,7 @@ public class SQLRun {
 		return cs;
 	}
 	
-	void init(String args[]) throws Exception {
+	void init(String args[]) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		SQLDump.init(args, papp);
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
@@ -317,9 +319,13 @@ public class SQLRun {
 	
 	/**
 	 * @param args
+	 * @throws NamingException 
+	 * @throws SQLException 
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
 	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		SQLRun sqlr = new SQLRun();
 		
 		try {

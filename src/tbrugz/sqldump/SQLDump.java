@@ -112,7 +112,7 @@ public class SQLDump {
 
 	Properties papp = new ParametrizedProperties();
 	
-	public static void init(String[] args, Properties papp) throws Exception {
+	public static void init(String[] args, Properties papp) throws IOException {
 		log.info("init...");
 		boolean useSysPropSetted = false;
 		//parse args
