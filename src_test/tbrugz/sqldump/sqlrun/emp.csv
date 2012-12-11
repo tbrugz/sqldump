@@ -1,0 +1,6 @@
+id,name,supervisor_id,department_id,salary
+1,john,1,1,2000
+2,mary,2,2,2000
+3,jane,2,2,1000
+4,lucas,2,2,1200
+5,wilson,1,1,1000
