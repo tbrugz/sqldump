@@ -115,11 +115,13 @@ public class SQLDump {
 	public static void init(String[] args, Properties papp) throws IOException {
 		log.info("init...");
 		boolean useSysPropSetted = false;
+		boolean propFilenameSetted = false;
 		//parse args
 		String propFilename = PROPERTIES_FILENAME;
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+				propFilenameSetted = true;
 			}
 			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
 				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
@@ -147,7 +149,9 @@ public class SQLDump {
 			papp.load(new FileInputStream(propFile));
 		}
 		catch(FileNotFoundException e) {
-			log.warn("prop file not found: "+propFile);
+			if(propFilenameSetted) {
+				log.warn("prop file not found: "+propFile);
+			}
 		}
 		
 		ColTypeUtil.setProperties(papp);
