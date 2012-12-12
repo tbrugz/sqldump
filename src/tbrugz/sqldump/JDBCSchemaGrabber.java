@@ -12,6 +12,8 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.FK.UpdateRule;
 import tbrugz.sqldump.dbmodel.Grant;
@@ -50,6 +52,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
+	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = "sqldump.schemagrab.proceduresandfunctions";
 	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
 	
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
@@ -87,6 +90,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			doSchemaGrabExportedFKs = false, 
 			doSchemaGrabGrants = false, 
 			doSchemaGrabIndexes = false,
+			doSchemaGrabProceduresAndFunctions = true,
 			doSchemaGrabDbSpecific = false;
 	
 	Long maxLevel = null;
@@ -106,6 +110,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
 		doSchemaGrabGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabGrants);
 		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
+		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
 
@@ -219,8 +224,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 		}
 		
-		}
-		
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
 			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
@@ -244,12 +247,48 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 		}
 		
+		}
+		
 		log.info(schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
 		log.info(schemaModel.getForeignKeys().size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
 			log.info(schemaModel.getIndexes().size()+" indexes grabbed");
 		}
+		
+		if(doSchemaGrabProceduresAndFunctions) {
+			int countproc = 0, countfunc = 0;
+			try {
+				for(String schemaName: schemasList) {
+					List<ExecutableObject> eos = doGrabProcedures(dbmd, schemaName);
+					if(eos!=null) {
+						countproc += eos.size();
+						schemaModel.getExecutables().addAll(eos);
+					}
+				}
+			}
+			catch(AbstractMethodError e) {
+				log.warn("abstract method error: "+e);
+			}
+			log.info(countproc+" procedures grabbed");
+			//TODO: executablesStats()!
 			
+			try {
+				for(String schemaName: schemasList) {
+					List<ExecutableObject> eos = doGrabFunctions(dbmd, schemaName);
+					if(eos!=null) {
+						countfunc += eos.size();
+						schemaModel.getExecutables().addAll(eos);
+					}
+				}
+			}
+			catch(AbstractMethodError e) {
+				log.warn("abstract method error: "+e);
+			}
+			log.info(countfunc+" functions grabbed");
+		}
+		
+		//XXX: getClientInfoProperties?
+		
 		if(doSchemaGrabDbSpecific) {
 			for(String schemaName: schemasList) {
 				grabDbSpecific(schemaModel, schemaName);
@@ -504,6 +543,96 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		if(feats!=null) { feats.grabDBObjects(model, schemaPattern, conn); }
 	}
 
+	List<ExecutableObject> doGrabProcedures(DatabaseMetaData dbmd, String schemaPattern) throws SQLException {
+		List<ExecutableObject> eos = null;
+		ResultSet rsProc = dbmd.getProcedures(null, schemaPattern, null);
+		eos = grabProcedures(rsProc);
+		ResultSet rsProcCols = dbmd.getProcedureColumns(null, schemaPattern, null, null);
+		grabProceduresColumns(eos, rsProcCols);
+		return eos;
+	}
+	
+	List<ExecutableObject> doGrabFunctions(DatabaseMetaData dbmd, String schemaPattern) throws SQLException {
+		List<ExecutableObject> eos = null;
+		ResultSet rsFunc = dbmd.getFunctions(null, schemaPattern, null);
+		//TODO: grab functions...
+		SQLUtils.dumpRS(rsFunc);
+		return eos;
+	}
+	
+	List<ExecutableObject> grabProcedures(ResultSet rs) throws SQLException {
+		//SQLUtils.dumpRS(rs);
+		List<ExecutableObject> eos = new ArrayList<ExecutableObject>();
+		while(rs.next()) {
+			ExecutableObject eo = new ExecutableObject();
+			eo.setName(rs.getString("PROCEDURE_NAME"));
+			eo.setSchemaName(rs.getString("PROCEDURE_SCHEM"));
+			eo.setPackageName(rs.getString("PROCEDURE_CAT")); //?? Oracle-only?
+			eo.setRemarks(rs.getString("REMARKS"));
+			
+			int type = rs.getInt("PROCEDURE_TYPE");
+			switch (type) {
+			case DatabaseMetaData.procedureReturnsResult:
+				eo.setType(DBObjectType.FUNCTION);
+				break;
+			default:
+				eo.setType(DBObjectType.PROCEDURE);
+				break;
+			}
+			//XXX: SPECIFIC_NAME?
+			
+			eos.add(eo);
+		}
+		return eos;
+	}
+
+	void grabProceduresColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
+		while(rs.next()) {
+			ExecutableParameter ep = new ExecutableParameter();
+			ep.name = rs.getString("COLUMN_NAME");
+			ep.dataType = rs.getString("TYPE_NAME");
+			
+			int type = rs.getInt("COLUMN_TYPE");
+			switch (type) {
+			case DatabaseMetaData.procedureColumnIn:
+				ep.inout = ExecutableParameter.INOUT.IN;
+				break;
+			case DatabaseMetaData.procedureColumnInOut:
+				ep.inout = ExecutableParameter.INOUT.INOUT;
+				break;
+			case DatabaseMetaData.procedureColumnOut:
+				ep.inout = ExecutableParameter.INOUT.OUT;
+				break;
+			default:
+				break;
+			}
+			
+			try {
+				ep.position = rs.getInt("ORDINAL_POSITION");
+			}
+			catch(SQLException e) {
+				try {
+					ep.position = rs.getInt("SEQUENCE"); //XXX: oracle-only?
+				}
+				catch(SQLException e2) {
+					log.warn("unknown column name for procedure parameter ordinal position: "+e2);
+				}
+			}
+			
+			String pName = rs.getString("PROCEDURE_NAME");
+			String pSchem = rs.getString("PROCEDURE_SCHEM");
+			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.PROCEDURE, pSchem, pName);
+			if(eo==null) {
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
+			}
+			
+			if(eo.getParams()==null) {
+				eo.setParams(new ArrayList<ExecutableParameter>());
+			}
+			eo.getParams().add(ep);
+		}
+	}
+	
 	static boolean grabColumnIsAutoincrement = true;
 	
 	static Column retrieveColumn(ResultSet cols) throws SQLException {

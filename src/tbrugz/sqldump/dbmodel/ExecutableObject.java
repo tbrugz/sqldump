@@ -13,6 +13,7 @@ public class ExecutableObject extends DBObject {
 	DBObjectType type;
 	public String body;
 	public List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
+	String remarks;
 
 	String packageName;
 	List<ExecutableParameter> params;
@@ -70,6 +71,14 @@ public class ExecutableObject extends DBObject {
 
 	public void setType(DBObjectType type) {
 		this.type = type;
+	}
+	
+	public String getRemarks() {
+		return remarks;
+	}
+
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
 	}
 
 	public String getPackageName() {
