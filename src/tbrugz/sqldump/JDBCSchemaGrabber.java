@@ -144,6 +144,8 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 
 	Map<TableType, Integer> tablesCountByTableType;
+	Map<DBObjectType, Integer> execCountByType;
+	
 	List<Pattern> excludeTableFilters;
 	
 	@Override
@@ -194,9 +196,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 		
 		log.info("schema dump... schema(s): "+schemaPattern);
+
+		//init stat objects
 		tablesCountByTableType = new HashMap<TableType, Integer>();
 		for(TableType tt: TableType.values()) {
 			tablesCountByTableType.put(tt, 0);
+		}
+		execCountByType = new HashMap<DBObjectType, Integer>();
+		for(DBObjectType t: DBObjectType.values()) {
+			execCountByType.put(t, 0);
 		}
 		
 		//register excklude table filters
@@ -269,8 +277,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
 			}
-			log.info(countproc+" procedures grabbed");
-			//TODO: executablesStats()!
+			log.info(countproc+" procedures grabbed ["+executableStats()+"]");
 			
 			try {
 				for(String schemaName: schemasList) {
@@ -284,6 +291,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
 			}
+			//XXX: add ["+executableStats()+"]?
 			log.info(countfunc+" functions grabbed");
 		}
 		
@@ -333,7 +341,19 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 		}
 		return sb.toString();
-		
+	}
+	
+	String executableStats() {
+		StringBuffer sb = new StringBuffer();
+		int countT = 0;
+		for(DBObjectType t: execCountByType.keySet()) {
+			int count = execCountByType.get(t);
+			if(count>0) {
+				sb.append((countT==0?"":", ")+"#"+t+"s="+count);
+				countT++;
+			}
+		}
+		return sb.toString();
 	}
 	
 	//XXX shoud it be "grabTables"?
@@ -555,7 +575,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	List<ExecutableObject> doGrabFunctions(DatabaseMetaData dbmd, String schemaPattern) throws SQLException {
 		List<ExecutableObject> eos = null;
 		ResultSet rsFunc = dbmd.getFunctions(null, schemaPattern, null);
-		//TODO: grab functions...
 		eos = grabFunctions(rsFunc);
 		ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
 		grabFunctionsColumns(eos, rsFuncCols);
@@ -563,7 +582,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	}
 	
 	List<ExecutableObject> grabProcedures(ResultSet rs) throws SQLException {
-		//SQLUtils.dumpRS(rs);
 		List<ExecutableObject> eos = new ArrayList<ExecutableObject>();
 		while(rs.next()) {
 			ExecutableObject eo = new ExecutableObject();
@@ -584,6 +602,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			//XXX: SPECIFIC_NAME?
 			
 			eos.add(eo);
+			execCountByType.put(eo.getType(), execCountByType.get(eo.getType())+1);
 		}
 		return eos;
 	}
@@ -920,7 +939,6 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
-		// TODO: properties-prefix setting
 	}
 	
 }
