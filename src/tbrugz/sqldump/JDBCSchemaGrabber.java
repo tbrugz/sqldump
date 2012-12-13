@@ -556,7 +556,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		List<ExecutableObject> eos = null;
 		ResultSet rsFunc = dbmd.getFunctions(null, schemaPattern, null);
 		//TODO: grab functions...
-		SQLUtils.dumpRS(rsFunc);
+		eos = grabFunctions(rsFunc);
+		ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
+		grabFunctionsColumns(eos, rsFuncCols);
 		return eos;
 	}
 	
@@ -624,12 +626,90 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.PROCEDURE, pSchem, pName);
 			if(eo==null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
+				//XXX: oracle driver adds 1 to function parameter positions...
+				if("oracle".equals(DBMSResources.instance().dbid())) {
+					ep.position--;
+				}
 			}
 			
-			if(eo.getParams()==null) {
-				eo.setParams(new ArrayList<ExecutableParameter>());
+			if(ep.position==0) { 
+				eo.setReturnParam(ep);
 			}
-			eo.getParams().add(ep);
+			else {
+				if(eo.getParams()==null) {
+					eo.setParams(new ArrayList<ExecutableParameter>());
+				}
+				eo.getParams().add(ep);
+			}
+		}
+	}
+
+	List<ExecutableObject> grabFunctions(ResultSet rs) throws SQLException {
+		//SQLUtils.dumpRS(rs);
+		List<ExecutableObject> eos = new ArrayList<ExecutableObject>();
+		while(rs.next()) {
+			ExecutableObject eo = new ExecutableObject();
+			eo.setName(rs.getString("FUNCTION_NAME"));
+			eo.setSchemaName(rs.getString("FUNCTION_SCHEM"));
+			//eo.setPackageName(rs.getString("FUNCTION_CAT"));
+			eo.setRemarks(rs.getString("REMARKS"));
+			
+			eo.setType(DBObjectType.FUNCTION);
+			/*int type = rs.getInt("FUNCTION_TYPE");
+			switch (type) {
+			case DatabaseMetaData.functionReturnsTable:
+			case DatabaseMetaData.functionNoTable:
+			case DatabaseMetaData.functionResultUnknown:
+			}*/
+			//XXX: SPECIFIC_NAME?
+			
+			eos.add(eo);
+		}
+		return eos;
+	}
+
+	void grabFunctionsColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
+		while(rs.next()) {
+			ExecutableParameter ep = new ExecutableParameter();
+			ep.name = rs.getString("COLUMN_NAME");
+			ep.dataType = rs.getString("TYPE_NAME");
+			
+			int type = rs.getInt("COLUMN_TYPE");
+			switch (type) {
+			case DatabaseMetaData.functionColumnIn:
+				ep.inout = ExecutableParameter.INOUT.IN;
+				break;
+			case DatabaseMetaData.functionColumnInOut:
+				ep.inout = ExecutableParameter.INOUT.INOUT;
+				break;
+			case DatabaseMetaData.functionColumnOut:
+				ep.inout = ExecutableParameter.INOUT.OUT;
+				break;
+			//XXX case DatabaseMetaData.functionColumnReturn: //??
+			default:
+				break;
+			}
+			
+			try {
+				ep.position = rs.getInt("ORDINAL_POSITION");
+			}
+			catch(SQLException e) {
+				log.warn("unknown column name for function parameter ordinal position: "+e);
+			}
+			
+			String pName = rs.getString("FUNCTION_NAME");
+			String pSchem = rs.getString("FUNCTION_SCHEM");
+			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
+			
+			if(ep.position==0) {
+				eo.setReturnParam(ep);
+			}
+			else {
+				if(eo.getParams()==null) {
+					eo.setParams(new ArrayList<ExecutableParameter>());
+				}
+				eo.getParams().add(ep);
+			}
 		}
 	}
 	
