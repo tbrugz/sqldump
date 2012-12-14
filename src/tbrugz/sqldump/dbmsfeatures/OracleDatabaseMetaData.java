@@ -97,7 +97,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		return st.executeQuery(sql);
 	}
 	
-	static boolean grabFKFromUK = true;
+	static boolean grabFKFromUK = false;
 	
 	/**
 	 * added a UK_CONSTRAINT_TYPE column, which returns: P - primary key, U - unique key

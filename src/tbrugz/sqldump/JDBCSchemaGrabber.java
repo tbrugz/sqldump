@@ -232,6 +232,12 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 		}
 		
+		}
+		
+		//TODO: option to grab all FKs from schema...
+		
+		if(doSchemaGrabTables) {
+		
 		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
 			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
@@ -567,8 +573,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		List<ExecutableObject> eos = null;
 		ResultSet rsProc = dbmd.getProcedures(null, schemaPattern, null);
 		eos = grabProcedures(rsProc);
+		closeResultSetAndStatement(rsProc);
 		ResultSet rsProcCols = dbmd.getProcedureColumns(null, schemaPattern, null, null);
 		grabProceduresColumns(eos, rsProcCols);
+		closeResultSetAndStatement(rsProcCols);
 		return eos;
 	}
 	
@@ -576,8 +584,10 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		List<ExecutableObject> eos = null;
 		ResultSet rsFunc = dbmd.getFunctions(null, schemaPattern, null);
 		eos = grabFunctions(rsFunc);
+		closeResultSetAndStatement(rsFunc);
 		ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
 		grabFunctionsColumns(eos, rsFuncCols);
+		closeResultSetAndStatement(rsFuncCols);
 		return eos;
 	}
 	
