@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
+import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,23 +21,45 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		public String toString() {
 			switch (this) {
 			case NO_ACTION:
-				return null;
+				return null; // return ""; //?
 			case CASCADE:
 				return "cascade";
 			case SET_NULL:
 				return "set null";
 			case SET_DEFAULT:
-				return "set null";
+				return "set default";
 			}
 			return "unknown";
 		};
 		
-		public static UpdateRule getUpdateRule(String s) {
+		/*public static UpdateRule getUpdateRule(String s) {
 			if(s==null) return null;
 			if("NO ACTION".equals(s)) return null; //XXX return NO_ACTION; ?
 			if("CASCADE".equals(s)) return CASCADE;
 			if("SET NULL".equals(s)) return SET_NULL;
 			if("SET DEFAULT".equals(s)) return SET_DEFAULT;
+			return null;
+		}*/
+
+		public static UpdateRule getUpdateRule(Integer i) {
+			if(i==null) return null;
+			switch (i) {
+			case DatabaseMetaData.importedKeyNoAction:
+			case DatabaseMetaData.importedKeyRestrict:
+				return null;
+			case DatabaseMetaData.importedKeyCascade:
+				return CASCADE;
+			case DatabaseMetaData.importedKeySetNull:
+				return SET_NULL;
+			case DatabaseMetaData.importedKeySetDefault:
+				return SET_DEFAULT;
+			/* //used for "DEFERRABILITY":
+			case DatabaseMetaData.importedKeyInitiallyDeferred:
+			case DatabaseMetaData.importedKeyInitiallyImmediate:
+			case DatabaseMetaData.importedKeyNotDeferrable: */
+			default:
+				break;
+			}
 			return null;
 		}
 	}

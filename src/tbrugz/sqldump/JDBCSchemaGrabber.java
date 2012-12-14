@@ -838,11 +838,15 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				fk.setFkTableSchemaName(fkrs.getString("FKTABLE_SCHEM"));
 				String pkTableCatalog = fkrs.getString("PKTABLE_CAT");
 				String fkTableCatalog = fkrs.getString("FKTABLE_CAT");
-				String updateRule = fkrs.getString("UPDATE_RULE");
-				String deleteRule = fkrs.getString("DELETE_RULE");
+				String updateRuleStr = fkrs.getString("UPDATE_RULE");
+				int updateRule = -1;
+				if(updateRuleStr!=null) {
+					updateRule = fkrs.getInt("UPDATE_RULE");
+				}
+				int deleteRule = fkrs.getInt("DELETE_RULE");
 				fk.updateRule = UpdateRule.getUpdateRule(updateRule);
 				fk.deleteRule = UpdateRule.getUpdateRule(deleteRule);
-				//log.debug("fk: "+fkName+" :: rules: "+updateRule+"|"+fk.updateRule+" / "+deleteRule+"|"+fk.deleteRule+"");
+				//log.info("fk: "+fkName+" :: rules: "+updateRule+"|"+fk.updateRule+" / "+deleteRule+"|"+fk.deleteRule+"");
 				
 				//for MySQL
 				if(fk.getPkTableSchemaName()==null && pkTableCatalog!=null) { fk.setPkTableSchemaName(pkTableCatalog); }

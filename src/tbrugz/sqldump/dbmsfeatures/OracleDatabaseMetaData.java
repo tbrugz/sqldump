@@ -130,7 +130,13 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		String sql = "select * from (";
 		sql += "select '' as PKTABLE_CAT, acuk.owner as PKTABLE_SCHEM, acuk.table_name as PKTABLE_NAME, accuk.column_name as PKCOLUMN_NAME, \n"
 				+"       '' as FKTABLE_CAT, acfk.owner as FKTABLE_SCHEM, acfk.table_name as FKTABLE_NAME, accfk.column_name as FKCOLUMN_NAME, \n"
-				+"       accuk.position as KEY_SEQ, '' as UPDATE_RULE, acfk.DELETE_RULE as DELETE_RULE, \n"
+				+"       accuk.position as KEY_SEQ, -1 as UPDATE_RULE, "
+				+"       decode(acfk.DELETE_RULE, "
+				+"'CASCADE', "+DatabaseMetaData.importedKeyCascade+", "
+				+"'NO ACTION', "+DatabaseMetaData.importedKeyNoAction+", "
+				+"'SET DEFAULT', "+DatabaseMetaData.importedKeySetDefault+", "
+				+"'SET NULL', "+DatabaseMetaData.importedKeySetNull+", "
+				+"-1) as DELETE_RULE, \n"
 				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY, \n"
 				+"       acuk.constraint_type as UK_CONSTRAINT_TYPE, " //returns type of unique key: P - primary, U - unique
 				+"       acfk.status, acfk.validated, acfk.rely "
