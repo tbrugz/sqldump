@@ -2,9 +2,11 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,8 +24,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 		//REMARKS String => comment describing column (may be null)
-		
 		Connection conn = metadata.getConnection();
+		List<String> params = new ArrayList<String>();
+		
 		String sql = "select tables.*, comm.comments as REMARKS from (\n";
 		//tables
 		sql += "select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKSz, " 
@@ -56,21 +59,29 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"from all_external_tables \n";
 		sql += ") tables, all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";
 		if(schemaPattern!=null) {
-			sql += "and TABLE_SCHEM_FILTER = '"+schemaPattern+"' ";
+			sql += "and TABLE_SCHEM_FILTER = ? ";
+			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
-			sql += "and tables.TABLE_NAME = '"+tableNamePattern+"' ";
+			sql += "and tables.TABLE_NAME = ? ";
+			params.add(tableNamePattern);
 		}
 		sql += "order by tables.TABLE_SCHEM, tables.TABLE_NAME";
-		Statement st = conn.createStatement();
+		
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery(sql);
+		return st.executeQuery();
 	}
 	
 	@Override
 	public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
 			throws SQLException {
 		Connection conn = metadata.getConnection();
+		List<String> params = new ArrayList<String>();
+		
 		String sql = "select * from (";
 		//strange: non-default columns must be at end (or 'sqlexception: already closed stream' can occur). maybe because DATA_DEFAULT is of type LONG/MEMO (read from a stream?)
 		sql += "select '' as TABLE_CAT, col.owner as TABLE_SCHEM, col.TABLE_NAME, col.COLUMN_NAME, data_type as TYPE_NAME, "
@@ -80,7 +91,8 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
 				+") ";
 		if(schemaPattern!=null) {
-			sql += "where TABLE_SCHEM = '"+schemaPattern+"' ";
+			sql += "where TABLE_SCHEM = ? ";
+			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
 			if(schemaPattern!=null) {
@@ -89,12 +101,17 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			else {
 				sql += "where ";
 			}
-			sql += " TABLE_NAME = '"+tableNamePattern+"' ";
+			sql += " TABLE_NAME = ? ";
+			params.add(tableNamePattern);
 		}
 		sql += "order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION ";
-		Statement st = conn.createStatement();
+		
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery(sql);
+		return st.executeQuery();
 	}
 	
 	static boolean grabFKFromUK = false;
@@ -113,9 +130,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	}
 	
 	public ResultSet getKeys(String catalog, String schema, String table, boolean imported) throws SQLException {
-		//TODOne: do not grab FKs that do not reference a PK
-
-		//TODO: if(grabFKFromUK==true) -> status, validated, rely are not returned! 
+		//XXX: if(grabFKFromUK==true) -> status, validated, rely are not returned! 
 		if(!grabFKFromUK) {
 			if(imported) {
 				return super.getImportedKeys(catalog, schema, table);
@@ -125,8 +140,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			}
 		}
 		
-		//XXX: this makes grabbing slower. prop option to use default method
 		Connection conn = metadata.getConnection();
+		List<String> params = new ArrayList<String>();
+
 		String sql = "select * from (";
 		sql += "select '' as PKTABLE_CAT, acuk.owner as PKTABLE_SCHEM, acuk.table_name as PKTABLE_NAME, accuk.column_name as PKCOLUMN_NAME, \n"
 				+"       '' as FKTABLE_CAT, acfk.owner as FKTABLE_SCHEM, acfk.table_name as FKTABLE_NAME, accfk.column_name as FKCOLUMN_NAME, \n"
@@ -150,7 +166,8 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+") ";
 
 		if(schema!=null) {
-			sql += "where "+(imported?"FKTABLE_SCHEM":"PKTABLE_SCHEM")+" = '"+schema+"' \n";
+			sql += "where "+(imported?"FKTABLE_SCHEM":"PKTABLE_SCHEM")+" = ? \n";
+			params.add(schema);
 		}
 		if(table!=null) {
 			if(schema!=null) {
@@ -159,12 +176,16 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			else {
 				sql += "where ";
 			}
-			sql += (imported?"FKTABLE_NAME":"PKTABLE_NAME")+" = '"+table+"' ";
+			sql += (imported?"FKTABLE_NAME":"PKTABLE_NAME")+" = ? ";
+			params.add(table);
 		}
 		sql += "order by PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ";
-		Statement st = conn.createStatement();
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery(sql);
+		return st.executeQuery();
 	}
 	
 }
