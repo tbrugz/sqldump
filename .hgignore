@@ -1,4 +1,5 @@
 glob:bin/*
+glob:build/*
 glob:dist/*
 glob:lib/*
 glob:tmp/*

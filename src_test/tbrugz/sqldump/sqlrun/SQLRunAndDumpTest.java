@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
 
-public class SQLRunTest {
+public class SQLRunAndDumpTest {
 	@Test
 	public void doRun() throws Exception {
 		String[] vmparams = {
@@ -45,7 +45,7 @@ public class SQLRunTest {
 		SQLDump.main(params);
 	}
 	
-	void setProperties(String[] vmparams) {
+	public static void setProperties(String[] vmparams) {
 		for(String s: vmparams) {
 			String key = null, value = null; 
 			if(s.startsWith("-D")) {
