@@ -60,9 +60,12 @@ public abstract class AbstractImporter {
 	String insertTable = null;
 	String insertSQL = null;
 	String inputEncoding = "UTF-8";
+	
+	int maxFailoverId = 0;
+	FailoverIdSelectionStrategy failoverStrategy = FailoverIdSelectionStrategy.CYCLE; //TODO: property for selecting failover strategy
+	
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
-	int maxFailoverId = 0;
 	Long commitEachXrows = 100l;
 	Long logEachXrows = 10000l; //XXX: prop for logEachXrows
 
@@ -123,23 +126,14 @@ public abstract class AbstractImporter {
 		//setDefaultImporterProperties(prop);
 	}
 
-	/*void setDefaultImporterProperties(Properties prop) {
-		setImporterProperties(prop, SQLRun.PREFIX_EXEC+execId);
-	}*/
-
-	void setImporterProperties(Properties prop) {
-		setImporterProperties(prop, failoverId);
-	}
-	
 	void setImporterProperties(Properties prop, String importerPrefix) {
 		insertTable = prop.getProperty(importerPrefix+SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(importerPrefix+SUFFIX_INSERTSQL);
-		//XXX: mustSetupSQLStatement = true ?
+		mustSetupSQLStatement = true;
 	}
 	
-	void setImporterProperties(Properties prop, int failId) {
-		if(failId==0) {
-			//setDefaultImporterProperties(prop);
+	void setImporterProperties(Properties prop) {
+		if(failoverId==0) {
 			setImporterProperties(prop, SQLRun.PREFIX_EXEC+execId);
 		}
 		else {
@@ -166,7 +160,8 @@ public abstract class AbstractImporter {
 		long ret = 0;
 		long filesImported = 0;
 		if(importFile!=null) {
-			log.info("importing file: "+importFile+" [maxfailoverid="+maxFailoverId+"]");
+			log.info("importing file: "+importFile+
+					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
 			ret = importFile();
 			filesImported++;
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
@@ -175,7 +170,8 @@ public abstract class AbstractImporter {
 			if(importDir==null) {
 				importDir = System.getProperty("user.dir");
 			}
-			log.info("importing files from dir: "+importDir+" [maxfailoverid="+maxFailoverId+"]");
+			log.info("importing files from dir: "+importDir+
+					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
 			List<String> files = SQLRun.getFiles(importDir, importFiles);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
@@ -213,24 +209,17 @@ public abstract class AbstractImporter {
 	boolean mustSetupSQLStatement = false;
 	int failoverId = 0;
 	
-	//TODOne: show processedLines by failoverId?
 	long importFile() throws SQLException, InterruptedException, IOException {
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
-		failoverId = 0;
+		//failoverId = 0;
 		IOCounter counter = countsByFailoverId.get(failoverId);
-		//TODO: property for selecting failover strategy
-		FailoverIdSelectionStrategy failoverStrategy = FailoverIdSelectionStrategy.CYCLE;
 		
 		Scanner scan = createScanner();
 		
 		Pattern p = scan.delimiter();
 		log.debug("scan delimiter pattern: "+p);
 		log.info("input file: "+importFile);
-		
-		//PreparedStatement stmt = null;
-		//String stmtStrPrep = null;
-		//String stmtStr = null;
 		
 		if(follow) {
 			//add shutdown hook
@@ -264,7 +253,6 @@ public abstract class AbstractImporter {
 						failoverId = 0;
 						counter = countsByFailoverId.get(failoverId);
 						setImporterProperties(prop);
-						mustSetupSQLStatement = true;
 					}
 				}
 				int loopStartedWithFailoverId = failoverId;
@@ -287,11 +275,12 @@ public abstract class AbstractImporter {
 						}
 						counter = countsByFailoverId.get(failoverId);
 						setImporterProperties(prop);
-						mustSetupSQLStatement = true;
 						
 						//is last failover-id?
 						if(failoverId == loopStartedWithFailoverId) {
-							log.warn("error processing line "+linecounter+" ["+failoverId+/*"/"+previousFailoverId+*/"/"+maxFailoverId+"]: "+e.getMessage());
+							log.warn("error processing line "+linecounter
+									+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
+									+e.getMessage());
 							importthisline = false;
 							//break;
 						}
@@ -318,17 +307,21 @@ public abstract class AbstractImporter {
 		return countAll;
 	}
 	
-	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) {
+	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) { // remove alwaysShowId?
 		long countAllIn = 0, countAllOut = 0;
+		int loopCount = 1, mapSize = ccMap.size();
 		for(Integer id: ccMap.keySet()) {
 			IOCounter cc = ccMap.get(id);
-			if(cc.input>0 || cc.output>0) {
-				log.info( ((id==0&&!alwaysShowId)?"":"[failover="+id+"] ") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
+			if(cc.input>0 || cc.output>0 || loopCount < mapSize) {
+				log.info( ((mapSize > 1)?"[failover="+id+"] ":"") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
 				countAllIn += cc.input;
 				countAllOut += cc.output;
 			}
+			loopCount++;
 		}
-		log.info( "[failover=ALL] "+"processedLines: "+countAllIn+" ; importedRows: "+countAllOut);
+		if(mapSize > 1) {
+			log.info("[failover=ALL] processedLines: "+countAllIn+" ; importedRows: "+countAllOut);
+		}
 		return countAllOut;
 	}
 	
