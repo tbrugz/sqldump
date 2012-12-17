@@ -56,6 +56,7 @@ public abstract class AbstractImporter {
 	String inputEncoding = "UTF-8";
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
+	int maxFailoverId = 0;
 	Long commitEachXrows = 100l;
 	Long logEachXrows = 10000l; //XXX: prop for logEachXrows
 
@@ -109,17 +110,36 @@ public abstract class AbstractImporter {
 		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, commitEachXrows);
 		
-		setDefaultImporterProperties(prop);
+		//set max failover id!
+		maxFailoverId = getMaxFailoverId();
+		
+		setImporterProperties(prop);
+		//setDefaultImporterProperties(prop);
 	}
 
-	void setDefaultImporterProperties(Properties prop) {
+	/*void setDefaultImporterProperties(Properties prop) {
 		setImporterProperties(prop, SQLRun.PREFIX_EXEC+execId);
+	}*/
+
+	void setImporterProperties(Properties prop) {
+		setImporterProperties(prop, failoverId);
 	}
 	
 	void setImporterProperties(Properties prop, String importerPrefix) {
 		insertTable = prop.getProperty(importerPrefix+SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(importerPrefix+SUFFIX_INSERTSQL);
 		//XXX: mustSetupSQLStatement = true ?
+	}
+	
+	void setImporterProperties(Properties prop, int failId) {
+		if(failId==0) {
+			//setDefaultImporterProperties(prop);
+			setImporterProperties(prop, SQLRun.PREFIX_EXEC+execId);
+		}
+		else {
+			String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
+			setImporterProperties(prop, failoverKey);
+		}
 	}
 
 	public void setConnection(Connection conn) {
@@ -139,6 +159,7 @@ public abstract class AbstractImporter {
 		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;
 		if(importFile!=null) {
+			log.info("importing file: "+importFile+" [maxfailoverid="+maxFailoverId+"]");
 			ret = importFile();
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
@@ -146,15 +167,15 @@ public abstract class AbstractImporter {
 			if(importDir==null) {
 				importDir = System.getProperty("user.dir");
 			}
-			log.info("importing files from dir: "+importDir);
+			log.info("importing files from dir: "+importDir+" [maxfailoverid="+maxFailoverId+"]");
 			List<String> files = SQLRun.getFiles(importDir, importFiles);
-			if(files==null) {
+			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
 			}
 			else {
 				for(String file: files) {
 					importFile = file;
-					//log.info("importing file: "+importFile);
+					log.debug("importing file: "+importFile);
 					ret += importFile();
 					addMapCount(aggCountsByFailoverId, countsByFailoverId);
 				}
@@ -184,16 +205,30 @@ public abstract class AbstractImporter {
 	long importFile() throws SQLException, InterruptedException, IOException {
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
+		failoverId = 0;
 		IOCounter counter = countsByFailoverId.get(failoverId);
 
 		//assume all lines of same size (in number of columns?)
 		//FileReader fr = new FileReader(importFile);
+		/*int maxFailoverId = 0;
+		for(int i=1;;i++) {
+			String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+i;
+			List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
+			if(foids==null || foids.size()==0) {
+				if(i>1) {
+					maxFailoverId = i-1;
+				}
+				break;
+			}
+			log.debug("foid: "+failoverKey);
+		}*/
 		
 		Scanner scan = createScanner();
 		
 		Pattern p = scan.delimiter();
 		log.debug("scan delimiter pattern: "+p);
 		log.info("input file: "+importFile);
+				//+(maxFailoverId>0?" [maxfailover="+maxFailoverId+"]":""));
 		
 		//PreparedStatement stmt = null;
 		//String stmtStrPrep = null;
@@ -221,15 +256,20 @@ public abstract class AbstractImporter {
 		boolean is1stloop = true;
 		//int[] filecol2tabcolMap = null;
 		do {
+			int linecounter = 0;
+			//failoverId = 0;
+			//int loopStartedWithFailoverId = failoverId;
 			while(scan.hasNext()) {
+				int loopStartedWithFailoverId = failoverId;
 				boolean importthisline = true;
-				if(failoverId>0) {
+				/*if(failoverId>0) {
 					failoverId = 0;
 					counter = countsByFailoverId.get(failoverId);
 					setDefaultImporterProperties(prop);
 					mustSetupSQLStatement = true;
-				}
+				}*/
 				String line = scan.next();
+				linecounter++;
 				/*if(line.endsWith(recordDelimiter)) {
 					log.info("line1["+line.length()+"]: ["+line+"]");
 					line = line.substring(0,line.length()-recordDelimiter.length()-1);
@@ -240,22 +280,47 @@ public abstract class AbstractImporter {
 					try {
 						procLineInternal(line, is1stloop);
 						importthisline = false;
+						//log.debug("procline-ok ["+linecounter+"]: failid="+failoverId);
 					}
 					catch(Exception e) {
 						counter.input++;
+						//next failover id
 						failoverId++;
-						counter = countsByFailoverId.get(failoverId);
-						String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
-						List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
-						if(foids!=null && foids.size()>0) {
-							//log.info("failover["+failoverId+"]: "+failoverKey);
-							setImporterProperties(prop, failoverKey);
-							mustSetupSQLStatement = true;
+						if(failoverId > maxFailoverId) {
+							failoverId = 0;
+						}
+						setImporterProperties(prop);
+						mustSetupSQLStatement = true;
+						
+						//is last failover-id?
+						if(failoverId != loopStartedWithFailoverId) {
+							/*counter = countsByFailoverId.get(failoverId);
+							String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
+							List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
+							if(foids!=null && foids.size()>0) {
+								//log.info("failover["+failoverId+"]: "+failoverKey);
+								setImporterProperties(prop);
+								/if(failoverId==0) {
+									setDefaultImporterProperties(prop);
+								}
+								else {
+									setImporterProperties(prop, failoverKey);
+								}* /
+								mustSetupSQLStatement = true;
+							}
+							else {
+								log.warn("should never occur! failoverkey="+failoverKey);
+							}*/
 						}
 						else {
-							log.warn("error processing line "+countsByFailoverId.get(0).input+": "+e.getMessage());
+							//int previousFailoverId = failoverId-1;
+							//if(previousFailoverId<0) { previousFailoverId = maxFailoverId; }
+							//long linenumber = countsByFailoverId.get(previousFailoverId).input;
+							log.warn("error processing line "+linecounter+" ["+failoverId+/*"/"+previousFailoverId+*/"/"+maxFailoverId+"]: "+e.getMessage());
+							//log.debug("error processing line",e);
+							//e.printStackTrace();
 							importthisline = false;
-							break;
+							//break;
 						}
 					}
 				} //while (importthisline)
@@ -382,6 +447,16 @@ public abstract class AbstractImporter {
 		}
 		stmt = conn.prepareStatement(sb.toString());
 		//stmtStrPrep = sb.toString();
+	}
+	
+	int getMaxFailoverId() {
+		for(int i=1;;i++) {
+			String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+i;
+			List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
+			if(foids==null || foids.size()==0) {
+				return i-1;
+			}
+		}
 	}
 
 	abstract String[] procLine(String line, long processedLines) throws SQLException;
