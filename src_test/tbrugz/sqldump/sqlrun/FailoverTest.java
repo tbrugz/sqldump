@@ -20,4 +20,13 @@ public class FailoverTest {
 		};
 		SQLRun.main(params);
 	}
+
+	@Test
+	public void testSimpleNoFailover() throws Exception {
+		String[] params = {
+				"-propfile=src_test/tbrugz/sqldump/sqlrun/failover-simple-no.properties",
+				"-usesysprop=false"
+		};
+		SQLRun.main(params);
+	}
 }

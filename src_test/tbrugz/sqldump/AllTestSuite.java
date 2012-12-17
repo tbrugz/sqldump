@@ -7,6 +7,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
+import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.test.SQLDumpTestSuite;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
@@ -16,6 +17,7 @@ import tbrugz.sqlrun.test.CSVImportTest;
 @SuiteClasses({
 	CSVImportTest.class,
 	DataDumpTest.class,
+	FailoverTest.class,
 	ParametrizedPropertiesTest.class,
 	SQLDumpTestSuite.class,
 	SQLDiffTest.class,
