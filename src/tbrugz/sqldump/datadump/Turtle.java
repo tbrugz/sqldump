@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Properties;
 
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.util.Utils;
 
 /**
  * RDB2RDF Direct Mapping Turtle dump syntax
@@ -22,8 +24,6 @@ public class Turtle extends RDFAbstractSyntax {
 
 	@Override
 	public void procProperties(Properties prop) {
-		// TODO Auto-generated method stub
-
 		// TODO set base url (by property?)
 		baseUrl = "http://example.com/";
 	}
@@ -81,22 +81,44 @@ public class Turtle extends RDFAbstractSyntax {
 					tableName+"#"+lsColNames.get(i)+"> "+
 					RDFAbstractSyntax.getLiteralValue(value, lsColTypes.get(i))+" .\n");
 		}
+
+		//FKs
+		if(fks!=null) {
+			for(FK fk: fks) {
+				//<People/ID=7> <People#ref-deptName;deptCity> <Department/ID=23> .
+				List<String> fkcols = fk.getFkColumns();
+				String fkKey = getKey(rs, fkcols);
+				if(fkKey==null) { continue; }
+				
+				String fkRef = Utils.join(fkcols, ";");
+				
+				fos.write("<"+tableName+"/"+pkKey+"> <"+
+						tableName+"#ref-"+fkRef+"> "+
+						"<"+fk.getPkTable()+"/"+fkKey+"> .\n");
+			}
+		}
+			
 		fos.write("\n");
-		
-		//TODO FKs
 	}
 	
 	String getPKKey(ResultSet rs) throws SQLException {
+		return getKey(rs, pkCols);
+	}
+	
+	String getKey(ResultSet rs, List<String> cols) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		boolean isFirst = true;
-		for(String col: pkCols) {
+		for(String col: cols) {
 			if(isFirst) {
 				isFirst = false;
 			}
 			else {
 				sb.append(";");
 			}
-			sb.append( col+"="+rs.getString(col));
+			String value = rs.getString(col);
+			if(value==null) { return null; }
+				
+			sb.append( col+"="+value);
 		}
 		return sb.toString();
 	}
