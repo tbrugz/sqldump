@@ -101,7 +101,7 @@ public class Table extends DBObject implements Relation {
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
-			List<FK> fks = getImportedKeys(foreignKeys);
+			List<FK> fks = DBIdentifiable.getImportedKeys(this, foreignKeys);
 			for(FK fk: fks) {
 				sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
 				countTabElements++;
@@ -283,18 +283,5 @@ public class Table extends DBObject implements Relation {
 			}
 		}
 		return sb.toString();
-	}
-	
-	public List<FK> getImportedKeys(Set<FK> allFKs) {
-		List<FK> fks = new ArrayList<FK>();
-		
-		for(FK fk: allFKs) {
-			if( (schemaName==null || fk.fkTableSchemaName==null || schemaName.equals(fk.fkTableSchemaName)) 
-					&& name.equals(fk.fkTable)) {
-				fks.add(fk);
-			}
-		}
-
-		return fks;
 	}
 }

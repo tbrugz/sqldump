@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -185,7 +186,7 @@ public class DataDump extends AbstractSQLProc {
 					}
 				}
 			}
-			List<FK> importedFKs = table.getImportedKeys(model.getForeignKeys());
+			List<FK> importedFKs = DBIdentifiable.getImportedKeys(table, model.getForeignKeys());
 			
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;

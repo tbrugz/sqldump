@@ -1,6 +1,9 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 //XXX implement Comparable<DBIdentifiable>? 
 public abstract class DBIdentifiable {
@@ -73,6 +76,20 @@ public abstract class DBIdentifiable {
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
+	
+	
+	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
+		List<FK> fks = new ArrayList<FK>();
+		for(FK fk: allFKs) {
+			if( (rel.getSchemaName()==null || fk.fkTableSchemaName==null || rel.getSchemaName().equals(fk.fkTableSchemaName)) 
+					&& rel.getName().equals(fk.fkTable)) {
+				fks.add(fk);
+			}
+		}
+
+		return fks;
+	}
+	
 
 	@Override
 	public int hashCode() {
