@@ -19,13 +19,20 @@ import tbrugz.sqldump.util.Utils;
  */
 public class Turtle extends RDFAbstractSyntax {
 
-	public static String[] NAMESPACE_PREFIXES = { "rdf", "xsd" }; 
+	public static String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
+	public static String PROP_KEYCOLSEPARATOR = "sqldump.datadump.turtle.keycolseparator"; 
+	public static String PROP_KEYINCLUDESCOLNAME = "sqldump.datadump.turtle.keyincludescolname"; 
+	
 	String baseUrl = null;
+	String keyColSeparator = ";";
+	boolean keyIncludesColName = true;
 
 	@Override
 	public void procProperties(Properties prop) {
-		// TODO set base url (by property?)
-		baseUrl = "http://example.com/";
+		//baseUrl = "http://example.com/";
+		baseUrl = prop.getProperty(RDFAbstractSyntax.PROP_RDF_BASE);
+		keyColSeparator = prop.getProperty(PROP_KEYCOLSEPARATOR, keyColSeparator);
+		keyIncludesColName = Utils.getPropBool(prop, PROP_KEYINCLUDESCOLNAME, keyIncludesColName);
 	}
 
 	@Override
@@ -64,11 +71,18 @@ public class Turtle extends RDFAbstractSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
-		//XXX if has no pk?
+		String entityId = null; 
 		String pkKey = getPKKey(rs);
+
+		if(pkKey==null) {
+			entityId = "_:"+count;
+		}
+		else {
+			entityId = "<"+tableName+"/"+pkKey+">";
+		}
 		
 		//ref:type
-		fos.write("<"+tableName+"/"+pkKey+"> rdf:type <"+tableName+"> .\n");
+		fos.write(entityId+" rdf:type <"+tableName+"> .\n");
 		
 		//values
 		List<?> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
@@ -77,7 +91,7 @@ public class Turtle extends RDFAbstractSyntax {
 			Object value = vals.get(i);
 			if(value==null) { continue; }
 			
-			fos.write("<"+tableName+"/"+pkKey+"> <"+
+			fos.write(entityId+" <"+
 					tableName+"#"+lsColNames.get(i)+"> "+
 					RDFAbstractSyntax.getLiteralValue(value, lsColTypes.get(i))+" .\n");
 		}
@@ -92,7 +106,7 @@ public class Turtle extends RDFAbstractSyntax {
 				
 				String fkRef = Utils.join(fkcols, ";");
 				
-				fos.write("<"+tableName+"/"+pkKey+"> <"+
+				fos.write(entityId+" <"+
 						tableName+"#ref-"+fkRef+"> "+
 						"<"+fk.getPkTable()+"/"+fkKey+"> .\n");
 			}
@@ -106,6 +120,8 @@ public class Turtle extends RDFAbstractSyntax {
 	}
 	
 	String getKey(ResultSet rs, List<String> cols) throws SQLException {
+		if(cols==null) return null;
+		
 		StringBuilder sb = new StringBuilder();
 		boolean isFirst = true;
 		for(String col: cols) {
@@ -113,12 +129,13 @@ public class Turtle extends RDFAbstractSyntax {
 				isFirst = false;
 			}
 			else {
-				sb.append(";");
+				sb.append(keyColSeparator);
 			}
 			String value = rs.getString(col);
 			if(value==null) { return null; }
-				
-			sb.append( col+"="+value);
+			
+			if(keyIncludesColName) { sb.append(col+"="); }
+			sb.append( value );
 		}
 		return sb.toString();
 	}
