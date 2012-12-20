@@ -17,6 +17,10 @@ import tbrugz.sqldump.util.Utils;
  * 
  * @see http://en.wikipedia.org/wiki/Turtle_(syntax)
  */
+/*
+ * TODO if have +1 PK/UK: use owl:sameAs ?
+ * http://answers.semanticweb.com/questions/356/seealso-or-sameas
+ */
 public class Turtle extends RDFAbstractSyntax {
 
 	public static String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
@@ -99,12 +103,12 @@ public class Turtle extends RDFAbstractSyntax {
 		//FKs
 		if(fks!=null) {
 			for(FK fk: fks) {
-				//<People/ID=7> <People#ref-deptName;deptCity> <Department/ID=23> .
-				List<String> fkcols = fk.getFkColumns();
-				String fkKey = getKey(rs, fkcols);
+				List<String> fkFKcols = fk.getFkColumns();
+				List<String> fkPKcols = fk.getPkColumns();
+				String fkKey = getKey(rs, fkFKcols, fkPKcols);
 				if(fkKey==null) { continue; }
 				
-				String fkRef = Utils.join(fkcols, ";");
+				String fkRef = Utils.join(fkFKcols, ";");
 				
 				fos.write(entityId+" <"+
 						tableName+"#ref-"+fkRef+"> "+
@@ -116,25 +120,28 @@ public class Turtle extends RDFAbstractSyntax {
 	}
 	
 	String getPKKey(ResultSet rs) throws SQLException {
-		return getKey(rs, pkCols);
+		return getKey(rs, pkCols, pkCols);
 	}
 	
-	String getKey(ResultSet rs, List<String> cols) throws SQLException {
-		if(cols==null) return null;
+	String getKey(ResultSet rs, List<String> fkCols, List<String> pkCols) throws SQLException {
+		if(fkCols==null) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		boolean isFirst = true;
-		for(String col: cols) {
+		//for(String col: fkCols) {
+		for(int i=0;i<fkCols.size();i++) {
+			String fkCol = fkCols.get(i);
+			String pkCol = pkCols.get(i);
 			if(isFirst) {
 				isFirst = false;
 			}
 			else {
 				sb.append(keyColSeparator);
 			}
-			String value = rs.getString(col);
+			String value = rs.getString(fkCol);
 			if(value==null) { return null; }
 			
-			if(keyIncludesColName) { sb.append(col+"="); }
+			if(keyIncludesColName) { sb.append(pkCol+"="); }
 			sb.append( value );
 		}
 		return sb.toString();

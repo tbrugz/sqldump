@@ -12,6 +12,9 @@ import java.util.Properties;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * http://www.w3.org/TR/rdb-direct-mapping/
+ */
 public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	
 	public static final String PROP_RDF_BASE = "sqldump.rdf.base";
