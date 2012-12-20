@@ -37,6 +37,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -168,6 +169,19 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
+		String quote = null;
+		try {
+			quote = conn.getMetaData().getIdentifierQuoteString();
+		}
+		catch(SQLException e) {
+			log.warn("MetaData.getIdentifierQuoteString(): sqlexception: "+e);
+			log.info("MetaData.getIdentifierQuoteString(): sqlexception", e);
+		}
+		if(quote==null) {
+			quote = DBMSResources.instance().getIdentifierQuoteString();
+			log.debug("MetaData.getIdentifierQuoteString() returned null, quote is ["+quote+"]");
+		}
+		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
 			String tableName = table.getName();
@@ -198,7 +212,7 @@ public class DataDump extends AbstractSQLProc {
 			if(orderClause==null && orderByPK) { 
 				Constraint ctt = table.getPKConstraint();
 				if(ctt!=null) {
-					orderClause = Utils.join(ctt.uniqueColumns, ", ");
+					orderClause = Utils.join(ctt.uniqueColumns, ", ", new StringDecorator.StringQuoterDecorator(quote));
 				}
 				else {
 					log.warn("table '"+tableName+"' has no PK for datadump ordering");
@@ -211,18 +225,6 @@ public class DataDump extends AbstractSQLProc {
 
 			log.debug("dumping data/inserts from table: "+tableName);
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
-			String quote = null;
-			try {
-				quote = conn.getMetaData().getIdentifierQuoteString();
-			}
-			catch(SQLException e) {
-				log.warn("MetaData.getIdentifierQuoteString(): sqlexception: "+e);
-				log.info("MetaData.getIdentifierQuoteString(): sqlexception", e);
-			}
-			if(quote==null) {
-				quote = DBMSResources.instance().getIdentifierQuoteString();
-				log.debug("MetaData.getIdentifierQuoteString() returned null, quote is ["+quote+"]");
-			}
 			
 			String sql = "select "+selectColumns
 					+" from "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+quote+tableName+quote

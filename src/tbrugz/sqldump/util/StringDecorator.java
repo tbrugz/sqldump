@@ -25,6 +25,20 @@ public class StringDecorator {
 		}
 	}
 	
+	public static class StringQuoterDecorator extends StringDecorator {
+		final String quote;
+		
+		public StringQuoterDecorator(String quote) {
+			this.quote = quote;
+		}
+		
+		@Override
+		public String get(String str) {
+			return str==null?null:quote+str+quote;
+		}
+	}
+	
+	
 	public String get(String str) { return str; }
 	
 	static StringDecorator instance = new StringDecorator();
