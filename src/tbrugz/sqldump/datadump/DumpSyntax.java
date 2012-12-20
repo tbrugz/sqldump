@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax {
@@ -25,6 +26,7 @@ public abstract class DumpSyntax {
 		FFCDataDump.class,
 		UpdateByPKDataDump.class,
 		BlobDataDump.class,
+		Turtle.class,
 	};
 	
 	public static final String DEFAULT_NULL_VALUE = "";
@@ -75,6 +77,8 @@ public abstract class DumpSyntax {
 	}
 	
 	public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
+
+	public void setImportedFKs(List<FK> fks) {}
 	
 	public abstract void dumpHeader(Writer fos) throws IOException;
 
@@ -100,6 +104,15 @@ public abstract class DumpSyntax {
 	 * FFCDataDump is stateful
 	 */
 	public boolean isStateful() {
+		return false;
+	}
+
+	/**
+	 * Should return true if imported FKs are used for datadump
+	 * 
+	 * @return
+	 */
+	public boolean usesImportedFKs() {
 		return false;
 	}
 	
