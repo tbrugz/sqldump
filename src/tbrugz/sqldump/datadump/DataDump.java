@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.AbstractSQLProc;
@@ -184,6 +185,7 @@ public class DataDump extends AbstractSQLProc {
 					}
 				}
 			}
+			List<FK> importedFKs = table.getImportedKeys(model.getForeignKeys());
 			
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
@@ -233,7 +235,8 @@ public class DataDump extends AbstractSQLProc {
 						rowlimit,
 						syntaxList,
 						null,
-						pkCols
+						pkCols,
+						importedFKs
 						);
 			}
 			catch(Exception e) {
@@ -251,7 +254,7 @@ public class DataDump extends AbstractSQLProc {
 			String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws Exception {
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null);
 	}
 		
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
@@ -259,7 +262,8 @@ public class DataDump extends AbstractSQLProc {
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
 			String[] partitionByPatterns,
-			List<String> keyColumns
+			List<String> keyColumns,
+			List<FK> importedFKs
 			) throws Exception {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -307,6 +311,10 @@ public class DataDump extends AbstractSQLProc {
 				ds.initDump(tableOrQueryName, keyColumns, md);
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
+				
+				if(ds.usesImportedFKs() || importedFKs!=null) {
+					ds.setImportedFKs(importedFKs);
+				}
 				
 				if(ds.isWriterIndependent()) { 
 					doSyntaxDumpList.set(i, true);

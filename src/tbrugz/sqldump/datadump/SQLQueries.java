@@ -176,7 +176,7 @@ public class SQLQueries extends AbstractSQLProc {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
-							keyCols);
+							keyCols, null);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.info("error on query "+qid+": "+e.getMessage(), e);

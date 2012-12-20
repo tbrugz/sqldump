@@ -101,16 +101,9 @@ public class Table extends DBObject implements Relation {
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
-			/*String fksDefinition = getFKsDefinition(dumpWithSchemaName, tableName, foreignKeys);
-			if(fksDefinition!=null && !fksDefinition.equals("")) {
-				sb.append(fksDefinition);
-				countTabElements++; // + 'n'?
-			}*/
-			//sb.append(+"\n\t"+dumpFKsInsideTable(foreignKeys, schemaName, name, dumpWithSchemaName));
-			for(FK fk: foreignKeys) {
-				if((schemaName==null || fk.fkTableSchemaName==null || schemaName.equals(fk.fkTableSchemaName)) && name.equals(fk.fkTable)) {
-					sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
-				}
+			List<FK> fks = getImportedKeys(foreignKeys);
+			for(FK fk: fks) {
+				sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
 				countTabElements++;
 			}
 		}
@@ -148,19 +141,6 @@ public class Table extends DBObject implements Relation {
 				sb.append((count==0?"":",")+"\n\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName));
 			}
 			count++;
-		}
-		return sb.toString();
-	}*/
-	
-	/*String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName, boolean dumpWithSchemaName) {
-		StringBuffer sb = new StringBuffer();
-		for(FK fk: foreignKeys) {
-			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
-				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
-				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
-				//sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
-				sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
-			}
 		}
 		return sb.toString();
 	}*/
@@ -303,5 +283,18 @@ public class Table extends DBObject implements Relation {
 			}
 		}
 		return sb.toString();
+	}
+	
+	public List<FK> getImportedKeys(Set<FK> allFKs) {
+		List<FK> fks = new ArrayList<FK>();
+		
+		for(FK fk: allFKs) {
+			if( (schemaName==null || fk.fkTableSchemaName==null || schemaName.equals(fk.fkTableSchemaName)) 
+					&& name.equals(fk.fkTable)) {
+				fks.add(fk);
+			}
+		}
+
+		return fks;
 	}
 }
