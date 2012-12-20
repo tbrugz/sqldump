@@ -4,6 +4,8 @@ import java.util.*;
 import java.sql.*;
 import java.io.*;
 
+import javax.naming.NamingException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -157,13 +159,13 @@ public class SQLDump {
 		ColTypeUtil.setProperties(papp);
 	}
 
-	void init(String[] args) throws Exception {
+	void init(String[] args) throws IOException {
 		SQLDump.init(args, papp);
 		
 		DBMSResources.instance().setup(papp);
 	}
 
-	void end() throws Exception {
+	void end() throws SQLException {
 		log.info("...done");
 		if(conn!=null) {
 			conn.rollback();
@@ -173,8 +175,12 @@ public class SQLDump {
 	
 	/**
 	 * @param args
+	 * @throws NamingException 
+	 * @throws SQLException 
+	 * @throws ClassNotFoundException 
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 
 		SQLDump sdd = new SQLDump();
 

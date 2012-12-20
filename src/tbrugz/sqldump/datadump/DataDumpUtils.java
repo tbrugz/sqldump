@@ -25,10 +25,12 @@ public class DataDumpUtils {
 
 	static Log log = LogFactory.getLog(DataDumpUtils.class);
 	
-	static final String DEFAULT_SQL_STRING_ENCLOSING = "'";
-	static final String DOUBLEQUOTE = "\"";
-	static final String EMPTY_STRING = "";
+	public static final String QUOTE = "'";
+	public static final String DOUBLEQUOTE = "\"";
+	public static final String EMPTY_STRING = "";
 
+	static final String DEFAULT_SQL_STRING_ENCLOSING = QUOTE;
+	
 	static boolean resultSetWarnedForSQLValue = false;
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
