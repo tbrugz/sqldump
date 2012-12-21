@@ -18,10 +18,10 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 		public String fullName() {
 			switch (this) {
 				case PK:
-					//return "PRIMARY KEY";
 					return "primary key";
-				case CHECK:
 				case UNIQUE:
+					return "unique";
+				case CHECK:
 				default:
 					return this.toString();
 			}
@@ -37,7 +37,7 @@ public class Constraint extends DBIdentifiable implements Comparable<Constraint>
 		switch (type) {
 			//XXX: use literal type (CHECK, UNIQUE) instead of variable 'type'?
 			case CHECK:
-				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type+" "+checkDescription;
+				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" "+checkDescription;
 			case UNIQUE:
 			case PK:
 				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ", SQLIdentifierDecorator.getInstance())+")";

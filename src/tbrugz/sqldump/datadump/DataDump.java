@@ -554,7 +554,7 @@ public class DataDump extends AbstractSQLProc {
 	static void writeBOMifNeeded(Writer w, String charset, Boolean doWrite) {
 		try {
 			if("UTF-8".equalsIgnoreCase(charset)) {
-				if(doWrite==null || doWrite==true) {
+				if(doWrite!=null && doWrite==true) {
 					w.write('\ufeff');
 				}
 			}

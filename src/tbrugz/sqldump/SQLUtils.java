@@ -257,8 +257,7 @@ public class SQLUtils {
 				else { value = rs.getDouble(i); }
 			}
 			else if(coltype.equals(Date.class)) {
-				//TODOne: how to format Date value?
-				value = rs.getDate(i);
+				value = rs.getTimestamp(i);
 			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
@@ -266,7 +265,7 @@ public class SQLUtils {
 				log.info("generic type ["+value.getClass().getSimpleName()+"/"+coltype.getSimpleName()+"] grabbed");
 				if(canReturnResultSet && ResultSet.class.isAssignableFrom(value.getClass())) {
 					log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
-					colTypes.set(i-1, ResultSet.class);					
+					colTypes.set(i-1, ResultSet.class);
 				}
 			}
 			else {
