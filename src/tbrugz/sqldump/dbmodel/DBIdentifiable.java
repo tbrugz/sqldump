@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+
 //XXX implement Comparable<DBIdentifiable>? 
 public abstract class DBIdentifiable {
 	String schemaName;
@@ -77,7 +79,6 @@ public abstract class DBIdentifiable {
 		return DBIdentifiable.getType(ident);
 	}
 	
-	
 	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
 		List<FK> fks = new ArrayList<FK>();
 		for(FK fk: allFKs) {
@@ -86,11 +87,19 @@ public abstract class DBIdentifiable {
 				fks.add(fk);
 			}
 		}
-
 		return fks;
 	}
-	
 
+	public static List<Constraint> getUKs(Relation rel) {
+		List<Constraint> uks = new ArrayList<Constraint>();
+		for(Constraint c: rel.getConstraints()) {
+			if(c.type==ConstraintType.UNIQUE) {
+				uks.add(c);
+			}
+		}
+		return uks;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
@@ -80,6 +81,8 @@ public abstract class DumpSyntax {
 
 	public void setImportedFKs(List<FK> fks) {}
 	
+	public void setAllUKs(List<Constraint> uks) {}
+	
 	public abstract void dumpHeader(Writer fos) throws IOException;
 
 	public abstract void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
@@ -113,6 +116,15 @@ public abstract class DumpSyntax {
 	 * @return
 	 */
 	public boolean usesImportedFKs() {
+		return false;
+	}
+
+	/**
+	 * Should return true if all Unique Keys are used for datadump
+	 * 
+	 * @return
+	 */
+	public boolean usesAllUKs() {
 		return false;
 	}
 	

@@ -201,6 +201,7 @@ public class DataDump extends AbstractSQLProc {
 				}
 			}
 			List<FK> importedFKs = DBIdentifiable.getImportedKeys(table, model.getForeignKeys());
+			List<Constraint> uniqueKeys = DBIdentifiable.getUKs(table);
 			
 			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
@@ -239,7 +240,8 @@ public class DataDump extends AbstractSQLProc {
 						syntaxList,
 						null,
 						pkCols,
-						importedFKs
+						importedFKs,
+						uniqueKeys
 						);
 			}
 			catch(Exception e) {
@@ -257,7 +259,7 @@ public class DataDump extends AbstractSQLProc {
 			String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws Exception {
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null);
 	}
 		
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
@@ -266,7 +268,8 @@ public class DataDump extends AbstractSQLProc {
 			List<DumpSyntax> syntaxList,
 			String[] partitionByPatterns,
 			List<String> keyColumns,
-			List<FK> importedFKs
+			List<FK> importedFKs,
+			List<Constraint> uniqueKeys
 			) throws Exception {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -318,6 +321,10 @@ public class DataDump extends AbstractSQLProc {
 				if(ds.usesImportedFKs() || importedFKs!=null) {
 					ds.setImportedFKs(importedFKs);
 				}
+				
+				if(ds.usesAllUKs()) {
+					ds.setAllUKs(uniqueKeys);
+				} 
 				
 				if(ds.isWriterIndependent()) { 
 					doSyntaxDumpList.set(i, true);
