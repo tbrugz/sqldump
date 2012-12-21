@@ -21,7 +21,8 @@ import tbrugz.sqldump.util.Utils;
  */
 /*
  * TODOne if have +1 PK/UK: use owl:sameAs ?
- *  - XXX what if table has UK but no PK?  
+ *  - XXX what if table has UK but no PK ?
+ * TODO add 'turtle.html' syntax?
  * http://answers.semanticweb.com/questions/356/seealso-or-sameas
  */
 public class Turtle extends RDFAbstractSyntax {
@@ -97,7 +98,7 @@ public class Turtle extends RDFAbstractSyntax {
 		fos.write(entityId+" rdf:type <"+tableName+"> .\n");
 		
 		//owl:sameAs
-		if(dumpOwlSameAsForUKs) {
+		if(dumpOwlSameAsForUKs && uks!=null) {
 			for(Constraint uk: uks) {
 				String ukKey = getKey(rs, uk.uniqueColumns, uk.uniqueColumns);
 				fos.write(entityId+" owl:sameAs "+

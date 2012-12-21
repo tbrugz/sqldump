@@ -15,6 +15,8 @@ import tbrugz.sqldump.util.Utils;
 
 /*
  * http://www.w3.org/TR/rdb-direct-mapping/
+ * 
+ * RDF/XML: add <?xml-stylesheet ?> ?
  */
 public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	
