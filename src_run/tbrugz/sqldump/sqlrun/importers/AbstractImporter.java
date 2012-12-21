@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
@@ -59,7 +60,7 @@ public abstract class AbstractImporter {
 	String recordDelimiter = "\r?\n";
 	String insertTable = null;
 	String insertSQL = null;
-	String inputEncoding = "UTF-8";
+	String inputEncoding = DataDumpUtils.CHARSET_UTF8;
 	
 	int maxFailoverId = 0;
 	FailoverIdSelectionStrategy failoverStrategy = FailoverIdSelectionStrategy.CYCLE; //TODO: property for selecting failover strategy

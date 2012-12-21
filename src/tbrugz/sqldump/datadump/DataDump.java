@@ -75,7 +75,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
 
 	//defaults
-	static final String CHARSET_DEFAULT = "UTF-8";
+	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
 	static final long LOG_EACH_X_ROWS_DEFAULT = 50000;
 	
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
@@ -543,7 +543,7 @@ public class DataDump extends AbstractSQLProc {
 	 */
 	static void writeBOMifNeeded(Writer w, String charset, Boolean doWrite) {
 		try {
-			if("UTF-8".equalsIgnoreCase(charset)) {
+			if(DataDumpUtils.CHARSET_UTF8.equalsIgnoreCase(charset)) {
 				if(doWrite!=null && doWrite==true) {
 					w.write('\ufeff');
 				}

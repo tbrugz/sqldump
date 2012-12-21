@@ -1,7 +1,9 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -137,11 +139,11 @@ public class Turtle extends RDFAbstractSyntax {
 		fos.write("\n");
 	}
 	
-	String getPKKey(ResultSet rs) throws SQLException {
+	String getPKKey(ResultSet rs) throws SQLException, UnsupportedEncodingException {
 		return getKey(rs, pkCols, pkCols);
 	}
 	
-	String getKey(ResultSet rs, List<String> fkCols, List<String> pkCols) throws SQLException {
+	String getKey(ResultSet rs, List<String> fkCols, List<String> pkCols) throws SQLException, UnsupportedEncodingException {
 		if(fkCols==null) return null;
 		
 		StringBuilder sb = new StringBuilder();
@@ -160,7 +162,7 @@ public class Turtle extends RDFAbstractSyntax {
 			if(value==null) { return null; }
 			
 			if(keyIncludesColName) { sb.append(pkCol+"="); }
-			sb.append( value );
+			sb.append( URLEncoder.encode(value, DataDumpUtils.CHARSET_UTF8) );
 		}
 		return sb.toString();
 	}

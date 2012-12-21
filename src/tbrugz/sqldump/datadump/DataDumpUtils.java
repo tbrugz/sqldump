@@ -28,6 +28,9 @@ public class DataDumpUtils {
 	public static final String QUOTE = "'";
 	public static final String DOUBLEQUOTE = "\"";
 	public static final String EMPTY_STRING = "";
+	
+	public static final String CHARSET_UTF8 = "UTF-8";
+	public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 
 	static final String DEFAULT_SQL_STRING_ENCLOSING = QUOTE;
 	
