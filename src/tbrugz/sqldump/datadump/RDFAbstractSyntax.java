@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
@@ -23,6 +24,7 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	static DateFormat xsdDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	
 	List<FK> fks = null;
+	List<Constraint> uks = null;
 	
 	{
 		//load properties
@@ -44,8 +46,18 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	}
 	
 	@Override
+	public boolean usesAllUKs() {
+		return true;
+	}
+	
+	@Override
 	public void setImportedFKs(List<FK> fks) {
 		this.fks = fks;
+	}
+	
+	@Override
+	public void setAllUKs(List<Constraint> uks) {
+		this.uks = uks;
 	}
 	
 	public static String getLiteralValue(Object elem, Class<?> type) {

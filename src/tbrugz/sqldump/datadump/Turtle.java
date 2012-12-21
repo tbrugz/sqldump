@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
@@ -18,7 +20,8 @@ import tbrugz.sqldump.util.Utils;
  * @see http://en.wikipedia.org/wiki/Turtle_(syntax)
  */
 /*
- * TODO if have +1 PK/UK: use owl:sameAs ?
+ * TODOne if have +1 PK/UK: use owl:sameAs ?
+ *  - XXX what if table has UK but no PK?  
  * http://answers.semanticweb.com/questions/356/seealso-or-sameas
  */
 public class Turtle extends RDFAbstractSyntax {
@@ -30,6 +33,7 @@ public class Turtle extends RDFAbstractSyntax {
 	String baseUrl = null;
 	String keyColSeparator = ";";
 	boolean keyIncludesColName = true;
+	boolean dumpOwlSameAsForUKs = true; //TODO: add prop for 'dumpOwlSameAsForUKs'
 
 	@Override
 	public void procProperties(Properties prop) {
@@ -59,7 +63,11 @@ public class Turtle extends RDFAbstractSyntax {
 		if(baseUrl!=null) {
 			fos.write("@base <"+baseUrl+"> .\n");
 		}
-		List<String> namespacePrefixes = Arrays.asList(NAMESPACE_PREFIXES); 
+		List<String> namespacePrefixes = Arrays.asList(NAMESPACE_PREFIXES);
+		if(dumpOwlSameAsForUKs) {
+			namespacePrefixes = new ArrayList<String>(namespacePrefixes);
+			namespacePrefixes.add("owl");
+		}
 		for(String prefix: namespaces.keySet()) {
 			if(namespacePrefixes.contains(prefix)) {
 				fos.write("@prefix "+prefix+": <"+namespaces.get(prefix)+"> .\n");
@@ -87,6 +95,15 @@ public class Turtle extends RDFAbstractSyntax {
 		
 		//ref:type
 		fos.write(entityId+" rdf:type <"+tableName+"> .\n");
+		
+		//owl:sameAs
+		if(dumpOwlSameAsForUKs) {
+			for(Constraint uk: uks) {
+				String ukKey = getKey(rs, uk.uniqueColumns, uk.uniqueColumns);
+				fos.write(entityId+" owl:sameAs "+
+						"<"+tableName+"/"+ukKey+"> .\n");
+			}
+		}
 		
 		//values
 		List<?> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
