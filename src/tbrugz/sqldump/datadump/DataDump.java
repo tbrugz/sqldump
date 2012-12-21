@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
@@ -169,18 +170,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		String quote = null;
-		try {
-			quote = conn.getMetaData().getIdentifierQuoteString();
-		}
-		catch(SQLException e) {
-			log.warn("MetaData.getIdentifierQuoteString(): sqlexception: "+e);
-			log.info("MetaData.getIdentifierQuoteString(): sqlexception", e);
-		}
-		if(quote==null) {
-			quote = DBMSResources.instance().getIdentifierQuoteString();
-			log.debug("MetaData.getIdentifierQuoteString() returned null, quote is ["+quote+"]");
-		}
+		String quote = DBMSResources.instance().getIdentifierQuoteString();
 		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
