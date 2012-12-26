@@ -30,11 +30,13 @@ import tbrugz.sqldump.util.Utils;
 public class Turtle extends RDFAbstractSyntax {
 
 	public static String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
-	public static String PROP_KEYCOLSEPARATOR = "sqldump.datadump.turtle.keycolseparator"; 
-	public static String PROP_KEYINCLUDESCOLNAME = "sqldump.datadump.turtle.keyincludescolname"; 
+	public static String PROP_KEY_COLSEPARATOR = "sqldump.datadump.turtle.keycolseparator"; 
+	public static String PROP_KEY_INCLUDESCOLNAME = "sqldump.datadump.turtle.keyincludescolname"; 
+	public static String PROP_KEY_APPENDSTR = "sqldump.datadump.turtle.keyappend"; 
 	
 	String baseUrl = null;
 	String keyColSeparator = ";";
+	String keyAppendStr = null;
 	boolean keyIncludesColName = true;
 	boolean dumpOwlSameAsForUKs = true; //TODO: add prop for 'dumpOwlSameAsForUKs'
 
@@ -42,8 +44,9 @@ public class Turtle extends RDFAbstractSyntax {
 	public void procProperties(Properties prop) {
 		//baseUrl = "http://example.com/";
 		baseUrl = prop.getProperty(RDFAbstractSyntax.PROP_RDF_BASE);
-		keyColSeparator = prop.getProperty(PROP_KEYCOLSEPARATOR, keyColSeparator);
-		keyIncludesColName = Utils.getPropBool(prop, PROP_KEYINCLUDESCOLNAME, keyIncludesColName);
+		keyColSeparator = prop.getProperty(PROP_KEY_COLSEPARATOR, keyColSeparator);
+		keyAppendStr = prop.getProperty(PROP_KEY_APPENDSTR, keyAppendStr);
+		keyIncludesColName = Utils.getPropBool(prop, PROP_KEY_INCLUDESCOLNAME, keyIncludesColName);
 	}
 
 	@Override
@@ -163,6 +166,9 @@ public class Turtle extends RDFAbstractSyntax {
 			
 			if(keyIncludesColName) { sb.append(pkCol+"="); }
 			sb.append( URLEncoder.encode(value, DataDumpUtils.CHARSET_UTF8) );
+		}
+		if(keyAppendStr!=null) {
+			sb.append(keyAppendStr);
 		}
 		return sb.toString();
 	}
