@@ -174,6 +174,9 @@ class PasswordInputGUI extends BaseInputGUI {
 	}
 }
 
+/*
+ * TODO: move getProp* functions to another class
+ */
 public class Utils {
 	
 	static final Log log = LogFactory.getLog(Utils.class);
@@ -267,6 +270,21 @@ public class Utils {
 		return "true".equals(value.trim());
 	}
 	
+	public static Integer getPropInt(Properties prop, String key) {
+		return getPropInt(prop, key, null);
+	}
+	
+	public static Integer getPropInt(Properties prop, String key, Integer defaultValue) {
+		String str = prop.getProperty(key);
+		try {
+			int i = Integer.parseInt(str);
+			return i;
+		}
+		catch(Exception e) {
+			return defaultValue;
+		}
+	}
+
 	public static Long getPropLong(Properties prop, String key) {
 		return getPropLong(prop, key, null);
 	}
