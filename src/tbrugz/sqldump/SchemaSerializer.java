@@ -2,8 +2,10 @@ package tbrugz.sqldump;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Connection;
@@ -25,7 +27,8 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	public static final String PROP_SERIALIZATION_INFILE = SERIALIZATION_DEFAULT_PREFIX + ".infile";
 	public static final String PROP_SERIALIZATION_INRESOURCE = SERIALIZATION_DEFAULT_PREFIX + ".inresource";
 
-	File fileInput;
+	String filenameIn;
+	InputStream fileInput;
 	String fileOutput;
 	
 	@Override
@@ -35,11 +38,17 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		if(fileInputStr==null) {
 			fileInputStr = prop.getProperty(PROP_SERIALIZATION_INRESOURCE);
 			if(fileInputStr!=null) {
-				fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+				filenameIn = fileInputStr;
+				fileInput = JAXBSchemaXMLSerializer.class.getResourceAsStream(fileInputStr);
 			}
 		}
 		else {
-			fileInput = new File(fileInputStr);
+			try {
+				filenameIn = fileInputStr;
+				fileInput = new FileInputStream(new File(fileInputStr));
+			} catch (FileNotFoundException e) {
+				log.warn("File not found: "+fileInputStr);
+			}
 		}
 	}
 	
@@ -70,7 +79,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		}
 
 		try {
-			ObjectInputStream ois = new ObjectInputStream(new FileInputStream(fileInput));
+			ObjectInputStream ois = new ObjectInputStream(fileInput);
 			SchemaModel sm = (SchemaModel) ois.readObject();
 			ois.close();
 			log.info("serialized schema model grabbed from '"+fileInput+"'");

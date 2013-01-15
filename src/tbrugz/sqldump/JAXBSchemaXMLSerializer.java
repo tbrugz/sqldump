@@ -1,6 +1,9 @@
 package tbrugz.sqldump;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -28,7 +31,8 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
-	File fileInput;
+	String filenameIn;
+	InputStream fileInput;
 	String fileOutput;
 	JAXBContext jc;
 	
@@ -49,11 +53,17 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		if(fileInputStr==null) {
 			fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
 			if(fileInputStr!=null) {
-				fileInput = new File(JAXBSchemaXMLSerializer.class.getResource(fileInputStr).getFile());
+				filenameIn = fileInputStr;
+				fileInput = JAXBSchemaXMLSerializer.class.getResourceAsStream(fileInputStr);
 			}
 		}
 		else {
-			fileInput = new File(fileInputStr);
+			try {
+				filenameIn = fileInputStr;
+				fileInput = new FileInputStream(new File(fileInputStr));
+			} catch (FileNotFoundException e) {
+				log.warn("File not found: "+fileInputStr);
+			}
 		}
 	}
 	
@@ -96,7 +106,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			for(Table t: sm.getTables()) {
 				t.validateConstraints();
 			}
-			log.info("xml schema model grabbed from '"+fileInput+"'");
+			log.info("xml schema model grabbed from '"+filenameIn+"'");
 			return sm;
 		}
 		catch(Exception e) {

@@ -281,7 +281,10 @@ public class DataDump extends AbstractSQLProc {
 
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
-			if(!hasData) return;
+			if(!hasData) {
+				log.info("table/query '"+tableOrQueryName+"' returned 0 rows");
+				return;
+			}
 			long count = 0;
 			
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
