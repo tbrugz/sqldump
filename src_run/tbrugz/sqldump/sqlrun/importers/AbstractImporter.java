@@ -2,9 +2,13 @@ package tbrugz.sqldump.sqlrun.importers;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -56,6 +60,8 @@ public abstract class AbstractImporter {
 	String importFile = null;
 	String importDir = null;
 	String importFiles = null;
+	String importURL = null;
+	String urlData = null;
 	boolean follow = false;
 	String recordDelimiter = "\r?\n";
 	String insertTable = null;
@@ -81,7 +87,9 @@ public abstract class AbstractImporter {
 	static final String SUFFIX_IMPORTFILE = ".importfile";
 	static final String SUFFIX_IMPORTDIR = ".importdir";
 	static final String SUFFIX_IMPORTFILES = ".importfiles";
-	//XXX: static String SUFFIX_IMPORTFILES //??
+	static final String SUFFIX_IMPORTURL = ".importurl";
+	static final String SUFFIX_URLMESSAGEBODY = ".urlmessagebody";
+	
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
 	static final String SUFFIX_ENCLOSING = ".enclosing";
@@ -98,6 +106,7 @@ public abstract class AbstractImporter {
 		SUFFIX_IMPORTFILE,
 		SUFFIX_IMPORTDIR,
 		SUFFIX_IMPORTFILES,
+		SUFFIX_IMPORTURL,
 		SUFFIX_INSERTTABLE,
 		SUFFIX_INSERTSQL,
 		SUFFIX_RECORDDELIMITER,
@@ -114,6 +123,8 @@ public abstract class AbstractImporter {
 		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
 		importDir = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
 		importFiles = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
+		importURL = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
+		urlData = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
 		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
@@ -187,6 +198,13 @@ public abstract class AbstractImporter {
 				}
 			}
 		}
+		else if(importURL!=null) {
+			log.info("importing URL: "+importURL+
+					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
+			ret = importFile();
+			filesImported++;
+			addMapCount(aggCountsByFailoverId, countsByFailoverId);
+		}
 		else {
 			log.warn("neither '"+SUFFIX_IMPORTFILE+"' nor '"+SUFFIX_IMPORTFILES+"' suffix specified...");
 		}
@@ -220,7 +238,7 @@ public abstract class AbstractImporter {
 		
 		Pattern p = scan.delimiter();
 		log.debug("scan delimiter pattern: "+p);
-		log.info("input file: "+importFile);
+		//log.info("input file: "+importFile);
 		
 		if(follow) {
 			//add shutdown hook
@@ -300,7 +318,7 @@ public abstract class AbstractImporter {
 		}
 		while(follow);
 		
-		fileIS.close(); fileIS = null;
+		if(fileIS!=null) { fileIS.close(); fileIS = null; }
 
 		//show counters
 		long countAll = logCounts(countsByFailoverId, false);
@@ -348,20 +366,27 @@ public abstract class AbstractImporter {
 			return;
 		}
 		
+		//List<String> values = new ArrayList<String>();
+		
 		for(int i=0;i<parts.length;i++) {
 			if(filecol2tabcolMap!=null) {
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
 					int index = filecol2tabcolMap.indexOf(i);
 					stmt.setString(index+1, parts[i]);
+					//values.add(parts[i]);
 					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);						
 				}
 			}
 			else {
 				stmt.setString(i+1, parts[i]);
+				//values.add(parts[i]);
 			}
 			//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
 		}
+		
+		//log.info("insert-values: "+values);
+		
 		//log.info("insert["+processedLines+"/"+importedLines+"]: "+stmtStr);
 		//stmt.addBatch(); //XXX: batch insert?
 		int changedRows = stmt.executeUpdate();
@@ -430,9 +455,12 @@ public abstract class AbstractImporter {
 
 	abstract String[] procLine(String line, long processedLines) throws SQLException;
 	
-	Scanner createScanner() throws FileNotFoundException {
+	Scanner createScanner() throws MalformedURLException, IOException {
 		Scanner scan = null;
-		if(SQLRun.STDIN.equals(importFile)) {
+		if(importURL!=null) {
+			scan = new Scanner(getURLInputStream(importURL, urlData, null), inputEncoding);
+		}
+		else if(SQLRun.STDIN.equals(importFile)) {
 			scan = new Scanner(System.in, inputEncoding);
 		}
 		else {
@@ -452,5 +480,45 @@ public abstract class AbstractImporter {
 		} catch (SQLException e) {
 			log.warn("error commiting: "+e);
 		}
+	}
+	
+	static InputStream getURLInputStream(final String importURL, final String urlData, final String cookiesHeader) throws MalformedURLException, IOException {
+		HttpURLConnection urlconn = (HttpURLConnection) new URL(importURL).openConnection();
+		urlconn.setInstanceFollowRedirects(false);
+		if(cookiesHeader!=null) {
+			urlconn.setRequestProperty("Cookie", cookiesHeader);
+		}
+		if(urlData!=null) {
+			urlconn.setDoOutput(true);
+			Writer w = new OutputStreamWriter( urlconn.getOutputStream() );
+			w.write(urlData);
+			w.flush();
+		}
+		urlconn.connect();
+		//int responseCode = urlconn.getResponseCode();
+		//log.debug("response-code: "+responseCode);
+		String location = urlconn.getHeaderField("Location");
+		if(location!=null) {
+			log.debug("location: "+location);
+			
+			List<String> cookies = urlconn.getHeaderFields().get("Set-Cookie");
+			String cookiesStr = null;
+			if(cookies!=null) {
+				StringBuilder sb = new StringBuilder();
+				boolean is1st = true;
+				for(String c: cookies) {
+					sb.append((is1st?"":"; ")+c.split(";")[0]);
+					is1st = false;
+				}
+				cookiesStr = sb.toString();
+			}
+			
+			if(!location.startsWith("http://") || !location.startsWith("https://")) {
+				location = importURL.substring(0, importURL.lastIndexOf("/")+1) + location;
+				log.debug("redir-location: "+location);
+			}
+			return getURLInputStream(location, urlData, cookiesStr);
+		}
+		return urlconn.getInputStream();
 	}
 }

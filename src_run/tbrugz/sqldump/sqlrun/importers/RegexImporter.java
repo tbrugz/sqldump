@@ -10,18 +10,24 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.Utils;
+
 public class RegexImporter extends AbstractImporter {
 	static final Log log = LogFactory.getLog(RegexImporter.class);
 	
 	static final String SUFFIX_PATTERN = ".pattern";
+	static final String SUFFIX_PATTERNFLAGS = ".patternflags";
+	
 	static final String[] NULL_STR_ARRAY = {};
 	
 	static final String[] REGEX_AUX_SUFFIXES = {
-		SUFFIX_PATTERN
+		SUFFIX_PATTERN,
+		SUFFIX_PATTERNFLAGS
 	};
 
 	String patternStr = null;
 	Pattern pattern = null;
+	int patternFlags = 0;
 	
 	List<Integer> loggedPatternFailoverIds = new ArrayList<Integer>();
 
@@ -29,7 +35,8 @@ public class RegexImporter extends AbstractImporter {
 	public void setImporterProperties(Properties prop, String importerPrefix) {
 		super.setImporterProperties(prop, importerPrefix);
 		patternStr = prop.getProperty(importerPrefix+SUFFIX_PATTERN, patternStr);
-		pattern = Pattern.compile(patternStr);
+		patternFlags = Utils.getPropInt(prop, importerPrefix+SUFFIX_PATTERNFLAGS, patternFlags);
+		pattern = Pattern.compile(patternStr, patternFlags);
 		
 		if(!loggedPatternFailoverIds.contains(failoverId)) {
 			log.info("pattern"+(failoverId>0?"[failover="+failoverId+"]":"")+": "+patternStr);
