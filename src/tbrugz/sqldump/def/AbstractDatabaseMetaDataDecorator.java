@@ -757,17 +757,17 @@ public abstract class AbstractDatabaseMetaDataDecorator implements DatabaseMetaD
 	}
 
 	//since 1.7
-	@Override
+	//@Override
 	public ResultSet getPseudoColumns(String catalog, String schemaPattern,
 			String tableNamePattern, String columnNamePattern)
 			throws SQLException {
-		return metadata.getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
+		return null;//metadata.getPseudoColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 	}
 
 	//since 1.7
-	@Override
+	//@Override
 	public boolean generatedKeyAlwaysReturned() throws SQLException {
-		return metadata.generatedKeyAlwaysReturned();
+		return false;//metadata.generatedKeyAlwaysReturned();
 	}
 	
 }
