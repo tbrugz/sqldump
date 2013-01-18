@@ -17,13 +17,15 @@ import tbrugz.sqldump.util.Utils;
 public class DBMSResources {
 
 	static Log log = LogFactory.getLog(DBMSResources.class);
+
+	static final String DEFAULT_QUOTE_STRING = "\"";
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	
 	String dbId;
 	Properties papp;
 	Properties dbmsSpecificResource = new ParametrizedProperties();
-	String identifierQuoteString = "\"";
+	String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	
 	List<String> dbIds = new ArrayList<String>();
 	
@@ -59,6 +61,8 @@ public class DBMSResources {
 			this.dbId = dbIdTmp;
 			log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId);
 		}
+
+		identifierQuoteString = DEFAULT_QUOTE_STRING;
 		
 		if(dbmd!=null) {
 			try {
@@ -67,6 +71,8 @@ public class DBMSResources {
 				e.printStackTrace();
 			}
 		}
+		//value from dbms-specific.properties::dbid.mysql.sqlquotestring takes precedence  
+		updateIdentifierQuoteString();
 		
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
@@ -76,10 +82,17 @@ public class DBMSResources {
 		if( (newid!=null && newid.equals(res.dbId)) || (newid==res.dbId) ) { return; }
 		
 		log.info("updating dbid: '"+newid+"' [old="+res.dbId+"]");
-		if(res.dbIds.contains(newid)) {	res.dbId = newid; }
+		if(res.dbIds.contains(newid)) {
+			res.dbId = newid;
+			res.updateIdentifierQuoteString();
+		}
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+res.dbId+"' as dbid");
 		}
+	}
+	
+	void updateIdentifierQuoteString() {
+		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", identifierQuoteString);
 	}
 	
 	String detectDbId(DatabaseMetaData dbmd) {
@@ -147,8 +160,6 @@ public class DBMSResources {
 		return instance;
 	}
 
-	static String DEFAULT_QUOTE_STRING = "\"";
-	
 	/* DatabaseMetaData.getIdentifierQuoteString() already does it */
 	public String getIdentifierQuoteString() {
 		return identifierQuoteString;

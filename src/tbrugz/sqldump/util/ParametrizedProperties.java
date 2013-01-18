@@ -46,15 +46,15 @@ public class ParametrizedProperties extends Properties {
 				}
 				loadedPropFiles.put(ff, false);
 				try {
-					log.debug("loading @include: "+ff.getAbsolutePath());
-					this.load(new FileInputStream(ff));
-					log.info("loaded @include: "+ff.getCanonicalPath());
-				} catch (IOException e) {
 					InputStream is = ParametrizedProperties.class.getResourceAsStream(f);
+					log.debug("loading @include resource: "+f);
+					this.load(is);
+					log.info("loaded @include resource: "+f);
+				} catch (IOException e) {
 					try {
-						log.debug("loading @include resource: "+f);
-						this.load(is);
-						log.info("loaded @include resource: "+f);
+						log.debug("loading @include: "+ff.getAbsolutePath());
+						this.load(new FileInputStream(ff));
+						log.info("loaded @include: "+ff.getCanonicalPath());
 					}
 					catch(IOException e2) {
 						log.warn("error loading @include '"+f+"': "+e.getMessage());
