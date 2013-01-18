@@ -68,6 +68,8 @@ public abstract class AbstractImporter {
 	String insertSQL = null;
 	String inputEncoding = DataDumpUtils.CHARSET_UTF8;
 	
+	boolean logMalformedLine = true;
+	
 	int maxFailoverId = 0;
 	FailoverIdSelectionStrategy failoverStrategy = FailoverIdSelectionStrategy.CYCLE; //TODO: property for selecting failover strategy
 	
@@ -97,6 +99,7 @@ public abstract class AbstractImporter {
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_ENCODING = ".encoding";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static final String[] AUX_SUFFIXES = {
@@ -111,6 +114,7 @@ public abstract class AbstractImporter {
 		SUFFIX_INSERTSQL,
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
+		SUFFIX_LOG_MALFORMED_LINE,
 		SUFFIX_X_COMMIT_EACH_X_ROWS
 	};
 	
@@ -130,6 +134,7 @@ public abstract class AbstractImporter {
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, commitEachXrows);
+		logMalformedLine = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
 		
 		//set max failover id!
 		maxFailoverId = getMaxFailoverId();
@@ -297,9 +302,11 @@ public abstract class AbstractImporter {
 						
 						//is last failover-id?
 						if(failoverId == loopStartedWithFailoverId) {
-							log.warn("error processing line "+linecounter
-									+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
-									+e.getMessage());
+							if(logMalformedLine) {
+								log.warn("error processing line "+linecounter
+										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
+										+e.getMessage());
+							}
 							importthisline = false;
 							//break;
 						}
@@ -458,7 +465,7 @@ public abstract class AbstractImporter {
 	Scanner createScanner() throws MalformedURLException, IOException {
 		Scanner scan = null;
 		if(importURL!=null) {
-			scan = new Scanner(getURLInputStream(importURL, urlData, null), inputEncoding);
+			scan = new Scanner(getURLInputStream(importURL, urlData, null, 0), inputEncoding);
 		}
 		else if(SQLRun.STDIN.equals(importFile)) {
 			scan = new Scanner(System.in, inputEncoding);
@@ -468,7 +475,6 @@ public abstract class AbstractImporter {
 				fileIS = new BufferedInputStream(new FileInputStream(importFile));
 			}
 			scan = new Scanner(fileIS, inputEncoding);
-			//scan = new Scanner(new File(importFile), inputEncoding);
 		}
 		scan.useDelimiter(recordDelimiter);
 		return scan;
@@ -482,7 +488,13 @@ public abstract class AbstractImporter {
 		}
 	}
 	
-	static InputStream getURLInputStream(final String importURL, final String urlData, final String cookiesHeader) throws MalformedURLException, IOException {
+	static final int MAX_LEVEL = 5;
+	
+	static InputStream getURLInputStream(final String importURL, final String urlData, final String cookiesHeader, final int level)
+			throws MalformedURLException, IOException {
+		if(level>MAX_LEVEL) {
+			throw new RuntimeException("max level redirection reached ("+MAX_LEVEL+")");
+		}
 		HttpURLConnection urlconn = (HttpURLConnection) new URL(importURL).openConnection();
 		urlconn.setInstanceFollowRedirects(false);
 		if(cookiesHeader!=null) {
@@ -499,7 +511,7 @@ public abstract class AbstractImporter {
 		//log.debug("response-code: "+responseCode);
 		String location = urlconn.getHeaderField("Location");
 		if(location!=null) {
-			log.debug("location: "+location);
+			log.info("location: "+location);
 			
 			List<String> cookies = urlconn.getHeaderFields().get("Set-Cookie");
 			String cookiesStr = null;
@@ -517,7 +529,7 @@ public abstract class AbstractImporter {
 				location = importURL.substring(0, importURL.lastIndexOf("/")+1) + location;
 				log.debug("redir-location: "+location);
 			}
-			return getURLInputStream(location, urlData, cookiesStr);
+			return getURLInputStream(location, urlData, cookiesStr, level+1);
 		}
 		return urlconn.getInputStream();
 	}
