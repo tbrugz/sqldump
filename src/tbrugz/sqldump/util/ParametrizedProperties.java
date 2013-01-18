@@ -26,6 +26,9 @@ public class ParametrizedProperties extends Properties {
 	public synchronized void load(final InputStream inStream) throws IOException {
 		//TODOne: load in temp Properties; load from @include directive; load from temp Properties
 		Properties ptmp = new Properties();
+		if(inStream==null) {
+			throw new IOException("input stream could not be read");
+		}
 		ptmp.load(inStream); //should be in the beggining so that getProperty(DIRECTIVE_INCLUDE) works
 		
 		String includes = ptmp.getProperty(DIRECTIVE_INCLUDE);
@@ -45,16 +48,17 @@ public class ParametrizedProperties extends Properties {
 				try {
 					log.debug("loading @include: "+ff.getAbsolutePath());
 					this.load(new FileInputStream(ff));
-					log.info("loaded @include: "+ff.getAbsolutePath());
+					log.info("loaded @include: "+ff.getCanonicalPath());
 				} catch (IOException e) {
 					InputStream is = ParametrizedProperties.class.getResourceAsStream(f);
 					try {
+						log.debug("loading @include resource: "+f);
 						this.load(is);
 						log.info("loaded @include resource: "+f);
 					}
 					catch(IOException e2) {
-						log.warn("error loading @include '"+ff.getAbsolutePath()+"': "+e.getMessage());
-						log.debug("error loading @include: "+ff.getAbsolutePath(), e);
+						log.warn("error loading @include '"+f+"': "+e.getMessage());
+						log.debug("error loading @include: "+f, e);
 					}
 				}
 			}

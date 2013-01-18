@@ -105,8 +105,9 @@ public class SQLDump {
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 	
-	public static final String PARAM_PROPERTIES_FILENAME = "-propfile="; 
-	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop="; 
+	public static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
+	public static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
+	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
 	
 	static Log log = LogFactory.getLog(SQLDump.class);
 	
@@ -118,12 +119,18 @@ public class SQLDump {
 		log.info("init...");
 		boolean useSysPropSetted = false;
 		boolean propFilenameSetted = false;
+		boolean propResourceSetted = false;
 		//parse args
 		String propFilename = PROPERTIES_FILENAME;
+		String propResource = null;
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
 				propFilenameSetted = true;
+			}
+			else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
+				propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
+				propResourceSetted = true;
 			}
 			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
 				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
@@ -139,20 +146,34 @@ public class SQLDump {
 			useSysPropSetted = true;
 		}
 		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
-		File propFile = new File(propFilename);
 		
-		//init properties
-		File propFileDir = propFile.getAbsoluteFile().getParentFile();
-		log.debug("propfile base dir: "+propFileDir);
-		papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-
-		log.info("loading properties: "+propFile);
+		InputStream propIS = null;
+		if(propResourceSetted) {
+			//XXX: set PROP_PROPFILEBASEDIR for resources?
+			
+			log.info("loading properties resource: "+propResource);
+			propIS = SQLDump.class.getResourceAsStream(propResource);
+		}
+		else {
+			File propFile = new File(propFilename);
+			
+			//init properties
+			File propFileDir = propFile.getAbsoluteFile().getParentFile();
+			log.debug("propfile base dir: "+propFileDir);
+			papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+	
+			log.info("loading properties: "+propFile);
+			propIS = new FileInputStream(propFile);
+		}
 		try {
-			papp.load(new FileInputStream(propFile));
+			papp.load(propIS);
 		}
 		catch(FileNotFoundException e) {
-			if(propFilenameSetted) {
-				log.warn("prop file not found: "+propFile);
+			if(propResourceSetted) {
+				log.warn("prop resource not found: "+propResource);
+			}
+			else if(propFilenameSetted) {
+				log.warn("prop file not found: "+propFilename);
 			}
 		}
 		
