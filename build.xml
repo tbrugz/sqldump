@@ -72,7 +72,7 @@
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on" target="1.6">
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
