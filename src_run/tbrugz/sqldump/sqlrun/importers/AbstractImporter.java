@@ -62,6 +62,7 @@ public abstract class AbstractImporter {
 	String importFiles = null;
 	String importURL = null;
 	String urlData = null;
+	String urlMethod = null;
 	boolean follow = false;
 	String recordDelimiter = "\r?\n";
 	String insertTable = null;
@@ -91,6 +92,7 @@ public abstract class AbstractImporter {
 	static final String SUFFIX_IMPORTFILES = ".importfiles";
 	static final String SUFFIX_IMPORTURL = ".importurl";
 	static final String SUFFIX_URLMESSAGEBODY = ".urlmessagebody";
+	static final String SUFFIX_URLMETHOD = ".urlmethod";
 	
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
@@ -129,6 +131,7 @@ public abstract class AbstractImporter {
 		importFiles = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
 		importURL = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
 		urlData = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
+		urlMethod = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
 		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
@@ -462,10 +465,12 @@ public abstract class AbstractImporter {
 
 	abstract String[] procLine(String line, long processedLines) throws SQLException;
 	
+	static Map<String,String> cookiesHeader = new HashMap<String, String>();
+	
 	Scanner createScanner() throws MalformedURLException, IOException {
 		Scanner scan = null;
 		if(importURL!=null) {
-			scan = new Scanner(getURLInputStream(importURL, urlData, null, 0), inputEncoding);
+			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, 0), inputEncoding);
 		}
 		else if(SQLRun.STDIN.equals(importFile)) {
 			scan = new Scanner(System.in, inputEncoding);
@@ -490,18 +495,23 @@ public abstract class AbstractImporter {
 	
 	static final int MAX_LEVEL = 5;
 	
-	static InputStream getURLInputStream(final String importURL, final String urlData, final String cookiesHeader, final int level)
+	static InputStream getURLInputStream(final String importURL, final String urlMethod, final String urlData, final Map<String,String> cookiesHeader, final int level)
 			throws MalformedURLException, IOException {
 		if(level>MAX_LEVEL) {
 			throw new RuntimeException("max level redirection reached ("+MAX_LEVEL+")");
 		}
 		HttpURLConnection urlconn = (HttpURLConnection) new URL(importURL).openConnection();
 		urlconn.setInstanceFollowRedirects(false);
+		if(urlMethod!=null) {
+			urlconn.setRequestMethod(urlMethod);
+		}
 		if(cookiesHeader!=null) {
-			urlconn.setRequestProperty("Cookie", cookiesHeader);
+			urlconn.setRequestProperty("Cookie", getCookieString(cookiesHeader));
 		}
 		if(urlData!=null) {
+			log.info("urldata["+urlMethod+"]: "+urlData);
 			urlconn.setDoOutput(true);
+			urlconn.setFixedLengthStreamingMode(urlData.length());
 			Writer w = new OutputStreamWriter( urlconn.getOutputStream() );
 			w.write(urlData);
 			w.flush();
@@ -514,23 +524,29 @@ public abstract class AbstractImporter {
 			log.info("location: "+location);
 			
 			List<String> cookies = urlconn.getHeaderFields().get("Set-Cookie");
-			String cookiesStr = null;
 			if(cookies!=null) {
-				StringBuilder sb = new StringBuilder();
-				boolean is1st = true;
 				for(String c: cookies) {
-					sb.append((is1st?"":"; ")+c.split(";")[0]);
-					is1st = false;
+					String[] cookie = c.split(";")[0].split("=");
+					cookiesHeader.put(cookie[0], cookie[1]);
 				}
-				cookiesStr = sb.toString();
 			}
 			
 			if(!location.startsWith("http://") || !location.startsWith("https://")) {
 				location = importURL.substring(0, importURL.lastIndexOf("/")+1) + location;
 				log.debug("redir-location: "+location);
 			}
-			return getURLInputStream(location, urlData, cookiesStr, level+1);
+			return getURLInputStream(location, urlMethod, urlData, cookiesHeader, level+1);
 		}
 		return urlconn.getInputStream();
+	}
+	
+	static String getCookieString(final Map<String,String> cookiesHeader) {
+		StringBuilder sb = new StringBuilder();
+		boolean is1st = true;
+		for(String key: cookiesHeader.keySet()) {
+			sb.append((is1st?"":"; ")+key+"="+cookiesHeader.get(key));
+			is1st = false;
+		}
+		return sb.toString();
 	}
 }
