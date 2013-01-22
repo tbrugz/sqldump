@@ -72,6 +72,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_LOG_EACH_X_ROWS = "sqldump.datadump.logeachxrows";
 	static final String PROP_DATADUMP_LOG_1ST_ROW = "sqldump.datadump.log1strow";
 	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
+	static final String PROP_DATADUMP_WRITEAPPEND = "sqldump.datadump.writeappend";
 
 	//defaults
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
@@ -298,6 +299,7 @@ public class DataDump extends AbstractSQLProc {
 			String partitionByStrId = "";
 			
 			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
+			boolean writeAppend = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEAPPEND, false);
 			
 			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			boolean logNumberOfOpenedWriters = true;
@@ -374,7 +376,7 @@ public class DataDump extends AbstractSQLProc {
 							}
 							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
-							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM);
+							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM, writeAppend);
 							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 								
 							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
@@ -513,7 +515,7 @@ public class DataDump extends AbstractSQLProc {
 		return key.substring(0, key.indexOf("$$"));
 	}
 	
-	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM) throws UnsupportedEncodingException, FileNotFoundException {
+	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
 		String key = getWriterMapKey(fname, partitionBy);
 		if(! writersOpened.containsKey(key)) {
 			File f = new File(fname);
@@ -529,7 +531,7 @@ public class DataDump extends AbstractSQLProc {
 			encoder.onMalformedInput(CodingErrorAction.REPLACE);
 			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			
-			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, false), encoder); //XXX: false: never append
+			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, append), encoder);
 			writeBOMifNeeded(w, charset, writeBOM);
 			writersOpened.put(key, w);
 			//filesOpened.add(fname);

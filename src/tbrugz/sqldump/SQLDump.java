@@ -97,6 +97,7 @@ public class SQLDump {
 	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
 	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
 	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
+	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";
 
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
@@ -218,7 +219,9 @@ public class SQLDump {
 		//class names
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
+		String processingClassesAfterDumpersStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
 		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+		
 		if(grabClassName!=null && dumpSchemaClasses==null) {
 			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 		}
@@ -235,8 +238,7 @@ public class SQLDump {
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
-					sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
-					DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
+					sdd.setupConnection();
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
@@ -264,23 +266,7 @@ public class SQLDump {
 		
 		//processing classes
 		if(processingClassesStr!=null) {
-			if(sdd.conn==null) {
-				sdd.conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, sdd.papp);
-				DBMSResources.instance().updateMetaData(sdd.conn.getMetaData());
-			}
-			String processingClasses[] = processingClassesStr.split(",");
-			for(String procClass: processingClasses) {
-				AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
-				if(sqlproc!=null) {
-					sqlproc.setProperties(sdd.papp);
-					sqlproc.setConnection(sdd.conn);
-					sqlproc.setSchemaModel(sm);
-					sqlproc.process();
-				}
-				else {
-					log.warn("Error initializing processing class: '"+procClass+"'");
-				}
-			}
+			sdd.processClasses(processingClassesStr, sm);
 		}
 		
 		//dumping model
@@ -300,11 +286,40 @@ public class SQLDump {
 		else {
 			log.debug("no schema dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
 		}
+
+		//processing classes after dumpers
+		if(processingClassesAfterDumpersStr!=null) {
+			sdd.processClasses(processingClassesAfterDumpersStr, sm);
+		}
 		
 		}
 		finally {
 			log.info("closing connection: "+sdd.conn);
 			sdd.end();
+		}
+	}
+	
+	void setupConnection() throws ClassNotFoundException, SQLException, NamingException {
+		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp);
+		DBMSResources.instance().updateMetaData(conn.getMetaData());
+	}
+	
+	void processClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
+		if(conn==null) {
+			setupConnection();
+		}
+		String processingClasses[] = processingClassesStr.split(",");
+		for(String procClass: processingClasses) {
+			AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+			if(sqlproc!=null) {
+				sqlproc.setProperties(papp);
+				sqlproc.setConnection(conn);
+				sqlproc.setSchemaModel(sm);
+				sqlproc.process();
+			}
+			else {
+				log.warn("Error initializing processing class: '"+procClass+"'");
+			}
 		}
 	}
 	

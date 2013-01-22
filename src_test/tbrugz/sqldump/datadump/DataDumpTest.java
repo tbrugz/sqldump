@@ -24,8 +24,8 @@ public class DataDumpTest {
 	public void testEncoding() throws IOException {
 		//DataDump dd = new DataDump();
 		Map<String, Writer> map = new HashMap<String, Writer>();
-		DataDump.isSetNewFilename(map, DIROUT+"t1-utf8.txt", "", DataDumpUtils.CHARSET_UTF8, null);
-		DataDump.isSetNewFilename(map, DIROUT+"t1-iso8859.txt", "", DataDumpUtils.CHARSET_ISO_8859_1, null); //ISO8859_1
+		DataDump.isSetNewFilename(map, DIROUT+"t1-utf8.txt", "", DataDumpUtils.CHARSET_UTF8, null, false);
+		DataDump.isSetNewFilename(map, DIROUT+"t1-iso8859.txt", "", DataDumpUtils.CHARSET_ISO_8859_1, null, false); //ISO8859_1
 		for(String s: map.keySet()) {
 			map.get(s).write("Pôrto Alégre");
 			map.get(s).close();
