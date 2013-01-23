@@ -69,8 +69,8 @@ class WeightedEdge extends Edge {
  * XXXxx: option: 2 queries: one for nodes & other for edges
  *      new query: OBJECT, OBJECT_TYPE, OBJECT_LABEL; remove from current query: SOURCE_TYPE, TARGET_TYPE
  *      'label/title node'?
- * XXX: *_TYPE columns should be optional
- * XXX: add optional OBJECT_WIDTH, OBJECT_HEIGHT
+ * XXXdone: *_TYPE columns should be optional
+ * XXXdone: add optional OBJECT_WIDTH, OBJECT_HEIGHT
  */
 public class ResultSet2GraphML extends AbstractSQLProc {
 	
@@ -81,24 +81,25 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 
 	//node cols
 	static final String COL_OBJECT = "OBJECT";
-	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //optional!
 	static final String COL_OBJECT_LABEL = "OBJECT_LABEL";
-	static final String COL_OBJECT_X = "OBJECT_X";
-	static final String COL_OBJECT_Y = "OBJECT_Y";
-	static final String COL_OBJECT_WIDTH = "OBJECT_WIDTH";
-	static final String COL_OBJECT_HEIGHT = "OBJECT_HEIGHT";
-	static final String COL_OBJECT_DESCRIPTION = "OBJECT_DESC"; //optional!
+	static final String COL_OBJECT_TYPE = "OBJECT_TYPE"; //optional
+	static final String COL_OBJECT_X = "OBJECT_X"; //optional
+	static final String COL_OBJECT_Y = "OBJECT_Y"; //optional
+	static final String COL_OBJECT_WIDTH = "OBJECT_WIDTH"; //optional
+	static final String COL_OBJECT_HEIGHT = "OBJECT_HEIGHT"; //optional
+	static final String COL_OBJECT_DESCRIPTION = "OBJECT_DESC"; //optional
 	
 	//edge cols
 	static final String COL_SOURCE = "SOURCE";
 	static final String COL_TARGET = "TARGET";
-	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //TODOne should be optional
-	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //TODOne should be optional
+	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //optional
+	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //optional
 	
 	//edge-only cols
-	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional!
-	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //optional!
+	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional
+	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //optional
 	
+	//required cols for node, edge
 	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_LABEL };
 	static final String[] EDGE_COLS = { COL_SOURCE, COL_TARGET };
 	
@@ -393,7 +394,12 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				}
 			}
 			
-			String outputfile = prop.getProperty("sqldump.graphmlquery."+qid+".outputfile");
+			String propOutFile = "sqldump.graphmlquery."+qid+".outputfile";
+			String outputfile = prop.getProperty(propOutFile);
+			if(outputfile==null) {
+				log.error("output file not defined (prop '"+propOutFile+"')");
+				return;
+			}
 			
 			logsql.info("edges sql: "+sqlEdges);
 			Statement st = conn.createStatement();
