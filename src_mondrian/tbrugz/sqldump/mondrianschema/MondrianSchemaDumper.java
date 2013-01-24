@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.mondrian.xsdmodel.Hierarchy;
 import tbrugz.mondrian.xsdmodel.Hierarchy.Join;
 import tbrugz.mondrian.xsdmodel.Hierarchy.Level;
+import tbrugz.mondrian.xsdmodel.Hierarchy.Level.Closure;
 import tbrugz.mondrian.xsdmodel.PrivateDimension;
 import tbrugz.mondrian.xsdmodel.Schema;
 import tbrugz.sqldump.dbmodel.Column;
@@ -43,6 +44,18 @@ class HierarchyLevelData {
 	//String joinPKTable;
 	String joinLeftKey;
 	String joinRightKey;
+	
+	RecursiveHierData recursiveHierarchy;
+}
+
+class RecursiveHierData {
+	String levelParentColumn;
+	String levelNullParentValue;
+
+	// closure properties
+	String closureTable;
+	String closureParentColumn;
+	String closureChildColumn;
 }
 
 /*
@@ -615,8 +628,27 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		level.joinRightKey = fk.getPkColumns().iterator().next();
 		//level.joinPKTable = fk.pkTable;
 		level.levelTable = fk.getPkTable();
+
+		// parent-child hierarchies properties
+		String levelParentColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelparentcol");
+		if(levelParentColumn!=null) {
+			level.recursiveHierarchy = new RecursiveHierData();
+			level.recursiveHierarchy.levelParentColumn = levelParentColumn;
+			
+			String levelNullParentVal = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnullparentvalue");
+			if(levelNullParentVal!=null) {
+				level.recursiveHierarchy.levelNullParentValue = levelNullParentVal;
+			}
+			String levelClosure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".closure");
+			if(levelClosure!=null) {
+				String[] parts = levelClosure.split(":"); //table:parent-column:child-column
+				level.recursiveHierarchy.closureTable = parts[0];
+				level.recursiveHierarchy.closureParentColumn = parts[1];
+				level.recursiveHierarchy.closureChildColumn = parts[2];
+			}
+		}
 		
-		log.debug("fkk: "+fk.toStringFull());
+		log.debug("fk: "+fk.toStringFull());
 		
 		thisLevels.add(level);
 		//levels.add(level);
@@ -730,6 +762,22 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		lret.setLevelType(l.levelType);
 		lret.setTable(sqlIdDecorator.get( l.levelTable ));
 		//XXX: lret.setNameExpression(value)
+		if(l.recursiveHierarchy!=null) {
+			lret.setParentColumn(l.recursiveHierarchy.levelParentColumn);
+			if(l.recursiveHierarchy.levelNullParentValue!=null) {
+				lret.setNullParentValue(l.recursiveHierarchy.levelNullParentValue);
+			}
+			if(l.recursiveHierarchy.closureTable!=null) {
+				Closure closure = new Closure();
+				tbrugz.mondrian.xsdmodel.Table t = new tbrugz.mondrian.xsdmodel.Table();
+				t.setName(l.recursiveHierarchy.closureTable);
+				closure.setTable(t);
+				closure.setParentColumn(l.recursiveHierarchy.closureParentColumn);
+				closure.setChildColumn(l.recursiveHierarchy.closureChildColumn);
+				lret.setClosure(closure);
+			}
+			
+		}
 		return lret;
 	}
 	
