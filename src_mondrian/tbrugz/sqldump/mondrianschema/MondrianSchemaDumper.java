@@ -103,6 +103,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	public static final String PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS = "sqldump.mondrianschema.defaultaggregators";
 	public static final String PROP_MONDRIAN_SCHEMA_SQLID_DECORATOR = "sqldump.mondrianschema.sqliddecorator";
 	public static final String PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE = "sqldump.mondrianschema.factcountmeasure";
+	public static final String PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER = "sqldump.mondrianschema.detectparentchild";
 
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
@@ -124,6 +125,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	boolean ignoreCubesWithNoDimension = true;
 	boolean hierarchyHasAll = true;
 	boolean addAllDegenerateDimCandidates = false;
+	boolean detectParentChildHierarchies = true;
 	
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
@@ -185,6 +187,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		ignoreCubesWithNoDimension = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION, ignoreCubesWithNoDimension);
 		hierarchyHasAll = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_HIERHASALL, hierarchyHasAll);
 		addAllDegenerateDimCandidates = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES, addAllDegenerateDimCandidates);
+		detectParentChildHierarchies = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER, detectParentChildHierarchies);
 
 		List<String> defaultAggTmp = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS, ",");
 		if(defaultAggTmp==null) {
@@ -585,19 +588,11 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		}
 	}
 	
-	void procHierRecursive(SchemaModel schemaModel, Schema.Cube cube, PrivateDimension dim, FK fk, String schemaName, 
-			String pkTableName, List<HierarchyLevelData> levelsData) {
-		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
-		thisLevels.addAll(levelsData);
-		boolean isLevelLeaf = true;
-
-		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
-		if(pkTable==null) {
-			log.warn("table not found: "+schemaName+"."+fk.getPkTable());
-		}
-		
+	HierarchyLevelData getHierLevelData(Table pkTable, FK fk) {
 		HierarchyLevelData level = new HierarchyLevelData();
-		level.levelName = pkTableName;
+		level.levelName = pkTable.getName();
+		String schemaName = pkTable.getSchemaName();
+		
 		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnamecol");
 		if(levelNameColumn!=null) {
 			if(pkTable.getColumn(levelNameColumn)!=null) {
@@ -618,9 +613,9 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 					}
 				}
 			}
-			else {
+			/*else {
 				log.warn("table not found [2]: "+schemaName+"."+fk.getPkTable());
-			}
+			}*/
 		}
 		level.levelColumn = fk.getPkColumns().iterator().next();
 		level.levelType = "Regular";
@@ -635,26 +630,57 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 			level.recursiveHierarchy = new RecursiveHierData();
 			level.recursiveHierarchy.levelParentColumn = levelParentColumn;
 			
-			String levelNullParentVal = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnullparentvalue");
-			if(levelNullParentVal!=null) {
-				level.recursiveHierarchy.levelNullParentValue = levelNullParentVal;
-			}
-			String levelClosure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".closure");
-			if(levelClosure!=null) {
-				String[] parts = levelClosure.split(":"); //table:parent-column:child-column
-				level.recursiveHierarchy.closureTable = parts[0];
-				level.recursiveHierarchy.closureParentColumn = parts[1];
-				level.recursiveHierarchy.closureChildColumn = parts[2];
-			}
+			getParentChildHierInfo(level);
 		}
 		
 		log.debug("fk: "+fk.toStringFull());
 		
-		thisLevels.add(level);
-		//levels.add(level);
+		return level;
+	}
+	
+	void getParentChildHierInfo(HierarchyLevelData level) {
+		String levelNullParentVal = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnullparentvalue");
+		if(levelNullParentVal!=null) {
+			level.recursiveHierarchy.levelNullParentValue = levelNullParentVal;
+		}
+		String levelClosure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".closure");
+		if(levelClosure!=null) {
+			String[] parts = levelClosure.split(":"); //table:parent-column:child-column
+			level.recursiveHierarchy.closureTable = parts[0];
+			level.recursiveHierarchy.closureParentColumn = parts[1];
+			level.recursiveHierarchy.closureChildColumn = parts[2];
+		}
+	}
+	
+	void procHierRecursive(SchemaModel schemaModel, Schema.Cube cube, PrivateDimension dim, FK fk, String schemaName, 
+			String pkTableName, List<HierarchyLevelData> levelsData) {
+		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
+		thisLevels.addAll(levelsData);
+		boolean isLevelLeaf = true;
+
+		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
+		if(pkTable==null) {
+			log.warn("table not found: "+schemaName+"."+fk.getPkTable());
+		}
+		
+		HierarchyLevelData getHierLevelData = getHierLevelData(pkTable, fk);
+		thisLevels.add(getHierLevelData);
 
 		for(FK fkInt: schemaModel.getForeignKeys()) {
-			if(fkInt.getFkTable().equals(pkTableName) && (fkInt.getFkColumns().size()==1)) {
+			if(fkInt.getFkTable().equals(pkTableName) && fkInt.getPkTable().equals(pkTableName)) {
+				//XXX auto (parent-child?) relationship
+				if(detectParentChildHierarchies && fkInt.getFkColumns().size()==1) {
+					if(getHierLevelData.recursiveHierarchy==null) {
+						getHierLevelData.recursiveHierarchy = new RecursiveHierData();
+					}
+					if(getHierLevelData.recursiveHierarchy.levelParentColumn==null) {
+						getHierLevelData.recursiveHierarchy.levelParentColumn = fkInt.getFkColumns().get(0);
+					}
+					getParentChildHierInfo(getHierLevelData);
+				}
+				
+			}
+			else if(fkInt.getFkTable().equals(pkTableName) && (fkInt.getFkColumns().size()==1)) {
 				isLevelLeaf = false;
 				procHierRecursive(schemaModel, cube, dim, fkInt, schemaName, fkInt.getPkTable(), thisLevels);
 				//isLeaf = false;
