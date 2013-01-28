@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,18 +17,6 @@ import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax {
 	
-	static final Class<?>[] arr = {
-		InsertIntoDataDump.class,
-		CSVDataDump.class,
-		XMLDataDump.class,
-		HTMLDataDump.class,
-		JSONDataDump.class,
-		FFCDataDump.class,
-		UpdateByPKDataDump.class,
-		BlobDataDump.class,
-		Turtle.class,
-	};
-	
 	public static final String DEFAULT_NULL_VALUE = "";
 	
 	public DateFormat dateFormatter;
@@ -37,10 +24,6 @@ public abstract class DumpSyntax {
 	public NumberFormat floatFormatter;
 	
 	public String nullValueStr = DEFAULT_NULL_VALUE;
-	
-	public static List<Class<? extends DumpSyntax>> getSyntaxes() {
-		return Arrays.asList((Class<? extends DumpSyntax>[])arr);
-	}
 	
 	public abstract void procProperties(Properties prop);
 

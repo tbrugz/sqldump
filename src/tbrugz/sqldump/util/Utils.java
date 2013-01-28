@@ -396,7 +396,20 @@ public class Utils {
 			Class<?> c = Class.forName(className);
 			return getClassInstance(c);
 		} catch (ClassNotFoundException e) {
-			log.debug("class not found: "+e.getMessage(), e);
+			log.debug("class not found: "+e);
+		}
+		return null;
+	}
+
+	public static Class<?> getClassWithinPackages(String className, String... packages) {
+		for(String pkg: packages) {
+			try {
+				String prepend = pkg!=null?pkg+".":"";
+				Class<?> c = Class.forName(prepend+className);
+				return c;
+			} catch (ClassNotFoundException e) {
+				log.debug("class not found: "+e);
+			}
 		}
 		return null;
 	}

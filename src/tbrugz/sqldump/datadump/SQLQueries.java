@@ -208,7 +208,7 @@ public class SQLQueries extends AbstractSQLProc {
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		for(String syntax: syntaxArr) {
 			boolean syntaxAdded = false;
-			for(Class<? extends DumpSyntax> dsc: DumpSyntax.getSyntaxes()) {
+			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
 					ds.procProperties(prop);
