@@ -63,6 +63,7 @@ class WeightedEdge extends Edge {
 	public void setWidth(Double width) {
 		this.width = width;
 	}
+	
 }
 
 /*
@@ -94,6 +95,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static final String COL_TARGET = "TARGET";
 	static final String COL_EDGE_TYPE = "EDGE_TYPE"; //optional
 	static final String COL_EDGE_WIDTH = "EDGE_WIDTH"; //optional
+	static final String COL_EDGE_LABEL = "EDGE_LABEL"; //optional
 	
 	//edge-only cols
 	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional
@@ -183,6 +185,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		boolean hasTargetType = false;
 		boolean hasEdgeWidth = false;
 		boolean hasEdgeType = false;
+		boolean hasEdgeLabel = false;
 		if(edgeOnlyStrategy) {
 			//List<String> newAllCols = new ArrayList<String>();
 			//newAllCols.addAll(allCols); newAllCols.addAll(Arrays.asList(EDGEONLY_XTRA_COLS));
@@ -192,6 +195,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		}
 		hasEdgeWidth = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_WIDTH, qid);
 		hasEdgeType = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_TYPE, qid);
+		hasEdgeLabel = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_LABEL, qid);
 		if(!hasAllColumns(rsEdges.getMetaData(), allCols)) { return null; }
 		
 		while(rsEdges.next()) {
@@ -231,7 +235,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			if(hasEdgeWidth) {
 				edgeWidth = rsEdges.getDouble(COL_EDGE_WIDTH);
-				edge.setName(nf.format(edgeWidth));
+				if(!hasEdgeLabel) {
+					edge.setName(nf.format(edgeWidth));
+				}
 				edge.setWidth(edgeWidth);
 
 				double width = useAbsolute? Math.abs(edgeWidth) : edgeWidth;
@@ -240,6 +246,11 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			if(hasEdgeType) {
 				edgeType = rsEdges.getString(COL_EDGE_TYPE);
+			}
+			if(hasEdgeLabel) {
+				edge.setName(rsEdges.getString(COL_EDGE_LABEL) 
+					//+ ((edge.getName()!=null)?" / "+edge.getName():"")
+					);
 			}
 			edge.setSource(source);
 			edge.setTarget(target);
