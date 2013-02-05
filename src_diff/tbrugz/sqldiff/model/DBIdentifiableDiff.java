@@ -39,7 +39,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
 			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"drop "
-					+ DBIdentifiable.getType4Diff(previousIdent)+" "+(previousIdent.getSchemaName()!=null?previousIdent.getSchemaName()+".":"")+previousIdent.getName()
+					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+(previousIdent.getSchemaName()!=null?previousIdent.getSchemaName()+".":"")+previousIdent.getName()
 					+ (addComments?getComment(ident, "new: "):"");
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
@@ -79,7 +79,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	static String getComment(DBIdentifiable dbident, String comment) {
 		if(dbident==null) return "";
 		return "\n/* "+comment
-				+ DBIdentifiable.getType4Diff(dbident)+" "
+				+ DBIdentifiable.getType4Diff(dbident).desc()+" "
 				+ (dbident.getSchemaName()!=null?dbident.getSchemaName()+".":"")+dbident.getName()
 				+ " */";
 	}

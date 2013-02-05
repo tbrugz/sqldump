@@ -75,6 +75,7 @@ public abstract class DBIdentifiable {
 	//used for 'DROP' statements
 	public static DBObjectType getType4Diff(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
+		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
