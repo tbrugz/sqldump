@@ -18,6 +18,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.CategorizedOut;
 
 //XXX: should SchemaDiff implement Diff?
@@ -57,6 +58,8 @@ public class SchemaDiff implements Diff {
 		if(modelOrig.getTables().size()>0) {
 			
 		for(Table tOrig: modelOrig.getTables()) {
+			if(! tOrig.getType().equals(TableType.TABLE)) continue;
+			
 			Table tNew = (Table) findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
 				//if new table doesn't exist, drop old
@@ -247,13 +250,14 @@ public class SchemaDiff implements Diff {
 		//TODO: executables: do not dump extra ";"
 		log.info("output other diffs...");
 		for(DBIdentifiableDiff dbid: dbidDiffs) {
-			switch(DBIdentifiable.getType(dbid.ident)) {
+			DBIdentifiable dbident = dbid.ident();
+			switch(DBIdentifiable.getType(dbident)) {
 			case EXECUTABLE:
 			case TRIGGER:
-				out.categorizedOut(dbid.getDiff()+"\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+				out.categorizedOut(dbid.getDiff()+"\n", dbident.getSchemaName(), DBIdentifiable.getType4Diff(dbident).toString());
 				break;
 			default:
-				out.categorizedOut(dbid.getDiff()+";\n", dbid.ident.getSchemaName(), DBIdentifiable.getType4Diff(dbid.ident).toString());
+				out.categorizedOut(dbid.getDiff()+";\n", dbident.getSchemaName(), DBIdentifiable.getType4Diff(dbident).toString());
 			}
 		}
 	} 

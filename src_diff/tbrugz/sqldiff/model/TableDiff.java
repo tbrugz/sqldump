@@ -92,7 +92,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getName(), newTable.getName());
 		//FIXedME: schemaname dumps as null
 		for(int i=0;i<dbiddiffs.size();i++) {
-			dbiddiffs.get(i).ident.setSchemaName(newTable.getSchemaName());
+			dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
 		}
 		diffs.addAll(dbiddiffs);
 		
@@ -113,19 +113,19 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {
 					log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
-					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origOwnerTableName));
-					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newOwnerTableName));
+					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
+					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
 				}
 			}
 			else {
 				log.debug("drop "+objType+": orig: "+cOrig);
-				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, origOwnerTableName));
+				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, null, origOwnerTableName));
 			}
 		}
 		for(DBIdentifiable cNew: listNew) {
 			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
 			log.debug("add "+objType+": new: "+cNew);
-			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cNew, newOwnerTableName));
+			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, null, cNew, newOwnerTableName));
 		}
 	}
 	
