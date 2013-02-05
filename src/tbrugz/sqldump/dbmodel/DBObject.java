@@ -24,6 +24,19 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 		return name.compareTo(o.name);
 	}
 	
+	public String getQualifiedName() {
+		return (schemaName!=null?schemaName+".":"")+name;
+	}
+
+	public String getFinalQualifiedName() {
+		return getFinalQualifiedName(true);
+	}
+	
+	public String getFinalQualifiedName(boolean dumpschema) {
+		return ((dumpschema && schemaName!=null)?
+				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
+	}
+	
 	//XXX: move to DBIdentifiable?
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {
