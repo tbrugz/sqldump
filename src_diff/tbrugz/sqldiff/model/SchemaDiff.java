@@ -156,33 +156,21 @@ public class SchemaDiff implements Diff {
 	}
 	
 	static void logInfo(SchemaDiff diff) {
-		/*log.info("tableDiffs....................: "+diff.tableDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.tableDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.tableDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.tableDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.tableDiffs).size());
-		log.info("tableColumnDiffs..............: "+diff.columnDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.columnDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.columnDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.columnDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.columnDiffs).size());
-		log.info("dbIdentifiableDiffs...........: "+diff.dbidDiffs.size());
-		log.info("  add.........................: "+SQLDiff.getDiffOfChangeType(ChangeType.ADD, diff.dbidDiffs).size());
-		log.info("  alter.......................: "+SQLDiff.getDiffOfChangeType(ChangeType.ALTER, diff.dbidDiffs).size());
-		log.info("  rename......................: "+SQLDiff.getDiffOfChangeType(ChangeType.RENAME, diff.dbidDiffs).size());
-		log.info("  drop........................: "+SQLDiff.getDiffOfChangeType(ChangeType.DROP, diff.dbidDiffs).size());*/
-		logInfoByObjectAndChangeType(diff.tableDiffs);
-		logInfoByObjectAndChangeType(diff.columnDiffs);
-		logInfoByObjectAndChangeType(diff.dbidDiffs);
+		int maxNameSize = getMaxDBObjectNameSize(diff.tableDiffs, diff.columnDiffs, diff.dbidDiffs);
+		logInfoByObjectAndChangeType(diff.tableDiffs, maxNameSize);
+		logInfoByObjectAndChangeType(diff.columnDiffs, maxNameSize);
+		logInfoByObjectAndChangeType(diff.dbidDiffs, maxNameSize);
 	}
 
-	static void logInfoByObjectAndChangeType(Collection<? extends Diff> diffs) {
+	static void logInfoByObjectAndChangeType(Collection<? extends Diff> diffs, int labelSize) {
 		//Map<DBObjectType, Integer> map = new NeverNullGetMap<DBObjectType, Integer>(Integer.class);
+		//String format = "changes [%-12s]: ";
+		String formatStr = "changes [%-"+labelSize+"s]: ";
 		for(DBObjectType type: DBObjectType.values()) {
 			List<Diff> diffsoftype = getDiffsByDBObjectType(diffs, type);
 			StringBuffer sb = new StringBuffer();
 			boolean changed = false;
-			sb.append(String.format("changes [%-12s]: ", type));
+			sb.append(String.format(formatStr, type));
 			//sb.append("changes ["+type+"]: ");
 			for(ChangeType ct: ChangeType.values()) {
 				int size = getDiffOfChangeType(ct, diffsoftype).size();
@@ -203,6 +191,17 @@ public class SchemaDiff implements Diff {
 			if(changeType.equals(d.getChangeType())) { ret.add(d); }
 		}
 		return ret;
+	}
+	
+	static int getMaxDBObjectNameSize(Collection<? extends Diff>... diffs) {
+		int max = 0;
+		for(Collection<? extends Diff> c: diffs) {
+			for(Diff d: c) {
+				int size = d.getObjectType().name().length();
+				if(size>max) { max = size; }
+			}
+		}
+		return max;
 	}
 	
 	static List<Diff> getDiffsByDBObjectType(Collection<? extends Diff> diffs, DBObjectType dbtype) {
