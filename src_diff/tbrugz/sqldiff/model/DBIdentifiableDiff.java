@@ -4,9 +4,9 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
-	ChangeType changeType;
-	DBIdentifiable ident;
-	String ownerTableName;
+	final ChangeType changeType;
+	final DBIdentifiable ident;
+	final String ownerTableName;
 
 	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable ident, String ownerTableName) {
 		this.changeType = changeType;

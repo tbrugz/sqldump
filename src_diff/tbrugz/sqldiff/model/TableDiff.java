@@ -17,13 +17,14 @@ import tbrugz.sqldump.dbmodel.Table;
 public class TableDiff implements Diff, Comparable<TableDiff> {
 	static Log log = LogFactory.getLog(TableDiff.class);
 
-	ChangeType diffType; //ADD, ALTER, RENAME, DROP;
-	String renameFrom;
-	Table table;
+	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
+	final String renameFrom;
+	final Table table;
 
 	public TableDiff(ChangeType changeType, Table table) {
 		this.diffType = changeType;
 		this.table = table;
+		this.renameFrom = null; //XXX: add constructor parameter?
 	}
 	
 	@Override
@@ -60,11 +61,12 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			Column cNew = SchemaDiff.getDBIdentifiableByTypeSchemaAndName(newTable.getColumns(), DBObjectType.COLUMN, origTable.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newColumnsThatExistsInOrigModel.add(cNew);
-				boolean equal = cNew.equals(cOrig);
+				//boolean equal = cNew.equals(cOrig);
+				boolean equal = Column.getColumnDesc(cOrig).equals(Column.getColumnDesc(cNew));
 				if(!equal) {
 					//alter column
 					log.debug("alter column: orig: "+cOrig+" new: "+cNew);
-					TableColumnDiff tcd = new TableColumnDiff(ChangeType.ALTER, newTable, cNew);
+					TableColumnDiff tcd = new TableColumnDiff(ChangeType.ALTER, newTable, cOrig, cNew);
 					diffs.add(tcd);
 				}
 				//else {
@@ -73,14 +75,14 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			}
 			else {
 				log.debug("drop column: orig: "+cOrig);
-				TableColumnDiff tcd = new TableColumnDiff(ChangeType.DROP, origTable, cOrig);
+				TableColumnDiff tcd = new TableColumnDiff(ChangeType.DROP, origTable, cOrig, null);
 				diffs.add(tcd);
 			}
 		}
 		for(Column cNew: newTable.getColumns()) {
 			if(newColumnsThatExistsInOrigModel.contains(cNew)) { continue; }
 			log.debug("add column: new: "+cNew);
-			TableColumnDiff tcd = new TableColumnDiff(ChangeType.ADD, newTable, cNew);
+			TableColumnDiff tcd = new TableColumnDiff(ChangeType.ADD, newTable, null, cNew);
 			diffs.add(tcd);
 		}
 		

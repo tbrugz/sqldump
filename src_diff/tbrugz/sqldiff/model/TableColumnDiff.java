@@ -6,17 +6,20 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class TableColumnDiff extends DBObject implements Diff {
-	ChangeType type; //ADD, ALTER, RENAME, DROP;
-	Column column;
+	private static final long serialVersionUID = 1L;
 	
-	//XXX: instead of renameFrom, add "Column from, to"?
-	String renameFrom;
+	final ChangeType type; //ADD, ALTER, RENAME, DROP;
+	final Column column;
+	final Column previousColumn;
+	
+	static boolean addComments = true;
 
-	public TableColumnDiff(ChangeType changeType, Table table, Column newColumn) {
+	public TableColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
 		this.type = changeType;
 		this.setName(table.getName());
 		this.setSchemaName(table.getSchemaName());
 		this.column = newColumn;
+		this.previousColumn = oldColumn;
 	}
 	
 	@Override
@@ -27,11 +30,16 @@ public class TableColumnDiff extends DBObject implements Diff {
 				colChange = "add column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				//XXX: option: rename old, create new, update new from old, drop old
-				colChange = "alter column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type; break;
+				colChange = "alter column "+Column.getColumnDesc(column);
+				if(addComments) {
+					colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
+				}
+				break; //COLUMN "+column.name+" "+column.type; break;
 			case RENAME:
-				colChange = "rename column "+renameFrom+" TO "+column.getName(); break;
+				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
+				colChange = "rename column "+previousColumn.getName()+" TO "+column.getName(); break;
 			case DROP:
-				colChange = "drop column "+column.getName(); break;
+				colChange = "drop column "+previousColumn.getName(); break;
 		}
 		return "alter table "+(getSchemaName()!=null?getSchemaName()+".":"")+getName()+" "+colChange;
 	}
@@ -69,6 +77,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 				TableColumnDiff tcd = (TableColumnDiff) o;
 				comp = type.compareTo(tcd.type);
 				if(comp==0) {
+					if(column==null || tcd.column==null) return 0;
 					return column.getName().compareTo(tcd.column.getName());
 				}
 			}

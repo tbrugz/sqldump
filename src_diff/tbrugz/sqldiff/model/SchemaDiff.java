@@ -26,9 +26,9 @@ public class SchemaDiff implements Diff {
 	static Log log = LogFactory.getLog(SchemaDiff.class);
 
 	//XXX: should be List<>?
-	Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
-	Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
-	Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
+	final Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
+	final Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
+	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {
@@ -37,6 +37,7 @@ public class SchemaDiff implements Diff {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(DBIdentifiable.getType4Diff(d)) 
