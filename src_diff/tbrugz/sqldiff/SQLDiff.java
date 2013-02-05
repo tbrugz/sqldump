@@ -17,17 +17,17 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 /*
  * TODOne: output diff to file
+ * TODOne: CategorizedOut: split by objecttype, schemaname, ...
  * 
- * TODO: CategorizedOut: split by objecttype, schemaname, ...
- * 
- * XXX: output diff by object type, change type
- * XXX: change: 'from'->'old', 'to'->'new' ? or older/newer?
+ * XXX: output diff by change type
+ * XXX: change: 'from'->'old', 'to'->'new' ? or older/newer? original/final? source/target?
  * 
  * XXX: option: [ignore|do not ignore] case; ignore schema name 
  */
@@ -95,8 +95,12 @@ public class SQLDiff {
 		log.info("grabbing 'to' model");
 		SchemaModel toSM = toSchemaGrabber.grabSchema();
 		
+		//XXX: option to set dialect from properties?
+		String dialect = toSM.getSqlDialect();
+		log.debug("diff dialect set to: "+dialect);
+		DBMSResources.instance().updateDbId(dialect);
+		
 		CategorizedOut co = new CategorizedOut();
-		//String finalPattern = outfilePattern;
 		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
 				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA,SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE);
@@ -105,19 +109,11 @@ public class SQLDiff {
 		co.setFilePathPattern(finalPattern);
 
 		//do diff
-		log.info("dumping diff");
+		log.info("dumping diff...");
 		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
 		//co.categorizedOut(diff.getDiff());
 		diff.outDiffs(co);
-		
-		/*
-		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
-		System.out.println("diff:\n"+diff.getDiff());
-		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
-		*/
-		
-		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
-		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
+		log.info("...done dumping");
 	}
 	
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {

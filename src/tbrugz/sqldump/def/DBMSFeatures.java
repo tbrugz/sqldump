@@ -36,4 +36,6 @@ public interface DBMSFeatures {
 	Table getTableObject();
 	FK getForeignKeyObject();
 	//XXX: should DBMS's Features return getDefaultDateFormat?
+	
+	String sqlAlterColumnClause();
 }

@@ -46,4 +46,9 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	@Override
 	public void addFKSpecificFeatures(FK fk, ResultSet rs) {
 	}
+	
+	@Override
+	public String sqlAlterColumnClause() {
+		return "alter column";
+	}
 }

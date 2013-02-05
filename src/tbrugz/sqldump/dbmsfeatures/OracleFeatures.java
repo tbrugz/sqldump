@@ -734,4 +734,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			log.warn("FK "+fk+" should be instance of "+OracleFK.class.getSimpleName());
 		}
 	}
+	
+	@Override
+	public String sqlAlterColumnClause() {
+		return "modify";
+	}
 }

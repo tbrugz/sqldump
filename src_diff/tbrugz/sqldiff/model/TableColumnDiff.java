@@ -1,18 +1,25 @@
 package tbrugz.sqldiff.model;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.DBMSFeatures;
+import tbrugz.sqldump.def.DBMSResources;
 
 public class TableColumnDiff extends DBObject implements Diff {
 	private static final long serialVersionUID = 1L;
+	static Log log = LogFactory.getLog(TableColumnDiff.class);
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
 	final Column column;
 	final Column previousColumn;
 	
 	static boolean addComments = true;
+	static DBMSFeatures features;
 
 	public TableColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
 		this.type = changeType;
@@ -20,6 +27,11 @@ public class TableColumnDiff extends DBObject implements Diff {
 		this.setSchemaName(table.getSchemaName());
 		this.column = newColumn;
 		this.previousColumn = oldColumn;
+		
+		if(features==null) {
+			features = DBMSResources.instance().databaseSpecificFeaturesClass();
+			log.debug("DBMSFeatures class: "+features);
+		}
 	}
 	
 	@Override
@@ -30,7 +42,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 				colChange = "add column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				//XXX: option: rename old, create new, update new from old, drop old
-				colChange = "alter column "+Column.getColumnDesc(column);
+				colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
 				if(addComments) {
 					colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
 				}

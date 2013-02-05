@@ -77,8 +77,8 @@ public class DBMSResources {
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
 	
-	public static void updateDbId(String newid) {
-		DBMSResources res = instance();
+	public void updateDbId(String newid) {
+		DBMSResources res = this;
 		if( (newid!=null && newid.equals(res.dbId)) || (newid==res.dbId) ) { return; }
 		
 		log.info("updating dbid: '"+newid+"' [old="+res.dbId+"]");
@@ -178,7 +178,12 @@ public class DBMSResources {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				of.procProperties(papp);
+				if(papp!=null) {
+					of.procProperties(papp);
+				}
+				else {
+					log.warn("properties are null");
+				}
 				return of;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
