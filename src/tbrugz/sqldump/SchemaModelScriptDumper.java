@@ -77,16 +77,16 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
 
-	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
+	public static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 
 	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
 
-	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
-	static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
-	static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
+	public static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
+	public static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
+	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
 	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();

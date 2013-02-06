@@ -116,6 +116,8 @@ public class SchemaDiff implements Diff {
 		addTables.addAll(modelNew.getTables());
 		addTables.removeAll(newTablesThatExistsInOrigModel);
 		for(Table t: addTables) {
+			if(! t.getType().equals(TableType.TABLE)) continue;
+
 			TableDiff td = new TableDiff(ChangeType.ADD, t);
 			diff.tableDiffs.add(td);
 		}

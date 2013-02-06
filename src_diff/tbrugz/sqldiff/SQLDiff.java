@@ -16,11 +16,13 @@ import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModelScriptDumper;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODOne: output diff to file
@@ -43,7 +45,9 @@ public class SQLDiff {
 	static Log log = LogFactory.getLog(SQLDiff.class);
 	
 	Properties prop = new ParametrizedProperties();
+
 	String outfilePattern = null;
+	boolean dumpWithCreateOrReplace = false;
 	
 	void init(String[] args) throws Exception {
 		log.info("init...");
@@ -69,6 +73,9 @@ public class SQLDiff {
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
 		prop.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+		
+		dumpWithCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
+		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 		
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
 		if(outfilePattern==null) {
