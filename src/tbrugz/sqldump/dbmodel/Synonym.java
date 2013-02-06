@@ -14,7 +14,7 @@ public class Synonym extends DBObject {
 		//return "create "
 		return (dumpCreateOrReplace?"create or replace ":"create ") 
 			+(publik?"public ":"")+"synonym "+getFinalQualifiedName(dumpSchemaName)
-			+" for "+objectOwner+"."+referencedObject
+			+" for "+DBObject.getFinalQualifiedName(objectOwner, referencedObject, dumpSchemaName)
 			+(dbLink!=null?"@"+dbLink:"");
 	}
 	

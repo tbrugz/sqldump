@@ -2,13 +2,9 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.List;
 
-public interface Relation {
+public interface Relation extends NamedDBObject {
 	
-	public String getName();
-
 	public void setName(String name);
-
-	public String getSchemaName();
 
 	public void setSchemaName(String schemaName);
 	

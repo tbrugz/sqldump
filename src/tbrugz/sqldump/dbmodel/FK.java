@@ -108,8 +108,9 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
 		return "constraint "+DBObject.getFinalIdentifier(getName())
 			+" foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
-			+whitespace+"references "+(dumpWithSchemaName?DBObject.getFinalIdentifier(pkTableSchemaName)+".":"")
-			+DBObject.getFinalIdentifier(pkTable)+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
+			+whitespace+"references "
+			+DBObject.getFinalQualifiedName(pkTableSchemaName, pkTable, dumpWithSchemaName)
+			+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+(updateRule!=null && updateRule!=UpdateRule.NO_ACTION?" on update "+updateRule:"")
 			+(deleteRule!=null && deleteRule!=UpdateRule.NO_ACTION?" on delete "+deleteRule:"")
 			;

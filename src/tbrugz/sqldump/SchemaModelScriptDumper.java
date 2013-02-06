@@ -60,6 +60,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	
 	boolean dumpDropStatements = false;
 	boolean dumpWithCreateOrReplace = false;
+	//boolean dumpWriteAppend = false;
 	
 	//Properties dbmsSpecificsProperties;
 	String fromDbId, toDbId;
@@ -86,6 +87,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
 	static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
 	static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
+	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
@@ -102,6 +104,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable); //default should be 'true'?
 		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
 		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
+		//dumpWriteAppend = Utils.getPropBool(prop, PROP_SCHEMADUMP_WRITEAPPEND, dumpWriteAppend);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 
@@ -233,7 +236,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				}
 			}
 
-			String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.getName();
+			String tableName = DBObject.getFinalQualifiedName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
 			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
@@ -300,7 +303,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(!dumpGrantsWithReferencingTable) {
 			//tables
 			for(Table table: schemaModel.getTables()) {
-				String tableName = (dumpWithSchemaName?table.getSchemaName()+".":"")+table.getName();
+				String tableName = DBObject.getFinalQualifiedName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.GRANT, grantOutput);
@@ -310,7 +313,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			//TODO: how to dump exec grants if 'dumpGrantsWithReferencingTable' is true?
 			//XXX: compactGrantDump for Executable's Grants doesn't make sense, since there is only one type of privilege for Executables (EXECUTE) (for now?)
 			for(ExecutableObject eo: schemaModel.getExecutables()) {
-				String eoName = (dumpWithSchemaName?eo.getSchemaName()+".":"")+eo.getName();
+				String eoName = DBObject.getFinalQualifiedName(eo.getSchemaName(), eo.getName(), dumpWithSchemaName);
 				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
 				String grantOutput = compactGrantDump(eo.grants, eoName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
@@ -334,7 +337,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	}
 	
 	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {
-		String fkTableName = (dumpWithSchemaName?DBObject.getFinalIdentifier(fk.getFkTableSchemaName())+".":"")+DBObject.getFinalIdentifier(fk.getFkTable());
+		String fkTableName = DBObject.getFinalQualifiedName(fk.getFkTableSchemaName(), fk.getFkTable(), dumpWithSchemaName);
 		return
 			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
 			+"alter table "+fkTableName
@@ -414,12 +417,13 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		fos.close();
 	}
 
-	String simpleGrantDump(Collection<Grant> grants, String tableName, String toDbId) {
+	@Deprecated
+	String simpleGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
 		StringBuffer sb = new StringBuffer();
 		
 		for(Grant grant: grants) {
 			sb.append("grant "+grant.privilege
-					+" on "+DBObject.getFinalIdentifier(tableName)
+					+" on "+finalTableName
 					+" to "+grant.grantee
 					+(grant.withGrantOption?" WITH GRANT OPTION":"")
 					+";\n\n");
@@ -430,7 +434,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		return "";
 	}
 	
-	String compactGrantDump(Collection<Grant> grants, String tableName, String toDbId) {
+	String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
 		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
 		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
 		
@@ -475,7 +479,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			Set<PrivilegeType> privs = mapWithGrant.get(grantee);
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
-					+" on "+DBObject.getFinalIdentifier(tableName)
+					+" on "+finalTableName
 					+" to "+grantee
 					+" WITH GRANT OPTION"+";\n\n");
 			/*for(PrivilegeType priv: privs) {
@@ -490,7 +494,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			Set<PrivilegeType> privs = mapWOGrant.get(grantee);
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
-					+" on "+DBObject.getFinalIdentifier(tableName)
+					+" on "+finalTableName
 					+" to "+grantee
 					+";\n\n");
 			/*for(PrivilegeType priv: privs) {
