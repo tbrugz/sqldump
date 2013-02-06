@@ -204,7 +204,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			}
 			
 			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
-			String afterTableScript = table.getAfterCreateTableScript();
+			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName);
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);
 			}

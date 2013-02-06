@@ -155,13 +155,13 @@ public class Table extends DBObject implements Relation {
 		return "";
 	}
 	
-	public String getAfterCreateTableScript() {
+	public String getAfterCreateTableScript(boolean dumpSchemaName) {
 		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
 		StringBuffer sb = new StringBuffer();
-		String stmp = getRelationRemarks(this);
+		String stmp = getRelationRemarks(this, dumpSchemaName);
 		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
 
-		stmp = getColumnRemarks(columns, this);
+		stmp = getColumnRemarks(columns, this, dumpSchemaName);
 		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
 
 		return sb.toString();
@@ -258,17 +258,17 @@ public class Table extends DBObject implements Relation {
 		return ret;
 	}
 	
-	static String getRelationRemarks(Relation rel) {
+	static String getRelationRemarks(Relation rel, boolean dumpSchemaName) {
 		StringBuffer sb = new StringBuffer();
 		String tableComment = rel.getRemarks();
 		if(tableComment!=null && !tableComment.trim().equals("")) {
 			tableComment = tableComment.replaceAll("'", "''");
-			sb.append("comment on table "+rel.getSchemaName()+"."+rel.getName()+" is '"+tableComment+"'"); //;\n
+			sb.append("comment on table "+DBObject.getFinalQualifiedName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
 		}
 		return sb.toString();
 	}
 	
-	static String getColumnRemarks(List<Column> columns, Relation rel) {
+	static String getColumnRemarks(List<Column> columns, Relation rel, boolean dumpSchemaName) {
 		StringBuffer sb = new StringBuffer();
 		//XXX: column comments should be ordered by col name?
 		int commentCount = 0;
@@ -279,7 +279,7 @@ public class Table extends DBObject implements Relation {
 					//XXXdone: escape comment
 					comment = comment.replaceAll("'", "''");
 					if(commentCount>0) { sb.append(";\n"); }
-					sb.append("comment on column "+rel.getSchemaName()+"."+rel.getName()+"."+c.name+" is '"+comment+"'");
+					sb.append("comment on column "+DBObject.getFinalQualifiedName(rel, dumpSchemaName)+"."+DBObject.getFinalIdentifier(c.name)+" is '"+comment+"'");
 					commentCount++;
 				}
 			}
