@@ -22,6 +22,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -47,7 +48,6 @@ public class SQLDiff {
 	Properties prop = new ParametrizedProperties();
 
 	String outfilePattern = null;
-	boolean dumpWithCreateOrReplace = false;
 	
 	void init(String[] args) throws Exception {
 		log.info("init...");
@@ -74,8 +74,8 @@ public class SQLDiff {
 		log.debug("propfile base dir: "+propFileDir);
 		prop.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
 		
-		dumpWithCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
-		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
+		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
+		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 		
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
 		if(outfilePattern==null) {

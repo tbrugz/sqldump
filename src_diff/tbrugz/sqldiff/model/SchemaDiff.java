@@ -78,8 +78,8 @@ public class SchemaDiff implements Diff {
 				TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, 
 						getFKsFromTable(modelOrig.getForeignKeys(), tOrig.getName()), 
 						getFKsFromTable(modelNew.getForeignKeys(), tNew.getName()), 
-						tOrig.getName(),
-						tNew.getName());
+						tOrig.getFinalQualifiedName(),
+						tNew.getFinalQualifiedName());
 				
 				for(Diff dt: diffs) {
 					if(dt instanceof TableDiff) {

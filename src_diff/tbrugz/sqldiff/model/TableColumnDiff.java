@@ -49,11 +49,14 @@ public class TableColumnDiff extends DBObject implements Diff {
 				break; //COLUMN "+column.name+" "+column.type; break;
 			case RENAME:
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
-				colChange = "rename column "+previousColumn.getName()+" TO "+column.getName(); break;
+				colChange = "rename column "+DBObject.getFinalIdentifier(previousColumn.getName())
+					+" TO "+DBObject.getFinalIdentifier(column.getName());
+				break;
 			case DROP:
-				colChange = "drop column "+previousColumn.getName(); break;
+				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
+				break;
 		}
-		return "alter table "+(getSchemaName()!=null?getSchemaName()+".":"")+getName()+" "+colChange;
+		return "alter table "+DBObject.getFinalQualifiedName(this, true)+" "+colChange;
 	}
 
 	@Override

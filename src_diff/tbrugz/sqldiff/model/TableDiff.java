@@ -36,9 +36,9 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			case ALTER:
 				return null; //XXX: alter table...??
 			case RENAME:
-				return "alter table "+renameFrom+" rename to "+table.getName();
+				return "alter table "+renameFrom+" rename to "+table.getFinalQualifiedName();
 			case DROP:
-				return "drop table "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+table.getName();
+				return "drop table "+table.getFinalQualifiedName();
 		}
 		return null;
 	}
@@ -89,7 +89,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		//constraints
 		//XXX: constraints should be dumper in defined order (FKs at end)
 		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
-		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getQualifiedName(), newTable.getQualifiedName());
+		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getFinalQualifiedName(), newTable.getFinalQualifiedName());
 		//FIXedME: schemaname dumps as null
 		for(int i=0;i<dbiddiffs.size();i++) {
 			dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
