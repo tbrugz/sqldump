@@ -61,7 +61,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "alter table "+(dumpSchemaName?getSchemaName()+".":"")+getName()
+		return "alter table "+DBObject.getFinalQualifiedName(this, dumpSchemaName)
 				+getDiff();
 	}
 	

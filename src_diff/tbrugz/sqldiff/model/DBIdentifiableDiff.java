@@ -1,6 +1,7 @@
 package tbrugz.sqldiff.model;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 
 /*
@@ -12,6 +13,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	final DBIdentifiable previousIdent;
 	final String ownerTableName;
 	
+	static boolean dumpSchemaName = true;
 	static boolean addComments = true;
 
 	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable previousIdent, DBIdentifiable ident, String ownerTableName) {
@@ -21,9 +23,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		this.ownerTableName = ownerTableName;
 	}
 
-	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable previousIdent, DBIdentifiable ident) {
+	/*public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable previousIdent, DBIdentifiable ident) {
 		this(changeType, previousIdent, ident, null);
-	}
+	}*/
 	
 	@Override
 	public ChangeType getChangeType() {
@@ -38,8 +40,14 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 					+ (addComments?getComment(previousIdent, "old: "):"");
 			//case ALTER:  return "ALTER "+ident.getDefinition(true);
 			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP: return (ownerTableName!=null?"alter table "+ownerTableName+" ":"")+"drop "
-					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+(previousIdent.getSchemaName()!=null?previousIdent.getSchemaName()+".":"")+previousIdent.getName()
+			case DROP:
+				if(ownerTableName!=null) {
+					return "alter table "+ownerTableName+" drop "
+							+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
+							+ (addComments?getComment(ident, "new: "):"");
+				}
+				return "drop "
+					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalQualifiedName(previousIdent, dumpSchemaName)
 					+ (addComments?getComment(ident, "new: "):"");
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
@@ -80,7 +88,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		if(dbident==null) return "";
 		return "\n/* "+comment
 				+ DBIdentifiable.getType4Diff(dbident).desc()+" "
-				+ (dbident.getSchemaName()!=null?dbident.getSchemaName()+".":"")+dbident.getName()
+				+ DBObject.getFinalQualifiedName(dbident, dumpSchemaName)
 				+ " */";
 	}
 	
