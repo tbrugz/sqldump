@@ -4,7 +4,8 @@ package tbrugz.sqldump.dbmodel;
  * see: http://download.oracle.com/docs/cd/E14072_01/server.112/e10592/statements_6015.htm
  */
 public class Sequence extends DBObject {
-	
+	private static final long serialVersionUID = 1L;
+
 	public Long minValue;
 	public Long maxValue; //XXX: not used yet
 	public long incrementBy;
@@ -17,7 +18,7 @@ public class Sequence extends DBObject {
 		//XXX: option to use "create or replace" for sequence?
 		//return (dumpCreateOrReplace?"create or replace ":"create ") 
 		return "create " 
-			+"sequence "+(dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"")+DBObject.getFinalIdentifier(name)
+			+"sequence "+getFinalQualifiedName(dumpSchemaName)
 			+(minValue!=null?" minvalue "+minValue:"")
 			+(dumpStartWith?" start with "+lastNumber:"")
 			+" increment by "+incrementBy;
@@ -25,7 +26,7 @@ public class Sequence extends DBObject {
 	
 	@Override
 	public String toString() {
-		return "[Sequence:"+schemaName+"."+name+";min:"+minValue+",max:"+maxValue+"]";
+		return "[Sequence:"+getSchemaName()+"."+getName()+";min:"+minValue+",max:"+maxValue+"]";
 	}
 
 	//XXX: do not use lastNumber

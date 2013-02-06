@@ -11,6 +11,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX: index type. e.g. bitmap (done for oracle)
  */
 public class Index extends DBObject {
+	private static final long serialVersionUID = 1L;
 	
 	public boolean unique;
 	public String type;
@@ -22,16 +23,17 @@ public class Index extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		String objectNamePrepend = (dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"");
-		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+objectNamePrepend+DBObject.getFinalIdentifier(name)+" on "+objectNamePrepend+DBObject.getFinalIdentifier(tableName)
+		String objectNamePrepend = (dumpSchemaName?DBObject.getFinalIdentifier(getSchemaName())+".":"");
+		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+getFinalQualifiedName(dumpSchemaName)
+			+" on "+objectNamePrepend+DBObject.getFinalIdentifier(tableName)
 			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+((local!=null && local)?" local":"")
-			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" --"+comment:"");
+			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" /* "+comment+" */":"");
 	}
 	
 	@Override
 	public String toString() {
-		return "[Index:"+schemaName+"."+name+":t:"+tableName+",u?:"+unique+",c:"+columns+"]";
+		return "[Index:"+getSchemaName()+"."+getName()+":t:"+tableName+",u?:"+unique+",c:"+columns+"]";
 	}
 	
 	@Override

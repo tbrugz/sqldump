@@ -11,6 +11,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class Table extends DBObject implements Relation {
+	private static final long serialVersionUID = 1L;
+
 	TableType type;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
@@ -55,7 +57,7 @@ public class Table extends DBObject implements Relation {
 	
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
-		String tableName = (dumpWithSchemaName?getFinalIdentifier(schemaName)+".":"")+getFinalIdentifier(name);
+		String tableName = getFinalQualifiedName(dumpWithSchemaName);
 
 		StringBuffer sb = new StringBuffer();
 		//Table

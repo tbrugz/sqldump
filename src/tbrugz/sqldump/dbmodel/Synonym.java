@@ -1,6 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
 public class Synonym extends DBObject {
+	private static final long serialVersionUID = 1L;
+
 	boolean publik;
 	public String objectOwner;
 	public String referencedObject;
@@ -11,14 +13,14 @@ public class Synonym extends DBObject {
 		//XXX: option to use "create or replace" for synonym?
 		//return "create "
 		return (dumpCreateOrReplace?"create or replace ":"create ") 
-			+(publik?"public ":"")+"synonym "+(dumpSchemaName?DBObject.getFinalIdentifier(schemaName)+".":"")+DBObject.getFinalIdentifier(name)
+			+(publik?"public ":"")+"synonym "+getFinalQualifiedName(dumpSchemaName)
 			+" for "+objectOwner+"."+referencedObject
 			+(dbLink!=null?"@"+dbLink:"");
 	}
 	
 	@Override
 	public String toString() {
-		return "[Synonym:"+schemaName+"."+name+"->"+objectOwner+"."+referencedObject+"]";
+		return "[Synonym:"+getSchemaName()+"."+getName()+"->"+objectOwner+"."+referencedObject+"]";
 	}
 
 	@Override

@@ -31,6 +31,7 @@ public abstract class DBIdentifiable {
 	//XXX: getDefinition() should have 'sql dialect' param?
 	public abstract String getDefinition(boolean dumpSchemaName);
 
+	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType4Diff(d)) 
@@ -41,6 +42,7 @@ public abstract class DBIdentifiable {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType4Diff(d)) 
@@ -49,6 +51,7 @@ public abstract class DBIdentifiable {
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType4Diff(d)) 

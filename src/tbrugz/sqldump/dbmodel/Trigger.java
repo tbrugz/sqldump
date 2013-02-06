@@ -1,6 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
 public class Trigger extends DBObject {
+	private static final long serialVersionUID = 1L;
+
 	public String description;
 	public String body;
 	public String tableName;

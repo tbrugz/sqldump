@@ -15,7 +15,8 @@ import tbrugz.sqldump.util.Utils;
  * see: http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Fsqlp%2Frbafywcohdg.htm
  */
 public class View extends DBObject implements Relation {
-	
+	private static final long serialVersionUID = 1L;
+
 	public enum CheckOptionType {
 		LOCAL, CASCADED, NONE, 
 		TRUE; //true: set for databases that doesn't have local and cascaded options 
@@ -56,7 +57,7 @@ public class View extends DBObject implements Relation {
 		}
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
-				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name)
+				+ getFinalQualifiedName(dumpSchemaName)
 				+ (sbConstraints.length()>0?" (\n\t"
 						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
 						+ sbConstraints.toString()+"\n)":"")
@@ -71,7 +72,7 @@ public class View extends DBObject implements Relation {
 	
 	@Override
 	public String toString() {
-		return "View["+name+"]";
+		return "View["+getName()+"]";
 	}
 	
 	@Override

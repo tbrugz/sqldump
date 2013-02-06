@@ -4,17 +4,17 @@ package tbrugz.sqldump.dbmodel;
  * TODO: mviews: refresh on commit|demand ; tablespace
  */
 public class MaterializedView extends View {
-	//public boolean materialized = true;
-	
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "materialized view "
-				+ (dumpSchemaName && schemaName!=null?DBObject.getFinalIdentifier(schemaName)+".":"") + DBObject.getFinalIdentifier(name) + " as \n" + query;
+				+ getFinalQualifiedName(dumpSchemaName) + " as \n" + query;
 	}
 	
 	@Override
 	public String toString() {
-		return "MaterializedView["+name+"]";
+		return "MaterializedView["+getName()+"]";
 	}
 	
 	/*@Override

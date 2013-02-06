@@ -8,7 +8,8 @@ import java.util.List;
  * create package: http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_6006.htm
  */
 public class ExecutableObject extends DBObject {
-
+	private static final long serialVersionUID = 1L;
+	
 	//public String type;
 	DBObjectType type;
 	public String body;
@@ -27,7 +28,7 @@ public class ExecutableObject extends DBObject {
 	
 	@Override
 	public String toString() {
-		return "[Executable:"+type+":"+schemaName+"."+name+
+		return "[Executable:"+type+":"+getSchemaName()+"."+getName()+
 				(packageName!=null?";pkg="+packageName:"")
 				+"]";
 	}
