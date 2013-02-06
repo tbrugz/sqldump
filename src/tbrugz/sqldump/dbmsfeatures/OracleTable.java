@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.util.List;
 
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.Utils;
 
@@ -12,7 +13,8 @@ import tbrugz.sqldump.util.Utils;
  * see: http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/statements_7002.htm
  */
 public class OracleTable extends Table {
-	
+	private static final long serialVersionUID = 1L;
+
 	public enum PartitionType {
 		RANGE, HASH, LIST;
 		//XXX: reference, composite-range, composite-list, system
@@ -42,14 +44,14 @@ public class OracleTable extends Table {
 	public String getTableFooter4sql() {
 		String footer = "";
 		if(dumpPhysicalAttributes) {
-			footer += tableSpace!=null?"\ntablespace "+tableSpace:"";
+			footer += tableSpace!=null?"\ntablespace "+DBObject.getFinalIdentifier(tableSpace):"";
 		}
 		if(dumpLoggingClause) {
 			footer += logging?"\nlogging":"";
 		}
 		//partition by
 		if(partitioned!=null && partitioned) {
-			footer += "\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")";
+			footer += "\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ", sqlIddecorator)+")";
 			if(partitions!=null) {
 				footer += " (";
 				int partCount = 0;

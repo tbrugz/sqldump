@@ -218,7 +218,7 @@ public class DataDump extends AbstractSQLProc {
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
 			
 			String sql = "select "+selectColumns
-					+" from "+(table.getSchemaName()!=null?table.getSchemaName()+".":"")+quote+tableName+quote
+					+" from "+table.getFinalQualifiedName()
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);

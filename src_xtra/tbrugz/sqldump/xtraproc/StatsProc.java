@@ -28,7 +28,7 @@ public class StatsProc extends AbstractSQLProc {
 
 		try {
 			for(Table table: model.getTables()) {
-				ResultSet rs = conn.createStatement().executeQuery("select count(*) from "+table.getSchemaName()+"."+table.getName());
+				ResultSet rs = conn.createStatement().executeQuery("select count(*) from "+table.getFinalQualifiedName());
 				rs.next();
 				int count = rs.getInt(1);
 				map.put(table.getName(), count);
