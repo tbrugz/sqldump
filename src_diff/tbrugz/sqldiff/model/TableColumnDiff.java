@@ -11,11 +11,11 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 
-public class TableColumnDiff extends DBObject implements Diff {
-	private static final long serialVersionUID = 1L;
+public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	static Log log = LogFactory.getLog(TableColumnDiff.class);
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
+	final Table table;
 	final Column column;
 	final Column previousColumn;
 	
@@ -24,8 +24,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 
 	public TableColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
 		this.type = changeType;
-		this.setName(table.getName());
-		this.setSchemaName(table.getSchemaName());
+		this.table = table;
 		this.column = newColumn;
 		this.previousColumn = oldColumn;
 		
@@ -57,15 +56,9 @@ public class TableColumnDiff extends DBObject implements Diff {
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
 		}
-		return "alter table "+DBObject.getFinalQualifiedName(this, true)+" "+colChange;
+		return "alter table "+DBObject.getFinalQualifiedName(table, true)+" "+colChange;
 	}
 
-	@Override
-	public String getDefinition(boolean dumpSchemaName) {
-		return "alter table "+DBObject.getFinalQualifiedName(this, dumpSchemaName)
-				+getDiff();
-	}
-	
 	/*public static List<TableColumnDiff> tableDiffs(Table origTable, Table newTable) {
 		List<TableColumnDiff> diff = new ArrayList<TableColumnDiff>();
 		//TODOxx: for each column...
@@ -86,16 +79,12 @@ public class TableColumnDiff extends DBObject implements Diff {
 	}
 	
 	@Override
-	public int compareTo(DBObject o) {
-		int comp = super.compareTo(o);
+	public int compareTo(TableColumnDiff o) {
+		int comp = type.compareTo(o.type);
+		if(comp==0) { comp = table.compareTo(o.table); }
 		if(comp==0) {
-			if(o instanceof TableColumnDiff) {
-				TableColumnDiff tcd = (TableColumnDiff) o;
-				comp = type.compareTo(tcd.type);
-				if(comp==0) {
-					if(column==null || tcd.column==null) return 0;
-					return column.getName().compareTo(tcd.column.getName());
-				}
+			if(column!=null && o.column!=null) {
+				comp = column.getName().compareTo(o.column.getName());
 			}
 		}
 		return comp;
@@ -103,7 +92,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 	
 	@Override
 	public String toString() {
-		return "[ColDiff:"+getName()+","+type+","+column+"]";
+		return "[ColDiff:"+table.getQualifiedName()+","+type+","+column+"]";
 	}
 
 	@Override
@@ -118,7 +107,7 @@ public class TableColumnDiff extends DBObject implements Diff {
 	
 	@Override
 	public NamedDBObject getNamedObject() {
-		return this;
+		return table;
 	}
 
 }

@@ -245,7 +245,7 @@ public class SchemaDiff implements Diff {
 		int count = 0;
 		for(Diff d: diffs) {
 			String schemaName = d.getNamedObject()!=null?d.getNamedObject().getSchemaName():"";
-			log.info("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
+			log.debug("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
 					+" ; "+schemaName+"; "+d.getNamedObject().getName());
 			out.categorizedOut(d.getDiff()+";\n", schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
 			count++;
@@ -264,7 +264,7 @@ public class SchemaDiff implements Diff {
 		//column
 		log.info("output column diffs...");
 		for(TableColumnDiff tcd: columnDiffs) {
-			out.categorizedOut(tcd.getDiff()+";\n", tcd.getSchemaName(), DBObjectType.COLUMN.toString());
+			out.categorizedOut(tcd.getDiff()+";\n", tcd.table.getSchemaName(), DBObjectType.COLUMN.toString());
 		}
 
 		//other

@@ -24,23 +24,16 @@ public class ExecOrderDiffComparator implements Comparator<Diff> {
 		}
 		
 		if(o1.getObjectType().equals(o2.getObjectType())) {
-			/*comp = o1.getChangeType().compareTo(o2.getChangeType());
-			//if same object type & 
-			if(comp!=0) {
-				return -comp;
-			}*/
-			
 			//if same object type, compare by name
-			//if(o1.getChangeType().equals(o2.getChangeType())) {
 			return compare(o1.getNamedObject(), o2.getNamedObject()); //OK!
-			//}
 		}
+		
 		int mult = -1;
 		if(o1.getChangeType().equals(ChangeType.ADD)) {
 			//if change type is add, use direct object type order, otherwise use inverse order 
 			mult = 1;
 		}
-		return dbObjectAddOrder(o1.getObjectType()).compareTo(dbObjectAddOrder(o2.getObjectType())) * mult;
+		return (dbObjectAddOrder(o1.getObjectType()) - dbObjectAddOrder(o2.getObjectType()) ) * mult;
 		//return o1.getObjectType().compareTo(o2.getObjectType()) * mult;
 	}
 	
@@ -52,7 +45,7 @@ public class ExecOrderDiffComparator implements Comparator<Diff> {
 		return o1.getName().compareTo(o2.getName());
 	}
 	
-	public static Integer dbObjectAddOrder(DBObjectType t) {
+	public static int dbObjectAddOrder(DBObjectType t) {
 		switch (t) {
 		case TABLE: return 1;
 		case COLUMN: return 2;
