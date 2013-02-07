@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
@@ -113,6 +114,11 @@ public class TableColumnDiff extends DBObject implements Diff {
 	@Override
 	public DBObjectType getObjectType() {
 		return DBObjectType.COLUMN;
+	}
+	
+	@Override
+	public NamedDBObject getNamedObject() {
+		return this;
 	}
 
 }

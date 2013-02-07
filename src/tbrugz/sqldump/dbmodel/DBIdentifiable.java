@@ -82,6 +82,11 @@ public abstract class DBIdentifiable implements NamedDBObject {
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
+
+	public static DBObjectType getType4Diff(DBObjectType type) {
+		if(type.equals(DBObjectType.FK)) { return DBObjectType.CONSTRAINT; }
+		return type;
+	}
 	
 	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
 		List<FK> fks = new ArrayList<FK>();

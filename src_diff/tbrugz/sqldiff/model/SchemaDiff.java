@@ -12,10 +12,12 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.compare.ExecOrderDiffComparator;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -157,6 +159,7 @@ public class SchemaDiff implements Diff {
 		return diff;
 	}
 	
+	@SuppressWarnings("unchecked")
 	static void logInfo(SchemaDiff diff) {
 		int maxNameSize = getMaxDBObjectNameSize(diff.tableDiffs, diff.columnDiffs, diff.dbidDiffs);
 		logInfoByObjectAndChangeType(diff.tableDiffs, maxNameSize);
@@ -230,11 +233,28 @@ public class SchemaDiff implements Diff {
 		diffs.addAll(columnDiffs);
 		diffs.addAll(dbidDiffs);
 		
-		Collections.sort(diffs, new DiffComparator());
+		//XXX: option to select diff comparator?
+		Collections.sort(diffs, new ExecOrderDiffComparator());
 		return diffs;
 	}
 	
 	public void outDiffs(CategorizedOut out) throws IOException {
+		List<Diff> diffs = getDiffList();
+
+		log.info("output diffs...");
+		int count = 0;
+		for(Diff d: diffs) {
+			String schemaName = d.getNamedObject()!=null?d.getNamedObject().getSchemaName():"";
+			log.info("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
+					+" ; "+schemaName+"; "+d.getNamedObject().getName());
+			out.categorizedOut(d.getDiff()+";\n", schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
+			count++;
+		}
+		log.info(count+" diffs dumped");
+	} 
+
+	@Deprecated
+	void outDiffsZ(CategorizedOut out) throws IOException {
 		//table
 		log.info("output table diffs...");
 		for(TableDiff td: tableDiffs) {
@@ -291,7 +311,7 @@ public class SchemaDiff implements Diff {
 		return sb.toString();
 	}
 
-	public String getDiffByDBObjectTypes(List<DBObjectType> types) {
+	/*public String getDiffByDBObjectTypes(List<DBObjectType> types) {
 		StringBuffer sb = new StringBuffer();
 		
 		List<Diff> diffs = getDiffList();
@@ -303,7 +323,7 @@ public class SchemaDiff implements Diff {
 		}
 
 		return sb.toString();
-	}
+	}*/
 	
 	@Override
 	public String toString() {
@@ -318,6 +338,11 @@ public class SchemaDiff implements Diff {
 	@Override
 	public DBObjectType getObjectType() {
 		return null; //XXX: SchemaDiff.DBObjectType?
+	}
+	
+	@Override
+	public NamedDBObject getNamedObject() {
+		return null; //XXX: SchemaDiff.getNamedObject
 	}
 
 }

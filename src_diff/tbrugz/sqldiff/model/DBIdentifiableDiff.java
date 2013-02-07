@@ -3,6 +3,7 @@ package tbrugz.sqldiff.model;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 
 /*
  * XXX option to change 'new:' & 'old:' xtra comments?
@@ -78,6 +79,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	@Override
 	public DBObjectType getObjectType() {
 		return DBIdentifiable.getType4Diff(ident()); //XXX: getType() or getType4Diff()? '4Diff' is better for logging...
+	}
+	
+	@Override
+	public NamedDBObject getNamedObject() {
+		return ident();
 	}
 	
 	public DBIdentifiable ident() {

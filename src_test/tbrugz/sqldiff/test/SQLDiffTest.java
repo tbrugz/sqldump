@@ -52,8 +52,8 @@ public class SQLDiffTest {
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());
 		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
-		List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
-		System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
+		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
+		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
 	}
 
 }

@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class TableDiff implements Diff, Comparable<TableDiff> {
@@ -144,6 +145,11 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	@Override
 	public DBObjectType getObjectType() {
 		return DBObjectType.TABLE;
+	}
+	
+	@Override
+	public NamedDBObject getNamedObject() {
+		return table;
 	}
 
 }
