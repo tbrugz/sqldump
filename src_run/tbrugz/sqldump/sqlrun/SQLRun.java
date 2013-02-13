@@ -53,6 +53,7 @@ public class SQLRun {
 	} 
 	
 	static Log log = LogFactory.getLog(SQLRun.class);
+	static Log logCommit = LogFactory.getLog(SQLRun.class.getName()+"-commit");
 
 	public static final String STDIN = "<stdin>"; 
 	
@@ -115,8 +116,8 @@ public class SQLRun {
 		
 		StmtProc srproc = new StmtProc();
 		srproc.setConn(conn);
-		srproc.setPapp(papp);
 		srproc.setCommitStrategy(commitStrategy);
+		srproc.setPapp(papp);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
@@ -199,8 +200,9 @@ public class SQLRun {
 				}
 				
 				importer.setExecId(procId);
-				importer.setProperties(papp);
 				importer.setConnection(conn);
+				importer.setCommitStrategy(commitStrategy);
+				importer.setProperties(papp);
 				long imported = 0;
 				try {
 					imported = importer.importData();
@@ -270,9 +272,9 @@ public class SQLRun {
 		try {
 			//log.debug("committing...");
 			conn.commit();
-			log.debug("committed!");
+			logCommit.debug("committed!");
 		} catch (SQLException e) {
-			log.warn("error commiting: "+e);
+			logCommit.warn("error commiting: "+e);
 		}
 	}
 

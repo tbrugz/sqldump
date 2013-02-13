@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
@@ -52,9 +53,11 @@ public abstract class AbstractImporter {
 	}
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
+	static final Log logBatch = LogFactory.getLog(AbstractImporter.class.getName()+"-batch");
 
 	Properties prop;
 	Connection conn;
+	CommitStrategy commitStrategy;
 	
 	String execId = null;
 	String importFile = null;
@@ -74,10 +77,15 @@ public abstract class AbstractImporter {
 	int maxFailoverId = 0;
 	FailoverIdSelectionStrategy failoverStrategy = FailoverIdSelectionStrategy.CYCLE; //TODO: property for selecting failover strategy
 	
+	boolean useBatchUpdate = false;
+	long batchUpdateSize = 1000;
+
+	long commitEachXrows = 0l;
+	static long defaultCommitEachXrowsForFileStrategy = 1000l;
+	
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
-	Long commitEachXrows = 100l;
-	Long logEachXrows = 10000l; //XXX: prop for logEachXrows
+	long logEachXrows = 10000l; //XXX: prop for logEachXrows
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;
@@ -101,6 +109,9 @@ public abstract class AbstractImporter {
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_ENCODING = ".encoding";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_BATCH_MODE = ".batchmode";
+	static final String SUFFIX_BATCH_SIZE = ".batchsize";
+	
 	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
@@ -116,6 +127,8 @@ public abstract class AbstractImporter {
 		SUFFIX_INSERTSQL,
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
+		SUFFIX_BATCH_MODE,
+		SUFFIX_BATCH_SIZE,
 		SUFFIX_LOG_MALFORMED_LINE,
 		SUFFIX_X_COMMIT_EACH_X_ROWS
 	};
@@ -136,8 +149,17 @@ public abstract class AbstractImporter {
 		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
-		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, commitEachXrows);
+		useBatchUpdate = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchUpdateSize = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_BATCH_SIZE, batchUpdateSize);
+		
+		long defaultCommitEachXrows = commitStrategy==CommitStrategy.FILE?defaultCommitEachXrowsForFileStrategy:commitEachXrows;
+		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
+		
 		logMalformedLine = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
+		
+		if(useBatchUpdate && commitEachXrows>0 && (commitEachXrows%batchUpdateSize)!=0) {
+			log.warn("better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
+		}
 		
 		//set max failover id!
 		maxFailoverId = getMaxFailoverId();
@@ -166,6 +188,10 @@ public abstract class AbstractImporter {
 		this.conn = conn;
 	}
 	
+	public void setCommitStrategy(CommitStrategy commitStrategy) {
+		this.commitStrategy = commitStrategy;
+	}
+	
 	public List<String> getAuxSuffixes() {
 		List<String> ret = new ArrayList<String>();
 		ret.addAll(Arrays.asList(AUX_SUFFIXES));
@@ -179,9 +205,16 @@ public abstract class AbstractImporter {
 		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;
 		long filesImported = 0;
+		if(commitEachXrows>0 && commitStrategy!=CommitStrategy.FILE) {
+			log.warn("property '"+SUFFIX_X_COMMIT_EACH_X_ROWS+"' needs "+CommitStrategy.FILE+" commit strategy");
+			commitEachXrows = 0;
+		}
+		String loginfo = (maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"")+
+				(commitEachXrows>0?" [commit-size="+commitEachXrows+"]":"")+
+				(useBatchUpdate?" [batch-size="+batchUpdateSize+"]":"");
+		
 		if(importFile!=null) {
-			log.info("importing file: "+importFile+
-					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
+			log.info("importing file: "+importFile+loginfo);
 			ret = importFile();
 			filesImported++;
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
@@ -190,8 +223,7 @@ public abstract class AbstractImporter {
 			if(importDir==null) {
 				importDir = System.getProperty("user.dir");
 			}
-			log.info("importing files from dir: "+importDir+
-					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
+			log.info("importing files from dir: "+importDir+loginfo);
 			List<String> files = SQLRun.getFiles(importDir, importFiles);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
@@ -199,7 +231,7 @@ public abstract class AbstractImporter {
 			else {
 				for(String file: files) {
 					importFile = file;
-					log.debug("importing file: "+importFile);
+					log.debug("importing file: "+importFile+loginfo);
 					ret += importFile();
 					filesImported++;
 					addMapCount(aggCountsByFailoverId, countsByFailoverId);
@@ -207,8 +239,7 @@ public abstract class AbstractImporter {
 			}
 		}
 		else if(importURL!=null) {
-			log.info("importing URL: "+importURL+
-					(maxFailoverId>0?" [failoverstrategy="+failoverStrategy+"; maxfailoverid="+maxFailoverId+"]":"") );
+			log.info("importing URL: "+importURL+loginfo);
 			ret = importFile();
 			filesImported++;
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
@@ -239,6 +270,9 @@ public abstract class AbstractImporter {
 	long importFile() throws SQLException, InterruptedException, IOException {
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
+		lastOutputCountCommit = 0;
+		lastOutputCountLog = 0;
+		
 		//failoverId = 0;
 		IOCounter counter = countsByFailoverId.get(failoverId);
 		
@@ -317,6 +351,12 @@ public abstract class AbstractImporter {
 				} //while (importthisline)
 				
 			}
+			
+			cleanupStatement(counter);
+			if(commitStrategy==CommitStrategy.FILE) {
+				SQLRun.doCommit(conn);
+			}
+
 			//XXX: commit in follow mode? here?
 			//XXX: sleep only in follow mode?
 			if(follow) { Thread.sleep(sleepMilis); }
@@ -353,6 +393,9 @@ public abstract class AbstractImporter {
 		}
 		return countAllOut;
 	}
+	
+	long lastOutputCountCommit = 0;
+	long lastOutputCountLog = 0;
 	
 	void procLineInternal(String line, boolean is1stloop) throws SQLException {
 		//log.info("line["+processedLines+"]: "+line);
@@ -398,15 +441,28 @@ public abstract class AbstractImporter {
 		//log.info("insert-values: "+values);
 		
 		//log.info("insert["+processedLines+"/"+importedLines+"]: "+stmtStr);
-		//stmt.addBatch(); //XXX: batch insert?
-		int changedRows = stmt.executeUpdate();
-		counter.input++;
-		counter.output += changedRows;
-		if(commitEachXrows!=null && commitEachXrows>0 && (counter.output%commitEachXrows==0)) {
-			doCommit(conn);
+		//stmt.addBatch(); //XXXdone: batch insert? yes!
+		if(useBatchUpdate) {
+			stmt.addBatch();
+			counter.input++;
+			if((counter.input % batchUpdateSize) == 0) {
+				cleanupStatement(counter);
+			}
 		}
-		if(logEachXrows!=null && logEachXrows>0 && (counter.output%logEachXrows==0)) {
+		else {
+			int changedRows = stmt.executeUpdate();
+			counter.input++;
+			counter.output += changedRows;
+		}
+
+		if(commitEachXrows>0 && (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0)) {
+			//XXX commit size should be multiple of batch size?
+			SQLRun.doCommit(conn);
+			lastOutputCountCommit = counter.output;
+		}
+		if(logEachXrows>0 && (counter.output>lastOutputCountLog) && (counter.output%logEachXrows==0)) {
 			log.info("[exec-id="+execId+"] "+counter.output+" rows imported");
+			lastOutputCountLog = counter.output;
 		}
 	}
 	
@@ -449,8 +505,32 @@ public abstract class AbstractImporter {
 			log.info("insert sql"+(failoverId>0?"[failover="+failoverId+"]":"")+": "+sb.toString());
 			loggedStatementFailoverIds.add(failoverId);
 		}
+		
+		if(stmt!=null) {
+			cleanupStatement(countsByFailoverId.get(failoverId));
+		}
 		stmt = conn.prepareStatement(sb.toString());
 		//stmtStrPrep = sb.toString();
+	}
+	
+	void cleanupStatement(IOCounter counter) throws SQLException {
+		if(stmt==null) {
+			log.warn("null statement! in = "+counter.input);
+			//new NullPointerException().printStackTrace();
+			return;
+		}
+		
+		if(useBatchUpdate) {
+			int[] changedRowsArr = stmt.executeBatch();
+			int sum = 0;
+			for(int i=0;i<changedRowsArr.length;i++) {
+				sum += changedRowsArr[i];
+			}
+			counter.output += sum;
+			if(sum>0) {
+				logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum);
+			}
+		}
 	}
 	
 	int getMaxFailoverId() {
@@ -483,14 +563,6 @@ public abstract class AbstractImporter {
 		}
 		scan.useDelimiter(recordDelimiter);
 		return scan;
-	}
-	
-	static void doCommit(Connection conn) {
-		try {
-			conn.commit();
-		} catch (SQLException e) {
-			log.warn("error commiting: "+e);
-		}
 	}
 	
 	static final int MAX_LEVEL = 5;
