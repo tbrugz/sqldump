@@ -16,6 +16,7 @@ public class NonNullGetMap<K,V> implements Map<K,V> {
 		this.initialValueClass = initialValueClass;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public V get(Object key) { //(K key)
 		V v = map.get(key);

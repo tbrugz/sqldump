@@ -14,9 +14,9 @@ Utility to dump schema and data from a RDBMS. Features:
 SQLDump also has two subprojects:
 
 - **SQLRun**: runs SQL scripts from files - may be used for regenerating database from dumped SQL-scripts. 
-	See [sqlrun.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqlrun.template.properties) for more info 
+	See [sqlrun.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqlrun.template.properties) for more info 
 - **SQLDiff**: generates a diff from 2 schema models.
-	See [sqldiff.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldiff.template.properties) for more info 
+	See [sqldiff.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldiff.template.properties) for more info 
 
 Author: Telmo Brugnara <[tbrugz@gmail.com](mailto:tbrugz@gmail.com)>
 
@@ -52,7 +52,7 @@ SQLDump processing consists of:
 - `mondrianschema.MondrianSchemaDumper` - Generates a Star/Snowflake [Mondrian Schema](http://mondrian.pentaho.com/) based on schema model
 - `xtradumpers.AlterSchemaSuggester` - Generates suggestions of SQL-scripts for altering the schema model (beta)
 
-All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties)
+All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldump.template.properties)
 for more info.
 
 Usage examples can be found at [doc/examples](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/examples).
