@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -45,7 +46,7 @@ public class SQLRun {
 	public static enum CommitStrategy {
 		AUTO_COMMIT,
 		//STATEMENT, //not implemented yet
-		//FILE, //not implemented yet
+		FILE,
 		EXEC_ID,
 		RUN,
 		NONE
@@ -88,7 +89,7 @@ public class SQLRun {
 	
 	Properties papp = new ParametrizedProperties();
 	Connection conn;
-	CommitStrategy commitStrategty = CommitStrategy.RUN;
+	CommitStrategy commitStrategy = CommitStrategy.FILE;
 	
 	void end() throws SQLException {
 		if(conn!=null) {
@@ -115,6 +116,7 @@ public class SQLRun {
 		StmtProc srproc = new StmtProc();
 		srproc.setConn(conn);
 		srproc.setPapp(papp);
+		srproc.setCommitStrategy(commitStrategy);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
@@ -144,8 +146,11 @@ public class SQLRun {
 					String dir = getDir(procId);
 					String fileRegex = papp.getProperty(key);
 					List<String> files = getFiles(dir, fileRegex);
+					int fileCount = 0;
 					for(String file: files) {
+						if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
 						srproc.execFile(file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+						fileCount++;
 					}
 					/*if(dir==null) {
 						log.warn("no '.dir' property...");
@@ -179,33 +184,28 @@ public class SQLRun {
 			// .import
 			else if(key.endsWith(SUFFIX_IMPORT)) {
 				String importType = papp.getProperty(key);
-				long imported = 0;
+				AbstractImporter importer = null;
 				//csv
 				if("CSV".equalsIgnoreCase(importType)) {
-					CSVImporter importer = new CSVImporter();
-					importer.setExecId(procId);
-					importer.setProperties(papp);
-					importer.setConnection(conn);
-					try {
-						imported = importer.importData();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					importer = new CSVImporter();
 				}
 				//regex
 				else if("REGEX".equalsIgnoreCase(importType)) {
-					RegexImporter importer = new RegexImporter();
-					importer.setExecId(procId);
-					importer.setProperties(papp);
-					importer.setConnection(conn);
-					try {
-						imported = importer.importData();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					importer = new RegexImporter();
 				}
 				else {
 					log.warn("unknown import type: "+importType);
+					continue;
+				}
+				
+				importer.setExecId(procId);
+				importer.setProperties(papp);
+				importer.setConnection(conn);
+				long imported = 0;
+				try {
+					imported = importer.importData();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 			// ...else
@@ -220,13 +220,15 @@ public class SQLRun {
 			}
 			
 			if(isExecId) {
-				if(commitStrategty==CommitStrategy.EXEC_ID) { doCommit(); }
+				if(commitStrategy==CommitStrategy.EXEC_ID || commitStrategy==CommitStrategy.FILE) {
+					doCommit();
+				}
 			}
 		}
 		long totalTime = System.currentTimeMillis() - initTime;
 		log.info("...end processing, total time = "+totalTime+"ms");
 		
-		if(commitStrategty==CommitStrategy.RUN) { doCommit(); }
+		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
 	}
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
@@ -261,8 +263,17 @@ public class SQLRun {
 	}
 	
 	void doCommit() throws SQLException {
-		log.debug("committing...");
-		conn.commit();
+		doCommit(conn);
+	}
+	
+	public static void doCommit(Connection conn) {
+		try {
+			//log.debug("committing...");
+			conn.commit();
+			log.debug("committed!");
+		} catch (SQLException e) {
+			log.warn("error commiting: "+e);
+		}
 	}
 
 	static String getExecId(String key, String prefix) {
@@ -273,10 +284,11 @@ public class SQLRun {
 		else { return key.substring(preflen, end); }
 	}
 	
-	static CommitStrategy getCommitStrategy(String commit) {
-		CommitStrategy cs = CommitStrategy.RUN;
+	static CommitStrategy getCommitStrategy(String commit, CommitStrategy defaultStrategy) {
+		CommitStrategy cs = defaultStrategy;
 		if(commit==null) {}
 		else if(commit.equals("autocommit")) { cs = CommitStrategy.AUTO_COMMIT; }
+		else if(commit.equals("file")) { cs = CommitStrategy.FILE; }
 		else if(commit.equals("execid")) { cs = CommitStrategy.EXEC_ID; }
 		else if(commit.equals("run")) { cs = CommitStrategy.RUN; }
 		else if(commit.equals("none")) { cs = CommitStrategy.NONE; }
@@ -293,8 +305,8 @@ public class SQLRun {
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
 		
-		commitStrategty = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY) );
-		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategty==CommitStrategy.AUTO_COMMIT);
+		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
+		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 	}
 	

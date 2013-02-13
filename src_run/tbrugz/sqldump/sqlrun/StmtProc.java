@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.IOUtil;
 
 public class StmtProc {
@@ -23,6 +24,7 @@ public class StmtProc {
 	
 	Connection conn;
 	Properties papp;
+	CommitStrategy commitStrategy;
 
 	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException, SQLException {
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
@@ -185,6 +187,9 @@ public class StmtProc {
 	}
 	public void setPapp(Properties papp) {
 		this.papp = papp;
+	}
+	public void setCommitStrategy(CommitStrategy commitStrategy) {
+		this.commitStrategy = commitStrategy;
 	}
 	
 }
