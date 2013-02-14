@@ -50,7 +50,7 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 			}
 			eo.returnType = rs.getString(3);
 			eo.externalLanguage = rs.getString(4);
-			eo.body = rs.getString(5);
+			eo.setBody( rs.getString(5) );
 			
 			//parameters!
 			String[] params = (String[]) rs.getArray(6).getArray();

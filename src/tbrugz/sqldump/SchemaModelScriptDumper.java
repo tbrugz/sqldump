@@ -277,7 +277,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		//ExecutableObjects
 		for(ExecutableObject eo: schemaModel.getExecutables()) {
 			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE,
-			if(eo.body!=null) {
+			if(eo.isDumpable()) {
 				categorizedOut(eo.getSchemaName(), eo.getName(), eo.getType(), 
 					"-- Executable: "+eo.getType()+" "+eo.getName()+"\n"
 					+eo.getDefinition(dumpWithSchemaName)+"\n");

@@ -6,6 +6,8 @@ import java.util.List;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 
 public class InformationSchemaRoutine extends ExecutableObject {
+	private static final long serialVersionUID = 1L;
+	
 	public String returnType;
 	public String externalLanguage;
 	public List<String> parameterNames = new ArrayList<String>();
@@ -27,7 +29,7 @@ public class InformationSchemaRoutine extends ExecutableObject {
 		return "create or replace "+getType()+" "+getName()+"("
 				+(sb!=null?sb.toString():"")
 				+")\n  returns "+returnType+" as \n$BODY$"
-				+body+"$BODY$"
+				+getBody()+"$BODY$"
 				+"\n  language "+externalLanguage+";";
 	}
 }

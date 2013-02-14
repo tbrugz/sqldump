@@ -30,6 +30,10 @@ public abstract class DBIdentifiable implements NamedDBObject {
 	
 	//XXX: getDefinition() should have 'sql dialect' param?
 	public abstract String getDefinition(boolean dumpSchemaName);
+	
+	public boolean isDumpable() {
+		return true;
+	}
 
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {

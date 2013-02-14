@@ -161,7 +161,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				}
 				eo.returnType = rs.getString(3);
 				eo.externalLanguage = rs.getString(4);
-				eo.body = rs.getString(5);
+				eo.setBody( rs.getString(5) );
 				count++;
 			}
 			eo.parameterNames.add(rs.getString(6));

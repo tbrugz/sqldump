@@ -175,7 +175,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(line==1) {
 				//end last object
 				if(eo!=null) {
-					eo.body = sb.toString();
+					eo.setBody( sb.toString() );
 					model.getExecutables().add(eo);
 					countExecutables++;
 				}
@@ -202,7 +202,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			count++;
 		}
 		if(sb!=null) {
-			eo.body = sb.toString();
+			eo.setBody( sb.toString() );
 			model.getExecutables().add(eo);
 			countExecutables++;
 		}
