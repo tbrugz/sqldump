@@ -53,8 +53,9 @@ public class SQLRun {
 		NONE
 	} 
 	
-	static Log log = LogFactory.getLog(SQLRun.class);
-	static Log logCommit = LogFactory.getLog(SQLRun.class.getName()+"-commit");
+	static final Log log = LogFactory.getLog(SQLRun.class);
+	static final Log logCommit = LogFactory.getLog(SQLRun.class.getName()+"-commit");
+	public static final Log logBatch = LogFactory.getLog(SQLRun.class.getName()+"-batch");
 
 	public static final String STDIN = "<stdin>"; 
 	
@@ -66,24 +67,26 @@ public class SQLRun {
 	public static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
 
 	//exec suffixes
-	static String SUFFIX_FILE = ".file";
-	static String SUFFIX_FILES = ".files";
-	static String SUFFIX_STATEMENT = ".statement";
-	static String SUFFIX_IMPORT = ".import";
+	static final String SUFFIX_FILE = ".file";
+	static final String SUFFIX_FILES = ".files";
+	static final String SUFFIX_STATEMENT = ".statement";
+	static final String SUFFIX_IMPORT = ".import";
 
 	//aux suffixes
-	static String SUFFIX_DIR = ".dir";
-	static String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
-	static String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
-	static String SUFFIX_PARAM = ".param";
+	static final String SUFFIX_DIR = ".dir";
+	static final String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
+	static final String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
+	static final String SUFFIX_PARAM = ".param";
+	public static final String SUFFIX_BATCH_MODE = ".batchmode";
+	public static final String SUFFIX_BATCH_SIZE = ".batchsize";
 	
 	//properties
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
-	static String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
+	static final String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 
 	//suffix groups
-	static String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT };
-	static String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM };
+	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT };
+	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, SUFFIX_BATCH_MODE, SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
 	
 	//other/reserved props

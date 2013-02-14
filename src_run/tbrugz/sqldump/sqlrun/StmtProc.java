@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -16,17 +17,25 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.Utils;
 
 public class StmtProc {
 	static Log log = LogFactory.getLog(StmtProc.class);
 	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
 	
+	boolean useBatchUpdate = false;
+	long batchSize = 1000;
+	
 	Connection conn;
 	Properties papp;
 	CommitStrategy commitStrategy;
+	
+	long batchExecCounter = 0;
+	Statement batchStmt = null;
 
-	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException, SQLException {
+	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException {
+		setupProperties();
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		FileReader reader = new FileReader(filePath);
 		Writer logerror = null;
@@ -77,6 +86,13 @@ public class StmtProc {
 				logRow.info(countExec+" statements processed");
 			}
 		}
+		try {
+			urowsTotal += closeStatement();
+		} catch (SQLException e) {
+			logStmt.warn("error closing statement (batch mode?): "+e);
+			logStmt.debug("error closing statement (batch mode?)",e);
+		}
+		
 		long totalTime = System.currentTimeMillis() - initTime;
 		//commit?
 		double statementsPerSec = Double.NaN;
@@ -132,8 +148,10 @@ public class StmtProc {
 	}
 	
 	public int execStatement(String stmtStr) throws IOException {
+		setupProperties();
 		try {
 			int urows = execStatementInternal(stmtStr);
+			urows += closeStatement();
 			log.info("statement exec: updates = "+urows);
 			log.debug("statement: "+stmtStr);
 			return urows;
@@ -152,11 +170,32 @@ public class StmtProc {
 		
 		logStmt.debug("executing sql: "+stmtStr);
 		try {
-			PreparedStatement stmt = conn.prepareStatement(stmtStr);
-			setParameters(stmt);
-			int urows = stmt.executeUpdate();
-			logStmt.debug("updated "+urows+" rows");
-			return urows;
+			if(useBatchUpdate) {
+				if(batchStmt==null) {
+					batchStmt = conn.createStatement();
+				}
+				batchStmt.addBatch(replaceParameters(stmtStr));
+				batchExecCounter++;
+				
+				if((batchExecCounter%batchSize)==0) {
+					int[] updateCounts = batchStmt.executeBatch();
+					int updateCount = Util.sumInts(updateCounts);
+					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
+					SQLRun.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
+					return updateCount;
+				}
+				else {
+					logStmt.debug("addBatch() executed [count="+batchExecCounter+"]");
+					return 0;
+				}
+			}
+			else {
+				PreparedStatement stmt = conn.prepareStatement(stmtStr);
+				setParameters(stmt);
+				int urows = stmt.executeUpdate();
+				logStmt.debug("updated "+urows+" rows");
+				return urows;
+			}
 		}
 		catch(SQLException e) {
 			try {
@@ -181,6 +220,43 @@ public class StmtProc {
 			else { return; }
 			i++;
 		}
+	}
+
+	String replaceParameters(String stmt) throws SQLException {
+		int i=1;
+		String retStmt = stmt;
+		while(true) {
+			String key = SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String param = papp.getProperty(key);
+			if(param!=null) {
+				log.debug("param #"+i+"/"+key+": "+param);
+				retStmt = retStmt.replaceFirst("?", param);
+			}
+			else { return retStmt; }
+			i++;
+		}
+	}
+
+	void setupProperties() {
+		if(papp==null) {
+			log.warn("null properties!");
+			return;
+		}
+		useBatchUpdate = Utils.getPropBool(papp, SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchSize = Utils.getPropLong(papp, SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_BATCH_SIZE, batchSize);
+	}
+	
+	int closeStatement() throws SQLException {
+		if(batchStmt!=null) {
+			int[] updateCounts = batchStmt.executeBatch();
+			int updateCount = Util.sumInts(updateCounts);
+			logStmt.debug("executeBatch(): "+updateCount+" rows updated");
+			
+			batchStmt.close(); batchStmt = null; batchExecCounter = 0;
+			
+			return updateCount;
+		}
+		return 0;
 	}
 	
 	public Connection getConn() {
