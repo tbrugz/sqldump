@@ -113,18 +113,30 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {
+					if(!cOrig.isDumpable()) {
+						log.debug("original/new object not dumpeable: "+cOrig);
+						continue;
+					}
 					log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
 					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
 					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
 				}
 			}
 			else {
+				if(!cOrig.isDumpable()) {
+					log.debug("original object not dumpeable: "+cOrig);
+					continue;
+				}
 				log.debug("drop "+objType+": orig: "+cOrig);
 				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, null, origOwnerTableName));
 			}
 		}
 		for(DBIdentifiable cNew: listNew) {
 			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
+			if(!cNew.isDumpable()) {
+				log.debug("new object not dumpeable: "+cNew);
+				continue;
+			}
 			log.debug("add "+objType+": new: "+cNew);
 			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, null, cNew, newOwnerTableName));
 		}
