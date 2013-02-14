@@ -32,12 +32,13 @@ import tbrugz.sqldump.util.Utils;
  * XXX: option for numeric/alphanumeric proc-ids
  * TODOne: one statement per file option -> split-true|false
  * XXXxx: statements 'split-by' option
- * TODO: commit/autocommit? when? each X statements? config per processing? (autocommit|statement|file|execid|run)?
+ * ~TODO: commit/autocommit? when? each X statements? config per processing? (autocommit|statement|file|execid|run)?
  * XXX: each procid may have its own commit strategy?
  * XXX: rollback strategy? savepoint(s)?
- * XXX: CSV importer? Fixed Column importer? FC importer with spec...
- * XXX: Regex importer (parses log lines, ...)
- * XXX: remove dependency from CSVImporter
+ * XXXdone: CSV importer
+ * XXX: Fixed Column importer? FC importer with spec...
+ * XXXdone: Regex importer (parses log lines, ...)
+ * XXX: remove dependency from CSVImporter, RegexImporter
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
@@ -174,13 +175,7 @@ public class SQLRun {
 			// .statement
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
 				String stmtStr = papp.getProperty(key);
-				try {
-					int urows = srproc.execStatement(stmtStr);
-				}
-				catch(SQLException e) {
-					log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
-					log.debug("error executing statement", e);
-				}
+				int urows = srproc.execStatement(stmtStr);
 			}
 			// .import
 			else if(key.endsWith(SUFFIX_IMPORT)) {

@@ -131,11 +131,18 @@ public class StmtProc {
 		return logerror;
 	}
 	
-	public int execStatement(String stmtStr) throws IOException, SQLException {
-		int urows = execStatementInternal(stmtStr);
-		log.info("statement exec: updates = "+urows);
-		log.debug("statement: "+stmtStr);
-		return urows;
+	public int execStatement(String stmtStr) throws IOException {
+		try {
+			int urows = execStatementInternal(stmtStr);
+			log.info("statement exec: updates = "+urows);
+			log.debug("statement: "+stmtStr);
+			return urows;
+		}
+		catch(SQLException e) {
+			log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
+			log.debug("error executing statement", e);
+			return 0;
+		}
 	}
 	
 	int execStatementInternal(String stmtStr) throws IOException, SQLException {
