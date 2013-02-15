@@ -29,7 +29,7 @@ public class StmtProc {
 	
 	Connection conn;
 	Properties papp;
-	CommitStrategy commitStrategy;
+	//CommitStrategy commitStrategy;
 	
 	long batchExecCounter = 0;
 	Statement batchStmt = null;
@@ -259,20 +259,14 @@ public class StmtProc {
 		return 0;
 	}
 	
-	public Connection getConn() {
-		return conn;
-	}
 	public void setConn(Connection conn) {
 		this.conn = conn;
-	}
-	public Properties getPapp() {
-		return papp;
 	}
 	public void setPapp(Properties papp) {
 		this.papp = papp;
 	}
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
-		this.commitStrategy = commitStrategy;
+		//this.commitStrategy = commitStrategy;
 	}
 	
 }

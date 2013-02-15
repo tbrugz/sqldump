@@ -113,7 +113,7 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	 * - table_name + initials(col_names) + UKI/FKI  //seems better
 	 * - 2initials(table) + initials(col_names) + UKI/FKI  //...
 	 */
-	//FIXME: simpleOut has no reference to schemaName
+	//FIXME: simpleOut() has no reference to schemaName - see CategorizedOut
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(schemaModel==null) {

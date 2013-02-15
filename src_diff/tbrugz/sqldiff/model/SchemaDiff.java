@@ -250,6 +250,7 @@ public class SchemaDiff implements Diff {
 			String schemaName = d.getNamedObject()!=null?d.getNamedObject().getSchemaName():"";
 			log.debug("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
 					+" ; "+schemaName+"; "+d.getNamedObject().getName());
+			//XXX: if diff is ADD+EXECUTABLE, not to include ';'?
 			out.categorizedOut(d.getDiff()+";\n", schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
 			count++;
 		}
@@ -293,6 +294,7 @@ public class SchemaDiff implements Diff {
 		List<Diff> diffs = getDiffList();
 
 		for(Diff d: diffs) {
+			//XXX: if diff is ADD+EXECUTABLE, not to include ';'?
 			sb.append(d.getDiff()+";\n\n");
 		}
 

@@ -18,6 +18,8 @@ import org.apache.commons.logging.LogFactory;
  * XXXxx: method for setting substitution parameters? like:
  *    outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
  *       .replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}");
+ * TODO: add predefined (property) comment to new created files
+ * XXX: add method alreadyOpened()/wouldCreateNewFile()?
  */
 public class CategorizedOut {
 	static final Log log = LogFactory.getLog(CategorizedOut.class);
