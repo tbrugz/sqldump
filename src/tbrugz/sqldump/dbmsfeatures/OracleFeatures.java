@@ -165,7 +165,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
-		int count = 0;
+		int linecount = 0;
 		int countExecutables = 0;
 		ExecutableObject eo = null;
 		StringBuffer sb = null;
@@ -176,8 +176,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//end last object
 				if(eo!=null) {
 					eo.setBody( sb.toString() );
-					model.getExecutables().add(eo);
-					countExecutables++;
+					boolean added = addExecutableToModel(model, eo);
+					if(added) { countExecutables++; }
 				}
 				//new object
 				eo = new ExecutableObject();
@@ -199,20 +199,37 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				}
 			}
 			sb.append(rs.getString(4)); //+"\n"
-			count++;
+			linecount++;
 		}
 		if(sb!=null) {
 			eo.setBody( sb.toString() );
-			model.getExecutables().add(eo);
-			countExecutables++;
+			boolean added = addExecutableToModel(model, eo);
+			if(added) { countExecutables++; }
 		}
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"]");
 		
 		//grabs metadata
 		grabDBExecutablesMetadata(model, schemaPattern, conn);
+	}
+	
+	boolean addExecutableToModel(SchemaModel model, ExecutableObject eo) {
+		boolean added = model.getExecutables().add(eo);
+		if(!added) {
+			boolean b1 = model.getExecutables().remove(eo);
+			boolean b2 = model.getExecutables().add(eo);
+			added = b1 && b2;
+			if(added) {
+				log.info("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
+			}
+			else {
+				log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model; removed:"+b1+" ; added:"+b2);
+			}
+			//log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model");
+		}
+		return added;
 	}
 	
 	void grabDBExecutablesMetadata(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
