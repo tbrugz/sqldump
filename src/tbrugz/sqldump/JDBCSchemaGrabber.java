@@ -191,7 +191,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		}
 
 		if(schemaPattern==null) {
-			log.warn("schema name undefined & no suggestion avaiable, aborting...");
+			log.error("schema name undefined & no suggestion avaiable, aborting...");
 			return null;
 		}
 		
@@ -330,7 +330,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 		}
 		catch(Exception e) {
-			log.warn("error grabbing schema: "+e);
+			log.error("error grabbing schema: "+e);
 			log.info("error grabbing schema", e);
 			return null;
 		}
@@ -455,7 +455,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 				//tableNamesForDataDump.add(tableName);
 			}
 			catch(OutOfMemoryError oome) {
-				log.warn("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
+				log.error("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
 				throw oome;
 			}
 			catch(SQLException sqle) {
@@ -936,7 +936,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		String[] excludes = filter.split("\\|");
 		for(String ex: excludes) {
 			String pattern = ex.trim();
-			log.info("added ignore filter: "+pattern);
+			log.info("added table ignore filter: "+pattern);
 			excludeFilters.add(Pattern.compile(pattern));
 			//count++;
 		}

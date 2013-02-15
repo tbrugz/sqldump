@@ -41,7 +41,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			//jc = JAXBContext.newInstance( "tbrugz.sqldump" );
 			jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
 		} catch (JAXBException e) {
-			log.warn("impossible to create JAXBContext: "+e);
+			log.error("impossible to create JAXBContext: "+e);
 			e.printStackTrace();
 		}
 	}
@@ -70,11 +70,11 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
-			log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			log.error("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
 			return;
 		}
 		if(schemaModel==null) {
-			log.warn("schemaModel is null!");
+			log.error("schemaModel is null!");
 			return;
 		}
 
@@ -87,7 +87,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			log.info("xml schema model dumped to '"+fileOutput+"'");
 		}
 		catch(Exception e) {
-			log.warn("error dumping schema: "+e);
+			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 		}
 	}

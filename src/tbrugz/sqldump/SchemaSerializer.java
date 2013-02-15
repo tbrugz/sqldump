@@ -55,7 +55,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
-			log.warn("serialization output file ["+PROP_SERIALIZATION_OUTFILE+"] not defined");
+			log.error("serialization output file ["+PROP_SERIALIZATION_OUTFILE+"] not defined");
 			return;
 		}
 		
@@ -66,7 +66,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 			log.info("schema model serialized to '"+fileOutput+"'");
 		}
 		catch(IOException e) {
-			log.warn("error dumping schema: "+e);
+			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 		}
 	}
@@ -74,7 +74,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	@Override
 	public SchemaModel grabSchema() {
 		if(fileInput==null) {
-			log.warn("serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined");
+			log.error("serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined");
 			return null;
 		}
 
@@ -86,12 +86,12 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 			return sm;
 		}
 		catch (ClassNotFoundException e) {
-			log.warn("error grabbing schema: "+e);
+			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
 			return null;
 		}
 		catch(IOException e) {
-			log.warn("error grabbing schema: "+e);
+			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
 			return null;
 		}

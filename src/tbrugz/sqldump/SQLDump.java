@@ -245,7 +245,7 @@ public class SQLDump {
 				DBMSResources.instance().updateDbId(sm.getSqlDialect());
 			}
 			else {
-				log.warn("schema grabber class '"+grabClassName+"' not found");
+				log.error("schema grabber class '"+grabClassName+"' not found");
 			}
 		}
 		else {
@@ -279,7 +279,7 @@ public class SQLDump {
 					schemaDumper.dumpSchema(sm);
 				}
 				else {
-					log.warn("Error initializing dump class: '"+dumpClass+"'");
+					log.error("Error initializing dump class: '"+dumpClass+"'");
 				}
 			}
 		}
@@ -318,7 +318,7 @@ public class SQLDump {
 				sqlproc.process();
 			}
 			else {
-				log.warn("Error initializing processing class: '"+procClass+"'");
+				log.error("Error initializing processing class: '"+procClass+"'");
 			}
 		}
 	}
