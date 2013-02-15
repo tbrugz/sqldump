@@ -56,7 +56,7 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
 		}
-		return "alter table "+DBObject.getFinalQualifiedName(table, true)+" "+colChange;
+		return "alter table "+DBObject.getFinalName(table, true)+" "+colChange;
 	}
 
 	/*public static List<TableColumnDiff> tableDiffs(Table origTable, Table newTable) {

@@ -57,7 +57,7 @@ public class View extends DBObject implements Relation {
 		}
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
-				+ getFinalQualifiedName(dumpSchemaName)
+				+ getFinalName(dumpSchemaName)
 				+ (sbConstraints.length()>0?" (\n\t"
 						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
 						+ sbConstraints.toString()+"\n)":"")

@@ -48,7 +48,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 							+ (addComments?getComment(ident, "new: "):"");
 				}
 				return "drop "
-					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalQualifiedName(previousIdent, dumpSchemaName)
+					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
 					+ (addComments?getComment(ident, "new: "):"");
 		}
 		throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
@@ -94,7 +94,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		if(dbident==null) return "";
 		return "\n/* "+comment
 				+ DBIdentifiable.getType4Diff(dbident).desc()+" "
-				+ DBObject.getFinalQualifiedName(dbident, dumpSchemaName)
+				+ DBObject.getFinalName(dbident, dumpSchemaName)
 				+ " */";
 	}
 	

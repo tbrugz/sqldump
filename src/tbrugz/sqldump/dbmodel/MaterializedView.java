@@ -9,7 +9,7 @@ public class MaterializedView extends View {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "materialized view "
-				+ getFinalQualifiedName(dumpSchemaName) + " as \n" + query;
+				+ getFinalName(dumpSchemaName) + " as \n" + query;
 	}
 	
 	@Override

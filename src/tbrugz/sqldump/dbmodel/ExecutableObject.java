@@ -30,9 +30,8 @@ public class ExecutableObject extends DBObject {
 		return (dumpCreateOrReplace?"create or replace ":"create ") 
 				+ (body!=null ? body : 
 					(
-						(getSchemaName()!=null?sqlId.get(getSchemaName())+".":"")+
-						(packageName!=null?sqlId.get(packageName)+".":"")+
-						sqlId.get(getName())+" /* has no body? */")
+						getType()+" "+
+						getFinalQualifiedName()+" /* has no body? */")
 					);
 	}
 	
@@ -46,6 +45,20 @@ public class ExecutableObject extends DBObject {
 	@Override
 	public boolean isDumpable() {
 		return body!=null || packageName==null; //XXX: remove packageName==null?
+	}
+	
+	@Override
+	public String getFinalQualifiedName() {
+		return (getSchemaName()!=null?sqlId.get(getSchemaName())+".":"")+
+				(packageName!=null?sqlId.get(packageName)+".":"")+
+				sqlId.get(getName());
+	}
+
+	@Override
+	public String getQualifiedName() {
+		return (getSchemaName()!=null?getSchemaName()+".":"")+
+				(packageName!=null?packageName+".":"")+
+				getName();
 	}
 	
 	@Override

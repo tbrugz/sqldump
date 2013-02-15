@@ -236,7 +236,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 				}
 			}
 
-			String tableName = DBObject.getFinalQualifiedName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
+			String tableName = DBObject.getFinalName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
 			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
@@ -303,7 +303,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 		if(!dumpGrantsWithReferencingTable) {
 			//tables
 			for(Table table: schemaModel.getTables()) {
-				String tableName = DBObject.getFinalQualifiedName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
+				String tableName = DBObject.getFinalName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
 				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.GRANT, grantOutput);
@@ -313,7 +313,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 			//TODO: how to dump exec grants if 'dumpGrantsWithReferencingTable' is true?
 			//XXX: compactGrantDump for Executable's Grants doesn't make sense, since there is only one type of privilege for Executables (EXECUTE) (for now?)
 			for(ExecutableObject eo: schemaModel.getExecutables()) {
-				String eoName = DBObject.getFinalQualifiedName(eo.getSchemaName(), eo.getName(), dumpWithSchemaName);
+				String eoName = DBObject.getFinalName(eo.getSchemaName(), eo.getName(), dumpWithSchemaName);
 				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
 				String grantOutput = compactGrantDump(eo.grants, eoName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
@@ -337,7 +337,7 @@ public class SchemaModelScriptDumper implements SchemaModelDumper {
 	}
 	
 	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {
-		String fkTableName = DBObject.getFinalQualifiedName(fk.getFkTableSchemaName(), fk.getFkTable(), dumpWithSchemaName);
+		String fkTableName = DBObject.getFinalName(fk.getFkTableSchemaName(), fk.getFkTable(), dumpWithSchemaName);
 		return
 			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
 			+"alter table "+fkTableName

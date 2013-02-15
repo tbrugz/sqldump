@@ -109,7 +109,7 @@ public class FK extends DBIdentifiable implements Comparable<FK>, Serializable {
 		return "constraint "+DBObject.getFinalIdentifier(getName())
 			+" foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+whitespace+"references "
-			+DBObject.getFinalQualifiedName(pkTableSchemaName, pkTable, dumpWithSchemaName)
+			+DBObject.getFinalName(pkTableSchemaName, pkTable, dumpWithSchemaName)
 			+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+(updateRule!=null && updateRule!=UpdateRule.NO_ACTION?" on update "+updateRule:"")
 			+(deleteRule!=null && deleteRule!=UpdateRule.NO_ACTION?" on delete "+deleteRule:"")

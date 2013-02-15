@@ -57,7 +57,7 @@ public class Table extends DBObject implements Relation {
 	
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
-		String tableName = getFinalQualifiedName(dumpWithSchemaName);
+		String tableName = getFinalName(dumpWithSchemaName);
 
 		StringBuffer sb = new StringBuffer();
 		//Table
@@ -263,7 +263,7 @@ public class Table extends DBObject implements Relation {
 		String tableComment = rel.getRemarks();
 		if(tableComment!=null && !tableComment.trim().equals("")) {
 			tableComment = tableComment.replaceAll("'", "''");
-			sb.append("comment on table "+DBObject.getFinalQualifiedName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
+			sb.append("comment on table "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
 		}
 		return sb.toString();
 	}
@@ -279,7 +279,7 @@ public class Table extends DBObject implements Relation {
 					//XXXdone: escape comment
 					comment = comment.replaceAll("'", "''");
 					if(commentCount>0) { sb.append(";\n"); }
-					sb.append("comment on column "+DBObject.getFinalQualifiedName(rel, dumpSchemaName)+"."+DBObject.getFinalIdentifier(c.name)+" is '"+comment+"'");
+					sb.append("comment on column "+DBObject.getFinalName(rel, dumpSchemaName)+"."+DBObject.getFinalIdentifier(c.name)+" is '"+comment+"'");
 					commentCount++;
 				}
 			}

@@ -29,10 +29,10 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 	}
 
 	public String getFinalQualifiedName() {
-		return getFinalQualifiedName(true);
+		return getFinalName(true);
 	}
 	
-	public String getFinalQualifiedName(boolean dumpSchemaName) {
+	public String getFinalName(boolean dumpSchemaName) {
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
 	}
@@ -49,12 +49,12 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 		return sqlIddecorator.get(id);
 	}
 	
-	public static String getFinalQualifiedName(NamedDBObject dbobject, boolean dumpSchemaName) {
+	public static String getFinalName(NamedDBObject dbobject, boolean dumpSchemaName) {
 		return ((dumpSchemaName && dbobject.getSchemaName()!=null)?
 				sqlIddecorator.get(dbobject.getSchemaName())+".":"")+sqlIddecorator.get(dbobject.getName());
 	}
 
-	public static String getFinalQualifiedName(String schemaName, String name, boolean dumpSchemaName) {
+	public static String getFinalName(String schemaName, String name, boolean dumpSchemaName) {
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
 	}
