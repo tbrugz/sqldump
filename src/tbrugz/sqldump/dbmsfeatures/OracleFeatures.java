@@ -222,12 +222,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			boolean b2 = model.getExecutables().add(eo);
 			added = b1 && b2;
 			if(added) {
-				log.info("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
+				log.debug("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
 			}
 			else {
-				log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model; removed:"+b1+" ; added:"+b2);
+				log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model [removed: "+b1+" ; added: "+b2+"]");
 			}
-			//log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model");
 		}
 		return added;
 	}
@@ -425,8 +424,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(idx==null || !idxName.equals(idx.getName())) {
 				//end last object
 				if(idx!=null) {
-					model.getIndexes().add(idx);
-					idxCount++;
+					boolean added = addIndexToModel(model, idx);
+					if(added) { idxCount++; }
 				}
 				//new object
 				idx = new Index();
@@ -443,13 +442,25 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			colCount++;
 		}
 		if(idx!=null) {
-			model.getIndexes().add(idx);
-			idxCount++;
+			boolean added = addIndexToModel(model, idx);
+			if(added) { idxCount++; }
 		}
 		rs.close();
 		st.close();
 		
 		log.info("["+schemaPattern+"]: "+idxCount+" indexes grabbed [colcount="+colCount+"]");
+	}
+	
+	boolean grabIndexesFromUnkownTables = false;
+	boolean addIndexToModel(SchemaModel model, Index idx) {
+		if(!grabIndexesFromUnkownTables) {
+			Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, idx.getSchemaName(), idx.tableName);
+			if(t==null) {
+				log.debug("table '"+idx.getSchemaName()+"."+idx.tableName+"' not found in model, index "+idx.getName()+" won't be grabbed");
+				return false;
+			}
+		}
+		return model.getIndexes().add(idx);
 	}
 	
 	static void setIndexType(Index idx, String typeStr) {
