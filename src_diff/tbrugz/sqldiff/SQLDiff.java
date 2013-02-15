@@ -32,15 +32,15 @@ import tbrugz.sqldump.util.Utils;
  * XXX: output diff by change type
  * XXX: change: 'from'->'old', 'to'->'new' ? or older/newer? original/final? source/target?
  * 
- * XXX: option: [ignore|do not ignore] case; ignore schema name 
+ * XXX: option: [ignore|do not ignore] case; ignore schema name
  */
 public class SQLDiff {
 	
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
 	
 	public static final String PROP_PREFIX = "sqldiff";
-	public static final String PROP_FROM = PROP_PREFIX+".from";
-	public static final String PROP_TO = PROP_PREFIX+".to";
+	public static final String PROP_SOURCE = PROP_PREFIX+".source";
+	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 
 	static Log log = LogFactory.getLog(SQLDiff.class);
@@ -91,15 +91,15 @@ public class SQLDiff {
 		SchemaModelGrabber toSchemaGrabber = null;
 		
 		//from
-		fromSchemaGrabber = initGrabber("from", PROP_FROM, prop);
+		fromSchemaGrabber = initGrabber("source", PROP_SOURCE, prop);
 		
 		//to
-		toSchemaGrabber = initGrabber("to", PROP_TO, prop);
+		toSchemaGrabber = initGrabber("target", PROP_TARGET, prop);
 		
 		//grab schemas
-		log.info("grabbing 'from' model");
+		log.info("grabbing 'source' model");
 		SchemaModel fromSM = fromSchemaGrabber.grabSchema();
-		log.info("grabbing 'to' model");
+		log.info("grabbing 'target' model");
 		SchemaModel toSM = toSchemaGrabber.grabSchema();
 		
 		//XXX: option to set dialect from properties?
@@ -137,9 +137,9 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
-	static SchemaModelGrabber initGrabber(String targetName, String propKey, Properties prop) throws Exception {
+	static SchemaModelGrabber initGrabber(String grabberLabel, String propKey, Properties prop) throws Exception {
 		String grabberId = prop.getProperty(propKey);
-		log.info("target '"+targetName+"' ["+grabberId+"] init");
+		log.info(grabberLabel+" model ["+grabberId+"] init");
 		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
 		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
 		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
