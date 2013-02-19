@@ -107,23 +107,28 @@ public class SQLUtils {
 			} 
 			
 			Properties p = new Properties();
-			p.setProperty(CONN_PROP_USER, papp.getProperty(propsPrefix+SUFFIX_USER, ""));
+			String user = papp.getProperty(propsPrefix+SUFFIX_USER, "");
+			p.setProperty(CONN_PROP_USER, user);
 			p.setProperty(CONN_PROP_PASSWORD, papp.getProperty(propsPrefix+SUFFIX_PASSWD, ""));
 			
 			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME)) {
-				p.setProperty(CONN_PROP_USER, Utils.readText("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': "));
+				user = Utils.readText("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
+				p.setProperty(CONN_PROP_USER, user);
 			}
 			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME_GUI)) {
-				p.setProperty(CONN_PROP_USER, Utils.readTextGUI("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': "));
+				user = Utils.readTextGUI("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
+				p.setProperty(CONN_PROP_USER, user);
 			}
 
 			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
-				p.setProperty(CONN_PROP_PASSWORD, Utils.readPassword("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
+				p.setProperty(CONN_PROP_PASSWORD, Utils.readPassword("password [user="+user+"]: "));
 			}
 			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD_GUI)) {
-				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+p.getProperty(CONN_PROP_USER)+"]: "));
+				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+user+"]: "));
 			}
 
+			log.debug("conn: "+user+"@"+dbUrl);
+			
 			return DriverManager.getConnection(dbUrl, p);
 		}
 		

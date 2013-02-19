@@ -477,7 +477,7 @@ public class Utils {
 	
 	public static void showSysProperties() {
 		if(log.isDebugEnabled()) {
-			System.out.println("Util: show sys prop");
+			//System.out.println("Util: show sys prop");
 			Map<Object, Object> m = new TreeMap<Object, Object>(System.getProperties());
 			log.debug("system properties:");
 			for(Object key: m.keySet()) {
@@ -485,6 +485,17 @@ public class Utils {
 			}
 			log.debug("end system properties");
 		}
+	}
+
+	public static void logEnvironment() {
+		if(log.isDebugEnabled()) {
+			log.debug("os: "+System.getProperty("os.name")
+					+" "+System.getProperty("os.version")
+					+" ("+System.getProperty("os.arch")+")"
+					+"; java.runtime: "+System.getProperty("java.runtime.version")
+					);
+		}
+		
 	}
 	
 	//XXX: remove 'syntax' param?

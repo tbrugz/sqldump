@@ -109,6 +109,8 @@ public class SQLRun {
 		List<String> execkeys = Utils.getKeysStartingWith(papp, PREFIX_EXEC);
 		Collections.sort(execkeys);
 		log.info("init processing...");
+		//Utils.showSysProperties();
+		Utils.logEnvironment();
 		long initTime = System.currentTimeMillis();
 
 		Set<String> procIds = new TreeSet<String>();

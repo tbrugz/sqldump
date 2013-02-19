@@ -72,12 +72,17 @@ public class QueryDumper implements Executor {
 	
 	//XXX @Override
 	public void execQuery(String sql) throws SQLException, IOException {
+		long initTime = System.currentTimeMillis();
+		
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
 		Writer w = getWriter(outputStream);
 		dumpResultSet(rs, dumpSyntax, w, queryName, null);
 		w.flush();
 		//w.close();
+		
+		long totalTime = System.currentTimeMillis() - initTime;
+		log.info("query '"+execId+"' dumped [elapsed = "+totalTime+"ms]");
 	}
 
 	void dumpResultSet(ResultSet rs, DumpSyntax ds, Writer w,

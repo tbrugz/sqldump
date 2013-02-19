@@ -150,9 +150,13 @@ public class StmtProc {
 	public int execStatement(String stmtStr) throws IOException {
 		setupProperties();
 		try {
+			long initTime = System.currentTimeMillis();
+			
 			int urows = execStatementInternal(stmtStr);
 			urows += closeStatement();
-			log.info("statement exec: updates = "+urows);
+			
+			long totalTime = System.currentTimeMillis() - initTime;
+			log.info("statement exec: updates = "+urows+" [elapsed = "+totalTime+"ms]");
 			log.debug("statement: "+stmtStr);
 			return urows;
 		}
