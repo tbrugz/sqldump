@@ -20,7 +20,7 @@ import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
 
-public class QueryDumper {
+public class QueryDumper implements Executor {
 	static final Log log = LogFactory.getLog(QueryDumper.class);
 	
 	//suffixes
@@ -40,14 +40,17 @@ public class QueryDumper {
 	String outputStream = null;
 	DumpSyntax dumpSyntax = null;
 
+	@Override
 	public void setExecId(String execId) {
 		this.execId = execId;
 	}
 
+	@Override
 	public void setConnection(Connection conn) {
 		this.conn = conn;
 	}
 	
+	@Override
 	public void setProperties(Properties prop) {
 		//this.prop = prop;
 		queryName = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_QUERYNAME);
@@ -67,6 +70,7 @@ public class QueryDumper {
 		}
 	}
 	
+	//XXX @Override
 	public void execQuery(String sql) throws SQLException, IOException {
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
@@ -91,7 +95,7 @@ public class QueryDumper {
 		ds.dumpFooter(w);
 	}
 	
-	//@Override
+	@Override
 	public List<String> getAuxSuffixes() {
 		List<String> ret = new ArrayList<String>();
 		ret.addAll(Arrays.asList(QUERYDUMPER_AUX_SUFFIXES));

@@ -25,12 +25,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.sqlrun.Executor;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
-public abstract class AbstractImporter {
+public abstract class AbstractImporter implements Executor {
 	
 	public static class IOCounter {
 		long input = 0;
@@ -128,10 +129,12 @@ public abstract class AbstractImporter {
 		SUFFIX_X_COMMIT_EACH_X_ROWS
 	};
 	
+	@Override
 	public void setExecId(String execId) {
 		this.execId = execId;
 	}
 	
+	@Override
 	public void setProperties(Properties prop) {
 		this.prop = prop;
 		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
@@ -179,14 +182,17 @@ public abstract class AbstractImporter {
 		}
 	}
 
+	@Override
 	public void setConnection(Connection conn) {
 		this.conn = conn;
 	}
 	
+	//XXX @Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
 		this.commitStrategy = commitStrategy;
 	}
 	
+	@Override
 	public List<String> getAuxSuffixes() {
 		List<String> ret = new ArrayList<String>();
 		ret.addAll(Arrays.asList(AUX_SUFFIXES));
@@ -196,6 +202,7 @@ public abstract class AbstractImporter {
 	//XXX add countsByFailoverId for all files?
 	Map<Integer, IOCounter> aggCountsByFailoverId;
 	
+	//XXX @Override
 	public long importData() throws SQLException, InterruptedException, IOException {
 		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;
