@@ -283,6 +283,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
 			}
+			catch(SQLException e) {
+				log.warn("sql exception grabbing procedures: "+e);
+			}
 			log.info(countproc+" procedures grabbed ["+executableStats()+"]");
 			
 			try {
@@ -296,6 +299,9 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 			}
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
+			}
+			catch(SQLException e) {
+				log.warn("sql exception grabbing functions: "+e);
 			}
 			//XXX: add ["+executableStats()+"]?
 			log.info(countfunc+" functions grabbed");

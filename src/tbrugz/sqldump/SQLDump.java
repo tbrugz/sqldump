@@ -242,7 +242,12 @@ public class SQLDump {
 				}
 				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
-				DBMSResources.instance().updateDbId(sm.getSqlDialect());
+				if(sm!=null) {
+					DBMSResources.instance().updateDbId(sm.getSqlDialect());
+				}
+				else {
+					log.warn("no model grabbed!");
+				}
 			}
 			else {
 				log.error("schema grabber class '"+grabClassName+"' not found");

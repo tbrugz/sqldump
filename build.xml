@@ -72,7 +72,7 @@
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on" target="1.6">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on" source="1.6" target="1.6">
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
@@ -144,7 +144,7 @@
 		</java>
 	</target>
 	
-	<target name="junit" depends="compile">
+	<target name="test" depends="compile">
 		<junit printsummary="on" filtertrace="off" fork="true" showoutput="true">
 			<classpath refid="classpath.test" />
 			<formatter type="xml"/>
