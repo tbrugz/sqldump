@@ -71,6 +71,7 @@ public class SQLRun {
 	static final String SUFFIX_FILES = ".files";
 	static final String SUFFIX_STATEMENT = ".statement";
 	static final String SUFFIX_IMPORT = ".import";
+	static final String SUFFIX_QUERY = ".query";
 
 	//aux suffixes
 	static final String SUFFIX_DIR = ".dir";
@@ -85,7 +86,7 @@ public class SQLRun {
 	static final String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 
 	//suffix groups
-	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT };
+	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT, SUFFIX_QUERY };
 	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, SUFFIX_BATCH_MODE, SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
 	
@@ -208,6 +209,14 @@ public class SQLRun {
 					e.printStackTrace();
 				}
 			}
+			// .query
+			else if(key.endsWith(SUFFIX_QUERY)) {
+				QueryDumper sqd = new QueryDumper();
+				sqd.setExecId(procId);
+				sqd.setConnection(conn);
+				sqd.setProperties(papp);
+				sqd.execQuery(papp.getProperty(key));
+			}
 			// ...else
 			else if(endsWithAny(key, allAuxSuffixes)) {
 				//do nothing here
@@ -304,6 +313,7 @@ public class SQLRun {
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
+		allAuxSuffixes.addAll(new QueryDumper().getAuxSuffixes());
 		
 		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
 		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
