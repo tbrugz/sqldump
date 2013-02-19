@@ -43,7 +43,9 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	transient int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	boolean showColNames = true, showColNamesLines = true;
+	boolean showColNames = true, showColNamesLines = true,
+			show1stColSeparator = true, mergeBlocksSeparatorLines = true,
+			showTrailerLine = true, showTrailerLineAllBlocks = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -89,12 +91,19 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	}
 	
 	int lineGroupSize = 20;
-	String separator = " | ";
+
+	String separator = "|";
+	String firstColSep = "+";
+	String colNamesLineCrossSep = "+";
+	String colNamesLineSep = "-";
+	
 	List<Boolean> leftAlignField = new ArrayList<Boolean>();
 	
 	//"stateful" props
 	List<Integer> colsMaxLenght = new ArrayList<Integer>();
 	List<List<String>> valuesBuffer = new ArrayList<List<String>>();
+	int lastBlockLineSize = 0;
+	boolean shouldClearBuffer = false;
 	//end stateful props
 	
 	@Override
@@ -125,6 +134,10 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		//first count is equal 0
 		if(count%lineGroupSize==0) {
 			dumpBuffer(fos);
+			if(shouldClearBuffer) {
+				clearBuffer();
+				shouldClearBuffer = false;
+			}
 		}
 
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
@@ -170,6 +183,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		for(int i=0;i<lsColNames.size();i++) { colsMaxLenght.add(0); }
 	}
 	
+	//XXX: rename to writeBuffer()
 	void dumpBuffer(Writer fos) throws IOException {
 		if(valuesBuffer.size()<=0) { return; } //should it be here? XXX: dump header only when rowCount = 0? 
 		
@@ -179,14 +193,11 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		if(showColNames) {
 			if(showColNamesLines) {
 				//upper line
-				for(int j=0;j<lsColNames.size();j++) {
-					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
-				}
-				sb.append(recordDemimiter);
+				appendLine(sb, mergeBlocksSeparatorLines);
 			}
 	
 			//col names
+			if(show1stColSeparator) { sb.append(separator); }
 			for(int j=0;j<lsColNames.size();j++) {
 				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
 				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
@@ -195,24 +206,50 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	
 			if(showColNamesLines) {
 				//lower line
-				for(int j=0;j<lsColNames.size();j++) {
-					//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-					appendPattern(sb, colsMaxLenght.get(j), "-", "-+-");
-				}
-				sb.append(recordDemimiter);
+				appendLine(sb, false);
 			}
 		}
 		
 		for(int i=0;i<valuesBuffer.size();i++) {
+			if(show1stColSeparator) { sb.append(separator); }
 			List<String> vals = valuesBuffer.get(i);
 			for(int j=0;j<lsColNames.size();j++) {
 				appendString(sb, colsMaxLenght.get(j), vals.get(j), j );
 			}
 			sb.append(recordDemimiter);
 		}
+		
+		if(showTrailerLineAllBlocks) {
+			appendLine(sb, false);
+		}
+		
 		out(sb.toString(), fos); //+"\n"
 		
-		clearBuffer();
+		shouldClearBuffer = true;
+		int thisBlockSize = 0;
+		for(int j=0;j<lsColNames.size();j++) {
+			thisBlockSize += colsMaxLenght.get(j);
+		}
+		
+		lastBlockLineSize = thisBlockSize;
+		//clearBuffer();
+	}
+	
+	void appendLine(StringBuffer sb, boolean isBlock1stLine) {
+		if(show1stColSeparator) { sb.append(firstColSep); }
+		//lower line
+		int colsSize = 0;
+		for(int j=0;j<lsColNames.size();j++) {
+			//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
+			appendPattern(sb, colsMaxLenght.get(j), colNamesLineSep, colNamesLineCrossSep);
+			colsSize += colsMaxLenght.get(j);
+		}
+		if(isBlock1stLine) {
+			if(colsSize<lastBlockLineSize) {
+				appendPattern(sb, lastBlockLineSize-colsSize-1, colNamesLineSep, colNamesLineCrossSep);
+			}
+		}
+		sb.append(recordDemimiter);
 	}
 	
 	void appendString(StringBuffer sb, int len, String value, int colIndex) {
@@ -244,12 +281,19 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	public void dumpFooter(Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
+		if(showTrailerLine && !showTrailerLineAllBlocks) {
+			StringBuffer sb = new StringBuffer();
+			appendLine(sb, false);
+			out(sb.toString(), fos);
+		}
+		clearBuffer();
 	}
 	
 	@Override
 	public void flushBuffer(Writer fos) throws IOException {
 		if(valuesBuffer.size()<=0) { return; } //not needed now: dumpBuffer() already does it
-		dumpBuffer(fos);
+		shouldClearBuffer = true;
+		//dumpBuffer(fos);
 	}
 
 	void out(String s, Writer pw) throws IOException {
