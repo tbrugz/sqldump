@@ -234,6 +234,7 @@ public class SQLRun {
 				if(commitStrategy==CommitStrategy.EXEC_ID || commitStrategy==CommitStrategy.FILE) {
 					doCommit();
 				}
+				Utils.logMemoryUsage();
 			}
 		}
 		long totalTime = System.currentTimeMillis() - initTime;

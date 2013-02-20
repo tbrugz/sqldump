@@ -498,6 +498,16 @@ public class Utils {
 		
 	}
 	
+	public static void logMemoryUsage() {
+		if(log.isDebugEnabled()) {
+			// http://stackoverflow.com/questions/1058991/how-to-monitor-java-memory-usage
+			Runtime rt = Runtime.getRuntime();
+			long totalMB = rt.totalMemory() / 1024 / 1024;
+			long usedMB = (rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
+			log.debug("used memory: "+usedMB+"Mb [total: "+totalMB+"Mb]");
+		}
+	}
+	
 	//XXX: remove 'syntax' param?
 	public static NumberFormat getFloatFormatter(String floatLocale, String floatFormat, String syntax) {
 		NumberFormat floatFormatter = null;
