@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -52,7 +53,10 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		String queriesStr = prop.getProperty(PROP_QUERIES);
 		if(queriesStr==null) {
-			log.warn("prop '"+PROP_QUERIES+"' not defined");
+			log.error("prop '"+PROP_QUERIES+"' not defined");
+			if(failonerror) {
+				throw new ProcessingException("SQLQueries: prop '"+PROP_QUERIES+"' not defined");
+			}
 			return;
 		}
 		String[] queriesArr = queriesStr.split(",");
@@ -180,6 +184,9 @@ public class SQLQueries extends AbstractSQLProc {
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.info("error on query "+qid+": "+e.getMessage(), e);
+					if(failonerror) {
+						throw new ProcessingException(e);
+					}
 				}
 			}
 			i++;

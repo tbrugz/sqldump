@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -126,7 +127,10 @@ public class DataDump extends AbstractSQLProc {
 		
 		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
 		if(syntaxes==null) {
-			log.warn("no datadump syntax defined");
+			log.error("no datadump syntax defined");
+			if(failonerror) {
+				throw new ProcessingException("DataDump: no datadump syntax defined");
+			}
 			return;
 		}
 		String[] syntaxArr = syntaxes.split(",");
@@ -240,6 +244,9 @@ public class DataDump extends AbstractSQLProc {
 			catch(Exception e) {
 				log.warn("error dumping data from table: "+tableName+"\n\tsql: "+sql+"\n\texception: "+e);
 				log.info("exception:", e);
+				if(failonerror) {
+					throw new ProcessingException(e);
+				}
 			}
 		}
 		

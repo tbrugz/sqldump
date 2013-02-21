@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.MapEntryValueComparator;
@@ -36,7 +37,10 @@ public class StatsProc extends AbstractSQLProc {
 			}
 		}
 		catch(SQLException e) {
-			e.printStackTrace();
+			log.warn("error counting rows", e);
+			if(failonerror) {
+				throw new ProcessingException(e);
+			}
 		}
 		
 		/*for (String key: map.keySet()) {

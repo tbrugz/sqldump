@@ -15,6 +15,8 @@ public interface Processor {
 
 	public void setSchemaModel(SchemaModel schemamodel);
 
+	public void setFailOnError(boolean failonerror);
+	
 	public void process();
 
 }

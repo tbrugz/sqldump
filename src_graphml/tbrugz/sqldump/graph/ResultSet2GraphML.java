@@ -1,6 +1,8 @@
 package tbrugz.sqldump.graph;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -23,6 +25,7 @@ import tbrugz.graphml.model.Node;
 import tbrugz.graphml.model.NodeXYWH;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -326,7 +329,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return s.replaceAll(" ", "_");
 	}
 	
-	boolean dumpSchema(String qid, ResultSet rsEdges, ResultSet rsNodes) throws Exception {
+	boolean dumpSchema(String qid, ResultSet rsEdges, ResultSet rsNodes) throws SQLException, FileNotFoundException {
 		log.info("dumping graphML: translating model [edgeonly="+isEdgeOnlyStrategy(rsEdges, rsNodes)+"]");
 		if(rsEdges==null) {
 			log.warn("resultSet is null!");
@@ -371,10 +374,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			processIntern();
 		} catch (Exception e) {
 			e.printStackTrace();
+			if(failonerror) {
+				throw new ProcessingException(e);
+			}
 		}
 	}
 	
-	void processIntern() throws Exception {
+	void processIntern() throws SQLException, IOException {
 		String queriesStr = prop.getProperty(PROP_GRAPHMLQUERIES);
 		if(queriesStr==null) {
 			log.warn("prop '"+PROP_GRAPHMLQUERIES+"' not defined");
