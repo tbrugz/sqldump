@@ -179,6 +179,9 @@ public class SchemaDiff implements Diff {
 		//Map<DBObjectType, Integer> map = new NeverNullGetMap<DBObjectType, Integer>(Integer.class);
 		//String format = "changes [%-12s]: ";
 		String formatStr = "changes [%-"+labelSize+"s]: ";
+		if(labelSize<=0) {
+			formatStr = "changes [%s]: ";
+		}
 		for(DBObjectType type: DBObjectType.values()) {
 			List<Diff> diffsoftype = getDiffsByDBObjectType(diffs, type);
 			StringBuffer sb = new StringBuffer();
@@ -235,7 +238,8 @@ public class SchemaDiff implements Diff {
 		return retfks;
 	}
 	
-	List<Diff> getDiffList() {
+	//XXX: rename to getChildren()?
+	public List<Diff> getDiffList() {
 		List<Diff> diffs = new ArrayList<Diff>();
 		diffs.addAll(tableDiffs);
 		diffs.addAll(columnDiffs);

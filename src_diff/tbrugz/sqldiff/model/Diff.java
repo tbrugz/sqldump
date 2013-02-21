@@ -8,4 +8,5 @@ public interface Diff {
 	public String getDiff();
 	public DBObjectType getObjectType();
 	public NamedDBObject getNamedObject();
+	//XXX add public List<Diff> getChildren()?
 }
