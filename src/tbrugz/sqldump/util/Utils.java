@@ -42,6 +42,8 @@ class RegularFileFilter implements FileFilter {
 }
 
 class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
+	private static final long serialVersionUID = 1L;
+
 	static Log log = LogFactory.getLog(BaseInputGUI.class);
 
 	static int width = 500;
@@ -143,9 +145,8 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 }
 
 class TextInputGUI extends BaseInputGUI {
-	//JTextField tf;
-	//String value;
-	
+	private static final long serialVersionUID = 1L;
+
 	public TextInputGUI(String message) {
 		tf = new JTextField(15);
 		tf.addKeyListener(this);
@@ -154,8 +155,8 @@ class TextInputGUI extends BaseInputGUI {
 }
 
 class PasswordInputGUI extends BaseInputGUI {
-	//JPasswordField pf;
-	
+	private static final long serialVersionUID = 1L;
+
 	public PasswordInputGUI(String message) {
 		//tf.removeKeyListener(this);
 		tf = new JPasswordField(15);
@@ -391,26 +392,18 @@ public class Utils {
 		return null;
 	}
 
-	public static Object getClassInstance(String className) {
-		try {
-			Class<?> c = Class.forName(className);
-			return getClassInstance(c);
-		} catch (ClassNotFoundException e) {
-			log.debug("class not found: "+e);
-		}
-		return null;
-	}
-
 	public static Class<?> getClassWithinPackages(String className, String... packages) {
+		Exception ex = null;
 		for(String pkg: packages) {
 			try {
 				String prepend = pkg!=null?pkg+".":"";
 				Class<?> c = Class.forName(prepend+className);
 				return c;
 			} catch (ClassNotFoundException e) {
-				log.debug("class not found: "+e);
+				if(ex==null) { ex = e; }
 			}
 		}
+		log.debug("class not found: "+className+" [ex: "+ex+"]");
 		return null;
 	}
 	

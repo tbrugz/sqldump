@@ -355,13 +355,10 @@ public class SQLDump {
 	}
 	*/
 	
+	//XXX: move to Utils?
 	public static Object getClassInstance(String className, String... defaultPackages) {
-		Object o = Utils.getClassInstance(className);
-		int countPack = 0;
-		while(o==null && defaultPackages!=null && defaultPackages.length > countPack) {
-			o = Utils.getClassInstance(defaultPackages[countPack]+"."+className);
-			countPack++;
-		}
+		Class<?> c = Utils.getClassWithinPackages(className, defaultPackages);
+		Object o = Utils.getClassInstance(c);
 		if(o==null) {
 			log.debug("class not found: "+className);
 		}
