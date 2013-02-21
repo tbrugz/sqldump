@@ -11,9 +11,9 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -254,8 +254,8 @@ public class SQLDump {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
 					sdd.setupConnection();
+					schemaGrabber.setConnection(sdd.conn);
 				}
-				schemaGrabber.setConnection(sdd.conn);
 				sm = schemaGrabber.grabSchema();
 				if(sm!=null) {
 					DBMSResources.instance().updateDbId(sm.getSqlDialect());
@@ -330,7 +330,7 @@ public class SQLDump {
 		}
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
-			AbstractSQLProc sqlproc = (AbstractSQLProc) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+			Processor sqlproc = (Processor) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 			if(sqlproc!=null) {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);
