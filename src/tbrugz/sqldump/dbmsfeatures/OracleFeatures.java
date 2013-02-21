@@ -764,6 +764,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	@Override
+	public String sqlAddColumnClause() {
+		return "add";
+	}
+
+	@Override
 	public String sqlAlterColumnClause() {
 		return "modify";
 	}

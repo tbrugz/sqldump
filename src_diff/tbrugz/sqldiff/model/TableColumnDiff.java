@@ -39,7 +39,7 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 		String colChange = null;
 		switch(type) {
 			case ADD:
-				colChange = "add column "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
+				colChange = features.sqlAddColumnClause()+" "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				//XXX: option: rename old, create new, update new from old, drop old
 				colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);

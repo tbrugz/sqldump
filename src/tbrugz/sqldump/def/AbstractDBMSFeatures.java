@@ -51,4 +51,10 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	public String sqlAlterColumnClause() {
 		return "alter column";
 	}
+	
+	@Override
+	public String sqlAddColumnClause() {
+		return "add column";
+	}
+	
 }
