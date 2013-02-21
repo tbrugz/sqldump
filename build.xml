@@ -145,7 +145,7 @@
 	</target>
 	
 	<target name="test" depends="compile">
-		<junit printsummary="on" filtertrace="off" fork="true" showoutput="true">
+		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
 			<classpath refid="classpath.test" />
 			<formatter type="xml"/>
 			<test name="tbrugz.sqldump.AllTestSuite" todir="${dist.dir}"/>

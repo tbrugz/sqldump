@@ -162,12 +162,19 @@ public class SQLDump {
 			File propFileDir = propFile.getAbsoluteFile().getParentFile();
 			log.debug("propfile base dir: "+propFileDir);
 			papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-	
-			log.info("loading properties: "+propFile);
-			propIS = new FileInputStream(propFile);
+			
+			if(propFile.exists()) {
+				log.info("loading properties: "+propFile);
+				propIS = new FileInputStream(propFile);
+			}
+			else {
+				log.info("properties file '"+propFile+"' does not exist");
+			}
 		}
 		try {
-			papp.load(propIS);
+			if(propIS!=null) {
+				papp.load(propIS);
+			}
 		}
 		catch(FileNotFoundException e) {
 			if(propResourceSetted) {
@@ -177,6 +184,14 @@ public class SQLDump {
 				log.warn("prop file not found: "+propFilename);
 			}
 		}
+		/*catch(IOException e) {
+			if(propResourceSetted) {
+				log.warn("error loading prop resource: "+propResource);
+			}
+			else if(propFilenameSetted) {
+				log.warn("error loading prop file: "+propFilename);
+			}
+		}*/
 		
 		ColTypeUtil.setProperties(papp);
 	}

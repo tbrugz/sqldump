@@ -129,6 +129,11 @@ public class SchemaDiff implements Diff {
 	}	
 		
 	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
+		if(modelOrig == null || modelNew == null) {
+			log.warn("source, target, or both models are null");
+			return null;
+		}
+		
 		SchemaDiff diff = new SchemaDiff();
 		
 		//Tables
