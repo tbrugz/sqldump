@@ -1,16 +1,21 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.util.Properties;
+
 import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
 
 public class SQLRunAndDumpTest {
+	
+	public String dbpath = "work/db/empdept";
+	
 	@Test
 	public void doRunAndDumpModel() throws Exception {
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.driverclass=org.h2.Driver",
-				"-Dsqlrun.dburl=jdbc:h2:work/db/empdept",
+				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
@@ -23,7 +28,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
 					"-Dsqldump.driverclass=org.h2.Driver",
-					"-Dsqldump.dburl=jdbc:h2:work/db/empdept",
+					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 					"-Dsqldump.user=h",
 					"-Dsqldump.password=h"
 					};
@@ -44,7 +49,7 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
-				"-Dsqlrun.dburl=jdbc:h2:work/db/empdept",
+				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
@@ -63,7 +68,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
 					"-Dsqldump.driverclass=org.h2.Driver",
-					"-Dsqldump.dburl=jdbc:h2:work/db/empdept",
+					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 					"-Dsqldump.user=h",
 					"-Dsqldump.password=h"
 					};
@@ -79,6 +84,18 @@ public class SQLRunAndDumpTest {
 				key = s.substring(2,i);
 				value = s.substring(i+1);
 				System.setProperty(key, value);
+			}
+		}
+	}
+
+	public static void setProperties(Properties p, String[] vmparams) {
+		for(String s: vmparams) {
+			String key = null, value = null; 
+			if(s.startsWith("-D")) {
+				int i = s.indexOf("=");
+				key = s.substring(2,i);
+				value = s.substring(i+1);
+				p.setProperty(key, value);
 			}
 		}
 	}
