@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.StringDecorator;
 
 public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -54,6 +55,11 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBOb
 				sqlIddecorator.get(dbobject.getSchemaName())+".":"")+sqlIddecorator.get(dbobject.getName());
 	}
 
+	public static String getFinalName(NamedDBObject dbobject, StringDecorator decorator, boolean dumpSchemaName) {
+		return ((dumpSchemaName && dbobject.getSchemaName()!=null)?
+				decorator.get(dbobject.getSchemaName())+".":"")+decorator.get(dbobject.getName());
+	}
+	
 	public static String getFinalName(String schemaName, String name, boolean dumpSchemaName) {
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);

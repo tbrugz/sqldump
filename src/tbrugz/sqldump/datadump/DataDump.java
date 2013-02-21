@@ -32,6 +32,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -109,6 +110,7 @@ public class DataDump extends AbstractSQLProc {
 	//TODOne: filter tables by table type (table, view, ...)
 	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
+		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		
 		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
@@ -171,6 +173,7 @@ public class DataDump extends AbstractSQLProc {
 		}
 		
 		String quote = DBMSResources.instance().getIdentifierQuoteString();
+		StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
@@ -203,7 +206,7 @@ public class DataDump extends AbstractSQLProc {
 			if(orderClause==null && orderByPK) { 
 				Constraint ctt = table.getPKConstraint();
 				if(ctt!=null) {
-					orderClause = Utils.join(ctt.uniqueColumns, ", ", new StringDecorator.StringQuoterDecorator(quote));
+					orderClause = Utils.join(ctt.uniqueColumns, ", ", quoteAllDecorator);
 				}
 				else {
 					log.warn("table '"+tableName+"' has no PK for datadump ordering");
@@ -218,7 +221,7 @@ public class DataDump extends AbstractSQLProc {
 			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
 			
 			String sql = "select "+selectColumns
-					+" from "+table.getFinalQualifiedName()
+					+" from "+DBObject.getFinalName(table, quoteAllDecorator, true)
 					+ (whereClause!=null?" where "+whereClause:"")
 					+ (orderClause!=null?" order by "+orderClause:"");
 			log.debug("sql: "+sql);
@@ -248,7 +251,7 @@ public class DataDump extends AbstractSQLProc {
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
 			String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
-			) throws Exception {
+			) throws SQLException, IOException {
 		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null);
 	}
 		
@@ -260,7 +263,7 @@ public class DataDump extends AbstractSQLProc {
 			List<String> keyColumns,
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys
-			) throws Exception {
+			) throws SQLException, IOException {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
 			//st.setFetchSize(20);
@@ -369,7 +372,11 @@ public class DataDump extends AbstractSQLProc {
 								String dskey = ds.getSyntaxId()+"$"+partitionByPattern;
 								DumpSyntax ds2 = statefulDumpSyntaxes.get(dskey);
 								if(ds2==null) {
-									ds2 = (DumpSyntax) ds.clone();
+									try {
+										ds2 = (DumpSyntax) ds.clone();
+									} catch (CloneNotSupportedException e) {
+										throw new IOException("Error cloning dump syntax", e);
+									}
 									statefulDumpSyntaxes.put(dskey, ds2);
 								}
 								ds = ds2;
