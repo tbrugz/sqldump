@@ -4,13 +4,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
-import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
 public class SQLDiffTest {
 	
@@ -30,28 +32,31 @@ public class SQLDiffTest {
 	 */
 
 	@Test
-	public void doIt() throws Exception {
-		//SQLDump sdd = new SQLDump();
-		//SchemaModel sm = sdd.grabSchema();
+	public void testIdenticalModels() throws Exception {
+		//depends on SQLRunAndDumpTest.doRun() ...
+		SQLRunAndDumpTest randd = new SQLRunAndDumpTest();
+		randd.doRunAndDumpModel();
 		
 		//xml serializer input Orig
 		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
-		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model1.jaxb.xml");
+		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropOrig);
 		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
 
 		//xml serializer input New
 		Properties jaxbPropNew = new Properties();
-		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "output/"+"model2.jaxb.xml");
+		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropNew);
 		SchemaModel smNew = schemaSerialGrabber.grabSchema();
 		
 		//do diff
 		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
-		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
 		System.out.println("diff:\n"+diff.getDiff());
-		System.out.println("=========+=========+=========+=========+=========+=========+=========+=========");
+		
+		List<Diff> diffs = diff.getDiffList();
+		Assert.assertEquals("diff size should be zero", 0, diffs.size());
+		
 		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
 		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
 	}

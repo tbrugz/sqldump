@@ -6,7 +6,33 @@ import tbrugz.sqldump.SQLDump;
 
 public class SQLRunAndDumpTest {
 	@Test
-	public void doRun() throws Exception {
+	public void doRunAndDumpModel() throws Exception {
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:work/db/empdept",
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		String[] params = {};
+		setProperties(vmparams);
+		SQLRun.main(params);
+		
+		String[] vmparamsDump = {
+					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer",
+					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
+					"-Dsqldump.driverclass=org.h2.Driver",
+					"-Dsqldump.dburl=jdbc:h2:work/db/empdept",
+					"-Dsqldump.user=h",
+					"-Dsqldump.password=h"
+					};
+		setProperties(vmparamsDump);
+		SQLDump.main(params);
+	}
+
+	@Test
+	public void doRunImportAndDumpModel() throws Exception {
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
