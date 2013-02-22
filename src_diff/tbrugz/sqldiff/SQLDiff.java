@@ -6,8 +6,13 @@ import static tbrugz.sqldump.SQLDump.PROP_PROPFILEBASEDIR;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
+
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,7 +54,7 @@ public class SQLDiff {
 
 	String outfilePattern = null;
 	
-	void init(String[] args) throws Exception {
+	void init(String[] args) throws FileNotFoundException, IOException {
 		log.info("init...");
 		//parse args
 		String propFilename = PROPERTIES_FILENAME;
@@ -84,7 +89,7 @@ public class SQLDiff {
 		}
 	}
 
-	void doIt() throws Exception {
+	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		if(outfilePattern==null) { return; }
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
@@ -137,7 +142,7 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
-	static SchemaModelGrabber initGrabber(String grabberLabel, String propKey, Properties prop) throws Exception {
+	static SchemaModelGrabber initGrabber(String grabberLabel, String propKey, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
 		String grabberId = prop.getProperty(propKey);
 		log.info(grabberLabel+" model ["+grabberId+"] init");
 		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
@@ -151,7 +156,7 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDiff sqldiff = new SQLDiff();
 		sqldiff.init(args);
 		sqldiff.doIt();
