@@ -24,14 +24,16 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.Executor;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
-public abstract class AbstractImporter implements Executor {
+public abstract class AbstractImporter extends AbstractFailable implements Executor {
 	
 	public static class IOCounter {
 		long input = 0;
@@ -247,7 +249,8 @@ public abstract class AbstractImporter implements Executor {
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
 		else {
-			log.warn("neither '"+SUFFIX_IMPORTFILE+"' nor '"+SUFFIX_IMPORTFILES+"' suffix specified...");
+			log.error("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...");
+			if(failonerror) { throw new ProcessingException("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified..."); }
 		}
 		
 		if(filesImported>1) {
@@ -345,6 +348,7 @@ public abstract class AbstractImporter implements Executor {
 								log.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
 										+e.getMessage());
+								//XXX: throw ProcessingException()?
 							}
 							importthisline = false;
 							//break;

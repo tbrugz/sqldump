@@ -11,6 +11,7 @@ public interface Executor {
 	void setProperties(Properties prop);
 	void setConnection(Connection conn);
 	void setCommitStrategy(CommitStrategy commitStrategy);
+	void setFailOnError(boolean failonerror);
 	//XXX void execute();
 	//XXX String getExecSuffix();
 	List<String> getAuxSuffixes();

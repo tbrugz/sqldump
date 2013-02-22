@@ -16,11 +16,13 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
-public class StmtProc implements Executor {
+public class StmtProc extends AbstractFailable implements Executor {
 	static Log log = LogFactory.getLog(StmtProc.class);
 	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
@@ -80,6 +82,7 @@ public class StmtProc implements Executor {
 				}
 				countError++;
 				logStmt.debug("error executing updates", e);
+				if(failonerror) { throw new ProcessingException(e); }
 			}
 			countExec++;
 			
@@ -164,6 +167,7 @@ public class StmtProc implements Executor {
 		catch(SQLException e) {
 			log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
 			log.debug("error executing statement", e);
+			if(failonerror) { throw new ProcessingException(e); }
 			return 0;
 		}
 	}

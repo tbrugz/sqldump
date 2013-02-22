@@ -17,11 +17,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
 
-public class QueryDumper implements Executor {
+public class QueryDumper extends AbstractFailable implements Executor {
 	static final Log log = LogFactory.getLog(QueryDumper.class);
 	
 	//suffixes
