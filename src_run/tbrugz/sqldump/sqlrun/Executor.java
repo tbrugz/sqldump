@@ -13,6 +13,6 @@ public interface Executor {
 	void setCommitStrategy(CommitStrategy commitStrategy);
 	void setFailOnError(boolean failonerror);
 	//XXX void execute();
-	//XXX String getExecSuffix();
+	List<String> getExecSuffixes();
 	List<String> getAuxSuffixes();
 }

@@ -70,7 +70,7 @@ public class SQLRun {
 	static final String SUFFIX_FILE = ".file";
 	static final String SUFFIX_FILES = ".files";
 	static final String SUFFIX_STATEMENT = ".statement";
-	static final String SUFFIX_IMPORT = ".import";
+	public static final String SUFFIX_IMPORT = ".import";
 	static final String SUFFIX_QUERY = ".query";
 
 	//aux suffixes
@@ -125,7 +125,7 @@ public class SQLRun {
 		srproc.setConnection(conn);
 		srproc.setCommitStrategy(commitStrategy);
 		srproc.setProperties(papp);
-		srproc.setFailOnError(true);
+		srproc.setFailOnError(true); //XXX setFailOnError by properties...
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;

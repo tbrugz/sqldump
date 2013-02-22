@@ -54,6 +54,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		CYCLE,
 		RESTART
 	}
+	
+	//XXX: different exec suffixes for each importer class?
+	static final String[] EXEC_SUFFIXES = {
+		SQLRun.SUFFIX_IMPORT,
+	};
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
 
@@ -627,4 +632,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public List<String> getExecSuffixes() {
+		List<String> ret = new ArrayList<String>();
+		ret.addAll(Arrays.asList(EXEC_SUFFIXES));
+		return ret;
+	}
+	
 }

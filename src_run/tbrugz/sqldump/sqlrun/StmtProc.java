@@ -10,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,6 +35,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 	Connection conn;
 	Properties papp;
 	//CommitStrategy commitStrategy;
+	
+	static final String[] EXEC_SUFFIXES = {
+		SQLRun.SUFFIX_FILE,
+		SQLRun.SUFFIX_FILES,
+		SQLRun.SUFFIX_STATEMENT
+	};
 	
 	long batchExecCounter = 0;
 	Statement batchStmt = null;
@@ -292,6 +300,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 	public List<String> getAuxSuffixes() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<String> getExecSuffixes() {
+		List<String> ret = new ArrayList<String>();
+		ret.addAll(Arrays.asList(EXEC_SUFFIXES));
+		return ret;
 	}
 	
 }

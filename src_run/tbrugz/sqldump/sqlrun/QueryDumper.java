@@ -30,6 +30,10 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	static final String SUFFIX_OUTSTREAM = ".outputstream";
 	static final String SUFFIX_QUERYNAME = ".queryname";
 	
+	static final String[] QUERYDUMPER_EXEC_SUFFIXES = {
+		SQLRun.SUFFIX_QUERY
+	};
+	
 	static final String[] QUERYDUMPER_AUX_SUFFIXES = {
 		SUFFIX_DUMPSYNTAX,
 		SUFFIX_OUTSTREAM,
@@ -138,6 +142,13 @@ public class QueryDumper extends AbstractFailable implements Executor {
 
 	@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
+	}
+
+	@Override
+	public List<String> getExecSuffixes() {
+		List<String> ret = new ArrayList<String>();
+		ret.addAll(Arrays.asList(QUERYDUMPER_EXEC_SUFFIXES));
+		return ret;
 	}
 	
 }
