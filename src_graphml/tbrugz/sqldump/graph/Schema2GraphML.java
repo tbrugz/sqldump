@@ -19,6 +19,7 @@ import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -26,6 +27,7 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.Utils;
 
@@ -53,7 +55,7 @@ enum EdgeLabelType {
  * XXX: node label: show table type (VIEW, EXTERNAL_TABLE, ...)?
  * XXX: option to map one stereotype to another (schema@XXX -> schema@YYY; type@EXTERNAL_TABLE -> type@VIEW)
  */
-public class Schema2GraphML implements SchemaModelDumper {
+public class Schema2GraphML extends AbstractFailable implements SchemaModelDumper {
 	
 	static Log log = LogFactory.getLog(Schema2GraphML.class);
 	
@@ -326,13 +328,15 @@ public class Schema2GraphML implements SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(output==null) {
-			log.warn("graphml output file is null. won't dump");
+			log.error("graphml output file is null. won't dump");
+			if(failonerror) { throw new ProcessingException("graphml output file is null. won't dump"); }
 			return;
 		}
 		
 		log.info("dumping graphML: translating model");
 		if(schemaModel==null) {
-			log.warn("schemaModel is null!");
+			log.error("schemaModel is null!");
+			if(failonerror) { throw new ProcessingException("schemaModel is null!"); }
 			return;
 		}
 		Root r = getGraphMlModel(schemaModel);
@@ -344,8 +348,9 @@ public class Schema2GraphML implements SchemaModelDumper {
 			dg.dumpModel(r, new PrintStream(output));
 			log.info("...graphML dumped");
 		} catch (FileNotFoundException e) {
-			log.warn("error dumping schema: "+e);
+			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 

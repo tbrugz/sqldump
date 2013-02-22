@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -21,6 +22,7 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
@@ -49,7 +51,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * TODOne: use tbrugz.sqldump.util.CategorizedOut
  */
-public class AlterSchemaSuggester implements SchemaModelDumper {
+public class AlterSchemaSuggester extends AbstractFailable implements SchemaModelDumper {
 	
 	public static class Warning implements Comparable<Warning> {
 		DBObjectType type;
@@ -117,14 +119,16 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(schemaModel==null) {
-			log.warn("schemaModel null, nothing to dump");
+			log.error("schemaModel null, nothing to dump");
+			if(failonerror) { throw new ProcessingException("schemaModel null, nothing to dump"); }
 			return;
 		}
 		
 		try {
 
 		if(fileOutput==null) {
-			log.warn("prop '"+PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN+"' not defined");
+			log.error("prop '"+PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN+"' not defined");
+			if(failonerror) { throw new ProcessingException("prop '"+PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN+"' not defined"); }
 			return;
 		}
 		
@@ -168,8 +172,9 @@ public class AlterSchemaSuggester implements SchemaModelDumper {
 		//fos.close();
 		
 		} catch (IOException e) {
-			log.warn("error dumping schema: "+e);
+			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 		

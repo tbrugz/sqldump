@@ -23,6 +23,7 @@ import tbrugz.mondrian.xsdmodel.Hierarchy.Level;
 import tbrugz.mondrian.xsdmodel.Hierarchy.Level.Closure;
 import tbrugz.mondrian.xsdmodel.PrivateDimension;
 import tbrugz.mondrian.xsdmodel.Schema;
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -30,6 +31,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -85,7 +87,7 @@ class RecursiveHierData {
  * XXX: uniqueMembers="true": maybe on 1st level of 1st dim table also... 
  * XXX: show parentLevel candidates
  */
-public class MondrianSchemaDumper implements SchemaModelDumper {
+public class MondrianSchemaDumper extends AbstractFailable implements SchemaModelDumper {
 	
 	public static final String PROP_MONDRIAN_SCHEMA = "sqldump.mondrianschema";
 	public static final String PROP_MONDRIAN_SCHEMA_OUTFILE = "sqldump.mondrianschema.outfile";
@@ -209,7 +211,8 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
-			log.warn("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
+			log.error("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
+			if(failonerror) { throw new ProcessingException("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined"); }
 			return;
 		}
 		
@@ -420,6 +423,7 @@ public class MondrianSchemaDumper implements SchemaModelDumper {
 		} catch (JAXBException e) {
 			log.warn("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 	

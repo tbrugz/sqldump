@@ -17,10 +17,11 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 
-public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGrabber {
+public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
 	static Log log = LogFactory.getLog(JAXBSchemaXMLSerializer.class);
 	
@@ -42,7 +43,8 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
 		} catch (JAXBException e) {
 			log.error("impossible to create JAXBContext: "+e);
-			e.printStackTrace();
+			log.info("impossible to create JAXBContext", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 	
@@ -71,10 +73,12 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
 			log.error("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			if(failonerror) { throw new ProcessingException("JAXB: xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined"); }
 			return;
 		}
 		if(schemaModel==null) {
 			log.error("schemaModel is null!");
+			if(failonerror) { throw new ProcessingException("JAXB: schemaModel is null!"); }
 			return;
 		}
 
@@ -89,6 +93,7 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 		catch(Exception e) {
 			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 
@@ -110,8 +115,9 @@ public class JAXBSchemaXMLSerializer implements SchemaModelDumper, SchemaModelGr
 			return sm;
 		}
 		catch(Exception e) {
-			log.warn("error grabbing schema: "+e);
+			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 			return null;
 		}
 		

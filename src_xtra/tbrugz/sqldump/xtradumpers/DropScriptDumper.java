@@ -7,11 +7,13 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 
@@ -20,7 +22,7 @@ import tbrugz.sqldump.util.CategorizedOut;
  * TODOne: optional dump scripts in one file for each type (categorizedOut?)
  * TODO: option to output schemaName
  */
-public class DropScriptDumper implements SchemaModelDumper {
+public class DropScriptDumper extends AbstractFailable implements SchemaModelDumper {
 	
 	static final Log log = LogFactory.getLog(DropScriptDumper.class);
 	
@@ -45,7 +47,10 @@ public class DropScriptDumper implements SchemaModelDumper {
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {
-			if(outfilePattern==null) { return; }
+			if(outfilePattern==null) {
+				if(failonerror) { throw new ProcessingException("outfilepattern is null"); }
+				return;
+			}
 			
 			CategorizedOut co = new CategorizedOut();
 			String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
@@ -61,7 +66,8 @@ public class DropScriptDumper implements SchemaModelDumper {
 			dumpDropObject(DBObjectType.TABLE.toString(), schemaModel.getTables(), co);
 		}
 		catch (IOException e) {
-			log.warn("i/o error dumping drop script: "+e);
+			log.error("i/o error dumping drop script: "+e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 	

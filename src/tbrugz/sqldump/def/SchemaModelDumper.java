@@ -10,12 +10,15 @@ public interface SchemaModelDumper {
 	
 	public void setPropertiesPrefix(String propertiesPrefix);
 	
+	public void setFailOnError(boolean failonerror);
+	
 	/*public boolean isDumpWithSchemaName() {
 		return false;
 	}
 
 	public void setDumpWithSchemaName(boolean dumpWithSchemaName) {}*/
 	
+	//XXX return errorlevel? not much java-like...
 	public void dumpSchema(SchemaModel schemaModel);
 
 }

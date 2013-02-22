@@ -15,10 +15,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 
-public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
+public class SchemaSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
 	static Log log = LogFactory.getLog(SchemaSerializer.class);
 	
@@ -56,6 +57,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	public void dumpSchema(SchemaModel schemaModel) {
 		if(fileOutput==null) {
 			log.error("serialization output file ["+PROP_SERIALIZATION_OUTFILE+"] not defined");
+			if(failonerror) { throw new ProcessingException("SchemaSerializer: serialization output file ["+PROP_SERIALIZATION_OUTFILE+"] not defined"); }
 			return;
 		}
 		
@@ -68,6 +70,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		catch(IOException e) {
 			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
 
@@ -75,6 +78,7 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 	public SchemaModel grabSchema() {
 		if(fileInput==null) {
 			log.error("serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined");
+			if(failonerror) { throw new ProcessingException("SchemaSerializer: serialization input file ["+PROP_SERIALIZATION_INFILE+"] not defined"); }
 			return null;
 		}
 
@@ -88,11 +92,13 @@ public class SchemaSerializer implements SchemaModelDumper, SchemaModelGrabber {
 		catch (ClassNotFoundException e) {
 			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 			return null;
 		}
 		catch(IOException e) {
 			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 			return null;
 		}
 	}
