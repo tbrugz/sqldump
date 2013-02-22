@@ -48,7 +48,7 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 				filenameIn = fileInputStr;
 				fileInput = new FileInputStream(new File(fileInputStr));
 			} catch (FileNotFoundException e) {
-				log.warn("File not found: "+fileInputStr);
+				log.warn("procproperties: File not found: "+fileInputStr);
 			}
 		}
 	}
