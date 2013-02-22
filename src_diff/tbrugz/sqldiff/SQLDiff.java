@@ -18,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.SchemaDiff;
+import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.SchemaModelScriptDumper;
@@ -144,8 +145,16 @@ public class SQLDiff {
 	
 	static SchemaModelGrabber initGrabber(String grabberLabel, String propKey, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
 		String grabberId = prop.getProperty(propKey);
+		if(grabberId==null || "".equals(grabberId)) {
+			throw new ProcessingException("'"+grabberLabel+"' grabber id not defined");
+		}
+		
 		log.info(grabberLabel+" model ["+grabberId+"] init");
 		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
+		if(grabClassName==null) {
+			throw new ProcessingException("'"+grabberLabel+"' grabber class (id="+grabberId+") not defined");
+		}
+		
 		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
 		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
 		if(schemaGrabber.needsConnection()) {
