@@ -105,13 +105,14 @@
 		2- load into different databases (sqlrun)
 		3- dump from all databases
 		4- compare with original (sqldiff) --> 
-	<target name="test-roundtrip1" depends="compile">
-		<!-- 1 -->
+	<!--
+		-> moved to RoundTripTest unit test class
+		target name="test-roundtrip1" depends="compile">
 		<echo message="roundtrip1: phase 1: dump [jaxb]" />
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}">
 			<arg value="-propfile=test/r1-sqldump-jaxb-test.properties"/>
 		</java>
-		<!-- 2 -->
+
 		<echo message="roundtrip1: phase 2: run [derby]" />
 		<java classpathref="classpath.run.derby" classname="${sqldump.sqlrun.mainclass}" fork="true">
 			<arg value="-propfile=test/r2-sqlrun-derby-test.properties"/>
@@ -120,7 +121,7 @@
 		<java classpathref="classpath.run.hsqldb" classname="${sqldump.sqlrun.mainclass}" fork="true">
 			<arg value="-propfile=test/r2-sqlrun-hsqldb-test.properties"/>
 		</java>
-		<!-- 3 -->
+
 		<echo message="roundtrip1: phase 3: dump [derby]" />
 		<java classpathref="classpath.run.derby" classname="${sqldump.mainclass}" fork="true">
 			<arg value="-propfile=test/r3-sqldump-derby-test.properties"/>
@@ -129,7 +130,7 @@
 		<java classpathref="classpath.run.hsqldb" classname="${sqldump.mainclass}" fork="true">
 			<arg value="-propfile=test/r3-sqldump-hsqldb-test.properties"/>
 		</java>
-		<!-- 4 -->
+
 		<echo message="roundtrip1: phase 4: diff [jaxb/jaxb-derby]" />
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
 			<arg value="-propfile=test/r4-sqldiff-test1.properties"/>
@@ -142,9 +143,9 @@
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
 			<arg value="-propfile=test/r4-sqldiff-test3.properties"/>
 		</java>
-	</target>
+	</target-->
 	
-	<target name="test" depends="compile">
+	<target name="test" depends="compile" description="run junit tests">
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
 			<classpath refid="classpath.test" />
 			<formatter type="xml"/>

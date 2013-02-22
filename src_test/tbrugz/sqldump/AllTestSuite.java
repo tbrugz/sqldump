@@ -18,6 +18,7 @@ import tbrugz.sqlrun.test.CSVImportTest;
 	DataDumpTest.class,
 	FailoverTest.class,
 	ParametrizedPropertiesTest.class,
+	//RoundTripTest.class,
 	SQLDumpTestSuite.class,
 	SQLDiffTest.class,
 	SQLRunAndDumpTest.class

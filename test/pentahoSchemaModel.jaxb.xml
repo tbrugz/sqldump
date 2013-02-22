@@ -11,7 +11,7 @@
         </columns>
         <columns>
             <name>REVISION</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -35,7 +35,7 @@
         </columns>
         <columns>
             <name>READONLY</name>
-            <type>bool</type>
+            <type>boolean</type>
             <columSize>1</columSize>
             <nullable>true</nullable>
         </columns>
@@ -234,7 +234,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -304,7 +304,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -346,7 +346,7 @@
         </columns>
         <columns>
             <name>latestvernum</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -358,7 +358,7 @@
         </columns>
         <columns>
             <name>writemode</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -434,7 +434,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -528,7 +528,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -558,13 +558,13 @@
         </columns>
         <columns>
             <name>versnum</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>filesize</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>true</nullable>
         </columns>
@@ -577,13 +577,13 @@
         </columns>
         <columns>
             <name>isinitialized</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>latestverid</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>true</nullable>
         </columns>
@@ -647,7 +647,7 @@
         </columns>
         <columns>
             <name>paramvalue</name>
-            <type>bytea</type>
+            <type>blob</type>
             <columSize>2147483647</columSize>
             <nullable>true</nullable>
         </columns>
@@ -718,7 +718,7 @@
         </columns>
         <columns>
             <name>maxactconn</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -730,7 +730,7 @@
         </columns>
         <columns>
             <name>idleconn</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -760,7 +760,7 @@
         </columns>
         <columns>
             <name>wait</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>false</nullable>
         </columns>
@@ -961,7 +961,7 @@
         </columns>
         <columns>
             <name>paramvalue</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>true</nullable>
         </columns>
@@ -1032,7 +1032,7 @@
         </columns>
         <columns>
             <name>paramvalue</name>
-            <type>text</type>
+            <type>clob</type>
             <columSize>2147483647</columSize>
             <nullable>true</nullable>
         </columns>
@@ -1174,13 +1174,13 @@
         </columns>
         <columns>
             <name>acl_mask</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>recip_type</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1192,7 +1192,7 @@
         </columns>
         <columns>
             <name>acl_position</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1257,7 +1257,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1281,19 +1281,19 @@
         </columns>
         <columns>
             <name>datacol</name>
-            <type>bytea</type>
+            <type>blob</type>
             <columSize>2147483647</columSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>directory</name>
-            <type>bool</type>
+            <type>boolean</type>
             <columSize>1</columSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>lastmodified</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1363,7 +1363,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1393,13 +1393,13 @@
         </columns>
         <columns>
             <name>repeatcount</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>repeatinterval</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>true</nullable>
         </columns>
@@ -1496,7 +1496,7 @@
         </columns>
         <columns>
             <name>schedid</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1561,7 +1561,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1637,7 +1637,7 @@
         </columns>
         <columns>
             <name>paramvalue</name>
-            <type>bytea</type>
+            <type>blob</type>
             <columSize>2147483647</columSize>
             <nullable>true</nullable>
         </columns>
@@ -1714,7 +1714,7 @@
         </columns>
         <columns>
             <name>schedid</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1779,13 +1779,13 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subscrtype</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -1873,7 +1873,7 @@
         </columns>
         <columns>
             <name>paramvalue</name>
-            <type>bytea</type>
+            <type>blob</type>
             <columSize>2147483647</columSize>
             <nullable>true</nullable>
         </columns>
@@ -1927,101 +1927,6 @@
         </grants>
         <grants>
             <table>pro_subscrparms</table>
-            <privilege>UPDATE</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <type>TABLE</type>
-    </table>
-    <table>
-        <name>rtelement</name>
-        <schemaName>public</schemaName>
-        <columns>
-            <name>instanceid</name>
-            <type>varchar</type>
-            <columSize>100</columSize>
-            <nullable>false</nullable>
-        </columns>
-        <columns>
-            <name>revision</name>
-            <type>int4</type>
-            <columSize>10</columSize>
-            <nullable>false</nullable>
-        </columns>
-        <columns>
-            <name>parid</name>
-            <type>varchar</type>
-            <columSize>254</columSize>
-            <nullable>true</nullable>
-        </columns>
-        <columns>
-            <name>partype</name>
-            <type>varchar</type>
-            <columSize>50</columSize>
-            <nullable>true</nullable>
-        </columns>
-        <columns>
-            <name>solnid</name>
-            <type>varchar</type>
-            <columSize>254</columSize>
-            <nullable>true</nullable>
-        </columns>
-        <columns>
-            <name>readonly</name>
-            <type>bool</type>
-            <columSize>1</columSize>
-            <nullable>true</nullable>
-        </columns>
-        <columns>
-            <name>created</name>
-            <type>timestamp</type>
-            <columSize>29</columSize>
-            <decimalDigits>6</decimalDigits>
-            <nullable>true</nullable>
-        </columns>
-        <constraints>
-            <name>rtelement_pkey</name>
-            <type>PK</type>
-            <uniqueColumns>instanceid</uniqueColumns>
-        </constraints>
-        <grants>
-            <table>rtelement</table>
-            <privilege>DELETE</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
-            <privilege>INSERT</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
-            <privilege>REFERENCES</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
-            <privilege>RULE</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
-            <privilege>SELECT</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
-            <privilege>TRIGGER</privilege>
-            <grantee>pentaho</grantee>
-            <withGrantOption>true</withGrantOption>
-        </grants>
-        <grants>
-            <table>rtelement</table>
             <privilege>UPDATE</privilege>
             <grantee>pentaho</grantee>
             <withGrantOption>true</withGrantOption>
@@ -2104,7 +2009,7 @@
         <schemaName>public</schemaName>
         <columns>
             <name>user_settings_id</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>false</nullable>
         </columns>
@@ -2198,7 +2103,7 @@
         </columns>
         <columns>
             <name>enabled</name>
-            <type>bool</type>
+            <type>boolean</type>
             <columSize>1</columSize>
             <nullable>false</nullable>
         </columns>
@@ -2262,7 +2167,7 @@
         </columns>
         <columns>
             <name>versionvalue</name>
-            <type>int8</type>
+            <type>bigint</type>
             <columSize>19</columSize>
             <nullable>true</nullable>
         </columns>
@@ -2333,7 +2238,7 @@
         </columns>
         <columns>
             <name>revision</name>
-            <type>int4</type>
+            <type>integer</type>
             <columSize>10</columSize>
             <nullable>false</nullable>
         </columns>
@@ -2395,7 +2300,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk61733c48fa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>bdparams</fkTable>
@@ -2403,7 +2308,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fk692b5eec44f32395</name>
         <pkTable>contentlocation</pkTable>
@@ -2413,7 +2318,7 @@
         <pkColumns>contentid</pkColumns>
         <fkColumns>parent_id</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk692b5eec875c1bf0</name>
         <pkTable>contentlocation</pkTable>
         <fkTable>contentitem</fkTable>
@@ -2421,7 +2326,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>contentid</pkColumns>
         <fkColumns>parent_id</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fk7fc3f44164d906f3</name>
         <pkTable>contentitem</pkTable>
@@ -2431,7 +2336,7 @@
         <pkColumns>contitemid</pkColumns>
         <fkColumns>parent_id</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk7fc3f441d2a64ce</name>
         <pkTable>contentitem</pkTable>
         <fkTable>contitemfile</fkTable>
@@ -2439,7 +2344,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>contitemid</pkColumns>
         <fkColumns>parent_id</fkColumns>
-    </foreignKey>
+    </foreignKey -->
     <foreignKey>
         <name>fkd6d6e97f4eedd021</name>
         <pkTable>rtelement</pkTable>
@@ -2449,7 +2354,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fkd6d6e97ffa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>cplxparams</fkTable>
@@ -2457,7 +2362,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey -->
     <foreignKey>
         <name>fk7f994a164eedd021</name>
         <pkTable>rtelement</pkTable>
@@ -2467,7 +2372,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk7f994a16fa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>dtparams</fkTable>
@@ -2475,7 +2380,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fk7471775d41b6da97</name>
         <pkTable>authorities</pkTable>
@@ -2503,7 +2408,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fke304fccbfa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>lngparams</fkTable>
@@ -2511,7 +2416,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fk89bc75cd4eedd021</name>
         <pkTable>rtelement</pkTable>
@@ -2521,7 +2426,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk89bc75cdfa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>lsparams</fkTable>
@@ -2529,7 +2434,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fk60e4afe64eedd025</name>
         <pkTable>rtelement</pkTable>
@@ -2539,7 +2444,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fkd3eda1b04eedd021</name>
         <pkTable>rtelement</pkTable>
         <fkTable>paramtypesmap</fkTable>
@@ -2547,8 +2452,8 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
-    <foreignKey>
+    </foreignKey-->
+    <!-- foreignKey>
         <name>fkd3eda1b0fa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>paramtypesmap</fkTable>
@@ -2556,7 +2461,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fkb65646c2b23c5d30</name>
         <pkTable>pro_files</pkTable>
@@ -2575,7 +2480,7 @@
         <pkColumns>file_id</pkColumns>
         <fkColumns>child_id</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk94a87e25cbbbb0ea</name>
         <pkTable>pro_files</pkTable>
         <fkTable>pro_files</fkTable>
@@ -2583,7 +2488,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>file_id</pkColumns>
         <fkColumns>parent</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fkf0d3fbd62593bc9e</name>
         <pkTable>pro_subcontent</pkTable>
@@ -2656,7 +2561,7 @@
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
     </foreignKey>
-    <foreignKey>
+    <!-- foreignKey>
         <name>fk60e4afe6fa34bfdc</name>
         <pkTable>rtelement</pkTable>
         <fkTable>ssparams</fkTable>
@@ -2664,7 +2569,7 @@
         <fkTableSchemaName>public</fkTableSchemaName>
         <pkColumns>instanceid</pkColumns>
         <fkColumns>itemid</fkColumns>
-    </foreignKey>
+    </foreignKey-->
     <foreignKey>
         <name>fkf4f325841e8538ef</name>
         <pkTable>versmgr</pkTable>
