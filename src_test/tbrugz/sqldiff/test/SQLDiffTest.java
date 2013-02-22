@@ -17,6 +17,7 @@ import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
@@ -89,7 +90,7 @@ public class SQLDiffTest {
 				"-Dsqldump.user=h",
 				"-Dsqldump.password=h"
 		};
-		SQLRunAndDumpTest.setProperties(jdbcPropNew, jdbcGrabParams);
+		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
 		schemaJdbcGrabber.procProperties(jdbcPropNew);
 		
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);

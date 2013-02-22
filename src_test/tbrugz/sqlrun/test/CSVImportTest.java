@@ -2,15 +2,18 @@ package tbrugz.sqlrun.test;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Properties;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
+import tbrugz.sqldump.ProcessingException;
+import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
 public class CSVImportTest {
 	
-	public static final String H2_JAR_PATH = "lib/h2-1.3.168.jar";
+	/*public static final String H2_JAR_PATH = "lib/h2-1.3.168.jar";
 	
 	@Test @Ignore
 	public void doImportWithNewClassLoader() throws Exception {
@@ -23,12 +26,24 @@ public class CSVImportTest {
 		
 		String[] params = {"-propfile=test/sqlrun-h2-csv.properties"};
 		SQLRun.main(params);
-	}
+	}*/
 
 	@Test
 	public void doImport() throws Exception {
 		String[] params = {"-propfile=test/sqlrun-h2-csv.properties"};
 		SQLRun.main(params);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void doImportWithError() throws Exception {
+		String[] params = {"-propfile=test/sqlrun-h2-csv.properties"};
+		String[] vmparams = {
+				"-Dsqlrun.exec.00.statement=drop table unexistent"
+		};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(params, p);
 	}
 	
 	static ClassLoader loadJar(URL url) {

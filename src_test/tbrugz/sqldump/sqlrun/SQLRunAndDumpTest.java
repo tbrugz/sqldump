@@ -1,10 +1,18 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.naming.NamingException;
+
+import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.TestUtil;
+import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class SQLRunAndDumpTest {
 	
@@ -12,16 +20,21 @@ public class SQLRunAndDumpTest {
 	
 	@Test
 	public void doRunAndDumpModel() throws Exception {
-		String[] vmparams = {
+		String[] params = {};
+
+		String[] vmparamsRun = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
-		String[] params = {};
-		setProperties(vmparams);
-		SQLRun.main(params);
+		SQLRun sqlr = new SQLRun();
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparamsRun);
+		sqlr.doMain(params, p);
+		
+		testForTwoTables();
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
@@ -32,12 +45,32 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.user=h",
 					"-Dsqldump.password=h"
 					};
-		setProperties(vmparamsDump);
-		SQLDump.main(params);
+		SQLDump sqld = new SQLDump();
+		p = new Properties();
+		TestUtil.setProperties(p, vmparamsDump);
+		sqld.doMain(params, p);
+	}
+	
+	void testForTwoTables() throws ClassNotFoundException, SQLException, NamingException {
+		SchemaModelGrabber schemaGrabber = new JDBCSchemaGrabber();
+		Properties jdbcPropOrig = new Properties();
+		String[] vmparams = {
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		TestUtil.setProperties(jdbcPropOrig, vmparams);
+		schemaGrabber.procProperties(jdbcPropOrig);
+		schemaGrabber.setConnection(TestUtil.getConn(jdbcPropOrig, "sqldump"));
+		SchemaModel smOrig = schemaGrabber.grabSchema();
+		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
 	}
 
 	@Test
 	public void doRunImportAndDumpModel() throws Exception {
+		SQLDump sqld = new SQLDump();
+		
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
@@ -54,8 +87,10 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.password=h"
 				};
 		String[] params = {};
-		setProperties(vmparams);
-		SQLRun.main(params);
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		//setSystemProperties(vmparams);
+		sqld.doMain(params, p);
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
@@ -72,11 +107,15 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.user=h",
 					"-Dsqldump.password=h"
 					};
-		setProperties(vmparamsDump);
-		SQLDump.main(params);
+		p = new Properties();
+		TestUtil.setProperties(p, vmparamsDump);
+		//setSystemProperties(vmparamsDump);
+		sqld.doMain(params, p);
 	}
 	
-	public static void setProperties(String[] vmparams) {
+	//not very much unit test 'isolated' - has 'side effects'
+	/*@Deprecated
+	public static void setSystemProperties(String[] vmparams) {
 		for(String s: vmparams) {
 			String key = null, value = null; 
 			if(s.startsWith("-D")) {
@@ -86,17 +125,6 @@ public class SQLRunAndDumpTest {
 				System.setProperty(key, value);
 			}
 		}
-	}
+	}*/
 
-	public static void setProperties(Properties p, String[] vmparams) {
-		for(String s: vmparams) {
-			String key = null, value = null; 
-			if(s.startsWith("-D")) {
-				int i = s.indexOf("=");
-				key = s.substring(2,i);
-				value = s.substring(i+1);
-				p.setProperty(key, value);
-			}
-		}
-	}
 }
