@@ -187,7 +187,7 @@ public abstract class AbstractImporter implements Executor {
 		this.conn = conn;
 	}
 	
-	//XXX @Override
+	@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
 		this.commitStrategy = commitStrategy;
 	}

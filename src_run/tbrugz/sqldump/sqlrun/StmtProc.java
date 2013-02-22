@@ -274,9 +274,9 @@ public class StmtProc implements Executor {
 		this.papp = papp;
 	}
 	
-	//@Override
+	@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
-		//this.commitStrategy = commitStrategy;
+		//XXX this.commitStrategy = commitStrategy;
 	}
 
 	@Override

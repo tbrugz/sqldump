@@ -17,6 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
 
@@ -56,10 +57,12 @@ public class QueryDumper implements Executor {
 		queryName = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_QUERYNAME);
 		outputStream = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_OUTSTREAM);
 		if(outputStream==null) {
+			//XXX: default to <stdout>?
 			log.error("output stream (suffix "+SUFFIX_OUTSTREAM+") not defined");
 		}
 		String dumpSyntaxStr = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_DUMPSYNTAX);
 		if(dumpSyntaxStr==null) {
+			//XXX: default to FFCDataDump?
 			log.error("dump syntax (suffix "+SUFFIX_DUMPSYNTAX+") not defined");
 		}
 		else {
@@ -130,6 +133,10 @@ public class QueryDumper implements Executor {
 		}
 		
 		return new FileWriter(writerName);
+	}
+
+	@Override
+	public void setCommitStrategy(CommitStrategy commitStrategy) {
 	}
 	
 }
