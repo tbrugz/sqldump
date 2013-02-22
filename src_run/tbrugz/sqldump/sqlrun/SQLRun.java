@@ -122,9 +122,9 @@ public class SQLRun {
 		log.info("processing ids in exec order: "+Utils.join(procIds, ", "));
 		
 		StmtProc srproc = new StmtProc();
-		srproc.setConn(conn);
+		srproc.setConnection(conn);
 		srproc.setCommitStrategy(commitStrategy);
-		srproc.setPapp(papp);
+		srproc.setProperties(papp);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;

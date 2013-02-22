@@ -10,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -19,7 +20,7 @@ import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
-public class StmtProc {
+public class StmtProc implements Executor {
 	static Log log = LogFactory.getLog(StmtProc.class);
 	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
@@ -263,14 +264,30 @@ public class StmtProc {
 		return 0;
 	}
 	
-	public void setConn(Connection conn) {
+	@Override
+	public void setConnection(Connection conn) {
 		this.conn = conn;
 	}
-	public void setPapp(Properties papp) {
+
+	@Override
+	public void setProperties(Properties papp) {
 		this.papp = papp;
 	}
+	
+	//@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
 		//this.commitStrategy = commitStrategy;
+	}
+
+	@Override
+	public void setExecId(String execId) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public List<String> getAuxSuffixes() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
