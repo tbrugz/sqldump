@@ -93,7 +93,7 @@ public class SQLRun {
 	//other/reserved props
 	static final String PROP_PROCID = "_procid";
 	
-	Properties papp = new ParametrizedProperties();
+	final Properties papp = new ParametrizedProperties();
 	Connection conn;
 	CommitStrategy commitStrategy = CommitStrategy.FILE;
 	
@@ -125,6 +125,7 @@ public class SQLRun {
 		srproc.setConnection(conn);
 		srproc.setCommitStrategy(commitStrategy);
 		srproc.setProperties(papp);
+		srproc.setFailOnError(true);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
@@ -352,14 +353,18 @@ public class SQLRun {
 	 */
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		SQLRun sqlr = new SQLRun();
-		
+		sqlr.doMain(args, null);
+	}
+	
+	public void doMain(String[] args, Properties p) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		try {
-			sqlr.init(args);
-			if(sqlr.conn==null) { return; }
-			sqlr.doIt();
+			if(p!=null) { papp.putAll(p); }
+			init(args);
+			if(conn==null) { return; }
+			doIt();
 		}
 		finally {
-			sqlr.end();
+			end();
 		}
 	}
 

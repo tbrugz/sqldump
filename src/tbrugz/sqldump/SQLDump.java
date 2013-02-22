@@ -114,7 +114,7 @@ public class SQLDump {
 	
 	Connection conn;
 
-	Properties papp = new ParametrizedProperties();
+	final Properties papp = new ParametrizedProperties();
 	
 	public static void init(String[] args, Properties papp) throws IOException {
 		log.info("init...");
@@ -218,12 +218,20 @@ public class SQLDump {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
-
 		SQLDump sdd = new SQLDump();
+		sdd.doMain(args, null);
+	}
 
+	public void doMain(String[] args, Properties prop) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		SQLDump sdd = this;
+		
 		try {
 
 		sdd.init(args);
+		
+		if(prop!=null) {
+			sdd.papp.putAll(prop);
+		}
 		
 		//Utils.showSysProperties();
 		
@@ -335,6 +343,8 @@ public class SQLDump {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);
 				sqlproc.setSchemaModel(sm);
+				//TODO: set fail on error based on properties
+				//sqlproc.setFailOnError(true);
 				sqlproc.process();
 			}
 			else {
