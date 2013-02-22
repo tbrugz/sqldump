@@ -25,6 +25,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
@@ -43,7 +44,7 @@ class DBObjectId extends DBIdentifiable {
  * TODO: accept list of tables/objects to grab/dump, types of objects to grab/dump
  * XXX: performance optimization: grab (columns, FKs, ...) in bulk
  */
-public class JDBCSchemaGrabber implements SchemaModelGrabber {
+public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGrabber {
 	
 	//sqldump.properties
 	static final String PROP_SCHEMAGRAB_TABLES = "sqldump.schemagrab.tables";
@@ -192,6 +193,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 
 		if(schemaPattern==null) {
 			log.error("schema name undefined & no suggestion avaiable, aborting...");
+			if(failonerror) { throw new ProcessingException("schema name undefined & no suggestion avaiable, aborting..."); }
 			return null;
 		}
 		
@@ -338,6 +340,7 @@ public class JDBCSchemaGrabber implements SchemaModelGrabber {
 		catch(Exception e) {
 			log.error("error grabbing schema: "+e);
 			log.info("error grabbing schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
 			return null;
 		}
 	}

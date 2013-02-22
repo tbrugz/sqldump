@@ -15,6 +15,8 @@ public interface SchemaModelGrabber {
 
 	public void setConnection(Connection conn);
 
+	public void setFailOnError(boolean failonerror);
+
 	public SchemaModel grabSchema();
 
 }
