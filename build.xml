@@ -19,6 +19,8 @@
 	<property name="sqldump.sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 	
 	<property file="build.properties"/>
+	<property file="version.properties"/>
+	<property file="ivysettings.properties"/>
 
 	<property name="lib.derby" value="${lib.dir}/derby-10.9.1.0.jar"/>
 	<property name="lib.h2" value="${lib.dir}/h2-1.3.170.jar"/>
@@ -250,7 +252,27 @@
 		</get>
 		<!-- markdownj: markdown testing -->
 		<get dest="${lib.dir}/markdownj-1.0.2b4-0.3.0.jar" src="http://code.google.com/p/markdownj/downloads/detail?name=markdownj-1.0.2b4-0.3.0.jar&amp;can=2&amp;q=" verbose="true"/>
-	</target>	
+	</target>
+	
+	<target name="report-ivy" depends="resolve-ivy">
+		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
+		<ivy:report todir="bin/report-ivy"/>
+	</target>
+	
+	<target name="publish" depends="jar" description="publish this project in the ivy repository">
+		<property name="revision" value="${version}"/>
+		<!--
+		<ivy:retrieve />
+		<ivy:resolve file="ivy.xml"/>
+		-->
+		<ivy:info file="ivy.xml"/>
+		<echo message="revision = ${revision} ; ivy.deliver.ivy.pattern = ${ivy.deliver.ivy.pattern}"/>
+		<ivy:publish resolver="local" pubrevision="${revision}" status="release" update="true" overwrite="true">
+			<!--artifacts pattern="${dist.dir}/[organisation]-[module].[ext]" /-->
+			<artifacts pattern="${dist.dir}/[module].[ext]" />
+		</ivy:publish>		
+		<echo message="project ${ant.project.name} released with version ${revision}"/>
+	</target>
 
 	<!-- ========= /dependencies tasks ========== -->
 	
