@@ -6,11 +6,11 @@
 	<classpathentry kind="src" path="src_diff"/>
 	<classpathentry kind="src" path="src_xtra"/>
 	<classpathentry kind="src" path="src_run"/>
-	<classpathentry kind="src" path="src_test"/>
+	<classpathentry kind="src" output="bin/test" path="src_test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/kmlutils.jar"/>
 	<classpathentry kind="lib" path="lib/mondrianschema2graphml.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.10.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="output" path="bin/main"/>
 </classpath>
