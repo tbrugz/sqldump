@@ -221,23 +221,23 @@
 	<!-- hint: ant -autoproxy -lib <ivy-dir> resolve -->
 	<!-- XXX: install ivy? see: ivy/example/go-ivy -->
 	
-	<target name="check-kmlutils" description="checks existence of kmlutils.jar">
-	    <available file="${lib.dir}/kmlutils.jar" property="kmlutils.present"/>
+	<!--target name="check-kmlutils" description="checks existence of kmlutils.jar">
+		<available file="${lib.dir}/kmlutils.jar" property="kmlutils.present"/>
 	</target>
 
-	<target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
-	    <available file="${lib.dir}/mondrianschema2graphml.jar" property="mondrianschema2graphml.present"/>
-	</target>
-	
 	<target name="resolve-kmlutils" depends="check-kmlutils" description="retrieve kmlutils dependency" unless="kmlutils.present">
 		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
-	</target>
+	</target-->
 
+	<target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
+		<available file="${lib.dir}/mondrianschema2graphml.jar" property="mondrianschema2graphml.present"/>
+	</target>
+	
 	<target name="resolve-mondrianschema2graphml" depends="check-mondrianschema2graphml" description="retrieve kmlutils dependency" unless="mondrianschema2graphml.present">
 		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/mondrianschema2graphml/downloads/mondrianschema2graphml.jar" verbose="true"/>
 	</target>
 	
-	<target name="resolve-base" depends="resolve-kmlutils,resolve-mondrianschema2graphml">
+	<target name="resolve-base" depends="resolve-mondrianschema2graphml">
 	</target>
 
 	<target name="resolve-ivy" description="retrieve dependencies with ivy" depends="resolve-base">
@@ -270,7 +270,7 @@
 		<ivy:publish resolver="local" pubrevision="${revision}" status="release" update="true" overwrite="true">
 			<!--artifacts pattern="${dist.dir}/[organisation]-[module].[ext]" /-->
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
-		</ivy:publish>		
+		</ivy:publish>
 		<echo message="project ${ant.project.name} released with version ${revision}"/>
 	</target>
 
