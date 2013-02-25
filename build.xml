@@ -30,8 +30,8 @@
 	<path id="classpath.compile">
 		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
 		<pathelement location="${lib.dir}/log4j-1.2.16.jar"/>
-		<pathelement location="${lib.dir}/kmlutils.jar"/>
-		<pathelement location="${lib.dir}/mondrianschema2graphml.jar"/>
+		<pathelement location="${lib.dir}/kmlutils-0.5.0.jar"/>
+		<pathelement location="${lib.dir}/mondrianschema2graphml-0.5.0.jar"/>
 	</path>
 
 	<path id="classpath.compiletest">
@@ -229,7 +229,7 @@
 		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
 	</target-->
 
-	<target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
+	<!--target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
 		<available file="${lib.dir}/mondrianschema2graphml.jar" property="mondrianschema2graphml.present"/>
 	</target>
 	
@@ -238,40 +238,40 @@
 	</target>
 	
 	<target name="resolve-base" depends="resolve-mondrianschema2graphml">
-	</target>
+	</target-->
 
-	<target name="resolve-ivy" description="retrieve dependencies with ivy" depends="resolve-base">
-		<ivy:retrieve />
-		<!--ivy:report todir="${dist.dir}" /-->
+	<target name="config-ivy" if="ivy.settings.dir">
+		<ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
 	</target>	
 
-	<target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
+	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
+		<ivy:retrieve />
+	</target>	
+
+	<!--target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
 		<get dest="${lib.dir}">
 			<url url="http://repo1.maven.org/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
 			<url url="http://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar"/>
 		</get>
-		<!-- markdownj: markdown testing -->
+		<!- - markdownj: markdown testing - ->
 		<get dest="${lib.dir}/markdownj-1.0.2b4-0.3.0.jar" src="http://code.google.com/p/markdownj/downloads/detail?name=markdownj-1.0.2b4-0.3.0.jar&amp;can=2&amp;q=" verbose="true"/>
-	</target>
+	</target-->
 	
 	<target name="report-ivy" depends="resolve-ivy">
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
 	
-	<target name="publish" depends="jar" description="publish this project in the ivy repository">
+	<target name="publish" depends="jar,config-ivy" description="publish this project in the ivy repository">
 		<property name="revision" value="${version}"/>
-		<!--
-		<ivy:retrieve />
-		<ivy:resolve file="ivy.xml"/>
-		-->
+		<property name="resolver" value="local"/>
 		<ivy:info file="ivy.xml"/>
 		<echo message="revision = ${revision} ; ivy.deliver.ivy.pattern = ${ivy.deliver.ivy.pattern}"/>
-		<ivy:publish resolver="local" pubrevision="${revision}" status="release" update="true" overwrite="true">
+		<ivy:publish resolver="${resolver}" pubrevision="${revision}" status="release" update="true" overwrite="true">
 			<!--artifacts pattern="${dist.dir}/[organisation]-[module].[ext]" /-->
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
 		</ivy:publish>
-		<echo message="project ${ant.project.name} released with version ${revision}"/>
+		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver}"/>
 	</target>
 
 	<!-- ========= /dependencies tasks ========== -->
