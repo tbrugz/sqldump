@@ -84,6 +84,7 @@ public class SQLRun {
 	//properties
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
 	static final String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
+	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -96,6 +97,7 @@ public class SQLRun {
 	final Properties papp = new ParametrizedProperties();
 	Connection conn;
 	CommitStrategy commitStrategy = CommitStrategy.FILE;
+	List<String> filterByIds = null;
 	
 	void end() throws SQLException {
 		if(conn!=null) {
@@ -114,12 +116,22 @@ public class SQLRun {
 		long initTime = System.currentTimeMillis();
 
 		Set<String> procIds = new TreeSet<String>();
+		if(filterByIds!=null) {
+			log.info("filter by ids: "+filterByIds);
+		}
 		for(String key: execkeys) {
 			String procId = getExecId(key, PREFIX_EXEC);
-			procIds.add(procId);
+			if(filterByIds==null || filterByIds.contains(procId)) {
+				procIds.add(procId);
+			}
 		}
 		//Collections.sort(procIds);
-		log.info("processing ids in exec order: "+Utils.join(procIds, ", "));
+		if(procIds.size()==0) {
+			log.warn("no processing ids selected for execution...");
+		}
+		else {
+			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
+		}
 		
 		StmtProc srproc = new StmtProc();
 		srproc.setConnection(conn);
@@ -131,6 +143,8 @@ public class SQLRun {
 			boolean isExecId = false;
 			String procId = getExecId(key, PREFIX_EXEC);
 			String action = key.substring((PREFIX_EXEC+procId).length());
+			if(filterByIds!=null && !filterByIds.contains(procId)) { continue; }
+			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
 				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"'");
 				isExecId = true;
@@ -318,6 +332,7 @@ public class SQLRun {
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new QueryDumper().getAuxSuffixes());
+		filterByIds = Utils.getStringListFromProp(papp, PROP_FILTERBYIDS, ",");
 		
 		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
 		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
