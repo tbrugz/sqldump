@@ -240,13 +240,21 @@
 	<target name="resolve-base" depends="resolve-mondrianschema2graphml">
 	</target-->
 
-	<target name="config-ivy" if="ivy.settings.dir">
+	<target name="config-ivy-file" if="ivy.settings.file">
+		<echo message="setting ivy file: ${ivy.settings.file}"/>
+		<ivy:settings file="${ivy.settings.file}"/>
+	</target>
+	
+	<target name="config-ivy-dir" if="ivy.settings.dir" unless="ivy.settings.file">
+		<echo message="setting ivy file (by dir): ${ivy.settings.dir}/ivysettings.xml"/>
 		<ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
-	</target>	
+	</target>
 
+	<target name="config-ivy" depends="config-ivy-file,config-ivy-dir"/>
+	
 	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve />
-	</target>	
+	</target>
 
 	<!--target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
 		<get dest="${lib.dir}">
@@ -264,14 +272,16 @@
 	
 	<target name="publish" depends="jar,config-ivy" description="publish this project in the ivy repository">
 		<property name="revision" value="${version}"/>
-		<property name="resolver" value="local"/>
-		<ivy:info file="ivy.xml"/>
-		<echo message="revision = ${revision} ; ivy.deliver.ivy.pattern = ${ivy.deliver.ivy.pattern}"/>
-		<ivy:publish resolver="${resolver}" pubrevision="${revision}" status="release" update="true" overwrite="true">
-			<!--artifacts pattern="${dist.dir}/[organisation]-[module].[ext]" /-->
+		<property name="resolver.publish" value="local"/>
+		<ivy:info/>
+		<echo message="revision = ${revision}"/>
+		<property name="ivy.pom.version" value="${revision}"/>
+		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom"/>
+		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true">
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
+			<artifact name="${ivy.module}" ext="pom" type="pom" />
 		</ivy:publish>
-		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver}"/>
+		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
 
 	<!-- ========= /dependencies tasks ========== -->
