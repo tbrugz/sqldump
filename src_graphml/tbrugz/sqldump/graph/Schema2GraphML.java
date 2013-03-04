@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
@@ -30,6 +29,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.xml.AbstractDump;
 
 enum EdgeLabelType {
 	FK, FKANDCOLUMNS, COLUMNS, NONE;
@@ -59,6 +59,9 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	
 	static Log log = LogFactory.getLog(Schema2GraphML.class);
 	
+	public static final String PREFIX_SCHEMA2GRAPHML = "sqldump.graphmldump";
+	public static final String SUFFIX_DUMPFORMATCLASS = ".dumpformatclass";
+	
 	public static final String PROP_OUTPUTFILE = "sqldump.graphmldump.outputfile";
 	public static final String PROP_SHOWSCHEMANAME = "sqldump.graphmldump.showschemaname";
 	public static final String PROP_SHOWCONSTRAINTS = "sqldump.graphmldump.showconstraints";
@@ -72,7 +75,12 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 	public static final String PROP_NODESTEREOTYPECONTAINS_PREFIX = "sqldump.graphmldump.nodestereotypecontains.";
+	
+	static final Class<?> DEFAULT_DUMPFORMAT_CLASS = DumpSchemaGraphMLModel.class;
 
+	Class<?> dumpFormatClass = null;
+	String snippetsFile;
+	
 	File output;
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
@@ -341,12 +349,14 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		}
 		Root r = getGraphMlModel(schemaModel);
 		log.info("dumping model...");
-		DumpGraphMLModel dg = new DumpSchemaGraphMLModel();
+
+		AbstractDump dg = (AbstractDump) Utils.getClassInstance(dumpFormatClass);
 		Utils.prepareDir(output);
 		
 		try {
+			if(snippetsFile!=null) { dg.loadSnippets(snippetsFile); }
 			dg.dumpModel(r, new PrintStream(output));
-			log.info("...graphML dumped");
+			log.info("graphML dumped to: "+output.getAbsolutePath());
 		} catch (FileNotFoundException e) {
 			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
@@ -364,6 +374,14 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		if(outFileStr==null) {
 			log.warn("graphml output file ["+PROP_OUTPUTFILE+"] not defined");
 			return;
+		}
+		
+		dumpFormatClass = getDumpFormatClass(prop, PREFIX_SCHEMA2GRAPHML+SUFFIX_DUMPFORMATCLASS);
+		if(dumpFormatClass!=null) {
+			log.info("dump format class: "+dumpFormatClass.getName());
+		}
+		else {
+			dumpFormatClass = DEFAULT_DUMPFORMAT_CLASS;
 		}
 		
 		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
@@ -421,12 +439,13 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		showSchemaName = Utils.getPropBool(prop, PROP_SHOWSCHEMANAME, showSchemaName);
 		showConstraints = Utils.getPropBool(prop, PROP_SHOWCONSTRAINTS, showConstraints);
 		showIndexes = Utils.getPropBool(prop, PROP_SHOWINDEXES, showIndexes);
+		//XXX: remove static reference to DumpSchemaGraphMLModel.nodeHeightByColsNumber
 		DumpSchemaGraphMLModel.nodeHeightByColsNumber = Utils.getPropBool(prop, PROP_NODEHEIGHTBYCOLSNUMBER, true);
 		
 		String snippetsFile = prop.getProperty(PROP_SNIPPETS_FILE);
 		if(snippetsFile!=null) {
-			DumpSchemaGraphMLModel.snippetsFile = snippetsFile;
-			log.debug("snippets-file is '"+DumpSchemaGraphMLModel.snippetsFile+"'");
+			this.snippetsFile = snippetsFile;
+			log.info("snippets-file is '"+this.snippetsFile+"'");
 		}
 		
 		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, addTableTypeStereotype);
@@ -457,5 +476,33 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
 		// TODO: properties-prefix setting
+	}
+	
+	/*static Class<?> getDumpFormatClass(Properties prop, String key, Class<?> defaultFormatClass) {
+		String dumpFormatClassStr = prop.getProperty(key);
+		if(dumpFormatClassStr!=null) {
+			Class<?> c = Utils.getClassWithinPackages(dumpFormatClassStr, "tbrugz.graphml", "tbrugz.sqldump.graph", null);
+			if(c!=null) {
+				return c;
+			}
+			else {
+				log.warn("dump format class '"+dumpFormatClassStr+"' not found. defaulting to '"+DEFAULT_DUMPFORMAT_CLASS.getName()+"'");
+			}
+		}
+		return defaultFormatClass;
+	}*/
+
+	static Class<?> getDumpFormatClass(Properties prop, String key) {
+		String dumpFormatClassStr = prop.getProperty(key);
+		if(dumpFormatClassStr!=null) {
+			Class<?> c = Utils.getClassWithinPackages(dumpFormatClassStr, "tbrugz.graphml", "tbrugz.sqldump.graph", null);
+			if(c!=null) {
+				return c;
+			}
+			else {
+				log.warn("dump format class '"+dumpFormatClassStr+"' not found. defaulting to '"+DEFAULT_DUMPFORMAT_CLASS.getName()+"'");
+			}
+		}
+		return null;
 	}
 }

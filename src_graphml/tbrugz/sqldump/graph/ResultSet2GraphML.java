@@ -19,7 +19,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.graphml.DumpGraphMLModel;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Node;
 import tbrugz.graphml.model.NodeXYWH;
@@ -29,6 +28,7 @@ import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.xml.AbstractDump;
 
 class RSNode extends NodeXYWH {
 	String description;
@@ -82,6 +82,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static Log logsql = LogFactory.getLog(ResultSet2GraphML.class.getName()+".sql");
 	
 	static final String DEFAULT_SNIPPETS = "graphml-snippets-rs.properties";
+	static final Class<?> DEFAULT_DUMPFORMAT_CLASS = DumpResultSetGraphMLModel.class;
+	
+	static final String PREFIX_RS2GRAPH = "sqldump.graphmlquery";
 
 	//node cols
 	static final String COL_OBJECT = "OBJECT";
@@ -120,6 +123,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static double edgeMinWidth = 0.1; //XXX: maybe 0?
 	static double edgeMaxWidth = 7.0; 
 	
+	Class<?> dumpFormatClass = null;
 	File output;
 	String snippets;
 	
@@ -341,7 +345,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			return false;
 		}
 		log.info("dumping model... [graph size = "+r.getChildren().size()+"]");
-		DumpGraphMLModel dg = new DumpResultSetGraphMLModel();
+		
+		AbstractDump dg = (AbstractDump) Utils.getClassInstance(dumpFormatClass);
 		dg.loadSnippets(DEFAULT_SNIPPETS);
 		if(snippets!=null) {
 			try {
@@ -353,7 +358,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		}
 		Utils.prepareDir(output);
 		dg.dumpModel(r, new PrintStream(output));
-		log.info("graphmlquery written to '"+output+"'");
+		log.info("graphmlquery written to '"+output.getAbsolutePath()+"'");
 		return true;
 	}
 
@@ -431,6 +436,15 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			
 			output = new File(outputfile);
 			snippets = prop.getProperty("sqldump.graphmlquery."+qid+".snippetsfile");
+			dumpFormatClass = Schema2GraphML.getDumpFormatClass(prop,
+					PREFIX_RS2GRAPH+"."+qid+Schema2GraphML.SUFFIX_DUMPFORMATCLASS);
+			if(dumpFormatClass!=null) {
+				log.info("dump format class: "+dumpFormatClass.getName()+" [qid = "+qid+"]");
+			}
+			else {
+				dumpFormatClass = DEFAULT_DUMPFORMAT_CLASS;
+			}
+			
 			boolean dumped = dumpSchema(qid, rsEdges, rsNodes);
 			
 			if(dumped) { i++; }
@@ -448,5 +462,5 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		node.setStereotype(null);
 		return node;
 	}
-
+	
 }
