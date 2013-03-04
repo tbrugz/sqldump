@@ -132,7 +132,7 @@ public class SQLDiff {
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {
 		SchemaModelGrabber schemaGrabber = null;
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) SQLDump.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
+			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber==null) {
 				log.warn("schema grabber class '"+grabClassName+"' not found");
 			}

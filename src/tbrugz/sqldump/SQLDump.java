@@ -257,7 +257,7 @@ public class SQLDump {
 		
 		//grabbing model
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
+			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection() && sdd.conn==null) {
@@ -301,7 +301,7 @@ public class SQLDump {
 		if(dumpSchemaClasses!=null) {
 			String dumpClasses[] = dumpSchemaClasses.split(",");
 			for(String dumpClass: dumpClasses) {
-				SchemaModelDumper schemaDumper = (SchemaModelDumper) getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
 					schemaDumper.procProperties(sdd.papp);
 					schemaDumper.dumpSchema(sm);
@@ -338,7 +338,7 @@ public class SQLDump {
 		}
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
-			Processor sqlproc = (Processor) getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+			Processor sqlproc = (Processor) Utils.getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 			if(sqlproc!=null) {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);
@@ -364,15 +364,5 @@ public class SQLDump {
 		}
 	}
 	*/
-	
-	//XXX: move to Utils?
-	public static Object getClassInstance(String className, String... defaultPackages) {
-		Class<?> c = Utils.getClassWithinPackages(className, defaultPackages);
-		Object o = Utils.getClassInstance(c);
-		if(o==null) {
-			log.debug("class not found: "+className);
-		}
-		return o;
-	}
 	
 }

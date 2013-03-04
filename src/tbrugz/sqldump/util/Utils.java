@@ -567,5 +567,14 @@ public class Utils {
 		//String s = readPasswordIntern("pass: ", "*");
 		//System.out.println("s = "+s);
 	}
+
+	public static Object getClassInstance(String className, String... defaultPackages) {
+		Class<?> c = getClassWithinPackages(className, defaultPackages);
+		Object o = getClassInstance(c);
+		if(o==null) {
+			log.debug("class not found: "+className);
+		}
+		return o;
+	}
 	
 }
