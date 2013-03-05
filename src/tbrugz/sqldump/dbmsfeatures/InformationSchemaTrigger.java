@@ -7,6 +7,8 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaTrigger extends Trigger {
+	private static final long serialVersionUID = 1L;
+	
 	public Set<String> eventsManipulation = new TreeSet<String>();
 	public String actionStatement; 
 	public String actionOrientation; 

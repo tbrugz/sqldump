@@ -5,6 +5,8 @@ import java.util.List;
 
 // http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/statements_7002.htm#i2125922
 public class OracleTablePartition implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	public String name;
 	public String tableSpace;
 

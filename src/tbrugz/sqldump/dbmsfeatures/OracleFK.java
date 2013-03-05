@@ -3,6 +3,8 @@ package tbrugz.sqldump.dbmsfeatures;
 import tbrugz.sqldump.dbmodel.FK;
 
 public class OracleFK extends FK {
+	private static final long serialVersionUID = 1L;
+	
 	public Boolean enabled; // enabled | disabled
 	public Boolean validated;
 	public Boolean rely;
