@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +25,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	static Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;
+	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");
 	
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
@@ -70,7 +73,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			View v = new View();
 			v.setName( rs.getString(3) );
 			v.query = rs.getString(4);
-			v.query = v.query.substring(0, v.query.length()-2);
+			Matcher m = patternLastSemicolon.matcher(v.query);
+			if(m.find()) {
+				v.query = m.replaceAll("");
+			}
+			/*if(v.query!=null && v.query.endsWith(";")) {
+				v.query = v.query.substring(0, v.query.length()-1);
+			}*/
 			v.setSchemaName( schemaPattern );
 			v.checkOption = View.CheckOptionType.valueOf(rs.getString(5)); //"YES".equalsIgnoreCase(rs.getString(5));
 			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));

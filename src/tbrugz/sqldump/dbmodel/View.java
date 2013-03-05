@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import tbrugz.sqldump.util.Utils;
 
@@ -32,6 +33,8 @@ public class View extends DBObject implements Relation {
 	
 	//public String checkOptionConstraintName;
 	
+	static final Pattern PATTERN_CREATE_VIEW = Pattern.compile("\\s*create\\s+(force\\s+)?view\\s+", Pattern.CASE_INSENSITIVE);
+	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		StringBuffer sbConstraints = new StringBuffer();
@@ -56,6 +59,11 @@ public class View extends DBObject implements Relation {
 			sbRemarks.delete(len-2, len);
 		}
 		
+		if(PATTERN_CREATE_VIEW.matcher(query).find()) {
+			return query;
+				//+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
+		}
+		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
 				+ getFinalName(dumpSchemaName)
 				+ (sbConstraints.length()>0?" (\n\t"
@@ -66,7 +74,7 @@ public class View extends DBObject implements Relation {
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
 						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""
 					)
-				  )
+				)
 				+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
 	}
 	
