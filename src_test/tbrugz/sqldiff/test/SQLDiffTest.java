@@ -9,6 +9,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import tbrugz.sqldiff.model.ChangeType;
@@ -26,34 +27,17 @@ import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
 public class SQLDiffTest {
 	
-	//pgsql: file:///D:/apps/PostgreSQL/9.0/doc/postgresql/html/sql-altertable.html
+	static final String dbPath = "mem:testIdenticalModels;DB_CLOSE_DELAY=-1";
 
-	//add column, alter column, drop column
-	/*
-	Set<Table> tables = new TreeSet<Table>();
-	Set<Sequence> sequences = new TreeSet<Sequence>(); ??
-
-	Set<FK> foreignKeys = new TreeSet<FK>();
-	Set<View> views = new TreeSet<View>();
-	Set<Trigger> triggers = new TreeSet<Trigger>();
-	Set<ExecutableObject> executables = new TreeSet<ExecutableObject>();
-	Set<Synonym> synonyms = new TreeSet<Synonym>();
-	Set<Index> indexes = new TreeSet<Index>();
-	 */
-	String dbPath = "mem:testIdenticalModels;DB_CLOSE_DELAY=-1";
-
-	@Test
-	public void testIt() throws Exception {
-		//depends on SQLRunAndDumpTest.doRun() ...
+	@BeforeClass
+	public static void testIt() throws Exception {
 		SQLRunAndDumpTest randd = new SQLRunAndDumpTest();
-		randd.dbpath = this.dbPath;
+		randd.dbpath = dbPath;
 		randd.doRunAndDumpModel();
-		
-		testIdenticalModels();
-		testDifferentModels();
 	}
 	
-	void testIdenticalModels() {
+	@Test
+	public void testIdenticalModels() {
 		//xml serializer input Orig
 		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
@@ -77,59 +61,63 @@ public class SQLDiffTest {
 		Assert.assertEquals("diff size should be zero", 0, diffs.size());
 	}
 	
-	void testDifferentModels() throws ClassNotFoundException, SQLException, NamingException {
+	SchemaModelGrabber schemaJdbcGrabber;
+	Connection conn;
+	SchemaModel smOriginal;
+	
+	void setup4diff() throws ClassNotFoundException, SQLException, NamingException {
+		if(schemaJdbcGrabber==null) {
+			schemaJdbcGrabber = new JDBCSchemaGrabber();
+			Properties jdbcPropNew = new Properties();
+			String[] jdbcGrabParams = {
+					"-Dsqldump.driverclass=org.h2.Driver",
+					"-Dsqldump.dburl=jdbc:h2:"+dbPath,
+					"-Dsqldump.user=h",
+					"-Dsqldump.password=h",
+					"-Dsqldump.usedbspecificfeatures=true"
+			};
+			TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
+			schemaJdbcGrabber.procProperties(jdbcPropNew);
+			
+			conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
+			DBMSResources.instance().updateMetaData(conn.getMetaData());
+			schemaJdbcGrabber.setConnection(conn);
+		}
 		
-		//List<DBObjectType> objtypeList = Arrays.asList(DBObjectType.TABLE, DBObjectType.COLUMN);
-		//System.out.println("diff [types:"+objtypeList+"]\n"+diff.getDiffByDBObjectTypes(objtypeList));
-
-		SchemaModelGrabber schemaJdbcGrabber = new JDBCSchemaGrabber();
-		Properties jdbcPropNew = new Properties();
-		String[] jdbcGrabParams = {
-				"-Dsqldump.driverclass=org.h2.Driver",
-				"-Dsqldump.dburl=jdbc:h2:"+dbPath,
-				"-Dsqldump.user=h",
-				"-Dsqldump.password=h"
-		};
-		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
-		schemaJdbcGrabber.procProperties(jdbcPropNew);
-		
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
-		schemaJdbcGrabber.setConnection(conn);
-		
-		/*DBMSResources res = DBMSResources.instance();
-		DBMSFeatures feat = res.databaseSpecificFeaturesClass();
-		System.out.println("conn = "+conn+"; res = "+res+"; feat = "+feat);*/
-		
-		SchemaModel sm1 = schemaJdbcGrabber.grabSchema();
-		Assert.assertEquals("should have grabbed 2 tables", 2, sm1.getTables().size());
-		
+		smOriginal = schemaJdbcGrabber.grabSchema();
+		Assert.assertEquals("should have grabbed 2 tables", 2, smOriginal.getTables().size());
+	}
+	
+	@Test
+	public void testDiffAddColumn() throws ClassNotFoundException, SQLException, NamingException {
+		setup4diff();
 		Statement st = conn.createStatement();
 		st.executeUpdate("alter table emp add column email varchar(100)");
-		//conn.commit();
-
+		
 		List<Diff> diffs = null;
-		SchemaDiff diff = null;
+		SchemaDiff schemaDiff = null;
+		Diff diff1st = null;
+		Diff dinv = null;
 		
 		//test diff size
 		{
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		diff = SchemaDiff.diff(sm1, sm2);
-		System.out.println("diff:\n"+diff.getDiff());
-		diffs = diff.getChildren();
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 1", 1, diffs.size());
 		}
 		
 		//test diff(0) type
 		{
-		Diff d = diffs.get(0);
-		Assert.assertEquals("diff type should be ADD", ChangeType.ADD, d.getChangeType());
-		Assert.assertEquals("diff object type should be COLUMN", DBObjectType.COLUMN, d.getObjectType());
+		diff1st = diffs.get(0);
+		Assert.assertEquals("diff type should be ADD", ChangeType.ADD, diff1st.getChangeType());
+		Assert.assertEquals("diff object type should be COLUMN", DBObjectType.COLUMN, diff1st.getObjectType());
 		}
-
+		
 		//test inverse diff(0)
 		{
-		Diff dinv = diff.inverse();
+		dinv = schemaDiff.inverse();
 		System.out.println("diff inverse:\n"+dinv.getDiff());
 		dinv = diffs.get(0).inverse();
 		Assert.assertEquals("diff type should be DROP", ChangeType.DROP, dinv.getChangeType());
@@ -138,32 +126,101 @@ public class SQLDiffTest {
 		//rolling back db changes
 		st.executeUpdate(dinv.getDiff());
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		diff = SchemaDiff.diff(sm1, sm2);
-		System.out.println("diff:\n"+diff.getDiff());
-		diffs = diff.getChildren();
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 0", 0, diffs.size());
 		}
-
-		//st = conn.createStatement();
+		
+		//test if generated diff runs ok on initial model
+		st.executeUpdate(diff1st.getDiff());
+		st.executeUpdate(dinv.getDiff()); //XXX: remove (restore database should not be the test responsability)
+	}
+		
+	@Test
+	public void testDiffCreateTable() throws ClassNotFoundException, SQLException, NamingException {
+		setup4diff();
+		Statement st = conn.createStatement();
+		//alter schema 
 		st.executeUpdate("create table newt (abc integer)");
-		//conn.commit();
+		SchemaDiff schemaDiff = null;
+		List<Diff> diffs = null;
+		Diff diff1st = null;
+		Diff dinv = null;
 
+		//get diff 
 		{
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		diff = SchemaDiff.diff(sm1, sm2);
-		System.out.println("diff:\n"+diff.getDiff());
-		diffs = diff.getChildren();
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 1", 1, diffs.size());
+		diff1st = diffs.get(0);
 		}
 		
+		//get inverse diff 
 		{
-		Diff dinv = diff.inverse();
+		dinv = schemaDiff.inverse();
 		System.out.println("diff inverse:\n"+dinv.getDiff());
 		dinv = diffs.get(0).inverse();
 		Assert.assertEquals("diff type should be DROP", ChangeType.DROP, dinv.getChangeType());
 		Assert.assertEquals("diff object type should be TABLE", DBObjectType.TABLE, dinv.getObjectType());
+
+		//rolling back db changes
+		st.executeUpdate(dinv.getDiff());
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
+		Assert.assertEquals("diff size should be 0", 0, diffs.size());
 		}
 		
+		//test if generated diff runs ok on initial model
+		st.executeUpdate(diff1st.getDiff());
+		st.executeUpdate(dinv.getDiff()); //remove
 	}
 
+	@Test
+	public void testDiffCreateView() throws ClassNotFoundException, SQLException, NamingException {
+		setup4diff();
+		Statement st = conn.createStatement();
+		//alter schema 
+		st.executeUpdate("create view emp_view as select id, name from emp");
+		SchemaDiff schemaDiff = null;
+		List<Diff> diffs = null;
+		Diff diff1st = null;
+		Diff dinv = null;
+
+		//get diff 
+		{
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		Assert.assertEquals("model should have 1 view", 1, sm2.getViews().size());
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
+		Assert.assertEquals("diff size should be 1", 1, diffs.size());
+		diff1st = diffs.get(0);
+		}
+		
+		//get inverse diff 
+		{
+		dinv = schemaDiff.inverse();
+		System.out.println("diff inverse:\n"+dinv.getDiff());
+		dinv = diffs.get(0).inverse();
+		Assert.assertEquals("diff type should be DROP", ChangeType.DROP, dinv.getChangeType());
+		Assert.assertEquals("diff object type should be VIEW", DBObjectType.VIEW, dinv.getObjectType());
+
+		//rolling back db changes
+		st.executeUpdate(dinv.getDiff());
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
+		Assert.assertEquals("diff size should be 0", 0, diffs.size());
+		}
+		
+		//test if generated diff runs ok on initial model
+		st.executeUpdate(diff1st.getDiff());
+		st.executeUpdate(dinv.getDiff()); //remove
+	}
 }
