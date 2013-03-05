@@ -98,4 +98,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 				+ " */";
 	}
 	
+	@Override
+	public DBIdentifiableDiff inverse() {
+		//TODO: review this
+		return new DBIdentifiableDiff(changeType.inverse(), previousIdent, ident, ownerTableName);
+	}
 }

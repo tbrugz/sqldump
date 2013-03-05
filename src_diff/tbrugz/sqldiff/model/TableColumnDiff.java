@@ -11,6 +11,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 
+//XXX: rename to ColumnDiff?
 public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	static Log log = LogFactory.getLog(TableColumnDiff.class);
 	
@@ -108,6 +109,11 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	@Override
 	public NamedDBObject getNamedObject() {
 		return table;
+	}
+	
+	@Override
+	public TableColumnDiff inverse() {
+		return new TableColumnDiff(type.inverse(), table, column, previousColumn);
 	}
 
 }

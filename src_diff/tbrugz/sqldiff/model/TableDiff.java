@@ -44,7 +44,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		return null;
 	}
 	
-	//XXX: rename to public List<Diff> getChildren()? what about TableDiff:RENAME?
+	//XXX: move to SchemaDiff or other class?
 	public static List<Diff> tableDiffs(Table origTable, Table newTable) {
 		//log.debug("difftable:\n"+origTable.getDefinition(true)+"\n"+newTable.getDefinition(true));
 		//log.debug("difftable: "+origTable.getName()+" - "+newTable.getName());
@@ -163,6 +163,11 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	@Override
 	public NamedDBObject getNamedObject() {
 		return table;
+	}
+	
+	@Override
+	public TableDiff inverse() {
+		return new TableDiff(diffType.inverse(), table);
 	}
 
 }

@@ -239,7 +239,8 @@ public class SchemaDiff implements Diff {
 	}
 	
 	//XXX: rename to getChildren()?
-	public List<Diff> getDiffList() {
+	//@Override
+	public List<Diff> getChildren() {
 		List<Diff> diffs = new ArrayList<Diff>();
 		diffs.addAll(tableDiffs);
 		diffs.addAll(columnDiffs);
@@ -251,7 +252,7 @@ public class SchemaDiff implements Diff {
 	}
 	
 	public void outDiffs(CategorizedOut out) throws IOException {
-		List<Diff> diffs = getDiffList();
+		List<Diff> diffs = getChildren();
 
 		log.info("output diffs...");
 		int count = 0;
@@ -300,7 +301,7 @@ public class SchemaDiff implements Diff {
 	public String getDiff() {
 		StringBuffer sb = new StringBuffer();
 		
-		List<Diff> diffs = getDiffList();
+		List<Diff> diffs = getChildren();
 
 		for(Diff d: diffs) {
 			//XXX: if diff is ADD+EXECUTABLE, not to include ';'?
@@ -357,6 +358,24 @@ public class SchemaDiff implements Diff {
 	@Override
 	public NamedDBObject getNamedObject() {
 		return null; //XXX: SchemaDiff.getNamedObject
+	}
+	
+	@Override
+	public SchemaDiff inverse() {
+		//List<Diff<?>> dlist = getChildren();
+		SchemaDiff inv = new SchemaDiff();
+		//List<Diff<?>> invlist = new ArrayList<Diff<?>>();
+		for(TableDiff d: tableDiffs) {
+			inv.tableDiffs.add(d.inverse());
+		}
+		for(TableColumnDiff d: columnDiffs) {
+			inv.columnDiffs.add(d.inverse());
+		}
+		for(DBIdentifiableDiff d: dbidDiffs) {
+			inv.dbidDiffs.add(d.inverse());
+		}
+		
+		return inv;
 	}
 
 }

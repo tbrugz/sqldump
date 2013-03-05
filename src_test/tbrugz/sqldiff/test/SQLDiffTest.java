@@ -73,7 +73,7 @@ public class SQLDiffTest {
 		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
 		System.out.println("diff:\n"+diff.getDiff());
 		
-		List<Diff> diffs = diff.getDiffList();
+		List<Diff> diffs = diff.getChildren();
 		Assert.assertEquals("diff size should be zero", 0, diffs.size());
 	}
 	
@@ -106,17 +106,64 @@ public class SQLDiffTest {
 		
 		Statement st = conn.createStatement();
 		st.executeUpdate("alter table emp add column email varchar(100)");
-		conn.commit();
+		//conn.commit();
 
-		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		SchemaDiff diff = SchemaDiff.diff(sm1, sm2);
-		System.out.println("diff:\n"+diff.getDiff());
-		List<Diff> diffs = diff.getDiffList();
-		Assert.assertEquals("diff size should be 1", 1, diffs.size());
+		List<Diff> diffs = null;
+		SchemaDiff diff = null;
 		
+		//test diff size
+		{
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		diff = SchemaDiff.diff(sm1, sm2);
+		System.out.println("diff:\n"+diff.getDiff());
+		diffs = diff.getChildren();
+		Assert.assertEquals("diff size should be 1", 1, diffs.size());
+		}
+		
+		//test diff(0) type
+		{
 		Diff d = diffs.get(0);
 		Assert.assertEquals("diff type should be ADD", ChangeType.ADD, d.getChangeType());
 		Assert.assertEquals("diff object type should be COLUMN", DBObjectType.COLUMN, d.getObjectType());
+		}
+
+		//test inverse diff(0)
+		{
+		Diff dinv = diff.inverse();
+		System.out.println("diff inverse:\n"+dinv.getDiff());
+		dinv = diffs.get(0).inverse();
+		Assert.assertEquals("diff type should be DROP", ChangeType.DROP, dinv.getChangeType());
+		Assert.assertEquals("diff object type should be COLUMN", DBObjectType.COLUMN, dinv.getObjectType());
+
+		//rolling back db changes
+		st.executeUpdate(dinv.getDiff());
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		diff = SchemaDiff.diff(sm1, sm2);
+		System.out.println("diff:\n"+diff.getDiff());
+		diffs = diff.getChildren();
+		Assert.assertEquals("diff size should be 0", 0, diffs.size());
+		}
+
+		//st = conn.createStatement();
+		st.executeUpdate("create table newt (abc integer)");
+		//conn.commit();
+
+		{
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		diff = SchemaDiff.diff(sm1, sm2);
+		System.out.println("diff:\n"+diff.getDiff());
+		diffs = diff.getChildren();
+		Assert.assertEquals("diff size should be 1", 1, diffs.size());
+		}
+		
+		{
+		Diff dinv = diff.inverse();
+		System.out.println("diff inverse:\n"+dinv.getDiff());
+		dinv = diffs.get(0).inverse();
+		Assert.assertEquals("diff type should be DROP", ChangeType.DROP, dinv.getChangeType());
+		Assert.assertEquals("diff object type should be TABLE", DBObjectType.TABLE, dinv.getObjectType());
+		}
+		
 	}
 
 }
