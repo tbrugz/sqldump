@@ -14,6 +14,10 @@ import tbrugz.sqldump.util.Utils;
  * 
  * XXXxx: check option: LOCAL, CASCADED, NONE
  * see: http://publib.boulder.ibm.com/infocenter/iseries/v5r3/index.jsp?topic=%2Fsqlp%2Frbafywcohdg.htm
+ * 
+ * create view refs:
+ * http://www.postgresql.org/docs/9.2/static/sql-createview.html
+ * http://dev.mysql.com/doc/refman/5.0/en/create-view.html
  */
 public class View extends DBObject implements Relation {
 	private static final long serialVersionUID = 1L;
@@ -33,7 +37,8 @@ public class View extends DBObject implements Relation {
 	
 	//public String checkOptionConstraintName;
 	
-	static final Pattern PATTERN_CREATE_VIEW = Pattern.compile("\\s*create\\s+(force\\s+)?view\\s+", Pattern.CASE_INSENSITIVE);
+	static final Pattern PATTERN_CREATE_VIEW = Pattern.compile("\\s*create\\s+", Pattern.CASE_INSENSITIVE);
+	//static final Pattern PATTERN_CREATE_VIEW = Pattern.compile("\\s*create\\s+(or\\s+replace\\s+)?(temp(orary)?\\s+)?(force\\s+)?view\\s+", Pattern.CASE_INSENSITIVE);
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

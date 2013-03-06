@@ -1,8 +1,5 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.nio.CharBuffer;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,7 +52,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		
 		int count = 0;
 		while(rs.next()) {
-			View v = new DerbyView();
+			View v = new View();
 			v.setName( rs.getString(1) );
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
 			v.query = rs.getString(3);
@@ -137,18 +134,4 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		st.close();
 		log.info(count+" sequences grabbed");
 	}
-
-	//not used...
-	static String getStringFromReader(Reader r) {
-		CharBuffer cb = CharBuffer.allocate(2000);
-		try {
-			r.read(cb);
-		}
-		catch(IOException ioe) {
-			log.warn(ioe);
-		}
-		int lenght = cb.position();
-		cb.position(0);
-		return cb.subSequence(0, lenght).toString();
-	} 
 }
