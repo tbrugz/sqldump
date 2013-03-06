@@ -55,6 +55,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = "sqldump.schemagrab.proceduresandfunctions";
 	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
+	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = "sqldump.schemagrab.setconnectionreadonly";
 	
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
@@ -92,7 +93,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabGrants = false, 
 			doSchemaGrabIndexes = false,
 			doSchemaGrabProceduresAndFunctions = true,
-			doSchemaGrabDbSpecific = false;
+			doSchemaGrabDbSpecific = false,
+			doSetConnectionReadOnly = false;
 	
 	Long maxLevel = null;
 	
@@ -114,6 +116,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
+		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
 
 		/*try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
@@ -124,14 +127,15 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	public void setConnection(Connection conn) {
 		this.conn = conn;
-		try {
-			//TODO: always set readonly==true?
-			conn.setReadOnly(true);
-		} catch (SQLException e) {
-			log.warn("error setting props [readonly=true] for db connection");
-			log.debug("stack...", e);
-			try { conn.rollback(); }
-			catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
+		if(doSetConnectionReadOnly) {
+			try {
+				conn.setReadOnly(true);
+			} catch (SQLException e) {
+				log.warn("error setting props [readonly=true] for db connection");
+				log.debug("stack...", e);
+				try { conn.rollback(); }
+				catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
+			}
 		}
 	}
 	
