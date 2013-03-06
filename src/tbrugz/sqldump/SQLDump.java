@@ -202,12 +202,13 @@ public class SQLDump {
 		DBMSResources.instance().setup(papp);
 	}
 
-	void end() throws SQLException {
-		log.info("...done");
-		if(conn!=null) {
+	void end(boolean closeConnection) throws SQLException {
+		if(closeConnection && conn!=null) {
+			log.info("closing connection: "+conn);
 			conn.rollback();
 			conn.close();
 		}
+		log.info("...done");
 	}
 	
 	/**
@@ -219,11 +220,16 @@ public class SQLDump {
 	 */
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sdd = new SQLDump();
-		sdd.doMain(args, null);
+		sdd.doMain(args, null, null);
 	}
 
 	public void doMain(String[] args, Properties prop) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		doMain(args, prop, null);
+	}
+	
+	public void doMain(String[] args, Properties prop, Connection c) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sdd = this;
+		if(c!=null) { sdd.conn = c; }
 		
 		try {
 
@@ -260,8 +266,8 @@ public class SQLDump {
 			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
-				if(schemaGrabber.needsConnection() && sdd.conn==null) {
-					sdd.setupConnection();
+				if(schemaGrabber.needsConnection()) {
+					if(sdd.conn==null) { sdd.setupConnection(); }
 					schemaGrabber.setConnection(sdd.conn);
 				}
 				sm = schemaGrabber.grabSchema();
@@ -322,8 +328,7 @@ public class SQLDump {
 		
 		}
 		finally {
-			log.info("closing connection: "+sdd.conn);
-			sdd.end();
+			sdd.end(c==null);
 		}
 	}
 	
@@ -333,9 +338,8 @@ public class SQLDump {
 	}
 	
 	void processClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
-		if(conn==null) {
-			setupConnection();
-		}
+		if(conn==null) { setupConnection(); }
+		
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
 			Processor sqlproc = (Processor) Utils.getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);

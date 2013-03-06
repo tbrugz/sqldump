@@ -125,6 +125,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public void setConnection(Connection conn) {
 		this.conn = conn;
 		try {
+			//TODO: always set readonly==true?
 			conn.setReadOnly(true);
 		} catch (SQLException e) {
 			log.warn("error setting props [readonly=true] for db connection");
@@ -139,11 +140,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return true;
 	}
 	
-	void end() throws Exception {
-		log.info("...done");
-		conn.close();
-	}
-
 	Map<TableType, Integer> tablesCountByTableType;
 	Map<DBObjectType, Integer> execCountByType;
 	

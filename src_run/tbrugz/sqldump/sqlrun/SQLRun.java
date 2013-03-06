@@ -99,8 +99,8 @@ public class SQLRun {
 	CommitStrategy commitStrategy = CommitStrategy.FILE;
 	List<String> filterByIds = null;
 	
-	void end() throws SQLException {
-		if(conn!=null) {
+	void end(boolean closeConnection) throws SQLException {
+		if(closeConnection && conn!=null) {
 			log.info("closing connection: "+conn);
 			conn.close();
 		}
@@ -326,7 +326,7 @@ public class SQLRun {
 		return cs;
 	}
 	
-	void init(String args[]) throws IOException, ClassNotFoundException, SQLException, NamingException {
+	void init(String args[], Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		SQLDump.init(args, papp);
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
@@ -335,7 +335,12 @@ public class SQLRun {
 		filterByIds = Utils.getStringListFromProp(papp, PROP_FILTERBYIDS, ",");
 		
 		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
-		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
+		if(c!=null) {
+			conn = c;
+		}
+		else {
+			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
+		}
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 	}
 	
@@ -368,18 +373,22 @@ public class SQLRun {
 	 */
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(args, null);
+		sqlr.doMain(args, null, null);
 	}
 	
 	public void doMain(String[] args, Properties p) throws ClassNotFoundException, IOException, SQLException, NamingException {
+		doMain(args, p, null);
+	}
+	
+	public void doMain(String[] args, Properties p, Connection c) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		try {
 			if(p!=null) { papp.putAll(p); }
-			init(args);
+			init(args, c);
 			if(conn==null) { return; }
 			doIt();
 		}
 		finally {
-			end();
+			end(c==null);
 		}
 	}
 
