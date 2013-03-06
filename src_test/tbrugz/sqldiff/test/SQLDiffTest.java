@@ -29,9 +29,10 @@ public class SQLDiffTest {
 	
 	//TODO: test with different databases
 	//see: http://www.mkyong.com/unittest/junit-4-tutorial-6-parameterized-test/
-	static String dbURL = "jdbc:h2:mem:testIdenticalModels";
-	static String dbDriver = "org.h2.Driver";
-	static String dbUser = "h";
+	
+	static String dbURL = null;
+	static String dbDriver = null;
+	static String dbUser = null;
 
 	SchemaModelGrabber schemaJdbcGrabber;
 	Connection conn;
@@ -39,33 +40,35 @@ public class SQLDiffTest {
 
 	@Before
 	public void setupConnProperties() throws SQLException {
-		dbURL = "jdbc:h2:mem:testIdenticalModels";
+		//'jdbc:h2:mem:SQLDiffTest'? no 'name' means a private database
+		//see http://www.h2database.com/html/features.html#in_memory_databases
+		dbURL = "jdbc:h2:mem:";
 		dbDriver = "org.h2.Driver";
 		dbUser = "h";
 	}
 	
 	void setup4diff() throws ClassNotFoundException, SQLException, NamingException, IOException {
-		//if(schemaJdbcGrabber==null) {
-			schemaJdbcGrabber = new JDBCSchemaGrabber();
-			Properties jdbcPropNew = new Properties();
-			String[] jdbcGrabParams = {
-					"-Dsqldump.driverclass="+dbDriver,
-					"-Dsqldump.dburl="+dbURL,
-					"-Dsqldump.user="+dbUser,
-					"-Dsqldump.password=h",
-					"-Dsqldump.usedbspecificfeatures=true",
-					//"-Dsqldump.sqltypes.ignoreprecision=SMALLINT,BIGINT,INTEGER",
-			};
-			TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
-			schemaJdbcGrabber.procProperties(jdbcPropNew);
-			
-			conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
-			DBMSResources.instance().updateMetaData(conn.getMetaData());
-			
-			SQLRunAndDumpTest.setupModel(conn);
-			
-			schemaJdbcGrabber.setConnection(conn);
-		//}
+		if(conn!=null) {
+			conn.close(); //removes database (for H2)
+		}
+		schemaJdbcGrabber = new JDBCSchemaGrabber();
+		Properties jdbcPropNew = new Properties();
+		String[] jdbcGrabParams = {
+				"-Dsqldump.driverclass="+dbDriver,
+				"-Dsqldump.dburl="+dbURL,
+				"-Dsqldump.user="+dbUser,
+				"-Dsqldump.password=h",
+				"-Dsqldump.usedbspecificfeatures=true",
+		};
+		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
+		schemaJdbcGrabber.procProperties(jdbcPropNew);
+		
+		conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
+		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		
+		SQLRunAndDumpTest.setupModel(conn);
+		
+		schemaJdbcGrabber.setConnection(conn);
 		
 		smOriginal = schemaJdbcGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOriginal.getTables().size());
@@ -117,7 +120,7 @@ public class SQLDiffTest {
 		
 		//test if generated diff runs ok on initial model
 		st.executeUpdate(diff1st.getDiff());
-		st.executeUpdate(dinv.getDiff()); //XXX: remove (restore database should not be the test responsability)
+		st.executeUpdate(dinv.getDiff()); //XXX: remove? (restore database should not be the test responsability)
 	}
 		
 	@Test
@@ -160,7 +163,7 @@ public class SQLDiffTest {
 		
 		//test if generated diff runs ok on initial model
 		st.executeUpdate(diff1st.getDiff());
-		st.executeUpdate(dinv.getDiff()); //remove
+		st.executeUpdate(dinv.getDiff()); //remove?
 	}
 
 	@Test
@@ -204,6 +207,6 @@ public class SQLDiffTest {
 		
 		//test if generated diff runs ok on initial model
 		st.executeUpdate(diff1st.getDiff());
-		st.executeUpdate(dinv.getDiff()); //remove
+		st.executeUpdate(dinv.getDiff()); //remove?
 	}
 }

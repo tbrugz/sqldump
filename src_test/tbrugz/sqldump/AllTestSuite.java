@@ -4,15 +4,16 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.sqldiff.test.DerbyDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.test.SQLTokenizerTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
-import tbrugz.sqlrun.test.CSVImportTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -33,6 +34,7 @@ import tbrugz.sqlrun.test.CSVImportTest;
 	//diff
 	SQLDiffTest.class,
 	DiffFromJAXB.class,
+	DerbyDiffTest.class,
 	
 	//roundtrip
 	SQLRunAndDumpTest.class,

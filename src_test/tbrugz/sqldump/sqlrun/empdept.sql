@@ -1,4 +1,4 @@
-drop table emp if exists;
+--drop table emp if exists
 
 create table emp (
 	id integer not null,
@@ -10,7 +10,7 @@ create table emp (
 	constraint emp_emp_fk foreign key (supervisor_id) references emp (id)
 );
 
-drop table dept if exists;
+--drop table dept if exists
 
 create table dept (
 	id integer not null,

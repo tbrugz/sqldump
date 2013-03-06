@@ -1,4 +1,4 @@
-package tbrugz.sqlrun.test;
+package tbrugz.sqldump.sqlrun;
 
 import java.net.URL;
 import java.net.URLClassLoader;
