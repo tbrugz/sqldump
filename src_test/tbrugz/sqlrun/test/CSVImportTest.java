@@ -9,7 +9,6 @@ import org.junit.Test;
 import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.sqlrun.SQLRun;
-import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
 public class CSVImportTest {
 	
@@ -43,7 +42,7 @@ public class CSVImportTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(params, p);
+		sqlr.doMain(params, p, null);
 	}
 	
 	static ClassLoader loadJar(URL url) {

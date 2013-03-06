@@ -4,25 +4,42 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
-import tbrugz.sqldump.test.SQLDumpTestSuite;
+import tbrugz.sqldump.test.SQLTokenizerTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 import tbrugz.sqlrun.test.CSVImportTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-	CSVImportTest.class,
+	//"unit" tests
 	DataDumpTest.class,
-	FailoverTest.class,
 	ParametrizedPropertiesTest.class,
-	//RoundTripTest.class,
-	SQLDumpTestSuite.class,
+	SQLTokenizerTest.class,
+
+	//import
+	CSVImportTest.class,
+	
+	//run
+	FailoverTest.class,
+
+	//dump ?
+	//SQLDumpTestSuite.class,
+	
+	//diff
 	SQLDiffTest.class,
-	SQLRunAndDumpTest.class
+	DiffFromJAXB.class,
+	
+	//roundtrip
+	SQLRunAndDumpTest.class,
+	//RoundTripTest.class,
 })
 public class AllTestSuite {
-
+	static {
+		AbstractFailable.DEFAULT_FAILONERROR = true;		
+	}
 }

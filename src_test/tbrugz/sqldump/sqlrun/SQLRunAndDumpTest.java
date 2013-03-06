@@ -1,5 +1,7 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -16,44 +18,61 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class SQLRunAndDumpTest {
 	
-	public String dbpath = "work/db/empdept";
-	
-	@Test
-	public void doRunAndDumpModel() throws Exception {
-		String[] params = {};
+	public static final String[] NULL_PARAMS = {};
 
+	public String dbpath = "mem:SQLRunAndDumpTest";
+	
+	/*Connection setupConnection(String prefix, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
+		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(prefix, prop);
+		return conn;
+	}*/
+	
+	public static void setupModel(Connection conn) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		String[] vmparamsRun = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				};
+		SQLRun sqlr = new SQLRun();
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparamsRun);
+		sqlr.doMain(NULL_PARAMS, p, conn);
+	}
+		
+	@Test
+	public void doRunAndDumpModel() throws Exception {
+		String[] vmparamsRun = {
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
-		SQLRun sqlr = new SQLRun();
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsRun);
-		sqlr.doMain(params, p);
+		Connection conn = TestUtil.getConn(p, "sqlrun");
+		setupModel(conn);
 		
-		testForTwoTables();
+		testForTwoTables(conn);
+		
+		System.out.println("conn: "+conn);
+		System.out.println("conn.isClosed(): "+conn.isClosed());
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
 					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
-					"-Dsqldump.driverclass=org.h2.Driver",
+					/*"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 					"-Dsqldump.user=h",
-					"-Dsqldump.password=h"
+					"-Dsqldump.password=h"*/
 					};
 		SQLDump sqld = new SQLDump();
 		p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		sqld.doMain(params, p);
+		sqld.doMain(NULL_PARAMS, p, conn);
 	}
 	
-	void testForTwoTables() throws ClassNotFoundException, SQLException, NamingException {
+	void testForTwoTables(Connection conn) throws ClassNotFoundException, SQLException, NamingException {
 		SchemaModelGrabber schemaGrabber = new JDBCSchemaGrabber();
-		Properties jdbcPropOrig = new Properties();
+		/*Properties jdbcPropOrig = new Properties();
 		String[] vmparams = {
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
@@ -62,8 +81,12 @@ public class SQLRunAndDumpTest {
 				};
 		TestUtil.setProperties(jdbcPropOrig, vmparams);
 		schemaGrabber.procProperties(jdbcPropOrig);
-		schemaGrabber.setConnection(TestUtil.getConn(jdbcPropOrig, "sqldump"));
+		schemaGrabber.setConnection(TestUtil.getConn(jdbcPropOrig, "sqldump"));*/
+		schemaGrabber.procProperties(new Properties());
+		schemaGrabber.setConnection(conn);
 		SchemaModel smOrig = schemaGrabber.grabSchema();
+		System.out.println("smOrig: "+smOrig);
+		System.out.println("smOrig.getTables(): "+smOrig.getTables());
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
 	}
 
@@ -90,7 +113,7 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		//setSystemProperties(vmparams);
-		sqld.doMain(params, p);
+		sqld.doMain(params, p, null);
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
@@ -110,21 +133,7 @@ public class SQLRunAndDumpTest {
 		p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
 		//setSystemProperties(vmparamsDump);
-		sqld.doMain(params, p);
+		sqld.doMain(params, p, null);
 	}
 	
-	//not very much unit test 'isolated' - has 'side effects'
-	/*@Deprecated
-	public static void setSystemProperties(String[] vmparams) {
-		for(String s: vmparams) {
-			String key = null, value = null; 
-			if(s.startsWith("-D")) {
-				int i = s.indexOf("=");
-				key = s.substring(2,i);
-				value = s.substring(i+1);
-				System.setProperty(key, value);
-			}
-		}
-	}*/
-
 }

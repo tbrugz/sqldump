@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.test;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,13 +10,12 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
-import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.TestUtil;
@@ -27,69 +27,52 @@ import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
 public class SQLDiffTest {
 	
-	static final String dbPath = "mem:testIdenticalModels;DB_CLOSE_DELAY=-1";
+	//TODO: test with different databases
+	//see: http://www.mkyong.com/unittest/junit-4-tutorial-6-parameterized-test/
+	static String dbURL = "jdbc:h2:mem:testIdenticalModels";
+	static String dbDriver = "org.h2.Driver";
+	static String dbUser = "h";
 
-	@BeforeClass
-	public static void testIt() throws Exception {
-		SQLRunAndDumpTest randd = new SQLRunAndDumpTest();
-		randd.dbpath = dbPath;
-		randd.doRunAndDumpModel();
-	}
-	
-	@Test
-	public void testIdenticalModels() {
-		//xml serializer input Orig
-		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
-		Properties jaxbPropOrig = new Properties();
-		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropOrig);
-		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
-		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
-
-		//xml serializer input New
-		Properties jaxbPropNew = new Properties();
-		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropNew);
-		SchemaModel smNew = schemaSerialGrabber.grabSchema();
-		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
-		
-		//do diff
-		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
-		System.out.println("diff:\n"+diff.getDiff());
-		
-		List<Diff> diffs = diff.getChildren();
-		Assert.assertEquals("diff size should be zero", 0, diffs.size());
-	}
-	
 	SchemaModelGrabber schemaJdbcGrabber;
 	Connection conn;
 	SchemaModel smOriginal;
+
+	@Before
+	public void setupConnProperties() throws SQLException {
+		dbURL = "jdbc:h2:mem:testIdenticalModels";
+		dbDriver = "org.h2.Driver";
+		dbUser = "h";
+	}
 	
-	void setup4diff() throws ClassNotFoundException, SQLException, NamingException {
-		if(schemaJdbcGrabber==null) {
+	void setup4diff() throws ClassNotFoundException, SQLException, NamingException, IOException {
+		//if(schemaJdbcGrabber==null) {
 			schemaJdbcGrabber = new JDBCSchemaGrabber();
 			Properties jdbcPropNew = new Properties();
 			String[] jdbcGrabParams = {
-					"-Dsqldump.driverclass=org.h2.Driver",
-					"-Dsqldump.dburl=jdbc:h2:"+dbPath,
-					"-Dsqldump.user=h",
+					"-Dsqldump.driverclass="+dbDriver,
+					"-Dsqldump.dburl="+dbURL,
+					"-Dsqldump.user="+dbUser,
 					"-Dsqldump.password=h",
-					"-Dsqldump.usedbspecificfeatures=true"
+					"-Dsqldump.usedbspecificfeatures=true",
+					//"-Dsqldump.sqltypes.ignoreprecision=SMALLINT,BIGINT,INTEGER",
 			};
 			TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
 			schemaJdbcGrabber.procProperties(jdbcPropNew);
 			
 			conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
 			DBMSResources.instance().updateMetaData(conn.getMetaData());
+			
+			SQLRunAndDumpTest.setupModel(conn);
+			
 			schemaJdbcGrabber.setConnection(conn);
-		}
+		//}
 		
 		smOriginal = schemaJdbcGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOriginal.getTables().size());
 	}
 	
 	@Test
-	public void testDiffAddColumn() throws ClassNotFoundException, SQLException, NamingException {
+	public void testDiffAddColumn() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		setup4diff();
 		Statement st = conn.createStatement();
 		st.executeUpdate("alter table emp add column email varchar(100)");
@@ -138,7 +121,7 @@ public class SQLDiffTest {
 	}
 		
 	@Test
-	public void testDiffCreateTable() throws ClassNotFoundException, SQLException, NamingException {
+	public void testDiffCreateTable() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		setup4diff();
 		Statement st = conn.createStatement();
 		//alter schema 
@@ -181,7 +164,7 @@ public class SQLDiffTest {
 	}
 
 	@Test
-	public void testDiffCreateView() throws ClassNotFoundException, SQLException, NamingException {
+	public void testDiffCreateView() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		setup4diff();
 		Statement st = conn.createStatement();
 		//alter schema 

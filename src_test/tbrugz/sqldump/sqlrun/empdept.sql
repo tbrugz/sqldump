@@ -16,7 +16,7 @@ create table dept (
 	id integer not null,
 	name varchar(100),
 	parent_id integer,
-	constraint dept_pk primary key (id),
+	constraint dept_pk primary key (id)
 );
 
 alter table emp add constraint emp_dept_fk foreign key (department_id) references dept (id);
