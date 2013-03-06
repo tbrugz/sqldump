@@ -23,7 +23,7 @@ public class DBMSResources {
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	
 	String dbId;
-	Properties papp;
+	Properties papp = new Properties();
 	Properties dbmsSpecificResource = new ParametrizedProperties();
 	String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	
@@ -39,6 +39,10 @@ public class DBMSResources {
 	}
 	
 	public void setup(Properties prop) {
+		if(prop==null) {
+			log.warn("trying to set null properties...");
+			return;
+		}
 		papp = prop;
 	}
 
@@ -178,12 +182,7 @@ public class DBMSResources {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				if(papp!=null) {
-					of.procProperties(papp);
-				}
-				else {
-					log.warn("properties are null");
-				}
+				of.procProperties(papp);
 				return of;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
