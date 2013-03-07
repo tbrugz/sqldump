@@ -9,6 +9,7 @@ import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
+import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
@@ -22,6 +23,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	DataDumpTest.class,
 	ParametrizedPropertiesTest.class,
 	SQLTokenizerTest.class,
+	ColTypeUtilTest.class,
 
 	//import
 	CSVImportTest.class,

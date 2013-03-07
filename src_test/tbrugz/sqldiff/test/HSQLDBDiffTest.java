@@ -5,19 +5,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import javax.naming.NamingException;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import tbrugz.sqldump.dbmodel.Column;
-
 public class HSQLDBDiffTest extends SQLDiffTest {
 
-	Properties hsqldbProp = new Properties();
-	
 	//in-memory hsqldb: http://hsqldb.org/doc/guide/ch01.html#N101CA
 	
 	@Before
@@ -26,11 +21,8 @@ public class HSQLDBDiffTest extends SQLDiffTest {
 		dbDriver = "org.hsqldb.jdbcDriver";
 		dbUser = "public";
 		
-		//FIXME: this should be in sqldump's logic -- sqldump.sqltypes.<dbid>@ignoreprecision ?
-		hsqldbProp.setProperty("sqldump.sqltypes.ignoreprecision", "SMALLINT,BIGINT,INTEGER");
-		Column.ColTypeUtil.setProperties(hsqldbProp);
-		
 		try {
+			//see: http://stackoverflow.com/questions/2951013/how-do-you-delete-the-default-database-schema-in-hsqldb
 			Connection conn = DriverManager.getConnection(dbURL, dbUser, SQLDiffTest.dbPassword);
 			Statement st = conn.createStatement();
 			st.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
