@@ -69,6 +69,26 @@ public class SQLUtils {
 				conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
 			}
 			
+			if(log.isDebugEnabled()) {
+				try {
+					Properties pclient = conn.getClientInfo();
+					if(pclient.size()==0) {
+						log.debug("no Connection.getClientInfo() info avaiable");
+					}
+					else {
+						for(Object key: pclient.keySet()) {
+							log.debug("client-info: "+key+" = "+pclient.getProperty((String)key));
+						}
+					}
+				}
+				catch(SQLException sqle) {
+					log.warn("exception on Connection.getClientInfo: "+sqle);
+				}
+				catch(AbstractMethodError e) {
+					log.warn("error on Connection.getClientInfo: "+e);
+				}
+			}
+			
 			conn.setAutoCommit(autoCommit);
 			
 			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
@@ -127,6 +147,7 @@ public class SQLUtils {
 				p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+user+"]: "));
 			}
 
+			//use DatabaseMetaData: getUserName() & getUrl()?
 			log.debug("conn: "+user+"@"+dbUrl);
 			
 			return DriverManager.getConnection(dbUrl, p);

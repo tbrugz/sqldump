@@ -291,9 +291,6 @@ public class SQLDump {
 			Utils.deleteDirRegularContents(dirToDeleteFiles);
 		}
 		
-		//FIXME: addLegacyProcessors()
-		//sdd.addLegacyProcessors();
-
 		//inits DBMSFeatures if not already initted
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		log.debug("DBMSFeatures: "+feats);
@@ -356,17 +353,5 @@ public class SQLDump {
 			}
 		}
 	}
-	
-	/*
-	@Deprecated
-	void addLegacyProcessors() {
-		if(doTests) {
-			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLTests.class.getName());
-		}
-		if(Utils.getPropBool(papp, PROP_DO_QUERIESDUMP)) {
-			papp.setProperty(PROP_PROCESSINGCLASSES, papp.getProperty(PROP_PROCESSINGCLASSES)+","+SQLQueries.class.getName());
-		}
-	}
-	*/
 	
 }
