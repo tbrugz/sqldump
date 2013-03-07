@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -16,8 +17,9 @@ import tbrugz.sqldump.util.Utils;
 public class Column extends DBIdentifiable implements Serializable {
 	
 	public static class ColTypeUtil {
-		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
+		//public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
+		public static final String PROP_DONOTUSEPRECISION = "type.donotuseprecision";
 		
 		static Properties dbmsSpecificProps;
 		static List<String> doNotUsePrecision;
@@ -29,7 +31,7 @@ public class Column extends DBIdentifiable implements Serializable {
 				if(is==null) throw new IOException("resource "+Defs.DBMS_SPECIFIC_RESOURCE+" not found");
 				dbmsSpecificProps.load(is);
 				
-				doNotUsePrecision = Utils.getStringListFromProp(dbmsSpecificProps, "type.donotuseprecision", ",");
+				doNotUsePrecision = Utils.getStringListFromProp(dbmsSpecificProps, PROP_DONOTUSEPRECISION, ",");
 			}
 			catch(IOException e) {
 				log.warn("Error loading typeMapping from resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
@@ -39,12 +41,12 @@ public class Column extends DBIdentifiable implements Serializable {
 		
 		public static void setProperties(Properties prop) {
 			//ignoreprecision
-			{
+			/*{
 				List<String> sqlTypesIgnorePrecision = Utils.getStringListFromProp(prop, PROP_IGNOREPRECISION, ",");
 				if(sqlTypesIgnorePrecision!=null) {
 					doNotUsePrecision.addAll(sqlTypesIgnorePrecision);
 				}
-			}
+			}*/
 			
 			//useprecision
 			{
@@ -62,7 +64,11 @@ public class Column extends DBIdentifiable implements Serializable {
 			if(colType==null) { return false; }
 			colType = colType.toUpperCase();
 			if(doNotUsePrecision.contains(colType)) { return false; }
-			return !"false".equals(dbmsSpecificProps.getProperty("type."+colType+".useprecision"));
+			String usePrecision = dbmsSpecificProps.getProperty("type."+colType+".useprecision");
+			if(usePrecision==null) {
+				usePrecision = dbmsSpecificProps.getProperty("type."+colType+"@"+DBMSResources.instance().dbid()+".useprecision");
+			}
+			return !"false".equals(usePrecision);
 		}
 	}
 	
