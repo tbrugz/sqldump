@@ -101,8 +101,14 @@ public class SQLRun {
 	
 	void end(boolean closeConnection) throws SQLException {
 		if(closeConnection && conn!=null) {
-			log.info("closing connection: "+conn);
-			conn.close();
+			try {
+				log.info("closing connection: "+conn);
+				//conn.rollback();
+				conn.close();
+			}
+			catch(Exception e) {
+				log.warn("exception in close(): "+e); 
+			}
 		}
 		log.info("...done");
 	}

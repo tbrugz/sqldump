@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
@@ -84,16 +85,19 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
+		if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
+			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
+		}
 		Writer w = getWriter(outputStream);
-		dumpResultSet(rs, dumpSyntax, w, queryName, null);
+		int count = dumpResultSet(rs, dumpSyntax, w, queryName, null);
 		w.flush();
 		//w.close();
 		
 		long totalTime = System.currentTimeMillis() - initTime;
-		log.info("query '"+execId+"' dumped [elapsed = "+totalTime+"ms]");
+		log.info("query '"+execId+"' dumped [lines = "+count+"; elapsed = "+totalTime+"ms]");
 	}
 
-	void dumpResultSet(ResultSet rs, DumpSyntax ds, Writer w,
+	int dumpResultSet(ResultSet rs, DumpSyntax ds, Writer w,
 			String queryName, List<String> uniqueColumns)
 			throws SQLException, IOException {
 		int count = 0;
@@ -106,6 +110,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 			count++;
 		}
 		ds.dumpFooter(w);
+		return count;
 	}
 	
 	@Override

@@ -235,7 +235,7 @@ public class DataDumpUtils {
 		}
 	}
 	
-	static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName) throws SQLException {
+	public static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName, Log log) throws SQLException {
 		int numCol = md.getColumnCount();		
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
@@ -249,7 +249,7 @@ public class DataDumpUtils {
 		for(int i=0;i<numCol;i++) {
 			sb.append("\n\t"+lsColNames.get(i)+" ["+lsColTypes.get(i).getSimpleName()+"/t:"+md.getColumnType(i+1)+"/p:"+md.getPrecision(i+1)+"/s:"+md.getScale(i+1)+"]; ");
 		}
-		DataDump.log.debug("dump columns ["+tableName+"]: "+sb);
+		log.debug("dump columns ["+tableName+"]: "+sb);
 	}
 	
 }

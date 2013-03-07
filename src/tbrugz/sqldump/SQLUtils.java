@@ -81,8 +81,8 @@ public class SQLUtils {
 						}
 					}
 				}
-				catch(SQLException sqle) {
-					log.warn("exception on Connection.getClientInfo: "+sqle);
+				catch(Exception ex) {
+					log.warn("exception on Connection.getClientInfo: "+ex);
 				}
 				catch(AbstractMethodError e) {
 					log.warn("error on Connection.getClientInfo: "+e);
