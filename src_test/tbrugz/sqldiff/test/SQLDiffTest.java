@@ -33,6 +33,7 @@ public class SQLDiffTest {
 	static String dbURL = null;
 	static String dbDriver = null;
 	static String dbUser = null;
+	static String dbPassword = "h";
 
 	SchemaModelGrabber schemaJdbcGrabber;
 	Connection conn;
@@ -57,7 +58,7 @@ public class SQLDiffTest {
 				"-Dsqldump.driverclass="+dbDriver,
 				"-Dsqldump.dburl="+dbURL,
 				"-Dsqldump.user="+dbUser,
-				"-Dsqldump.password=h",
+				"-Dsqldump.password="+dbPassword,
 				"-Dsqldump.usedbspecificfeatures=true",
 		};
 		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);

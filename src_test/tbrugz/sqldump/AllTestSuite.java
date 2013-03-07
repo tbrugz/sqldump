@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 import tbrugz.sqldiff.test.DerbyDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
+import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.def.AbstractFailable;
@@ -32,9 +33,12 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//SQLDumpTestSuite.class,
 	
 	//diff
-	SQLDiffTest.class,
 	DiffFromJAXB.class,
+
+	//diff + database
+	SQLDiffTest.class,
 	DerbyDiffTest.class,
+	HSQLDBDiffTest.class,
 	
 	//roundtrip
 	SQLRunAndDumpTest.class,
