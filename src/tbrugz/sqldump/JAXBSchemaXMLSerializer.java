@@ -86,9 +86,10 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			Marshaller m = jc.createMarshaller();
 			//XXX: property for formatting or not JAXB output?
 			//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
-			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
-			m.marshal(schemaModel, new File(fileOutput));
-			log.info("xml schema model dumped to '"+fileOutput+"'");
+			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			File fout = new File(fileOutput);
+			m.marshal(schemaModel, fout);
+			log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
 		}
 		catch(Exception e) {
 			log.error("error dumping schema: "+e);

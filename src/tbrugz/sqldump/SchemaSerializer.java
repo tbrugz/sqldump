@@ -62,10 +62,11 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 		}
 		
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fileOutput));
+			File fout = new File(fileOutput);
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(fout));
 			oos.writeObject(schemaModel);
 			oos.close();
-			log.info("schema model serialized to '"+fileOutput+"'");
+			log.info("schema model serialized to '"+fout.getAbsolutePath()+"'");
 		}
 		catch(IOException e) {
 			log.error("error dumping schema: "+e);
