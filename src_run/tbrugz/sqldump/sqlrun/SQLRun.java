@@ -20,6 +20,8 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.def.DBMSFeatures;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
@@ -348,6 +350,14 @@ public class SQLRun {
 			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
 		}
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
+
+		//inits DBMSResources
+		DBMSResources.instance().setup(papp);
+		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		
+		//inits specific DBMSFeatures class
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		log.debug("DBMSFeatures: "+feats);
 	}
 	
 	public static List<String> getFiles(String dir, String fileRegex) {

@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.def.AbstractFailable;
@@ -85,9 +86,11 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
+		SQLUtils.setupForNewQuery(rs.getMetaData().getColumnCount());
 		if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
 			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		}
+		
 		Writer w = getWriter(outputStream);
 		int count = dumpResultSet(rs, dumpSyntax, w, queryName, null);
 		w.flush();
