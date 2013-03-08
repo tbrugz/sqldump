@@ -235,6 +235,7 @@ public class DataDumpUtils {
 		}
 	}
 	
+	//XXX: add columnTypeMapper?
 	public static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName, Log log) throws SQLException {
 		int numCol = md.getColumnCount();		
 		List<String> lsColNames = new ArrayList<String>();

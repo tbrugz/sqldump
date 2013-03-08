@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
@@ -35,6 +36,8 @@ public interface DBMSFeatures {
 	
 	Table getTableObject();
 	FK getForeignKeyObject();
+	Map<Class<?>, Class<?>> getColumnTypeMapper();
+	
 	//XXX: should DBMS's Features return getDefaultDateFormat?
 	
 	String sqlAddColumnClause();

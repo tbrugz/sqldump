@@ -2,6 +2,7 @@ package tbrugz.sqldump.def;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
@@ -45,6 +46,11 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 
 	@Override
 	public void addFKSpecificFeatures(FK fk, ResultSet rs) {
+	}
+	
+	@Override
+	public Map<Class<?>, Class<?>> getColumnTypeMapper() {
+		return null;
 	}
 	
 	@Override

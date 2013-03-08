@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -177,8 +178,8 @@ public class SQLUtils {
 		}
 	}
 
-	static Log log = LogFactory.getLog(SQLUtils.class);
-	static StringBuffer sbTmp = new StringBuffer();
+	static final Log log = LogFactory.getLog(SQLUtils.class);
+	static final StringBuffer sbTmp = new StringBuffer();
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
 		return getRowFromRS(rs, numCol, table, ";");
@@ -218,6 +219,25 @@ public class SQLUtils {
 		return getRowObjectListFromRS(rs, colTypes, numCol, false);
 	}
 	
+	static String errorGettingValueValue = "###";
+	//static int errorGettingValueWarnCount = 0;
+	//static int errorGettingValueWarnMaxCount = 20;
+	static boolean is1stRow = true;
+	static Map<Class<?>, Class<?>> colTypeMapper = null;
+	
+	public static void setupForNewQuery(int numCol) {
+		/*if(numCol>0) {
+			errorGettingValueWarnMaxCount = numCol;
+			log.info("setupForNewQuery: numCol = "+numCol);
+		}
+		errorGettingValueWarnCount = 0;*/
+		is1stRow = true;
+	}
+
+	public static void setupColumnTypeMapper(Map<Class<?>, Class<?>> columnTypeMapper) {
+		colTypeMapper = columnTypeMapper;
+	}
+	
 	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol, boolean canReturnResultSet) throws SQLException {
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
@@ -231,6 +251,15 @@ public class SQLUtils {
 				coltype = String.class;
 			}
 			
+			if(colTypeMapper!=null) {
+				Class<?> cTmp = colTypeMapper.get(coltype);
+				if(cTmp!=null) {
+					coltype = cTmp;
+				}
+			}
+			
+			try {
+
 			if(coltype.equals(Blob.class)) {
 				//XXX: do not dump Blobs this way
 				//value = null; //Blob and ResultSet should be tested first? yes!
@@ -284,6 +313,7 @@ public class SQLUtils {
 			}
 			else if(coltype.equals(Date.class)) {
 				value = rs.getTimestamp(i);
+				//XXX value = rs.getDate(i) ?
 			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
@@ -302,8 +332,20 @@ public class SQLUtils {
 			
 			}
 			
+			}
+			catch(SQLException e) {
+				value = errorGettingValueValue;
+				//if(errorGettingValueWarnCount<errorGettingValueWarnMaxCount) {
+				if(is1stRow) {
+					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()+"]: "+e);
+					log.debug("error getting value [col="+i+"]", e);
+					//errorGettingValueWarnCount++;
+				}
+			}
+			
 			ls.add(value);
 		}
+		is1stRow = false;
 		return ls;
 	}
 	

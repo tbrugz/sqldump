@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.ProcessingException;
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -297,6 +298,8 @@ public class DataDump extends AbstractSQLProc {
 				return;
 			}
 			long count = 0;
+			
+			SQLUtils.setupForNewQuery(md.getColumnCount());
 			
 			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();

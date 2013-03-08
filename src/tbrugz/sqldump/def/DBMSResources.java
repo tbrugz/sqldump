@@ -5,11 +5,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -99,6 +101,7 @@ public class DBMSResources {
 		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", identifierQuoteString);
 	}
 	
+	//TODO: also detect by getUrl()...
 	String detectDbId(DatabaseMetaData dbmd) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
@@ -175,6 +178,7 @@ public class DBMSResources {
 		return dbId;
 	}
 	
+	//TODO: cache DBMSFeatures?
 	public DBMSFeatures databaseSpecificFeaturesClass() {
 		String dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass");
 		if(dbSpecificFeaturesClass!=null) {
@@ -182,7 +186,7 @@ public class DBMSResources {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				of.procProperties(papp);
+				initDBMSFeatures(of, papp);
 				return of;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -193,6 +197,15 @@ public class DBMSResources {
 			}
 		}
 		return new DefaultDBMSFeatures();
+	}
+	
+	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
+		feats.procProperties(prop);
+		Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
+		if(mapper!=null) {
+			SQLUtils.setupColumnTypeMapper(mapper);
+			log.debug("column-mapper: "+mapper);
+		}
 	}
 	
 	public String getPrivileges(String dbId) {
