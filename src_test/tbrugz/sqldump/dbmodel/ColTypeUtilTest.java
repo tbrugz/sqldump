@@ -1,5 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.util.Properties;
+
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,5 +50,30 @@ public class ColTypeUtilTest {
 		
 		assertIt("integer", false);
 		assertIt("smallint", false);
+	}
+	
+	@Test
+	public void testSQLTypesProps() {
+		DBMSResources.instance().updateDbId(null);
+		
+		Properties p = new Properties();
+		p.setProperty("sqldump.sqltypes.ignoreprecision", "VARCHAR,varchar2");
+		p.setProperty("sqldump.sqltypes.useprecision", "blob");
+		Column.ColTypeUtil.setProperties(p);
+		
+		assertIt("numeric", true);
+		assertIt("long raw", false);
+		
+		//should use precision
+		assertIt("blob", true);
+
+		//should NOT use precision
+		assertIt("varchar", false);
+		assertIt("varchar2", false);
+	}
+	
+	@AfterClass
+	public static void tearDown() {
+		Column.ColTypeUtil.setProperties(null);
 	}
 }

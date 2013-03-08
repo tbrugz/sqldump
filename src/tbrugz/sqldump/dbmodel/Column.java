@@ -17,7 +17,7 @@ import tbrugz.sqldump.util.Utils;
 public class Column extends DBIdentifiable implements Serializable {
 	
 	public static class ColTypeUtil {
-		//public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
+		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
 		public static final String PROP_DONOTUSEPRECISION = "type.donotuseprecision";
 		
@@ -25,6 +25,10 @@ public class Column extends DBIdentifiable implements Serializable {
 		static List<String> doNotUsePrecision;
 		
 		static {
+			init();
+		}
+		
+		static void init() {
 			dbmsSpecificProps = new ParametrizedProperties();
 			try {
 				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE);
@@ -40,21 +44,30 @@ public class Column extends DBIdentifiable implements Serializable {
 		}
 		
 		public static void setProperties(Properties prop) {
+			if(prop==null) {
+				//reset...
+				doNotUsePrecision.clear();
+				init();
+				return;
+			}
+			
 			//ignoreprecision
-			/*{
+			{
 				List<String> sqlTypesIgnorePrecision = Utils.getStringListFromProp(prop, PROP_IGNOREPRECISION, ",");
 				if(sqlTypesIgnorePrecision!=null) {
-					doNotUsePrecision.addAll(sqlTypesIgnorePrecision);
+					for(String s: sqlTypesIgnorePrecision) {
+						doNotUsePrecision.add(s.toUpperCase());
+					}
 				}
-			}*/
+			}
 			
 			//useprecision
 			{
 				List<String> sqlTypesUsePrecision = Utils.getStringListFromProp(prop, PROP_USEPRECISION, ",");
 				if(sqlTypesUsePrecision!=null) {
-					doNotUsePrecision.removeAll(sqlTypesUsePrecision);
 					for(String ctype: sqlTypesUsePrecision) {
-						dbmsSpecificProps.remove("type."+ctype+".useprecision");
+						doNotUsePrecision.remove(ctype.toUpperCase());
+						dbmsSpecificProps.remove("type."+ctype.toUpperCase()+".useprecision");
 					}
 				}
 			}
