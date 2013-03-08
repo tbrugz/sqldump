@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
 import tbrugz.sqldump.resultset.EmptyResultSet;
 
+//TODO: getExportedKeys(), getCrossReference()?
 public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 
 	static Log log = LogFactory.getLog(MSAccessDatabaseMetaData.class);
@@ -37,6 +38,10 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 	-32764 - Report
 	-32761 - Module
 	-32756 - Pages
+	
+	MSysQueries?
+	
+	MSysRelationships...
 	
 	*/
 	
@@ -70,18 +75,33 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 	public ResultSet getPrimaryKeys(String catalog, String schema, String table)
 			throws SQLException {
 		return new EmptyResultSet();
-		//return null;
-		//return super.getPrimaryKeys(catalog, schema, table);
 	}
 
-	//TODO: getImportedKeys() (& getExportedKeys()?)
 	@Override
 	public ResultSet getImportedKeys(String catalog, String schema, String table)
 			throws SQLException {
-		return new EmptyResultSet();
+		Connection conn = metadata.getConnection();
+		//List<String> params = new ArrayList<String>();
+		
+		String sql = "select null as PKTABLE_SCHEM, null as FKTABLE_SCHEM, null as PKTABLE_CAT, null as FKTABLE_CAT, null as FK_NAME, "
+				+"szObject as FKTABLE_NAME, szColumn as FKCOLUMN_NAME, szReferencedObject as PKTABLE_NAME, szReferencedColumn as PKCOLUMN_NAME, "
+				+"null as UPDATE_RULE, null as DELETE_RULE \n"
+				+"from MSysRelationships"
+				;
+		if(table!=null) {
+			sql += "\nwhere szObject = '"+table+"' ";
+			//sql += "\nwhere szObject = ? ";
+			//params.add(table);
+		}
+		PreparedStatement st = conn.prepareStatement(sql);
+		//for(int i=0;i<params.size();i++) {
+			//st.setString(i+1, params.get(i));
+		//}
+		log.debug("sql:\n"+sql);
+		return st.executeQuery();
 	}
-	
-	//TODO: getTablePrivileges()
+
+	//XXX: MSAccess: getTablePrivileges()?
 	@Override
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern,
 			String tableNamePattern) throws SQLException {

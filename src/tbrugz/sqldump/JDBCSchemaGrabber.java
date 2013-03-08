@@ -837,9 +837,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		while(fkrs.next()) {
 			//log.debug("FK!!!");
 			String fkName = fkrs.getString("FK_NAME");
+			String fkTableName = fkrs.getString("FKTABLE_NAME");
+			String pkTableName = fkrs.getString("PKTABLE_NAME");
 			if(fkName==null) {
-				log.warn("nameless FK: "+fkrs.getString("FKTABLE_NAME")+"->"+fkrs.getString("PKTABLE_NAME"));
-				fkName = "FK_"+count;
+				log.warn("nameless FK: "+fkTableName+"->"+pkTableName);
+				fkName = newFKName(fkTableName, pkTableName, count);
 				count++;
 			}
 			FK fk = fks.get(fkName);
@@ -849,8 +851,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				fks.put(fkName, fk);
 			}
 			if(fk.getPkTable()==null) {
-				fk.setPkTable(fkrs.getString("PKTABLE_NAME"));
-				fk.setFkTable(fkrs.getString("FKTABLE_NAME"));
+				fk.setPkTable(pkTableName);
+				fk.setFkTable(fkTableName);
 				fk.setPkTableSchemaName(fkrs.getString("PKTABLE_SCHEM"));
 				fk.setFkTableSchemaName(fkrs.getString("FKTABLE_SCHEM"));
 				String pkTableCatalog = fkrs.getString("PKTABLE_CAT");
@@ -966,6 +968,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	public static String newNameFromTableName(String tableName, String pattern) {
 		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
+	}
+	
+	static String newFKName(String fkTable, String pkTable, int count) {
+		return fkTable.replaceAll(" ", "_")+"_"+count+"_FK";
 	}
 	
 	@Override
