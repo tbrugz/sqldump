@@ -523,6 +523,7 @@ public class Utils {
 	
 	public static String getEqualIgnoreCaseFromList(Collection<String> col, String str) {
 		for(String s: col) {
+			if(s==null) { continue; }
 			if(s.equalsIgnoreCase(str)) { return s; }
 		}
 		return null;

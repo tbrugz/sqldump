@@ -439,6 +439,11 @@ public class SQLUtils {
 	}
 
 	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
+		if(dbmd.getSchemas()==null) {
+			List<String> schemas = new ArrayList<String>();
+			schemas.add("");
+			return schemas;
+		}
 		return getColumnValues(dbmd.getSchemas(), "table_schem");
 	}
 

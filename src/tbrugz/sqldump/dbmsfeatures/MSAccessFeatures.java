@@ -1,5 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.sql.DatabaseMetaData;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,11 @@ public class MSAccessFeatures extends DefaultDBMSFeatures {
 	@Override
 	public Map<Class<?>, Class<?>> getColumnTypeMapper() {
 		return columnTypeMapper;
+	}
+	
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
+		return new MSAccessDatabaseMetaData(metadata);
 	}
 
 }

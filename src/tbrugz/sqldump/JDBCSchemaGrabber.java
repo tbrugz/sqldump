@@ -73,6 +73,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static String[] DEFAULT_SCHEMA_NAMES = {
 		"public", //postgresql, h2, hsqldb
 		"APP",    //derby
+		"",       //"schema-less" databases
 	};
 	
 	Connection conn;
@@ -165,13 +166,14 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
+		//log.info("feats/metadata: "+feats+" / "+dbmd);
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 		
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
 		
 		if(schemaPattern==null) {
-			List<String> schemas = SQLUtils.getSchemaNames(conn.getMetaData());
+			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
 			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
 			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + SQLUtils.ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
@@ -197,7 +199,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			return null;
 		}
 		
-		log.info("schema dump... schema(s): "+schemaPattern);
+		log.info("schema dump... schema(s): '"+schemaPattern+"'");
 
 		//init stat objects
 		tablesCountByTableType = new HashMap<TableType, Integer>();
@@ -285,6 +287,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
 			}
+			catch(RuntimeException e) {
+				log.warn("runtime exception grabbing functions: "+e);
+			}
 			catch(SQLException e) {
 				log.warn("sql exception grabbing procedures: "+e);
 			}
@@ -301,6 +306,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			catch(AbstractMethodError e) {
 				log.warn("abstract method error: "+e);
+			}
+			catch(RuntimeException e) {
+				log.warn("runtime exception grabbing functions: "+e);
 			}
 			catch(SQLException e) {
 				log.warn("sql exception grabbing functions: "+e);
@@ -418,7 +426,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
 			
 			try {
-				String fullTablename = (schemaPattern==null?"":table.getSchemaName()+".")+tableName;
+				String fullTablename = table.getQualifiedName();
 				log.debug("getting columns from "+fullTablename);
 
 				//columns
