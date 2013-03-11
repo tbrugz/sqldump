@@ -30,6 +30,7 @@ public class Column extends DBIdentifiable implements Serializable {
 		
 		static void init() {
 			dbmsSpecificProps = new ParametrizedProperties();
+			doNotUsePrecision = null;
 			try {
 				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE);
 				if(is==null) throw new IOException("resource "+Defs.DBMS_SPECIFIC_RESOURCE+" not found");
@@ -46,7 +47,6 @@ public class Column extends DBIdentifiable implements Serializable {
 		public static void setProperties(Properties prop) {
 			if(prop==null) {
 				//reset...
-				doNotUsePrecision.clear();
 				init();
 				return;
 			}

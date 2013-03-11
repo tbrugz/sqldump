@@ -28,8 +28,11 @@ public class ColTypeUtilTest {
 		assertIt("text", false);
 		assertIt("timestamp", false);
 		assertIt("date", false);
-
-		assertIt("integer", true);
+		assertIt("integer", false);
+		assertIt("bit", true);
+		
+		//XXX not ansi-sql92 compatible (yet?)
+		assertIt("real", true);
 	}
 
 	@Test
@@ -50,6 +53,17 @@ public class ColTypeUtilTest {
 		
 		assertIt("integer", false);
 		assertIt("smallint", false);
+	}
+	
+	@Test
+	public void testMSAccessColTypes() {
+		DBMSResources.instance().updateDbId("msaccess");
+		assertIt("varchar", true);
+		
+		//ms-access specific
+		assertIt("BIT", false);
+		assertIt("real", false);
+		assertIt("CURRENCY", false);
 	}
 	
 	@Test
