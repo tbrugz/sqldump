@@ -65,6 +65,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMADUMP_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	static final String PROP_SCHEMADUMP_TABLEFILTER = "sqldump.schemagrab.tablefilter";
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
+	static final String PROP_SCHEMAGRAB_TABLETYPES = "sqldump.schemagrab.tabletypes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
@@ -97,6 +98,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabDbSpecific = false,
 			doSetConnectionReadOnly = false;
 	
+	List<TableType> tableTypesToGrab = null;
+	
 	Long maxLevel = null;
 	
 	@Override
@@ -118,6 +121,19 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
+		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
+		if(tableTypesToGrabStr!=null) {
+			tableTypesToGrab = new ArrayList<TableType>();
+			for(String s: tableTypesToGrabStr) {
+				try {
+					TableType tt = TableType.valueOf(s);
+					tableTypesToGrab.add(tt);
+				}
+				catch(IllegalArgumentException e) {
+					log.warn("'"+s+"' is not a valid table type for grabbing tables (property '"+PROP_SCHEMAGRAB_TABLETYPES+"')");
+				}
+			}
+		}
 
 		/*try {
 			dbmsSpecificResource.load(JDBCSchemaGrabber.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE));
@@ -400,6 +416,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			
 			ttype = TableType.getTableType(rs.getString("TABLE_TYPE"), tableName);
 			if(ttype==null) { continue; }
+			
+			if(tableTypesToGrab!=null) {
+				if(!tableTypesToGrab.contains(ttype)) { continue; }
+			}
 			
 			//test for filter exclusion
 			boolean ignoreTable = false;
