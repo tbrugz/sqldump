@@ -30,7 +30,7 @@
 	<path id="classpath.compile">
 		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
 		<pathelement location="${lib.dir}/log4j-1.2.16.jar"/>
-		<pathelement location="${lib.dir}/kmlutils-0.5.0.jar"/>
+		<pathelement location="${lib.dir}/kmlutils-0.5.1.jar"/>
 		<pathelement location="${lib.dir}/mondrianschema2graphml-0.5.0.jar"/>
 	</path>
 

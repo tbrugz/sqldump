@@ -14,6 +14,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class DiffFromJAXB {
 	
+	//FIXME: remove dependence of SQLRunAndDumpTest 
 	@Test
 	public void testIdenticalModelsFromJAXB() {
 		//xml serializer input Orig
