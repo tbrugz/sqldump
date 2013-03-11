@@ -61,6 +61,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	
 	boolean dumpDropStatements = false;
 	boolean dumpWithCreateOrReplace = false;
+	boolean dumpScriptComments = true;
+	boolean dumpRemarks = true;
 	//boolean dumpWriteAppend = false;
 	
 	//Properties dbmsSpecificsProperties;
@@ -87,6 +89,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 
 	public static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
 	public static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
+	public static final String PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS = "sqldump.schemadump.dumpscriptcomments";
+	public static final String PROP_SCHEMADUMP_DUMPREMARKS = "sqldump.schemadump.dumpremarks";
 	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
 	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
 	
@@ -105,6 +109,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable); //default should be 'true'?
 		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
 		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
+		dumpScriptComments = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS, dumpScriptComments);
+		dumpRemarks = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPREMARKS, dumpRemarks);
+		
 		//dumpWriteAppend = Utils.getPropBool(prop, PROP_SCHEMADUMP_WRITEAPPEND, dumpWriteAppend);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
@@ -204,8 +211,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
 			}
 			
-			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
-			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName);
+			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, dumpScriptComments, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
+			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName, dumpRemarks);
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);
 			}

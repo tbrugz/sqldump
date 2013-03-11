@@ -52,10 +52,10 @@ public class Table extends DBObject implements Relation {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return getDefinition(dumpSchemaName, true, false, false, null, null);
+		return getDefinition(dumpSchemaName, true, false, false, true, null, null);
 	}
 	
-	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, Properties colTypeConversionProp, Set<FK> foreignKeys) {
+	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, boolean dumpComments, Properties colTypeConversionProp, Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
 		String tableName = getFinalName(dumpWithSchemaName);
 
@@ -66,7 +66,8 @@ public class Table extends DBObject implements Relation {
 		}
 		sb.append("create ");
 		sb.append(getTableType4sql());
-		sb.append("table "+tableName+" ( -- type="+type);
+		sb.append("table "+tableName+" ("
+				+(dumpComments?" -- type="+type:"") );
 
 		int countTabElements=0;
 		
@@ -155,14 +156,16 @@ public class Table extends DBObject implements Relation {
 		return "";
 	}
 	
-	public String getAfterCreateTableScript(boolean dumpSchemaName) {
+	public String getAfterCreateTableScript(boolean dumpSchemaName, boolean dumpRemarks) {
 		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
 		StringBuffer sb = new StringBuffer();
-		String stmp = getRelationRemarks(this, dumpSchemaName);
-		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
+		if(dumpRemarks) {
+			String stmp = getRelationRemarks(this, dumpSchemaName);
+			if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
 
-		stmp = getColumnRemarks(columns, this, dumpSchemaName);
-		if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
+			stmp = getColumnRemarks(columns, this, dumpSchemaName);
+			if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
+		}
 
 		return sb.toString();
 	}
