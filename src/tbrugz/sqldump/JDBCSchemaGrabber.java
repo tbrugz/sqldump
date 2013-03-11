@@ -203,7 +203,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			
 			if(schemaPattern!=null) {
-				log.info("setting suggested schema: "+schemaPattern+(equalsUsername?" (same as username)":""));
+				log.info("setting suggested schema: '"+schemaPattern+"'"
+						+(equalsUsername?" (same as username)":"") );
 				papp.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
 				propOriginal.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
 			}

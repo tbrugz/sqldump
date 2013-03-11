@@ -105,6 +105,16 @@ public class DBMSResources {
 	String detectDbId(DatabaseMetaData dbmd) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
+			int dbMajorVersion = -1;
+			int dbMinorVersion = -1;
+			try {
+				dbMajorVersion = dbmd.getDatabaseMajorVersion();
+				dbMinorVersion = dbmd.getDatabaseMinorVersion();
+			}
+			catch(Exception e) {
+				log.warn("error getting metadata: "+e);
+			}
+			log.info("detectDbId: product = "+dbProdName+"; majorVersion = "+dbMajorVersion+"; minorVersion = "+dbMinorVersion);
 			//String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
 			//String[] dbIds = dbIdsProp.split(",");
 			for(String dbid: dbIds) {
@@ -116,17 +126,29 @@ public class DBMSResources {
 				Long majorVersionEQorLess = Utils.getPropLong(dbmsSpecificResource, "dbid."+dbid+".detectversion.major.equalorless");
 
 				if(majorVersionEQorLess==null) { return dbid; }
-				if(dbmd.getDatabaseMajorVersion() < majorVersionEQorLess) { return dbid; }
-				if(dbmd.getDatabaseMajorVersion() > majorVersionEQorLess) { continue; }
+				if(dbMajorVersion < majorVersionEQorLess) { return dbid; }
+				if(dbMajorVersion > majorVersionEQorLess) { continue; }
 
 				//equal major version...
 				Long minorVersionEQorLess = Utils.getPropLong(dbmsSpecificResource, "dbid."+dbid+".detectversion.minor.equalorless");
 				if(minorVersionEQorLess==null) { return dbid; }
 				//if(dbmd.getDatabaseMinorVersion() <= minorVersionEQorLess) { return dbid; }
-				if(dbmd.getDatabaseMinorVersion() > minorVersionEQorLess) { continue; }
+				if(dbMinorVersion > minorVersionEQorLess) { continue; }
 				
 				return dbid;
 			}
+			
+			/*String dbUrl = dbmd.getURL();
+			for(String dbid: dbIds) {
+				dbid = dbid.trim();
+				String regex = dbmsSpecificResource.getProperty("dbid."+dbid+".detectregex.url");
+				log.info("db: "+dbid+" url: "+dbUrl+" ; urlregex: "+regex);
+				if(regex==null) { continue; }
+				if(!dbUrl.matches(regex)) { continue; }
+				
+				return dbid;
+			}*/
+			log.warn("unknown database type: product name = '"+dbProdName+"'");
 		} catch (SQLException e) {
 			log.warn("Error detecting database type: "+e);
 			log.debug("Error detecting database type",e);
