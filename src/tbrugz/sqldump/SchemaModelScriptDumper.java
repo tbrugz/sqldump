@@ -3,8 +3,11 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -45,8 +48,6 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	
 	static Log log = LogFactory.getLog(SchemaModelScriptDumper.class);
 
-	//File fileOutput;
-	
 	boolean dumpWithSchemaName = false;
 	boolean doSchemaDumpPKs = true;
 	boolean dumpFKsInsideTable = false;
@@ -56,6 +57,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	
 	boolean dumpGrantsWithReferencingTable = false;
 	boolean dumpIndexesWithReferencingTable = false;
+	boolean dumpIndexesSortedByTableName = false;
 	boolean dumpFKsWithReferencingTable = false;
 	boolean dumpTriggersWithReferencingTable = false;
 	
@@ -92,6 +94,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	public static final String PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS = "sqldump.schemadump.dumpscriptcomments";
 	public static final String PROP_SCHEMADUMP_DUMPREMARKS = "sqldump.schemadump.dumpremarks";
 	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
+	public static final String PROP_SCHEMADUMP_INDEXORDERBY = "sqldump.schemadump.index.orderby";
 	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
@@ -111,6 +114,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
 		dumpScriptComments = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS, dumpScriptComments);
 		dumpRemarks = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPREMARKS, dumpRemarks);
+		String dumpIndexOrderBy = prop.getProperty(PROP_SCHEMADUMP_INDEXORDERBY);
+		dumpIndexesSortedByTableName = "tablename".equalsIgnoreCase(dumpIndexOrderBy);
 		
 		//dumpWriteAppend = Utils.getPropBool(prop, PROP_SCHEMADUMP_WRITEAPPEND, dumpWriteAppend);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
@@ -302,7 +307,12 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 
 		//Indexes
 		if(!dumpIndexesWithReferencingTable) {
-			for(Index idx: schemaModel.getIndexes()) {
+			List<Index> li = new ArrayList<Index>(); 
+			li.addAll(schemaModel.getIndexes());
+			if(dumpIndexesSortedByTableName) {
+				Collections.sort(li, new Index.ByTableNameComparator());
+			}
+			for(Index idx: li) {
 				categorizedOut(idx.getSchemaName(), idx.getName(), DBObjectType.INDEX, idx.getDefinition(dumpWithSchemaName)+";\n");
 			}
 		}

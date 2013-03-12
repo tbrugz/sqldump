@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
@@ -13,17 +14,35 @@ import tbrugz.sqldump.util.Utils;
 public class Index extends DBObject {
 	private static final long serialVersionUID = 1L;
 	
+	public static class ByTableNameComparator implements Comparator<Index> {
+		@Override
+		public int compare(Index o1, Index o2) {
+			int compare = 0;
+			if( (o1.schemaName!=null && o2.schemaName!=null)
+				|| (o1.schemaName==null && o2.schemaName==null) ) {
+				compare = o1.tableName.compareTo(o2.tableName);
+			}
+			else if(o1.schemaName==null || o2.schemaName==null) {
+				compare = o1.schemaName!=null?-1:+1;
+			}
+			if(compare!=0) { return compare; }
+			compare = o1.compareTo(o2);
+			
+			return compare;
+		}
+	}
+	
 	public boolean unique;
 	public String type;
 	public Boolean reverse;
-	public String tableName;
-	public List<String> columns = new ArrayList<String>();
+	public String tableName; //XXX: Table instead of tableName?
+	public final List<String> columns = new ArrayList<String>();
 	public String comment;
 	public Boolean local;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create "+(unique?"unique ":"")+(type!=null?type+" ":"")+"index "+getFinalName(dumpSchemaName)
+		return "create "+(unique?"unique ":"")+(type!=null?type.toLowerCase()+" ":"")+"index "+getFinalName(dumpSchemaName)
 			+" on "+DBObject.getFinalName(getSchemaName(), tableName, dumpSchemaName)
 			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+((local!=null && local)?" local":"")
