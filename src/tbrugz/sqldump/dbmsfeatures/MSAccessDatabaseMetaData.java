@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,7 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
 import tbrugz.sqldump.resultset.EmptyResultSet;
 
-//TODO: getExportedKeys(), getCrossReference()?
+//TODO: getCrossReference()?
 public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 
 	static Log log = LogFactory.getLog(MSAccessDatabaseMetaData.class);
@@ -45,6 +46,7 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 	
 	*/
 	
+	/*
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern,
 			String tableNamePattern, String[] types) throws SQLException {
@@ -60,6 +62,19 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 		log.debug("sql:\n"+sql);
 		return st.executeQuery();
 	}
+	*/
+	
+	@Override
+	public ResultSet getTables(String catalog, String schemaPattern,
+			String tableNamePattern, String[] types) throws SQLException {
+		return super.getTables(null, null, tableNamePattern, types);
+	}
+	
+	@Override
+	public ResultSet getColumns(String catalog, String schemaPattern,
+			String tableNamePattern, String columnNamePattern) throws SQLException {
+		return super.getColumns(null, null, tableNamePattern, columnNamePattern);
+	}
 	
 	/*@Override
 	public ResultSet getColumns(String catalog, String schemaPattern,
@@ -70,18 +85,28 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 		return super.getColumns(catalog, schemaPattern, tableNamePattern, columnNamePattern);
 	}*/
 	
-	//TODO: add getPrimaryKeys()
+	//XXX: add getPrimaryKeys()? unique indexes already returned by getIndexInfo()... 
 	@Override
 	public ResultSet getPrimaryKeys(String catalog, String schema, String table)
 			throws SQLException {
+		//return super.getPrimaryKeys(null, null, table);
 		return new EmptyResultSet();
 	}
 
 	@Override
 	public ResultSet getImportedKeys(String catalog, String schema, String table)
 			throws SQLException {
+		return getKeys(table, true);
+	}
+	
+	@Override
+	public ResultSet getExportedKeys(String catalog, String schema, String table)
+			throws SQLException {
+		return getKeys(table, false);
+	}
+	
+	ResultSet getKeys(String table, boolean imported) throws SQLException {
 		Connection conn = metadata.getConnection();
-		//List<String> params = new ArrayList<String>();
 		
 		String sql = "select null as PKTABLE_SCHEM, null as FKTABLE_SCHEM, null as PKTABLE_CAT, null as FKTABLE_CAT, null as FK_NAME, "
 				+"szObject as FKTABLE_NAME, szColumn as FKCOLUMN_NAME, szReferencedObject as PKTABLE_NAME, szReferencedColumn as PKCOLUMN_NAME, "
@@ -89,16 +114,35 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 				+"from MSysRelationships"
 				;
 		if(table!=null) {
-			sql += "\nwhere szObject = '"+table+"' ";
-			//sql += "\nwhere szObject = ? ";
-			//params.add(table);
+			if(imported) {
+				sql += "\nwhere szObject = '"+table+"' ";
+			}
+			else {
+				sql += "\nwhere szReferencedObject = '"+table+"' ";
+			}
 		}
-		PreparedStatement st = conn.prepareStatement(sql);
-		//for(int i=0;i<params.size();i++) {
-			//st.setString(i+1, params.get(i));
-		//}
-		log.debug("sql:\n"+sql);
-		return st.executeQuery();
+		
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			log.debug("sql:\n"+sql);
+			return st.executeQuery();
+		}
+		catch(SQLException e) {
+			log.warn("error grabbing "+(imported?"imported":"exported")+" FKs [table='"+table+"']: "+e);
+			if(isACCDB(conn.getMetaData())) {
+				log.info("It seems than an '.accdb' database is in use. There is no support for grabbing relatioships (foreign keys) for this kind of database");
+			}
+			else {
+				log.info("read permission is needed in table 'MSysRelationships' for sqldump to be able to grab relationships (foreign keys) from a '.mdb' database");
+			}
+			return new EmptyResultSet();
+		}
+	}
+	
+	@Override
+	public ResultSet getIndexInfo(String catalog, String schema, String table,
+			boolean unique, boolean approximate) throws SQLException {
+		return super.getIndexInfo(null, null, table, unique, approximate);
 	}
 
 	//XXX: MSAccess: getTablePrivileges()?
@@ -106,5 +150,13 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern,
 			String tableNamePattern) throws SQLException {
 		return new EmptyResultSet();
+	}
+	
+	static final String ACCDB_PATTERN = "DBQ=.*\\.accdb";
+	static final Pattern accdPattern = Pattern.compile(ACCDB_PATTERN);
+	
+	boolean isACCDB(DatabaseMetaData dbmd) throws SQLException {
+		String url = dbmd.getURL();
+		return accdPattern.matcher(url).find(); 
 	}
 }
