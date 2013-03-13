@@ -23,6 +23,7 @@ public class DBMSResources {
 	static final String DEFAULT_QUOTE_STRING = "\"";
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
+	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
 	
 	String dbId;
 	Properties papp = new Properties();
@@ -202,13 +203,15 @@ public class DBMSResources {
 	
 	//TODO: cache DBMSFeatures?
 	public DBMSFeatures databaseSpecificFeaturesClass() {
-		String dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass");
+		String dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS,
+				dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass"));
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				DBMSFeatures of = (DBMSFeatures) c.newInstance();
 				initDBMSFeatures(of, papp);
+				log.debug("specific DBMS features class: "+c.getName());
 				return of;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -218,6 +221,7 @@ public class DBMSResources {
 				e.printStackTrace();
 			}
 		}
+		log.info("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
 		return new DefaultDBMSFeatures();
 	}
 	
