@@ -3,7 +3,6 @@ package tbrugz.sqldump.def;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -18,27 +17,28 @@ import tbrugz.sqldump.util.Utils;
 
 public class DBMSResources {
 
-	static Log log = LogFactory.getLog(DBMSResources.class);
+	static final Log log = LogFactory.getLog(DBMSResources.class);
 
 	static final String DEFAULT_QUOTE_STRING = "\"";
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
 	
+	final Properties papp = new Properties();
+	final Properties dbmsSpecificResource = new ParametrizedProperties();
+
 	String dbId;
-	Properties papp = new Properties();
-	Properties dbmsSpecificResource = new ParametrizedProperties();
 	String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	
-	List<String> dbIds = new ArrayList<String>();
+	final List<String> dbIds; // = new ArrayList<String>();
 	
-	{
+	protected DBMSResources() {
 		try {
 			dbmsSpecificResource.load(DBMSResources.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE));
-			dbIds = Utils.getStringListFromProp(dbmsSpecificResource, "dbids", ",");
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn("error loading resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 		}
+		dbIds = Utils.getStringListFromProp(dbmsSpecificResource, "dbids", ",");
 	}
 	
 	public void setup(Properties prop) {
@@ -46,7 +46,8 @@ public class DBMSResources {
 			log.warn("trying to set null properties...");
 			return;
 		}
-		papp = prop;
+		papp.clear();
+		papp.putAll(prop);
 	}
 
 	/*private void setup(Properties prop, DatabaseMetaData dbmd) {
@@ -85,16 +86,18 @@ public class DBMSResources {
 	}
 	
 	public void updateDbId(String newid) {
-		DBMSResources res = this;
-		if( (newid!=null && newid.equals(res.dbId)) || (newid==res.dbId) ) { return; }
+		if( (newid!=null) && newid.equals(dbId) ) {
+			log.debug("same dbid, no update");
+			return;
+		}
 		
-		log.info("updating dbid: '"+newid+"' [old="+res.dbId+"]");
-		if(res.dbIds.contains(newid) || newid==null) {
-			res.dbId = newid;
-			res.updateIdentifierQuoteString();
+		log.info("updating dbid: '"+newid+"' [old="+dbId+"]");
+		if(dbIds.contains(newid) || newid==null) {
+			dbId = newid;
+			updateIdentifierQuoteString();
 		}
 		else {
-			log.warn("unknown dbid: '"+newid+"' ; keeping '"+res.dbId+"' as dbid");
+			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");
 		}
 	}
 	
@@ -203,8 +206,12 @@ public class DBMSResources {
 	
 	//TODO: cache DBMSFeatures?
 	public DBMSFeatures databaseSpecificFeaturesClass() {
-		String dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS,
+		String dbSpecificFeaturesClass = null;
+		
+		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS,
 				dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass"));
+		
+		
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()
 			try {

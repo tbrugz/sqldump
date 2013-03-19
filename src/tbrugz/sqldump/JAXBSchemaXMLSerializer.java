@@ -32,7 +32,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
-	String filenameIn;
+	File filenameIn;
 	InputStream fileInput;
 	String fileOutput;
 	JAXBContext jc;
@@ -55,13 +55,13 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		if(fileInputStr==null) {
 			fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
 			if(fileInputStr!=null) {
-				filenameIn = fileInputStr;
+				filenameIn = new File(fileInputStr);
 				fileInput = JAXBSchemaXMLSerializer.class.getResourceAsStream(fileInputStr);
 			}
 		}
 		else {
 			try {
-				filenameIn = fileInputStr;
+				filenameIn = new File(fileInputStr);
 				fileInput = new FileInputStream(new File(fileInputStr));
 			} catch (FileNotFoundException e) {
 				log.warn("procproperties: File not found: "+fileInputStr);
@@ -112,7 +112,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			for(Table t: sm.getTables()) {
 				t.validateConstraints();
 			}
-			log.info("xml schema model grabbed from '"+filenameIn+"'");
+			log.info("xml schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
 			return sm;
 		}
 		catch(Exception e) {
