@@ -51,6 +51,7 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 
 	JTextField tf;
 	String value;
+	RuntimeException throwit = null;
 	
 	public BaseInputGUI() {
 	}
@@ -106,6 +107,10 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if(throwit!=null) {
+				log.warn("throwable detected: exiting");
+				throw throwit;
+			}
 		}
 		return value;
 	}
@@ -122,8 +127,10 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 	public void windowClosed(WindowEvent e) {
 		if(value!=null) { return; } 
 		log.warn("windowClosed: exiting sqldump");
-		//XXX: check for permission (java.lang.RuntimePermission exitVM)? exception during ant invocation...
-		System.exit(0);
+		throwit = new RuntimeException("windowClosed: exiting sqldump");
+		
+		//XXXxx: check for permission (java.lang.RuntimePermission exitVM)? exception during ant invocation...
+		//System.exit(0);
 	}
 
 	@Override
