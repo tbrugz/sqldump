@@ -101,16 +101,18 @@ public class SQLDump {
 
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
+	static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 	
+	//cli parameters
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
 	public static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
 	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
 	
-	static Log log = LogFactory.getLog(SQLDump.class);
+	static final Log log = LogFactory.getLog(SQLDump.class);
 	
 	Connection conn;
 
@@ -330,7 +332,14 @@ public class SQLDump {
 	}
 	
 	void setupConnection() throws ClassNotFoundException, SQLException, NamingException {
-		conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp);
+		String connPrefix = papp.getProperty(PROP_CONNPROPPREFIX);
+		if(connPrefix==null) {
+			connPrefix = CONN_PROPS_PREFIX;
+		}
+		else {
+			log.info("connection properties prefix: '"+connPrefix+"'");
+		}
+		conn = SQLUtils.ConnectionUtil.initDBConnection(connPrefix, papp);
 		DBMSResources.instance().updateMetaData(conn.getMetaData());
 	}
 	
