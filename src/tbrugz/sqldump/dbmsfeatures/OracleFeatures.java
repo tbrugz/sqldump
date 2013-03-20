@@ -590,7 +590,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			else {
 				countNotAdded++;
 				if(c.getName()==null || c.getName().startsWith("BIN$")) {
-					log.debug("deleted chack constraint "+c+" can't be added to table '"+tableName+"': table not found");
+					log.debug("deleted check constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
 				else {
 					log.warn("check constraint "+c+" can't be added to table '"+tableName+"': table not found");
