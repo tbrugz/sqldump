@@ -9,11 +9,11 @@
 		<artifact name="sqldump" type="jar"/>
 	</publications>
 	<dependencies>
-		<dependency org="commons-logging" name="commons-logging" rev="1.1.1"/>
+		<dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="main"/>
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>
-		<dependency org="junit" name="junit" rev="4.10"/>
-		<dependency name="kmlutils" rev="0.5.1"/>
-		<dependency name="mondrianschema2graphml" rev="0.5.0"/>
+		<dependency org="junit" name="junit" rev="4.10" conf="main"/>
+		<dependency name="kmlutils" rev="0.5.1" conf="main"/>
+		<dependency name="mondrianschema2graphml" rev="0.5.0" conf="main"/>
 		<!-- dependency org="org.odftoolkit" name="simple-odf" rev="0.6.6"/ -->
 		<dependency org="org.apache.derby" name="derby" rev="10.9.1.0" conf="test->default"/>
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.2.8" conf="test->default"/>
