@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,11 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 public class PivotResultSet extends AbstractResultSet {
 	
 	final static Log log = LogFactory.getLog(PivotResultSet.class);
+
+	final static String COLS_SEP = "|";
+	final static String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
+	final static String COLVAL_SEP = ":";
+	final static String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
 	
 	final ResultSet rs;
 	final int rsColsCount;
@@ -145,7 +151,7 @@ public class PivotResultSet extends AbstractResultSet {
 		String colName = colsToPivotNames.get(colNumber);
 		Set<String> colVals = keyColValues.get(colName);
 		for(String v: colVals) {
-			String colFullName = partialColName+(colNumber==0?"":"|")+colName+":"+v;
+			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotNames.size()) {
 				//add col name
 				log.debug("col-full-name: "+colFullName);
@@ -277,10 +283,10 @@ public class PivotResultSet extends AbstractResultSet {
 			//is pivotcol
 
 			StringBuilder sb = new StringBuilder();
-			String[] parts = columnLabel.split("\\|");
+			String[] parts = columnLabel.split(COLS_SEP_PATTERN);
 			for(int i=0;i<parts.length;i++) {
 				String p = parts[i];
-				sb.append( (i==0?"":"|") + p.split(":")[1]);
+				sb.append( (i==0?"":"|") + p.split(COLVAL_SEP_PATTERN)[1]);
 			}
 			String key = currentNonPivotKey+"%"+sb.toString();
 			log.debug("pivotCol: key:: "+key);

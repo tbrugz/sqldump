@@ -4,13 +4,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import tbrugz.sqldiff.test.DerbyDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
@@ -24,6 +24,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	ParametrizedPropertiesTest.class,
 	SQLTokenizerTest.class,
 	ColTypeUtilTest.class,
+	PivotRSTest.class,
 
 	//import
 	CSVImportTest.class,
@@ -39,7 +40,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 
 	//diff + database
 	SQLDiffTest.class,
-	DerbyDiffTest.class,
+	//DerbyDiffTest.class, //taking too long...
 	HSQLDBDiffTest.class,
 	
 	//roundtrip

@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import junit.framework.Assert;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
@@ -59,12 +61,6 @@ public class PivotRSTest {
 		log.info("nonPivotKeyValues: "+prs.nonPivotKeyValues);
 		log.info("measures: "+prs.measureCols);
 		
-		/*log.info(prs.currentNonPivotKey);
-		prs.next();
-		log.info(prs.currentNonPivotKey);
-		prs.next();
-		log.info(prs.currentNonPivotKey);*/
-		
 		int colcount = prs.getMetaData().getColumnCount();
 		log.info("colcount: "+colcount);
 		List<String> cols = new ArrayList<String>();
@@ -77,12 +73,27 @@ public class PivotRSTest {
 		
 		int rowCounter = 0;
 		while(prs.next()) {
-			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("description:two|category:c1"));
+			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("description:two"+PivotResultSet.COLS_SEP+"category:c1"));
 			rowCounter++;
 		}
 		log.info("row count: "+rowCounter);
 		
 		log.info("originalRSRowCount: "+prs.originalRSRowCount+" ; new rowCount: "+prs.rowCount);
+
+		prs.beforeFirst();
+		prs.next();
+		Assert.assertEquals("1", prs.getString("id"));
+		Assert.assertEquals("10", prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c1"));
+		Assert.assertEquals(null, prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c3"));
+		try {
+			prs.getString("description:one|category:c4");
+			Assert.fail("column 'description:one|category:c4' does not exist");
+		}
+		catch(SQLException e) {}
+		prs.next();
+		Assert.assertEquals("2", prs.getString("id"));
+		Assert.assertEquals(null, prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c1"));
+		Assert.assertEquals("20", prs.getString("description:two"+PivotResultSet.COLS_SEP+"category:c1"));
 	}
 
 	@Test
@@ -112,6 +123,16 @@ public class PivotRSTest {
 		log.info("cols: "+cols);
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
+		
+		prs.next();
+		Assert.assertEquals("1", prs.getString("id"));
+		Assert.assertEquals("10", prs.getString("category:c1"));
+		Assert.assertEquals(null, prs.getString("category:c2"));
+		prs.next();
+		prs.next();
+		Assert.assertEquals("3", prs.getString("id"));
+		Assert.assertEquals(null, prs.getString("category:c1"));
+		Assert.assertEquals("30", prs.getString("category:c2"));
 	}
 
 	@Test
@@ -129,6 +150,16 @@ public class PivotRSTest {
 		prs.process();
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
+
+		prs.next();
+		Assert.assertEquals("1", prs.getString("id"));
+		Assert.assertEquals("10", prs.getString("description:one"));
+		Assert.assertEquals(null, prs.getString("description:three"));
+		prs.next();
+		prs.next();
+		Assert.assertEquals("3", prs.getString("id"));
+		Assert.assertEquals(null, prs.getString("description:one"));
+		Assert.assertEquals("30", prs.getString("description:three"));
 	}
 
 	@Test
@@ -146,5 +177,16 @@ public class PivotRSTest {
 		prs.process();
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
+
+		prs.next();
+		Assert.assertEquals("1", prs.getString("id"));
+		Assert.assertEquals("10", prs.getString("category:c1"));
+		Assert.assertEquals(null, prs.getString("category:c2"));
+		prs.next();
+		prs.next();
+		prs.next();
+		Assert.assertEquals("4", prs.getString("id"));
+		Assert.assertEquals(null, prs.getString("category:c1"));
+		Assert.assertEquals("40", prs.getString("category:c3"));
 	}
 }
