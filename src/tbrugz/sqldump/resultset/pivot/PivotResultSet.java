@@ -248,7 +248,7 @@ public class PivotResultSet extends AbstractResultSet {
 	@Override
 	public String getString(String columnLabel) throws SQLException {
 		int index = colsNotToPivot.indexOf(columnLabel);
-		log.debug("getString:: "+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
+		log.debug("getString:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
 		if(index>=0) {
 			//is nonpivotcol
 			return currentNonPivotKey.split("\\|")[index];
@@ -279,12 +279,12 @@ public class PivotResultSet extends AbstractResultSet {
 
 	@Override
 	public String getString(int columnIndex) throws SQLException {
-		log.debug("index: "+columnIndex);
+		log.debug("index: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
 		if(columnIndex <= colsNotToPivot.size()) {
 			return getString(colsNotToPivot.get(columnIndex-1));
 		}
 		if(columnIndex - colsNotToPivot.size() <= newColNames.size()) {
-			return getString(newColNames.get(columnIndex-colsNotToPivot.size()));
+			return getString(newColNames.get(columnIndex-1));
 		}
 		return "";
 	}
