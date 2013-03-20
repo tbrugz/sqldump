@@ -160,12 +160,14 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	}
 	
 	public static void simplerRSDump(ResultSet rs) throws SQLException, IOException {
-		simpleRSDump(rs, "FFCDataDump", new PrintWriter(System.err));
+		Properties p = new Properties();
+		p.setProperty("sqldump.datadump.ffc.nullvalue", "-");
+		simpleRSDump(rs, "FFCDataDump", p, new PrintWriter(System.err));
 	}
 	
-	public static void simpleRSDump(ResultSet rs, String dumpClass, Writer w) throws SQLException, IOException {
+	public static void simpleRSDump(ResultSet rs, String dumpClass, Properties dumpProp, Writer w) throws SQLException, IOException {
 		QueryDumper qd = new QueryDumper();
-		DumpSyntax dumpSyntax = getSyntax(dumpClass, new Properties());
+		DumpSyntax dumpSyntax = getSyntax(dumpClass, dumpProp);
 		qd.dumpResultSet(rs, dumpSyntax, w, null, null);
 		w.flush();
 	} 

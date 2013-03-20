@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class PivotRSTest {
 	public void test01() throws SQLException, IntrospectionException, IOException {
 		log.info("--> test01()");
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"id"});
-		final Map<String, Comparable> colsToPivot = new HashMap<String, Comparable>();
+		final Map<String, Comparable> colsToPivot = new LinkedHashMap<String, Comparable>();
 		for(String s: new String[]{"description", "category"}) {
 			colsToPivot.put(s, null);
 		}
@@ -76,7 +77,7 @@ public class PivotRSTest {
 		
 		int rowCounter = 0;
 		while(prs.next()) {
-			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("category:c1|description:two"));
+			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("description:two|category:c1"));
 			rowCounter++;
 		}
 		log.info("row count: "+rowCounter);
@@ -124,6 +125,23 @@ public class PivotRSTest {
 		
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"id", "category"});
 		List<String> colsToPivot = Arrays.asList(new String[]{"description"});
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		prs.process();
+		
+		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
+	}
+
+	@Test
+	public void test04() throws SQLException, IntrospectionException, IOException {
+		log.info("--> test04()");
+		ResultSetListAdapter<TestBean> rsla = new ResultSetListAdapter<TestBean>("testbeanLA", 
+				TestBean.getUniqueCols(), TestBean.getAllCols(), 
+				l1, TestBean.class);
+		
+		QueryDumper.simplerRSDump(rsla); rsla.beforeFirst();
+		
+		List<String> colsNotToPivot = Arrays.asList(new String[]{"description", "id"});
+		List<String> colsToPivot = Arrays.asList(new String[]{"category"});
 		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
 		prs.process();
 		

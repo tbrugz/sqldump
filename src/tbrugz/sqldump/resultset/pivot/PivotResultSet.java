@@ -20,6 +20,7 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 
 /*
  * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting)
+ * TODO: multiple column type (beside String): Integer, Double, Date
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
@@ -151,6 +152,7 @@ public class PivotResultSet extends AbstractResultSet {
 				newColNames.add(colFullName);
 			}
 			else {
+				log.debug("col-partial-name: "+colFullName);
 				genNewCols(colNumber+1, colFullName);
 			}
 		}
@@ -249,7 +251,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void updateCurrentElement() {
 		if(position<0) {
-			currentNonPivotKey = "";
+			currentNonPivotKey = null;
 		}
 		else {
 			currentNonPivotKey = nonPivotKeyValues.get(position);
@@ -290,7 +292,7 @@ public class PivotResultSet extends AbstractResultSet {
 			
 			//TODO: multi-measure!
 		}
-		return super.getString(columnLabel);
+		throw new SQLException("unknown column: "+columnLabel);
 	}
 
 	@Override
@@ -302,7 +304,7 @@ public class PivotResultSet extends AbstractResultSet {
 		if(columnIndex - colsNotToPivot.size() <= newColNames.size()) {
 			return getString(newColNames.get(columnIndex-1));
 		}
-		return "";
+		throw new SQLException("unknown column index: "+columnIndex);
 	}
 	
 	@Override
