@@ -48,7 +48,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException {
 		setupProperties();
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
-		FileReader reader = new FileReader(filePath);
+		File file = new File(filePath);
+		FileReader reader = new FileReader(file);
 		Writer logerror = null;
 		String fileStr = IOUtil.readFile(reader);
 		//FIXME: SQLStmtTokenizer not working (on big files?)
@@ -62,7 +63,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 		reader.close();
 		
-		log.info("file exec: statements from file '"+filePath+"'...");
+		log.info("file exec: statements from file '"+file+"'...");
 		long logEachXStmts = 1000;
 		long urowsTotal = 0;
 		long countOk = 0;
@@ -115,7 +116,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		
 		log.info("exec = "+countExec+" [ok = "+countOk+", error = "+countError+"], rows updated = "+urowsTotal
 				+", elapsed = "+totalTime+"ms, statements/sec = "+statementsPerSec
-				+" [file = '"+filePath+"']");
+				+" [file = '"+file.getAbsolutePath()+"']");
 		if(logerror!=null) {
 			logerror.close();
 			log.warn(""+countError+" erroneous statements logged");
