@@ -22,9 +22,6 @@ public class PivotRSTest {
 
 	static final Log log = LogFactory.getLog(PivotRSTest.class);
 
-	//final String[] colsNotToPivotArr = {"id"}; //{"a", "b"};
-	//final String[] colsToPivotArr = {"description", "category"}; //"c", "d"};
-
 	List<TestBean> l1;
 	
 	@Before
@@ -40,6 +37,7 @@ public class PivotRSTest {
 	
 	@Test
 	public void test01() throws SQLException, IntrospectionException, IOException {
+		log.info("--> test01()");
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"id"});
 		final Map<String, Comparable> colsToPivot = new HashMap<String, Comparable>();
 		for(String s: new String[]{"description", "category"}) {
@@ -88,6 +86,7 @@ public class PivotRSTest {
 
 	@Test
 	public void test02() throws SQLException, IntrospectionException, IOException {
+		log.info("--> test02()");
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"id", "description"});
 		final Map<String, Comparable> colsToPivot = new HashMap<String, Comparable>();
 		for(String s: new String[]{"category"}) {
@@ -98,7 +97,6 @@ public class PivotRSTest {
 				TestBean.getUniqueCols(), TestBean.getAllCols(), 
 				l1, TestBean.class);
 		
-		//SQLUtils.dumpRS(rsla); rsla.first();
 		QueryDumper.simplerRSDump(rsla); rsla.beforeFirst();
 		
 		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
@@ -111,6 +109,23 @@ public class PivotRSTest {
 			cols.add(prs.getMetaData().getColumnName(i));
 		}
 		log.info("cols: "+cols);
+		
+		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
+	}
+
+	@Test
+	public void test03() throws SQLException, IntrospectionException, IOException {
+		log.info("--> test03()");
+		ResultSetListAdapter<TestBean> rsla = new ResultSetListAdapter<TestBean>("testbeanLA", 
+				TestBean.getUniqueCols(), TestBean.getAllCols(), 
+				l1, TestBean.class);
+		
+		QueryDumper.simplerRSDump(rsla); rsla.beforeFirst();
+		
+		List<String> colsNotToPivot = Arrays.asList(new String[]{"id", "category"});
+		List<String> colsToPivot = Arrays.asList(new String[]{"description"});
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		prs.process();
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
 	}

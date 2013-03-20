@@ -6,10 +6,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +18,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.resultset.AbstractResultSet;
 import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 
+/*
+ * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting)
+ */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
 	
@@ -46,6 +50,10 @@ public class PivotResultSet extends AbstractResultSet {
 	boolean showMeasuresInColumns = true;
 
 	//colsNotToPivot - key cols
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot) throws SQLException {
+		this(rs, colsNotToPivot, list2Map(colsToPivot));
+	}
+	
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot) throws SQLException {
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
@@ -92,7 +100,7 @@ public class PivotResultSet extends AbstractResultSet {
 				//TODO: if value already existed, throw exception? aggregate?
 				String prevValue = values.get(key);
 				if(prevValue!=null) {
-					log.debug("prevValue not null[measurecol="+measureCol+";key="+key+"]: "+prevValue);
+					log.warn("prevValue not null[measurecol="+measureCol+";key="+key+"]: "+prevValue);
 				}
 				
 				values.put(key, value);
@@ -174,13 +182,21 @@ public class PivotResultSet extends AbstractResultSet {
 		//adds value to set
 		Set<String> vals = keyColValues.get(col);
 		if(vals==null) {
-			vals = new HashSet<String>();
+			//XXX: order of elements inside set: use Comparator/Comparable
+			vals = new TreeSet<String>();
 			keyColValues.put(col, vals);
 		}
 		vals.add(val);
 	}
 	
-	
+	//=============== util methods =============
+	static Map<String, Comparable> list2Map(List<String> colsToPivot) {
+		final Map<String, Comparable> colsToPivotMap = new LinkedHashMap<String, Comparable>();
+		for(String s: colsToPivot) {
+			colsToPivotMap.put(s, null);
+		}
+		return colsToPivotMap;
+	}
 	//=============== RS methods ===============
 	
 	@Override
