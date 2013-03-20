@@ -78,8 +78,10 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				columnNames.add(pname);
 				methods.add(m);
+				return;
 			}
 		}
+		log.warn("column '"+matchCol+"' not matched: missing a getter?");
 	}
 
 	@Override

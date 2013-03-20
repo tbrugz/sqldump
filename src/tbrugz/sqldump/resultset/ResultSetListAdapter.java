@@ -31,6 +31,11 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	}
 	
 	@Override
+	public void beforeFirst() throws SQLException {
+		resetPosition();
+	}
+	
+	@Override
 	public boolean first() throws SQLException {
 		resetPosition();
 		return next();
