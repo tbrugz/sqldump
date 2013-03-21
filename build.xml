@@ -254,6 +254,7 @@
 	
 	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve />
+		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
 	</target>
 
 	<!--target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
