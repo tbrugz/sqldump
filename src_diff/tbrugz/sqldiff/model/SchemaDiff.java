@@ -272,12 +272,15 @@ public class SchemaDiff implements Diff {
 			String schemaName = d.getNamedObject()!=null?d.getNamedObject().getSchemaName():"";
 			log.debug("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
 					+" ; "+schemaName+"; "+d.getNamedObject().getName());
-			//XXX: if diff is ADD+EXECUTABLE, not to include ';'?
-			out.categorizedOut(d.getDiff()+";\n", schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
+			//XXXdone: if diff is ADD+EXECUTABLE, not to include ';'? yep
+			String append = (d.getObjectType().isExecutableType()
+					&& d.getChangeType().equals(ChangeType.ADD)) 
+					? "\n" : ";\n";
+			out.categorizedOut(d.getDiff()+append, schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
 			count++;
 		}
 		log.info(count+" diffs dumped");
-	} 
+	}
 
 	@Deprecated
 	void outDiffsZ(CategorizedOut out) throws IOException {

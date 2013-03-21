@@ -25,4 +25,20 @@ public enum DBObjectType {
 		
 		return this.name().toLowerCase();
 	}
+	
+	public boolean isExecutableType() {
+		switch (this) {
+		case EXECUTABLE: //generic type, but anyway...
+		case FUNCTION:
+		case JAVA_SOURCE:
+		case PACKAGE:
+		case PACKAGE_BODY:
+		case PROCEDURE:
+		case TYPE:
+		case TYPE_BODY:
+			return true;
+		}
+		return false;
+	}
+	
 }
