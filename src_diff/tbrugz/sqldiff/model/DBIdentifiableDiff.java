@@ -71,7 +71,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	public int compareTo(DBIdentifiableDiff o) {
 		int comp = changeType.compareTo(o.changeType);
 		if(comp==0) {
-			return ident().getName().compareTo(o.ident().getName());
+			return ident().compareTo(o.ident());
 		}
 		return comp;
 	}

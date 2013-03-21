@@ -4,6 +4,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 
 //XXX Diff<T> ?
+//XXX implements Comparable<Diff> ?
 public interface Diff {
 	public ChangeType getChangeType();
 	public String getDiff();

@@ -87,17 +87,23 @@ public class SchemaDiff implements Diff {
 						tNew.getFinalQualifiedName());
 				
 				for(Diff dt: diffs) {
+					boolean added = false;
 					if(dt instanceof TableDiff) {
-						diff.tableDiffs.add((TableDiff)dt);
+						added = diff.tableDiffs.add((TableDiff)dt);
 					}
 					else if(dt instanceof TableColumnDiff) {
-						diff.columnDiffs.add((TableColumnDiff)dt);
+						added = diff.columnDiffs.add((TableColumnDiff)dt);
 					}
 					else if(dt instanceof DBIdentifiableDiff) {
-						diff.dbidDiffs.add((DBIdentifiableDiff)dt);
+						added = diff.dbidDiffs.add((DBIdentifiableDiff)dt);
 					}
 					else {
+						added = true;
 						log.warn("unknown diff: "+dt);
+					}
+					
+					if(!added) {
+						log.warn("diff already present in set: "+dt);
 					}
 				}
 				//diff.tableDiffs.addAll(diffs);
@@ -197,6 +203,12 @@ public class SchemaDiff implements Diff {
 			}
 			if(changed) {
 				log.info(sb.toString());
+			}
+		}
+		
+		if(log.isDebugEnabled()) {
+			for(Diff d: diffs) {
+				log.debug("diff: obj = "+d.getNamedObject().getSchemaName()+"."+d.getNamedObject().getName()+" ; type = "+d.getObjectType());
 			}
 		}
 	}
