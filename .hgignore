@@ -6,3 +6,5 @@ glob:tmp/*
 glob:output/*
 glob:sqldump.properties
 glob:.settings/*
+glob:log/*
+glob:zzz/*

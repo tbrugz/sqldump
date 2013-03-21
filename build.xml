@@ -277,7 +277,7 @@
 		<echo message="revision = ${revision}"/>
 		<property name="ivy.pom.version" value="${revision}"/>
 		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom">
-			<mapping conf="main" scope="compile"/>
+			<mapping conf="default" scope="compile"/>
 			<mapping conf="test" scope="test"/>
 		</ivy:makepom>
 		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true">
