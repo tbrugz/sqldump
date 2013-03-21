@@ -37,6 +37,8 @@ public interface DBMSFeatures {
 	Table getTableObject();
 	FK getForeignKeyObject();
 	Map<Class<?>, Class<?>> getColumnTypeMapper();
+	//XXX: add Map<Integer, String> getSQLTypeClassMapper() (mainly for unknown types)?
+	//XXX: add String getDefaultSchemaName()?
 	
 	//XXX: should DBMS's Features return getDefaultDateFormat?
 	

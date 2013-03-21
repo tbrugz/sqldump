@@ -61,27 +61,18 @@ public class DBMSResources {
 			String dbid = detectDbId(dbmd);
 			if(dbid!=null) {
 				log.info("database type identifier: "+dbid);
-				this.dbId = dbid;
+				updateDbId(dbid);
 			}
-			else { log.warn("can't detect database type"); }
+			else {
+				log.warn("can't detect database type");
+				updateIdentifierQuoteString();
+			}
 		}
 		else {
-			this.dbId = dbIdTmp;
+			updateDbId(dbIdTmp);
 			log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId);
 		}
 
-		identifierQuoteString = DEFAULT_QUOTE_STRING;
-		
-		if(dbmd!=null) {
-			try {
-				identifierQuoteString = dbmd.getIdentifierQuoteString();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-		}
-		//value from dbms-specific.properties::dbid.mysql.sqlquotestring takes precedence  
-		updateIdentifierQuoteString();
-		
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
 	
@@ -102,7 +93,9 @@ public class DBMSResources {
 	}
 	
 	void updateIdentifierQuoteString() {
-		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", identifierQuoteString);
+		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", 
+				(identifierQuoteString!=null ? identifierQuoteString : DEFAULT_QUOTE_STRING)
+				);
 	}
 	
 	//TODO: also detect by getUrl()...
@@ -162,30 +155,6 @@ public class DBMSResources {
 		}
 		return null;
 	}
-	
-	/*public void setDbId(String dbId) {
-		this.dbId = dbId;
-	}*/
-
-	/*DBMSFeatures grabDbSpecificFeaturesClass() {
-		String dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+dbId+".specificgrabclass");
-		if(dbSpecificFeaturesClass!=null) {
-			//XXX: call Utils.getClassByName()
-			try {
-				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				of.procProperties(papp);
-				return of;
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			} catch (InstantiationException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-		}
-		return new DefaultDBMSFeatures();
-	}*/
 	
 	static DBMSResources instance;
 	
