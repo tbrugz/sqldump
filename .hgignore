@@ -2,9 +2,13 @@ glob:bin/*
 glob:build/*
 glob:dist/*
 glob:lib/*
-glob:tmp/*
-glob:output/*
-glob:sqldump.properties
-glob:.settings/*
 glob:log/*
+glob:output/*
+glob:tmp/*
+glob:work/db/*
 glob:zzz/*
+glob:.settings/*
+glob:*~
+glob:*.orig
+glob:derby.log
+glob:sqldump.properties
