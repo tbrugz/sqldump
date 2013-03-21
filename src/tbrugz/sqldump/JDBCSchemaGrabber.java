@@ -11,6 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
@@ -65,6 +66,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMADUMP_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	static final String PROP_SCHEMADUMP_TABLEFILTER = "sqldump.schemagrab.tablefilter";
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
+	static final String PROP_SCHEMAGRAB_EXCLUDEOBJECTS = "sqldump.schemagrab.objectname.excludes";
 	static final String PROP_SCHEMAGRAB_TABLETYPES = "sqldump.schemagrab.tabletypes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
@@ -164,7 +166,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	Map<TableType, Integer> tablesCountByTableType;
 	Map<DBObjectType, Integer> execCountByType;
 	
-	List<Pattern> excludeTableFilters;
+	List<Pattern> excludeTableFilters; //XXX: remove as object property & add as grabRelations() parameter?
 	
 	@Override
 	public SchemaModel grabSchema() {
@@ -230,7 +232,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		
 		//register excklude table filters
-		excludeTableFilters = getExcludeTableFilters(papp);
+		excludeTableFilters = getExcludeFilters(papp, PROP_SCHEMADUMP_EXCLUDETABLES, "table");
+		List<Pattern> excludeObjectFilters = getExcludeFilters(papp, PROP_SCHEMAGRAB_EXCLUDEOBJECTS, "dbobject");
 		
 		String[] schemasArr = schemaPattern.split(",");
 		List<String> schemasList = new ArrayList<String>();
@@ -298,6 +301,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					List<ExecutableObject> eos = doGrabProcedures(dbmd, schemaName);
 					if(eos!=null) {
 						countproc += eos.size();
+						filterObjects(eos, excludeObjectFilters, "procedure");
 						schemaModel.getExecutables().addAll(eos);
 					}
 				}
@@ -318,6 +322,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					List<ExecutableObject> eos = doGrabFunctions(dbmd, schemaName);
 					if(eos!=null) {
 						countfunc += eos.size();
+						filterObjects(eos, excludeObjectFilters, "function");
 						schemaModel.getExecutables().addAll(eos);
 					}
 				}
@@ -360,6 +365,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 
+		filterObjects(schemaModel.getExecutables(), excludeObjectFilters, "executable");
+		filterObjects(schemaModel.getTriggers(), excludeObjectFilters, "trigger");
+		filterObjects(schemaModel.getViews(), excludeObjectFilters, "view");
+		//XXX: filter FKs, indexes, sequences, synonyms?
+		
 		return schemaModel;
 
 		}
@@ -969,15 +979,15 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 	}
 	
-	static List<Pattern> getExcludeTableFilters(Properties prop) {
+	static List<Pattern> getExcludeFilters(Properties prop, String propKey, String objectType) {
 		List<Pattern> excludeFilters = new ArrayList<Pattern>();
 		//int count = 1;
-		String filter = prop.getProperty(PROP_SCHEMADUMP_EXCLUDETABLES);
+		String filter = prop.getProperty(propKey);
 		if(filter==null) { return excludeFilters; }
 		String[] excludes = filter.split("\\|");
 		for(String ex: excludes) {
 			String pattern = ex.trim();
-			log.info("added table ignore filter: "+pattern);
+			log.info("added "+objectType+" ignore filter: "+pattern);
 			excludeFilters.add(Pattern.compile(pattern));
 			//count++;
 		}
@@ -988,6 +998,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public static final String pkNamePattern = "${tablename}_pk";
 	public static final String pkiNamePattern = "${tablename}_pki";
 	
+	//XXX: change visibility to default
 	public static String newNameFromTableName(String tableName, String pattern) {
 		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
 	}
@@ -998,6 +1009,28 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
+	}
+	
+	static void filterObjects(Collection<? extends DBIdentifiable> list, List<Pattern> excludeFilters, String objectType) {
+		if(excludeFilters==null) { return; }
+		
+		Iterator<? extends DBIdentifiable> i = list.iterator();
+		
+		loop_dbi:
+		//for(int i=list.size()-1;i>=0;i--) {
+		//for(DBIdentifiable dbi: list) {
+		while(i.hasNext()) {
+			//DBIdentifiable dbi = list.get(i);
+			DBIdentifiable dbi = i.next();
+			for(Pattern p: excludeFilters) {
+				if(p.matcher(dbi.getName()).matches()) {
+					//boolean removed = list.remove(dbi);
+					i.remove();
+					log.info("ignoring "+objectType+": "+DBObject.getFinalName(dbi.getSchemaName(), dbi.getName(), true));//+" [removed="+removed+"]");
+					continue loop_dbi;
+				}
+			}
+		}
 	}
 	
 }
