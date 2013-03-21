@@ -85,7 +85,7 @@ public class SQLUtils {
 				catch(Exception ex) {
 					log.warn("exception on Connection.getClientInfo: "+ex);
 				}
-				catch(AbstractMethodError e) {
+				catch(LinkageError e) {
 					log.warn("error on Connection.getClientInfo: "+e);
 				}
 			}
@@ -172,7 +172,7 @@ public class SQLUtils {
 			} catch (Exception e) {
 				log.warn("error grabbing database/jdbc driver info: "+e);
 				//e.printStackTrace();
-			} catch (AbstractMethodError e) {
+			} catch (LinkageError e) {
 				log.warn("error grabbing database/jdbc driver info: "+e);
 			}
 		}

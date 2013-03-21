@@ -118,6 +118,9 @@ public class DBMSResources {
 			catch(Exception e) {
 				log.warn("error getting metadata: "+e);
 			}
+			catch(LinkageError e) {
+				log.warn("error getting metadata: "+e);
+			}
 			log.info("detectDbId: product = "+dbProdName+"; majorVersion = "+dbMajorVersion+"; minorVersion = "+dbMinorVersion);
 			//String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
 			//String[] dbIds = dbIdsProp.split(",");

@@ -306,7 +306,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					}
 				}
 			}
-			catch(AbstractMethodError e) {
+			catch(LinkageError e) {
 				log.warn("abstract method error: "+e);
 			}
 			catch(RuntimeException e) {
@@ -327,7 +327,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					}
 				}
 			}
-			catch(AbstractMethodError e) {
+			catch(LinkageError e) {
 				log.warn("abstract method error: "+e);
 			}
 			catch(RuntimeException e) {
