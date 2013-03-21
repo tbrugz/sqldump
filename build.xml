@@ -280,7 +280,7 @@
 			<mapping conf="default" scope="compile"/>
 			<mapping conf="test" scope="test"/>
 		</ivy:makepom>
-		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true">
+		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" forcedeliver="true">
 			<artifacts pattern="${dist.dir}/[module].[ext]" />
 			<artifact name="${ivy.module}" ext="pom" type="pom" />
 		</ivy:publish>
