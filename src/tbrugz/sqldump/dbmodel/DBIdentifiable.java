@@ -8,7 +8,7 @@ import java.util.Set;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 //XXX implement Comparable<DBIdentifiable>? 
-public abstract class DBIdentifiable implements NamedDBObject {
+public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIdentifiable> {
 	String schemaName;
 	String name;
 
@@ -143,6 +143,15 @@ public abstract class DBIdentifiable implements NamedDBObject {
 		} else if (!schemaName.equals(other.schemaName))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public int compareTo(DBIdentifiable o) {
+		int comp = getType4Diff(this).compareTo(getType4Diff(o));
+		if(comp==0) {
+			comp = getName().compareTo(o.getName());
+		}
+		return comp;
 	}
 	
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class Constraint extends DBIdentifiable implements Comparable<Constraint>, Serializable {
+public class Constraint extends DBIdentifiable implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static enum ConstraintType {

@@ -44,7 +44,7 @@ public class ExecutableObject extends DBObject {
 	
 	@Override
 	public boolean isDumpable() {
-		return body!=null || packageName==null; //XXX: remove packageName==null?
+		return body!=null;
 	}
 	
 	@Override

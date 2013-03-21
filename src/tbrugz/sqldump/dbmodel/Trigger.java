@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmodel;
 public class Trigger extends DBObject {
 	private static final long serialVersionUID = 1L;
 
+	//TODO: add transient String name, add get/set
 	public String description;
 	public String body;
 	public String tableName;

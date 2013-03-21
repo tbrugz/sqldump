@@ -6,7 +6,7 @@ import java.util.Collection;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.StringDecorator;
 
-public abstract class DBObject extends DBIdentifiable implements Comparable<DBObject>, Serializable {
+public abstract class DBObject extends DBIdentifiable implements Comparable<DBIdentifiable>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	//dumping parameters
