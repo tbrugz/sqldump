@@ -185,6 +185,8 @@
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties, **/jaxb.index">
 			<manifest>
+				<attribute name="Implementation-Title" value="${ant.project.name}"/>
+				<attribute name="Implementation-Version" value="${version}"/> 
 				<attribute name="Main-Class" value="${sqldump.mainclass}"/>
 			</manifest>
 		</jar>
@@ -197,6 +199,8 @@
 	<target name="javadoc" depends="prepare">
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
 	</target>
+	
+	<target name="dist" depends="jar" description="builds jar"/>
 	
 	<target name="all" depends="javadoc,jar" description="builds project">
 		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
@@ -252,7 +256,7 @@
 
 	<target name="config-ivy" depends="config-ivy-file,config-ivy-dir"/>
 	
-	<target name="resolve-ivy" depends="config-ivy" description="retrieve dependencies with ivy">
+	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve />
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
 	</target>
@@ -266,12 +270,12 @@
 		<get dest="${lib.dir}/markdownj-1.0.2b4-0.3.0.jar" src="http://code.google.com/p/markdownj/downloads/detail?name=markdownj-1.0.2b4-0.3.0.jar&amp;can=2&amp;q=" verbose="true"/>
 	</target-->
 	
-	<target name="report-ivy" depends="resolve-ivy">
+	<target name="report-ivy" depends="resolve">
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
 	
-	<target name="publish" depends="jar,config-ivy" description="publish this project in the ivy repository">
+	<target name="publish" depends="dist,config-ivy" description="publish this project in the ivy repository">
 		<property name="revision" value="${version}"/>
 		<property name="resolver.publish" value="local"/>
 		<ivy:info/>
