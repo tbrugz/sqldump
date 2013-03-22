@@ -30,6 +30,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.sqlrun.QueryDumper;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
@@ -53,6 +54,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_DO_SCHEMADUMP_FKS = "sqldump.doschemadump.fks";
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
+	static final String PROP_SCHEMAGRAB_ALLGRANTS = "sqldump.schemagrab.allgrants"; //XXX: xperimental
 	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = "sqldump.schemagrab.proceduresandfunctions";
 	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
@@ -94,7 +96,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabPKs = true, 
 			doSchemaGrabFKs = true, 
 			doSchemaGrabExportedFKs = false, 
-			doSchemaGrabGrants = false, 
+			doSchemaGrabTableGrants = false,
+			doGrabAllSchemaGrants = false, 
 			doSchemaGrabIndexes = false,
 			doSchemaGrabProceduresAndFunctions = true,
 			doSchemaGrabDbSpecific = false,
@@ -117,7 +120,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		doSchemaGrabPKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
 		doSchemaGrabFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
 		doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
-		doSchemaGrabGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabGrants);
+		doSchemaGrabTableGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabTableGrants);
+		doGrabAllSchemaGrants = Utils.getPropBool(papp, PROP_SCHEMAGRAB_ALLGRANTS, doGrabAllSchemaGrants);
 		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
@@ -231,7 +235,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			execCountByType.put(t, 0);
 		}
 		
-		//register excklude table filters
+		//register exclude table filters
 		excludeTableFilters = getExcludeFilters(papp, PROP_SCHEMADUMP_EXCLUDETABLES, "table");
 		List<Pattern> excludeObjectFilters = getExcludeFilters(papp, PROP_SCHEMAGRAB_EXCLUDEOBJECTS, "dbobject");
 		
@@ -338,6 +342,22 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			//XXX: add ["+executableStats()+"]?
 			log.info(countfunc+" functions grabbed");
+		}
+		
+		//XXX schema GRANTs ? how/where to add in schemaModel?
+		if(doGrabAllSchemaGrants) {
+			for(String schemaName: schemasList) {
+				log.info("getting grants from schema "+schemaName);
+				//XXX filter by GRANTEE, not GRANTOR/SCHEMA ? schema != user (in some databases?)
+				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaName, null);
+				//List<Grant> grants = grabSchemaGrants(grantrs); //table.setGrants(  );
+				QueryDumper.simplerRSDump(grantrs);
+				closeResultSetAndStatement(grantrs);
+			}
+			//log.info("getting grants from all schemas ");
+			//ResultSet grantrs = dbmd.getTablePrivileges(null, null, null);
+			//QueryDumper.simplerRSDump(grantrs);
+			//closeResultSetAndStatement(grantrs);
 		}
 		
 		//XXX: getClientInfoProperties?
@@ -486,10 +506,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				
 				//GRANTs
-				if(doSchemaGrabGrants) {
+				if(doSchemaGrabTableGrants) {
 					log.debug("getting grants from "+fullTablename);
 					ResultSet grantrs = dbmd.getTablePrivileges(null, table.getSchemaName(), tableName);
-					table.setGrants( grabSchemaGrants(grantrs, tableName) );
+					table.setGrants( grabSchemaGrants(grantrs) );
 					closeResultSetAndStatement(grantrs);
 				}
 				
@@ -821,7 +841,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return c;
 	}
 
-	List<Grant> grabSchemaGrants(ResultSet grantrs, String tableName) throws SQLException {
+	List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		while(grantrs.next()) {
 			try {

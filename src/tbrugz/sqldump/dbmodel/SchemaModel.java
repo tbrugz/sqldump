@@ -25,6 +25,7 @@ public class SchemaModel implements Serializable {
 	Set<Sequence> sequences = new TreeSet<Sequence>();
 	
 	//XXX: add List<String>(?) schemasGrabbed? may be used by Schema2GraphML
+	//XXX: add Set<Grant> schemaGrants?
 
 	@XmlElement(name="table")
 	public Set<Table> getTables() {
