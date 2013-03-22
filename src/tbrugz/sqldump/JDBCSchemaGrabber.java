@@ -934,9 +934,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				dbmsfeatures.addFKSpecificFeatures(fk, fkrs);
 			}
-			fk.getFkColumns().add(fkrs.getString("FKCOLUMN_NAME"));
-			fk.getPkColumns().add(fkrs.getString("PKCOLUMN_NAME"));
-			log.debug("fk: "+fkName+" - "+fk);
+			String fkcol = fkrs.getString("FKCOLUMN_NAME");
+			String pkcol = fkrs.getString("PKCOLUMN_NAME");
+			fk.getFkColumns().add(fkcol);
+			fk.getPkColumns().add(pkcol);
+			
+			log.debug("fk: "+fkName+" - "+fk+" / fkcol:"+fkcol+" / pkcol:"+pkcol);
 		}
 		List<FK> ret = new ArrayList<FK>();
 		for(String key: fks.keySet()) {

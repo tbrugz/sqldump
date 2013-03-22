@@ -95,8 +95,10 @@ public class FK extends DBIdentifiable implements Serializable {
 		this.name = name;
 	}*/
 
-	public int compareTo(FK o) {
-		int fkCompare = fkTable.compareTo(o.fkTable);
+	public int compareTo(DBIdentifiable o) {
+		if(! (o instanceof FK)) { return super.compareTo(o); }
+		
+		int fkCompare = fkTable.compareTo(((FK) o).fkTable);
 		if(fkCompare==0) { //if same FK Table, compare FK Name
 			return name.compareTo(o.name);
 		}

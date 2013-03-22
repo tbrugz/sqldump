@@ -7,7 +7,6 @@ import java.util.Set;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
-//XXX implement Comparable<DBIdentifiable>? 
 public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIdentifiable> {
 	String schemaName;
 	String name;
