@@ -31,6 +31,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	
 	boolean useBatchUpdate = false;
 	long batchSize = 1000;
+	boolean useSQLStmtTokenizerClass = true;
 	
 	Connection conn;
 	Properties papp;
@@ -53,13 +54,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 		Writer logerror = null;
 		String fileStr = IOUtil.readFile(reader);
 		//FIXME: SQLStmtTokenizer not working (on big files?)
-		//SQLStmtTokenizer stmtTokenizer = new SQLStmtTokenizer(fileStr);
-		String[] stmtTokenizer = { null };
-		if(split) {
-			stmtTokenizer = fileStr.split(";");
+		Iterable<String> stmtTokenizer = null;
+		if(useSQLStmtTokenizerClass) {
+			stmtTokenizer = new SQLStmtTokenizer(fileStr);
 		}
 		else {
-			stmtTokenizer[0] = fileStr;
+			stmtTokenizer = new StringSpliter(fileStr, split);
 		}
 		reader.close();
 		
@@ -282,8 +282,26 @@ public class StmtProc extends AbstractFailable implements Executor {
 		this.conn = conn;
 	}
 
+	static final String STMT_TOKENIZER_CLASS = "SQLStmtTokenizer";
+	static final String STRING_SPLITTER_CLASS = "StringSpliter";
+	
 	@Override
 	public void setProperties(Properties papp) {
+		String tokenizer = papp.getProperty(SQLRun.PROP_SQLTOKENIZERCLASS);
+		useSQLStmtTokenizerClass = true;
+		if(null == tokenizer) {
+		}
+		else if(STMT_TOKENIZER_CLASS.equals(tokenizer)) {
+			log.info("using '"+tokenizer+"' tokenizer class");
+		}
+		else if(STRING_SPLITTER_CLASS.equals(tokenizer)) {
+			useSQLStmtTokenizerClass = false;
+			log.info("using '"+tokenizer+"' tokenizer class");
+		}
+		else {
+			log.warn("unknown string tokenizer class: "+tokenizer+" (using '"+STMT_TOKENIZER_CLASS+"')");
+		}
+		
 		this.papp = papp;
 	}
 	

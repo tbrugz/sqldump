@@ -87,6 +87,7 @@ public class SQLRun {
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
 	static final String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
+	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -356,6 +357,7 @@ public class SQLRun {
 		DBMSResources.instance().updateMetaData(conn.getMetaData());
 		
 		//inits specific DBMSFeatures class
+		//XXX: really needed?
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		log.debug("DBMSFeatures: "+feats);
 	}

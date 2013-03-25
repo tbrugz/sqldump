@@ -7,12 +7,12 @@ import org.apache.commons.logging.LogFactory;
 
 public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 
-	static Log log = LogFactory.getLog(SQLStmtTokenizer.class);
+	static final Log log = LogFactory.getLog(SQLStmtTokenizer.class);
 	
-	String sql;
+	final String sql;
+	final int length;
 	int pos = 0;
 	int searchFrom = 0;
-	int length = 0;
 	
 	public SQLStmtTokenizer(String sql) {
 		this.sql = sql;
