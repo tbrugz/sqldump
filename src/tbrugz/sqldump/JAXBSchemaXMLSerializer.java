@@ -125,6 +125,11 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	}
 
 	@Override
+	public Connection getConnection() {
+		return null;
+	}
+	
+	@Override
 	public void setConnection(Connection conn) {
 		log.debug("setConnection() is empty");
 	}

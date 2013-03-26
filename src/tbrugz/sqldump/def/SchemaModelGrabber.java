@@ -13,6 +13,8 @@ public interface SchemaModelGrabber {
 	
 	public boolean needsConnection();
 
+	public Connection getConnection();
+	
 	public void setConnection(Connection conn);
 
 	public void setFailOnError(boolean failonerror);

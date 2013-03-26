@@ -147,6 +147,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			e.printStackTrace();
 		}*/
 	}
+	
+	@Override
+	public Connection getConnection() {
+		return conn;
+	}
 
 	public void setConnection(Connection conn) {
 		this.conn = conn;
