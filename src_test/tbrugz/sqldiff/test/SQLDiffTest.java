@@ -21,7 +21,6 @@ import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 
@@ -65,7 +64,6 @@ public class SQLDiffTest {
 		schemaJdbcGrabber.procProperties(jdbcPropNew);
 		
 		conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
 		
 		SQLRunAndDumpTest.setupModel(conn);
 		

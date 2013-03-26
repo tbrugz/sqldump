@@ -2,6 +2,8 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +11,8 @@ import org.junit.Test;
 import tbrugz.sqldump.def.DBMSResources;
 
 public class ColTypeUtilTest {
+	
+	static final Log log = LogFactory.getLog(ColTypeUtilTest.class);
 	
 	void assertIt(String type, boolean shouldUsePrecision) {
 		Assert.assertEquals("Column type "+type.toUpperCase()+" should "+(shouldUsePrecision?"":"NOT ")+"use precision",
@@ -88,6 +92,7 @@ public class ColTypeUtilTest {
 	
 	@AfterClass
 	public static void tearDown() {
+		log.info("tearDown");
 		Column.ColTypeUtil.setProperties(null);
 	}
 }
