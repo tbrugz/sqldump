@@ -17,6 +17,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SQLDump;
@@ -48,6 +49,7 @@ public class SQLDiff {
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
+	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 
 	static Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -126,6 +128,19 @@ public class SQLDiff {
 		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
 		//co.categorizedOut(diff.getDiff());
 		diff.outDiffs(co);
+		
+		//data diff!
+		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
+		if(doDataDiff) {
+			DataDiff dd = new DataDiff();
+			dd.setProperties(prop);
+			dd.setSourceSchemaModel(fromSM);
+			dd.setSourceConnection(fromSchemaGrabber.getConnection());
+			dd.setTargetSchemaModel(toSM);
+			dd.setTargetConnection(toSchemaGrabber.getConnection());
+			dd.process();
+		}
+		
 		log.info("...done dumping");
 	}
 	
