@@ -44,23 +44,14 @@ import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * TODOne: prop for selecting which tables to dump data from
- * TODOne: limit number of rows to dump
- * TODOne: where clause for data dump 
- * TODOne: column values escaping
- * TODOne: 'insert into' datadump syntax:
- *   sqldump.datadump.useinsertintosyntax=false
- *   sqldump.datadump.useinsertintosyntax.withcolumnnames=true
- * XXXdone: refactoring: unify dumpDataRawSyntax & dumpDataInsertIntoSyntax
- * XXXxx: property for selecting which columns to dump
- * XXXdone: order-by-primary-key prop? asc, desc?
- * TODOne: dumpsyntaxes: x InsertInto, x CSV, xml, x JSON, x fixedcolumnsize
- * XXXdone: refactor: add abstract class OutputSyntax and XMLOutput, CSVOutput, ...
  * TODO: floatFormatter!
  * TODO: option to include, or not, partition columns in output
  */
 public class DataDump extends AbstractSQLProc {
 
+	//prefix
+	static final String DATADUMP_PROP_PREFIX = "sqldump.datadump.";
+	
 	//generic props
 	public static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
 	//static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
@@ -76,6 +67,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_LOG_1ST_ROW = "sqldump.datadump.log1strow";
 	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
 	static final String PROP_DATADUMP_WRITEAPPEND = "sqldump.datadump.writeappend";
+	static final String PROP_DATADUMP_CREATEEMPTYFILES = "sqldump.datadump.createemptyfiles";
 
 	//defaults
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
@@ -83,8 +75,8 @@ public class DataDump extends AbstractSQLProc {
 	
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
 	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
-	//static final String FILENAME_PATTERN_QUERYNAME = "\\$\\{queryname\\}";
 	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
+	//XXX add [tabletype] pattern - TABLE, VIEW, QUERY ?
 	
 	static Log log = LogFactory.getLog(DataDump.class);
 	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
@@ -201,13 +193,13 @@ public class DataDump extends AbstractSQLProc {
 			List<FK> importedFKs = DBIdentifiable.getImportedKeys(table, model.getForeignKeys());
 			List<Constraint> uniqueKeys = DBIdentifiable.getUKs(table);
 			
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.datadump."+tableName+".rowlimit");
+			Long tablerowlimit = Utils.getPropLong(prop, DATADUMP_PROP_PREFIX+tableName+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 
-			String whereClause = prop.getProperty("sqldump.datadump."+tableName+".where");
-			String selectColumns = prop.getProperty("sqldump.datadump."+tableName+".columns");
+			String whereClause = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".where");
+			String selectColumns = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
-			String orderClause = prop.getProperty("sqldump.datadump."+tableName+".order");
+			String orderClause = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".order");
 			if(orderClause==null && orderByPK) { 
 				Constraint ctt = table.getPKConstraint();
 				if(ctt!=null) {
@@ -291,11 +283,15 @@ public class DataDump extends AbstractSQLProc {
 				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 			}
 
+			boolean createEmptyDumpFiles = Utils.getPropBoolean(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
+			
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
 			if(!hasData) {
 				log.info("table/query '"+tableOrQueryName+"' returned 0 rows");
-				return;
+				if(!createEmptyDumpFiles) {
+					return;
+				}
 			}
 			long count = 0;
 			
@@ -413,7 +409,12 @@ public class DataDump extends AbstractSQLProc {
 								writersSyntaxes.put(finalFilename, ds);
 							}
 							try {
-								ds.dumpRow(rs, countInPartition, w);
+								if(hasData) {
+									ds.dumpRow(rs, countInPartition, w);
+								}
+								else {
+									log.debug("no data to dump to file '"+finalFilename+"'");
+								}
 							}
 							catch(SQLException e) {
 								log.warn("error dumping row "+(count+1)+" from query '"+tableOrQueryId+"/"+tableOrQueryName+"': syntax "+ds.getSyntaxId()+" disabled");
@@ -426,7 +427,10 @@ public class DataDump extends AbstractSQLProc {
 					lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
 					countInPartitionByPattern.put(partitionByPattern, ++countInPartition);
 				}
-				count++;
+
+				if(hasData) {
+					count++;
+				}
 				
 				if(count==1) {
 					dump1stRowTime = System.currentTimeMillis();
@@ -435,7 +439,7 @@ public class DataDump extends AbstractSQLProc {
 							" ["+(dump1stRowTime-initTime)+"ms elapsed]");
 					}
 				}
-				if( (logEachXRows>0) && (count%logEachXRows==0) ) { 
+				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) { 
 					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped"
 							+(logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"") );
 				}
