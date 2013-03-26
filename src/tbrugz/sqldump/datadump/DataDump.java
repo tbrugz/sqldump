@@ -169,9 +169,6 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		String quote = DBMSResources.instance().getIdentifierQuoteString();
-		StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
-		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
 			String tableName = table.getName();
@@ -200,28 +197,13 @@ public class DataDump extends AbstractSQLProc {
 			String selectColumns = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".columns");
 			if(selectColumns==null) { selectColumns = "*"; }
 			String orderClause = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".order");
-			if(orderClause==null && orderByPK) { 
-				Constraint ctt = table.getPKConstraint();
-				if(ctt!=null) {
-					orderClause = Utils.join(ctt.uniqueColumns, ", ", quoteAllDecorator);
-				}
-				else {
-					log.warn("table '"+tableName+"' has no PK for datadump ordering");
-				}
-			}
+
 			List<String> pkCols = null;  
 			if(table.getPKConstraint()!=null) {
 				pkCols = table.getPKConstraint().uniqueColumns;
 			} 
-
-			log.debug("dumping data/inserts from table: "+tableName);
-			//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
 			
-			String sql = "select "+selectColumns
-					+" from "+DBObject.getFinalName(table, quoteAllDecorator, true)
-					+ (whereClause!=null?" where "+whereClause:"")
-					+ (orderClause!=null?" order by "+orderClause:"");
-			log.debug("sql: "+sql);
+			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK);
 			
 			try {
 				//XXX: table dump with partitionBy?
@@ -247,6 +229,34 @@ public class DataDump extends AbstractSQLProc {
 			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
 		}
 	}
+	
+	public static String getQuery(Table table, String selectColumns, String whereClause, String orderClause, boolean orderByPK) {
+		String tableName = table.getName();
+		
+		String quote = DBMSResources.instance().getIdentifierQuoteString();
+		StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
+		
+		if(orderClause==null && orderByPK) { 
+			Constraint ctt = table.getPKConstraint();
+			if(ctt!=null) {
+				orderClause = Utils.join(ctt.uniqueColumns, ", ", quoteAllDecorator);
+			}
+			else {
+				log.warn("table '"+tableName+"' has no PK for datadump ordering");
+			}
+		}
+
+		log.debug("dumping data/inserts from table: "+tableName);
+		//String sql = "select "+selectColumns+" from \""+table.schemaName+"."+tableName+"\""
+		
+		String sql = "select "+selectColumns
+				+" from "+DBObject.getFinalName(table, quoteAllDecorator, true)
+				+ (whereClause!=null?" where "+whereClause:"")
+				+ (orderClause!=null?" order by "+orderClause:"");
+		log.debug("sql: "+sql);
+
+		return sql;
+	} 
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
 			String tableOrQueryId, String tableOrQueryName, String charset,

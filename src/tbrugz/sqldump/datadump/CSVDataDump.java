@@ -76,7 +76,7 @@ public class CSVDataDump extends DumpSyntax {
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.md = md;
-		numCol = md.getColumnCount();		
+		numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
