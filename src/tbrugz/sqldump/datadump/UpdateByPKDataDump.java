@@ -23,7 +23,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	
 	static Log log = LogFactory.getLog(UpdateByPKDataDump.class);
 	
-	List<String> pkCols = null; 
+	protected List<String> pkCols = null;
 	
 	@Override
 	public String getSyntaxId() {
@@ -47,7 +47,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 			//XXX: throw RuntimeException / IllegalArgument ?
 			return;
 		}
-		super.initDump(tableName, null, md);
+		super.initDump(tableName, cols, md);
 	}
 	
 	@Override
@@ -71,7 +71,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 				wheres.add(colname+" = "+vals.get(i));
 			}
 		}
-			
+		
 		out("update "+tableName+" set "+
 			Utils.join(sets, ", ")+
 			" where "+
@@ -79,5 +79,8 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 			";", fos);
 	}
 	
+	protected void superDumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
+		super.dumpRow(rs, count, fos);
+	}
 	
 }

@@ -1,6 +1,7 @@
 package tbrugz.sqldiff.datadiff;
 
 import java.beans.IntrospectionException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,7 @@ public class ResultSetDiffTest {
 	}
 	
 	@Test
-	public void test01() throws IntrospectionException, SQLException {
+	public void test01() throws IntrospectionException, SQLException, IOException {
 		ResultSetListAdapter<TestBean> rsla1 = new ResultSetListAdapter<TestBean>("rsla1", 
 				TestBean.getUniqueCols(), TestBean.getAllCols(), 
 				l1, TestBean.class);
@@ -49,11 +50,11 @@ public class ResultSetDiffTest {
 		ResultSetDiff rsd = new ResultSetDiff();
 
 		log.info("s: 1 t: 2");
-		rsd.diff(rsla1, rsla2, TestBean.getUniqueCols());
+		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols());
 		
 		log.info("s: 2 t: 1");
 		rsla1.beforeFirst(); rsla2.beforeFirst();
-		rsd.diff(rsla2, rsla1, TestBean.getUniqueCols());
+		rsd.diff(rsla2, rsla1, "table2", TestBean.getUniqueCols());
 	}
 
 }

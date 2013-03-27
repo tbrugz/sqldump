@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.datadiff;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -74,7 +75,7 @@ public class DataDiff {
 		targetConn = conn;
 	}
 
-	public void process() throws SQLException {
+	public void process() throws SQLException, IOException {
 		Set<Table> tablesToDiff = sourceSchemaModel.getTables();
 		Set<Table> targetTables = targetSchemaModel.getTables();
 		tablesToDiff.retainAll(targetTables);
@@ -113,7 +114,7 @@ public class DataDiff {
 			}
 			
 			log.info("diff for table '"+table+"'...");
-			rsdiff.diff(rsSource, rsTarget, keyCols);
+			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols);
 			
 			rsSource.close(); rsTarget.close();
 		}

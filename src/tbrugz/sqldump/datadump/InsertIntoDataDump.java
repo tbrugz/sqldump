@@ -17,11 +17,11 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final String INSERTINTO_SYNTAX_ID = "insertinto";
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.insertinto.withcolumnnames";
 
-	String tableName;
-	int numCol;
+	protected String tableName;
+	protected int numCol;
 	String colNames;
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected List<String> lsColNames = new ArrayList<String>();
+	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	boolean doColumnNamesDump = true;
 	
 	@Override
@@ -60,7 +60,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 			");", fos);
 	}
 	
-	void out(String s, Writer pw) throws IOException {
+	protected void out(String s, Writer pw) throws IOException {
 		pw.write(s+"\n");
 	}
 
