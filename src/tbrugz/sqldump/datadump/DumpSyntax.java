@@ -15,7 +15,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
-public abstract class DumpSyntax {
+public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	public static final String DEFAULT_NULL_VALUE = "";
 	
