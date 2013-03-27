@@ -25,6 +25,7 @@ public class SQLTests extends AbstractSQLProc {
 
 	static void testsInternal(Connection conn) throws Exception {
 		log.info("some tests...");
+		@SuppressWarnings("unused")
 		DatabaseMetaData dbmd = conn.getMetaData();
 
 		//log.info("test: catalogs...");

@@ -24,19 +24,32 @@ import org.apache.commons.logging.LogFactory;
  * XXX: add method alreadyOpened()/wouldCreateNewFile()?
  */
 public class CategorizedOut {
+	
+	public static class NullWriter extends Writer {
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+		}
+
+		@Override
+		public void flush() throws IOException {
+		}
+
+		@Override
+		public void close() throws IOException {
+		}
+	}
+	
 	static final Log log = LogFactory.getLog(CategorizedOut.class);
 	
 	public static final String STDOUT = "<stdout>"; 
 	public static final String STDERR = "<stderr>";
-	//XXX: new constant for '/dev/null' ?
+	public static final String NULL_WRITER = "<null>"; // constant for "/dev/null"
 	
-	final PrintWriter pwSTDOUT;
-	final PrintWriter pwSTDERR;
+	final static Writer pwSTDOUT = new PrintWriter(System.out);
+	final static Writer pwSTDERR = new PrintWriter(System.err);
+	final static Writer nullWriter = new NullWriter();
 	
 	public CategorizedOut(String filePathPattern) {
-		pwSTDOUT = new PrintWriter(System.out);
-		pwSTDERR = new PrintWriter(System.err);
-		
 		this.filePathPattern = filePathPattern;
 	}
 
@@ -105,6 +118,9 @@ public class CategorizedOut {
 		else if(STDERR.equals(thisFP)) {
 			System.err.println(message);
 		}
+		else if(NULL_WRITER.equals(thisFP)) {
+			nullWriter.write(message); //not realy needed...
+		}
 		else {
 			boolean alreadyOpened = filesOpened.contains(thisFP);
 			if(!alreadyOpened) { filesOpened.add(thisFP); }
@@ -157,6 +173,9 @@ public class CategorizedOut {
 		else if(STDERR.equals(thisFP)) {
 			return pwSTDERR;
 		}
+		else if(NULL_WRITER.equals(thisFP)) {
+			return nullWriter;
+		}
 		else {
 			boolean alreadyOpened = filesOpened.contains(thisFP);
 			if(!alreadyOpened) { filesOpened.add(thisFP); }
@@ -186,8 +205,7 @@ public class CategorizedOut {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		CategorizedOut co = new CategorizedOut();
-		co.setFilePathPattern("d:/temp/abc_${1}_${2}_${1}.txt");
+		CategorizedOut co = new CategorizedOut("d:/temp/abc_${1}_${2}_${1}.txt");
 		co.categorizedOut("hello", "a", "$123");
 		//System.out.println(Matcher.quoteReplacement("\\$123"));
 	}

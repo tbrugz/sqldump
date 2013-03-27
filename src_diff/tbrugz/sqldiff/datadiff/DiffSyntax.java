@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 
+//XXX: rename to DataDiffSyntax ?
 public interface DiffSyntax extends DumpSyntaxInt {
 	
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource, ResultSet rsTarget, long count, Writer w)

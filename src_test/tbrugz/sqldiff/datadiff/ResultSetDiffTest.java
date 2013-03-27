@@ -52,7 +52,7 @@ public class ResultSetDiffTest {
 		
 		ResultSetDiff rsd = new ResultSetDiff();
 
-		CategorizedOut cout = new CategorizedOut(CategorizedOut.STDOUT);
+		CategorizedOut cout = new CategorizedOut(CategorizedOut.NULL_WRITER);
 		
 		log.info("s: 1 t: 2");
 		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), cout);
