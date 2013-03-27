@@ -3,6 +3,8 @@ package tbrugz.sqldump.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,10 +28,27 @@ public class CategorizedOut {
 	
 	public static final String STDOUT = "<stdout>"; 
 	public static final String STDERR = "<stderr>";
+	//XXX: new constant for '/dev/null' ?
+	
+	final PrintWriter pwSTDOUT;
+	final PrintWriter pwSTDERR;
+	
+	public CategorizedOut(String filePathPattern) {
+		pwSTDOUT = new PrintWriter(System.out);
+		pwSTDERR = new PrintWriter(System.err);
+		
+		this.filePathPattern = filePathPattern;
+	}
+
+	@Deprecated
+	public CategorizedOut() {
+		this(null);
+	}
 	
 	Set<String> filesOpened = new TreeSet<String>();
 	
 	//String[] categories = null;
+	//XXX: final filePathPattern ?
 	String filePathPattern; // XXX: file: /abc/def/${1}file${2}.sql
 	
 	/*public String[] getCategories() {
@@ -44,10 +63,18 @@ public class CategorizedOut {
 		return filePathPattern;
 	}
 
+	//XXX @Deprecated ?
 	public void setFilePathPattern(String filePathPattern) {
 		this.filePathPattern = filePathPattern;
 	}
 
+	public void categorizedNewOut(String message, String... categories) throws IOException {
+		Writer w = getCategorizedWriter(categories);
+		w.write(message+"\n");
+		w.flush();
+	}
+	
+	//XXX: use getCategorizedWriter() (as categorizedNewOut()) ?
 	public void categorizedOut(String message, String... categories) throws IOException {
 		if(filePathPattern==null) {
 			throw new RuntimeException("filePathPattern not defined, aborting");
@@ -64,7 +91,8 @@ public class CategorizedOut {
 			}
 			c = Matcher.quoteReplacement(c);
 			//c = c.replaceAll("\\$", "\\\\\\$"); //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll() & Matcher.quoteReplacement()
-			thisFP = thisFP.replaceAll("\\$\\{"+(i+1)+"\\}", c);
+			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
+			thisFP = thisFP.replaceAll("\\$\\{"+(i+1)+"\\}", c); //XXX: deprecated?
 		}
 		
 		if(hasnull) {
@@ -98,10 +126,61 @@ public class CategorizedOut {
 			fos.close();
 		}
 	}
+
+	public Writer getCategorizedWriter(String... categories) throws IOException {
+		if(filePathPattern==null) {
+			throw new RuntimeException("filePathPattern not defined, aborting");
+		}
+
+		String thisFP = new String(filePathPattern);
+		
+		boolean hasnull = false;
+		for(int i=0;i<categories.length;i++) {
+			String c = categories[i];
+			if(c==null) {
+				hasnull = true;
+				continue;
+			}
+			c = Matcher.quoteReplacement(c);
+			//c = c.replaceAll("\\$", "\\\\\\$"); //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll() & Matcher.quoteReplacement()
+			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
+			thisFP = thisFP.replaceAll("\\$\\{"+(i+1)+"\\}", c); //XXX: deprecated?
+		}
+		
+		if(hasnull) {
+			log.debug("cats w/ null: "+Arrays.asList(categories));
+		}
+		
+		if(STDOUT.equals(thisFP)) {
+			return pwSTDOUT;
+		}
+		else if(STDERR.equals(thisFP)) {
+			return pwSTDERR;
+		}
+		else {
+			boolean alreadyOpened = filesOpened.contains(thisFP);
+			if(!alreadyOpened) { filesOpened.add(thisFP); }
+			
+			File f = new File(thisFP);
+			//String dirStr = f.getParent();
+			File dir = new File(f.getParent());
+			if(!dir.exists()) {
+				dir.mkdirs();
+			}
+			else {
+				if(!dir.isDirectory()) {
+					throw new IOException(dir+" already exists and is not a directory");
+				}
+			}
+			FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
+			return fos;
+		}
+	}
 	
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
-			outpattern = outpattern.replaceAll(categories[i], "\\$\\{"+(i+1)+"\\}");
+			outpattern = outpattern.replaceAll("\\["+categories[i]+"\\]", "\\["+(i+1)+"\\]");
+			outpattern = outpattern.replaceAll(categories[i], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated
 		}
 		return outpattern;
 	}
