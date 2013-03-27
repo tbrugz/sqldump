@@ -78,6 +78,9 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 
 	static final String PROP_PREFIX = "sqldump.alterschemasuggester";
 	
+	static final String FILENAME_PATTERN_SCHEMA = "\\[schemaname\\]";
+	static final String FILENAME_PATTERN_OBJECTTYPE	= "\\[objecttype\\]";
+	
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS = PROP_PREFIX+".alterobjectsfromschemas";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_SIMPLEFKSONLY = PROP_PREFIX+".simplefksonly";
@@ -87,7 +90,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	
 	String fileOutput;
 	List<String> schemasToAlter;
-	boolean dumpSimpleFKsOnly = false; //XXXdone: add prop for dumpSimpleFKsOnly
+	boolean dumpSimpleFKsOnly = false;
 	boolean dumpFKIndexesOnly = true;
 	CategorizedOut cout;
 
@@ -132,11 +135,10 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 			return;
 		}
 		
-		cout = new CategorizedOut();
-		String finalPattern = CategorizedOut.generateFinalOutPattern(fileOutput, 
-				SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, 
-				SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE);
-		cout.setFilePathPattern(finalPattern);
+		String finalPattern = CategorizedOut.generateFinalOutPattern(fileOutput,
+				FILENAME_PATTERN_SCHEMA,
+				FILENAME_PATTERN_OBJECTTYPE);
+		cout = new CategorizedOut(finalPattern);
 		
 		//FileWriter fos = new FileWriter(fileOutput, false);
 		

@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.ProcessingException;
-import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
@@ -52,10 +51,11 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 				return;
 			}
 			
-			CategorizedOut co = new CategorizedOut();
-			String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
-					.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...
-			co.setFilePathPattern(finalPattern);
+			String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern,
+					AlterSchemaSuggester.FILENAME_PATTERN_SCHEMA,
+					AlterSchemaSuggester.FILENAME_PATTERN_OBJECTTYPE);
+			//XXX: Matcher.quoteReplacement()? maybe not...
+			CategorizedOut co = new CategorizedOut(finalPattern);
 			
 			dumpDropFKs(schemaModel, co);
 			dumpDropObject(DBObjectType.INDEX.toString(), schemaModel.getIndexes(), co);
