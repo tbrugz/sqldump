@@ -60,17 +60,24 @@ public class SQLDiff {
 	void init(String[] args) throws FileNotFoundException, IOException {
 		log.info("init...");
 		//parse args
+		boolean useSysPropSetted = false;		
 		String propFilename = PROPERTIES_FILENAME;
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
 			}
 			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				ParametrizedProperties.setUseSystemProperties(true);
+				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
+				ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
+				useSysPropSetted = true;
 			}
 			else {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
 			}
+		}
+		if(!useSysPropSetted) {
+			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
+			useSysPropSetted = true;
 		}
 		File propFile = new File(propFilename);
 		
