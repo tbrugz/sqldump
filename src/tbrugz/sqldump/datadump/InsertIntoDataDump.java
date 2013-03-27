@@ -20,8 +20,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	protected String tableName;
 	protected int numCol;
 	String colNames;
-	protected List<String> lsColNames = new ArrayList<String>();
-	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected final List<String> lsColNames = new ArrayList<String>();
+	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	boolean doColumnNamesDump = true;
 	
 	@Override

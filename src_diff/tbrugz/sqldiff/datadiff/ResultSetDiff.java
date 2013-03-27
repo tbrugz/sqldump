@@ -49,7 +49,7 @@ public class ResultSetDiff {
 		}
 		
 		DiffSyntax ds = getSyntax(new Properties(), tableName, keyCols, md); //XXX: properties?
-		Writer w = new PrintWriter(System.out); //XXX: change to COut
+		Writer w = new PrintWriter(System.out); //XXX: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;
 		long count = 0;
 		
@@ -72,20 +72,20 @@ public class ResultSetDiff {
 				//same key
 				readSource = readTarget = true;
 				boolean updated = ds.dumpUpdateRowIfNotEquals(source, target, count, w);
-				log.info("update? "+sourceVals+" / "+targetVals+" [updated="+updated+"] // "+hasNextSource+"/"+hasNextTarget);
+				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				if(updated) { updateCount++; }
 				else { identicalRowsCount++; }
 			}
 			else if(compare<0) {
 				readSource = true; readTarget = false;
 				if(hasNextSource) {
-					log.info("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
+					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					ds.dumpDeleteRow(source, count, w);
 					deleteCount++;
 				}
 				else {
 					readSource = false; readTarget = true;
-					log.info("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
+					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					ds.dumpRow(target, count, w);
 					dumpCount++;
 				}
@@ -93,13 +93,13 @@ public class ResultSetDiff {
 			else {
 				readSource = false; readTarget = true;
 				if(hasNextTarget) {
-					log.info("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
+					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					ds.dumpRow(target, count, w);
 					dumpCount++;
 				}
 				else {
 					readSource = true; readTarget = false;
-					log.info("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
+					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					ds.dumpDeleteRow(source, count, w);
 					deleteCount++;
 				}
@@ -150,7 +150,7 @@ public class ResultSetDiff {
 		}
 	}*/
 	
-	int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
+	static int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
 		int comp = 0;
 		for(int i=0;i<keyIndexes.length; i++) {
 			comp = vals1.get(keyIndexes[i]).compareTo(vals2.get(keyIndexes[i]));
@@ -167,7 +167,7 @@ public class ResultSetDiff {
 		return ret;
 	}
 	
-	DiffSyntax getSyntax(Properties prop, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+	static DiffSyntax getSyntax(Properties prop, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		DiffSyntax ds = new SQLDataDiffSyntax();
 		ds.procProperties(prop);
 		ds.initDump(tableName, pkCols, md);

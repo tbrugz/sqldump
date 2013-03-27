@@ -20,13 +20,23 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 		superDumpRow(rs, count, fos);
 	}
 	
+	//XXX: option to select update strategy: updatealways/if modified, update changed cols/all cols ?
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
 			ResultSet rsTarget, long count, Writer w) throws IOException,
 			SQLException {
-		// TODO compare!
-		dumpUpdateRowInternal(rsTarget, null, count, w);
-		return true;
+		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
+		List<String> valsT = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol), dateFormatter );
+		
+		List<String> changedCols = getChangedCols(lsColNames, valsS, valsT);
+		if(changedCols.size()>0) {
+			//dumpUpdateRowInternal(rsTarget, null, count, w); //updates all cols
+			dumpUpdateRowInternal(rsTarget, changedCols, count, w); //updates changed cols
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	@Override
@@ -64,9 +74,11 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 		for(int i = 0;i<lsColNames.size();i++) {
 			String colname = lsColNames.get(i);
 			if(!pkCols.contains(colname)) {
-				sets.add(colname+" = "+vals.get(i));
+				if(colsToUpdate==null || colsToUpdate.contains(colname)) {
+					sets.add(colname+" = "+vals.get(i));
+				}
 			}
-			else if(colsToUpdate==null || colsToUpdate.contains(colname)) {
+			else {
 				wheres.add(colname+" = "+vals.get(i));
 			}
 		}
@@ -76,6 +88,19 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 				" where "+
 				Utils.join(wheres, " and ")+
 				";", w);
-	}	
+	}
+	
+	static List<String> getChangedCols(List<String> lsColNames, List<String> vals1, List<String> vals2) {
+		int comp = 0;
+		int size = vals1.size();
+		List<String> changedColNames = new ArrayList<String>();
+		for(int i=0;i<size; i++) {
+			comp = vals1.get(i).compareTo(vals2.get(i));
+			if(comp!=0) {
+				changedColNames.add(lsColNames.get(i));
+			}
+		}
+		return changedColNames;
+	}
 	
 }
