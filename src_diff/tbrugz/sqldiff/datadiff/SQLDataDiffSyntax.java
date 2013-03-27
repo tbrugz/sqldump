@@ -14,10 +14,13 @@ import tbrugz.sqldump.util.Utils;
 
 public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax {
 
+	boolean shouldFlush = true;
+	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
 		superDumpRow(rs, count, fos);
+		if(shouldFlush) { fos.flush(); }
 	}
 	
 	//XXX: option to select update strategy: updatealways/if modified, update changed cols/all cols ?
@@ -63,6 +66,7 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 				" where "+
 				Utils.join(wheres, " and ")+
 				";", w);
+		if(shouldFlush) { w.flush(); }
 	}
 
 	void dumpUpdateRowInternal(ResultSet rs, List<String> colsToUpdate, long count, Writer w) throws IOException, SQLException {
@@ -88,6 +92,7 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 				" where "+
 				Utils.join(wheres, " and ")+
 				";", w);
+		if(shouldFlush) { w.flush(); }
 	}
 	
 	static List<String> getChangedCols(List<String> lsColNames, List<String> vals1, List<String> vals2) {

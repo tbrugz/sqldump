@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.datadiff;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -19,19 +20,29 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class DataDiff {
 
-	static Log log = LogFactory.getLog(DataDiff.class);
+	static final Log log = LogFactory.getLog(DataDiff.class);
 	
 	public static final String PROP_DATADIFF_TABLES = SQLDiff.PROP_PREFIX+".datadiff.tables";
+	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
+	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
+	
+	static final String FILENAME_PATTERN_SCHEMANAME = "schemaname";
+	static final String FILENAME_PATTERN_TABLENAME = "tablename";
+	static final String FILENAME_PATTERN_CHANGETYPE = "changetype";
 	
 	StringDecorator quoteAllDecorator;
 	
 	Properties prop = null;
 	List<String> tablesToDiffFilter = new ArrayList<String>();
+	String outFilePattern = null;
+	long loopLimit = 0;
+	
 	SchemaModel sourceSchemaModel = null;
 	SchemaModel targetSchemaModel = null;
 	Connection sourceConn = null;
@@ -41,6 +52,8 @@ public class DataDiff {
 		tablesToDiffFilter = Utils.getStringListFromProp(prop, PROP_DATADIFF_TABLES, ",");
 		String quote = DBMSResources.instance().getIdentifierQuoteString();
 		quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
+		outFilePattern = prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN);
+		loopLimit = Utils.getPropLong(prop, PROP_DATADIFF_LOOPLIMIT, loopLimit);
 		
 		this.prop = prop;
 	}
@@ -80,9 +93,23 @@ public class DataDiff {
 		Set<Table> targetTables = targetSchemaModel.getTables();
 		tablesToDiff.retainAll(targetTables);
 		
-		//XXX: test if source & target conn are valid; if not, create based on properties
+		//TODO: test if source & target conn are valid; if not, create based on properties
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
+		rsdiff.setLimit(loopLimit);
+		
+		if(outFilePattern==null) {
+			log.error("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)");
+			return;
+		}
+		
+		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
+		
+		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
+				FILENAME_PATTERN_SCHEMANAME, 
+				FILENAME_PATTERN_TABLENAME,
+				FILENAME_PATTERN_CHANGETYPE);
+		CategorizedOut cout = new CategorizedOut(finalPattern);
 		
 		for(Table table: tablesToDiff) {
 			if(tablesToDiffFilter!=null) {
@@ -101,7 +128,7 @@ public class DataDiff {
 			Statement stmtTarget = targetConn.createStatement();
 			ResultSet rsTarget = stmtTarget.executeQuery(sql);
 			
-			//XXX: check if rsmetadata is equal between RSs...
+			//TODO: check if rsmetadata is equal between RSs...
 			
 			List<String> keyCols = null;
 			Constraint ctt = table.getPKConstraint();
@@ -114,7 +141,8 @@ public class DataDiff {
 			}
 			
 			log.info("diff for table '"+table+"'...");
-			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols);
+			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, cout);
+			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsSource.close(); rsTarget.close();
 		}

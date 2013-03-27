@@ -1,8 +1,6 @@
 package tbrugz.sqldiff.datadiff;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -14,16 +12,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.util.CategorizedOut;
 
 public class ResultSetDiff {
 
 	static final Log log = LogFactory.getLog(ResultSetDiff.class);
 	
-	//XXX: add option to set limit
-	long limit = 200;
+	//XXX: option to set 'logEachXLoops' 
+	int logEachXLoops = 1000;
+	
+	long limit = 0;
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
-	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols) throws SQLException, IOException {
+	//XXX: add schemaName ? properties or DiffSyntax ?
+	@SuppressWarnings("rawtypes")
+	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+			CategorizedOut cout) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
 		boolean hasNextSource = true;
@@ -49,7 +53,7 @@ public class ResultSetDiff {
 		}
 		
 		DiffSyntax ds = getSyntax(new Properties(), tableName, keyCols, md); //XXX: properties?
-		Writer w = new PrintWriter(System.out); //XXX: change to COut ? - [schemaname](?), [tablename], [changetype]
+		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;
 		long count = 0;
 		
@@ -71,7 +75,7 @@ public class ResultSetDiff {
 			if(compare==0) {
 				//same key
 				readSource = readTarget = true;
-				boolean updated = ds.dumpUpdateRowIfNotEquals(source, target, count, w);
+				boolean updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				if(updated) { updateCount++; }
 				else { identicalRowsCount++; }
@@ -80,13 +84,13 @@ public class ResultSetDiff {
 				readSource = true; readTarget = false;
 				if(hasNextSource) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpDeleteRow(source, count, w);
+					ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
 					deleteCount++;
 				}
 				else {
 					readSource = false; readTarget = true;
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpRow(target, count, w);
+					ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
 					dumpCount++;
 				}
 			}
@@ -94,13 +98,13 @@ public class ResultSetDiff {
 				readSource = false; readTarget = true;
 				if(hasNextTarget) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpRow(target, count, w);
+					ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
 					dumpCount++;
 				}
 				else {
 					readSource = true; readTarget = false;
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpDeleteRow(source, count, w);
+					ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
 					deleteCount++;
 				}
 				
@@ -109,13 +113,21 @@ public class ResultSetDiff {
 			
 			count++;
 			
+			if( (logEachXLoops>0) && (count>0) &&(count%logEachXLoops==0) ) { 
+				log.info("[table="+tableName+"] "+count+" rows compared ; stats: "+getCompactStats());
+			}
+			
 			if(limit>0 && count>limit) {
-				log.info("limit reached: "+limit);
+				log.info("limit reached: "+limit+" [table="+tableName+"]");
 				break;
 			}
 		}
-		ds.dumpFooter(w);
-		w.flush();
+		//XXX ds.dumpFooter(w); ??? cout.getAllWriters() ?
+		//w.flush();
+	}
+	
+	public void setLimit(long limit) {
+		this.limit = limit;
 	}
 
 	public int getIdenticalRowsCount() {
@@ -142,6 +154,17 @@ public class ResultSetDiff {
 		return targetRowCount;
 	}
 	
+	public String getStats() {
+		return "dumps="+dumpCount+"; updates="+updateCount+"; deletes="+deleteCount
+				+"; identicalRows="+identicalRowsCount
+				+" [sourceCount="+sourceRowCount+"; targetCount="+targetRowCount+"]";
+	}
+
+	String getCompactStats() {
+		return "IUDE/ST="+dumpCount+","+updateCount+","+deleteCount+","+identicalRowsCount
+				+" / "+sourceRowCount+","+targetRowCount;
+	}
+	
 	/*static String getKeyValue(ResultSet rs, List<String> keyCols) {
 		List<String> keyvalue = new ArrayList<String>();
 		
@@ -150,6 +173,7 @@ public class ResultSetDiff {
 		}
 	}*/
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
 		int comp = 0;
 		for(int i=0;i<keyIndexes.length; i++) {
@@ -159,6 +183,7 @@ public class ResultSetDiff {
 		return comp;
 	}
 	
+	@SuppressWarnings("rawtypes")
 	static List<Comparable> cast(List<Object> list) {
 		List<Comparable> ret = new ArrayList<Comparable>();
 		for(Object o: list) {
