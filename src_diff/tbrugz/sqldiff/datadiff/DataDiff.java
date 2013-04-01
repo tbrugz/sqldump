@@ -20,10 +20,12 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
+//XXX: add prop 'sqldiff.datadiff.ignoretables'
 public class DataDiff {
 
 	static final Log log = LogFactory.getLog(DataDiff.class);
@@ -129,7 +131,13 @@ public class DataDiff {
 			Statement stmtTarget = targetConn.createStatement();
 			ResultSet rsTarget = stmtTarget.executeQuery(sql);
 			
-			//TODO: check if rsmetadata is equal between RSs...
+			//TODOne: check if rsmetadata is equal between RSs...
+			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
+			ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsTarget.getMetaData());
+			if(!sRSColmd.equals(tRSColmd)) {
+				log.warn("["+table+"] metadata from ResultSets differ. diff disabled");
+				continue;
+			}
 			
 			List<String> keyCols = null;
 			Constraint ctt = table.getPKConstraint();
