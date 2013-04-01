@@ -7,7 +7,6 @@ import java.util.TreeMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -17,6 +16,7 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXXdone: partition over (columnX) - different outputfiles for different values of columnX
@@ -152,7 +152,7 @@ public class SQLQueries extends AbstractSQLProc {
 					Constraint cpk = new Constraint();
 					cpk.type = ConstraintType.PK;
 					cpk.uniqueColumns = keyCols;
-					cpk.setName(JDBCSchemaGrabber.newNameFromTableName(queryName, JDBCSchemaGrabber.pkNamePattern));
+					cpk.setName(SQLUtils.newNameFromTableName(queryName, SQLUtils.pkNamePattern));
 					List<Constraint> lc = query.getConstraints(); 
 					if(lc==null) {
 						lc = new ArrayList<Constraint>();

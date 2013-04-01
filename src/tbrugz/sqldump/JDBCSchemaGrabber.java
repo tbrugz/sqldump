@@ -875,7 +875,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		while(pks.next()) {
 			pkName = pks.getString("PK_NAME");
 			if(pkName==null || pkName.equals("PRIMARY")) { //equals("PRIMARY"): for MySQL
-				pkName = newNameFromTableName(relation.getName(), pkNamePattern);
+				pkName = SQLUtils.newNameFromTableName(relation.getName(), SQLUtils.pkNamePattern);
 			}
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
 			count++;
@@ -984,7 +984,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				//for MySQL
 				if(idx.getSchemaName()==null && catName!=null) { idx.setSchemaName( catName ); }
 				if(idx.getName().equals("PRIMARY")) {
-					idx.setName( newNameFromTableName(idx.tableName, pkiNamePattern) );
+					idx.setName( SQLUtils.newNameFromTableName(idx.tableName, SQLUtils.pkiNamePattern) );
 				}
 				
 			}
@@ -1022,15 +1022,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			//count++;
 		}
 		return excludeFilters;
-	}
-	
-	//XXX: props for setting pk(i)NamePatterns?
-	public static final String pkNamePattern = "${tablename}_pk";
-	public static final String pkiNamePattern = "${tablename}_pki";
-	
-	//XXX: change visibility to default
-	public static String newNameFromTableName(String tableName, String pattern) {
-		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
 	}
 	
 	static String newFKName(String fkTable, String pkTable, int count) {

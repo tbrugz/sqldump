@@ -446,5 +446,13 @@ public class SQLUtils {
 		}
 		return getColumnValues(rsSchemas, "table_schem");
 	}
+	
+	//XXX: props for setting pk(i)NamePatterns?
+	public static final String pkNamePattern = "${tablename}_pk";
+	public static final String pkiNamePattern = "${tablename}_pki";
+	
+	public static String newNameFromTableName(String tableName, String pattern) {
+		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
+	}
 
 }
