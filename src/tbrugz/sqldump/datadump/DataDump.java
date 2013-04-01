@@ -40,6 +40,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -213,7 +214,8 @@ public class DataDump extends AbstractSQLProc {
 						null,
 						pkCols,
 						importedFKs,
-						uniqueKeys
+						uniqueKeys,
+						null
 						);
 			}
 			catch(Exception e) {
@@ -262,7 +264,7 @@ public class DataDump extends AbstractSQLProc {
 			String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws SQLException, IOException {
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
 	}
 		
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
@@ -272,7 +274,8 @@ public class DataDump extends AbstractSQLProc {
 			String[] partitionByPatterns,
 			List<String> keyColumns,
 			List<FK> importedFKs,
-			List<Constraint> uniqueKeys
+			List<Constraint> uniqueKeys,
+			ResultSetDecoratorFactory rsDecoratorFactory
 			) throws SQLException, IOException {
 		
 			PreparedStatement st = conn.prepareStatement(sql);
@@ -287,6 +290,9 @@ public class DataDump extends AbstractSQLProc {
 			long dump1stRowTime = -1;
 			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
+			if(rsDecoratorFactory!=null) {
+				rs = rsDecoratorFactory.getDecoratorOf(rs);
+			}
 			ResultSetMetaData md = rs.getMetaData();
 			
 			if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?

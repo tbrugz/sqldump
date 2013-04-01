@@ -320,6 +320,15 @@ public class Utils {
 		}
 		return null;
 	}
+	
+	public static List<String> splitStringWithTrim(String string, String delimiter) {
+		List<String> ret = new ArrayList<String>();
+		String[] retArr = string.split(delimiter);
+		for(String s: retArr) {
+			ret.add(s.trim());
+		}
+		return ret;
+	}
 
 	public static String PASSECHO_WARN_MESSAGE = "WARN: password will be echoed";
 	

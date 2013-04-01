@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +14,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -117,6 +119,17 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
+			
+			ResultSetDecoratorFactory rsdf = null;
+			String rsDecoratorFactory = prop.getProperty("sqldump.query."+qid+".rsdecoratorfactory");
+			String rsArgPrepend = "sqldump.query."+qid+".rsdecorator.";
+			List<String> rsFactoryArgs = Utils.getKeysStartingWith(prop, rsArgPrepend);
+			if(rsDecoratorFactory!=null) {
+				rsdf = (ResultSetDecoratorFactory) Utils.getClassInstance(rsDecoratorFactory, "tbrugz.sqldump.resultset", null);
+				for(String arg: rsFactoryArgs) {
+					rsdf.set(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+				}
+			}
 
 			// adding query to model
 			ADD_QUERY_TO_MODEL:
@@ -168,6 +181,14 @@ public class SQLQueries extends AbstractSQLProc {
 						log.warn("error setting cols for query [id="+qid+"; name="+queryName+"]");
 					}
 				}
+				
+				if(rsDecoratorFactory!=null) {
+					query.rsDecoratorFactoryClass = rsDecoratorFactory;
+					query.rsDecoratorArguments = new TreeMap<String, String>();
+					for(String arg: rsFactoryArgs) {
+						query.rsDecoratorArguments.put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+					}
+				}
 
 				//queries.add(query);
 				queriesGrabbed++;
@@ -180,7 +201,7 @@ public class SQLQueries extends AbstractSQLProc {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
-							keyCols, null, null);
+							keyCols, null, null, rsdf);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.info("error on query "+qid+": "+e.getMessage(), e);
