@@ -25,12 +25,12 @@ import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-//XXX: add prop 'sqldiff.datadiff.ignoretables'
 public class DataDiff {
 
 	static final Log log = LogFactory.getLog(DataDiff.class);
 	
 	public static final String PROP_DATADIFF_TABLES = SQLDiff.PROP_PREFIX+".datadiff.tables";
+	public static final String PROP_DATADIFF_IGNORETABLES = SQLDiff.PROP_PREFIX+".datadiff.ignoretables";
 	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
 	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
 	
@@ -42,6 +42,7 @@ public class DataDiff {
 	
 	Properties prop = null;
 	List<String> tablesToDiffFilter = new ArrayList<String>();
+	List<String> tablesToIgnore = new ArrayList<String>();
 	String outFilePattern = null;
 	long loopLimit = 0;
 	
@@ -52,6 +53,7 @@ public class DataDiff {
 	
 	public void setProperties(Properties prop) {
 		tablesToDiffFilter = Utils.getStringListFromProp(prop, PROP_DATADIFF_TABLES, ",");
+		tablesToIgnore = Utils.getStringListFromProp(prop, PROP_DATADIFF_IGNORETABLES, ",");
 		String quote = DBMSResources.instance().getIdentifierQuoteString();
 		quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 		outFilePattern = prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN);
@@ -123,6 +125,13 @@ public class DataDiff {
 					continue;
 				}
 			}
+			if(tablesToIgnore!=null) {
+				if(tablesToIgnore.contains(table.getName())) {
+					tablesToIgnore.remove(table.getName());
+					log.info("ignoring table '"+table+"'");
+					continue;
+				}
+			}
 			String sql = DataDump.getQuery(table, "*", null, null, true);
 			
 			Statement stmtSource = sourceConn.createStatement();
@@ -159,6 +168,10 @@ public class DataDiff {
 
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
 			log.warn("tables not found for diff: "+Utils.join(tablesToDiffFilter, ", "));
+		}
+
+		if(tablesToIgnore!=null && tablesToIgnore.size()>0) {
+			log.warn("tables to ignore that were not found: "+Utils.join(tablesToIgnore, ", "));
 		}
 	}
 	
