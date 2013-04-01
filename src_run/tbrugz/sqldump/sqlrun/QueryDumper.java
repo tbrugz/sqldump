@@ -17,7 +17,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -46,7 +46,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	String execId = null;
 	String queryName = null;
 	String outputStream = null;
-	DumpSyntax dumpSyntax = null;
+	DumpSyntaxInt dumpSyntax = null;
 
 	@Override
 	public void setExecId(String execId) {
@@ -100,7 +100,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		log.info("query '"+execId+"' dumped [lines = "+count+"; elapsed = "+totalTime+"ms]");
 	}
 
-	int dumpResultSet(ResultSet rs, DumpSyntax ds, Writer w,
+	int dumpResultSet(ResultSet rs, DumpSyntaxInt ds, Writer w,
 			String queryName, List<String> uniqueColumns)
 			throws SQLException, IOException {
 		int count = 0;
@@ -123,13 +123,13 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		return ret;
 	}
 	
-	static DumpSyntax getSyntax(String className, Properties prop) {
+	static DumpSyntaxInt getSyntax(String className, Properties prop) {
 		Class<?> c = Utils.getClassWithinPackages(className, "tbrugz.sqldump.datadump", null);
 		if(c==null) {
 			log.warn("class '"+className+"' not found");
 			return null;
 		}
-		DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(c);
+		DumpSyntaxInt ds = (DumpSyntaxInt) Utils.getClassInstance(c);
 		if(ds==null) {
 			return null;
 		}
@@ -167,7 +167,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	
 	public static void simpleRSDump(ResultSet rs, String dumpClass, Properties dumpProp, Writer w) throws SQLException, IOException {
 		QueryDumper qd = new QueryDumper();
-		DumpSyntax dumpSyntax = getSyntax(dumpClass, dumpProp);
+		DumpSyntaxInt dumpSyntax = getSyntax(dumpClass, dumpProp);
 		qd.dumpResultSet(rs, dumpSyntax, w, null, null);
 		w.flush();
 	} 
