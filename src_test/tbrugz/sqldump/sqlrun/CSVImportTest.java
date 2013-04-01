@@ -6,8 +6,8 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.TestUtil;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
 public class CSVImportTest {

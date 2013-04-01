@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -23,6 +22,7 @@ import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;

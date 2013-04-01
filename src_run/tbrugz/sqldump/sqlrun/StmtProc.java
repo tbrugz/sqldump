@@ -18,8 +18,8 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;

@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 

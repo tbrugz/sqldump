@@ -24,9 +24,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.Executor;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;

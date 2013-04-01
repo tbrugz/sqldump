@@ -1,4 +1,4 @@
-package tbrugz.sqldump;
+package tbrugz.sqldump.def;
 
 public class ProcessingException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

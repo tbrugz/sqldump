@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -40,6 +39,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;

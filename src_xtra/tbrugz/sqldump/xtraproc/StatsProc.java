@@ -8,9 +8,9 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.MapEntryValueComparator;
 
 /*

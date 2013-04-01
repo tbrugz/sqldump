@@ -29,6 +29,7 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.sqlrun.QueryDumper;
 import tbrugz.sqldump.util.ParametrizedProperties;

@@ -8,12 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
-import tbrugz.sqldump.ProcessingException;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
