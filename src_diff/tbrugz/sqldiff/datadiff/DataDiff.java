@@ -94,6 +94,7 @@ public class DataDiff {
 		tablesToDiff.retainAll(targetTables);
 		
 		//TODO: test if source & target conn are valid; if not, create based on properties
+		//XXX: option to create resultset based on file (use csv/regex importer RSdecorator ? / insert into temporary table - H2 database by default?)
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
@@ -136,7 +137,7 @@ public class DataDiff {
 				keyCols = ctt.uniqueColumns;
 			}
 			if(keyCols==null) {
-				log.warn("table '"+table+"' has no PK. Diff disabled");
+				log.warn("table '"+table+"' has no PK. diff disabled");
 				continue;
 			}
 			

@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.UpdateByPKDataDump;
@@ -14,6 +17,8 @@ import tbrugz.sqldump.util.Utils;
 
 public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax {
 
+	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
+	
 	boolean shouldFlush = true;
 	
 	@Override
@@ -97,10 +102,23 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 	
 	static List<String> getChangedCols(List<String> lsColNames, List<String> vals1, List<String> vals2) {
 		int comp = 0;
-		int size = vals1.size();
+		int size1 = vals1.size();
+		int size2 = vals2.size();
+		if(size1!=size2) {
+			log.warn("different list size: vals1="+vals1+" ; vals2="+vals2);
+			return null;
+		}
 		List<String> changedColNames = new ArrayList<String>();
-		for(int i=0;i<size; i++) {
-			comp = vals1.get(i).compareTo(vals2.get(i));
+		for(int i=0;i<size1; i++) {
+			String val1str = vals1.get(i);
+			String val2str = vals2.get(i);
+			if(val1str==null) {
+				if(val2str!=null) {
+					changedColNames.add(lsColNames.get(i));
+				}
+				continue;
+			}
+			comp = val1str.compareTo(val2str);
 			if(comp!=0) {
 				changedColNames.add(lsColNames.get(i));
 			}

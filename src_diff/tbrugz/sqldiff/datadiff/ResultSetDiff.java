@@ -60,18 +60,30 @@ public class ResultSetDiff {
 		while(true) {
 			if(readSource) {
 				hasNextSource = source.next();
-				if(hasNextSource) { sourceRowCount++; }
-				sourceVals = cast(SQLUtils.getRowObjectListFromRS(source, lsColTypes, numCol));
+				if(hasNextSource) {
+					sourceRowCount++;
+					sourceVals = cast(SQLUtils.getRowObjectListFromRS(source, lsColTypes, numCol));
+				}
 			}
 			if(readTarget) {
 				hasNextTarget = target.next();
-				if(hasNextTarget) { targetRowCount++; }
-				targetVals = cast(SQLUtils.getRowObjectListFromRS(target, lsColTypes, numCol));
+				if(hasNextTarget) {
+					targetRowCount++;
+					targetVals = cast(SQLUtils.getRowObjectListFromRS(target, lsColTypes, numCol));
+				}
 			}
 			
 			if(!hasNextSource && !hasNextTarget) { break; }
 			
-			int compare = compareVals(sourceVals, targetVals, keyIndexes);
+			int compare = 0;
+			try {
+				compare = compareVals(sourceVals, targetVals, keyIndexes);
+			}
+			catch(ClassCastException e) {
+				log.error("error compating rows: source="+sourceVals+" ; target="+targetVals+" ; [ex="+e+"]");
+				return;
+			}
+			
 			if(compare==0) {
 				//same key
 				readSource = readTarget = true;
