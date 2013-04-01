@@ -13,7 +13,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.util.SQLUtils;
 
 /*
  * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date

@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import tbrugz.sqldump.SQLUtils;
+import tbrugz.sqldump.util.SQLUtils;
 
 /*
  * CALS Table spec? https://www.oasis-open.org/specs/tm9502.html

@@ -17,12 +17,12 @@ import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JDBCSchemaGrabber;
-import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
+import tbrugz.sqldump.util.SQLUtils;
 
 public class SQLDiffTest {
 	

@@ -11,9 +11,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import tbrugz.sqldump.SQLUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /**

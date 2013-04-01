@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.SQLUtils;
 
 public class TestUtil {
 
