@@ -54,7 +54,7 @@ public class PivotRSTest {
 		//SQLUtils.dumpRS(rsla); rsla.first();
 		QueryDumper.simplerRSDump(rsla); rsla.beforeFirst();
 		
-		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot, false);
 		prs.process();
 		
 		log.info("keyColValues: "+prs.keyColValues);
@@ -111,7 +111,7 @@ public class PivotRSTest {
 		
 		QueryDumper.simplerRSDump(rsla); rsla.beforeFirst();
 		
-		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot, false);
 		prs.process();
 		
 		int colcount = prs.getMetaData().getColumnCount();
@@ -146,7 +146,7 @@ public class PivotRSTest {
 		
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"id", "category"});
 		List<String> colsToPivot = Arrays.asList(new String[]{"description"});
-		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot, false);
 		prs.process();
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();
@@ -173,7 +173,7 @@ public class PivotRSTest {
 		
 		List<String> colsNotToPivot = Arrays.asList(new String[]{"description", "id"});
 		List<String> colsToPivot = Arrays.asList(new String[]{"category"});
-		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot);
+		PivotResultSet prs = new PivotResultSet(rsla, colsNotToPivot, colsToPivot, false);
 		prs.process();
 		
 		QueryDumper.simplerRSDump(prs); prs.beforeFirst();

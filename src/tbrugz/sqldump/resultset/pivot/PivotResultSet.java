@@ -22,6 +22,8 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 /*
  * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting)
  * TODO: multiple column type (beside String): Integer, Double, Date
+ * TODO: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
+ * XXX: option to remove cols/rows/both where all measures are null
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
@@ -32,6 +34,8 @@ public class PivotResultSet extends AbstractResultSet {
 	final static String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
 	final static String COLVAL_SEP = ":";
 	final static String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
+
+	final static int logEachXRows = 1000;
 	
 	final ResultSet rs;
 	final int rsColsCount;
@@ -57,11 +61,12 @@ public class PivotResultSet extends AbstractResultSet {
 	boolean showMeasuresInColumns = true;
 
 	//colsNotToPivot - key cols
-	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot) throws SQLException {
-		this(rs, colsNotToPivot, list2Map(colsToPivot));
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess) throws SQLException {
+		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess);
 	}
 	
-	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot) throws SQLException {
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
+			boolean doProcess) throws SQLException {
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
 		this.colsToPivot = colsToPivot;
@@ -81,10 +86,12 @@ public class PivotResultSet extends AbstractResultSet {
 				measureCols.add(colName);
 				valuesForEachMeasure.add(new HashMap<String, String>());
 			}
-			log.debug("colName["+rsColsCount+"]: "+colName);
+			log.debug("colName "+i+" [colCount="+rsColsCount+"]: "+colName);
 		}
 		
 		metadata = new RSMetaDataAdapter(null, null, newColNames);
+		
+		if(doProcess) { process(); }
 	}
 	
 	//XXX: addObservers, ...
@@ -129,8 +136,13 @@ public class PivotResultSet extends AbstractResultSet {
 			
 			log.debug("key: "+key);
 			
-			//XXX: observer: count%COUNT_SIZE==0 ...
 			count++;
+			
+			//XXX: observer: count%COUNT_SIZE==0 ...
+			
+			if(count%logEachXRows == 0) {
+				log.debug("processed row count: "+count);
+			}
 		}
 		
 		//-- create rs-metadata --
@@ -169,6 +181,7 @@ public class PivotResultSet extends AbstractResultSet {
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
 			String val = rs.getString(col);
+			if(val==null) { log.warn("value for key col is null [col = "+col+"]"); }
 			addValueToSet(col, val);
 			sb.append( (i==0?"":"|") + val);
 		}
@@ -176,6 +189,7 @@ public class PivotResultSet extends AbstractResultSet {
 		for(int i=0;i<colsToPivotNames.size();i++) {
 			String col = colsToPivotNames.get(i);
 			String val = rs.getString(col);
+			if(val==null) { log.warn("value for pivotted key col is null [col = "+col+"]"); }
 			addValueToSet(col, val);
 			sb.append( (i==0?"":"|") + val);
 		}

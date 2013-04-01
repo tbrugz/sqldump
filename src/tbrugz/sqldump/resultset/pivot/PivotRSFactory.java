@@ -36,7 +36,7 @@ public class PivotRSFactory implements ResultSetDecoratorFactory {
 	@Override
 	public ResultSet getDecoratorOf(ResultSet arg) {
 		try {
-			return new PivotResultSet(arg, colsNotToPivot, colsToPivot);
+			return new PivotResultSet(arg, colsNotToPivot, colsToPivot, true);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
