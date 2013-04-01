@@ -150,7 +150,8 @@ public class DataDiff {
 			}
 			
 			log.info("diff for table '"+table+"'...");
-			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, cout);
+			DiffSyntax ds = getSyntax(new Properties()); //XXX: properties?
+			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, ds, cout);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsSource.close(); rsTarget.close();
@@ -159,6 +160,12 @@ public class DataDiff {
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
 			log.warn("tables not found for diff: "+Utils.join(tablesToDiffFilter, ", "));
 		}
+	}
+	
+	static DiffSyntax getSyntax(Properties prop) throws SQLException {
+		DiffSyntax ds = new SQLDataDiffSyntax(); //XXX: option/prop to select DiffSyntax?
+		ds.procProperties(prop);
+		return ds;
 	}
 	
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.Assert;
 
@@ -54,8 +55,10 @@ public class ResultSetDiffTest {
 
 		CategorizedOut cout = new CategorizedOut(CategorizedOut.NULL_WRITER);
 		
+		DiffSyntax ds = DataDiff.getSyntax(new Properties());
+		
 		log.info("s: 1 t: 2");
-		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), cout);
+		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), ds, cout);
 		Assert.assertEquals(2, rsd.getDumpCount());
 		Assert.assertEquals(1, rsd.getUpdateCount());
 		Assert.assertEquals(1, rsd.getDeleteCount());
@@ -63,7 +66,7 @@ public class ResultSetDiffTest {
 		
 		log.info("s: 2 t: 1");
 		rsla1.beforeFirst(); rsla2.beforeFirst();
-		rsd.diff(rsla2, rsla1, "table2", TestBean.getUniqueCols(), cout);
+		rsd.diff(rsla2, rsla1, "table2", TestBean.getUniqueCols(), ds, cout);
 		Assert.assertEquals(1, rsd.getDumpCount());
 		Assert.assertEquals(1, rsd.getUpdateCount());
 		Assert.assertEquals(2, rsd.getDeleteCount());

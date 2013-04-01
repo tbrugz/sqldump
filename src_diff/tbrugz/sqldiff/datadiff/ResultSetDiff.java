@@ -6,7 +6,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +23,10 @@ public class ResultSetDiff {
 	long limit = 0;
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
-	//XXX: add schemaName ? properties or DiffSyntax ?
+	//XXX: add schemaName ?
 	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
-			CategorizedOut cout) throws SQLException, IOException {
+			DiffSyntax ds, CategorizedOut cout) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
 		boolean hasNextSource = true;
@@ -52,7 +51,7 @@ public class ResultSetDiff {
 			keyIndexes[i] = lsColNames.indexOf(key);
 		}
 		
-		DiffSyntax ds = getSyntax(new Properties(), tableName, keyCols, md); //XXX: properties?
+		ds.initDump(tableName, keyCols, md);
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;
 		long count = 0;
@@ -202,12 +201,5 @@ public class ResultSetDiff {
 			ret.add((Comparable)o);
 		}
 		return ret;
-	}
-	
-	static DiffSyntax getSyntax(Properties prop, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		DiffSyntax ds = new SQLDataDiffSyntax();
-		ds.procProperties(prop);
-		ds.initDump(tableName, pkCols, md);
-		return ds;
 	}
 }
