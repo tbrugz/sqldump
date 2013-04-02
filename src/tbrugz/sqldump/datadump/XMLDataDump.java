@@ -14,14 +14,19 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.SQLUtils;
 
+//XXX: option to define per-table or per-column 'row' xml-element
 public class XMLDataDump extends DumpSyntax {
 	
 	static Log log = LogFactory.getLog(XMLDataDump.class);
 
 	static final String XML_SYNTAX_ID = "xml";
+	static final String DEFAULT_ROW_ELEMENT = "row";
+	
+	static final String PROP_ROWELEMENT = "sqldump.datadump.xml.rowelement";
 	
 	String tableName;
 	int numCol;
+	String rowElement = DEFAULT_ROW_ELEMENT;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
@@ -30,6 +35,7 @@ public class XMLDataDump extends DumpSyntax {
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
+		rowElement = prop.getProperty(PROP_ROWELEMENT, rowElement);
 	}
 
 	@Override
@@ -57,8 +63,7 @@ public class XMLDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
-		//XXX: option to define 'row' xml-element
-		sb.append("\t"+"<row>");
+		sb.append("\t"+"<"+rowElement+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
@@ -82,7 +87,7 @@ public class XMLDataDump extends DumpSyntax {
 				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
 			}
 		}
-		sb.append("</row>");
+		sb.append("</"+rowElement+">");
 		out(sb.toString()+"\n", fos);
 	}
 
