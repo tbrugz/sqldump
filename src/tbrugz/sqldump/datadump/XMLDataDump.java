@@ -19,28 +19,43 @@ import tbrugz.sqldump.util.Utils;
 public class XMLDataDump extends DumpSyntax {
 	
 	static Log log = LogFactory.getLog(XMLDataDump.class);
-
+	
 	static final String XML_SYNTAX_ID = "xml";
 	static final String DEFAULT_ROW_ELEMENT = "row";
 	
 	static final String PROP_ROWELEMENT = "sqldump.datadump.xml.rowelement";
 	static final String PROP_DUMPROWELEMENT = "sqldump.datadump.xml.dumprowelement";
 	
+	static final String PREFIX_ROWELEMENT4TABLE = "sqldump.datadump.xml.rowelement4table@";
+	static final String PREFIX_DUMPROWELEMENT4TABLE = "sqldump.datadump.xml.dumprowelement4table@";
+
+	public XMLDataDump() {
+		this.padding = "";
+	}
+
+	public XMLDataDump(String padding) {
+		this.padding = padding;
+	}
+	
 	String tableName;
 	int numCol;
-	String rowElement = DEFAULT_ROW_ELEMENT;
-	boolean dumpRowElement = true;
+	String defaultRowElement = DEFAULT_ROW_ELEMENT;
+	String rowElement = defaultRowElement;
+	boolean defaultDumpRowElement = true;
+	boolean dumpRowElement = defaultDumpRowElement;
+	Properties prop = null;
 	
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	final List<String> lsColNames = new ArrayList<String>();
+	final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
-	String padding = "";
+	final String padding;
 	
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
-		rowElement = prop.getProperty(PROP_ROWELEMENT, rowElement);
-		dumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, dumpRowElement);
+		defaultRowElement = prop.getProperty(PROP_ROWELEMENT, defaultRowElement);
+		defaultDumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, defaultDumpRowElement);
+		this.prop = prop;
 	}
 
 	@Override
@@ -55,6 +70,9 @@ public class XMLDataDump extends DumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
+		
+		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, defaultRowElement);
+		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
 	}
 	
 	@Override
@@ -82,15 +100,15 @@ public class XMLDataDump extends DumpSyntax {
 				out(sb.toString()+"\n", fos);
 				sb = new StringBuilder();
 				
-				XMLDataDump xmldd = new XMLDataDump();
-				xmldd.padding = this.padding+"\t\t";
+				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t");
+				xmldd.procProperties(prop);
 				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
 				sb.append("\n\t");
 			}
 			else {
 				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
 				//Object value = getValueNotNull( vals.get(i) );
-				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
+				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">" );
 			}
 		}
 		if(dumpRowElement) { sb.append("</"+rowElement+">"); }
