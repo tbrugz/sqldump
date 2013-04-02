@@ -24,6 +24,7 @@ import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -122,10 +123,12 @@ public class SQLDiff {
 		log.debug("diff dialect set to: "+dialect);
 		DBMSResources.instance().updateDbId(dialect);
 		
-		CategorizedOut co = new CategorizedOut();
 		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
 				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
-		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA,SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE);
+		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
+				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.PATTERN_SCHEMA},
+				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.PATTERN_OBJECTTYPE});
+		CategorizedOut co = new CategorizedOut(finalPattern);
 		log.debug("final pattern: "+finalPattern);
 		
 		co.setFilePathPattern(finalPattern);

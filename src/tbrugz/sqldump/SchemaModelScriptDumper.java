@@ -74,10 +74,13 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	String mainOutputFilePattern;
 	Properties prop;
 	
+	@Deprecated
 	public static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
+	@Deprecated
 	public static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
+	@Deprecated
 	public static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
-	
+
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	

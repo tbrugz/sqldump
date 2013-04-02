@@ -199,7 +199,25 @@ public class CategorizedOut {
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
 			outpattern = outpattern.replaceAll("\\["+categories[i]+"\\]", "\\["+(i+1)+"\\]");
+			String tmp = outpattern;
 			outpattern = outpattern.replaceAll(categories[i], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated
+			if(! tmp.equals(outpattern) && categories[i].startsWith("\\$")) {
+				log.warn("using deprecated pattern '${xxx}': "+categories[i]);
+			}
+		}
+		return outpattern;
+	}
+
+	public static String generateFinalOutPattern(String outpattern, String[]... categoriesArr) {
+		for(int i=0;i<categoriesArr.length;i++) {
+			for(int j=0;j<categoriesArr.length;j++) {
+				outpattern = outpattern.replaceAll("\\["+categoriesArr[i][j]+"\\]", "\\["+(i+1)+"\\]");
+				String tmp = outpattern;
+				outpattern = outpattern.replaceAll(categoriesArr[i][j], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated
+				if(! tmp.equals(outpattern) && categoriesArr[i][j].startsWith("\\$")) {
+					log.warn("using deprecated pattern '${xxx}': "+categoriesArr[i][j]);
+				}
+			}
 		}
 		return outpattern;
 	}
