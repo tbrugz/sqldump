@@ -16,6 +16,7 @@ import tbrugz.sqldump.util.Utils;
 
 public class Column extends DBIdentifiable implements Serializable {
 	
+	//XXX: refactoring: move to another package?
 	public static class ColTypeUtil {
 		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";

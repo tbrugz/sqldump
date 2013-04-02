@@ -76,34 +76,49 @@ Dependencies
 - [ivy](http://ant.apache.org/ivy/) (recommended)
 
 
-Usage (with sources & ant)
---------------------------
-- Run (with ivy) `ant resolve-ivy` or (without ivy) `ant resolve-get`
-- Run `ant compile`
-- Copy `sqldump.template.properties` to `sqldump.properties`
-- Edit `sqldump.properties`
+Building from sources (with ant & ivy)
+--------------------------------------
+- Run `hg clone https://bitbucket.org/tbrugz/sqldump <project-dir>` (if not done already)
+- Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
+  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml))
 - Copy `build.template.properties` to `build.properties`
 - Edit `build.properties`
-- Run `ant run`
-
-
-Usage (with sources, without ant)
----------------------------------
-- Download dependencies to `/lib`
+- Run `ant resolve`
+- Run `ant dist`
 - Copy `sqldump.template.properties` to `sqldump.properties`
-- Edit `sqldump.properties`
+
+
+Building (method 2 - without ant)
+---------------------------------
+- Download dependencies to `<project-dir>/lib`
+- `cd` to `<project-dir>` 
+- Copy `sqldump.template.properties` to `sqldump.properties`
 - Compile sources into `bin`
+
+
+Running (with sources)
+----------------------
+- Download jdbc jars for your database of choice
+- Edit `sqldump.properties`
+- Run `ant run` *or*
 - Run `tbrugz.sqldump.SQLDump`, e.g., `java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
-Usage (without sources)
------------------------
-- Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated)
+Not building? Setup env (without sources)
+-----------------------------------------
+- Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated).
+  Better than that, download from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
+  (e.g.: [sqldump 0.9.2](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.2/sqldump-0.9.2.jar))
 - Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
-- (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat` or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
+- (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat`
+  or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
 - Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
-- Download jdbc jars for your database of choice
 - Edit `sqldump.properties` and (windows) `sqldump.bat` or (unix-like) `sqldump.sh` (you may include command-line options at end)
+
+
+Running (without sources)
+-------------------------
+- Download jdbc jars for your database of choice
 - (windows) Run `sqldump.bat`
 - (unix-like) Run `sqldump.sh` or run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 

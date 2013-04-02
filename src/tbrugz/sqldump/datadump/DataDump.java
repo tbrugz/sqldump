@@ -47,6 +47,7 @@ import tbrugz.sqldump.util.Utils;
 /*
  * TODO: floatFormatter!
  * TODO: option to include, or not, partition columns in output
+ * XXX: partition by schemaname?
  */
 public class DataDump extends AbstractSQLProc {
 
