@@ -180,14 +180,23 @@ public class DataDumpUtils {
 	//dumpers: XML, HTML
 	//XXX: XML format: translate '<', '>', '&'?
 	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, String nullValue) {
-		if(elem == null) {
+		String value = getFormattedXMLValue(elem, type, floatFormatter);
+		if(value == null) {
 			return nullValue;
+		}
+
+		return value;
+	} 
+
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter) {
+		if(elem == null) {
+			return null;
 		}
 		else if(Double.class.isAssignableFrom(type)) {
 			return floatFormatter.format(elem);
 		}
 		else if(ResultSet.class.isAssignableFrom(type)) {
-			return nullValue;
+			return null;
 		}
 
 		return String.valueOf(elem);

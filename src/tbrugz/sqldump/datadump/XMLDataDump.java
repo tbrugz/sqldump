@@ -26,6 +26,7 @@ public class XMLDataDump extends DumpSyntax {
 	
 	static final String PROP_ROWELEMENT = "sqldump.datadump.xml.rowelement";
 	static final String PROP_DUMPROWELEMENT = "sqldump.datadump.xml.dumprowelement";
+	static final String PROP_DUMPNULLVALUES = "sqldump.datadump.xml.dumpnullvalues";
 	
 	static final String PREFIX_ROWELEMENT4TABLE = "sqldump.datadump.xml.rowelement4table@";
 	static final String PREFIX_DUMPROWELEMENT4TABLE = "sqldump.datadump.xml.dumprowelement4table@";
@@ -49,6 +50,7 @@ public class XMLDataDump extends DumpSyntax {
 	int numCol;
 	String rowElement = defaultRowElement;
 	boolean dumpRowElement = defaultDumpRowElement;
+	boolean dumpNullValues = true;
 	Properties prop = null;
 	
 	final List<String> lsColNames = new ArrayList<String>();
@@ -59,6 +61,7 @@ public class XMLDataDump extends DumpSyntax {
 		procStandardProperties(prop);
 		defaultRowElement = prop.getProperty(PROP_ROWELEMENT, defaultRowElement);
 		defaultDumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, defaultDumpRowElement);
+		dumpNullValues = Utils.getPropBool(prop, PROP_DUMPNULLVALUES, dumpNullValues);
 		this.prop = prop;
 	}
 
@@ -121,9 +124,15 @@ public class XMLDataDump extends DumpSyntax {
 				sb.append("\t");
 			}
 			else {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
-				//Object value = getValueNotNull( vals.get(i) );
-				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">" );
+				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter);
+				if(value==null) {
+					if(dumpNullValues) {
+						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
+					}
+				}
+				else {
+					sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">" );
+				}
 			}
 		}
 		if(dumpRowElement) { sb.append("</"+rowElement+">"); }
