@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.Utils;
 
 //XXX: option to define per-table or per-column 'row' xml-element
 public class XMLDataDump extends DumpSyntax {
@@ -23,10 +24,13 @@ public class XMLDataDump extends DumpSyntax {
 	static final String DEFAULT_ROW_ELEMENT = "row";
 	
 	static final String PROP_ROWELEMENT = "sqldump.datadump.xml.rowelement";
+	static final String PROP_DUMPROWELEMENT = "sqldump.datadump.xml.dumprowelement";
 	
 	String tableName;
 	int numCol;
 	String rowElement = DEFAULT_ROW_ELEMENT;
+	boolean dumpRowElement = true;
+	
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
@@ -36,6 +40,7 @@ public class XMLDataDump extends DumpSyntax {
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
 		rowElement = prop.getProperty(PROP_ROWELEMENT, rowElement);
+		dumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, dumpRowElement);
 	}
 
 	@Override
@@ -62,8 +67,9 @@ public class XMLDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+"<"+rowElement+">");
+		StringBuilder sb = new StringBuilder();
+		sb.append("\t");
+		if(dumpRowElement) { sb.append("<"+rowElement+">"); }
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
@@ -74,7 +80,7 @@ public class XMLDataDump extends DumpSyntax {
 				}
 				
 				out(sb.toString()+"\n", fos);
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				
 				XMLDataDump xmldd = new XMLDataDump();
 				xmldd.padding = this.padding+"\t\t";
@@ -87,7 +93,7 @@ public class XMLDataDump extends DumpSyntax {
 				sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">");
 			}
 		}
-		sb.append("</"+rowElement+">");
+		if(dumpRowElement) { sb.append("</"+rowElement+">"); }
 		out(sb.toString()+"\n", fos);
 	}
 
