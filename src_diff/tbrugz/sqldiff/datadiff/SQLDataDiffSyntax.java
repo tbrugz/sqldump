@@ -11,11 +11,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.datadump.UpdateByPKDataDump;
+import tbrugz.sqldump.datadump.InsertIntoDataDump;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax {
+public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax {
 
 	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
 	
@@ -24,7 +24,7 @@ public class SQLDataDiffSyntax extends UpdateByPKDataDump implements DiffSyntax 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
-		superDumpRow(rs, count, fos);
+		super.dumpRow(rs, count, fos);
 		if(shouldFlush) { fos.flush(); }
 	}
 	

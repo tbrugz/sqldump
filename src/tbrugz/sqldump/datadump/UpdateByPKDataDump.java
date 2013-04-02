@@ -23,8 +23,6 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	
 	static Log log = LogFactory.getLog(UpdateByPKDataDump.class);
 	
-	protected List<String> pkCols = null;
-	
 	@Override
 	public String getSyntaxId() {
 		return UPDATEBYPK_SYNTAX_ID;
@@ -55,13 +53,9 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 		if(pkCols==null) { return; }
 		
 		List<String> vals = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );
-		//StringBuffer sb = new StringBuffer();
-		//sb.append("update "+tableName+" set ");
 		List<String> sets = new ArrayList<String>();
 		List<String> wheres = new ArrayList<String>();
 
-		//StringBuffer sbWhere = new StringBuffer();
-		//boolean isFirst = true;
 		for(int i = 0;i<lsColNames.size();i++) {
 			String colname = lsColNames.get(i);
 			if(!pkCols.contains(colname)) {
@@ -77,10 +71,6 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 			" where "+
 			Utils.join(wheres, " and ")+
 			";", fos);
-	}
-	
-	protected void superDumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		super.dumpRow(rs, count, fos);
 	}
 	
 }

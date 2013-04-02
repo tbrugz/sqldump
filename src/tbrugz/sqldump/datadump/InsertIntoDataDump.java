@@ -22,6 +22,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	String colNames;
 	protected final List<String> lsColNames = new ArrayList<String>();
 	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected List<String> pkCols = null;
+	
 	boolean doColumnNamesDump = true;
 	
 	@Override
@@ -38,6 +40,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
+		this.pkCols = pkCols;
 		numCol = md.getColumnCount();
 		lsColTypes.clear();
 		lsColNames.clear();
