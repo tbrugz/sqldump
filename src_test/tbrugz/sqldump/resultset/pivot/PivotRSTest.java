@@ -21,6 +21,7 @@ import tbrugz.sqldump.resultset.ResultSetListAdapter;
 import tbrugz.sqldump.resultset.TestBean;
 import tbrugz.sqldump.sqlrun.QueryDumper;
 
+@SuppressWarnings("rawtypes")
 public class PivotRSTest {
 
 	static final Log log = LogFactory.getLog(PivotRSTest.class);

@@ -34,11 +34,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * TODOne: output diff to file
- * TODOne: CategorizedOut: split by objecttype, schemaname, ...
- * 
  * XXX: output diff by change type
- * XXX: change: 'from'->'old', 'to'->'new' ? or older/newer? original/final? source/target?
  * 
  * XXX: option: [ignore|do not ignore] case; ignore schema name
  */
