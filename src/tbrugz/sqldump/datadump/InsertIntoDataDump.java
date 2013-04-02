@@ -16,6 +16,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 
 	static final String INSERTINTO_SYNTAX_ID = "insertinto";
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.insertinto.withcolumnnames";
+	static final String PROP_INSERTINTO_DUMPCURSORS = "sqldump.datadump.insertinto.dumpcursors";
+	//XXX: option/prop to include or not columns that are cursor expressions (ResultSets) as null
 
 	protected String tableName;
 	protected int numCol;
@@ -25,11 +27,15 @@ public class InsertIntoDataDump extends DumpSyntax {
 	protected List<String> pkCols = null;
 	
 	boolean doColumnNamesDump = true;
+	boolean doDumpCursors = false;
+	Properties prop;
 	
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
+		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
+		this.prop = prop;
 	}
 	
 	@Override
@@ -54,13 +60,26 @@ public class InsertIntoDataDump extends DumpSyntax {
 		colNames = "("+Utils.join(lsColNames, ", ")+")";
 	}
 
+	//XXX: option to dump ResultSet columns
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, doDumpCursors);
 		out("insert into "+tableName+" "+
 			colNames+" values ("+
 			DataDumpUtils.join4sql(vals, dateFormatter, ", ")+
 			");", fos);
+		
+		if(doDumpCursors) {
+			for(int i=0;i<lsColNames.size();i++) {
+				if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+					ResultSet rsInt = (ResultSet) vals.get(i);
+					if(rsInt==null) { continue; }
+					InsertIntoDataDump iidd = new InsertIntoDataDump();
+					iidd.procProperties(prop);
+					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				}
+			}
+		}
 	}
 	
 	protected void out(String s, Writer pw) throws IOException {
