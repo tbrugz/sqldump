@@ -14,20 +14,19 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class DiffFromJAXB {
 	
-	//FIXME: remove dependence of SQLRunAndDumpTest 
 	@Test
 	public void testIdenticalModelsFromJAXB() {
 		//xml serializer input Orig
 		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
-		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
+		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropOrig);
 		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
 
 		//xml serializer input New
 		Properties jaxbPropNew = new Properties();
-		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "work/output/empdept.jaxb.xml");
+		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
 		schemaSerialGrabber.procProperties(jaxbPropNew);
 		SchemaModel smNew = schemaSerialGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
