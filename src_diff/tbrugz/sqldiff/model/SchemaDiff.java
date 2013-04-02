@@ -261,7 +261,13 @@ public class SchemaDiff implements Diff {
 			String append = (d.getObjectType().isExecutableType()
 					&& d.getChangeType().equals(ChangeType.ADD)) 
 					? "\n" : ";\n";
-			out.categorizedOut(d.getDiff()+append, schemaName, DBIdentifiable.getType4Diff(d.getObjectType()).name() );
+			
+			out.categorizedOut(d.getDiff()+append,
+					schemaName,
+					DBIdentifiable.getType4Diff(d.getObjectType()).name(),
+					d.getNamedObject().getName(),
+					d.getChangeType().name()
+					);
 			count++;
 		}
 		log.info(count+" diffs dumped");
