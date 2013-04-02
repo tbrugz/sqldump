@@ -20,6 +20,7 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.StringDecorator;
@@ -33,10 +34,6 @@ public class DataDiff {
 	public static final String PROP_DATADIFF_IGNORETABLES = SQLDiff.PROP_PREFIX+".datadiff.ignoretables";
 	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
 	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
-	
-	static final String FILENAME_PATTERN_SCHEMANAME = "schemaname";
-	static final String FILENAME_PATTERN_TABLENAME = "tablename";
-	static final String FILENAME_PATTERN_CHANGETYPE = "changetype";
 	
 	StringDecorator quoteAllDecorator;
 	
@@ -111,9 +108,9 @@ public class DataDiff {
 		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
 		
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
-				FILENAME_PATTERN_SCHEMANAME, 
-				FILENAME_PATTERN_TABLENAME,
-				FILENAME_PATTERN_CHANGETYPE);
+				Defs.PATTERN_SCHEMANAME, 
+				Defs.PATTERN_TABLENAME,
+				Defs.PATTERN_CHANGETYPE);
 		CategorizedOut cout = new CategorizedOut(finalPattern);
 		
 		for(Table table: tablesToDiff) {
