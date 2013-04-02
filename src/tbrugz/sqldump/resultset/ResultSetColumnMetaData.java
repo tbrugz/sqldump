@@ -67,6 +67,11 @@ public class ResultSetColumnMetaData {
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return "[#col="+numCol+" ; colNames="+colNames+" ; colTypes="+colTypes+"]";
+	}
+	
 	/*@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof ResultSetColumnMetaData) {

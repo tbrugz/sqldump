@@ -142,6 +142,7 @@ public class DataDiff {
 			ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsTarget.getMetaData());
 			if(!sRSColmd.equals(tRSColmd)) {
 				log.warn("["+table+"] metadata from ResultSets differ. diff disabled");
+				log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
 				continue;
 			}
 			
