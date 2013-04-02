@@ -75,7 +75,8 @@ public class ParametrizedProperties extends Properties {
 	
 	@Override
 	public String getProperty(String key) {
-		log.debug("getp: "+key);
+		if(log.isDebugEnabled()) { logKey(key); }
+		
 		String s = null;
 		if(useSystemProperties) {
 			s = System.getProperty(key);
@@ -127,6 +128,26 @@ public class ParametrizedProperties extends Properties {
 	public static void setUseSystemProperties(boolean useSystemPropertiesParam) {
 		log.debug("using system properties: "+useSystemPropertiesParam);
 		useSystemProperties = useSystemPropertiesParam;
+	}
+	
+	void logKey(String key) {
+		if(key.startsWith("sqldump.")) {}
+		else if(key.startsWith("sqldiff.")) {}
+		else if(key.startsWith("dbid.")) {}
+		else if(key.startsWith("type.")) {}
+		else if(key.startsWith("dbids")) {}
+		else if(key.startsWith("outputdir")) {}
+		else if(key.startsWith("dbms.")) {}
+		/*
+		else if(key.startsWith("")) {}
+		else if(key.startsWith("")) {}
+		else if(key.startsWith("")) {}
+		else if(key.startsWith("")) {}
+		else if(key.startsWith("")) {}
+		*/
+		else {
+			log.debug("get: "+key);
+		}
 	}
 	
 }
