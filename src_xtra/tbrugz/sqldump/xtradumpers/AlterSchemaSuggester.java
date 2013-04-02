@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -376,7 +375,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		int dumpCounter = 0;
 		for(FK fk: fks) {
 			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.getFkTableSchemaName()))) {
-				fos.categorizedOut(SchemaModelScriptDumper.fkScriptWithAlterTable(fk, false, true), fk.getSchemaName(), DBObjectType.FK.toString() );
+				fos.categorizedOut(fk.fkScriptWithAlterTable(false, true), fk.getSchemaName(), DBObjectType.FK.toString() );
 				//fos.write( fk.getDefinition(true)+";\n\n" );
 				dumpCounter++;
 			}

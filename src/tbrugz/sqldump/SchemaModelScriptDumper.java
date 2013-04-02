@@ -233,7 +233,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
 				for(FK fk: schemaModel.getForeignKeys()) {
 					if(fk.getFkTable().equals(table.getName())) {
-						String fkscript = fkScriptWithAlterTable(fk, dumpDropStatements, dumpWithSchemaName);
+						String fkscript = fk.fkScriptWithAlterTable(dumpDropStatements, dumpWithSchemaName);
 						categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, fkscript);
 					}
 				}
@@ -359,18 +359,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 	}
 	
-	public static String fkScriptWithAlterTable(FK fk, boolean dumpDropStatements, boolean dumpWithSchemaName) {
-		String fkTableName = DBObject.getFinalName(fk.getFkTableSchemaName(), fk.getFkTable(), dumpWithSchemaName);
-		return
-			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+fk.getName()+";\n":"")
-			+"alter table "+fkTableName
-			+"\n\tadd "+fk.fkSimpleScript("\n\t", dumpWithSchemaName)+";\n";
-	}
-
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
 		//StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
-			String fkscript = fkScriptWithAlterTable(fk, dumpDropStatements, dumpWithSchemaName);
+			String fkscript = fk.fkScriptWithAlterTable(dumpDropStatements, dumpWithSchemaName);
 			//sb.append(fkscript+"\n");
 			//if(dumpFKsWithReferencingTable) {
 			//	categorizedOut(fk.fkTableSchemaName, fk.fkTable, DBObjectType.TABLE, fkscript);

@@ -185,4 +185,12 @@ public class FK extends DBIdentifiable implements Serializable {
 	public String getSchemaName() {
 		return fkTableSchemaName;
 	}
+
+	public String fkScriptWithAlterTable(boolean dumpDropStatements, boolean dumpWithSchemaName) {
+		String fkTableName = DBObject.getFinalName(getFkTableSchemaName(), getFkTable(), dumpWithSchemaName);
+		return
+			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+getName()+";\n":"")
+			+"alter table "+fkTableName
+			+"\n\tadd "+fkSimpleScript("\n\t", dumpWithSchemaName)+";\n";
+	}
 }
