@@ -15,7 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-//XXX: option to define per-table or per-column 'row' xml-element
+//XXX: option to define per-column 'row' xml-element? cursors already have "table-name"...
+//XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 public class XMLDataDump extends DumpSyntax {
 	
 	static Log log = LogFactory.getLog(XMLDataDump.class);
@@ -28,6 +29,8 @@ public class XMLDataDump extends DumpSyntax {
 	
 	static final String PREFIX_ROWELEMENT4TABLE = "sqldump.datadump.xml.rowelement4table@";
 	static final String PREFIX_DUMPROWELEMENT4TABLE = "sqldump.datadump.xml.dumprowelement4table@";
+	//static final String PREFIX_ROWELEMENT4COLUMN = "sqldump.datadump.xml.rowelement4column@";
+	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
 
 	public XMLDataDump() {
 		this.padding = "";
@@ -37,18 +40,19 @@ public class XMLDataDump extends DumpSyntax {
 		this.padding = padding;
 	}
 	
+	final String padding;
+	
+	String defaultRowElement = DEFAULT_ROW_ELEMENT;
+	boolean defaultDumpRowElement = true;
+	
 	String tableName;
 	int numCol;
-	String defaultRowElement = DEFAULT_ROW_ELEMENT;
 	String rowElement = defaultRowElement;
-	boolean defaultDumpRowElement = true;
 	boolean dumpRowElement = defaultDumpRowElement;
 	Properties prop = null;
 	
 	final List<String> lsColNames = new ArrayList<String>();
 	final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	
-	final String padding;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -100,10 +104,21 @@ public class XMLDataDump extends DumpSyntax {
 				out(sb.toString()+"\n", fos);
 				sb = new StringBuilder();
 				
+				//XXX: one dumper for each column (not each column/row)?
 				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t");
 				xmldd.procProperties(prop);
+				/*String rowElement4column = prop.getProperty(PREFIX_ROWELEMENT4COLUMN+lsColNames.get(i));
+				if(rowElement4column!=null) {
+					Properties propInt = new Properties();
+					propInt.putAll(prop);
+					propInt.put(PREFIX_ROWELEMENT4TABLE+lsColNames.get(i), rowElement4column);
+					xmldd.procProperties(propInt);
+				}
+				else {
+					xmldd.procProperties(prop);
+				}*/
 				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
-				sb.append("\n\t");
+				sb.append("\t");
 			}
 			else {
 				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
@@ -117,7 +132,7 @@ public class XMLDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(Writer fos) throws IOException {
-		out("</"+tableName+">", fos);
+		out("</"+tableName+">\n", fos);
 	}
 
 	void out(String s, Writer pw) throws IOException {
