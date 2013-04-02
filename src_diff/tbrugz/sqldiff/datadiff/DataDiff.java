@@ -159,7 +159,7 @@ public class DataDiff {
 			}
 			
 			log.info("diff for table '"+table+"'...");
-			DiffSyntax ds = getSyntax(new Properties()); //XXX: properties?
+			DiffSyntax ds = getSyntax(prop);
 			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, ds, cout);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
@@ -176,7 +176,7 @@ public class DataDiff {
 	}
 	
 	static DiffSyntax getSyntax(Properties prop) throws SQLException {
-		DiffSyntax ds = new SQLDataDiffSyntax(); //XXX: option/prop to select DiffSyntax?
+		DiffSyntax ds = new SQLDataDiffSyntax(); //XXX: option/prop to select DiffSyntax (based on properties?)?
 		ds.procProperties(prop);
 		return ds;
 	}

@@ -236,7 +236,6 @@ public class SchemaDiff implements Diff {
 		return retfks;
 	}
 	
-	//XXX: rename to getChildren()?
 	//@Override
 	public List<Diff> getChildren() {
 		List<Diff> diffs = new ArrayList<Diff>();
@@ -268,36 +267,6 @@ public class SchemaDiff implements Diff {
 		log.info(count+" diffs dumped");
 	}
 
-	@Deprecated
-	void outDiffsZ(CategorizedOut out) throws IOException {
-		//table
-		log.info("output table diffs...");
-		for(TableDiff td: tableDiffs) {
-			out.categorizedOut(td.getDiff()+";\n", td.table.getSchemaName(), DBObjectType.TABLE.toString());
-		}
-
-		//column
-		log.info("output column diffs...");
-		for(TableColumnDiff tcd: columnDiffs) {
-			out.categorizedOut(tcd.getDiff()+";\n", tcd.table.getSchemaName(), DBObjectType.COLUMN.toString());
-		}
-
-		//other
-		//TODO: executables: do not dump extra ";"
-		log.info("output other diffs...");
-		for(DBIdentifiableDiff dbid: dbidDiffs) {
-			DBIdentifiable dbident = dbid.ident();
-			switch(DBIdentifiable.getType(dbident)) {
-			case EXECUTABLE:
-			case TRIGGER:
-				out.categorizedOut(dbid.getDiff()+"\n", dbident.getSchemaName(), DBIdentifiable.getType4Diff(dbident).toString());
-				break;
-			default:
-				out.categorizedOut(dbid.getDiff()+";\n", dbident.getSchemaName(), DBIdentifiable.getType4Diff(dbident).toString());
-			}
-		}
-	} 
-	
 	@Override
 	public String getDiff() {
 		StringBuffer sb = new StringBuffer();
@@ -326,20 +295,6 @@ public class SchemaDiff implements Diff {
 		
 		return sb.toString();
 	}
-
-	/*public String getDiffByDBObjectTypes(List<DBObjectType> types) {
-		StringBuffer sb = new StringBuffer();
-		
-		List<Diff> diffs = getDiffList();
-
-		for(Diff d: diffs) {
-			if(types.contains(d.getObjectType())) {
-				sb.append(d.getDiff()+";\n\n");
-			}
-		}
-
-		return sb.toString();
-	}*/
 	
 	@Override
 	public String toString() {
