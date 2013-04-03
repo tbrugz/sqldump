@@ -30,8 +30,8 @@ public class BlobDataDump extends DumpSyntax {
 	static final String BLOB_SYNTAX_ID = "blob";
 	static final String PROP_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern";
 	
-	static final String REGEX_COLUMNNAME = "\\$\\{columnname\\}";
-	static final String REGEX_ROWID = "\\$\\{rowid\\}";
+	static final String REGEX_COLUMNNAME = "\\[columnname\\]";
+	static final String REGEX_ROWID = "\\[rowid\\]";
 
 	String tableName;
 	List<String> pkCols;
@@ -97,11 +97,12 @@ public class BlobDataDump extends DumpSyntax {
 			Class<?> c = lsColTypes.get(i);
 			if(! c.equals(Blob.class)) { continue; }
 			
-			String filename = outFilePattern.replaceAll(DataDump.FILENAME_PATTERN_TABLENAME, tableName)
+			String filename = outFilePattern
+					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, tableName)
 					//.replaceAll("${pkcolumnnames}", "")
 					.replaceAll(REGEX_COLUMNNAME, lsColNames.get(i)) //table may have more than 1 blob per row
 					.replaceAll(REGEX_ROWID, rowid) //pkid? rowid?
-					.replaceAll(DataDump.FILENAME_PATTERN_SYNTAXFILEEXT, BLOB_SYNTAX_ID);
+					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, BLOB_SYNTAX_ID);
 			log.debug("blob filename: "+filename+"; col: "+lsColNames.get(i));
 			
 			//open file, open blob, write content, close both
