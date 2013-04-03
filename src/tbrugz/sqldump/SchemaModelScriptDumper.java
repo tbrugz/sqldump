@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,12 +75,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	String mainOutputFilePattern;
 	Properties prop;
 	
+	public static final String PATTERN_SCHEMANAME_FINAL = Defs.makePattern(Defs.PATTERN_SCHEMANAME);
+	public static final String PATTERN_OBJECTTYPE_FINAL = Defs.makePattern(Defs.PATTERN_OBJECTTYPE);
+	public static final String PATTERN_OBJECTNAME_FINAL = Defs.makePattern(Defs.PATTERN_OBJECTNAME);
+	
 	@Deprecated
 	public static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
 	@Deprecated
-	public static final String FILENAME_PATTERN_OBJECTTYPE	= "\\$\\{objecttype\\}";
+	public static final String FILENAME_PATTERN_OBJECTTYPE = "\\$\\{objecttype\\}";
 	@Deprecated
-	public static final String FILENAME_PATTERN_OBJECTNAME	= "\\$\\{objectname\\}";
+	public static final String FILENAME_PATTERN_OBJECTNAME = "\\$\\{objectname\\}";
 
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
@@ -392,6 +397,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	//Map<DBObjectType, String> outFilePatterns = new HashMap<DBObjectType, String>();
 	Set<String> filesOpened = new TreeSet<String>();
 	
+	Set<String> warnedOldPatternFiles = new TreeSet<String>();
+	
 	void categorizedOut(String schemaName, String objectName, DBObjectType objectType, String message) throws IOException {
 		//String outFilePattern = outFilePatterns.get(objectType);
 		//if(outFilePatterns.containsKey(objectType)) {}
@@ -406,12 +413,29 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			throw new RuntimeException("output file patterns (e.g. 'sqldump.mainoutputfilepattern') not defined, aborting");
 		}
 		
-		objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
-		
+		//objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
 		if(schemaName==null) { schemaName = ""; };
-		String outFile = outFilePattern.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
+		schemaName = Matcher.quoteReplacement(schemaName);
+		objectName = Matcher.quoteReplacement(objectName);
+		
+		String outFileTmp = outFilePattern;
+		String outFile = outFilePattern
+			.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
 			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
 			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);
+		
+		if(!outFileTmp.equals(outFile) && !warnedOldPatternFiles.contains(outFileTmp)) {
+			warnedOldPatternFiles.add(outFileTmp);
+			log.warn("using deprecated pattern '${xxx}': "
+					+FILENAME_PATTERN_SCHEMA+", "+FILENAME_PATTERN_OBJECTTYPE+" or "+FILENAME_PATTERN_OBJECTNAME
+					+" [filename="+outFileTmp+"]");
+		}
+		
+		outFile = outFile
+			.replaceAll(PATTERN_SCHEMANAME_FINAL, schemaName)
+			.replaceAll(PATTERN_OBJECTTYPE_FINAL, objectType.name())
+			.replaceAll(PATTERN_OBJECTNAME_FINAL, objectName);
+		
 		boolean alreadyOpened = filesOpened.contains(outFile);
 		if(!alreadyOpened) { filesOpened.add(outFile); }
 		
