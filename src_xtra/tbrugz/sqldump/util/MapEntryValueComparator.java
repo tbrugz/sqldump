@@ -20,6 +20,7 @@ public class MapEntryValueComparator<K,V> implements Comparator<Map.Entry<K,V>> 
 
 	boolean inverse = false;
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public int compare(Entry<K,V> o1, Entry<K,V> o2) {
 		if(inverse) {

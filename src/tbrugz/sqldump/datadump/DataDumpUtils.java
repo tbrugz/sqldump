@@ -215,7 +215,11 @@ public class DataDumpUtils {
 		StringBuffer buffer = new StringBuffer();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
-			buffer.append(getFormattedSQLValue(iter.next(), df));
+			Object obj = iter.next();
+			/*if(obj!=null && ResultSet.class.isAssignableFrom(obj.getClass())) {
+				obj = null;
+			}*/
+			buffer.append(getFormattedSQLValue(obj, df));
 
 			if (iter.hasNext()) {
 				buffer.append(delimiter);

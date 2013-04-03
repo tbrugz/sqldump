@@ -90,7 +90,7 @@
 	</target>
 
 	<target name="compile" depends="prepare">
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" debug="on" source="1.6" target="1.6">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" source="1.6" target="1.6">
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
@@ -98,7 +98,7 @@
 			<src path="${src.mondrian.dir}"/>
 			<src path="${src.xtra.dir}"/>
 		</javac>
-		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" debug="on" source="1.6" target="1.6">
+		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" source="1.6" target="1.6">
 			<src path="${src.test.dir}"/>
 		</javac>
 		<copy todir="${bin.dir}" >

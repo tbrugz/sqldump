@@ -133,10 +133,13 @@ public class ParametrizedProperties extends Properties {
 	void logKey(String key) {
 		if(key.startsWith("sqldump.")) {}
 		else if(key.startsWith("sqldiff.")) {}
+		else if(key.startsWith("sqlrun.")) {}
 		else if(key.startsWith("dbid.")) {}
 		else if(key.startsWith("type.")) {}
 		else if(key.startsWith("dbids")) {}
+		else if(key.startsWith("column.")) {}
 		else if(key.startsWith("outputdir")) {}
+		else if(key.startsWith("propfilebasedir")) {}
 		else if(key.startsWith("dbms.")) {}
 		/*
 		else if(key.startsWith("")) {}
