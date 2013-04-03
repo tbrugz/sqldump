@@ -410,9 +410,9 @@ public class DataDump extends AbstractSQLProc {
 							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 								
 							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
-							if(lastPartitionId!=null && !partitionByStrId.equals(lastPartitionId)) {
+							if(lastPartitionId!=null && lastPartitionIdByPartitionPattern.size()>1 && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
-								//log.info("partid>> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename+" // "+countInPartition);
+								//log.debug("partid >> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename+" // "+countInPartition);
 								countInPartition = 0;
 								String lastWriterMapKey = getWriterMapKey(lastFinalFilename, partitionByPattern);
 								closeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
@@ -555,6 +555,7 @@ public class DataDump extends AbstractSQLProc {
 	
 	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
 		String key = getWriterMapKey(fname, partitionBy);
+		//log.debug("isSet: "+key+" ; contains = "+writersOpened.containsKey(key));
 		if(! writersOpened.containsKey(key)) {
 			File f = new File(fname);
 			File parent = f.getParentFile();
