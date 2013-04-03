@@ -38,6 +38,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.SQLUtils;
@@ -75,10 +76,24 @@ public class DataDump extends AbstractSQLProc {
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
 	static final long LOG_EACH_X_ROWS_DEFAULT = 50000;
 	
-	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
-	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
-	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
+	static final String PATTERN_TABLE_QUERY_ID = "id";
+	static final String PATTERN_PARTITIONBY = "partitionby";
+	static final String PATTERN_SYNTAXFILEEXT = "syntaxfileext"; //syntaxdefaultfileext, defaultsyntaxfileext, defaultfileext, fileext
+	
+	static final String PATTERN_TABLE_QUERY_ID_FINAL = Defs.makePattern(PATTERN_TABLE_QUERY_ID);
+	static final String PATTERN_TABLENAME_FINAL = Defs.makePattern(Defs.PATTERN_TABLENAME);
+	static final String PATTERN_PARTITIONBY_FINAL = Defs.makePattern(PATTERN_PARTITIONBY);
+	static final String PATTERN_SYNTAXFILEEXT_FINAL = Defs.makePattern(PATTERN_SYNTAXFILEEXT);
 	//XXX add [tabletype] pattern - TABLE, VIEW, QUERY ?
+		
+	@Deprecated
+	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";
+	@Deprecated
+	public static final String FILENAME_PATTERN_TABLENAME = "\\$\\{tablename\\}";
+	@Deprecated
+	static final String FILENAME_PATTERN_PARTITIONBY = "\\$\\{partitionby\\}";
+	@Deprecated
+	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
 	static Log log = LogFactory.getLog(DataDump.class);
 	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
@@ -357,9 +372,20 @@ public class DataDump extends AbstractSQLProc {
 					log.warn("no output file defined for syntax '"+ds.getSyntaxId()+"'");
 				}
 				else {
+					String filenameTmp = filename;
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLE_QUERY_ID, tableOrQueryId);
+					//if(!filenameTmp.equals(filename)) { log.warn("using deprecated pattern '${xxx}': "+FILENAME_PATTERN_TABLE_QUERY_ID); filenameTmp = filename; }
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableOrQueryName);
+					//if(!filenameTmp.equals(filename)) { log.warn("using deprecated pattern '${xxx}': "+FILENAME_PATTERN_TABLENAME); filenameTmp = filename; }
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
+					if(!filenameTmp.equals(filename)) {
+						log.warn("using deprecated pattern '${xxx}': "
+							+FILENAME_PATTERN_TABLE_QUERY_ID+", "+FILENAME_PATTERN_TABLENAME+", "+FILENAME_PATTERN_PARTITIONBY+" or "+FILENAME_PATTERN_SYNTAXFILEEXT
+							+" [filename="+filenameTmp+"]"); // filenameTmp = filename;
+					}
+					filename = filename.replaceAll(PATTERN_TABLE_QUERY_ID_FINAL, tableOrQueryId);
+					filename = filename.replaceAll(PATTERN_TABLENAME_FINAL, tableOrQueryName);
+					filename = filename.replaceAll(PATTERN_SYNTAXFILEEXT_FINAL, ds.getDefaultFileExtension());
 					
 					doSyntaxDumpList.set(i, true);
 					filenameList.set(i, filename);
@@ -530,7 +556,9 @@ public class DataDump extends AbstractSQLProc {
 	}
 	
 	static String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
-		return filenameAbstract.replaceAll("\\$\\{partitionby\\}", partitionByStr);
+		return filenameAbstract
+				.replaceAll(FILENAME_PATTERN_PARTITIONBY, partitionByStr)
+				.replaceAll(PATTERN_PARTITIONBY_FINAL, partitionByStr);
 	}
 	
 	/*Writer getWriterForFilename(String filename, String charset, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
@@ -604,10 +632,19 @@ public class DataDump extends AbstractSQLProc {
 		}
 	}
 	
-	static List<String> getPartitionCols(String partitionByPattern) {
+	static Pattern colMatch = Pattern.compile("\\[col:(.+?)\\]");
+	@Deprecated
+	static Pattern colMatchOld = Pattern.compile("\\$\\{col:(.+?)\\}");
+	
+	static List<String> getPartitionCols(final String partitionByPattern) {
 		List<String> rets = new ArrayList<String>();
-		String sMatcher = "\\$\\{col:(.+?)\\}";
-		Matcher m = Pattern.compile(sMatcher).matcher(partitionByPattern);
+		Matcher m = colMatch.matcher(partitionByPattern);
+		while(m.find()) {
+			rets.add(m.group(1));
+		}
+
+		//TODO: remove col match '${col:(.+?)}'
+		m = colMatchOld.matcher(partitionByPattern);
 		while(m.find()) {
 			rets.add(m.group(1));
 		}
@@ -627,7 +664,8 @@ public class DataDump extends AbstractSQLProc {
 				throw e;
 			}
 			if(replacement==null) { replacement = ""; }
-			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement);
+			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement); //XXX: remove deprecated pattern style
+			partitionByStr = partitionByStr.replaceAll("\\[col:"+c+"\\]", replacement);
 		}
 		return partitionByStr;
 	}
