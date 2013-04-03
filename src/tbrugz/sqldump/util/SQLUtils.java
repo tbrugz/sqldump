@@ -104,6 +104,17 @@ public class SQLUtils {
 			}
 			return conn;
 		}
+
+		public static boolean isBasePropertiesDefined(String propsPrefix, Properties papp) {
+			String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
+			if(connectionDataSource!=null) { return true; }
+			
+			String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
+			String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
+			if(driverClass!=null && dbUrl!=null) { return true; }
+			
+			return false;
+		}
 		
 		static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 			if(driverClass==null) {
@@ -160,6 +171,19 @@ public class SQLUtils {
 			Context envContext  = (Context) initContext.lookup("java:/comp/env");
 			DataSource datasource = (DataSource) envContext.lookup(dataSource);
 			return datasource.getConnection();
+		}
+		
+		public static void closeConnection(Connection conn) {
+			if(conn!=null) {
+				log.info("closing connection: "+conn);
+				try {
+					conn.rollback();
+					conn.close();
+				} catch (SQLException e) {
+					log.warn("error trying to close connection: "+e);
+					log.debug("error trying to close connection [conn="+conn+"]", e);
+				}
+			}
 		}
 		
 		public static void showDBInfo(DatabaseMetaData dbmd) {
