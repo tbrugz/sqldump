@@ -19,6 +19,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.sqldump.util.Version;
 
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
@@ -119,8 +120,9 @@ public class SQLDump {
 
 	final Properties papp = new ParametrizedProperties();
 	
+	//XXX: move to utils(?)... (used by sqldump & sqlrun -- why not sqldiff?) 
 	public static void init(String[] args, Properties papp) throws IOException {
-		log.info("init...");
+		log.info("init... [version "+Version.getVersion()+"]");
 		boolean useSysPropSetted = false;
 		boolean propFilenameSetted = false;
 		boolean propResourceSetted = false;
@@ -206,10 +208,8 @@ public class SQLDump {
 	}
 
 	void end(boolean closeConnection) throws SQLException {
-		if(closeConnection && conn!=null) {
-			log.info("closing connection: "+conn);
-			conn.rollback();
-			conn.close();
+		if(closeConnection) {
+			SQLUtils.ConnectionUtil.closeConnection(conn);
 		}
 		log.info("...done");
 	}
@@ -295,7 +295,7 @@ public class SQLDump {
 		}
 		
 		//inits DBMSFeatures if not already initted
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
 		log.debug("DBMSFeatures: "+feats);
 		
 		//processing classes
@@ -341,7 +341,7 @@ public class SQLDump {
 			log.info("connection properties prefix: '"+connPrefix+"'");
 		}
 		conn = SQLUtils.ConnectionUtil.initDBConnection(connPrefix, papp);
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
 	}
 	
 	void processClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {

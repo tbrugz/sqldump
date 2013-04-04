@@ -19,7 +19,7 @@
 	<property name="sqldump.sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
 	
 	<property file="build.properties"/>
-	<property file="version.properties"/>
+	<property file="${src.dir}/version.properties"/>
 	<property file="ivysettings.properties"/>
 
 	<property name="lib.derby" value="${lib.dir}/derby-10.9.1.0.jar"/>
