@@ -194,11 +194,11 @@ public class CategorizedOut {
 	
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
-			//TODO: categories should be fully defined (e.g.: with '[', ']', '{', ...) 
-			if(categories[i].startsWith("${")) {
+			String outpatternTmp = outpattern;
+			outpattern = outpattern.replaceAll(Pattern.quote(categories[i]), Matcher.quoteReplacement("["+(i+1)+"]"));
+			if(!outpatternTmp.equals(outpattern) && categories[i].startsWith("${")) {
 				log.warn("using deprecated pattern '${xxx}': "+categories[i]);
 			}
-			outpattern = outpattern.replaceAll(Pattern.quote(categories[i]), Matcher.quoteReplacement("["+(i+1)+"]"));
 		}
 		return outpattern;
 	}
@@ -206,19 +206,14 @@ public class CategorizedOut {
 	public static String generateFinalOutPattern(String outpattern, String[]... categoriesArr) {
 		for(int i=0;i<categoriesArr.length;i++) {
 			for(int j=0;j<categoriesArr[i].length;j++) {
-				if(categoriesArr[i][j].startsWith("${")) {
+				String outpatternTmp = outpattern;
+				outpattern = outpattern.replaceAll(Pattern.quote(categoriesArr[i][j]), Matcher.quoteReplacement("["+(i+1)+"]"));
+				if(!outpatternTmp.equals(outpattern) && categoriesArr[i][j].startsWith("${")) {
 					log.warn("using deprecated pattern '${xxx}': "+categoriesArr[i][j]);
 				}
-				outpattern = outpattern.replaceAll(Pattern.quote(categoriesArr[i][j]), Matcher.quoteReplacement("["+(i+1)+"]"));
 			}
 		}
 		return outpattern;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		CategorizedOut co = new CategorizedOut("d:/temp/abc_${1}_${2}_${1}.txt");
-		co.categorizedOut("hello", "a", "$123");
-		//System.out.println(Matcher.quoteReplacement("\\$123"));
 	}
 
 }

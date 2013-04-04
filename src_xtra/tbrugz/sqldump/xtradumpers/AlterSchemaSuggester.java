@@ -49,6 +49,8 @@ import tbrugz.sqldump.util.Utils;
  * XXX: option to ignore tables by regex pattern
  * 
  * TODOne: use tbrugz.sqldump.util.CategorizedOut
+ * 
+ * XXX: rename to SchemaHints?
  */
 public class AlterSchemaSuggester extends AbstractFailable implements SchemaModelDumper {
 	
