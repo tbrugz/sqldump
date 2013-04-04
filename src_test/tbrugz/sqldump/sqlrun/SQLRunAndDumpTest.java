@@ -15,6 +15,7 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.IOUtil;
 
 public class SQLRunAndDumpTest {
 	
@@ -92,7 +93,7 @@ public class SQLRunAndDumpTest {
 
 	@Test
 	public void doRunImportAndDumpModel() throws Exception {
-		SQLDump sqld = new SQLDump();
+		String mydbpath = dbpath+"-import;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
@@ -105,7 +106,7 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
-				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
@@ -113,7 +114,8 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		//setSystemProperties(vmparams);
-		sqld.doMain(params, p, null);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(params, p, null);
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
@@ -121,19 +123,28 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.processingclasses=DataDump",
 					"-Dsqldump.mainoutputfilepattern=work/output/dbobjects.sql",
 					"-Dsqldump.schemadump.dumpdropstatements=true",
-					"-Dsqldump.datadump.dumpsyntaxes=insertinto",
-					"-Dsqldump.datadump.outfilepattern=work/output/${tablename}.${syntaxfileext}",
+					"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
+					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
-					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
+					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/SQLRunAndDumpTest/empdept.jaxb.xml",
 					"-Dsqldump.driverclass=org.h2.Driver",
-					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
 					"-Dsqldump.user=h",
 					"-Dsqldump.password=h"
 					};
+		SQLDump sqld = new SQLDump();
 		p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
 		//setSystemProperties(vmparamsDump);
 		sqld.doMain(params, p, null);
+		
+		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_DEPT.csv");
+		String expected = "ID,NAME,PARENT_ID\n0,CEO,0\n1,HR,0\n2,Engineering,0\n";
+		Assert.assertEquals(expected, csvDept);
+		
+		String sqlEmp = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_EMP.sql");
+		expected = "insert into EMP (ID, NAME, SUPERVISOR_ID, DEPARTMENT_ID, SALARY) values (1, 'john', 1, 1, 2000);";
+		Assert.assertTrue(sqlEmp.startsWith(expected));
 	}
 	
 }
