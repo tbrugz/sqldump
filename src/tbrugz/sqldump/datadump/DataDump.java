@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -282,7 +283,9 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
 	}
-		
+	
+	final Set<String> deprecatedPatternWarnedFiles = new HashSet<String>();
+	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
 			String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
@@ -378,7 +381,8 @@ public class DataDump extends AbstractSQLProc {
 					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableOrQueryName);
 					//if(!filenameTmp.equals(filename)) { log.warn("using deprecated pattern '${xxx}': "+FILENAME_PATTERN_TABLENAME); filenameTmp = filename; }
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
-					if(!filenameTmp.equals(filename)) {
+					if(!filenameTmp.equals(filename) && !deprecatedPatternWarnedFiles.contains(filenameTmp)) {
+						deprecatedPatternWarnedFiles.add(filenameTmp);
 						log.warn("using deprecated pattern '${xxx}': "
 							+FILENAME_PATTERN_TABLE_QUERY_ID+", "+FILENAME_PATTERN_TABLENAME+", "+FILENAME_PATTERN_PARTITIONBY+" or "+FILENAME_PATTERN_SYNTAXFILEEXT
 							+" [filename="+filenameTmp+"]"); // filenameTmp = filename;
