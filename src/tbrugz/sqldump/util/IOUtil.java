@@ -49,7 +49,7 @@ public class IOUtil {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int len;
 		while ((len = is.read(buffer)) != -1) {
-		    os.write(buffer, 0, len);
+			os.write(buffer, 0, len);
 		}
 	}
 }
