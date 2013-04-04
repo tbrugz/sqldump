@@ -198,6 +198,7 @@ public class CategorizedOut {
 	
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
+			//TODO: categories should be fully defined (e.g.: with '[', ']', '{', ...) 
 			outpattern = outpattern.replaceAll("\\["+categories[i]+"\\]", "\\["+(i+1)+"\\]");
 			String tmp = outpattern;
 			outpattern = outpattern.replaceAll(categories[i], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated

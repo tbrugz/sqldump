@@ -16,6 +16,7 @@ import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.test.SQLTokenizerTest;
+import tbrugz.sqldump.util.CategorizedOutTest;
 import tbrugz.sqldump.util.IOUtilTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 
@@ -28,6 +29,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	ColTypeUtilTest.class,
 	PivotRSTest.class,
 	IOUtilTest.class,
+	CategorizedOutTest.class,
 
 	//import
 	CSVImportTest.class,
