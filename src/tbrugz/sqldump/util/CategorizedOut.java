@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +18,6 @@ import org.apache.commons.logging.LogFactory;
  * TODOne: if filePattern == '<stdout>'|'<stderr>', write to standard out/err streams
  * XXX: pattern for writing to logger? <log:<level>> ? <log:info>, <log.warn>, ? which logger? <log:<logger/class>:<level>>
  * XXX: multiple patterns? Map<String, String>? so it can be used by SchemaModelScriptDumper
- * XXXxx: method for setting substitution parameters? like:
- *    outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
- *       .replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}");
  * TODO: add predefined (property) comment to new created files
  * XXX: add method alreadyOpened()/wouldCreateNewFile()?
  */
@@ -103,9 +101,9 @@ public class CategorizedOut {
 				continue;
 			}
 			c = Matcher.quoteReplacement(c);
-			//c = c.replaceAll("\\$", "\\\\\\$"); //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll() & Matcher.quoteReplacement()
+			//String tmpThisFP = thisFP;
 			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
-			thisFP = thisFP.replaceAll("\\$\\{"+(i+1)+"\\}", c); //XXX: deprecated?
+			//log.debug("fp: "+tmpThisFP+" / "+thisFP);
 		}
 		
 		if(hasnull) {
@@ -158,9 +156,7 @@ public class CategorizedOut {
 				continue;
 			}
 			c = Matcher.quoteReplacement(c);
-			//c = c.replaceAll("\\$", "\\\\\\$"); //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll() & Matcher.quoteReplacement()
 			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
-			thisFP = thisFP.replaceAll("\\$\\{"+(i+1)+"\\}", c); //XXX: deprecated?
 		}
 		
 		if(hasnull) {
@@ -199,12 +195,10 @@ public class CategorizedOut {
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
 			//TODO: categories should be fully defined (e.g.: with '[', ']', '{', ...) 
-			outpattern = outpattern.replaceAll("\\["+categories[i]+"\\]", "\\["+(i+1)+"\\]");
-			String tmp = outpattern;
-			outpattern = outpattern.replaceAll(categories[i], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated
-			if(! tmp.equals(outpattern) && categories[i].startsWith("\\$")) {
+			if(categories[i].startsWith("${")) {
 				log.warn("using deprecated pattern '${xxx}': "+categories[i]);
 			}
+			outpattern = outpattern.replaceAll(Pattern.quote(categories[i]), Matcher.quoteReplacement("["+(i+1)+"]"));
 		}
 		return outpattern;
 	}
@@ -212,12 +206,10 @@ public class CategorizedOut {
 	public static String generateFinalOutPattern(String outpattern, String[]... categoriesArr) {
 		for(int i=0;i<categoriesArr.length;i++) {
 			for(int j=0;j<categoriesArr[i].length;j++) {
-				outpattern = outpattern.replaceAll("\\["+categoriesArr[i][j]+"\\]", "\\["+(i+1)+"\\]");
-				String tmp = outpattern;
-				outpattern = outpattern.replaceAll(categoriesArr[i][j], "\\$\\{"+(i+1)+"\\}"); //XXX: deprecated
-				if(! tmp.equals(outpattern) && categoriesArr[i][j].startsWith("\\$")) {
+				if(categoriesArr[i][j].startsWith("${")) {
 					log.warn("using deprecated pattern '${xxx}': "+categoriesArr[i][j]);
 				}
+				outpattern = outpattern.replaceAll(Pattern.quote(categoriesArr[i][j]), Matcher.quoteReplacement("["+(i+1)+"]"));
 			}
 		}
 		return outpattern;

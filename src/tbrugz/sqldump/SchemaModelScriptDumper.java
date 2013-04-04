@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,16 +76,25 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	String mainOutputFilePattern;
 	Properties prop;
 	
-	public static final String PATTERN_SCHEMANAME_FINAL = Defs.makePattern(Defs.PATTERN_SCHEMANAME);
-	public static final String PATTERN_OBJECTTYPE_FINAL = Defs.makePattern(Defs.PATTERN_OBJECTTYPE);
-	public static final String PATTERN_OBJECTNAME_FINAL = Defs.makePattern(Defs.PATTERN_OBJECTNAME);
+	static final String PATTERN_SCHEMANAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME);
+	static final String PATTERN_SCHEMANAME_QUOTED = Pattern.quote(PATTERN_SCHEMANAME_FINAL);
+	static final String PATTERN_OBJECTTYPE_FINAL = Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE);
+	static final String PATTERN_OBJECTTYPE_QUOTED = Pattern.quote(PATTERN_OBJECTTYPE_FINAL);
+	static final String PATTERN_OBJECTNAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME);
+	static final String PATTERN_OBJECTNAME_QUOTED = Pattern.quote(PATTERN_OBJECTNAME_FINAL);
 	
 	@Deprecated
-	public static final String FILENAME_PATTERN_SCHEMA = "\\$\\{schemaname\\}";
+	public static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
 	@Deprecated
-	public static final String FILENAME_PATTERN_OBJECTTYPE = "\\$\\{objecttype\\}";
+	static final String FILENAME_PATTERN_SCHEMA_QUOTED = Pattern.quote(FILENAME_PATTERN_SCHEMA);
 	@Deprecated
-	public static final String FILENAME_PATTERN_OBJECTNAME = "\\$\\{objectname\\}";
+	public static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";
+	@Deprecated
+	static final String FILENAME_PATTERN_OBJECTTYPE_QUOTED = Pattern.quote(FILENAME_PATTERN_OBJECTTYPE);
+	@Deprecated
+	static final String FILENAME_PATTERN_OBJECTNAME = "${objectname}";
+	@Deprecated
+	static final String FILENAME_PATTERN_OBJECTNAME_QUOTED = Pattern.quote(FILENAME_PATTERN_OBJECTNAME);
 
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
@@ -420,9 +430,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		String outFileTmp = outFilePattern;
 		String outFile = outFilePattern
-			.replaceAll(FILENAME_PATTERN_SCHEMA, schemaName)
-			.replaceAll(FILENAME_PATTERN_OBJECTTYPE, objectType.name())
-			.replaceAll(FILENAME_PATTERN_OBJECTNAME, objectName);
+			.replaceAll(FILENAME_PATTERN_SCHEMA_QUOTED, schemaName)
+			.replaceAll(FILENAME_PATTERN_OBJECTTYPE_QUOTED, objectType.name())
+			.replaceAll(FILENAME_PATTERN_OBJECTNAME_QUOTED, objectName);
 		
 		if(!outFileTmp.equals(outFile) && !warnedOldPatternFiles.contains(outFileTmp)) {
 			warnedOldPatternFiles.add(outFileTmp);
@@ -432,9 +442,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 		
 		outFile = outFile
-			.replaceAll(PATTERN_SCHEMANAME_FINAL, schemaName)
-			.replaceAll(PATTERN_OBJECTTYPE_FINAL, objectType.name())
-			.replaceAll(PATTERN_OBJECTNAME_FINAL, objectName);
+			.replaceAll(PATTERN_SCHEMANAME_QUOTED, schemaName)
+			.replaceAll(PATTERN_OBJECTTYPE_QUOTED, objectType.name())
+			.replaceAll(PATTERN_OBJECTNAME_QUOTED, objectName);
 		
 		boolean alreadyOpened = filesOpened.contains(outFile);
 		if(!alreadyOpened) { filesOpened.add(outFile); }

@@ -1,7 +1,5 @@
 package tbrugz.sqldump.def;
 
-import java.util.regex.Pattern;
-
 //XXX: rename to Constants?
 public class Defs {
 
@@ -16,8 +14,8 @@ public class Defs {
 	public static final String PATTERN_TABLENAME = "tablename";
 	public static final String PATTERN_CHANGETYPE = "changetype";
 	
-	public static String makePattern(String patternStr) {
-		return Pattern.quote("["+patternStr+"]");
+	public static String addSquareBraquets(String patternStr) {
+		return "["+patternStr+"]";
 	}
 	
 }

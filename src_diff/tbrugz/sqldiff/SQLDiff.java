@@ -122,10 +122,10 @@ public class SQLDiff {
 		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
 				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
-				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.PATTERN_SCHEMANAME},
-				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.PATTERN_OBJECTTYPE},
-				new String[]{Defs.PATTERN_OBJECTNAME},
-				new String[]{Defs.PATTERN_CHANGETYPE}
+				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
+				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
+				new String[]{Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME)},
+				new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
 				);
 		CategorizedOut co = new CategorizedOut(finalPattern);
 		log.debug("final pattern: "+finalPattern);

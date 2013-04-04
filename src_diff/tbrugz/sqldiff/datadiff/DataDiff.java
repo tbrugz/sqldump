@@ -126,9 +126,9 @@ public class DataDiff {
 		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
 		
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
-				Defs.PATTERN_SCHEMANAME, 
-				Defs.PATTERN_TABLENAME,
-				Defs.PATTERN_CHANGETYPE);
+				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
+				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
+				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
 		CategorizedOut cout = new CategorizedOut(finalPattern);
 		
 		for(Table table: tablesToDiff) {
