@@ -1,12 +1,5 @@
 package tbrugz.sqldiff;
 
-import static tbrugz.sqldump.SQLDump.PARAM_PROPERTIES_FILENAME;
-import static tbrugz.sqldump.SQLDump.PARAM_USE_SYSPROPERTIES;
-import static tbrugz.sqldump.SQLDump.PROP_PROPFILEBASEDIR;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -27,6 +19,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
@@ -54,48 +47,6 @@ public class SQLDiff {
 
 	String outfilePattern = null;
 	
-	void init(String[] args) throws FileNotFoundException, IOException {
-		log.info("init...");
-		//parse args
-		boolean useSysPropSetted = false;		
-		String propFilename = PROPERTIES_FILENAME;
-		for(String arg: args) {
-			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
-				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-			}
-			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
-				ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
-				useSysPropSetted = true;
-			}
-			else {
-				log.warn("unrecognized param '"+arg+"'. ignoring...");
-			}
-		}
-		if(!useSysPropSetted) {
-			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
-			useSysPropSetted = true;
-		}
-		File propFile = new File(propFilename);
-		
-		//init properties
-		log.info("loading properties: "+propFile);
-		prop.load(new FileInputStream(propFile));
-		
-		File propFileDir = propFile.getAbsoluteFile().getParentFile();
-		log.debug("propfile base dir: "+propFileDir);
-		prop.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-		
-		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
-		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
-		
-		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
-		if(outfilePattern==null) {
-			log.warn("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script");
-			return;
-		}
-	}
-
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		if(outfilePattern==null) { return; }
 		
@@ -156,7 +107,7 @@ public class SQLDiff {
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {
 		SchemaModelGrabber schemaGrabber = null;
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, SQLDump.DEFAULT_CLASSLOADING_PACKAGES);
+			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber==null) {
 				log.warn("schema grabber class '"+grabClassName+"' not found");
 			}
@@ -191,7 +142,17 @@ public class SQLDiff {
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDiff sqldiff = new SQLDiff();
-		sqldiff.init(args);
+		
+		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
+		DBObject.dumpCreateOrReplace = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
+		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
+		sqldiff.outfilePattern = sqldiff.prop.getProperty(PROP_OUTFILEPATTERN);
+		if(sqldiff.outfilePattern==null) {
+			log.error("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script");
+			//XXX: throw exception (if failonerror) ?
+			return;
+		}
+		
 		sqldiff.doIt();
 	}
 }

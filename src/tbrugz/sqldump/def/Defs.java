@@ -7,6 +7,8 @@ public class Defs {
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	
 	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
+	
+	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 
 	public static final String PATTERN_SCHEMANAME = "schemaname";
 	public static final String PATTERN_OBJECTTYPE = "objecttype";

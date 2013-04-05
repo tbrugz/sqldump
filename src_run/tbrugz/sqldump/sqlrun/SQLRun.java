@@ -18,12 +18,13 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
+import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -336,7 +337,9 @@ public class SQLRun {
 	}
 	
 	void init(String args[], Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
-		SQLDump.init(args, papp);
+		CLIProcessor.init("sqlrun", args, PROPERTIES_FILENAME, papp);
+		ColTypeUtil.setProperties(papp);
+		
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
@@ -354,7 +357,7 @@ public class SQLRun {
 
 		//inits DBMSResources
 		DBMSResources.instance().setup(papp);
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
 		
 		//inits specific DBMSFeatures class
 		//XXX: really needed?

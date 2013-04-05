@@ -13,14 +13,15 @@ import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
-import tbrugz.sqldump.util.Version;
 
 /*
  * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
@@ -91,9 +92,6 @@ import tbrugz.sqldump.util.Version;
  */
 public class SQLDump {
 	
-	//static/constant properties
-	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
-	
 	static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
@@ -109,12 +107,6 @@ public class SQLDump {
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
-	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
-	
-	//cli parameters
-	public static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
-	public static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
-	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
 	
 	static final Log log = LogFactory.getLog(SQLDump.class);
 	
@@ -123,93 +115,13 @@ public class SQLDump {
 
 	final Properties papp = new ParametrizedProperties();
 	
-	//XXX: move to utils(?)... (used by sqldump & sqlrun -- why not sqldiff?) 
-	public static void init(String[] args, Properties papp) throws IOException {
-		log.info("init... [version "+Version.getVersion()+"]");
-		boolean useSysPropSetted = false;
-		boolean propFilenameSetted = false;
-		boolean propResourceSetted = false;
-		//parse args
-		String propFilename = PROPERTIES_FILENAME;
-		String propResource = null;
-		for(String arg: args) {
-			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
-				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-				propFilenameSetted = true;
-			}
-			else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
-				propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
-				propResourceSetted = true;
-			}
-			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
-				ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
-				useSysPropSetted = true;
-			}
-			else {
-				log.warn("unrecognized param '"+arg+"'. ignoring...");
-			}
-		}
-		if(!useSysPropSetted) {
-			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
-			useSysPropSetted = true;
-		}
-		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
-		
-		InputStream propIS = null;
-		if(propResourceSetted) {
-			//XXX: set PROP_PROPFILEBASEDIR for resources?
-			
-			log.info("loading properties resource: "+propResource);
-			propIS = SQLDump.class.getResourceAsStream(propResource);
-		}
-		else {
-			File propFile = new File(propFilename);
-			
-			//init properties
-			File propFileDir = propFile.getAbsoluteFile().getParentFile();
-			log.debug("propfile base dir: "+propFileDir);
-			papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-			
-			if(propFile.exists()) {
-				log.info("loading properties: "+propFile);
-				propIS = new FileInputStream(propFile);
-			}
-			else {
-				log.info("properties file '"+propFile+"' does not exist");
-			}
-		}
-		try {
-			if(propIS!=null) {
-				papp.load(propIS);
-			}
-		}
-		catch(FileNotFoundException e) {
-			if(propResourceSetted) {
-				log.warn("prop resource not found: "+propResource);
-			}
-			else if(propFilenameSetted) {
-				log.warn("prop file not found: "+propFilename);
-			}
-		}
-		/*catch(IOException e) {
-			if(propResourceSetted) {
-				log.warn("error loading prop resource: "+propResource);
-			}
-			else if(propFilenameSetted) {
-				log.warn("error loading prop file: "+propFilename);
-			}
-		}*/
-		
-		ColTypeUtil.setProperties(papp);
-	}
-
 	void init(String[] args) throws IOException {
-		SQLDump.init(args, papp); //generic arguments init
+		CLIProcessor.init("sqldump", args, PROPERTIES_FILENAME, papp); //generic arguments init
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 		log.info("failonerror: "+failonerror);
 		
+		ColTypeUtil.setProperties(papp);
 		DBMSResources.instance().setup(papp);
 	}
 
@@ -274,7 +186,7 @@ public class SQLDump {
 		
 		//grabbing model
 		if(grabClassName!=null) {
-			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, DEFAULT_CLASSLOADING_PACKAGES);
+			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
 				if(schemaGrabber.needsConnection()) {
@@ -316,7 +228,7 @@ public class SQLDump {
 		if(dumpSchemaClasses!=null) {
 			String dumpClasses[] = dumpSchemaClasses.split(",");
 			for(String dumpClass: dumpClasses) {
-				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass.trim(), Defs.DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
 					schemaDumper.procProperties(sdd.papp);
 					schemaDumper.setFailOnError(failonerror);
@@ -359,7 +271,7 @@ public class SQLDump {
 		
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
-			Processor sqlproc = (Processor) Utils.getClassInstance(procClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
+			Processor sqlproc = (Processor) Utils.getClassInstance(procClass.trim(), Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(sqlproc!=null) {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);
