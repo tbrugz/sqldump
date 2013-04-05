@@ -5,12 +5,11 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
-public abstract class AbstractSQLProc implements Processor {
+public abstract class AbstractSQLProc extends AbstractFailable implements Processor {
 	
 	protected Properties prop;
 	protected Connection conn;
 	protected SchemaModel model;
-	protected boolean failonerror = false; //XXX: default 'failonerror' should be true?
 
 	@Override
 	public void setProperties(Properties prop) {
@@ -30,11 +29,6 @@ public abstract class AbstractSQLProc implements Processor {
 		this.model = schemamodel;
 	}
 	
-	@Override
-	public void setFailOnError(boolean failonerror) {
-		this.failonerror = failonerror;
-	}
-
 	@Override
 	public abstract void process();
 	

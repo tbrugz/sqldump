@@ -13,6 +13,7 @@ import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
@@ -104,6 +105,7 @@ public class SQLDump {
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
+	static final String PROP_FAILONERROR = "sqldump.failonerror";
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
@@ -117,6 +119,7 @@ public class SQLDump {
 	static final Log log = LogFactory.getLog(SQLDump.class);
 	
 	Connection conn;
+	boolean failonerror = true;
 
 	final Properties papp = new ParametrizedProperties();
 	
@@ -202,7 +205,10 @@ public class SQLDump {
 	}
 
 	void init(String[] args) throws IOException {
-		SQLDump.init(args, papp);
+		SQLDump.init(args, papp); //generic arguments init
+		
+		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
+		log.info("failonerror: "+failonerror);
 		
 		DBMSResources.instance().setup(papp);
 	}
@@ -261,7 +267,9 @@ public class SQLDump {
 			log.warn("dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined but no grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		if(grabClassName==null && dumpSchemaClasses==null && processingClassesStr==null) {
-			log.warn("no grabber [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'], dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
+			String message = "no grabber [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'], dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined";
+			log.error(message);
+			if(failonerror) { throw new ProcessingException(message); }
 		}
 		
 		//grabbing model
@@ -272,6 +280,7 @@ public class SQLDump {
 				if(schemaGrabber.needsConnection()) {
 					if(sdd.conn==null) { sdd.setupConnection(); }
 					schemaGrabber.setConnection(sdd.conn);
+					schemaGrabber.setFailOnError(failonerror);
 				}
 				sm = schemaGrabber.grabSchema();
 				if(sm!=null) {
@@ -310,6 +319,7 @@ public class SQLDump {
 				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass.trim(), DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
 					schemaDumper.procProperties(sdd.papp);
+					schemaDumper.setFailOnError(failonerror);
 					schemaDumper.dumpSchema(sm);
 				}
 				else {
@@ -354,8 +364,8 @@ public class SQLDump {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);
 				sqlproc.setSchemaModel(sm);
-				//TODO: set fail on error based on properties
-				//sqlproc.setFailOnError(true);
+				//TODO: set fail on error based on (processor) properties ?
+				sqlproc.setFailOnError(failonerror);
 				sqlproc.process();
 			}
 			else {
