@@ -95,9 +95,13 @@ public class SQLQueries extends AbstractSQLProc {
 				//replace props! XXX: replaceProps(): should be activated by a prop?
 				sql = ParametrizedProperties.replaceProps(sql, prop);
 			}
-			if(sql==null || queryName==null) {
-				log.warn("no SQL or name defined for query [id="+qid+"]");
+			if(sql==null) {
+				log.warn("no SQL defined for query [id="+qid+"]");
 				continue;
+			}
+			if(queryName==null) {
+				log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
+				queryName = qid;
 			}
 			//params
 			int paramCount = 1;
@@ -204,7 +208,7 @@ public class SQLQueries extends AbstractSQLProc {
 							keyCols, null, null, rsdf);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
-					log.info("error on query "+qid+": "+e.getMessage(), e);
+					log.debug("error on query "+qid+": "+e.getMessage(), e);
 					if(failonerror) {
 						throw new ProcessingException(e);
 					}

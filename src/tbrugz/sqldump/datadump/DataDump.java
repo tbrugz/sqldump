@@ -120,7 +120,7 @@ public class DataDump extends AbstractSQLProc {
 	}
 
 	//TODOne: filter tables by table type (table, view, ...)
-	public void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
+	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
@@ -228,7 +228,7 @@ public class DataDump extends AbstractSQLProc {
 				runQuery(conn, sql, null, prop, tableName, tableName, charset, 
 						rowlimit,
 						syntaxList,
-						null,
+						null, //partitionby
 						pkCols,
 						importedFKs,
 						uniqueKeys,
@@ -244,8 +244,14 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		if(tables4dump!=null && tables4dump.size()>0) {
+		if(tablesForDataDump.size()==0) {
+			log.warn("no tables found in model for data dumping...");
+		}
+		else if(tables4dump!=null && tables4dump.size()>0) {
 			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
+		}
+		else {
+			log.info("...data dumped");
 		}
 	}
 	
@@ -306,12 +312,33 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			long initTime = System.currentTimeMillis();
-			long dump1stRowTime = -1;
 			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
 			if(rsDecoratorFactory!=null) {
 				rs = rsDecoratorFactory.getDecoratorOf(rs);
 			}
+			
+			dumpResultSet(rs, prop, tableOrQueryId, tableOrQueryName,
+					charset, rowlimit, syntaxList, partitionByPatterns,
+					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
+					initTime);
+	}
+
+	void dumpResultSet(ResultSet rs, Properties prop, 
+			String tableOrQueryId, String tableOrQueryName, String charset, 
+			long rowlimit,
+			List<DumpSyntax> syntaxList,
+			String[] partitionByPatterns,
+			List<String> keyColumns,
+			List<FK> importedFKs,
+			List<Constraint> uniqueKeys,
+			ResultSetDecoratorFactory rsDecoratorFactory,
+			long initTime
+			) throws SQLException, IOException {
+			
+			if(initTime<=0) { initTime = System.currentTimeMillis(); }
+			long dump1stRowTime = -1;
+			
 			ResultSetMetaData md = rs.getMetaData();
 			
 			if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
