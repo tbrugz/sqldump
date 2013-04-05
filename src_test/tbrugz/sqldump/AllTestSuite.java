@@ -55,6 +55,6 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 })
 public class AllTestSuite {
 	static {
-		AbstractFailable.DEFAULT_FAILONERROR = true;		
+		AbstractFailable.DEFAULT_FAILONERROR = true;
 	}
 }
