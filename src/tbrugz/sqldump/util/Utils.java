@@ -443,15 +443,17 @@ public class Utils {
 		for(File ff: files) {
 			if(ff.isFile()) {
 				log.debug("file to delete: "+ff);
-				ff.delete();
-				delCount++;
+				boolean deleted = ff.delete();
+				if(!deleted) { log.warn("can't delete file: "+ff); }
+				else { delCount++; }
 			}
 			else if(ff.isDirectory()) {
 				//XXXxx: deleteDirRegularContents: recurse int subdirs
 				delCount += deleteDirRegularContents(ff.getAbsolutePath(), level+1);
 				log.debug("dir to delete: "+ff);
-				ff.delete();
-				delCount++;
+				boolean deleted = ff.delete();
+				if(!deleted) { log.warn("can't delete dir: "+ff); }
+				else { delCount++; }
 			}
 		}
 		if(level==0) {

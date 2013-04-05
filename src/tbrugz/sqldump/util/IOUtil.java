@@ -38,7 +38,10 @@ public class IOUtil {
 
 	public static String readFromFilename(String fileName) {
 		try {
-			return IOUtil.readFile(new FileReader(fileName));
+			Reader reader = new FileReader(fileName);
+			String ret = IOUtil.readFile(reader);
+			reader.close();
+			return ret;
 		} catch (IOException e) {
 			log.warn("error reading file "+fileName+": "+e.getMessage());
 		}
