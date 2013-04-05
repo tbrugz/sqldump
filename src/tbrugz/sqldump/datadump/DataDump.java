@@ -466,7 +466,7 @@ public class DataDump extends AbstractSQLProc {
 							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM, writeAppend);
 							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 								
-							String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
+							/*String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
 							if(lastPartitionId!=null && lastPartitionIdByPartitionPattern.size()>1 && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
 								//log.debug("partid >> "+lastPartitionId+" // "+partitionByStrId+" // "+lastFinalFilename+" // "+countInPartition);
@@ -474,7 +474,7 @@ public class DataDump extends AbstractSQLProc {
 								String lastWriterMapKey = getWriterMapKey(lastFinalFilename, partitionByPattern);
 								closeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
 								removeWriter(writersOpened, writersSyntaxes, lastWriterMapKey);
-							}
+							}*/
 							
 							if(newFilename) {
 								//if(lastWriterMapKey!=null) { ds.flushBuffer(writersOpened.get(lastWriterMapKey)); }
