@@ -100,7 +100,7 @@ public class HTMLDataDump extends DumpSyntax {
 				sb.append("\n\t</td>");
 			}
 			else {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
+				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr);
 				//Object value = getValueNotNull( vals.get(i) );
 				sb.append( "<td>"+ value +"</td>");
 			}

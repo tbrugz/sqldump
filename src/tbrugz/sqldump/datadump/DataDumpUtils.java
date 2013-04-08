@@ -179,8 +179,8 @@ public class DataDumpUtils {
 
 	//dumpers: XML, HTML
 	//XXX: XML format: translate '<', '>', '&'?
-	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, String nullValue) {
-		String value = getFormattedXMLValue(elem, type, floatFormatter);
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String nullValue) {
+		String value = getFormattedXMLValue(elem, type, floatFormatter, df);
 		if(value == null) {
 			return nullValue;
 		}
@@ -188,12 +188,15 @@ public class DataDumpUtils {
 		return value;
 	} 
 
-	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter) {
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
 		else if(Double.class.isAssignableFrom(type)) {
 			return floatFormatter.format(elem);
+		}
+		else if(Date.class.isAssignableFrom(type)) {
+			return df.format((Date)elem);
 		}
 		else if(ResultSet.class.isAssignableFrom(type)) {
 			return null;

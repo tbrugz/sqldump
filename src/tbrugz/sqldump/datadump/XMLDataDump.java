@@ -124,7 +124,7 @@ public class XMLDataDump extends DumpSyntax {
 				sb.append("\t");
 			}
 			else {
-				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter);
+				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter);
 				if(value==null) {
 					if(dumpNullValues) {
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );

@@ -50,7 +50,7 @@ public class DocbookTable extends XMLDataDump {
 		fos.write("\t<row"+drawRowSepStr+">");
 		
 		for(int i=0;i<numCol;i++) {
-			Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, nullValueStr);
+			Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr);
 			fos.write("<entry>"+value+"</entry>");
 		}
 		fos.write("</row>\n");
