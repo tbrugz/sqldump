@@ -17,9 +17,10 @@ import tbrugz.sqldump.util.Utils;
 
 //XXX: option to define per-column 'row' xml-element? cursors already have "table-name"...
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
+//XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
 public class XMLDataDump extends DumpSyntax {
 	
-	static Log log = LogFactory.getLog(XMLDataDump.class);
+	static final Log log = LogFactory.getLog(XMLDataDump.class);
 	
 	static final String XML_SYNTAX_ID = "xml";
 	static final String DEFAULT_ROW_ELEMENT = "row";
@@ -34,14 +35,16 @@ public class XMLDataDump extends DumpSyntax {
 	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
 
 	public XMLDataDump() {
-		this.padding = "";
+		this("", true);
 	}
 
-	public XMLDataDump(String padding) {
+	public XMLDataDump(String padding, boolean alwaysDumpHeaderAndFooter) {
 		this.padding = padding;
+		this.alwaysDumpHeaderAndFooter = alwaysDumpHeaderAndFooter;
 	}
 	
 	final String padding;
+	final boolean alwaysDumpHeaderAndFooter;
 	
 	String defaultRowElement = DEFAULT_ROW_ELEMENT;
 	boolean defaultDumpRowElement = true;
@@ -87,14 +90,21 @@ public class XMLDataDump extends DumpSyntax {
 		//XXX: add xml declaration? optional? e.g.: <?xml version="1.0" encoding="UTF-8" ?>
 		//see http://www.w3.org/TR/REC-xml/#NT-XMLDecl
 		//    http://www.ibm.com/developerworks/xml/library/x-tipdecl/index.html
-		out("<"+tableName+">\n", fos);
+		if(alwaysDumpHeaderAndFooter) {
+			out("<"+tableName+">\n", fos);
+		}
 	}
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
+		if(count==0 && !alwaysDumpHeaderAndFooter) {
+			out("<"+tableName+">\n", fos);
+		}
+		if(dumpRowElement) {
+			out("\t<"+rowElement+">\n",fos);
+		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t");
-		if(dumpRowElement) { sb.append("<"+rowElement+">"); }
+		sb.append("\t\t");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
@@ -104,11 +114,10 @@ public class XMLDataDump extends DumpSyntax {
 					continue;
 				}
 				
-				out(sb.toString()+"\n", fos);
-				sb = new StringBuilder();
+				dumpAndClearBuffer(sb, fos);
 				
 				//XXX: one dumper for each column (not each column/row)?
-				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t");
+				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t", false);
 				xmldd.procProperties(prop);
 				/*String rowElement4column = prop.getProperty(PREFIX_ROWELEMENT4COLUMN+lsColNames.get(i));
 				if(rowElement4column!=null) {
@@ -121,7 +130,7 @@ public class XMLDataDump extends DumpSyntax {
 					xmldd.procProperties(prop);
 				}*/
 				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
-				sb.append("\t");
+				//sb.append("\t");
 			}
 			else {
 				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter);
@@ -135,13 +144,26 @@ public class XMLDataDump extends DumpSyntax {
 				}
 			}
 		}
-		if(dumpRowElement) { sb.append("</"+rowElement+">"); }
-		out(sb.toString()+"\n", fos);
+		dumpAndClearBuffer(sb, fos);
+		
+		if(dumpRowElement) {
+			out("\t</"+rowElement+">\n", fos);
+		}
+	}
+	
+	void dumpAndClearBuffer(StringBuilder sb, Writer fos) throws IOException {
+		String sbuff = sb.toString(); sb.setLength(0);
+		if("".equals(sbuff.trim())) {
+			return;
+		}
+		out(sbuff+"\n", fos);
 	}
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
-		out("</"+tableName+">\n", fos);
+		if(alwaysDumpHeaderAndFooter || count>0) {
+			out("</"+tableName+">\n", fos);
+		}
 	}
 
 	void out(String s, Writer pw) throws IOException {
