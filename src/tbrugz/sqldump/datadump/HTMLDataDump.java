@@ -110,7 +110,7 @@ public class HTMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws IOException {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		out("</table>", fos);
 		if(append!=null) { out(append, fos); }
 	}

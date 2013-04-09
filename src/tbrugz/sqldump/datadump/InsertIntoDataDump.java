@@ -92,7 +92,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) {
+	public void dumpFooter(long count, Writer fos) {
 		//do nothing
 	}
 

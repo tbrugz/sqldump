@@ -133,7 +133,7 @@ public class JSONDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws IOException {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		if(tableName!=null) {
 			out((usePK?"}":"]")+"}",fos);
 		}

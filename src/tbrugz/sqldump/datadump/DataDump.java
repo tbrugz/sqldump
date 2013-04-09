@@ -355,7 +355,6 @@ public class DataDump extends AbstractSQLProc {
 					return;
 				}
 			}
-			long count = 0;
 			
 			SQLUtils.setupForNewQuery(md.getColumnCount());
 			
@@ -429,6 +428,8 @@ public class DataDump extends AbstractSQLProc {
 			for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
 				countInPartitionByPattern.put(partitionByPatterns[partIndex], 0l);
 			}
+			
+			long count = 0;
 			
 			//rows
 			do {
@@ -533,7 +534,8 @@ public class DataDump extends AbstractSQLProc {
 			Set<String> filenames = writersOpened.keySet();
 			for(String filename: filenames) {
 				//for(String partitionByPattern: partitionByPatterns) {
-				closeWriter(writersOpened, writersSyntaxes, filename);
+				//FIXME: should be count for this file/partition, not resultset. Last countInPartition would work for last partition only
+				closeWriter(writersOpened, writersSyntaxes, filename, count);
 			}
 			writersOpened.clear();
 			writersSyntaxes.clear();
@@ -542,14 +544,14 @@ public class DataDump extends AbstractSQLProc {
 			rs.close();
 	}
 	
-	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key) throws IOException {
+	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, long rowsDumped) throws IOException {
 		Writer w = writersOpened.get(key);
 		String filename = getFilenameFromWriterMapKey(key);
 		//String key = getWriterMapKey(filename, partitionByPattern);
 		
 		DumpSyntax ds = writersSyntaxes.get(filename);
 		try {
-			ds.dumpFooter(w);
+			ds.dumpFooter(rowsDumped, w);
 			w.close();
 			//log.info("closed stream; filename: "+filename);
 		}

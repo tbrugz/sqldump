@@ -240,7 +240,7 @@ public class DataDumpUtils {
 			ds.dumpRow(rs, count, writer);
 			count++;
 		}
-		ds.dumpFooter(writer);
+		ds.dumpFooter(count, writer);
 		if(resetRS) {
 			try {
 				rs.first();

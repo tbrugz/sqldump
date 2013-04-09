@@ -2,9 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -25,7 +22,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	public String nullValueStr = DEFAULT_NULL_VALUE;
 	
-	public abstract void procProperties(Properties prop);
+	//public abstract void procProperties(Properties prop);
 
 	public void procStandardProperties(Properties prop) {
 		String dateFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".dateformat");
@@ -52,25 +49,27 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		return o;
 	}
 	
-	public abstract String getSyntaxId();
+	//public abstract String getSyntaxId();
 
-	public abstract String getMimeType();
+	//public abstract String getMimeType();
 	
 	public String getDefaultFileExtension() {
 		return getSyntaxId();
 	}
 	
-	public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
+	//public abstract void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
 
 	public void setImportedFKs(List<FK> fks) {}
 	
 	public void setAllUKs(List<Constraint> uks) {}
 	
+	/*
 	public abstract void dumpHeader(Writer fos) throws IOException;
 
 	public abstract void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
 
-	public abstract void dumpFooter(Writer fos) throws IOException;
+	public abstract void dumpFooter(long count, Writer fos) throws IOException;
+	*/
 
 	public void flushBuffer(Writer fos) throws IOException {}
 	

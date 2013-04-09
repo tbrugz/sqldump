@@ -123,7 +123,7 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) {
+	public void dumpFooter(long count, Writer fos) {
 	}
 	
 	@Override

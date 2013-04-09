@@ -140,7 +140,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws IOException {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		out("</"+tableName+">\n", fos);
 	}
 

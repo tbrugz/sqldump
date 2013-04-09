@@ -278,7 +278,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	}
 
 	@Override
-	public void dumpFooter(Writer fos) throws IOException {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
 		if(showTrailerLine && !showTrailerLineAllBlocks) {

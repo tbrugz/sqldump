@@ -112,7 +112,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 			ds.dumpRow(rs, count, w);
 			count++;
 		}
-		ds.dumpFooter(w);
+		ds.dumpFooter(count,w);
 		return count;
 	}
 	

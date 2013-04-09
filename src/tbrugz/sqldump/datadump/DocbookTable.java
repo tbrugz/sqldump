@@ -57,7 +57,7 @@ public class DocbookTable extends XMLDataDump {
 	}
 	
 	@Override
-	public void dumpFooter(Writer fos) throws IOException {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		fos.write("</tbody></tgroup>\n</table>\n");
 	}
 	
