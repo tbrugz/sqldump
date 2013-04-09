@@ -1,5 +1,6 @@
 package tbrugz.sqldump.datadump;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -208,7 +209,10 @@ public class SQLQueries extends AbstractSQLProc {
 							keyCols, null, null, rsdf);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
-					log.debug("error on query "+qid+": "+e.getMessage(), e);
+					log.debug("error on query "+qid+" [class="+e.getClass().getName()+"]: "+e.getMessage(), e);
+					if(log.isDebugEnabled() && (e instanceof SQLException)) {
+						SQLUtils.xtraLogSQLException((SQLException) e, log);
+					}
 					if(failonerror) {
 						throw new ProcessingException(e);
 					}

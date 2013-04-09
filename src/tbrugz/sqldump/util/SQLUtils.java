@@ -10,10 +10,12 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -476,6 +478,36 @@ public class SQLUtils {
 	
 	public static String newNameFromTableName(String tableName, String pattern) {
 		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
+	}
+	
+	/*
+	 * see:
+	 * http://docs.oracle.com/javase/tutorial/jdbc/basics/sqlexception.html
+	 * http://docs.oracle.com/javase/6/docs/api/java/sql/SQLSyntaxErrorException.html
+	 */
+	public static void logWarnings(SQLWarning warning, Log log)
+			throws SQLException {
+		while (warning != null) {
+			log.debug("SQLWarning: message: " + warning.getMessage()
+					+"; state: " + warning.getSQLState()
+					+"; error code: "+warning.getErrorCode());
+			warning = warning.getNextWarning();
+		}
+	}
+	
+	public static void xtraLogSQLException(SQLException se, Log log) {
+		log.debug("SQLException: state: "+se.getSQLState()+" ; errorCode: "+se.getErrorCode());
+		if(se.iterator()!=null) {
+			Iterator<Throwable> it = se.iterator();
+			while(it.hasNext()) {
+				Throwable t = it.next();
+				log.debug("inner SQLException: "+t);
+			}
+		}
+		se = se.getNextException();
+		while(se!=null) {
+			log.debug("next SQLException: "+se);
+		} 
 	}
 
 }

@@ -308,7 +308,8 @@ public class DataDump extends AbstractSQLProc {
 			ResultSetDecoratorFactory rsDecoratorFactory
 			) throws SQLException, IOException {
 		
-			PreparedStatement st = conn.prepareStatement(sql);
+		PreparedStatement st = conn.prepareStatement(sql);
+		try {
 			//st.setFetchSize(20);
 			if(params!=null) {
 				for(int i=0;i<params.size();i++) {
@@ -319,6 +320,7 @@ public class DataDump extends AbstractSQLProc {
 			long initTime = System.currentTimeMillis();
 			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
+			if(log.isDebugEnabled()) { SQLUtils.logWarnings(rs.getWarnings(), log); }
 			if(rsDecoratorFactory!=null) {
 				rs = rsDecoratorFactory.getDecoratorOf(rs);
 			}
@@ -327,6 +329,10 @@ public class DataDump extends AbstractSQLProc {
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
 					initTime);
+		}
+		finally {
+			if(log.isDebugEnabled()) { SQLUtils.logWarnings(st.getWarnings(), log); }
+		}
 	}
 
 	void dumpResultSet(ResultSet rs, Properties prop, 
