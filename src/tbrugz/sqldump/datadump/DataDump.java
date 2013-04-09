@@ -15,10 +15,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,6 +74,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
 	static final String PROP_DATADUMP_WRITEAPPEND = "sqldump.datadump.writeappend";
 	static final String PROP_DATADUMP_CREATEEMPTYFILES = "sqldump.datadump.createemptyfiles";
+	static final String PROP_DATADUMP_PARTITIONBY_DATEFORMAT = "sqldump.datadump.partitionby.dateformat";
 
 	//defaults
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
@@ -99,6 +102,8 @@ public class DataDump extends AbstractSQLProc {
 	static Log log = LogFactory.getLog(DataDump.class);
 	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
 	static Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
+	
+	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
 	/*
 	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
@@ -346,6 +351,11 @@ public class DataDump extends AbstractSQLProc {
 			}
 
 			boolean createEmptyDumpFiles = Utils.getPropBoolean(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
+			
+			String partitionByDF = prop.getProperty(PROP_DATADUMP_PARTITIONBY_DATEFORMAT);
+			if(partitionByDF!=null) {
+				partitionByDateFormatter = new SimpleDateFormat(partitionByDF);
+			}
 			
 			boolean hasData = rs.next();
 			//so empty tables do not create empty dump files
@@ -686,11 +696,18 @@ public class DataDump extends AbstractSQLProc {
 	
 	static String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
 		//XXX: numberformatter (leading 0s) for partitionId?
-		//XXX: add dataformatter? useful for partitioning by year, year-month, ... 
+		//XXXxx: add dataformatter? useful for partitioning by year, year-month, ...
+		//XXX: per-column dateFormatter?
 		for(String c: cols) {
 			String replacement = null;
 			try {
-				replacement = rs.getString(c);
+				Object o = rs.getObject(c);
+				if(o instanceof Date) {
+					replacement = partitionByDateFormatter.format((Date)o);
+				}
+				else {
+					replacement = String.valueOf(o); //rs.getString(c);
+				}
 			}
 			catch(SQLException e) {
 				log.warn("getPartitionByStr(): column '"+c+"' not found in result set");
