@@ -128,8 +128,12 @@ public class CSVDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
 		List<?> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol);
+		dumpValues(vals, count, fos);
+	}
+	
+	void dumpValues(List<?> vals, long count, Writer fos) throws IOException {
+		StringBuffer sb = new StringBuffer();
 		for(int i=0;i<lsColTypes.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				
@@ -155,7 +159,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		//do nothing
 	}
 	
