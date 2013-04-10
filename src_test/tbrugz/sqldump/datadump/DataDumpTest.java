@@ -165,4 +165,59 @@ public class DataDumpTest {
 		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n1,john,1,1,2000\n2,mary,2,2,2000\n3,jane,2,2,1000\n4,lucas,2,2,1200\n5,wilson,1,1,1000\n";
 		Assert.assertEquals(expected, csvEmpAll);
 	}
+	
+	@Test
+	public void dumpWithRowNumber() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		String[] vmparamsDump = {
+				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql=select * from emp",
+				"-Dsqldump.datadump.dumpsyntaxes=rncsv",
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
+				"-Dsqldump.datadump.writebom=false",
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparamsDump);
+		new SQLDump().doMain(params, p, null);
+		
+		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1.rn.csv");
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,1,john,1,1,2000\n"+"1,2,mary,2,2,2000\n"+"2,3,jane,2,2,1000\n"+"3,4,lucas,2,2,1200\n"+"4,5,wilson,1,1,1000\n"+"5\n";
+		Assert.assertEquals(expected, csvEmpAll);
+	}
+	
+	@Test
+	public void dumpPartitionedWithRowNumber() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		String[] vmparamsDump = {
+				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql=select * from emp",
+				"-Dsqldump.query.q1.partitionby=p2_[col:SUPERVISOR_ID]",
+				"-Dsqldump.datadump.dumpsyntaxes=rncsv",
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
+				"-Dsqldump.datadump.writebom=false",
+				"-Dsqldump.datadump.logeachxrows=1",
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparamsDump);
+		new SQLDump().doMain(params, p, null);
+		
+		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.rn.csv");
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,1,john,1,1,2000\n"+"1,5,wilson,1,1,1000\n"+"2\n";
+		Assert.assertEquals(expected, csvEmpS1);
+		
+		String csvEmpS2 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_2.rn.csv");
+		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,2,mary,2,2,2000\n"+"1,3,jane,2,2,1000\n"+"2,4,lucas,2,2,1200\n"+"3\n";
+		Assert.assertEquals(expected, csvEmpS2);
+	}
+	
 }
