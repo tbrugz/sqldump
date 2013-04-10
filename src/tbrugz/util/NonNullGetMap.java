@@ -7,13 +7,21 @@ import java.util.Set;
 //XXXxx should this be a decorator? yes!
 public class NonNullGetMap<K,V> implements Map<K,V> {
 	
-	Map<K,V> map;
-	Class<V> initialValueClass;
+	final Map<K,V> map;
+	final Class<V> initialValueClass;
+	final GenericFactory<V> factory;
 	
 	public NonNullGetMap(Map<K,V> map, Class<V> initialValueClass) {
 		this.map = map;
 		//this.initialValueClass = (Class<V>) map.values().iterator().next().getClass();
 		this.initialValueClass = initialValueClass;
+		this.factory = null;
+	}
+
+	public NonNullGetMap(Map<K,V> map, GenericFactory<V> factory) {
+		this.map = map;
+		this.initialValueClass = null;
+		this.factory = factory;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -22,10 +30,18 @@ public class NonNullGetMap<K,V> implements Map<K,V> {
 		V v = map.get(key);
 		if(v==null) {
 			try {
-				v = initialValueClass.newInstance();
+				if(factory!=null) {
+					v = factory.getInstance();
+				}
+				else {
+					v = initialValueClass.newInstance();
+				}
 				put((K)key, v);
+			} catch (InstantiationException e) {
+				throw new RuntimeException(e);
 			} catch (Exception e) {
 				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 		return v;

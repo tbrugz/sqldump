@@ -47,6 +47,8 @@ import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.util.GenericFactory;
+import tbrugz.util.NonNullGetMap;
 
 /*
  * TODO: floatFormatter!
@@ -237,7 +239,7 @@ public class DataDump extends AbstractSQLProc {
 						pkCols,
 						importedFKs,
 						uniqueKeys,
-						null
+						null //decoratorFactory
 						);
 			}
 			catch(Exception e) {
@@ -438,12 +440,9 @@ public class DataDump extends AbstractSQLProc {
 				}
 			}
 			
-			Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
+			//Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
 			Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
-			Map<String, Long> countInPartitionByPattern = new HashMap<String, Long>();
-			for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
-				countInPartitionByPattern.put(partitionByPatterns[partIndex], 0l);
-			}
+			Map<String, Long> countInPartitionByPattern = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
 			
 			long count = 0;
 			
@@ -453,9 +452,10 @@ public class DataDump extends AbstractSQLProc {
 					String partitionByPattern = partitionByPatterns[partIndex];
 					//log.info("row:: partitionby:: "+partitionByPattern);
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
-					long countInPartition = countInPartitionByPattern.get(partitionByPattern);
 					
 					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
+					String countInPartitionKey = partitionByPattern+"$"+partitionByStrId;
+					long countInPartition = countInPartitionByPattern.get(countInPartitionKey);
 					
 					for(int i=0;i<syntaxList.size();i++) {
 						DumpSyntax ds = syntaxList.get(i);
@@ -515,8 +515,8 @@ public class DataDump extends AbstractSQLProc {
 							}
 						}
 					}
-					lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
-					countInPartitionByPattern.put(partitionByPattern, ++countInPartition);
+					//lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
+					countInPartitionByPattern.put(countInPartitionKey, ++countInPartition);
 				}
 
 				if(hasData) {
@@ -745,6 +745,15 @@ public class DataDump extends AbstractSQLProc {
 			return tables4dump;
 		}
 		return null;
+	}
+	
+	static class LongFactory extends GenericFactory<Long> {
+		long initialValue = 0l;
+		
+		@Override
+		public Long getInstance() {
+			return initialValue;
+		}
 	}
 	
 }
