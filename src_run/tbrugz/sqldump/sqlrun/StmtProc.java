@@ -31,7 +31,41 @@ public class StmtProc extends AbstractFailable implements Executor {
 	
 	boolean useBatchUpdate = false;
 	long batchSize = 1000;
-	boolean useSQLStmtTokenizerClass = true;
+	
+	public enum TokenizerStrategy {
+		STMT_TOKENIZER,
+		STMT_SCANNER,
+		STRING_SPLITTER;
+		
+		public static final String STMT_TOKENIZER_CLASS = "SQLStmtTokenizer";
+		public static final String STRING_SPLITTER_CLASS = "StringSpliter";
+		public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
+		
+		public static TokenizerStrategy getTokenizer(String tokenizer) {
+			if(tokenizer == null) {
+				return TokenizerStrategy.STMT_SCANNER;
+			}
+			tokenizer = tokenizer.trim();
+
+			if(STMT_TOKENIZER_CLASS.equals(tokenizer)) {
+				log.info("using '"+tokenizer+"' tokenizer class");
+				return TokenizerStrategy.STMT_TOKENIZER;
+			}
+			else if(STRING_SPLITTER_CLASS.equals(tokenizer)) {
+				log.info("using '"+tokenizer+"' tokenizer class");
+				return TokenizerStrategy.STRING_SPLITTER;
+			}
+			else if(STMT_SCANNER_CLASS.equals(tokenizer)) {
+				log.info("using '"+tokenizer+"' tokenizer class");
+				return TokenizerStrategy.STMT_SCANNER;
+			}
+			else {
+				throw new IllegalArgumentException("unknown string tokenizer class: "+tokenizer);
+			}
+		}
+	}
+	
+	TokenizerStrategy tokenizerStrategy = TokenizerStrategy.STMT_SCANNER;
 	
 	Connection conn;
 	Properties papp;
@@ -50,18 +84,29 @@ public class StmtProc extends AbstractFailable implements Executor {
 		setupProperties();
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		File file = new File(filePath);
-		FileReader reader = new FileReader(file);
-		Writer logerror = null;
-		String fileStr = IOUtil.readFile(reader);
-		//FIXME: SQLStmtTokenizer not working (on big files?)
+		//FIXedME: SQLStmtTokenizer not working (on big files?)
 		Iterable<String> stmtTokenizer = null;
-		if(useSQLStmtTokenizerClass) {
-			stmtTokenizer = new SQLStmtTokenizer(fileStr);
+		switch(tokenizerStrategy) {
+		case STMT_SCANNER:
+			stmtTokenizer = new SQLStmtScanner(filePath);
+			break;
+		default:
+			FileReader reader = new FileReader(file);
+			String fileStr = IOUtil.readFile(reader);
+			switch (tokenizerStrategy) {
+			case STMT_TOKENIZER:
+				stmtTokenizer = new SQLStmtTokenizer(fileStr);
+				break;
+			case STRING_SPLITTER:
+				stmtTokenizer = new StringSpliter(fileStr, split);
+				break;
+			default:
+				break;
+			}
+			reader.close();
 		}
-		else {
-			stmtTokenizer = new StringSpliter(fileStr, split);
-		}
-		reader.close();
+
+		Writer logerror = null;
 		
 		log.info("file exec: statements from file '"+file+"'...");
 		long logEachXStmts = 1000;
@@ -282,25 +327,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 		this.conn = conn;
 	}
 
-	static final String STMT_TOKENIZER_CLASS = "SQLStmtTokenizer";
-	static final String STRING_SPLITTER_CLASS = "StringSpliter";
-	
 	@Override
 	public void setProperties(Properties papp) {
 		String tokenizer = papp.getProperty(SQLRun.PROP_SQLTOKENIZERCLASS);
-		useSQLStmtTokenizerClass = true;
-		if(null == tokenizer) {
-		}
-		else if(STMT_TOKENIZER_CLASS.equals(tokenizer)) {
-			log.info("using '"+tokenizer+"' tokenizer class");
-		}
-		else if(STRING_SPLITTER_CLASS.equals(tokenizer)) {
-			useSQLStmtTokenizerClass = false;
-			log.info("using '"+tokenizer+"' tokenizer class");
-		}
-		else {
-			log.warn("unknown string tokenizer class: "+tokenizer+" (using '"+STMT_TOKENIZER_CLASS+"')");
-		}
+		tokenizerStrategy = TokenizerStrategy.getTokenizer(tokenizer);
 		
 		this.papp = papp;
 	}
