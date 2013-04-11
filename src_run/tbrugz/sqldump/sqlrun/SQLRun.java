@@ -1,6 +1,5 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
@@ -21,6 +20,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.sqlrun.def.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.Constants;
+import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
@@ -47,33 +49,14 @@ import tbrugz.sqldump.util.Utils;
 */
 public class SQLRun {
 	
-	public static enum CommitStrategy {
-		AUTO_COMMIT,
-		//STATEMENT, //not implemented yet
-		FILE,
-		EXEC_ID,
-		RUN,
-		NONE
-	} 
-	
 	static final Log log = LogFactory.getLog(SQLRun.class);
-	static final Log logCommit = LogFactory.getLog(SQLRun.class.getName()+"-commit");
-	public static final Log logBatch = LogFactory.getLog(SQLRun.class.getName()+"-batch");
-
-	public static final String STDIN = "<stdin>"; 
-	
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
-	static final String SQLRUN_PROPS_PREFIX = "sqlrun"; 
-	static final String CONN_PROPS_PREFIX = SQLRUN_PROPS_PREFIX; 
+	static final String CONN_PROPS_PREFIX = Constants.SQLRUN_PROPS_PREFIX; 
 	
-	//prefixes
-	public static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
-
 	//exec suffixes
 	static final String SUFFIX_FILE = ".file";
 	static final String SUFFIX_FILES = ".files";
 	static final String SUFFIX_STATEMENT = ".statement";
-	public static final String SUFFIX_IMPORT = ".import";
 	static final String SUFFIX_QUERY = ".query";
 
 	//aux suffixes
@@ -81,18 +64,15 @@ public class SQLRun {
 	static final String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
 	static final String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
 	static final String SUFFIX_PARAM = ".param";
-	public static final String SUFFIX_BATCH_MODE = ".batchmode";
-	public static final String SUFFIX_BATCH_SIZE = ".batchsize";
-	
 	//properties
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
-	static final String PROP_LOGINVALIDSTATEMENTS = SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
+	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 
 	//suffix groups
-	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, SUFFIX_IMPORT, SUFFIX_QUERY };
-	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, SUFFIX_BATCH_MODE, SUFFIX_BATCH_SIZE };
+	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
+	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, Constants.SUFFIX_BATCH_MODE, Constants.SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
 	
 	//other/reserved props
@@ -118,7 +98,7 @@ public class SQLRun {
 	}
 	
 	void doIt() throws IOException, SQLException {
-		List<String> execkeys = Utils.getKeysStartingWith(papp, PREFIX_EXEC);
+		List<String> execkeys = Utils.getKeysStartingWith(papp, Constants.PREFIX_EXEC);
 		Collections.sort(execkeys);
 		log.info("init processing...");
 		//Utils.showSysProperties();
@@ -130,7 +110,7 @@ public class SQLRun {
 			log.info("filter by ids: "+filterByIds);
 		}
 		for(String key: execkeys) {
-			String procId = getExecId(key, PREFIX_EXEC);
+			String procId = getExecId(key, Constants.PREFIX_EXEC);
 			if(filterByIds==null || filterByIds.contains(procId)) {
 				procIds.add(procId);
 			}
@@ -151,8 +131,8 @@ public class SQLRun {
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
-			String procId = getExecId(key, PREFIX_EXEC);
-			String action = key.substring((PREFIX_EXEC+procId).length());
+			String procId = getExecId(key, Constants.PREFIX_EXEC);
+			String action = key.substring((Constants.PREFIX_EXEC+procId).length());
 			if(filterByIds!=null && !filterByIds.contains(procId)) { continue; }
 			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
@@ -161,12 +141,12 @@ public class SQLRun {
 			}
 			papp.setProperty(PROP_PROCID, procId);
 			
-			boolean splitBySemicolon = Utils.getPropBool(papp, PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
+			boolean splitBySemicolon = Utils.getPropBool(papp, Constants.PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
 			
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
 				try {
-					srproc.execFile(papp.getProperty(key), PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+					srproc.execFile(papp.getProperty(key), Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -178,11 +158,11 @@ public class SQLRun {
 				try {
 					String dir = getDir(procId);
 					String fileRegex = papp.getProperty(key);
-					List<String> files = getFiles(dir, fileRegex);
+					List<String> files = Util.getFiles(dir, fileRegex);
 					int fileCount = 0;
 					for(String file: files) {
 						if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
-						srproc.execFile(file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+						srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 						fileCount++;
 					}
 					/*if(dir==null) {
@@ -209,7 +189,7 @@ public class SQLRun {
 				int urows = srproc.execStatement(stmtStr);
 			}
 			// .import
-			else if(key.endsWith(SUFFIX_IMPORT)) {
+			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
 				String importType = papp.getProperty(key);
 				AbstractImporter importer = null;
 				//csv
@@ -272,9 +252,9 @@ public class SQLRun {
 	}*/
 
 	String getDir(String procId) {
-		String dir = papp.getProperty(PREFIX_EXEC+procId+SUFFIX_DIR);
+		String dir = papp.getProperty(Constants.PREFIX_EXEC+procId+SUFFIX_DIR);
 		if(dir!=null) { return dir; }
-		dir = papp.getProperty(SQLRUN_PROPS_PREFIX+SUFFIX_DIR);
+		dir = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+SUFFIX_DIR);
 		return dir;
 	}
 	
@@ -300,19 +280,9 @@ public class SQLRun {
 	}
 	
 	void doCommit() throws SQLException {
-		doCommit(conn);
+		Util.doCommit(conn);
 	}
 	
-	public static void doCommit(Connection conn) {
-		try {
-			//log.debug("committing...");
-			conn.commit();
-			logCommit.debug("committed!");
-		} catch (SQLException e) {
-			logCommit.warn("error commiting: "+e);
-		}
-	}
-
 	static String getExecId(String key, String prefix) {
 		int preflen = prefix.length();
 		int end = key.indexOf('.', preflen);
@@ -363,25 +333,6 @@ public class SQLRun {
 		//XXX: really needed?
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		log.debug("DBMSFeatures: "+feats);
-	}
-	
-	public static List<String> getFiles(String dir, String fileRegex) {
-		List<String> ret = new ArrayList<String>();
-		if(dir==null) {
-			log.warn("dir '"+dir+"' not found...");
-			return null;
-		}
-		File fdir = new File(dir);
-		String[] files = fdir.list();
-		if(files==null) {
-			return null;
-		}
-		for(String file: files) {
-			if(file.matches(fileRegex)) {
-				ret.add(fdir.getAbsolutePath()+File.separator+file);
-			}
-		}
-		return ret;
 	}
 	
 	/**

@@ -27,9 +27,10 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
-import tbrugz.sqldump.sqlrun.Executor;
-import tbrugz.sqldump.sqlrun.SQLRun;
-import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.Constants;
+import tbrugz.sqldump.sqlrun.def.Executor;
+import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
@@ -57,7 +58,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
-		SQLRun.SUFFIX_IMPORT,
+		Constants.SUFFIX_IMPORT,
 	};
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
@@ -144,23 +145,23 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	@Override
 	public void setProperties(Properties prop) {
 		this.prop = prop;
-		importFile = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
-		importDir = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
-		importFiles = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
-		importURL = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
-		urlData = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
-		urlMethod = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
-		inputEncoding = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
-		recordDelimiter = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
-		skipHeaderN = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
-		follow = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
-		useBatchUpdate = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SQLRun.SUFFIX_BATCH_MODE, useBatchUpdate);
-		batchUpdateSize = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SQLRun.SUFFIX_BATCH_SIZE, batchUpdateSize);
+		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
+		importDir = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
+		importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
+		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
+		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
+		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
+		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
+		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
+		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
+		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
+		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
 		
 		long defaultCommitEachXrows = commitStrategy==CommitStrategy.FILE?defaultCommitEachXrowsForFileStrategy:commitEachXrows;
-		commitEachXrows = Utils.getPropLong(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
+		commitEachXrows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
 		
-		logMalformedLine = Utils.getPropBool(prop, SQLRun.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
+		logMalformedLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
 		
 		if(useBatchUpdate && commitEachXrows>0 && (commitEachXrows%batchUpdateSize)!=0) {
 			log.warn("better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
@@ -181,10 +182,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	void setImporterProperties(Properties prop) {
 		if(failoverId==0) {
-			setImporterProperties(prop, SQLRun.PREFIX_EXEC+execId);
+			setImporterProperties(prop, Constants.PREFIX_EXEC+execId);
 		}
 		else {
-			String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
+			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
 			setImporterProperties(prop, failoverKey);
 		}
 	}
@@ -233,7 +234,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				importDir = System.getProperty("user.dir");
 			}
 			log.info("importing files from dir: "+importDir+loginfo);
-			List<String> files = SQLRun.getFiles(importDir, importFiles);
+			List<String> files = Util.getFiles(importDir, importFiles);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
 			}
@@ -365,7 +366,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			
 			cleanupStatement(counter);
 			if(commitStrategy==CommitStrategy.FILE) {
-				SQLRun.doCommit(conn);
+				Util.doCommit(conn);
 			}
 
 			//XXX: commit in follow mode? here?
@@ -468,7 +469,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 
 		if(commitEachXrows>0 && (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0)) {
 			//XXX commit size should be multiple of batch size?
-			SQLRun.doCommit(conn);
+			Util.doCommit(conn);
 			lastOutputCountCommit = counter.output;
 		}
 		if(logEachXrows>0 && (counter.output>lastOutputCountLog) && (counter.output%logEachXrows==0)) {
@@ -539,14 +540,14 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			}
 			counter.output += sum;
 			if(sum>0) {
-				SQLRun.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum);
+				Util.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum);
 			}
 		}
 	}
 	
 	int getMaxFailoverId() {
 		for(int i=1;;i++) {
-			String failoverKey = SQLRun.PREFIX_EXEC+execId+PREFIX_FAILOVER+i;
+			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+i;
 			List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
 			if(foids==null || foids.size()==0) {
 				return i-1;
@@ -563,7 +564,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		if(importURL!=null) {
 			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, 0), inputEncoding);
 		}
-		else if(SQLRun.STDIN.equals(importFile)) {
+		else if(Constants.STDIN.equals(importFile)) {
 			scan = new Scanner(System.in, inputEncoding);
 		}
 		else {

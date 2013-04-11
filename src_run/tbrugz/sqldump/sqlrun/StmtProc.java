@@ -20,7 +20,9 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
-import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.Constants;
+import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
@@ -243,9 +245,9 @@ public class StmtProc extends AbstractFailable implements Executor {
 				
 				if((batchExecCounter%batchSize)==0) {
 					int[] updateCounts = batchStmt.executeBatch();
-					int updateCount = Util.sumInts(updateCounts);
+					int updateCount = tbrugz.sqldump.sqlrun.def.Util.sumInts(updateCounts);
 					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
-					SQLRun.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
+					tbrugz.sqldump.sqlrun.def.Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
 					return updateCount;
 				}
 				else {
@@ -275,7 +277,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	void setParameters(PreparedStatement stmt) throws SQLException {
 		int i=1;
 		while(true) {
-			String key = SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String key = Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
 			String param = papp.getProperty(key);
 			if(param!=null) {
 				log.debug("param #"+i+"/"+key+": "+param);
@@ -290,7 +292,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		int i=1;
 		String retStmt = stmt;
 		while(true) {
-			String key = SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String key = Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
 			String param = papp.getProperty(key);
 			if(param!=null) {
 				log.debug("param #"+i+"/"+key+": "+param);
@@ -306,14 +308,14 @@ public class StmtProc extends AbstractFailable implements Executor {
 			log.warn("null properties!");
 			return;
 		}
-		useBatchUpdate = Utils.getPropBool(papp, SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_BATCH_MODE, useBatchUpdate);
-		batchSize = Utils.getPropLong(papp, SQLRun.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_BATCH_SIZE, batchSize);
+		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_SIZE, batchSize);
 	}
 	
 	int closeStatement() throws SQLException {
 		if(batchStmt!=null) {
 			int[] updateCounts = batchStmt.executeBatch();
-			int updateCount = Util.sumInts(updateCounts);
+			int updateCount = tbrugz.sqldump.sqlrun.def.Util.sumInts(updateCounts);
 			logStmt.debug("executeBatch(): "+updateCount+" rows updated");
 			
 			batchStmt.close(); batchStmt = null; batchExecCounter = 0;

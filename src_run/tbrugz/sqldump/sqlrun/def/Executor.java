@@ -1,10 +1,8 @@
-package tbrugz.sqldump.sqlrun;
+package tbrugz.sqldump.sqlrun.def;
 
 import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
-
-import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
 
 public interface Executor {
 	void setExecId(String execId);

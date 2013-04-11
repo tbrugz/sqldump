@@ -19,7 +19,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.datadump.DumpSyntaxInt;
 import tbrugz.sqldump.def.AbstractFailable;
-import tbrugz.sqldump.sqlrun.SQLRun.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.CommitStrategy;
+import tbrugz.sqldump.sqlrun.def.Constants;
+import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -61,13 +63,13 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	@Override
 	public void setProperties(Properties prop) {
 		//this.prop = prop;
-		queryName = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_QUERYNAME);
-		outputStream = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_OUTSTREAM);
+		queryName = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_QUERYNAME);
+		outputStream = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_OUTSTREAM);
 		if(outputStream==null) {
 			//XXX: default to <stdout>?
 			log.error("output stream (suffix "+SUFFIX_OUTSTREAM+") not defined");
 		}
-		String dumpSyntaxStr = prop.getProperty(SQLRun.PREFIX_EXEC+execId+SUFFIX_DUMPSYNTAX);
+		String dumpSyntaxStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_DUMPSYNTAX);
 		if(dumpSyntaxStr==null) {
 			//XXX: default to FFCDataDump?
 			log.error("dump syntax (suffix "+SUFFIX_DUMPSYNTAX+") not defined");
