@@ -15,6 +15,7 @@ import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
+import tbrugz.sqldump.sqlrun.StmtExecTest;
 import tbrugz.sqldump.test.SQLTokenizerTest;
 import tbrugz.sqldump.util.CategorizedOutTest;
 import tbrugz.sqldump.util.IOUtilTest;
@@ -36,10 +37,8 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	
 	//run
 	FailoverTest.class,
+	StmtExecTest.class,
 
-	//dump ?
-	//SQLDumpTestSuite.class,
-	
 	//diff
 	DiffFromJAXB.class,
 	ResultSetDiffTest.class,
