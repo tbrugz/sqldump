@@ -3,6 +3,7 @@ import org.junit.Test;
 
 import tbrugz.sqldump.sqlrun.SQLStmtTokenizer;
 
+@Deprecated
 public class SQLTokenizerTest {
 
 	@Test

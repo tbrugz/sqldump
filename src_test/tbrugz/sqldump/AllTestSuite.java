@@ -15,8 +15,8 @@ import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
+import tbrugz.sqldump.sqlrun.SQLTokenizersTest;
 import tbrugz.sqldump.sqlrun.StmtExecTest;
-import tbrugz.sqldump.test.SQLTokenizerTest;
 import tbrugz.sqldump.util.CategorizedOutTest;
 import tbrugz.sqldump.util.IOUtilTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
@@ -26,7 +26,8 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//"unit" tests
 	DataDumpTest.class,
 	ParametrizedPropertiesTest.class,
-	SQLTokenizerTest.class,
+	//SQLTokenizerTest.class,
+	SQLTokenizersTest.class,
 	ColTypeUtilTest.class,
 	PivotRSTest.class,
 	IOUtilTest.class,

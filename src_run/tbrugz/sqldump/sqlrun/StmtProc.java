@@ -89,7 +89,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		Iterable<String> stmtTokenizer = null;
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER:
-			stmtTokenizer = new SQLStmtScanner(filePath);
+			stmtTokenizer = new SQLStmtScanner(file);
 			break;
 		default:
 			FileReader reader = new FileReader(file);
