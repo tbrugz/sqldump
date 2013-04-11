@@ -7,8 +7,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 public class IOUtilTest {
