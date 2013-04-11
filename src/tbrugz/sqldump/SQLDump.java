@@ -69,7 +69,7 @@ import tbrugz.sqldump.util.Utils;
  * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
- * ~TODO: sqlregen/sqlrun/sqlexec/sqlcmd // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
+ * TODOne: sqlregen/sqlrun/sqlexec/sqlcmd // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
  * XXXxx: default value for 'sqldump.dumpschemapattern'? user? upper(user)/(oracle)? public (postgresql)? only if contained in MetaData().getSchemas()
  * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
@@ -86,9 +86,9 @@ import tbrugz.sqldump.util.Utils;
  * XXXdone: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties
  * TODOne: add SQLDialectTransformer
  * XXXdone: log4j -> commons logging ( static Log log = LogFactory.getLog(XXX.class) )
- * TODO: sqldump.schemagrab.tables=<schema>.<table>, <table2>
- * TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
- * TODO: warnings: grabber with no dumper or processor || dumper with no grabber || no dumper, no grabber, no processor
+ * TODOne: sqldump.schemagrab.tablefilter=<schema>.<table>, <table2> 
+ * ~TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
+ * TODOne: warnings: grabber with no dumper or processor || dumper with no grabber || no dumper, no grabber, no processor
  */
 public class SQLDump {
 	
@@ -172,8 +172,9 @@ public class SQLDump {
 		String processingClassesAfterDumpersStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
 		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
 		
-		if(grabClassName!=null && dumpSchemaClasses==null) {
-			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined");
+		if(grabClassName!=null && dumpSchemaClasses==null && processingClassesStr==null) {
+			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
+			//XXX: throw ProcessingException ?
 		}
 		if(grabClassName==null && dumpSchemaClasses!=null) {
 			log.warn("dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined but no grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
@@ -183,6 +184,8 @@ public class SQLDump {
 			log.error(message);
 			if(failonerror) { throw new ProcessingException(message); }
 		}
+		
+		//XXX: log (info): grabber, processing & dumper classes
 		
 		//grabbing model
 		if(grabClassName!=null) {
