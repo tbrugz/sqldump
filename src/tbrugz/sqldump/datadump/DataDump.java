@@ -442,7 +442,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			//Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
 			Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
-			Map<String, Long> countInPartitionByPattern = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
+			//Map<String, Long> countInPartitionByPattern = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
 			Map<String, Long> countByPatternFinalFilename = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
 			
 			long count = 0;
@@ -455,14 +455,14 @@ public class DataDump extends AbstractSQLProc {
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
 					
 					partitionByStrId = getPartitionByStr(partitionByPattern, rs, partitionByCols);
-					String countInPartitionKey = partitionByPattern+"$"+partitionByStrId;
-					long countInPartition = countInPartitionByPattern.get(countInPartitionKey);
+					//String countInPartitionKey = partitionByPattern+"$"+partitionByStrId;
+					//long countInPartition = countInPartitionByPattern.get(countInPartitionKey);
 					
 					for(int i=0;i<syntaxList.size();i++) {
 						DumpSyntax ds = syntaxList.get(i);
 						if(doSyntaxDumpList.get(i)) {
 							if(ds.isWriterIndependent()) {
-								ds.dumpRow(rs, countInPartition, null);
+								ds.dumpRow(rs, count, null); //writer indepentend syntax should not care abount 'countInPartition' line number, right?
 								continue;
 							}
 							
@@ -503,7 +503,7 @@ public class DataDump extends AbstractSQLProc {
 							}
 							try {
 								if(hasData) {
-									ds.dumpRow(rs, countInPartition, w);
+									ds.dumpRow(rs, countInFilename, w);
 									countByPatternFinalFilename.put(finalFilename, ++countInFilename);
 								}
 								else {
@@ -519,7 +519,7 @@ public class DataDump extends AbstractSQLProc {
 						}
 					}
 					//lastPartitionIdByPartitionPattern.put(partitionByPattern, partitionByStrId);
-					countInPartitionByPattern.put(countInPartitionKey, ++countInPartition);
+					//countInPartitionByPattern.put(countInPartitionKey, ++countInPartition);
 				}
 
 				if(hasData) {
