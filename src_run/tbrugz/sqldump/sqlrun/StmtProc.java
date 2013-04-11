@@ -52,7 +52,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				return TokenizerStrategy.STMT_TOKENIZER;
 			}
 			else if(STRING_SPLITTER_CLASS.equals(tokenizer)) {
-				log.info("using '"+tokenizer+"' tokenizer class");
+				log.warn("using deprecated '"+tokenizer+"' tokenizer class");
 				return TokenizerStrategy.STRING_SPLITTER;
 			}
 			else if(STMT_SCANNER_CLASS.equals(tokenizer)) {
@@ -80,6 +80,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	long batchExecCounter = 0;
 	Statement batchStmt = null;
 
+	@SuppressWarnings("deprecation")
 	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException {
 		setupProperties();
 		//String errorLogFilePath = papp.getProperty(errorLogKey);

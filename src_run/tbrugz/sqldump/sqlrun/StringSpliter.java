@@ -5,6 +5,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+@Deprecated
 public class StringSpliter implements Iterator<String>, Iterable<String> {
 
 	static final Log log = LogFactory.getLog(StringSpliter.class);
