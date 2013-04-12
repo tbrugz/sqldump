@@ -24,7 +24,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
-	static Log log = LogFactory.getLog(JAXBSchemaXMLSerializer.class);
+	static final Log log = LogFactory.getLog(JAXBSchemaXMLSerializer.class);
 	
 	public static final String XMLSERIALIZATION_JAXB_DEFAULT_PREFIX = "sqldump.xmlserialization.jaxb";
 	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";
@@ -110,9 +110,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			Unmarshaller u = jc.createUnmarshaller();
 			SchemaModel sm = (SchemaModel) u.unmarshal(fileInput);
 			//use Unmarshaller.afterUnmarshal()?
-			for(Table t: sm.getTables()) {
-				t.validateConstraints();
-			}
+			validateSchema(sm);
 			log.info("xml schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
 			return sm;
 		}
@@ -123,6 +121,12 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			return null;
 		}
 		
+	}
+	
+	void validateSchema(SchemaModel sm) {
+		for(Table t: sm.getTables()) {
+			t.validateConstraints();
+		}
 	}
 
 	@Override

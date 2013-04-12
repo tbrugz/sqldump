@@ -59,13 +59,12 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 			Configuration config = new Configuration();
 			MappedNamespaceConvention con = new MappedNamespaceConvention(config);
 			JSONObject obj = new JSONObject(IOUtil.readFile(new InputStreamReader(fileInput)));
+			//XXX: option to pass a InputStream to MappedXMLStreamReader ?
 			XMLStreamReader xmlStreamReader = new MappedXMLStreamReader(obj, con);
 			
 			SchemaModel sm = (SchemaModel) u.unmarshal(xmlStreamReader);
 			//use Unmarshaller.afterUnmarshal()?
-			for(Table t: sm.getTables()) {
-				t.validateConstraints();
-			}
+			validateSchema(sm);
 			log.info("json schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
 			return sm;
 		}
