@@ -126,9 +126,10 @@
 	</target>
 
 	<target name="run" depends="compile">
-		<java classpathref="classpath.run" classname="${sqldump.mainclass}">
+		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}" failonerror="true">
 			<arg value="${run.arg}"/>
 		</java>
+		<echo message="run finished" />
 	</target>
 	
 	<!-- full test: 

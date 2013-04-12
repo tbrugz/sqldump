@@ -12,7 +12,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 
 public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 
-	//TODO: option to define recordDelimiter & inputEncoding
+	//TODO: option to define inputEncoding  (& recordDelimiter?)
 	final static String recordDelimiter = ";";
 	final static String inputEncoding = DataDumpUtils.CHARSET_UTF8;
 	final Scanner scan;
@@ -58,6 +58,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	public void remove() {
 	}
 	
+	//TODO: ignore apos inside comments: "--;\n", "/*;*/" - if they are not inside strings...
 	static int countApos(String str) {
 		int occurences = -1;
 		int fromIndex = 0;

@@ -12,6 +12,7 @@ import org.junit.runners.MethodSorters;
 
 import tbrugz.sqldump.def.DBMSResources;
 
+//TODO: remove @FixMethodOrder ?
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ColTypeUtilTest {
 	
