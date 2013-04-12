@@ -2,22 +2,29 @@ package tbrugz.sqldump;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.InputStreamReader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jettison.json.JSONObject;
 import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
+import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.IOUtil;
 
 /*
  * see: http://blog.bdoughan.com/2011/04/jaxb-and-json-via-jettison.html
@@ -41,7 +48,33 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 	
 	@Override
 	public SchemaModel grabSchema() {
-		throw new RuntimeException("Not implemented yet :(");
+		if(fileInput==null) {
+			log.warn("json serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
+			return null;
+		}
+
+		try {
+			Unmarshaller u = jc.createUnmarshaller();
+			
+			Configuration config = new Configuration();
+			MappedNamespaceConvention con = new MappedNamespaceConvention(config);
+			JSONObject obj = new JSONObject(IOUtil.readFile(new InputStreamReader(fileInput)));
+			XMLStreamReader xmlStreamReader = new MappedXMLStreamReader(obj, con);
+			
+			SchemaModel sm = (SchemaModel) u.unmarshal(xmlStreamReader);
+			//use Unmarshaller.afterUnmarshal()?
+			for(Table t: sm.getTables()) {
+				t.validateConstraints();
+			}
+			log.info("json schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
+			return sm;
+		}
+		catch(Exception e) {
+			log.error("error grabbing schema: "+e);
+			log.debug("error grabbing schema", e);
+			if(failonerror) { throw new ProcessingException(e); }
+			return null;
+		}
 	}
 
 	@Override
@@ -62,9 +95,12 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 			MappedNamespaceConvention con = new MappedNamespaceConvention(config);
 			
 			Marshaller m = jc.createMarshaller();
-			//XXX: how to format JSON output?
-			//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
-			//m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			/*
+			 * XXX: how to format JSON output? String formatted = new StringIndenter(jsonString).result(); ?
+			 * see:
+			 * - Human readable JSON output option - http://jira.codehaus.org/browse/JETTISON-43
+			 * - http://svn.codehaus.org/jettison/trunk/src/main/java/org/codehaus/jettison/util/StringIndenter.java
+			 */
 			File fout = new File(fileOutput);
 			FileWriter fw = new FileWriter(fout);
 			XMLStreamWriter xmlStreamWriter = new MappedXMLStreamWriter(con, fw);

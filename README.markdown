@@ -36,6 +36,7 @@ SQLDump processing consists of:
 
 - `JDBCSchemaGrabber` - Grabs schema metadata from a JDBC connection 
 - `JAXBSchemaXMLSerializer` - Grabs schema metadata from a XML file 
+- `JSONSchemaSerializer` - Grabs schema metadata from a JSON file 
 
 *Processors* can be:
 
@@ -46,8 +47,9 @@ SQLDump processing consists of:
 
 *Dumpers* can be:
 
-- `SchemaModelScriptDumper` - Dumps schema model in SQL-script format (DDL)  
-- `JAXBSchemaXMLSerializer` - Dumps a XML representation of the schema model 
+- `SchemaModelScriptDumper` - Dumps schema model in SQL-script format (DDL)
+- `JAXBSchemaXMLSerializer` - Dumps a XML representation of the schema model
+- `JSONSchemaSerializer` - Dumps a JSON representation of the schema model
 - `graph.Schema2GraphML` - Generates a Entity-Relationship diagram based on schema model
 - `mondrianschema.MondrianSchemaDumper` - Generates a Star/Snowflake [Mondrian Schema](http://mondrian.pentaho.com/) based on schema model
 - `xtradumpers.AlterSchemaSuggester` - Generates suggestions of SQL-scripts for altering the schema model (beta)
