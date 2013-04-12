@@ -189,6 +189,7 @@ public class SQLDump {
 		
 		//grabbing model
 		if(grabClassName!=null) {
+			grabClassName = grabClassName.trim();
 			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
 				schemaGrabber.procProperties(sdd.papp);
@@ -231,7 +232,8 @@ public class SQLDump {
 		if(dumpSchemaClasses!=null) {
 			String dumpClasses[] = dumpSchemaClasses.split(",");
 			for(String dumpClass: dumpClasses) {
-				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass.trim(), Defs.DEFAULT_CLASSLOADING_PACKAGES);
+				dumpClass = dumpClass.trim();
+				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
 					schemaDumper.procProperties(sdd.papp);
 					schemaDumper.setFailOnError(failonerror);
@@ -274,7 +276,8 @@ public class SQLDump {
 		
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
-			Processor sqlproc = (Processor) Utils.getClassInstance(procClass.trim(), Defs.DEFAULT_CLASSLOADING_PACKAGES);
+			procClass = procClass.trim();
+			Processor sqlproc = (Processor) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(sqlproc!=null) {
 				sqlproc.setProperties(papp);
 				sqlproc.setConnection(conn);

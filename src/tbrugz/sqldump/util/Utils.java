@@ -589,9 +589,13 @@ public class Utils {
 
 	public static Object getClassInstance(String className, String... defaultPackages) {
 		Class<?> c = getClassWithinPackages(className, defaultPackages);
+		if(c==null) {
+			log.warn("class not found: "+className);
+			return null;
+		}
 		Object o = getClassInstance(c);
 		if(o==null) {
-			log.debug("class not found: "+className);
+			log.warn("couldn't instantiate object from class: "+className);
 		}
 		return o;
 	}
