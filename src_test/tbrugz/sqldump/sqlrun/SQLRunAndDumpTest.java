@@ -58,8 +58,9 @@ public class SQLRunAndDumpTest {
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
-					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer",
+					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer, JSONSchemaSerializer",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
+					"-Dsqldump.jsonserialization.outfile=work/output/empdept.json",
 					/*"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 					"-Dsqldump.user=h",

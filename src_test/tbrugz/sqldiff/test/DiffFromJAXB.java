@@ -9,6 +9,7 @@ import org.junit.Test;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
+import tbrugz.sqldump.JSONSchemaSerializer;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 
@@ -39,4 +40,36 @@ public class DiffFromJAXB {
 		Assert.assertEquals("diff size should be zero", 0, diffs.size());
 	}
 
+	@Test
+	public void testIdenticalModelsFromJAXBAndJSON() {
+		//xml serializer input Orig
+		SchemaModel smOrig = null;
+		{
+		SchemaModelGrabber jaxbGrabber = new JAXBSchemaXMLSerializer();
+		Properties jaxbPropOrig = new Properties();
+		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
+		jaxbGrabber.procProperties(jaxbPropOrig);
+		smOrig = jaxbGrabber.grabSchema();
+		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
+		}
+
+		//json serializer input New
+		SchemaModel smNew = null;
+		{
+		SchemaModelGrabber jsonGrabber = new JSONSchemaSerializer();
+		Properties jsonPropNew = new Properties();
+		jsonPropNew.setProperty(JSONSchemaSerializer.JSONSERIALIZATION_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/json/empdept.json");
+		jsonGrabber.procProperties(jsonPropNew);
+		smNew = jsonGrabber.grabSchema();
+		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
+		}
+		
+		//do diff
+		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
+		System.out.println("diff:\n"+diff.getDiff());
+		
+		List<Diff> diffs = diff.getChildren();
+		Assert.assertEquals("diff size should be zero", 0, diffs.size());
+	}
+	
 }
