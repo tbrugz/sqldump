@@ -1,6 +1,7 @@
 package tbrugz.sqldiff.datadiff;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +24,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
+import tbrugz.sqldump.sqlrun.SQLStmtScanner;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
@@ -101,18 +104,25 @@ public class DataDiff {
 		Set<Table> targetTables = targetSchemaModel.getTables();
 		tablesToDiff.retainAll(targetTables);
 		
-		boolean sourceConnCreated = false,
-			targetConnCreated = false;
+		boolean
+			sourceConnCreated = false,
+			targetConnCreated = false,
+			sourceMustImportData = false,
+			targetMustImportData = false;
 		
-		//TODOne: test if source & target conn are valid; if not, create based on properties
-		//XXX: option to create resultset based on file (use csv/regex importer RSdecorator ? / insert into temporary table - H2 database by default?)
+		//~XXX: option to create resultset based on file (use csv/regex importer RSdecorator) ?
+		//XXXxx: insert into temporary table - H2 database by default?
 		if(sourceConn==null) {
-			sourceConn = getConn(prop, sourceId);
+			sourceConn = getConn(sourceId);
+			if(sourceConn==null) { return; }
 			sourceConnCreated = true;
+			sourceMustImportData = mustImportData(sourceId);
 		}
 		if(targetConn==null) {
-			targetConn = getConn(prop, targetId);
+			targetConn = getConn(targetId);
+			if(targetConn==null) { return; }
 			targetConnCreated = true;
+			targetMustImportData = mustImportData(targetId);
 		}
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
@@ -131,6 +141,13 @@ public class DataDiff {
 				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
 		CategorizedOut cout = new CategorizedOut(finalPattern);
 		
+		if(sourceMustImportData) {
+			log.info("[source] importing data for datadiff from: "+getImportDataPattern(sourceId));
+		}
+		if(targetMustImportData) {
+			log.info("[target] importing data for datadiff from: "+getImportDataPattern(targetId));
+		}
+		
 		for(Table table: tablesToDiff) {
 			if(tablesToDiffFilter!=null) {
 				if(tablesToDiffFilter.contains(table.getName())) {
@@ -147,11 +164,28 @@ public class DataDiff {
 					continue;
 				}
 			}
+
+			List<String> keyCols = null;
+			Constraint ctt = table.getPKConstraint();
+			if(ctt!=null) {
+				keyCols = ctt.uniqueColumns;
+			}
+			if(keyCols==null) {
+				log.warn("table '"+table+"' has no PK. diff disabled");
+				continue;
+			}
+			
 			String sql = DataDump.getQuery(table, "*", null, null, true);
 			
+			if(sourceMustImportData) {
+				importData(table, sourceConn, sourceId);
+			}
 			Statement stmtSource = sourceConn.createStatement();
 			ResultSet rsSource = stmtSource.executeQuery(sql);
 			
+			if(targetMustImportData) {
+				importData(table, targetConn, targetId);
+			}
 			Statement stmtTarget = targetConn.createStatement();
 			ResultSet rsTarget = stmtTarget.executeQuery(sql);
 			
@@ -164,22 +198,14 @@ public class DataDiff {
 				continue;
 			}
 			
-			List<String> keyCols = null;
-			Constraint ctt = table.getPKConstraint();
-			if(ctt!=null) {
-				keyCols = ctt.uniqueColumns;
-			}
-			if(keyCols==null) {
-				log.warn("table '"+table+"' has no PK. diff disabled");
-				continue;
-			}
-			
-			log.info("diff for table '"+table+"'...");
+			log.debug("diff for table '"+table+"'...");
 			DiffSyntax ds = getSyntax(prop);
 			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, ds, cout);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsSource.close(); rsTarget.close();
+			
+			//XXX: drop table if imported?
 		}
 		
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
@@ -204,21 +230,87 @@ public class DataDiff {
 		return ds;
 	}
 	
-	static Connection getConn(Properties prop, String grabberId) {
+	Connection getConn(String grabberId) {
 		try {
+			if(mustImportData(grabberId)) {
+				Connection conn =  SQLUtils.ConnectionUtil.initDBConnection("", getTempDBConnProperties(grabberId));
+				log.info("new connection [grabberId="+grabberId+"]: "+conn);
+				return conn;
+			}
+			else {
+			
 			String propsPrefix = "sqldiff."+grabberId;
 			if(SQLUtils.ConnectionUtil.isBasePropertiesDefined(propsPrefix, prop)) {
 				Connection conn =  SQLUtils.ConnectionUtil.initDBConnection(propsPrefix, prop);
 				log.info("database connection created [grabberId="+grabberId+"]");
 				return conn;
 			}
+			
+			}
+			
 			log.error("base connection properties not defined, can't proceed [grabberId="+grabberId+"]");
+			//XXX: throw?
 			return null;
 		} catch (Exception e) {
 			log.error("error creating connection [grabberId="+grabberId+"]: "+e);
 			log.debug("error creating connection",e);
+			//XXX: throw?
 			return null;
 		}
+	}
+	
+	String getImportDataPattern(String grabberId) {
+		String inDataFilePatternProp = "sqldiff.datadiff."+grabberId+".indatafilepattern";
+		return prop.getProperty(inDataFilePatternProp);
+	}
+	
+	boolean mustImportData(String grabberId) {
+		return getImportDataPattern(grabberId)!=null;
+	}
+	
+	static final String SCEHMANAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME));
+	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
+	
+	void importData(Table table, Connection conn, String grabberId) throws SQLException, FileNotFoundException {
+		Statement st = conn.createStatement();
+		
+		//create schema
+		if(table.getSchemaName()!=null) {
+			st.executeUpdate("create schema if not exists "+table.getSchemaName());
+			st.executeUpdate("set schema "+table.getSchemaName());
+		}
+		
+		//create table
+		st.executeUpdate(table.getDefinition(true));
+		
+		//import data
+		String dataPattern = getImportDataPattern(grabberId);
+		//log.info("importing data for datadiff from: "+dataPattern);
+		String fileName = dataPattern
+				.replaceAll(SCEHMANAME_PATTERN, table.getSchemaName())
+				.replaceAll(TABLENAME_PATTERN, table.getName());
+		File file = new File(fileName);
+		log.debug("importing data from file: "+file);
+		SQLStmtScanner scanner = new SQLStmtScanner(file);
+		long updateCount = 0;
+		for(String sql: scanner) {
+			updateCount += st.executeUpdate(sql);
+		}
+		log.info("imported "+updateCount+" rows into table '"+table.getQualifiedName()+"' from file '"+file+"'");
+		//log.info("imported "+updateCount+" rows");
+	}
+	
+	static String[][] defaultTempDbProp = {
+		{".driverclass", "org.h2.Driver"},
+		{".dburl", "jdbc:h2:mem:"}
+	};
+	
+	static Properties getTempDBConnProperties(String grabberId) {
+		Properties prop = new Properties();
+		for(String[] sarr: defaultTempDbProp) {
+			prop.put(sarr[0], sarr[1]);
+		}
+		return prop;
 	}
 	
 }

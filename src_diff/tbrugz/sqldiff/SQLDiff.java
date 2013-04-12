@@ -101,6 +101,8 @@ public class SQLDiff {
 			dd.process();
 		}
 		
+		//XXX close connections if open?
+		
 		log.info("...done dumping");
 	}
 	
