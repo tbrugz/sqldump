@@ -8,27 +8,34 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Scanner;
 
-import tbrugz.sqldump.datadump.DataDumpUtils;
-
 public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 
-	//TODO: option to define inputEncoding  (& recordDelimiter?)
+	//final static String DEFAULT_CHARSET = DataDumpUtils.CHARSET_UTF8;
+	//TODOne: option to define inputEncoding
+	//XXX: option to define recordDelimiter?
 	final static String recordDelimiter = ";";
-	final static String inputEncoding = DataDumpUtils.CHARSET_UTF8;
+	final String inputEncoding;
 	final Scanner scan;
 	final InputStream is;
 	
-	public SQLStmtScanner(File file) throws FileNotFoundException {
-		is = new BufferedInputStream(new FileInputStream(file));
+	/*public SQLStmtScanner(File file) throws FileNotFoundException {
+		this(file, DEFAULT_CHARSET);
+	}*/
+
+	public SQLStmtScanner(File file, String charset) throws FileNotFoundException {
+		this(new BufferedInputStream(new FileInputStream(file)), charset);
+	}
+	
+	public SQLStmtScanner(InputStream is, String charset) {
+		this.is = is;
+		inputEncoding = charset;
 		scan = new Scanner(is, inputEncoding);
 		scan.useDelimiter(recordDelimiter);
 	}
 
-	public SQLStmtScanner(InputStream is) {
-		this.is = is;
-		scan = new Scanner(is, inputEncoding);
-		scan.useDelimiter(recordDelimiter);
-	}
+	/*public SQLStmtScanner(InputStream is) {
+		this(is, DEFAULT_CHARSET);
+	}*/
 	
 	@Override
 	public Iterator<String> iterator() {

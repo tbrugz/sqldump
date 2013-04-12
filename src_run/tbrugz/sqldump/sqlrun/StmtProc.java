@@ -18,6 +18,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
@@ -91,7 +92,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 		Iterable<String> stmtTokenizer = null;
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER:
-			stmtTokenizer = new SQLStmtScanner(file);
+			//XXX option to define charset
+			stmtTokenizer = new SQLStmtScanner(file, DataDumpUtils.CHARSET_UTF8);
 			break;
 		default:
 			FileReader reader = new FileReader(file);

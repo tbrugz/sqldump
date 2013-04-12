@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -40,6 +41,7 @@ public class DataDiff extends AbstractFailable {
 	public static final String PROP_DATADIFF_IGNORETABLES = SQLDiff.PROP_PREFIX+".datadiff.ignoretables";
 	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
 	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
+	public static final String PROP_DATADIFF_IMPORTCHARSET = SQLDiff.PROP_PREFIX+".datadiff.importcharset";
 	
 	StringDecorator quoteAllDecorator;
 	
@@ -56,6 +58,8 @@ public class DataDiff extends AbstractFailable {
 	String sourceId;
 	String targetId;
 	
+	String importCharset;
+	
 	public void setProperties(Properties prop) {
 		tablesToDiffFilter = Utils.getStringListFromProp(prop, PROP_DATADIFF_TABLES, ",");
 		tablesToIgnore = Utils.getStringListFromProp(prop, PROP_DATADIFF_IGNORETABLES, ",");
@@ -67,6 +71,7 @@ public class DataDiff extends AbstractFailable {
 		sourceId = prop.getProperty(SQLDiff.PROP_SOURCE);
 		targetId = prop.getProperty(SQLDiff.PROP_TARGET);
 		log.debug("source: "+sourceId+" ; target: "+targetId);
+		importCharset = prop.getProperty(PROP_DATADIFF_IMPORTCHARSET, DataDumpUtils.CHARSET_UTF8);
 		
 		this.prop = prop;
 	}
@@ -292,7 +297,7 @@ public class DataDiff extends AbstractFailable {
 				.replaceAll(TABLENAME_PATTERN, table.getName());
 		File file = new File(fileName);
 		log.debug("importing data from file: "+file);
-		SQLStmtScanner scanner = new SQLStmtScanner(file);
+		SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset);
 		long updateCount = 0;
 		for(String sql: scanner) {
 			updateCount += st.executeUpdate(sql);
