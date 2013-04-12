@@ -21,8 +21,10 @@ import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.sqlrun.SQLStmtScanner;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -30,7 +32,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class DataDiff {
+public class DataDiff extends AbstractFailable {
 
 	static final Log log = LogFactory.getLog(DataDiff.class);
 	
@@ -130,6 +132,7 @@ public class DataDiff {
 		
 		if(outFilePattern==null) {
 			log.error("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)");
+			if(failonerror) { throw new ProcessingException("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)"); }
 			return;
 		}
 		
@@ -238,23 +241,21 @@ public class DataDiff {
 				return conn;
 			}
 			else {
-			
-			String propsPrefix = "sqldiff."+grabberId;
-			if(SQLUtils.ConnectionUtil.isBasePropertiesDefined(propsPrefix, prop)) {
-				Connection conn =  SQLUtils.ConnectionUtil.initDBConnection(propsPrefix, prop);
-				log.info("database connection created [grabberId="+grabberId+"]");
-				return conn;
-			}
-			
+				String propsPrefix = "sqldiff."+grabberId;
+				if(SQLUtils.ConnectionUtil.isBasePropertiesDefined(propsPrefix, prop)) {
+					Connection conn = SQLUtils.ConnectionUtil.initDBConnection(propsPrefix, prop);
+					log.info("database connection created [grabberId="+grabberId+"]");
+					return conn;
+				}
 			}
 			
 			log.error("base connection properties not defined, can't proceed [grabberId="+grabberId+"]");
-			//XXX: throw?
+			if(failonerror) { throw new ProcessingException("base connection properties not defined, can't proceed [grabberId="+grabberId+"]"); }
 			return null;
 		} catch (Exception e) {
 			log.error("error creating connection [grabberId="+grabberId+"]: "+e);
 			log.debug("error creating connection",e);
-			//XXX: throw?
+			if(failonerror) { throw new ProcessingException("error creating connection [grabberId="+grabberId+"]: "+e,e); }
 			return null;
 		}
 	}

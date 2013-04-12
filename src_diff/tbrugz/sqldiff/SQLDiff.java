@@ -41,10 +41,11 @@ public class SQLDiff {
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 
-	static Log log = LogFactory.getLog(SQLDiff.class);
+	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
 	Properties prop = new ParametrizedProperties();
 
+	boolean failonerror = true;
 	String outfilePattern = null;
 	
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -93,6 +94,7 @@ public class SQLDiff {
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
 		if(doDataDiff) {
 			DataDiff dd = new DataDiff();
+			dd.setFailOnError(failonerror);
 			dd.setProperties(prop);
 			dd.setSourceSchemaModel(fromSM);
 			dd.setSourceConnection(fromSchemaGrabber.getConnection());
@@ -151,7 +153,7 @@ public class SQLDiff {
 		sqldiff.outfilePattern = sqldiff.prop.getProperty(PROP_OUTFILEPATTERN);
 		if(sqldiff.outfilePattern==null) {
 			log.error("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script");
-			//XXX: throw exception (if failonerror) ?
+			if(sqldiff.failonerror) { throw new ProcessingException("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script"); }
 			return;
 		}
 		

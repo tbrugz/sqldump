@@ -17,7 +17,7 @@ public class Table extends DBObject implements Relation {
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
 	List<Constraint> constraints = new ArrayList<Constraint>();
-	String remarks;	//e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
+	String remarks; //e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	Boolean domainTable;
 	
 	static Log log = LogFactory.getLog(Table.class);
