@@ -392,6 +392,8 @@ public class DataDump extends AbstractSQLProc {
 			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			boolean logNumberOfOpenedWriters = true;
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
+			
+			try {
 
 			//header
 			for(int i=0;i<syntaxList.size();i++) {
@@ -485,6 +487,8 @@ public class DataDump extends AbstractSQLProc {
 							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 							long countInFilename = countByPatternFinalFilename.get(finalFilename);
 							
+							//XXX: close writers? there will be problems if query is not ordered by columns used by [partitionby]
+							
 							/*String lastPartitionId = lastPartitionIdByPartitionPattern.get(partitionByPattern);
 							if(lastPartitionId!=null && lastPartitionIdByPartitionPattern.size()>1 && !partitionByStrId.equals(lastPartitionId)) {
 								String lastFinalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), lastPartitionId);
@@ -561,6 +565,18 @@ public class DataDump extends AbstractSQLProc {
 			log.debug("wrote all footers for table/query: "+tableOrQueryName);
 			
 			rs.close();
+			
+			}
+			catch(IOException e) {
+				/*
+				 * too many open files? see ulimit
+				 * http://posidev.com/blog/2009/06/04/set-ulimit-parameters-on-ubuntu/
+				 * https://confluence.atlassian.com/display/CONF29/Fix+'Too+many+open+files'+error+on+Linux+by+increasing+filehandles
+				 * http://stackoverflow.com/questions/13988780/too-many-open-files-ulimit-already-changed
+				 */
+				log.warn("IOException occured ["+writersOpened.size()+" opened writers]: "+e);
+				throw e;
+			}
 	}
 	
 	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename) throws IOException {
