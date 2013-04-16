@@ -77,6 +77,7 @@ public class DataDiff extends AbstractFailable {
 	}
 
 	public void setFailOnError(boolean failonerror) {
+		this.failonerror = failonerror;
 	}
 	
 	public void setSourceSchemaModel(SchemaModel schemamodel) {

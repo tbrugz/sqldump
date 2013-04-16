@@ -44,6 +44,7 @@ public class SQLDiff {
 	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
 	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
+	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -180,6 +181,7 @@ public class SQLDiff {
 		SQLDiff sqldiff = new SQLDiff();
 		
 		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
+		sqldiff.failonerror = Utils.getPropBool(sqldiff.prop, PROP_FAILONERROR, sqldiff.failonerror);
 		DBObject.dumpCreateOrReplace = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 		sqldiff.outfilePattern = sqldiff.prop.getProperty(PROP_OUTFILEPATTERN);
