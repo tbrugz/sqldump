@@ -12,5 +12,7 @@ public class Constants {
 	public static final String SUFFIX_IMPORT = ".import";
 	public static final String SUFFIX_BATCH_MODE = ".batchmode";
 	public static final String SUFFIX_BATCH_SIZE = ".batchsize";
+	public static final String SUFFIX_ENCODING = ".encoding";
+	public static final String SUFFIX_DEFAULT_ENCODING = ".defaultencoding";
 
 }

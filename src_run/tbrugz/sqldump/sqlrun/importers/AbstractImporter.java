@@ -115,7 +115,6 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_ENCLOSING = ".enclosing";
 	static final String SUFFIX_INSERTTABLE = ".inserttable";
 	static final String SUFFIX_INSERTSQL = ".insertsql";
-	static final String SUFFIX_ENCODING = ".encoding";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
 	
 	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
@@ -123,7 +122,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	static final String[] AUX_SUFFIXES = {
 		SUFFIX_ENCLOSING,
-		SUFFIX_ENCODING,
+		Constants.SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
 		SUFFIX_IMPORTFILE,
 		SUFFIX_IMPORTDIR,
@@ -151,7 +150,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
 		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
 		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
-		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_ENCODING, inputEncoding);
+		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, inputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);

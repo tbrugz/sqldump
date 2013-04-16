@@ -34,6 +34,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 	
 	boolean useBatchUpdate = false;
 	long batchSize = 1000;
+	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
+	String inputEncoding = defaultInputEncoding;
 	
 	public enum TokenizerStrategy {
 		STMT_TOKENIZER,
@@ -93,7 +95,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER:
 			//XXX option to define charset
-			stmtTokenizer = new SQLStmtScanner(file, DataDumpUtils.CHARSET_UTF8);
+			stmtTokenizer = new SQLStmtScanner(file, inputEncoding);
 			break;
 		default:
 			FileReader reader = new FileReader(file);
@@ -310,8 +312,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 			log.warn("null properties!");
 			return;
 		}
+		defaultInputEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, defaultInputEncoding);
+		
+		//TODO: useBatchUpdate & batchSize: default value should not be previous value
 		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_SIZE, batchSize);
+		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 	}
 	
 	int closeStatement() throws SQLException {
