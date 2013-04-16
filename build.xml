@@ -262,7 +262,7 @@
 	<target name="config-ivy" depends="config-ivy-file,config-ivy-dir"/>
 	
 	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
-		<ivy:retrieve />
+		<ivy:retrieve haltonfailure="false"/>
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
 	</target>
 
