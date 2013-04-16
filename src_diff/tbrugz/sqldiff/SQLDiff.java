@@ -1,11 +1,13 @@
 package tbrugz.sqldiff;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +41,7 @@ public class SQLDiff {
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
+	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
@@ -47,6 +50,7 @@ public class SQLDiff {
 
 	boolean failonerror = true;
 	String outfilePattern = null;
+	String xmloutfile = null;
 	
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		if(outfilePattern==null) { return; }
@@ -89,6 +93,16 @@ public class SQLDiff {
 		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
 		//co.categorizedOut(diff.getDiff());
 		diff.outDiffs(co);
+		
+		if(xmloutfile!=null) {
+			try {
+				File f = new File(xmloutfile);
+				diff.outDiffsXML(f);
+			} catch (JAXBException e) {
+				log.warn("error writing xml: "+e);
+				log.debug("error writing xml: "+e.getMessage(),e);
+			}
+		}
 		
 		//data diff!
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
@@ -156,6 +170,7 @@ public class SQLDiff {
 			if(sqldiff.failonerror) { throw new ProcessingException("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script"); }
 			return;
 		}
+		sqldiff.xmloutfile = sqldiff.prop.getProperty(PROP_XMLOUTFILE);
 		
 		sqldiff.doIt();
 	}

@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,6 +9,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,12 +34,17 @@ import tbrugz.sqldump.util.CategorizedOut;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 public class SchemaDiff implements Diff {
 	static Log log = LogFactory.getLog(SchemaDiff.class);
 
 	//XXX: should be List<>?
+	@XmlElement(name="tableDiff")
 	final Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
+	@XmlElement(name="columnDiff")
 	final Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
+	@XmlElement(name="dbidDiff")
 	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
@@ -273,6 +287,14 @@ public class SchemaDiff implements Diff {
 		log.info(count+" diffs dumped");
 	}
 
+	public void outDiffsXML(File fout) throws IOException, JAXBException {
+		//JAXBContext jc = JAXBContext.newInstance( SchemaDiff.class );
+		JAXBContext jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures:tbrugz.sqldiff.model" );
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(this, fout);
+	}
+	
 	@Override
 	public String getDiff() {
 		StringBuffer sb = new StringBuffer();
