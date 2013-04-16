@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -293,6 +294,14 @@ public class SchemaDiff implements Diff {
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		m.marshal(this, fout);
+	}
+
+	public static SchemaDiff grabDiffsFromXML(File fin) throws IOException, JAXBException {
+		JAXBContext jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures:tbrugz.sqldiff.model" );
+		Unmarshaller u = jc.createUnmarshaller();
+		SchemaDiff sdiff = (SchemaDiff) u.unmarshal(fin);
+		log.info("xml diff model grabbed from '"+fin.getAbsolutePath()+"'");
+		return sdiff;
 	}
 	
 	@Override

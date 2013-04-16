@@ -107,6 +107,12 @@ public class DataDiff extends AbstractFailable {
 	}
 
 	public void process() throws SQLException, IOException {
+		if(sourceSchemaModel==null || targetSchemaModel==null) {
+			log.error("can't datadiff if source or taget models are null");
+			if(failonerror) { throw new ProcessingException("can't datadiff if source or taget models are null"); }
+			return;
+		}
+		
 		Set<Table> tablesToDiff = sourceSchemaModel.getTables();
 		Set<Table> targetTables = targetSchemaModel.getTables();
 		tablesToDiff.retainAll(targetTables);

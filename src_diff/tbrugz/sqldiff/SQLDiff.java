@@ -42,6 +42,7 @@ public class SQLDiff {
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
+	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
@@ -50,13 +51,23 @@ public class SQLDiff {
 
 	boolean failonerror = true;
 	String outfilePattern = null;
+	String xmlinfile = null;
 	String xmloutfile = null;
 	
-	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
+	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
 		if(outfilePattern==null) { return; }
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
+		SchemaModel fromSM = null;
+		SchemaModel toSM = null;
+		
+		SchemaDiff diff = null;
+		
+		if(xmlinfile!=null) {
+			diff = SchemaDiff.grabDiffsFromXML(new File(xmlinfile));
+		}
+		else {
 		
 		//from
 		fromSchemaGrabber = initGrabber("source", PROP_SOURCE, prop);
@@ -66,17 +77,22 @@ public class SQLDiff {
 		
 		//grab schemas
 		log.info("grabbing 'source' model");
-		SchemaModel fromSM = fromSchemaGrabber.grabSchema();
+		fromSM = fromSchemaGrabber.grabSchema();
 		log.info("grabbing 'target' model");
-		SchemaModel toSM = toSchemaGrabber.grabSchema();
+		toSM = toSchemaGrabber.grabSchema();
 		
 		//XXX: option to set dialect from properties?
 		String dialect = toSM.getSqlDialect();
 		log.debug("diff dialect set to: "+dialect);
 		DBMSResources.instance().updateDbId(dialect);
+
+		//do diff
+		log.info("diffing...");
+		diff = SchemaDiff.diff(fromSM, toSM);
 		
-		/*String finalPattern = outfilePattern.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, "\\$\\{1\\}")
-				.replaceAll(SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, "\\$\\{2\\}"); //XXX: Matcher.quoteReplacement()? maybe not...*/
+		}
+
+		//dump diff
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
 				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
 				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
@@ -88,10 +104,8 @@ public class SQLDiff {
 		
 		co.setFilePathPattern(finalPattern);
 
-		//do diff
-		log.info("dumping diff...");
-		SchemaDiff diff = SchemaDiff.diff(fromSM, toSM);
 		//co.categorizedOut(diff.getDiff());
+		//log.info("dumping diff...");
 		diff.outDiffs(co);
 		
 		if(xmloutfile!=null) {
@@ -111,9 +125,13 @@ public class SQLDiff {
 			dd.setFailOnError(failonerror);
 			dd.setProperties(prop);
 			dd.setSourceSchemaModel(fromSM);
-			dd.setSourceConnection(fromSchemaGrabber.getConnection());
+			if(fromSchemaGrabber!=null) {
+				dd.setSourceConnection(fromSchemaGrabber.getConnection());
+			}
 			dd.setTargetSchemaModel(toSM);
-			dd.setTargetConnection(toSchemaGrabber.getConnection());
+			if(toSchemaGrabber!=null) {
+				dd.setTargetConnection(toSchemaGrabber.getConnection());
+			}
 			dd.process();
 		}
 		
@@ -158,7 +176,7 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
 		SQLDiff sqldiff = new SQLDiff();
 		
 		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
@@ -170,6 +188,7 @@ public class SQLDiff {
 			if(sqldiff.failonerror) { throw new ProcessingException("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script"); }
 			return;
 		}
+		sqldiff.xmlinfile = sqldiff.prop.getProperty(PROP_XMLINFILE);
 		sqldiff.xmloutfile = sqldiff.prop.getProperty(PROP_XMLOUTFILE);
 		
 		sqldiff.doIt();
