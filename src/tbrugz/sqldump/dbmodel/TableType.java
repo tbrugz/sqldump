@@ -7,7 +7,8 @@ public enum TableType {
 	TABLE, SYNONYM, SYSTEM_TABLE,
 	VIEW, MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
-	EXTERNAL_TABLE;
+	EXTERNAL_TABLE,
+	BASE_TABLE; //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
 	
 	//XXX javadoc DatabaseMetaData#getTableTypes(): TABLE_TYPE String => table type.
 	// Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", 
@@ -38,13 +39,16 @@ public enum TableType {
 		else if(tableType.equals("EXTERNAL TABLE")) {
 			return TableType.EXTERNAL_TABLE;
 		}
+		else if(tableType.equals("BASE TABLE")) {
+			return TableType.BASE_TABLE;
+		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
 			return null;
 		}
 
-		log.warn("table "+tableName+" of unknown type: "+tableType);
-		return null;
+		log.warn("table "+tableName+" of unknown type: "+tableType+" (defaulting to TABLE)");
+		return TableType.TABLE;
 	}
 	
 	/*public boolean isPhysical() {
