@@ -90,6 +90,8 @@ public class SQLUtils {
 				}
 			}
 			
+			if(conn==null) { return null; }
+			
 			conn.setAutoCommit(autoCommit);
 			
 			String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
@@ -463,13 +465,19 @@ public class SQLUtils {
 	}
 
 	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
+		List<String> ret = null;
 		ResultSet rsSchemas = dbmd.getSchemas();
-		if(rsSchemas==null) {
-			List<String> schemas = new ArrayList<String>();
-			schemas.add("");
-			return schemas;
+		ret = getColumnValues(rsSchemas, "table_schem");
+		if(ret.size()==0) {
+			log.info("no schemas found, getting schemas from catalog names...");
+			ResultSet rsCatalogs = dbmd.getCatalogs();
+			ret = getColumnValues(rsCatalogs, "table_cat");
+			if(ret.size()==0) {
+				ret.add("");
+			}
 		}
-		return getColumnValues(rsSchemas, "table_schem");
+		log.debug("schemas: "+ret);
+		return ret;
 	}
 	
 	//XXX: props for setting pk(i)NamePatterns?

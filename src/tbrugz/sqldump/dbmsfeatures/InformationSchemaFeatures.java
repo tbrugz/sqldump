@@ -235,6 +235,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		int countConstraints = 0;
 		while(rs.next()) {
 			String schemaName = rs.getString(1);
 			String tableName = rs.getString(2);
@@ -246,6 +247,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
+				countConstraints++;
 			}
 			else {
 				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
@@ -255,7 +257,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(count+" check constraints grabbed");
+		log.info(countConstraints+" check constraints grabbed [rowcount="+count+"]");
 	}
 
 	String grabDBUniqueConstraintsQuery(String schemaPattern) {
@@ -293,11 +295,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
+					countUniqueConstraints++;
 				}
 				else {
 					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
-				countUniqueConstraints++;
 			}
 			c.uniqueColumns.add(rs.getString(4));
 			previousConstraintId = constraintId;

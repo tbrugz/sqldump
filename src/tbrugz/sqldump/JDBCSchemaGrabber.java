@@ -402,7 +402,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		catch(Exception e) {
 			log.error("error grabbing schema: "+e);
-			log.info("error grabbing schema", e);
+			log.debug("error grabbing schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
 			return null;
 		}
