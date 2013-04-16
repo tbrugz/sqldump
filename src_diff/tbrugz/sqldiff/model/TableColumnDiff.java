@@ -12,11 +12,12 @@ import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 
 //XXX: rename to ColumnDiff?
+//@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
 public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	static Log log = LogFactory.getLog(TableColumnDiff.class);
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
-	final Table table;
+	final Table table; //TODO: change to tableName & schemaName?
 	final Column column;
 	final Column previousColumn;
 	

@@ -16,6 +16,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 
+//@XmlJavaTypeAdapter(TableDiffAdapter.class)
 public class TableDiff implements Diff, Comparable<TableDiff> {
 	static Log log = LogFactory.getLog(TableDiff.class);
 

@@ -8,6 +8,8 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 /*
  * XXX option to change 'new:' & 'old:' xtra comments?
  */
+//@XmlType(factoryMethod="newInstance")
+//@XmlJavaTypeAdapter(DBIdentifiableDiffAdapter.class)
 public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> {
 	final ChangeType changeType;
 	final DBIdentifiable ident;
@@ -102,4 +104,15 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	public DBIdentifiableDiff inverse() {
 		return new DBIdentifiableDiff(changeType.inverse(), ident, previousIdent, ownerTableName);
 	}
+	
+	/*
+	 * see:
+	 * http://stackoverflow.com/questions/7552310/add-override-behavior-on-jaxb-generated-classes-by-extending-them
+	 * http://blog.bdoughan.com/2011/06/jaxb-and-factory-methods.html
+	 */
+	/*
+	public static DBIdentifiableDiff newInstance() throws JAXBException {
+		return null;
+	}
+	*/
 }
