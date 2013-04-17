@@ -70,6 +70,7 @@ public class SQLRun {
 	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
+	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -83,6 +84,7 @@ public class SQLRun {
 	Connection conn;
 	CommitStrategy commitStrategy = CommitStrategy.FILE;
 	List<String> filterByIds = null;
+	boolean failonerror = true;
 	
 	void end(boolean closeConnection) throws SQLException {
 		if(closeConnection && conn!=null) {
@@ -131,7 +133,7 @@ public class SQLRun {
 		srproc.setDefaultFileEncoding(defaultEncoding);
 		srproc.setCommitStrategy(commitStrategy);
 		srproc.setProperties(papp);
-		srproc.setFailOnError(true); //XXX setFailOnError by properties...
+		srproc.setFailOnError(failonerror);
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
@@ -213,6 +215,7 @@ public class SQLRun {
 				importer.setConnection(conn);
 				importer.setDefaultFileEncoding(defaultEncoding);
 				importer.setCommitStrategy(commitStrategy);
+				importer.setFailOnError(failonerror);
 				importer.setProperties(papp);
 				long imported = 0;
 				try {
@@ -227,6 +230,7 @@ public class SQLRun {
 				sqd.setExecId(procId);
 				sqd.setConnection(conn);
 				sqd.setDefaultFileEncoding(defaultEncoding);
+				sqd.setFailOnError(failonerror);
 				sqd.setProperties(papp);
 				sqd.execQuery(papp.getProperty(key));
 			}
@@ -340,6 +344,8 @@ public class SQLRun {
 		//XXX: really needed?
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		log.debug("DBMSFeatures: "+feats);
+		
+		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 	}
 	
 	/**
