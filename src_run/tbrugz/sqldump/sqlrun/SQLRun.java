@@ -69,7 +69,6 @@ public class SQLRun {
 	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
 	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
-	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
 
 	//suffix groups

@@ -30,11 +30,16 @@ import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
 public class StmtProc extends AbstractFailable implements Executor {
-	static Log log = LogFactory.getLog(StmtProc.class);
-	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
-	static Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
+	static final Log log = LogFactory.getLog(StmtProc.class);
+	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
+	static final Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
+	
+	//properties
+	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
+	static final String PROP_USE_PREPARED_STATEMENT = "sqlrun.usepreparedstatement";
 	
 	boolean useBatchUpdate = false;
+	boolean usePreparedStatement = true;
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
@@ -263,10 +268,16 @@ public class StmtProc extends AbstractFailable implements Executor {
 					return 0;
 				}
 			}
-			else {
+			else if(usePreparedStatement){
 				PreparedStatement stmt = conn.prepareStatement(stmtStr);
 				setParameters(stmt);
 				int urows = stmt.executeUpdate();
+				logStmt.debug("updated "+urows+" rows");
+				return urows;
+			}
+			else {
+				Statement stmt = conn.createStatement();
+				int urows = stmt.executeUpdate(replaceParameters(stmtStr));
 				logStmt.debug("updated "+urows+" rows");
 				return urows;
 			}
@@ -342,8 +353,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 
 	@Override
 	public void setProperties(Properties papp) {
-		String tokenizer = papp.getProperty(SQLRun.PROP_SQLTOKENIZERCLASS);
+		String tokenizer = papp.getProperty(StmtProc.PROP_SQLTOKENIZERCLASS);
 		tokenizerStrategy = TokenizerStrategy.getTokenizer(tokenizer);
+		usePreparedStatement = Utils.getPropBool(papp, PROP_USE_PREPARED_STATEMENT, usePreparedStatement);
+		if(!usePreparedStatement) {
+			log.info("not using prepared statements [prop '"+PROP_USE_PREPARED_STATEMENT+"']");
+		}
 		
 		this.papp = papp;
 	}
