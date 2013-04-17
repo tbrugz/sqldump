@@ -17,6 +17,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
@@ -123,8 +124,11 @@ public class SQLRun {
 			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
 		}
 		
+		String defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
+		
 		StmtProc srproc = new StmtProc();
 		srproc.setConnection(conn);
+		srproc.setDefaultFileEncoding(defaultEncoding);
 		srproc.setCommitStrategy(commitStrategy);
 		srproc.setProperties(papp);
 		srproc.setFailOnError(true); //XXX setFailOnError by properties...
@@ -207,6 +211,7 @@ public class SQLRun {
 				
 				importer.setExecId(procId);
 				importer.setConnection(conn);
+				importer.setDefaultFileEncoding(defaultEncoding);
 				importer.setCommitStrategy(commitStrategy);
 				importer.setProperties(papp);
 				long imported = 0;
@@ -221,6 +226,7 @@ public class SQLRun {
 				QueryDumper sqd = new QueryDumper();
 				sqd.setExecId(procId);
 				sqd.setConnection(conn);
+				sqd.setDefaultFileEncoding(defaultEncoding);
 				sqd.setProperties(papp);
 				sqd.execQuery(papp.getProperty(key));
 			}
@@ -311,6 +317,7 @@ public class SQLRun {
 		ColTypeUtil.setProperties(papp);
 		
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
+		allAuxSuffixes.addAll(new StmtProc().getAuxSuffixes());
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new QueryDumper().getAuxSuffixes());

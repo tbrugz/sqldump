@@ -27,6 +27,7 @@ import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
+//XXX: remove references to SQLRun class
 public class StmtProc extends AbstractFailable implements Executor {
 	static Log log = LogFactory.getLog(StmtProc.class);
 	static Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
@@ -312,9 +313,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 			log.warn("null properties!");
 			return;
 		}
-		defaultInputEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, defaultInputEncoding);
-		
-		//TODO: useBatchUpdate & batchSize: default value should not be previous value
+		//TODO: useBatchUpdate & batchSize: default value should not be based on previous value
 		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_SIZE, batchSize);
 		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_ENCODING, defaultInputEncoding);
@@ -358,8 +357,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 
 	@Override
 	public List<String> getAuxSuffixes() {
-		// TODO Auto-generated method stub
-		return null;
+		List<String> ret = new ArrayList<String>();
+		return ret;
 	}
 
 	@Override
@@ -367,6 +366,11 @@ public class StmtProc extends AbstractFailable implements Executor {
 		List<String> ret = new ArrayList<String>();
 		ret.addAll(Arrays.asList(EXEC_SUFFIXES));
 		return ret;
+	}
+
+	@Override
+	public void setDefaultFileEncoding(String encoding) {
+		defaultInputEncoding = encoding;
 	}
 	
 }

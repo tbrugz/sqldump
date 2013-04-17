@@ -172,5 +172,9 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		DumpSyntaxInt dumpSyntax = getSyntax(dumpClass, dumpProp);
 		qd.dumpResultSet(rs, dumpSyntax, w, null, null);
 		w.flush();
+	}
+
+	@Override
+	public void setDefaultFileEncoding(String encoding) {
 	} 
 }

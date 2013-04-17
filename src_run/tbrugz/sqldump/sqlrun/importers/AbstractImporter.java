@@ -78,7 +78,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	String recordDelimiter = "\r?\n";
 	String insertTable = null;
 	String insertSQL = null;
-	String inputEncoding = DataDumpUtils.CHARSET_UTF8;
+	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
+	String inputEncoding = defaultInputEncoding;
 	
 	boolean logMalformedLine = true;
 	
@@ -150,7 +151,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
 		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
 		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
-		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, inputEncoding);
+		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
 		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
@@ -638,6 +639,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		List<String> ret = new ArrayList<String>();
 		ret.addAll(Arrays.asList(EXEC_SUFFIXES));
 		return ret;
+	}
+	
+	@Override
+	public void setDefaultFileEncoding(String encoding) {
+		defaultInputEncoding = encoding;
 	}
 	
 }

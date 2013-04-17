@@ -10,6 +10,7 @@ public interface Executor {
 	void setConnection(Connection conn);
 	void setCommitStrategy(CommitStrategy commitStrategy);
 	void setFailOnError(boolean failonerror);
+	void setDefaultFileEncoding(String encoding);
 	//XXX void execute();
 	List<String> getExecSuffixes();
 	List<String> getAuxSuffixes();
