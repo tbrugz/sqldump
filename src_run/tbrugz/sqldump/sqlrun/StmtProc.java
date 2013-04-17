@@ -25,6 +25,7 @@ import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
@@ -144,6 +145,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				}
 				countError++;
 				logStmt.debug("error executing updates", e);
+				SQLUtils.xtraLogSQLException(e, log);
 				if(failonerror) { throw new ProcessingException(e); }
 			}
 			countExec++;
@@ -184,6 +186,11 @@ public class StmtProc extends AbstractFailable implements Executor {
 		if(errorLogFilePath==null) {
 			errorLogFilePath = papp.getProperty(SQLRun.PROP_LOGINVALIDSTATEMENTS);
 		}
+		if(errorLogFilePath==null) {
+			log.warn("error log file not defined [prop '"+SQLRun.PROP_LOGINVALIDSTATEMENTS+"']");
+			errorFileNotFoundWarned = true;
+			return null;
+		}
 		
 		FileWriter logerror = null;
 		try {
@@ -200,11 +207,6 @@ public class StmtProc extends AbstractFailable implements Executor {
 				log.warn("error opening file '"+errorLogFilePath+"' for writing invalid statements. Ex: "+fnfe);
 				errorFileNotFoundWarned = true;
 			}
-		}
-		catch (NullPointerException npe) {
-			log.warn("error log file not defined. Ex: "+npe);
-			//npe.printStackTrace();
-			errorFileNotFoundWarned = true;
 		}
 		catch (IOException e) {
 			log.warn("ioexception when opening error log file. Ex: "+e);
@@ -229,6 +231,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		catch(SQLException e) {
 			log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
 			log.debug("error executing statement", e);
+			SQLUtils.xtraLogSQLException(e, log);
 			if(failonerror) { throw new ProcessingException(e); }
 			return 0;
 		}

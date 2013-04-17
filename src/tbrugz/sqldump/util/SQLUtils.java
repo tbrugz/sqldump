@@ -515,6 +515,7 @@ public class SQLUtils {
 		se = se.getNextException();
 		while(se!=null) {
 			log.debug("next SQLException: "+se);
+			se = se.getNextException();
 		} 
 	}
 
