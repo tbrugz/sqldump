@@ -504,17 +504,17 @@ public class SQLUtils {
 	}
 	
 	public static void xtraLogSQLException(SQLException se, Log log) {
-		log.debug("SQLException: state: "+se.getSQLState()+" ; errorCode: "+se.getErrorCode());
+		log.info("SQLException: state: "+se.getSQLState()+" ; errorCode: "+se.getErrorCode());
 		if(se.iterator()!=null) {
 			Iterator<Throwable> it = se.iterator();
 			while(it.hasNext()) {
 				Throwable t = it.next();
-				log.debug("inner SQLException: "+t);
+				log.info("inner SQLException: "+t);
 			}
 		}
 		se = se.getNextException();
 		while(se!=null) {
-			log.debug("next SQLException: "+se);
+			log.info("next SQLException: "+se);
 			se = se.getNextException();
 		} 
 	}

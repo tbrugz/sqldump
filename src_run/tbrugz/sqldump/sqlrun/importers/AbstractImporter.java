@@ -31,6 +31,7 @@ import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Util;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
@@ -173,10 +174,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		//set max failover id!
 		maxFailoverId = getMaxFailoverId();
 		
-		columnTypes = Utils.getStringListFromProp(prop, Constants.PREFIX_EXEC+execId+SUFFIX_COLUMN_TYPES, ",");
+		/*columnTypes = Utils.getStringListFromProp(prop, Constants.PREFIX_EXEC+execId+SUFFIX_COLUMN_TYPES, ",");
 		if(columnTypes!=null) {
 			log.info("[execId="+execId+"] column-types: "+columnTypes);
-		}
+		}*/
 		
 		setImporterProperties(prop);
 		//setDefaultImporterProperties(prop);
@@ -185,6 +186,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	void setImporterProperties(Properties prop, String importerPrefix) {
 		insertTable = prop.getProperty(importerPrefix+SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(importerPrefix+SUFFIX_INSERTSQL);
+		columnTypes = Utils.getStringListFromProp(prop, importerPrefix+SUFFIX_COLUMN_TYPES, ",");
 		mustSetupSQLStatement = true;
 	}
 	
@@ -231,6 +233,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				(commitEachXrows>0?" [commit-size="+commitEachXrows+"]":"")+
 				(useBatchUpdate?" [batch-size="+batchUpdateSize+"]":"");
 		
+		try {
+			
 		if(importFile!=null) {
 			log.info("importing file: "+importFile+loginfo);
 			ret = importFile();
@@ -265,6 +269,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		else {
 			log.error("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...");
 			if(failonerror) { throw new ProcessingException("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified..."); }
+		}
+		
+		} catch(SQLException e) {
+			log.warn("sqlexception: "+e);
+			SQLUtils.xtraLogSQLException(e, log);
+			throw e;
 		}
 		
 		if(filesImported>1) {
@@ -511,7 +521,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				//XXX: more column types (double, date, boolean, byte, long, object?, null?, ...)
 			}
 			else {
-				log.warn("stmtSetValue: columnTypes.size() <= index (will use 'string' type)");
+				log.warn("stmtSetValue: columnTypes.size() <= index [="+index+"] (will use 'string' type)");
 			}
 		}
 		//default: set as string
