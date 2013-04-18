@@ -2,9 +2,11 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 
+//TODO: remove returnType, parameterNames & parameterTypes (use the ones from ExecutableObject)
 public class InformationSchemaRoutine extends ExecutableObject {
 	private static final long serialVersionUID = 1L;
 	
@@ -13,8 +15,14 @@ public class InformationSchemaRoutine extends ExecutableObject {
 	public List<String> parameterNames = new ArrayList<String>();
 	public List<String> parameterTypes = new ArrayList<String>();
 
+	static final Pattern PATTERN_CREATE_EXECUTABLE = Pattern.compile("\\s*create\\s+", Pattern.CASE_INSENSITIVE);
+	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
+		if(PATTERN_CREATE_EXECUTABLE.matcher(getBody()).find()) {
+			return getBody();
+		}
+		
 		StringBuffer sb = null;
 		if(parameterNames!=null) {
 			sb = new StringBuffer();

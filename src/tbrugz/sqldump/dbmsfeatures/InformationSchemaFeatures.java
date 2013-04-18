@@ -63,8 +63,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing views");
 		String query = grabDBViewsQuery(schemaPattern);
+		log.debug("grabbing views: sql:\n"+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -193,9 +193,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.debug("grabbing sequences");
 		Statement st = conn.createStatement();
 		String query = grabDBSequencesQuery(schemaPattern);
+		log.debug("grabbing sequences: sql:\n"+query);
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
