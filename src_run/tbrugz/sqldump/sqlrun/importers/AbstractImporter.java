@@ -80,6 +80,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	String insertSQL = null;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
+	List<String> columnTypes;
 	
 	boolean logMalformedLine = true;
 	
@@ -117,6 +118,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_INSERTTABLE = ".inserttable";
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_COLUMN_TYPES = ".columntypes";
 	
 	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
@@ -134,7 +136,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
 		SUFFIX_LOG_MALFORMED_LINE,
-		SUFFIX_X_COMMIT_EACH_X_ROWS
+		SUFFIX_X_COMMIT_EACH_X_ROWS,
+		SUFFIX_COLUMN_TYPES
 	};
 	
 	@Override
@@ -164,11 +167,16 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		logMalformedLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
 		
 		if(useBatchUpdate && commitEachXrows>0 && (commitEachXrows%batchUpdateSize)!=0) {
-			log.warn("better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
+			log.warn("[execId="+execId+"] better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
 		}
 		
 		//set max failover id!
 		maxFailoverId = getMaxFailoverId();
+		
+		columnTypes = Utils.getStringListFromProp(prop, Constants.PREFIX_EXEC+execId+SUFFIX_COLUMN_TYPES, ",");
+		if(columnTypes!=null) {
+			log.info("[execId="+execId+"] column-types: "+columnTypes);
+		}
 		
 		setImporterProperties(prop);
 		//setDefaultImporterProperties(prop);
@@ -353,7 +361,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 							if(logMalformedLine) {
 								log.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
-										+e.getMessage());
+										+e);
+								//log.debug("error processing line "+linecounter, e);
 								//XXX: throw ProcessingException()?
 							}
 							importthisline = false;
@@ -434,18 +443,32 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		//List<String> values = new ArrayList<String>();
 		
 		for(int i=0;i<parts.length;i++) {
+			int index = i;
+			try {
+				
 			if(filecol2tabcolMap!=null) {
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
-					int index = filecol2tabcolMap.indexOf(i);
-					stmt.setString(index+1, parts[i]);
+					index = filecol2tabcolMap.indexOf(i);
+					stmtSetValue(index, parts[i]);
 					//values.add(parts[i]);
 					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);						
 				}
+				else {
+					//do nothing!
+				}
 			}
 			else {
-				stmt.setString(i+1, parts[i]);
+				stmtSetValue(index, parts[i]);
 				//values.add(parts[i]);
+			}
+			
+			}
+			catch(RuntimeException e) {
+				log.debug("error procLineInternal: i="+i+"; index="+index+" ; value='"+parts[i]+"'"
+						+(columnTypes!=null?" ; type="+columnTypes.get(index):"")
+						+": "+e);
+				throw e;
 			}
 			//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
 		}
@@ -476,6 +499,23 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			log.info("[exec-id="+execId+"] "+counter.output+" rows imported");
 			lastOutputCountLog = counter.output;
 		}
+	}
+	
+	void stmtSetValue(int index, String value) throws SQLException {
+		if(columnTypes!=null) {
+			if(columnTypes.size()>index) {
+				if(columnTypes.get(index).equals("int")) {
+					stmt.setInt(index+1, Integer.parseInt(value.trim()));
+					return;
+				}
+				//XXX: more column types (double, date, boolean, byte, long, object?, null?, ...)
+			}
+			else {
+				log.warn("stmtSetValue: columnTypes.size() <= index (will use 'string' type)");
+			}
+		}
+		//default: set as string
+		stmt.setString(index+1, value);
 	}
 	
 	List<Integer> loggedStatementFailoverIds = new ArrayList<Integer>();
