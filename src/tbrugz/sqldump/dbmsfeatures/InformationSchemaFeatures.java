@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
@@ -132,7 +135,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern) {
-		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type "
+		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type, p.ordinal_position "
 				+"from information_schema.routines r, information_schema.parameters p "
 				+"where r.specific_name = p.specific_name and r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
@@ -154,7 +157,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			if(eo==null || !routineName.equals(eo.getName())) {
 				//end last object
 				if(eo!=null) {
-					model.getExecutables().add(eo);
+					if(addExecutableToModel(model, eo)) {
+						count++;
+					}
 				}
 
 				//new object
@@ -168,21 +173,37 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("unknown object type: "+rs.getString(2));
 					eo.setType( DBObjectType.EXECUTABLE );
 				}
-				eo.returnType = rs.getString(3);
+				ExecutableParameter ep = new ExecutableParameter();
+				ep.dataType = rs.getString(3);
+				eo.setReturnParam(ep);
+				eo.setParams(new ArrayList<ExecutableParameter>());
+				
 				eo.externalLanguage = rs.getString(4);
 				eo.setBody( rs.getString(5) );
-				count++;
 			}
-			eo.parameterNames.add(rs.getString(6));
-			eo.parameterTypes.add(rs.getString(7));
+			ExecutableParameter ep = new ExecutableParameter();
+			ep.name = rs.getString(6);
+			ep.dataType = rs.getString(7);
+			ep.position = rs.getInt(8);
+			eo.getParams().add(ep);
 		}
 		if(eo!=null) {
-			model.getExecutables().add(eo);
+			if(addExecutableToModel(model, eo)) {
+				count++;
+			}
 		}
 		
 		rs.close();
 		st.close();
 		log.info(count+" executable objects/routines grabbed");
+	}
+	
+	boolean addExecutableToModel(SchemaModel model, ExecutableObject eo) {
+		boolean added = model.getExecutables().add(eo);
+		if(!added) {
+			log.warn("executable cound not be added to model: "+eo.toString()+" (already added?)");
+		}
+		return added;
 	}
 
 	String grabDBSequencesQuery(String schemaPattern) {

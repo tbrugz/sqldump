@@ -16,7 +16,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		
-		grabExtraConstraints = false; //XXX: unique constraints - from SYS.KEYS?
+		grabExtraConstraints = false; //XXX: unique constraints - from SYS.KEYS [type==1]? (pk==0, fk==2)
 		grabSynonyms = false; //monetdb doesn't seem to have synonyms
 		grabTriggers = false; //XXX: grab from SYS.TRIGGERS
 	};
@@ -52,7 +52,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		return "select functions.name as routine_name, 'FUNCTION' as routine_type, ret.type as data_type"
 				//+", functions.mod as external_language, func as routine_definition"
 				+", null as external_language, func as routine_definition"
-				+", p.name as parameter_name, p.type as data_type "
+				+", p.name as parameter_name, p.type as data_type, p.number as ordinal_position "
 				+"from sys.functions "
 				+"inner join sys.schemas on functions.schema_id = schemas.id "
 				+"inner join sys.args p on functions.id = p.func_id "

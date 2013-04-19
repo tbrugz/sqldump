@@ -21,8 +21,8 @@ public class ExecutableObject extends DBObject {
 	String remarks;
 
 	String packageName;
-	List<ExecutableParameter> params;
-	ExecutableParameter returnParam;
+	protected List<ExecutableParameter> params;
+	protected ExecutableParameter returnParam;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
