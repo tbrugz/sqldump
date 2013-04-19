@@ -848,20 +848,27 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return c;
 	}
 
+	Set<String> unknownPrivilegesWarned = new HashSet<String>();
+	
 	List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
+		String privilege = null;
 		while(grantrs.next()) {
 			try {
 				Grant grant = new Grant();
 				
 				grant.grantee = grantrs.getString("GRANTEE");
-				grant.privilege = PrivilegeType.valueOf(Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE")));
+				privilege = Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE"));
+				grant.privilege = PrivilegeType.valueOf(privilege);
 				grant.table = grantrs.getString("TABLE_NAME");
 				grant.withGrantOption = "YES".equals(grantrs.getString("IS_GRANTABLE"));
 				grantsList.add(grant);
 			}
 			catch(IllegalArgumentException iae) {
-				log.warn(iae);
+				if(!unknownPrivilegesWarned.contains(privilege)) {
+					log.warn("unknown privilege: "+privilege+" [ex: "+iae+"]");
+					unknownPrivilegesWarned.add(privilege);
+				}
 			}
 		}
 		return grantsList;

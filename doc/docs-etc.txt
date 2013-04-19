@@ -28,11 +28,6 @@ http://oreilly.com/catalog/javadata/chapter/ch04.html
 
 
 ==============
-TODO:
-- erros jdbc postgresql
-- criar driver jdbc para access (usando Jackess) 
-
-==============
 constraints:
 check, not null, unique 
 pk, fk
