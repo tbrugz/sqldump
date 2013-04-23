@@ -27,6 +27,7 @@ import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
+import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
@@ -125,6 +126,9 @@ public class SQLRun {
 			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
 		}
 		
+		SQLR sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
+		SQLR.registerMBeanSimple(sqlrmbean);
+		
 		String defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		
 		StmtProc srproc = new StmtProc();
@@ -133,6 +137,9 @@ public class SQLRun {
 		srproc.setCommitStrategy(commitStrategy);
 		srproc.setProperties(papp);
 		srproc.setFailOnError(failonerror);
+		
+		int sqlrunCounter = 0;
+		
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean isExecId = false;
@@ -140,9 +147,13 @@ public class SQLRun {
 			String action = key.substring((Constants.PREFIX_EXEC+procId).length());
 			if(filterByIds!=null && !filterByIds.contains(procId)) { continue; }
 			
+			String execValue = papp.getProperty(key);
+			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
 				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"'");
 				isExecId = true;
+				sqlrunCounter++;
+				sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
 			}
 			papp.setProperty(PROP_PROCID, procId);
 			
@@ -151,7 +162,7 @@ public class SQLRun {
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
 				try {
-					srproc.execFile(papp.getProperty(key), Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+					srproc.execFile(execValue, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -162,8 +173,7 @@ public class SQLRun {
 			else if(key.endsWith(SUFFIX_FILES)) {
 				try {
 					String dir = getDir(procId);
-					String fileRegex = papp.getProperty(key);
-					List<String> files = Util.getFiles(dir, fileRegex);
+					List<String> files = Util.getFiles(dir, execValue);
 					int fileCount = 0;
 					for(String file: files) {
 						if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
@@ -190,12 +200,11 @@ public class SQLRun {
 			}
 			// .statement
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
-				String stmtStr = papp.getProperty(key);
-				int urows = srproc.execStatement(stmtStr);
+				int urows = srproc.execStatement(execValue);
 			}
 			// .import
 			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
-				String importType = papp.getProperty(key);
+				String importType = execValue;
 				AbstractImporter importer = null;
 				//csv
 				if("CSV".equalsIgnoreCase(importType)) {
@@ -231,7 +240,7 @@ public class SQLRun {
 				sqd.setDefaultFileEncoding(defaultEncoding);
 				sqd.setFailOnError(failonerror);
 				sqd.setProperties(papp);
-				sqd.execQuery(papp.getProperty(key));
+				sqd.execQuery(execValue);
 			}
 			// ...else
 			else if(endsWithAny(key, allAuxSuffixes)) {
