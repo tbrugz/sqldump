@@ -21,9 +21,9 @@ public enum DBObjectType {
 			return "package body";
 		case TYPE_BODY:
 			return "type body";
+		default:
+			return this.name().toLowerCase();
 		}
-		
-		return this.name().toLowerCase();
 	}
 	
 	public boolean isExecutableType() {
@@ -37,8 +37,9 @@ public enum DBObjectType {
 		case TYPE:
 		case TYPE_BODY:
 			return true;
+		default:
+			return false;
 		}
-		return false;
 	}
 	
 }

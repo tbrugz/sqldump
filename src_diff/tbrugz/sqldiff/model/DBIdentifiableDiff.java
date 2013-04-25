@@ -52,8 +52,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 				return "drop "
 					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
 					+ (addComments?getComment(ident, "new: "):"");
+			default:
+				throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
 		}
-		throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
 	}
 	
 	@Override

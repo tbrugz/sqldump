@@ -62,6 +62,9 @@ public class OracleTable extends Table {
 						footer += " values less than ("+Utils.join(otp.upperValues, ",")+")"; break;
 					case LIST:
 						footer += " values ("+Utils.join(otp.values, ",")+")"; break;
+					case HASH:
+					default:
+						break;
 					}
 					footer += (dumpPhysicalAttributes?" tablespace "+otp.tableSpace:"");
 					partCount++;

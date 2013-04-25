@@ -71,7 +71,7 @@ public class ExecOrderDiffComparator implements Comparator<Diff> {
 		case GRANT: return 31;
 
 		//case JAVA_SOURCE: ?
+		default: return 100;
 		}
-		return 100;
 	}
 }

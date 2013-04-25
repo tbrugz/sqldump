@@ -12,9 +12,9 @@ public enum PrivilegeType {
 		switch(this) {
 			//case ON_COMMIT_REFRESH: return Utils.denormalizeEnumStringConstant(String.valueOf(ON_COMMIT_REFRESH)); 
 			//case QUERY_REWRITE: return Utils.denormalizeEnumStringConstant(String.valueOf(QUERY_REWRITE)); 
-			case ON_COMMIT_REFRESH: return "ON COMMIT REFRESH"; 
-			case QUERY_REWRITE: return "QUERY REWRITE"; 
+			case ON_COMMIT_REFRESH: return "ON COMMIT REFRESH";
+			case QUERY_REWRITE: return "QUERY REWRITE";
+			default: return super.toString(); 
 		}
-		return super.toString();
 	}
 }
