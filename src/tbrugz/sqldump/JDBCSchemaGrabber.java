@@ -832,7 +832,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			try {
 				cols.getBoolean("IS_AUTOINCREMENT");
 			}
-			catch(SQLException e) {
+			catch(Exception e) {
 				grabColumnIsAutoincrement = false;
 				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not avaiable");
 			}
