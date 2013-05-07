@@ -132,8 +132,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY "
-				+"FROM ALL_TRIGGERS where owner = '"+schemaPattern+"' ORDER BY trigger_name";
+		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
+				+"FROM ALL_TRIGGERS "
+				+"where owner = '"+schemaPattern+"' "
+				//+"and status = 'ENABLED' "
+				+"ORDER BY trigger_name";
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -146,6 +149,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			t.tableName = rs.getString(3);
 			t.description = rs.getString(4);
 			t.body = rs.getString(5);
+			t.whenClause = rs.getString(6);
+			if(t.description!=null) { t.description = t.description.trim(); }
+			
 			model.getTriggers().add(t);
 			count++;
 		}

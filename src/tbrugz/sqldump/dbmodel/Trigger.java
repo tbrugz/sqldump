@@ -7,11 +7,14 @@ public class Trigger extends DBObject {
 	public String description;
 	public String body;
 	public String tableName;
+	public String whenClause;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return (dumpCreateOrReplace?"create or replace ":"create ") + "trigger "
-				+ description + "\n" + body;
+				+ description + "\n"
+				+ (whenClause!=null?"when ( "+whenClause.trim()+" )\n":"")
+				+ body;
 	}
 
 	@Override
