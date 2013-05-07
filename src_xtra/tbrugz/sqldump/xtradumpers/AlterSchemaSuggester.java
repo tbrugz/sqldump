@@ -146,7 +146,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		//XXX: do not dump suggested indexes if indexes hasn't been grabbed
 		Set<Index> addIndexes = dumpCreateIndexes(schemaModel, schemaModel.getForeignKeys());
 		if(addIndexes.size()>0) {
-			simpleOut("-- indexes", cout, null, DBObjectType.INDEX);
+			simpleOut("-- indexes for existing FKs", cout, null, DBObjectType.INDEX);
 			int count = writeIndexes(addIndexes, cout);
 			log.info("dumped "+count+" 'create index' statements");
 		}

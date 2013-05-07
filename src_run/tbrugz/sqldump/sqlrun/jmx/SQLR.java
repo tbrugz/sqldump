@@ -1,7 +1,6 @@
 package tbrugz.sqldump.sqlrun.jmx;
 
 import java.lang.management.ManagementFactory;
-import java.security.AccessControlException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
@@ -12,7 +11,11 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class SQLR implements SQLRMBean {
+	static final Log log = LogFactory.getLog(SQLRMBean.class);
 	
 	static final String MBEAN_NAME = "tbrugz.sqlrun:type=SQLRun";
 	
@@ -92,19 +95,11 @@ public class SQLR implements SQLRMBean {
 	}
 
 	public static void registerMBeanSimple(SQLRMBean mbean) {
-		//TODO log exceptions
 		try {
 			registerMBean(mbean);
-		} catch (MalformedObjectNameException e) {
-			e.printStackTrace();
-		} catch (InstanceAlreadyExistsException e) {
-			e.printStackTrace();
-		} catch (MBeanRegistrationException e) {
-			e.printStackTrace();
-		} catch (NotCompliantMBeanException e) {
-			e.printStackTrace();
-		} catch (AccessControlException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			log.warn("Error registering MBean '"+MBEAN_NAME+"': "+e);
+			log.debug("Error registering MBean '"+MBEAN_NAME+"'", e);
 		}
 	}
 

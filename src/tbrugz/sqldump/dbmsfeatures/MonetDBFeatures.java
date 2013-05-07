@@ -19,7 +19,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		grabExtraConstraints = false; //XXX: unique constraints - from SYS.KEYS [type==1]? (pk==0, fk==2)
 		grabSynonyms = false; //monetdb doesn't seem to have synonyms
 		grabTriggers = false; //XXX: grab from SYS.TRIGGERS
-	};
+	}
 	
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws java.sql.SQLException {
 		try {
@@ -29,7 +29,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 			log.warn("sqlexception: "+e);
 		}
 		super.grabDBObjects(model, schemaPattern, conn);
-	};
+	}
 	
 	String grabDBViewsQuery(String schemaPattern) {
 		return "select '' as table_catalog, schemas.name as table_schema, tables.name as table_name"
