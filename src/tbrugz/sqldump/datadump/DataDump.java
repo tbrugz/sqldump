@@ -194,15 +194,23 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
+		int queriesRunned = 0;
+		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
 			String tableName = table.getName();
 			if(tables4dump!=null) {
-				if(!tables4dump.contains(tableName)) { continue; }
+				if(!tables4dump.contains(tableName)) {
+					log.debug("ignoring table: "+tableName+" [filtered]");
+					continue;
+				}
 				else { tables4dump.remove(tableName); }
 			}
 			if(typesToDump!=null) {
-				if(!typesToDump.contains(table.getType())) { continue; }
+				if(!typesToDump.contains(table.getType())) {
+					log.debug("ignoring table: "+tableName+" [type="+table.getType()+"]");
+					continue;
+				}
 			}
 			if(ignoretablesregex!=null) {
 				for(String tregex: ignoretablesregex) {
@@ -241,6 +249,7 @@ public class DataDump extends AbstractSQLProc {
 						uniqueKeys,
 						null //decoratorFactory
 						);
+				queriesRunned++;
 			}
 			catch(Exception e) {
 				log.warn("error dumping data from table: "+tableName+"\n\tsql: "+sql+"\n\texception: "+e);
@@ -254,11 +263,11 @@ public class DataDump extends AbstractSQLProc {
 		if(tablesForDataDump.size()==0) {
 			log.warn("no tables found in model for data dumping...");
 		}
-		else if(tables4dump!=null && tables4dump.size()>0) {
-			log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
-		}
 		else {
-			log.info("...data dumped");
+			if(tables4dump!=null && tables4dump.size()>0) {
+				log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
+			}
+			log.info("..."+queriesRunned+" queries dumped");
 		}
 	}
 	
