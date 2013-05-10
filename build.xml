@@ -110,6 +110,7 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
+				<exclude name="**/log4j.properties"/>
 			</fileset>
 			<fileset dir="${src.graphml.dir}">
 				<include name="**/*.properties"/>
@@ -203,14 +204,19 @@
 	</target>
 
 	<target name="javadoc" depends="prepare">
-		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" />
+		<!--echo message="java.home: ${java.home}" /-->
+		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" classpathref="classpath.compile">
+			<sourcepath location="${src.dir}"/>
+			<sourcepath location="${src.diff.dir}"/>
+			<sourcepath location="${src.run.dir}"/>
+			<sourcepath location="${src.graphml.dir}"/>
+			<sourcepath location="${src.mondrian.dir}"/>
+		</javadoc>
 	</target>
 	
 	<target name="dist" depends="jar" description="builds jar"/>
 	
-	<target name="all" depends="javadoc,jar" description="builds project">
-		<!--copy todir="${dist.dir}/" verbose="on" file="sqldump.properties"/-->
-	</target>
+	<target name="all" depends="clean,javadoc,publish" description="clean, build and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
