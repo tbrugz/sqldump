@@ -145,11 +145,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	{
 		try {
 			Properties mondrianProp = new Properties();
-			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("/mondrianxsd.properties"));
+			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("mondrianxsd.properties"));
 			String[] ntypes = mondrianProp.getProperty("type.numeric").split(",");
 			for(String s: ntypes) {
 				numericTypes.add(s.toUpperCase().trim());
 			}
+			//log.debug("numeric types: "+numericTypes);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
