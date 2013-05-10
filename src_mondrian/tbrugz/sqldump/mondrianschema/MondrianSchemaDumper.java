@@ -32,6 +32,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -91,6 +92,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	public static final String PROP_MONDRIAN_SCHEMA = "sqldump.mondrianschema";
 	public static final String PROP_MONDRIAN_SCHEMA_OUTFILE = "sqldump.mondrianschema.outfile";
+	public static final String PROP_MONDRIAN_SCHEMA_VALIDATE = "sqldump.mondrianschema.validateschema";
+	
 	public static final String PROP_MONDRIAN_SCHEMA_FACTTABLES = "sqldump.mondrianschema.facttables";
 	public static final String PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES = "sqldump.mondrianschema.xtrafacttables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
@@ -117,6 +120,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	Properties prop;
 	List<String> numericTypes = new ArrayList<String>();
 	String fileOutput = "mondrian-schema.xml";
+	boolean validateSchema = false;
+	
 	String mondrianSchemaName;
 	List<String> factTables = null;
 	List<String> extraFactTables = new ArrayList<String>();
@@ -206,6 +211,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			sqlIdDecorator = StringDecorator.getDecorator(decoratorStr);
 			log.debug("sql id decorator: "+sqlIdDecorator.getClass().getSimpleName());
 		}
+		
+		validateSchema = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_VALIDATE, validateSchema);
 	}
 
 	@Override
@@ -420,6 +427,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		try {
 			jaxbOutput(schema, new File(fileOutput));
+			
+			if(validateSchema) {
+				Processor msv = new MondrianSchemaValidator();
+				msv.setProperties(prop);
+				msv.process();
+			}
 		} catch (JAXBException e) {
 			log.warn("error dumping schema: "+e);
 			log.debug("error dumping schema", e);

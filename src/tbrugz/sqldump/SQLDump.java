@@ -92,7 +92,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SQLDump {
 	
-	static final String CONN_PROPS_PREFIX = "sqldump";
+	public static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
 	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
@@ -102,7 +102,7 @@ public class SQLDump {
 
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
-	static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
+	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
 	
 	//properties files filenames
