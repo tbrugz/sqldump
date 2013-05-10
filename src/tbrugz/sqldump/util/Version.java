@@ -11,7 +11,7 @@ public class Version {
 	
 	static {
 		try {
-			prop.load(Version.class.getResourceAsStream("/version.properties"));
+			prop.load(Version.class.getResourceAsStream("/sqldump-version.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
