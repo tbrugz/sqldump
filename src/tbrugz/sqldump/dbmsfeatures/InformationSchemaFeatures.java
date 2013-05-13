@@ -51,8 +51,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		if(grabSequences) {
 			grabDBSequences(model, schemaPattern, conn);
 		}
-		if(grabExtraConstraints) {
+		if(grabCheckConstraints) {
 			grabDBCheckConstraints(model, schemaPattern, conn);
+		}
+		if(grabUniqueConstraints) {
 			grabDBUniqueConstraints(model, schemaPattern, conn);
 		}
 	}

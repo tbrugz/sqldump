@@ -1,10 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
-
-import tbrugz.sqldump.dbmodel.SchemaModel;
 
 public class FirebirdFeatures extends InformationSchemaFeatures {
 
@@ -13,6 +9,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 		super.procProperties(prop);
 		
 		grabExecutables = false; //XXX: grab executables?
+		grabCheckConstraints = false; //XXX: grab check constraints?
 	}
 	
 	@Override
@@ -65,10 +62,4 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 				+"ORDER BY i.RDB$RELATION_NAME, rc.RDB$CONSTRAINT_NAME, s.RDB$FIELD_POSITION";
 	}
 	
-	//XXX: grab check constraints?
-	@Override
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
-	}
-
 }

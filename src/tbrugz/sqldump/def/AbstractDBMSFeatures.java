@@ -18,7 +18,8 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabSynonyms = true;
 	protected boolean grabTriggers = true;
 	protected boolean grabViews = true;
-	protected boolean grabExtraConstraints = true;
+	protected boolean grabUniqueConstraints = true;
+	protected boolean grabCheckConstraints = true;
 
 	@Override
 	public void procProperties(Properties prop) {
@@ -28,7 +29,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, grabSynonyms);
 		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, grabTriggers);
 		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, grabViews);
-		grabExtraConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, grabExtraConstraints);
+		grabUniqueConstraints = grabCheckConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, grabUniqueConstraints);
 	}
 	
 	@Override

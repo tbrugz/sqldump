@@ -16,7 +16,8 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		
-		grabExtraConstraints = false; //XXX: unique constraints - from SYS.KEYS [type==1]? (pk==0, fk==2)
+		grabCheckConstraints = false; //XXX: check constraints?
+		grabUniqueConstraints = false; //XXX: unique constraints - from SYS.KEYS [type==1]? (pk==0, fk==2)
 		grabSynonyms = false; //monetdb doesn't seem to have synonyms
 		grabTriggers = false; //XXX: grab from SYS.TRIGGERS
 	}

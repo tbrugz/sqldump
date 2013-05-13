@@ -77,8 +77,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		if(grabSequences) {
 			grabDBSequences(model, schemaPattern, conn);
 		}
-		if(grabExtraConstraints) {
+		if(grabCheckConstraints) {
 			grabDBCheckConstraints(model, schemaPattern, conn);
+		}
+		if(grabUniqueConstraints) {
 			grabDBUniqueConstraints(model, schemaPattern, conn);
 		}
 	}
