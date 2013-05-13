@@ -9,10 +9,10 @@ import tbrugz.sqldump.util.Utils;
 public class InformationSchemaTrigger extends Trigger {
 	private static final long serialVersionUID = 1L;
 	
-	public Set<String> eventsManipulation = new TreeSet<String>();
-	public String actionStatement; 
-	public String actionOrientation; 
-	public String conditionTiming;
+	public Set<String> eventsManipulation = new TreeSet<String>(); //insert, update, delete
+	public String actionStatement; //trigger body/statement
+	public String actionOrientation; //row, statement
+	public String conditionTiming; //before, after
 	static boolean addSplitter; //XXX: should be static? or belongs to model?
 	
 	@Override
@@ -20,7 +20,8 @@ public class InformationSchemaTrigger extends Trigger {
 		return "create trigger "+getName()
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
 				+"\n  on "+tableName
-				+"\n  for each "+actionOrientation
+				+ (actionOrientation!=null?"\n  for each "+actionOrientation:"")
+				+ (whenClause!=null?"\n  when ( "+whenClause.trim()+" )":"")
 				+"\n  "+actionStatement
 				+(addSplitter?";":"");
 	}

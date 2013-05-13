@@ -102,6 +102,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
 	}
 	
+	/*
+	 * TODO: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
+	 */
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern);
@@ -117,11 +120,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			
 			if(t==null) {
 				t = new InformationSchemaTrigger();
+				t.setSchemaName( schemaName );
+				t.setName( name );
 				model.getTriggers().add(t);
 				count++;
 			}
-			t.setSchemaName( schemaName );
-			t.setName( name );
 			t.eventsManipulation.add(rs.getString(4));
 			t.tableName = rs.getString(6);
 			t.actionStatement = rs.getString(7);

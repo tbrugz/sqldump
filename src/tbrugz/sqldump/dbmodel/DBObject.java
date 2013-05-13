@@ -41,7 +41,8 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	//XXX: move to DBIdentifiable?
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {
-			if(schemaName.equals(obj.schemaName) && name.equals(obj.name)) return obj;
+			if(( (schemaName==null && obj.schemaName==null) || schemaName.equals(obj.schemaName)) 
+					&& name.equals(obj.name)) return obj;
 		}
 		return null;
 	}
