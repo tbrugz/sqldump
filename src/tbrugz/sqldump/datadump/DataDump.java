@@ -431,9 +431,9 @@ public class DataDump extends AbstractSQLProc {
 				}
 				else {
 					String filenameTmp = filename;
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLE_QUERY_ID, tableOrQueryId);
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLE_QUERY_ID, Matcher.quoteReplacement(tableOrQueryId));
 					//if(!filenameTmp.equals(filename)) { log.warn("using deprecated pattern '${xxx}': "+FILENAME_PATTERN_TABLE_QUERY_ID); filenameTmp = filename; }
-					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, tableOrQueryName);
+					filename = filename.replaceAll(FILENAME_PATTERN_TABLENAME, Matcher.quoteReplacement(tableOrQueryName));
 					//if(!filenameTmp.equals(filename)) { log.warn("using deprecated pattern '${xxx}': "+FILENAME_PATTERN_TABLENAME); filenameTmp = filename; }
 					filename = filename.replaceAll(FILENAME_PATTERN_SYNTAXFILEEXT, ds.getDefaultFileExtension());
 					if(!filenameTmp.equals(filename) && !deprecatedPatternWarnedFiles.contains(filenameTmp)) {
@@ -442,9 +442,9 @@ public class DataDump extends AbstractSQLProc {
 							+FILENAME_PATTERN_TABLE_QUERY_ID+", "+FILENAME_PATTERN_TABLENAME+", "+FILENAME_PATTERN_PARTITIONBY+" or "+FILENAME_PATTERN_SYNTAXFILEEXT
 							+" [filename="+filenameTmp+"]"); // filenameTmp = filename;
 					}
-					filename = filename.replaceAll(PATTERN_TABLE_QUERY_ID_FINAL, tableOrQueryId);
-					filename = filename.replaceAll(PATTERN_TABLENAME_FINAL, tableOrQueryName);
-					filename = filename.replaceAll(PATTERN_SYNTAXFILEEXT_FINAL, ds.getDefaultFileExtension());
+					filename = filename.replaceAll(PATTERN_TABLE_QUERY_ID_FINAL, Matcher.quoteReplacement(tableOrQueryId));
+					filename = filename.replaceAll(PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableOrQueryName));
+					filename = filename.replaceAll(PATTERN_SYNTAXFILEEXT_FINAL, Matcher.quoteReplacement(ds.getDefaultFileExtension()));
 					
 					doSyntaxDumpList.set(i, true);
 					filenameList.set(i, filename);
@@ -635,8 +635,8 @@ public class DataDump extends AbstractSQLProc {
 	
 	static String getFinalFilenameForAbstractFilename(String filenameAbstract, String partitionByStr) throws UnsupportedEncodingException, FileNotFoundException {
 		return filenameAbstract
-				.replaceAll(FILENAME_PATTERN_PARTITIONBY, partitionByStr)
-				.replaceAll(PATTERN_PARTITIONBY_FINAL, partitionByStr);
+				.replaceAll(FILENAME_PATTERN_PARTITIONBY, Matcher.quoteReplacement(partitionByStr))
+				.replaceAll(PATTERN_PARTITIONBY_FINAL, Matcher.quoteReplacement(partitionByStr));
 	}
 	
 	/*Writer getWriterForFilename(String filename, String charset, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
@@ -749,6 +749,7 @@ public class DataDump extends AbstractSQLProc {
 				throw e;
 			}
 			if(replacement==null) { replacement = ""; }
+			replacement = Matcher.quoteReplacement(replacement);
 			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement); //XXX: remove deprecated pattern style
 			partitionByStr = partitionByStr.replaceAll("\\[col:"+c+"\\]", replacement);
 		}

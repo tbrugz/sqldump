@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,10 +99,10 @@ public class BlobDataDump extends DumpSyntax {
 			if(! c.equals(Blob.class)) { continue; }
 			
 			String filename = outFilePattern
-					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, tableName)
+					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
 					//.replaceAll("${pkcolumnnames}", "")
-					.replaceAll(REGEX_COLUMNNAME, lsColNames.get(i)) //table may have more than 1 blob per row
-					.replaceAll(REGEX_ROWID, rowid) //pkid? rowid?
+					.replaceAll(REGEX_COLUMNNAME, Matcher.quoteReplacement(lsColNames.get(i)) ) //table may have more than 1 blob per row
+					.replaceAll(REGEX_ROWID, Matcher.quoteReplacement(rowid) ) //pkid? rowid?
 					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, BLOB_SYNTAX_ID);
 			log.debug("blob filename: "+filename+"; col: "+lsColNames.get(i));
 			

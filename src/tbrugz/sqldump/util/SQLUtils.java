@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -485,7 +486,7 @@ public class SQLUtils {
 	public static final String pkiNamePattern = "${tablename}_pki";
 	
 	public static String newNameFromTableName(String tableName, String pattern) {
-		return pattern.replaceAll("\\$\\{tablename\\}", tableName);
+		return pattern.replaceAll("\\$\\{tablename\\}", Matcher.quoteReplacement(tableName) );
 	}
 	
 	/*

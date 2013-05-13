@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
@@ -300,8 +301,8 @@ public class DataDiff extends AbstractFailable {
 		String dataPattern = getImportDataPattern(grabberId);
 		//log.info("importing data for datadiff from: "+dataPattern);
 		String fileName = dataPattern
-				.replaceAll(SCEHMANAME_PATTERN, table.getSchemaName())
-				.replaceAll(TABLENAME_PATTERN, table.getName());
+				.replaceAll(SCEHMANAME_PATTERN, Matcher.quoteReplacement(table.getSchemaName()) )
+				.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(table.getName()) );
 		File file = new File(fileName);
 		log.debug("importing data from file: "+file);
 		SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset);
