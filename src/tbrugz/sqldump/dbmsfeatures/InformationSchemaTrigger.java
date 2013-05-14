@@ -13,7 +13,8 @@ public class InformationSchemaTrigger extends Trigger {
 	public String actionStatement; //trigger body/statement
 	public String actionOrientation; //row, statement
 	public String conditionTiming; //before, after
-	static boolean addSplitter; //XXX: should be static? or belongs to model?
+	@Deprecated
+	static boolean addSplitter = true; //XXX: should be static? or belongs to model?
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {

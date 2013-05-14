@@ -108,7 +108,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	/*
-	 * TODO: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
+	 * TODOne: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
 	 */
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
@@ -212,7 +212,16 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	boolean addExecutableToModel(SchemaModel model, ExecutableObject eo) {
 		boolean added = model.getExecutables().add(eo);
 		if(!added) {
-			log.warn("executable cound not be added to model: "+eo.toString()+" (already added?)");
+			boolean b1 = model.getExecutables().remove(eo);
+			boolean b2 = model.getExecutables().add(eo);
+			added = b1 && b2;
+			if(added) {
+				log.debug("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
+			}
+			else {
+				log.warn("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' not added to model [removed: "+b1+" ; added: "+b2+"]");
+			}
+			//log.warn("executable could not be added to model: "+eo.toString()+" (already added?)");
 		}
 		return added;
 	}
@@ -292,6 +301,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(countConstraints+" check constraints grabbed [rowcount="+count+"]");
 	}
 
+	//order by "column_position"? see grabDBUniqueConstraints()
 	String grabDBUniqueConstraintsQuery(String schemaPattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "

@@ -74,7 +74,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
-		InformationSchemaTrigger.addSplitter = true;
+		//InformationSchemaTrigger.addSplitter = true;
 		
 		int count = 0;
 		while(rs.next()) {
