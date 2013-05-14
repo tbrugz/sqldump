@@ -8,7 +8,11 @@ public enum TableType {
 	VIEW, MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
 	EXTERNAL_TABLE,
-	BASE_TABLE; //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
+	BASE_TABLE, //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
+	TYPE //XXX 'TYPE' table type? - postgresql
+	;
+	
+	//non-tables: INDEX, SEQUENCE, ...
 	
 	//XXX javadoc DatabaseMetaData#getTableTypes(): TABLE_TYPE String => table type.
 	// Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", 
@@ -42,7 +46,14 @@ public enum TableType {
 		else if(tableType.equals("BASE TABLE")) {
 			return TableType.BASE_TABLE;
 		}
+		else if(tableType.equals("TYPE")) {
+			return TableType.TYPE;
+		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
+			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
+			return null;
+		}
+		else if(tableType.equalsIgnoreCase("SEQUENCE")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
 			return null;
 		}

@@ -230,9 +230,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		for(Table table: schemaModel.getTables()) {
 			switch(table.getType()) {
+				case TABLE: 
+				case BASE_TABLE: 
+					break;
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
+				//XXX: other tables: EXTERNAL_TABLE(?), SYSTEM_TABLE
+				//XXX: other views: SYSTEM_VIEW
+				//XXX: other things - 'TYPE' table ... ?
+				//default: break;
 			}
 			
 			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, dumpScriptComments, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");

@@ -1,5 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		int rowcount = 0;
 		while(rs.next()) {
 			InformationSchemaRoutine eo = new InformationSchemaRoutine();
 			eo.setSchemaName( schemaPattern );
@@ -59,28 +61,34 @@ public class PostgreSQLFeatures extends InformationSchemaFeatures {
 			eo.setBody( rs.getString(5) );
 			
 			//parameters!
-			String[] params = (String[]) rs.getArray(6).getArray();
-			//eo.parameterNames = Arrays.asList(params);
-			String[] paramTypes = (String[]) rs.getArray(7).getArray();
-			//eo.parameterTypes = Arrays.asList(paramTypes);
-			List<ExecutableParameter> lpar = new ArrayList<ExecutableParameter>();
-			for(int i=0;i<params.length;i++) {
-				ExecutableParameter epar = new ExecutableParameter();
-				epar.name = params[i];
-				epar.dataType = paramTypes[i];
-				lpar.add(epar);
-			}
-			if(lpar.size()>0) {
-				eo.setParams(lpar);
+			Array paramsArr = rs.getArray(6);
+			if(paramsArr!=null) {
+				String[] params = (String[]) paramsArr.getArray();
+				//eo.parameterNames = Arrays.asList(params);
+				String[] paramTypes = (String[]) rs.getArray(7).getArray();
+				//eo.parameterTypes = Arrays.asList(paramTypes);
+				List<ExecutableParameter> lpar = new ArrayList<ExecutableParameter>();
+				for(int i=0;i<params.length;i++) {
+					ExecutableParameter epar = new ExecutableParameter();
+					epar.name = params[i];
+					epar.dataType = paramTypes[i];
+					lpar.add(epar);
+				}
+				if(lpar.size()>0) {
+					eo.setParams(lpar);
+				}
 			}
 			
-			model.getExecutables().add(eo);
-			count++;
+			if(addExecutableToModel(model, eo)) {
+				count++;
+			}
+			
+			rowcount++;
 		}
 		
 		rs.close();
 		st.close();
-		log.info(count+" executable objects/routines grabbed");
+		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+model.getExecutables().size()+"]");
 	}
 	
 }
