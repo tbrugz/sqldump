@@ -97,8 +97,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" views grabbed");
 	}
 
+	/*
+	 * see: http://www.postgresql.org/docs/9.1/static/infoschema-triggers.html
+	 */
 	String grabDBTriggersQuery(String schemaPattern) {
-		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing "
+		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing, action_condition "
 			+"from information_schema.triggers "
 			+"where trigger_schema = '"+schemaPattern+"' "
 			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
@@ -115,6 +118,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
+		int rowcount = 0;
 		while(rs.next()) {
 			String schemaName = rs.getString(2);
 			String name = rs.getString(3);
@@ -132,11 +136,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			t.actionStatement = rs.getString(7);
 			t.actionOrientation = rs.getString(8);
 			t.conditionTiming = rs.getString(9);
+			t.whenClause = rs.getString(10);
+			rowcount++;
 		}
 		
 		rs.close();
 		st.close();
-		log.info(count+" triggers grabbed");
+		log.info(count+" triggers grabbed [rowcount="+rowcount+"]");
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern) {
