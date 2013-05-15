@@ -63,6 +63,9 @@ public class CLIProcessor {
 			
 			log.info("loading properties resource: "+propResource);
 			propIS = CLIProcessor.class.getResourceAsStream(propResource);
+			if(propIS==null) {
+				log.warn("properties resource '"+propResource+"' does not exist");
+			}
 		}
 		else {
 			File propFile = new File(propFilename);
@@ -77,7 +80,12 @@ public class CLIProcessor {
 				propIS = new FileInputStream(propFile);
 			}
 			else {
-				log.info("properties file '"+propFile+"' does not exist");
+				if(propFilenameSetted) {
+					log.warn("properties file '"+propFile+"' does not exist");
+				}
+				else {
+					log.info("properties file '"+propFile+"' does not exist"); //XXX: change to debug() ?
+				}
 			}
 		}
 		try {
