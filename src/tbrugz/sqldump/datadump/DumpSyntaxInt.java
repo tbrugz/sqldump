@@ -32,6 +32,8 @@ public interface DumpSyntaxInt {
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
 
 	public void dumpFooter(long count, Writer fos) throws IOException; //long count or boolean hasDumpedData?
+	
+	//XXX dumpBreak() - intermetiate "header" dump? endDump()?
 
 	public void flushBuffer(Writer fos) throws IOException;
 	

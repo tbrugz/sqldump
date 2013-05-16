@@ -97,8 +97,8 @@ public class SQLDump {
 	//sqldump.properties
 	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
 	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
-	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";
-	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";
+	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";  //.(pre)processors?
+	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
 
 	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
