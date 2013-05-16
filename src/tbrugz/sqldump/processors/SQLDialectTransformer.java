@@ -11,20 +11,24 @@ import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.util.Utils;
 
 public class SQLDialectTransformer extends AbstractSQLProc {
 
+	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
+	
 	static Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
 	//String fromDialectId;
+	boolean toANSI = false;
 	String toDialectId;
 	
 	@Override
 	public void process() {
-		if(toDialectId==null) {
-			log.warn("undefined toDialectId");
+		if(toDialectId==null && !toANSI) {
+			log.warn("undefined toDialectId or '.toansi' property");
 			if(failonerror) {
-				throw new ProcessingException("SQLDialectTransformer: undefined toDialectId");
+				throw new ProcessingException("SQLDialectTransformer: undefined toDialectId or '.toansi' property");
 			}
 			return;
 		}
@@ -43,6 +47,7 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 				if(ansiColType!=null) {
 					ansiColType = ansiColType.toUpperCase();
 					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, ansiColType);
+					log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 					//newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDialectId+"."+ansiColType);
 				}
 				
@@ -66,7 +71,16 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 	@Override
 	public void setProperties(Properties prop) {
 		toDialectId = prop.getProperty(Defs.PROP_TO_DB_ID);
-		if(!DBMSResources.instance().getDbIds().contains(toDialectId)) {
+		if(toDialectId==null) {
+			Boolean transformToANSI = Utils.getPropBoolean(prop, PROP_TRANSFORM_TO_ANSI, null);
+			if(transformToANSI!=null) {
+				toANSI = transformToANSI;
+			}
+			else {
+				log.warn("transform to database-id/ansi undefined");
+			}
+		}
+		else if(!DBMSResources.instance().getDbIds().contains(toDialectId)) {
 			log.warn("unknown database id: "+toDialectId);
 			toDialectId = null;
 		}
