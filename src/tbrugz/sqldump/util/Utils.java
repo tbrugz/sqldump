@@ -308,6 +308,10 @@ public class Utils {
 		}
 	}
 
+	public static boolean propertyExists(Properties prop, String key) {
+		return prop.getProperty(key)!=null;
+	}
+
 	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter) {
 		String strings = prop.getProperty(key);
 		if(strings!=null) {
