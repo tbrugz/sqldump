@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -38,6 +39,8 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	boolean batchMode = false;
 	int commitSize = 100;
 	
+	long updated = 0;
+	
 	@Override
 	public void initDump(String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
@@ -52,6 +55,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			throw new ProcessingException("connection prefix is null, can't proceed");
 		}
 		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
+		updated = 0;
 		
 		//create connection
 		try {
@@ -114,13 +118,14 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			stmt.addBatch();
 		}
 		else {
-			stmt.executeUpdate();
+			updated += stmt.executeUpdate();
 		}
 		
 		//commit - maybe
 		if( (commitSize<=1) || (( (count+1) % commitSize)==0) ) {
 			if(batchMode) {
-				stmt.executeUpdate();
+				int[] updateCounts = stmt.executeBatch();
+				updated += Util.sumInts(updateCounts);
 			}
 			if(!autoCommit) {
 				conn.commit();
@@ -145,7 +150,10 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			//close connection
 			conn.close();
 			
-			log.debug("commit-last? "+count);
+			log.debug("commit-last? count="+count+" updated="+updated);
+			if(count!=updated) {
+				log.warn("may not have imported all rows [count="+count+" updated="+updated+"]");
+			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
