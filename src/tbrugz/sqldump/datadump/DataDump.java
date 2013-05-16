@@ -195,6 +195,7 @@ public class DataDump extends AbstractSQLProc {
 		}
 		
 		int queriesRunned = 0;
+		int ignoredTables = 0;
 		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDump) {
@@ -202,6 +203,7 @@ public class DataDump extends AbstractSQLProc {
 			if(tables4dump!=null) {
 				if(!tables4dump.contains(tableName)) {
 					log.debug("ignoring table: "+tableName+" [filtered]");
+					ignoredTables++;
 					continue;
 				}
 				else { tables4dump.remove(tableName); }
@@ -209,13 +211,15 @@ public class DataDump extends AbstractSQLProc {
 			if(typesToDump!=null) {
 				if(!typesToDump.contains(table.getType())) {
 					log.debug("ignoring table: "+tableName+" [type="+table.getType()+"]");
+					ignoredTables++;
 					continue;
 				}
 			}
 			if(ignoretablesregex!=null) {
 				for(String tregex: ignoretablesregex) {
 					if(tableName.matches(tregex)) {
-						log.info("ignoring table: "+tableName);
+						log.debug("ignoring table: "+tableName);
+						ignoredTables++;
 						continue LABEL_TABLE;
 					}
 				}
@@ -267,7 +271,8 @@ public class DataDump extends AbstractSQLProc {
 			if(tables4dump!=null && tables4dump.size()>0) {
 				log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
 			}
-			log.info("..."+queriesRunned+" queries dumped");
+			log.info("..."+queriesRunned+" queries dumped"
+					+(ignoredTables>0?" ["+ignoredTables+" tables ignored]":"") );
 		}
 	}
 	
@@ -571,6 +576,16 @@ public class DataDump extends AbstractSQLProc {
 			}
 			writersOpened.clear();
 			writersSyntaxes.clear();
+			//writer-independent footers
+			for(int i=0;i<syntaxList.size();i++) {
+				DumpSyntax ds = syntaxList.get(i);
+				if(doSyntaxDumpList.get(i)) {
+					if(ds.isWriterIndependent()) {
+						ds.dumpFooter(count, null);
+					}
+				}
+			}
+			
 			log.debug("wrote all footers for table/query: "+tableOrQueryName);
 			
 			rs.close();
