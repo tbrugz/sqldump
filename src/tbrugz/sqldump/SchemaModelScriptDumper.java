@@ -3,6 +3,8 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -40,6 +42,7 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -75,6 +78,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	
 	String mainOutputFilePattern;
 	Properties prop;
+	String outputConnPropPrefix;
+	Connection outputConn = null;
 	
 	static final String PATTERN_SCHEMANAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME);
 	static final String PATTERN_SCHEMANAME_QUOTED = Pattern.quote(PATTERN_SCHEMANAME_FINAL);
@@ -97,9 +102,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	static final String FILENAME_PATTERN_OBJECTNAME_QUOTED = Pattern.quote(FILENAME_PATTERN_OBJECTNAME);
 
 	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
-	public static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
-	
+
+	static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
 	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
+	static final String PROP_OUTPUT_CONN_PROP_PREFIX = "sqldump.schemadump.output.connpropprefix";
 
 	public static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
@@ -146,7 +152,15 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
 		mainOutputFilePattern = prop.getProperty(PROP_MAIN_OUTPUT_FILE_PATTERN);
-		if(mainOutputFilePattern==null) { mainOutputFilePattern = prop.getProperty(PROP_OUTPUTFILE); }
+		if(mainOutputFilePattern==null) {
+			mainOutputFilePattern = prop.getProperty(PROP_OUTPUTFILE);
+			if(mainOutputFilePattern!=null) {
+				log.warn("using deprecated property '"+PROP_OUTPUTFILE+"' - use '"+PROP_MAIN_OUTPUT_FILE_PATTERN+"' instead");
+			}
+		}
+		if(mainOutputFilePattern==null) {
+			outputConnPropPrefix = prop.getProperty(PROP_OUTPUT_CONN_PROP_PREFIX);
+		}
 		
 		String outputobjectswithtable = prop.getProperty(PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE);
 		if(outputobjectswithtable!=null) {
@@ -203,7 +217,11 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {
-			
+		
+		if(outputConnPropPrefix!=null) {
+			outputConn = SQLUtils.ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
+		}
+		
 		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
 		if(fromDbId==null || toDbId==null) {
 			log.info("fromDbId or toDbId null: no conversion");
@@ -379,6 +397,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			log.info("error dumping schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
 		}
+		finally {
+			if(outputConnPropPrefix!=null) {
+				try {
+					outputConn.close();
+				} catch (SQLException e) {
+					log.warn("error closing connection '"+outputConn+"': "+e);
+					log.debug("error closing connection '"+outputConn+"'", e);
+				}
+			}
+		}
 	}
 	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
@@ -417,6 +445,20 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	Set<String> warnedOldPatternFiles = new TreeSet<String>();
 	
 	void categorizedOut(String schemaName, String objectName, DBObjectType objectType, String message) throws IOException {
+
+		//if output is connection
+		if(outputConnPropPrefix!=null && outputConn!=null) {
+			try {
+				outputConn.createStatement().execute(message);
+			} catch (SQLException e) {
+				if(failonerror) {
+					throw new ProcessingException("error executing sql: "+message,e);
+				}
+				log.warn("error executing sql [ex="+e+"]: "+message);
+			}
+			return;
+		}
+		
 		//String outFilePattern = outFilePatterns.get(objectType);
 		//if(outFilePatterns.containsKey(objectType)) {}
 		DBObjectType mappedObjectType = mappingBetweenDBObjectTypes.get(objectType);
