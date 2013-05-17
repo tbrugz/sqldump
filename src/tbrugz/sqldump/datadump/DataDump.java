@@ -204,7 +204,7 @@ public class DataDump extends AbstractSQLProc {
 		}
 		else {
 			//ordering tables for dump
-			tablesForDataDumpLoop = new ArrayList<>();
+			tablesForDataDumpLoop = new ArrayList<Table>();
 			for(String tName: tables4dump) {
 				Table t = DBObject.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
 				if(t==null) {

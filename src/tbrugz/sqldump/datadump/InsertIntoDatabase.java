@@ -71,7 +71,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		//drop & create table
 		if(dropCreateTables) {
 			execSimpleSQL("drop table "+tableName, false);
-			List<String> newcols = new ArrayList<>();
+			List<String> newcols = new ArrayList<String>();
 			for(int i=0;i<lsColNames.size();i++) {
 				newcols.add( lsColNames.get(i)+" "+getSQLType(lsColTypes.get(i)) );
 			}
@@ -82,7 +82,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		}
 		
 		//create prepared statement
-		List<String> vals = new ArrayList<>();
+		List<String> vals = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) { vals.add("?"); }
 		String sql = "insert into "+tableName+" "+colNames+" values ("+
 				Utils.join(vals, ", ")+
