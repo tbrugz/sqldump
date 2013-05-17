@@ -34,7 +34,9 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		}
 		
 		String fromDialectId = model.getSqlDialect();
-		log.info("sql dialect transformer: from '"+fromDialectId+"' to '"+toDialectId+"'");
+		log.info("sql dialect transformer: from '"+fromDialectId+"' to "
+				+(toANSI?"ANSI-SQL":"'"+toDialectId+"'")
+				);
 		
 		for(Table table: model.getTables()) {
 			for(Column col: table.getColumns()) {

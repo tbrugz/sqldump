@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -197,20 +198,39 @@ public class DataDump extends AbstractSQLProc {
 		int queriesRunned = 0;
 		int ignoredTables = 0;
 		
-		LABEL_TABLE:
-		for(Table table: tablesForDataDump) {
-			String tableName = table.getName();
-			if(tables4dump!=null) {
-				if(!tables4dump.contains(tableName)) {
-					log.debug("ignoring table: "+tableName+" [filtered]");
+		Collection<Table> tablesForDataDumpLoop = null;
+		if(tables4dump==null) {
+			tablesForDataDumpLoop = tablesForDataDump;
+		}
+		else {
+			//ordering tables for dump
+			tablesForDataDumpLoop = new ArrayList<>();
+			for(String tName: tables4dump) {
+				Table t = DBObject.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
+				if(t==null) {
+					log.warn("table '"+tName+"' not found for dump");
+					ignoredTables++;
+				}
+				else {
+					tablesForDataDumpLoop.add(t);
+				}
+			}
+			for(Table t: tablesForDataDump) {
+				if(!tables4dump.contains(t.getName())) {
+					log.debug("ignoring table: "+t.getName()+" [filtered]");
 					ignoredTables++;
 					continue;
 				}
-				else { tables4dump.remove(tableName); }
 			}
+		}
+		
+		LABEL_TABLE:
+		for(Table table: tablesForDataDumpLoop) {
+			String tableName = table.getName();
+			if(tables4dump!=null) { tables4dump.remove(tableName); }
 			if(typesToDump!=null) {
 				if(!typesToDump.contains(table.getType())) {
-					log.debug("ignoring table: "+tableName+" [type="+table.getType()+"]");
+					log.debug("ignoring table '"+tableName+"' by type [type="+table.getType()+"]");
 					ignoredTables++;
 					continue;
 				}
@@ -218,7 +238,7 @@ public class DataDump extends AbstractSQLProc {
 			if(ignoretablesregex!=null) {
 				for(String tregex: ignoretablesregex) {
 					if(tableName.matches(tregex)) {
-						log.debug("ignoring table: "+tableName);
+						log.debug("ignoring table '"+tableName+"' by regex [regex="+tregex+"]");
 						ignoredTables++;
 						continue LABEL_TABLE;
 					}

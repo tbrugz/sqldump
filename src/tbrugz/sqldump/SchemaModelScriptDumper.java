@@ -222,9 +222,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			outputConn = SQLUtils.ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
 		}
 		
-		log.info("dumping schema... from '"+fromDbId+"' to '"+toDbId+"'");
-		if(fromDbId==null || toDbId==null) {
-			log.info("fromDbId or toDbId null: no conversion");
+		log.info("dumping schema..."
+				+(toDbId!=null?" from '"+fromDbId+"' to '"+toDbId+"'":""));
+		if(fromDbId==null) {
+			log.info("fromDbId is null: no conversion");
 		}
 		else {
 			if(fromDbId.equals(toDbId)) {
