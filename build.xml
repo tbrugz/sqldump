@@ -12,7 +12,7 @@
 	<property name="bin.test.dir"  value="bin/test"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="lib.dir" value="lib"/>
-	<property name="javadoc.dir" value="dist/javadoc"/>
+	<property name="javadoc.dir" value="dist/javadocs"/>
 	
 	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
 	<property name="sqldump.sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
@@ -197,7 +197,7 @@
 	</target>
 	
 	<target name="jar" depends="compile" description="builds jar">
-		<jar destfile="${dist.dir}/sqldump.jar"
+		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
 			includes="**/*.class, *.properties, **/jaxb.index">
 			<manifest>
@@ -211,6 +211,18 @@
 			includes="**/jaxb.properties">
 		</jar-->
 	</target>
+	
+	<target name="jar-source" depends="prepare" description="builds sources jar">
+		<jar destfile="${dist.dir}/sources/sqldump.jar"
+			basedir="${basedir}">
+			<include name="${src.dir}/**"/>
+			<include name="${src.graphml.dir}/**"/>
+			<include name="${src.diff.dir}/**"/>
+			<include name="${src.run.dir}/**"/>
+			<include name="${src.mondrian.dir}/**"/>
+			<include name="${src.xtra.dir}/**"/>
+		</jar>
+	</target>
 
 	<target name="javadoc" depends="prepare">
 		<!--echo message="java.home: ${java.home}" /-->
@@ -221,11 +233,14 @@
 			<sourcepath location="${src.graphml.dir}"/>
 			<sourcepath location="${src.mondrian.dir}"/>
 		</javadoc>
+		<jar destfile="${dist.dir}/javadocs/sqldump.jar"
+			basedir="${javadoc.dir}" includes="**">
+		</jar>
 	</target>
 	
 	<target name="dist" depends="jar" description="builds jar"/>
 	
-	<target name="all" depends="clean,javadoc,publish" description="clean, build and publish project"/>
+	<target name="all" depends="clean,javadoc,jar-source,publish" description="clean, build and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
@@ -302,13 +317,16 @@
 		<ivy:info/>
 		<echo message="revision = ${revision}"/>
 		<property name="ivy.pom.version" value="${revision}"/>
-		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/${ivy.module}.pom">
+		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/poms/${ivy.module}.pom">
 			<mapping conf="default" scope="compile"/>
 			<mapping conf="test" scope="test"/>
 		</ivy:makepom>
-		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" forcedeliver="true">
-			<artifacts pattern="${dist.dir}/[module].[ext]" />
+		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" forcedeliver="true"
+			artifactsPattern="${dist.dir}/[type]s/[artifact].[ext]">
+			<!--artifacts pattern="${dist.dir}/[type]s/[module].[ext]" /-->
 			<artifact name="${ivy.module}" ext="pom" type="pom" />
+			<artifact name="${ivy.module}" ext="jar" type="source" classifier="source"/>
+			<artifact name="${ivy.module}" ext="jar" type="javadoc" classifier="javadoc"/>
 		</ivy:publish>
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
