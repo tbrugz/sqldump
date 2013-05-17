@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="src_mondrian"/>
+	<classpathentry kind="src" path="src_graphml"/>
+	<classpathentry kind="src" path="src_diff"/>
+	<classpathentry kind="src" path="src_xtra"/>
+	<classpathentry kind="src" path="src_run"/>
+	<classpathentry kind="src" output="bin/test" path="src_test"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=sqldump&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
+	<classpathentry kind="output" path="bin/main"/>
+</classpath>
