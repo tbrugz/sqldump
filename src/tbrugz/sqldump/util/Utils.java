@@ -230,7 +230,12 @@ public class Utils {
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
 			Object elem = iter.next();
-			buffer.append(decorator.get(elem.toString()));
+			if(decorator!=null) {
+				buffer.append(decorator.get(elem.toString()));
+			}
+			else {
+				buffer.append(elem.toString());
+			}
 
 			if (iter.hasNext()) {
 				buffer.append(delimiter);

@@ -131,8 +131,6 @@ public class DataDump extends AbstractSQLProc {
 	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
 		
-		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
-		
 		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
 		if(dateFormat!=null) {
 			DataDumpUtils.dateFormatter = new SimpleDateFormat(dateFormat);
@@ -142,29 +140,11 @@ public class DataDump extends AbstractSQLProc {
 
 		List<String> tables4dump = getTables4dump(prop);
 		
-		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
-		
-		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
-		if(syntaxes==null) {
+		List<DumpSyntax> syntaxList = getSyntaxList(prop);
+		if(syntaxList==null) {
 			log.error("no datadump syntax defined");
 			if(failonerror) {
 				throw new ProcessingException("DataDump: no datadump syntax defined");
-			}
-			return;
-		}
-		String[] syntaxArr = syntaxes.split(",");
-		for(String syntax: syntaxArr) {
-			boolean syntaxAdded = false;
-			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
-				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
-				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
-					ds.procProperties(prop);
-					syntaxList.add(ds);
-					syntaxAdded = true;
-				}
-			}
-			if(!syntaxAdded) {
-				log.warn("unknown datadump syntax: "+syntax.trim());
 			}
 		}
 		
@@ -247,8 +227,7 @@ public class DataDump extends AbstractSQLProc {
 			List<FK> importedFKs = DBIdentifiable.getImportedKeys(table, model.getForeignKeys());
 			List<Constraint> uniqueKeys = DBIdentifiable.getUKs(table);
 			
-			Long tablerowlimit = Utils.getPropLong(prop, DATADUMP_PROP_PREFIX+tableName+".rowlimit");
-			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
+			long rowlimit = getTableRowLimit(prop, tableName);
 
 			String whereClause = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".where");
 			String selectColumns = prop.getProperty(DATADUMP_PROP_PREFIX+tableName+".columns");
@@ -324,7 +303,23 @@ public class DataDump extends AbstractSQLProc {
 		return sql;
 	} 
 	
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
+			String tableOrQueryId, String tableOrQueryName
+			) throws SQLException, IOException {
+		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
+		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
+		List<DumpSyntax> syntaxList = getSyntaxList(prop);
+		if(syntaxList==null) {
+			log.error("no datadump syntax defined");
+			if(failonerror) {
+				throw new ProcessingException("DataDump: no datadump syntax defined");
+			}
+		}
+		
+		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
+	}
+	
+	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
 			String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws SQLException, IOException {
@@ -819,6 +814,38 @@ public class DataDump extends AbstractSQLProc {
 		public Long getInstance() {
 			return initialValue;
 		}
+	}
+	
+	static List<DumpSyntax> getSyntaxList(Properties prop) {
+		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
+		if(syntaxes==null) {
+			return null;
+		}
+		
+		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
+		String[] syntaxArr = syntaxes.split(",");
+		for(String syntax: syntaxArr) {
+			boolean syntaxAdded = false;
+			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
+				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
+				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
+					ds.procProperties(prop);
+					syntaxList.add(ds);
+					syntaxAdded = true;
+				}
+			}
+			if(!syntaxAdded) {
+				log.warn("unknown datadump syntax: "+syntax.trim());
+			}
+		}
+		
+		return syntaxList;
+	}
+	
+	static long getTableRowLimit(Properties prop, String tableOrQueryName) {
+		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
+		Long tablerowlimit = Utils.getPropLong(prop, DATADUMP_PROP_PREFIX+tableOrQueryName+".rowlimit");
+		return tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 	}
 	
 }
