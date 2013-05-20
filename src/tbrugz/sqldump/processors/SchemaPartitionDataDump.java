@@ -27,7 +27,8 @@ import tbrugz.sqldump.util.Utils;
  * 
  * XXX: what if multiple paths (from multiple start points) reach the same table?
  * union? intersect? save queries for later execution...
- * XXX: go into all directions (follow FK-IM after FM-EX and vire-versa)?
+ * XXXdone: go into all directions (follow FK-IM after FM-EX - DONE)?
+ * XXX: option to follow FM-EX after FK-IM?
  */
 public class SchemaPartitionDataDump extends AbstractSQLProc {
 
@@ -38,7 +39,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	
 	//generic props
 	static final String PROP_SPDD_STARTTABLES = SPDD_PROP_PREFIX+".starttables";
-	static final String PROP_SPDD_STOPTABLES = SPDD_PROP_PREFIX+".stoptables"; //XXX adasd
+	static final String PROP_SPDD_STOPTABLES = SPDD_PROP_PREFIX+".stoptables";
 	static final String PROP_SPDD_EXPORTEDKEYS = SPDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level?
 	
@@ -85,7 +86,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 
 	Set<String> dumpedTables = new HashSet<String>();
 	
-	void dumpTable(Table t, List<FK> fks, String origFilter, Boolean exportedKeys) throws SQLException, IOException {
+	void dumpTable(Table t, List<FK> fks, String origFilter, Boolean followExportedKeys) throws SQLException, IOException {
 		if(!dumpedTables.add(t.getName())) {
 			return;
 		}
@@ -98,10 +99,19 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		String join = null;
 		if(filter==null && fks!=null) {
 			StringBuilder sb = new StringBuilder();
+			String lastTable = t.getName();
 			for(FK fk: fks) {
+				//String tableJoin = exportedKeys?fk.getFkTable():fk.getPkTable();
+				String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
+				/*if(tableJoin.equals(lastTable)) {
+					tableJoin = exportedKeys?fk.getPkTable():fk.getFkTable();
+				}*/
 				sb.append("\ninner join "
-						+(exportedKeys?fk.getPkTable():fk.getFkTable() ));
+						//+(t.getName().equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable()) );
+						//+(exportedKeys?fk.getFkTable():fk.getPkTable() ));
+						+tableJoin);
 						//+fk.getFkTable());
+				lastTable = tableJoin;
 				for(int ci=0;ci<fk.getPkColumns().size();ci++) {
 					if(ci==0) { sb.append(" on "); }
 					else { sb.append(" and "); }
@@ -117,9 +127,9 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		if(filter==null) { filter = origFilter; }
 		
 		//importedKeys recursive dump
-		if(exportedKeys==null || !exportedKeys || fks==null) {
-			procFKs4Dump(t, fks, filter, false);
-		}
+		//if(followExportedKeys==null || !followExportedKeys || fks==null) {
+		procFKs4Dump(t, fks, filter, false);
+		//}
 		
 		//do dump
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
@@ -136,12 +146,12 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				sql += "\norder by "+Utils.join(pkcols, ", ", null);
 			}
 		}
-		log.debug("sql: "+sql);
+		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
 		dd.runQuery(conn, sql, null, prop, t.getName(), t.getName());
 		
 		//exportedKeys recursive dump
-		if(exportedKeys!=null && exportedKeys) {
-			procFKs4Dump(t, fks, filter, exportedKeys);
+		if(followExportedKeys!=null && followExportedKeys) {
+			procFKs4Dump(t, fks, filter, followExportedKeys);
 		}
 	}
 	
