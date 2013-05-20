@@ -22,6 +22,13 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * possible names: CascadingDataDump, SchemaPartitionDataDump, MasterDetailDataDump
+ * 
+ * XXX: what if multiple paths (from multiple start points) reach the same table?
+ * union? intersect? save queries for later execution...
+ * XXX: go into all directions (follow FK-IM after FM-EX and vire-versa)?
+ */
 public class SchemaPartitionDataDump extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(SchemaPartitionDataDump.class);
@@ -30,7 +37,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	static final String SPDD_PROP_PREFIX = "sqldump.schemapartitiondd";
 	
 	//generic props
-	//static final String PROP_SPDD_OUTFILEPATTERN = SPDD_PROP_PREFIX+".outfilepattern";
 	static final String PROP_SPDD_STARTTABLES = SPDD_PROP_PREFIX+".starttables";
 	static final String PROP_SPDD_STOPTABLES = SPDD_PROP_PREFIX+".stoptables"; //XXX adasd
 	static final String PROP_SPDD_EXPORTEDKEYS = SPDD_PROP_PREFIX+".exportedkeys";
@@ -38,7 +44,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	
 	String quote = DBMSResources.instance().getIdentifierQuoteString();
 	//StringDecorator quoter = new StringDecorator.StringQuoterDecorator(quote);
-	StringDecorator quoter = null;
+	StringDecorator quoter = null; //XXX add prop?
 	
 	List<String> startTables = null;
 	List<String> stopTables = null;
@@ -52,7 +58,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		startTables = Utils.getStringListFromProp(prop, PROP_SPDD_STARTTABLES, ",");
 		stopTables = Utils.getStringListFromProp(prop, PROP_SPDD_STOPTABLES, ",");
 		exportedKeys = Utils.getPropBoolean(prop, PROP_SPDD_EXPORTEDKEYS, null);
-		//XXX follow exported keys?
 	}
 
 	@Override
@@ -78,8 +83,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		log.info("partitioned dump done [#start points="+count+"]");
 	}
 
-	//XXX: set of tables dumped? tio prevent infinite recursion...
-	
 	Set<String> dumpedTables = new HashSet<String>();
 	
 	void dumpTable(Table t, List<FK> fks, String origFilter, Boolean exportedKeys) throws SQLException, IOException {

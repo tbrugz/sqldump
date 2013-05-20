@@ -422,6 +422,8 @@ public class DataDump extends AbstractSQLProc {
 			boolean logNumberOfOpenedWriters = true;
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 			
+			long count = 0;
+			
 			try {
 
 			//header
@@ -475,8 +477,6 @@ public class DataDump extends AbstractSQLProc {
 			Map<String, DumpSyntax> statefulDumpSyntaxes = new HashMap<String, DumpSyntax>();
 			//Map<String, Long> countInPartitionByPattern = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
 			Map<String, Long> countByPatternFinalFilename = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
-			
-			long count = 0;
 			
 			//rows
 			do {
@@ -614,6 +614,10 @@ public class DataDump extends AbstractSQLProc {
 				 * http://stackoverflow.com/questions/13988780/too-many-open-files-ulimit-already-changed
 				 */
 				log.warn("IOException occured ["+writersOpened.size()+" opened writers]: "+e);
+				throw e;
+			}
+			catch(SQLException e) {
+				log.warn("SQLException occured [count="+count+"]: "+e);
 				throw e;
 			}
 	}
