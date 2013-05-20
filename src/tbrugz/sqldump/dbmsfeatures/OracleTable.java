@@ -22,6 +22,7 @@ public class OracleTable extends Table {
 	
 	static boolean dumpPhysicalAttributes = true; 
 	static boolean dumpLoggingClause = true; 
+	static boolean dumpPartitionClause = true; 
 	
 	public String tableSpace;
 	public boolean temporary;
@@ -50,7 +51,7 @@ public class OracleTable extends Table {
 			footer += logging?"\nlogging":"";
 		}
 		//partition by
-		if(partitioned!=null && partitioned) {
+		if(dumpPartitionClause && partitioned!=null && partitioned) {
 			footer += "\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ", sqlIddecorator)+")";
 			if(partitions!=null) {
 				footer += " (";

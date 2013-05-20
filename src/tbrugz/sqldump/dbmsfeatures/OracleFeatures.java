@@ -50,6 +50,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		OracleDatabaseMetaData.grabFKFromUK = Utils.getPropBool(prop, PROP_GRAB_FKFROMUK, OracleDatabaseMetaData.grabFKFromUK);
 		OracleTable.dumpPhysicalAttributes = Utils.getPropBool(prop, PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES, OracleTable.dumpPhysicalAttributes);
 		OracleTable.dumpLoggingClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_LOGGING, OracleTable.dumpLoggingClause);
+		OracleTable.dumpPartitionClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_PARTITION, OracleTable.dumpPartitionClause);
 	}
 	
 	/* (non-Javadoc)

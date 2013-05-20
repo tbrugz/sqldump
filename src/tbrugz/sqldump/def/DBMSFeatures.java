@@ -25,6 +25,7 @@ public interface DBMSFeatures {
 	static String PROP_DUMP_SEQUENCE_STARTWITH = "sqldump.dbspecificfeatures.sequencestartwithdump";
 	static String PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES = "sqldump.dbspecificfeatures.dumpphysicalattributes";
 	static String PROP_DUMP_TABLE_LOGGING = "sqldump.dbspecificfeatures.dumplogging";
+	static String PROP_DUMP_TABLE_PARTITION = "sqldump.dbspecificfeatures.dumppartition";
 	
 	void procProperties(Properties prop);
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
