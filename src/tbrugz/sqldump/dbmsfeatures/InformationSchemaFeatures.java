@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint;
-import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
@@ -122,7 +122,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			String schemaName = rs.getString(2);
 			String name = rs.getString(3);
-			InformationSchemaTrigger t = (InformationSchemaTrigger) DBObject.findDBObjectBySchemaAndName(model.getTriggers(), schemaName, name);
+			InformationSchemaTrigger t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTriggers(), schemaName, name);
 			
 			if(t==null) {
 				t = new InformationSchemaTrigger();
@@ -285,7 +285,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			c.type = Constraint.ConstraintType.CHECK;
 			c.setName( rs.getString(3) );
 			c.checkDescription = rs.getString(4);
-			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 				countConstraints++;
@@ -334,7 +334,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				c = new Constraint();
 				c.type = Constraint.ConstraintType.UNIQUE;
 				c.setName( constraintName );
-				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), schemaName, tableName);
+				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 					countUniqueConstraints++;

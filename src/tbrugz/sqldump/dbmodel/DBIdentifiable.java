@@ -62,6 +62,23 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		}
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(Collection<? extends DBIdentifiable> dbids, String schemaName, String name) {
+		for(DBIdentifiable obj: dbids) {
+			if(( (schemaName==null && obj.schemaName==null) || schemaName.equals(obj.schemaName)) 
+					&& name.equals(obj.name)) return (T) obj;
+		}
+		return null;		
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableByName(Collection<? extends DBIdentifiable> dbids, String name) {
+		for(DBIdentifiable d: dbids) {
+			if(d.getName().equals(name)) return (T) d;
+		}
+		return null;
+	}
 	
 	public static DBObjectType getType(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }
@@ -91,6 +108,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return type;
 	}
 	
+	//move to 'util' class?
 	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
 		List<FK> fks = new ArrayList<FK>();
 		for(FK fk: allFKs) {
@@ -102,6 +120,18 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return fks;
 	}
 
+	//move to 'util' class?
+	public static List<FK> getExportedKeys(Relation rel, Set<FK> allFKs) {
+		List<FK> fks = new ArrayList<FK>();
+		for(FK fk: allFKs) {
+			if( (rel.getSchemaName()==null || fk.pkTableSchemaName==null || rel.getSchemaName().equals(fk.pkTableSchemaName)) 
+					&& rel.getName().equals(fk.pkTable)) {
+				fks.add(fk);
+			}
+		}
+		return fks;
+	}
+	
 	//XXX: refactoring: move to another class/package?
 	public static List<Constraint> getUKs(Relation rel) {
 		List<Constraint> uks = new ArrayList<Constraint>();

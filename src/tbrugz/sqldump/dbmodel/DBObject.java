@@ -1,7 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
-import java.util.Collection;
 
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.StringDecorator;
@@ -36,15 +35,6 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	public String getFinalName(boolean dumpSchemaName) {
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
-	}
-	
-	//XXX: move to DBIdentifiable?
-	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
-		for(DBObject obj: col) {
-			if(( (schemaName==null && obj.schemaName==null) || schemaName.equals(obj.schemaName)) 
-					&& name.equals(obj.name)) return obj;
-		}
-		return null;
 	}
 	
 	public static String getFinalIdentifier(String id) {

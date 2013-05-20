@@ -17,7 +17,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
-import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
@@ -590,7 +589,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			//ignore NOT NULL constraints
 			if(c.checkDescription.contains(" IS NOT NULL")) continue;
 			
-			Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 				count++;
@@ -637,7 +636,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(!constraintName.equals(previousConstraint)) {
 				String tableName = rs.getString(2);
 				c = new Constraint();
-				Table t = (Table) DBObject.findDBObjectBySchemaAndName(model.getTables(), rs.getString(1), tableName);
+				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 					countUniqueConstraints++;
