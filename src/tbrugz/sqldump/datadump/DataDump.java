@@ -49,6 +49,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.GenericFactory;
+import tbrugz.util.LongFactory;
 import tbrugz.util.NonNullGetMap;
 
 /*
@@ -809,15 +810,6 @@ public class DataDump extends AbstractSQLProc {
 			return tables4dump;
 		}
 		return null;
-	}
-	
-	static class LongFactory extends GenericFactory<Long> {
-		long initialValue = 0l;
-		
-		@Override
-		public Long getInstance() {
-			return initialValue;
-		}
 	}
 	
 	static List<DumpSyntax> getSyntaxList(Properties prop) {

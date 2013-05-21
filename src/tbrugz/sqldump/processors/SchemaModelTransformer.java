@@ -1,20 +1,25 @@
 package tbrugz.sqldump.processors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.util.LongFactory;
+import tbrugz.util.NonNullGetMap;
 
 public class SchemaModelTransformer extends AbstractSQLProc {
 	static final Log log = LogFactory.getLog(SchemaModelTransformer.class);
@@ -46,13 +51,16 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	public void process() {
 		removeFKs();
 		addFKs();
+		
+		alterColymnType();
+		
 		if(doRemoveSchemaName) {
 			removeSchemaname();
 		}
 	}
 
 	//moved from SchemaModelTransformer.dumpSchema()
-	public void addFKs() {
+	void addFKs() {
 		addedFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
 			//sqldump.modeltransform.table@<fktable>.xtrafk=<fkcolumn>:[<schema>.]<pktable>:<pkcolumn>[:<fk-name>][;(...)]
@@ -104,7 +112,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 		schemaModel.getForeignKeys().addAll(addedFKs);
 	}
 
-	public void removeFKs() {
+	void removeFKs() {
 		int count = 0;
 		List<String> fksToRemove = Utils.getStringListFromProp(prop, prefix+SUFFIX_REMOVE_FKS_BYNAME, ",");
 		Iterator<FK> i = schemaModel.getForeignKeys().iterator();
@@ -122,6 +130,27 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 		}
 	}
 	
+	Map<String, Long> colTypeTransforms = new NonNullGetMap<String, Long>(new HashMap<String, Long>(), new LongFactory());
+
+	void alterColymnType() {
+		//sqldump.schematransform.columntype@DATE=TIMESTAMP
+		int count = 0;
+		for(Table t: schemaModel.getTables()) {
+			for(Column c: t.getColumns()) {
+				String newColType = prop.getProperty(prefix+".columntype@"+c.type);
+				if(newColType!=null) {
+					colTypeTransforms.put(c.type, colTypeTransforms.get(c.type)+1);
+					//log.info("prop: "+prefix+".columntype@"+c.type+" newValue="+newColType);
+					c.type = newColType;
+					count++;
+				}
+			}
+		}
+		if(count>0) {
+			log.info(count+" column types changed ["+Utils.countByKeyString(colTypeTransforms)+"]");
+		}
+	} 
+	
 	/*public void removeAllFKs() {
 		schemaModel.getForeignKeys().removeAll(addedFKs);
 	}*/
@@ -130,7 +159,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 		return addedFKs;
 	}
 	
-	public void removeSchemaname() {
+	void removeSchemaname() {
 		removeSchemaname(schemaModel.getTables());
 		removeSchemaname(schemaModel.getForeignKeys());
 		removeSchemaname(schemaModel.getIndexes());
