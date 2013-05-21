@@ -31,7 +31,9 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	static final String PROP_IIDB_BATCH_MODE = PREFIX_IIDB+".batchmode";
 	static final String PROP_IIDB_COMMIT_SIZE = PREFIX_IIDB+".commitsize";
 	static final String PROP_IIDB_DROP_CREATE_TABLES = PREFIX_IIDB+".dropcreatetables";
+	static final String PROP_IIDB_FALLBACK_TO_FILE = PREFIX_IIDB+".fallbacktofile";
 	
+	boolean fallbackToFile = false;
 	Connection conn = null;
 	PreparedStatement stmt = null;
 	
@@ -48,14 +50,16 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 
 		//setup
 		autoCommit = Utils.getPropBool(prop, PROP_IIDB_AUTOCOMMIT, autoCommit);
-		batchMode = Utils.getPropBool(prop, PROP_IIDB_AUTOCOMMIT, batchMode);
+		batchMode = Utils.getPropBool(prop, PROP_IIDB_BATCH_MODE, batchMode);
 		commitSize = Utils.getPropInt(prop, PROP_IIDB_COMMIT_SIZE, commitSize);
+		fallbackToFile = Utils.getPropBool(prop, PROP_IIDB_FALLBACK_TO_FILE, fallbackToFile);
 		String connPropPrefix = prop.getProperty(PROP_IIDB_CONN_PREFIX);
 		if(connPropPrefix==null) {
 			throw new ProcessingException("connection prefix is null, can't proceed");
 		}
 		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
 		updated = 0;
+		//log.info("ac="+autoCommit+";batch="+batchMode+";commitsize="+commitSize+";fallback="+fallbackToFile);
 		
 		//create connection
 		try {
@@ -87,7 +91,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		String sql = "insert into "+tableName+" "+colNames+" values ("+
 				Utils.join(vals, ", ")+
 				")";
-		log.info("stmt[autocommit="+autoCommit+";batch="+batchMode+"]: "+sql);
+		log.debug("stmt[autocommit="+autoCommit+";batch="+batchMode+"]: "+sql);
 		stmt = conn.prepareStatement(sql);
 	}
 	
@@ -99,6 +103,8 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, doDumpCursors);
+		
+		try {
 
 		//populate statement
 		for(int i=0;i<lsColTypes.size();i++) {
@@ -132,6 +138,15 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			}
 			log.debug("commit? "+ (count+1));
 		}
+		
+		} catch (SQLException e) {
+			if(fallbackToFile) {
+				super.dumpRow(rs, count, fos);
+			}
+			else {
+				throw e;
+			}
+		}
 	}
 	
 	@Override
@@ -155,7 +170,12 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 				log.warn("may not have imported all rows [count="+count+" updated="+updated+"]");
 			}
 		} catch (SQLException e) {
-			throw new RuntimeException(e);
+			if(fallbackToFile) {
+				super.dumpFooter(count, fos);
+			}
+			else {
+				throw new ProcessingException(e);
+			}
 		}
 	}
 	
@@ -174,7 +194,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	
 	@Override
 	public boolean isWriterIndependent() {
-		return true;
+		return !fallbackToFile;
 	}
 	
 	@Override
