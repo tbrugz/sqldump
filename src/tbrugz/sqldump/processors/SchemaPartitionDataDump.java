@@ -55,6 +55,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	//generic props
 	static final String PROP_SPDD_STARTTABLES = SPDD_PROP_PREFIX+".starttables";
 	static final String PROP_SPDD_STOPTABLES = SPDD_PROP_PREFIX+".stoptables";
+	static final String PROP_SPDD_ORDERBYPK = SPDD_PROP_PREFIX+".orderbypk";
 	static final String PROP_SPDD_EXPORTEDKEYS = SPDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
 	
@@ -64,12 +65,11 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	
 	List<String> startTables = null;
 	List<String> stopTables = null; //XXX for exported FKs only?
-	boolean orderByPK = true; //XXX add prop
+	boolean orderByPK = true;
 	Boolean exportedKeys = null;
 
 	Map<String, List<Query4CDD>> queries4dump = new LinkedHashMap<String, List<Query4CDD>>();
 	//Map<String, List<Query4CDD>> queries4dump = new NonNullGetMap<String, List<Query4CDD>>(new LinkedHashMap<String, List<Query4CDD>>(), ArrayList<Query4CDD>.class);
-	//Map<String, Table> tablesByName = new HashMap<String, Table>();
 	Map<String, Constraint> tablePKs = new HashMap<String, Constraint>();
 	
 	@Override
@@ -77,6 +77,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		super.setProperties(prop);
 		startTables = Utils.getStringListFromProp(prop, PROP_SPDD_STARTTABLES, ",");
 		stopTables = Utils.getStringListFromProp(prop, PROP_SPDD_STOPTABLES, ",");
+		orderByPK = Utils.getPropBoolean(prop, PROP_SPDD_ORDERBYPK, orderByPK);
 		exportedKeys = Utils.getPropBoolean(prop, PROP_SPDD_EXPORTEDKEYS, null);
 	}
 
@@ -94,7 +95,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			count++;
 		}
 
-		log.info("dumping tables ["+dumpedTablesList.size()+"]: "+dumpedTablesList);
+		log.info("dumping tables [#"+dumpedTablesList.size()+"]: "+dumpedTablesList);
 		
 		DataDump dd = new DataDump();
 		List<String> dumpedTables = new ArrayList<String>();
@@ -111,12 +112,12 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 						Constraint pk = tablePKs.get(tname);
 						sql = addOrderBy(sql, pk);
 					}
-					log.info("simple-sql["+tname+"]:\n"+sql);
+					log.debug("simple-sql["+tname+"]:\n"+sql);
 					dd.runQuery(conn, sql, null, prop, tname, tname);
 					dumpedTables.add(tname);
 				}
 				else {
-					log.info("many queries for table '"+tname+"': "+qs.size());
+					log.debug("many queries for table '"+tname+"': "+qs.size());
 					String setOperation = null;
 					if(areAllImported(qs)) {
 						//union
@@ -143,15 +144,9 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					Constraint pk = tablePKs.get(tname);
 					if(orderByPK && pk!=null) {
 						addOrderBy(sb, pk);
-						/*List<String> pkcols = new ArrayList<String>();
-						for(String col: pk.uniqueColumns) {
-							pkcols.add(qualifiedColName(tablesByName.get(tname),col));
-						}*/
-						//sb.insert(0, "select * from (\n");
-						//sb.append("\n) order by "+Utils.join(pk.uniqueColumns, ", ", null));
 					}
 					
-					log.info("join-sql["+tname+"]:\n"+sb.toString());
+					log.debug("join-sql["+tname+"]:\n"+sb.toString());
 					dd.runQuery(conn, sb.toString(), null, prop, tname, tname);
 					dumpedTables.add(tname);
 				}
@@ -164,7 +159,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		
 		log.info("partitioned dump done [#start points="+count+"]");
-		log.info("dumped tables ["+dumpedTables.size()+"]: "+dumpedTables);
+		log.info("dumped tables [#"+dumpedTables.size()+"]: "+dumpedTables);
 	}
 
 	List<String> dumpedTablesList = new ArrayList<String>();
@@ -180,7 +175,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		if(stopTables.contains(t.getName())) {
 			return;
 		}
-		//tablesByName.put(t.getName(), t);
 		
 		//get filter/sql
 		String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
@@ -190,12 +184,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			String lastTable = t.getName();
 			for(int i=0;i<fks.size();i++) {
 				FK fk = fks.get(i);
-				/*if(i==0) {
-					//prevents infinite recursion...
-					if(!dumpedFKs.add(fk.toStringFull())) {
-						return;
-					}
-				}*/
 				String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
 				sb.append("\ninner join "+tableJoin);
 				lastTable = tableJoin;
