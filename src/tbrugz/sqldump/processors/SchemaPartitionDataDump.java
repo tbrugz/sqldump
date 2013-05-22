@@ -91,9 +91,11 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				continue;
 			}
 			
-			dumpTable(t, null, null, exportedKeys);
+			String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
+			dumpTable(t, null, filter, exportedKeys);
 			count++;
 		}
+		//XXX: warn for filters not used (for tables not in starttables)
 
 		log.info("dumping tables [#"+dumpedTablesList.size()+"]: "+dumpedTablesList);
 		
@@ -132,6 +134,11 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 						//continue;
 						log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to 'union' operation");
 						setOperation = "union";
+
+						/*//dump 1st?
+						dd.runQuery(conn, qs.get(0).sql, null, prop, tname, tname);
+						dumpedTables.add(tname);
+						continue;*/
 					}
 					
 					StringBuilder sb = new StringBuilder();
@@ -165,33 +172,58 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	List<String> dumpedTablesList = new ArrayList<String>();
 	Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
-	void dumpTable(final Table t, final List<FK> fks, final String origFilter, final Boolean followExportedKeys) {
+	void dumpTable(final Table t, final List<FK> fks, final String filter, final Boolean followExportedKeys) {
 		if(fks!=null) {
-			//prevents infinite recursion...
+			//prevents infinite recursion... remove this?
 			if(!dumpedFKs.add(fks.get(0).toStringFull())) {
 				return;
 			}
+			
+			//TODO: detect cycles (source of 1st fk equals target of last) - use CTE (common table expressions)?
+			/*
+			FK fkOne = fks.get(0);
+			FK fkLast = fks.get(fks.size()-1);
+			if(fks.size()>1 && (t.getName().equals(fkLast.getFkTable()) || t.getName().equals(fkLast.getPkTable())) ) {
+				log.warn("loop detected !! [fEx="+followExportedKeys+",#="+fks.size()+"]! "+fks+" fl:"+fkLast);
+				return;
+			}
+			
+			for(int i=0;i<fks.size();i++) {
+				FK fkX = fks.get(i);
+				if(followExportedKeys && fkOne.getPkTable().equals(fkX.getFkTable())) {
+					log.warn("loop detected[fEx="+followExportedKeys+",#="+fks.size()+"]! "+fks+" f1:"+fkOne+" fl:"+fkX);
+					return;
+				}
+				if(!followExportedKeys && fkOne.getFkTable().equals(fkX.getPkTable())) {
+					log.warn("loop detected[fEx="+followExportedKeys+",#="+fks.size()+"]! "+fks+" f1:"+fkOne+" fl:"+fkX);
+					return;
+				}
+			}*/
 		}
 		if(stopTables.contains(t.getName())) {
 			return;
 		}
 		
 		//get filter/sql
-		String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
 		String join = null;
-		if(filter==null && fks!=null) {
+		if(fks!=null) {
 			StringBuilder sb = new StringBuilder();
 			String lastTable = t.getName();
+			sb.append("\n/* "+fks+" */");
 			for(int i=0;i<fks.size();i++) {
 				FK fk = fks.get(i);
 				String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
+				if(tableJoin.equals(t.getName())) {
+					log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
+					continue;
+				}
 				sb.append("\ninner join "+tableJoin);
-				lastTable = tableJoin;
 				for(int ci=0;ci<fk.getPkColumns().size();ci++) {
 					if(ci==0) { sb.append(" on "); }
 					else { sb.append(" and "); }
 					sb.append(fk.getPkTable()+"."+fk.getPkColumns().get(ci) +" = "+ fk.getFkTable()+"."+fk.getFkColumns().get(ci));
 				}
+				lastTable = tableJoin;
 			}
 			join = sb.toString();
 		}
@@ -199,7 +231,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":""));
 		}
-		if(filter==null) { filter = origFilter; }
 		
 		//importedKeys recursive dump
 		procFKs4Dump(t, fks, filter, false);
@@ -224,7 +255,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		
 		//exportedKeys recursive dump
 		if(followExportedKeys!=null && followExportedKeys) {
-			procFKs4Dump(t, fks, filter, followExportedKeys);
+			procFKs4Dump(t, fks, filter, true);
 		}
 	}
 	
@@ -240,15 +271,27 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		
 		if(fki!=null) {
+			OUTER:
 			for(FK fk: fki) {
 				String table = exportedKeys?fk.getFkTable():fk.getPkTable();
 				String schema = exportedKeys?fk.getFkTableSchemaName():fk.getPkTableSchemaName();
 				Table pkt = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schema, table);
 				List<FK> newFKs = new ArrayList<FK>();
 				newFKs.add(fk);
+				//if(!exportedKeys) {newFKs.add(fk);}
 				if(fks!=null) {
-					newFKs.addAll(fks);
+					for(FK xfk: fks) {
+						if(fk.equals(xfk)) {
+							log.warn("existing FK["+t.getName()+"]: "+xfk+" <newFKs:"+newFKs+"> <origFKs:"+fks+">");
+							//XXX continue OUTER; //or just if "last" FK?
+						}
+						else {
+							newFKs.add(xfk);
+						}
+					}
+					//newFKs.addAll(fks);
 				}
+				//if(exportedKeys) {newFKs.add(fk);}
 				dumpTable(pkt, newFKs, filter, exportedKeys);
 			}
 		}
@@ -272,7 +315,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			//if(q.exported==null || q.exported) { return false; }
 		}
 		if(!ret) {
-			log.warn("allImported[all-should-be-false]? exported="+sb.toString());
+			log.info("allImported[all-should-be-false]? exported="+sb.toString());
 		}
 		return ret;
 	}
@@ -288,7 +331,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			//if(q.exported==null || !q.exported) { return false; }
 		}
 		if(!ret) {
-			log.warn("allExported[all-should-be-true]? exported="+sb.toString());
+			log.info("allExported[all-should-be-true]? exported="+sb.toString());
 		}
 		return ret;
 	}

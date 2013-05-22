@@ -609,7 +609,7 @@ public class Utils {
 		return o;
 	}
 	
-	public static String countByKeyString(Map map) {
+	public static String countByKeyString(Map<?,?> map) {
 		StringBuilder sb = new StringBuilder();
 		for(Object key: map.keySet()) {
 			sb.append((sb.length()>0?";":"")+"#"+key+"="+map.get(key));
