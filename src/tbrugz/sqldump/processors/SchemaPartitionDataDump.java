@@ -1,6 +1,7 @@
 package tbrugz.sqldump.processors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -68,6 +69,8 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 
 	Map<String, List<Query4CDD>> queries4dump = new LinkedHashMap<String, List<Query4CDD>>();
 	//Map<String, List<Query4CDD>> queries4dump = new NonNullGetMap<String, List<Query4CDD>>(new LinkedHashMap<String, List<Query4CDD>>(), ArrayList<Query4CDD>.class);
+	//Map<String, Table> tablesByName = new HashMap<String, Table>();
+	Map<String, Constraint> tablePKs = new HashMap<String, Constraint>();
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -103,7 +106,13 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				}
 				else if(qs.size()==1) {
 					Query4CDD q4cdd = qs.get(0);
-					dd.runQuery(conn, q4cdd.sql, null, prop, tname, tname);
+					String sql = q4cdd.sql;
+					if(orderByPK) {
+						Constraint pk = tablePKs.get(tname);
+						sql = addOrderBy(sql, pk);
+					}
+					log.info("simple-sql["+tname+"]:\n"+sql);
+					dd.runQuery(conn, sql, null, prop, tname, tname);
 					dumpedTables.add(tname);
 				}
 				else {
@@ -131,7 +140,18 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 						Query4CDD q = qs.get(i);
 						sb.append(q.sql);
 					}
-					log.info("join-sql:\n"+sb.toString());
+					Constraint pk = tablePKs.get(tname);
+					if(orderByPK && pk!=null) {
+						addOrderBy(sb, pk);
+						/*List<String> pkcols = new ArrayList<String>();
+						for(String col: pk.uniqueColumns) {
+							pkcols.add(qualifiedColName(tablesByName.get(tname),col));
+						}*/
+						//sb.insert(0, "select * from (\n");
+						//sb.append("\n) order by "+Utils.join(pk.uniqueColumns, ", ", null));
+					}
+					
+					log.info("join-sql["+tname+"]:\n"+sb.toString());
 					dd.runQuery(conn, sb.toString(), null, prop, tname, tname);
 					dumpedTables.add(tname);
 				}
@@ -160,6 +180,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		if(stopTables.contains(t.getName())) {
 			return;
 		}
+		//tablesByName.put(t.getName(), t);
 		
 		//get filter/sql
 		String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
@@ -199,16 +220,10 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
 				+(join!=null?join:"")
 				+(filter!=null?"\nwhere "+filter:"");
-		/*if(orderByPK) { 
-			Constraint ctt = t.getPKConstraint();
-			if(ctt!=null) {
-				List<String> pkcols = new ArrayList<String>();
-				for(String col: ctt.uniqueColumns) {
-					pkcols.add(qualifiedColName(t,col));
-				}
-				sql += "\norder by "+Utils.join(pkcols, ", ", null);
-			}
-		}*/
+		Constraint ctt = t.getPKConstraint();
+		if(ctt!=null) {
+			tablePKs.put(t.getName(), ctt);				
+		}
 		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
 		Query4CDD qd = new Query4CDD(sql, followExportedKeys);
 		List<Query4CDD> qs = queries4dump.get(t.getName());
@@ -260,28 +275,50 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	
 	static boolean areAllImported(List<Query4CDD> qs) {
 		StringBuffer sb = new StringBuffer();
+		boolean ret = true;
 		for(Query4CDD q: qs) {
 			sb.append(q.exported+", ");
 			if(q.exported!=null && q.exported) {
-				log.warn("allImported[no]? exported="+sb.toString());
-				return false;
+				ret = false;
 			}
 			//if(q.exported==null || q.exported) { return false; }
 		}
-		return true;
+		if(!ret) {
+			log.warn("allImported[all-should-be-false]? exported="+sb.toString());
+		}
+		return ret;
 	}
 
 	static boolean areAllExported(List<Query4CDD> qs) {
 		StringBuffer sb = new StringBuffer();
+		boolean ret = true;
 		for(Query4CDD q: qs) {
 			sb.append(q.exported+", ");
 			if(q.exported!=null && !q.exported) {
-				log.warn("allExported[no]? exported="+sb.toString());
-				return false;
+				ret = false;
 			}
 			//if(q.exported==null || !q.exported) { return false; }
 		}
-		return true;
+		if(!ret) {
+			log.warn("allExported[all-should-be-true]? exported="+sb.toString());
+		}
+		return ret;
+	}
+
+	static void addOrderBy(StringBuilder sb, Constraint pk) {
+		if(pk==null) { return; }
+		
+		sb.insert(0, "select * from (\n");
+		sb.append("\n) order by "+Utils.join(pk.uniqueColumns, ", ", null));
+	}
+
+	static String addOrderBy(String s, Constraint pk) {
+		if(pk==null) { return s; }
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(s);
+		addOrderBy(sb, pk);
+		return sb.toString();
 	}
 	
 }
