@@ -1,10 +1,10 @@
 package tbrugz.sqldump.processors;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -22,6 +22,18 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
+class Query4CDD {
+	//final String tableName;
+	final String sql;
+	final Boolean exported;
+	
+	public Query4CDD(String sql, Boolean exported) {
+		//this.tableName = tableName;
+		this.exported = exported;
+		this.sql = sql;
+	}
+}
+
 /*
  * possible names: CascadingDataDump, SchemaPartitionDataDump, MasterDetailDataDump
  * 
@@ -30,7 +42,7 @@ import tbrugz.sqldump.util.Utils;
  * - if multiple filters, intersect
  * - if table is parent of multiple other tables, union 
  * XXXdone: go into all directions (follow FK-IM after FM-EX - DONE)?
- * XXX: option to follow FM-EX after FK-IM?
+ * ~XXX: option to follow FM-EX after FK-IM?
  */
 public class SchemaPartitionDataDump extends AbstractSQLProc {
 
@@ -53,7 +65,9 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	List<String> stopTables = null; //XXX for exported FKs only?
 	boolean orderByPK = true; //XXX add prop
 	Boolean exportedKeys = null;
-	DataDump dd = new DataDump();
+
+	Map<String, List<Query4CDD>> queries4dump = new LinkedHashMap<String, List<Query4CDD>>();
+	//Map<String, List<Query4CDD>> queries4dump = new NonNullGetMap<String, List<Query4CDD>>(new LinkedHashMap<String, List<Query4CDD>>(), ArrayList<Query4CDD>.class);
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -73,16 +87,35 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				continue;
 			}
 			
-			try {
-				dumpTable(t, null, null, exportedKeys);
-				count++;
-			} catch (Exception e) {
-				log.warn("error running query: "+e);
-				if(failonerror) {
-					throw new ProcessingException(e);
+			dumpTable(t, null, null, exportedKeys);
+			count++;
+		}
+
+		log.info("dumping tables ["+dumpedTablesList.size()+"]: "+dumpedTablesList);
+		
+		DataDump dd = new DataDump();
+		try {
+			for(String tname: queries4dump.keySet()) {
+				List<Query4CDD> qs = queries4dump.get(tname);
+				if(qs.size()==0) {
+					log.warn("0 queries for table '"+tname+"'");
+				}
+				else if(qs.size()==1) {
+					Query4CDD q4cdd = qs.get(0);
+					dd.runQuery(conn, q4cdd.sql, null, prop, tname, tname);
+				}
+				else {
+					//TODO: instersect, union
+					log.info("many queries for table '"+tname+"': "+qs.size());
 				}
 			}
+		} catch (Exception e) {
+			log.warn("error running query: "+e);
+			if(failonerror) {
+				throw new ProcessingException(e);
+			}
 		}
+		
 		log.info("partitioned dump done [#start points="+count+"]");
 		log.info("dumped tables ["+dumpedTablesList.size()+"]: "+dumpedTablesList);
 	}
@@ -91,7 +124,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	List<String> dumpedTablesList = new ArrayList<String>();
 	Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
-	void dumpTable(final Table t, final List<FK> fks, final String origFilter, final Boolean followExportedKeys) throws SQLException, IOException {
+	void dumpTable(final Table t, final List<FK> fks, final String origFilter, final Boolean followExportedKeys) {
 		if(!dumpedTables.add(t.getName())) {
 			return;
 		}
@@ -149,7 +182,13 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			}
 		}
 		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
-		dd.runQuery(conn, sql, null, prop, t.getName(), t.getName());
+		Query4CDD qd = new Query4CDD(sql, followExportedKeys);
+		List<Query4CDD> qs = queries4dump.get(t.getName());
+		if(qs==null) {
+			qs = new ArrayList<Query4CDD>();
+			queries4dump.put(t.getName(), qs);
+		}
+		qs.add(qd);
 		dumpedTablesList.add(t.getName());
 		
 		//exportedKeys recursive dump
@@ -158,7 +197,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 	}
 	
-	void procFKs4Dump(final Table t, final List<FK> fks, final String filter, final boolean exportedKeys) throws SQLException, IOException {
+	void procFKs4Dump(final Table t, final List<FK> fks, final String filter, final boolean exportedKeys) {
 		List<FK> fki = null;
 		if(exportedKeys) {
 			fki = DBIdentifiable.getExportedKeys(t, model.getForeignKeys());
