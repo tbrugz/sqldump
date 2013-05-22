@@ -116,13 +116,15 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 		int count = 0;
 		List<String> fksToRemove = Utils.getStringListFromProp(prop, prefix+SUFFIX_REMOVE_FKS_BYNAME, ",");
 		Iterator<FK> i = schemaModel.getForeignKeys().iterator();
-		while (i.hasNext()) {
-			FK fk = i.next();
-			//boolean removeFK = Utils.getPropBool(prop, prefix+".fk@"+fk.getName()+".remove", false);
-			//if(removeFK) {
-			if(fksToRemove.contains(fk.getName())) {
-				i.remove();
-				count++;
+		if(fksToRemove!=null) {
+			while (i.hasNext()) {
+				FK fk = i.next();
+				//boolean removeFK = Utils.getPropBool(prop, prefix+".fk@"+fk.getName()+".remove", false);
+				//if(removeFK) {
+				if(fksToRemove.contains(fk.getName())) {
+					i.remove();
+					count++;
+				}
 			}
 		}
 		if(count>0) {

@@ -107,11 +107,32 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					dumpedTables.add(tname);
 				}
 				else {
-					//TODO: instersect, union
 					log.info("many queries for table '"+tname+"': "+qs.size());
-					//dumping first...
-					Query4CDD q4cdd = qs.get(0);
-					dd.runQuery(conn, q4cdd.sql, null, prop, tname, tname);
+					String setOperation = null;
+					if(areAllImported(qs)) {
+						//union
+						setOperation = "union";
+					}
+					else if(areAllExported(qs)) {
+						//intersect
+						setOperation = "intersect";
+					}
+					else {
+						//XXX what??
+						//continue;
+						log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to 'union' operation");
+						setOperation = "union";
+					}
+					
+					StringBuilder sb = new StringBuilder();
+					//XXX: test for equality between sql parts?
+					for(int i=0;i<qs.size();i++) {
+						if(i>0) { sb.append("\n"+setOperation+"\n"); }
+						Query4CDD q = qs.get(i);
+						sb.append(q.sql);
+					}
+					log.info("join-sql:\n"+sb.toString());
+					dd.runQuery(conn, sb.toString(), null, prop, tname, tname);
 					dumpedTables.add(tname);
 				}
 			}
@@ -130,6 +151,12 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
 	void dumpTable(final Table t, final List<FK> fks, final String origFilter, final Boolean followExportedKeys) {
+		if(fks!=null) {
+			//prevents infinite recursion...
+			if(!dumpedFKs.add(fks.get(0).toStringFull())) {
+				return;
+			}
+		}
 		if(stopTables.contains(t.getName())) {
 			return;
 		}
@@ -142,12 +169,12 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			String lastTable = t.getName();
 			for(int i=0;i<fks.size();i++) {
 				FK fk = fks.get(i);
-				if(i==0) {
+				/*if(i==0) {
 					//prevents infinite recursion...
 					if(!dumpedFKs.add(fk.toStringFull())) {
 						return;
 					}
-				}
+				}*/
 				String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
 				sb.append("\ninner join "+tableJoin);
 				lastTable = tableJoin;
@@ -172,17 +199,16 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
 				+(join!=null?join:"")
 				+(filter!=null?"\nwhere "+filter:"");
-		if(orderByPK) { 
+		/*if(orderByPK) { 
 			Constraint ctt = t.getPKConstraint();
 			if(ctt!=null) {
 				List<String> pkcols = new ArrayList<String>();
 				for(String col: ctt.uniqueColumns) {
-					//pkcols.add(quoter.get(t.getName())+"."+quoter.get(col));
 					pkcols.add(qualifiedColName(t,col));
 				}
 				sql += "\norder by "+Utils.join(pkcols, ", ", null);
 			}
-		}
+		}*/
 		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
 		Query4CDD qd = new Query4CDD(sql, followExportedKeys);
 		List<Query4CDD> qs = queries4dump.get(t.getName());
@@ -231,5 +257,31 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		return quoter.get(t.getName())+"."+quoter.get(col);
 	}
+	
+	static boolean areAllImported(List<Query4CDD> qs) {
+		StringBuffer sb = new StringBuffer();
+		for(Query4CDD q: qs) {
+			sb.append(q.exported+", ");
+			if(q.exported!=null && q.exported) {
+				log.warn("allImported[no]? exported="+sb.toString());
+				return false;
+			}
+			//if(q.exported==null || q.exported) { return false; }
+		}
+		return true;
+	}
 
+	static boolean areAllExported(List<Query4CDD> qs) {
+		StringBuffer sb = new StringBuffer();
+		for(Query4CDD q: qs) {
+			sb.append(q.exported+", ");
+			if(q.exported!=null && !q.exported) {
+				log.warn("allExported[no]? exported="+sb.toString());
+				return false;
+			}
+			//if(q.exported==null || !q.exported) { return false; }
+		}
+		return true;
+	}
+	
 }
