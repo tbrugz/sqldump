@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
-import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
