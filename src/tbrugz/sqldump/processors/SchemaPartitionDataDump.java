@@ -94,6 +94,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		log.info("dumping tables ["+dumpedTablesList.size()+"]: "+dumpedTablesList);
 		
 		DataDump dd = new DataDump();
+		List<String> dumpedTables = new ArrayList<String>();
 		try {
 			for(String tname: queries4dump.keySet()) {
 				List<Query4CDD> qs = queries4dump.get(tname);
@@ -103,10 +104,15 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				else if(qs.size()==1) {
 					Query4CDD q4cdd = qs.get(0);
 					dd.runQuery(conn, q4cdd.sql, null, prop, tname, tname);
+					dumpedTables.add(tname);
 				}
 				else {
 					//TODO: instersect, union
 					log.info("many queries for table '"+tname+"': "+qs.size());
+					//dumping first...
+					Query4CDD q4cdd = qs.get(0);
+					dd.runQuery(conn, q4cdd.sql, null, prop, tname, tname);
+					dumpedTables.add(tname);
 				}
 			}
 		} catch (Exception e) {
@@ -117,17 +123,13 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		
 		log.info("partitioned dump done [#start points="+count+"]");
-		log.info("dumped tables ["+dumpedTablesList.size()+"]: "+dumpedTablesList);
+		log.info("dumped tables ["+dumpedTables.size()+"]: "+dumpedTables);
 	}
 
-	Set<String> dumpedTables = new LinkedHashSet<String>();
 	List<String> dumpedTablesList = new ArrayList<String>();
 	Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
 	void dumpTable(final Table t, final List<FK> fks, final String origFilter, final Boolean followExportedKeys) {
-		if(!dumpedTables.add(t.getName())) {
-			return;
-		}
 		if(stopTables.contains(t.getName())) {
 			return;
 		}
