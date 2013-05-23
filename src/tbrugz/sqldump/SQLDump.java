@@ -129,7 +129,6 @@ public class SQLDump {
 		if(closeConnection) {
 			SQLUtils.ConnectionUtil.closeConnection(conn);
 		}
-		log.info("...done");
 	}
 	
 	/**
@@ -151,6 +150,8 @@ public class SQLDump {
 	public void doMain(String[] args, Properties prop, Connection c) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sdd = this;
 		if(c!=null) { sdd.conn = c; }
+		
+		long initTime = System.currentTimeMillis();
 		
 		try {
 
@@ -256,6 +257,7 @@ public class SQLDump {
 		}
 		finally {
 			sdd.end(c==null);
+			log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		}
 	}
 	

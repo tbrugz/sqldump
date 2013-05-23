@@ -252,8 +252,17 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		
 		if(fki!=null) {
-			OUTER:
+			//OUTER:
 			for(FK fk: fki) {
+				if(fks!=null && fks.get(0).equals(fk)) {
+					log.warn("fk "+fk+" already added...");
+					continue;
+				}
+				if(fk.getFkTable().equals(fk.getPkTable())) {
+					log.warn("self-relationship [loop] detected: "+fk.toStringFull()+" [not yet implemented]");
+					continue;
+				}
+				
 				String table = exportedKeys?fk.getFkTable():fk.getPkTable();
 				String schema = exportedKeys?fk.getFkTableSchemaName():fk.getPkTableSchemaName();
 				Table pkt = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schema, table);
