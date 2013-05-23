@@ -3,11 +3,9 @@ package tbrugz.sqldump.processors;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
@@ -95,7 +93,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			}
 			
 			String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
-			dumpTable(t, null, filter, exportedKeys);
+			dumpTable(t, null, t, filter, null);
 			count++;
 		}
 		//XXX: warn for filters not used (for tables not in starttables)
@@ -135,7 +133,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					else {
 						//XXX what??
 						//continue;
-						setOperation = "intersect";
+						setOperation = "union";
 						log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to '"+setOperation+"' operation");
 
 						/*//dump 1st?
@@ -173,14 +171,14 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	}
 
 	List<String> dumpedTablesList = new ArrayList<String>();
-	Set<String> dumpedFKs = new LinkedHashSet<String>();
+	//Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
-	void dumpTable(final Table t, final List<FK> fks, final String filter, final Boolean followExportedKeys) {
+	void dumpTable(final Table t, final List<FK> fks, final Table filterTable, final String filter, final Boolean followExportedKeys) {
 		if(fks!=null) {
 			//prevents infinite recursion... remove this?
-			if(!dumpedFKs.add(fks.get(0).toStringFull())) {
+			/*if(!dumpedFKs.add(fks.get(0).toStringFull())) {
 				return;
-			}
+			}*/
 			
 			//TODO: detect cycles (source of 1st fk equals target of last) - use CTE (common table expressions)?
 			/*
@@ -212,19 +210,21 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":""));
 		}
-		String join = getSQL(t,fks,filter);
+		String join = getSQL(t,fks,filterTable,filter);
 		
 		//importedKeys recursive dump
-		procFKs4Dump(t, fks, filter, false);
+		procFKs4Dump(t, fks, filterTable, filter, false);
 		
 		//do dump
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
-				+(join!=null?join:"");
+				+(join!=null?join:
+					(filter!=null?"\nwhere "+filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(t.getName())):"")
+				);
 		Constraint ctt = t.getPKConstraint();
 		if(ctt!=null) {
 			tablePKs.put(t.getName(), ctt);				
 		}
-		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
+		log.debug("sql[followEx="+followExportedKeys+";null="+(followExportedKeys==null)+"]: "+sql);
 		Query4CDD qd = new Query4CDD(sql, followExportedKeys);
 		List<Query4CDD> qs = queries4dump.get(t.getName());
 		if(qs==null) {
@@ -235,12 +235,12 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		dumpedTablesList.add(t.getName());
 		
 		//exportedKeys recursive dump
-		if(followExportedKeys!=null && followExportedKeys) {
-			procFKs4Dump(t, fks, filter, true);
+		if(exportedKeys!=null && exportedKeys && (followExportedKeys==null || followExportedKeys)) {
+			procFKs4Dump(t, fks, filterTable, filter, true);
 		}
 	}
 	
-	void procFKs4Dump(final Table t, final List<FK> fks, final String filter, final boolean exportedKeys) {
+	void procFKs4Dump(final Table t, final List<FK> fks, final Table filterTable, final String filter, final boolean exportedKeys) {
 		List<FK> fki = null;
 		if(exportedKeys) {
 			fki = DBIdentifiable.getExportedKeys(t, model.getForeignKeys());
@@ -255,7 +255,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			//OUTER:
 			for(FK fk: fki) {
 				if(fks!=null && fks.get(0).equals(fk)) {
-					log.warn("fk "+fk+" already added...");
+					//log.warn("fk "+fk+" already added...");
 					continue;
 				}
 				if(fk.getFkTable().equals(fk.getPkTable())) {
@@ -282,36 +282,40 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					//newFKs.addAll(fks);
 				}
 				//if(exportedKeys) {newFKs.add(fk);}
-				dumpTable(pkt, newFKs, filter, exportedKeys);
+				dumpTable(pkt, newFKs, filterTable, filter, exportedKeys);
 			}
 		}
 	}
 	
-	static String getSQL(final Table t, final List<FK> fks, String filter) {
+	static String getSQL(final Table t, final List<FK> fks, final Table filterTable, String filter) {
 		if(addAlias) {
-			return getSQLAlias(t, fks, filter);
+			return getSQLAlias(t, fks, filterTable, filter);
 		}
 		else {
-			return getSQLNoAlias(t, fks, filter);
+			return getSQLNoAlias(t, fks, filterTable, filter);
 		}
 	}
 	
-	static String getSQLAlias(final Table t, final List<FK> fks, final String filter) {
+	static String getSQLAlias(final Table t, final List<FK> fks, final Table filterTable, final String filter) {
 		if(fks==null) return null;
 		
 		StringBuilder sb = new StringBuilder();
 		String lastTable = t.getName();
 		String lastAlias = t.getName();
+		String filterAlias = filterTable.getName();
 		if(addSQLremarks) { sb.append("\n/* "+fks+" */"); }
 		for(int i=0;i<fks.size();i++) {
 			FK fk = fks.get(i);
 			boolean joinWithFKT = lastTable.equals(fk.getPkTable());
 			String tableJoin = joinWithFKT?fk.getFkTable():fk.getPkTable();
-			String alias = "A"+i;
 			if(tableJoin.equals(t.getName())) {
-				log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
+				//log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
 				continue;
 			}
+			String alias = "A"+i;
+			if(tableJoin.equals(filterTable.getName())) {
+				filterAlias = alias;
+			} 
 			sb.append("\ninner join "+tableJoin+" "+alias);
 			//sb.append("\ninner join "+tableJoin);
 			for(int ci=0;ci<fk.getPkColumns().size();ci++) {
@@ -326,13 +330,13 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			lastAlias = alias;
 		}
 		if(filter!=null) {
-			String newFilter = filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(lastAlias));
+			String newFilter = filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(filterAlias));
 			sb.append("\nwhere "+newFilter);
 		}
 		return sb.toString();
 	}
 
-	static String getSQLNoAlias(final Table t, final List<FK> fks, String filter) {
+	static String getSQLNoAlias(final Table t, final List<FK> fks, final Table filterTable, String filter) {
 		if(fks==null) return null;
 		
 		StringBuilder sb = new StringBuilder();
@@ -342,7 +346,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			FK fk = fks.get(i);
 			String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
 			if(tableJoin.equals(t.getName())) {
-				log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
+				//log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
 				continue;
 			}
 			sb.append("\ninner join "+tableJoin);
@@ -379,7 +383,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			//if(q.exported==null || q.exported) { return false; }
 		}
 		if(!ret) {
-			log.info("allImported[all-should-be-false]? exported="+sb.toString());
+			log.info("allImported/union[all-should-be-false]? exported="+sb.toString());
 		}
 		return ret;
 	}
@@ -395,7 +399,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			//if(q.exported==null || !q.exported) { return false; }
 		}
 		if(!ret) {
-			log.info("allExported[all-should-be-true]? exported="+sb.toString());
+			log.info("allExported/intersect[all-should-be-true]? exported="+sb.toString());
 		}
 		return ret;
 	}
