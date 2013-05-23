@@ -89,7 +89,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PATTERN_SYNTAXFILEEXT = "syntaxfileext"; //syntaxdefaultfileext, defaultsyntaxfileext, defaultfileext, fileext
 	
 	static final String PATTERN_TABLE_QUERY_ID_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_TABLE_QUERY_ID));
-	static final String PATTERN_TABLENAME_FINAL = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
+	public static final String PATTERN_TABLENAME_FINAL = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	static final String PATTERN_PARTITIONBY_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_PARTITIONBY));
 	static final String PATTERN_SYNTAXFILEEXT_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_SYNTAXFILEEXT));
 	//XXX add [tabletype] pattern - TABLE, VIEW, QUERY ?

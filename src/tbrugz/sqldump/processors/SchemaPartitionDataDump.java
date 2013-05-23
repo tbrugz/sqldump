@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,6 +59,8 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	static final String PROP_SPDD_ORDERBYPK = SPDD_PROP_PREFIX+".orderbypk";
 	static final String PROP_SPDD_EXPORTEDKEYS = SPDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
+	static boolean addAlias = true;
+	static boolean addSQLremarks = true;
 	
 	String quote = DBMSResources.instance().getIdentifierQuoteString();
 	//StringDecorator quoter = new StringDecorator.StringQuoterDecorator(quote);
@@ -132,8 +135,8 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					else {
 						//XXX what??
 						//continue;
-						log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to 'union' operation");
-						setOperation = "union";
+						setOperation = "intersect";
+						log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to '"+setOperation+"' operation");
 
 						/*//dump 1st?
 						dd.runQuery(conn, qs.get(0).sql, null, prop, tname, tname);
@@ -205,40 +208,18 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		}
 		
 		//get filter/sql
-		String join = null;
-		if(fks!=null) {
-			StringBuilder sb = new StringBuilder();
-			String lastTable = t.getName();
-			sb.append("\n/* "+fks+" */");
-			for(int i=0;i<fks.size();i++) {
-				FK fk = fks.get(i);
-				String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
-				if(tableJoin.equals(t.getName())) {
-					log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
-					continue;
-				}
-				sb.append("\ninner join "+tableJoin);
-				for(int ci=0;ci<fk.getPkColumns().size();ci++) {
-					if(ci==0) { sb.append(" on "); }
-					else { sb.append(" and "); }
-					sb.append(fk.getPkTable()+"."+fk.getPkColumns().get(ci) +" = "+ fk.getFkTable()+"."+fk.getFkColumns().get(ci));
-				}
-				lastTable = tableJoin;
-			}
-			join = sb.toString();
-		}
 		if(fks==null) {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":""));
 		}
+		String join = getSQL(t,fks,filter);
 		
 		//importedKeys recursive dump
 		procFKs4Dump(t, fks, filter, false);
 		
 		//do dump
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
-				+(join!=null?join:"")
-				+(filter!=null?"\nwhere "+filter:"");
+				+(join!=null?join:"");
 		Constraint ctt = t.getPKConstraint();
 		if(ctt!=null) {
 			tablePKs.put(t.getName(), ctt);				
@@ -295,6 +276,80 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				dumpTable(pkt, newFKs, filter, exportedKeys);
 			}
 		}
+	}
+	
+	static String getSQL(final Table t, final List<FK> fks, String filter) {
+		if(addAlias) {
+			return getSQLAlias(t, fks, filter);
+		}
+		else {
+			return getSQLNoAlias(t, fks, filter);
+		}
+	}
+	
+	static String getSQLAlias(final Table t, final List<FK> fks, final String filter) {
+		if(fks==null) return null;
+		
+		StringBuilder sb = new StringBuilder();
+		String lastTable = t.getName();
+		String lastAlias = t.getName();
+		if(addSQLremarks) { sb.append("\n/* "+fks+" */"); }
+		for(int i=0;i<fks.size();i++) {
+			FK fk = fks.get(i);
+			boolean joinWithFKT = lastTable.equals(fk.getPkTable());
+			String tableJoin = joinWithFKT?fk.getFkTable():fk.getPkTable();
+			String alias = "A"+i;
+			if(tableJoin.equals(t.getName())) {
+				log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
+				continue;
+			}
+			sb.append("\ninner join "+tableJoin+" "+alias);
+			//sb.append("\ninner join "+tableJoin);
+			for(int ci=0;ci<fk.getPkColumns().size();ci++) {
+				if(ci==0) { sb.append(" on "); }
+				else { sb.append(" and "); }
+				//sb.append(fk.getPkTable()+"."+fk.getPkColumns().get(ci)+" = "+fk.getFkTable()+"."+fk.getFkColumns().get(ci));
+				sb.append( (joinWithFKT?lastAlias:alias) +"."+fk.getPkColumns().get(ci));
+				sb.append(" = ");
+				sb.append( (joinWithFKT?alias:lastAlias) +"."+fk.getFkColumns().get(ci));
+			}
+			lastTable = tableJoin;
+			lastAlias = alias;
+		}
+		if(filter!=null) {
+			String newFilter = filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(lastAlias));
+			sb.append("\nwhere "+newFilter);
+		}
+		return sb.toString();
+	}
+
+	static String getSQLNoAlias(final Table t, final List<FK> fks, String filter) {
+		if(fks==null) return null;
+		
+		StringBuilder sb = new StringBuilder();
+		String lastTable = t.getName();
+		if(addSQLremarks) { sb.append("\n/* "+fks+" */"); }
+		for(int i=0;i<fks.size();i++) {
+			FK fk = fks.get(i);
+			String tableJoin = (lastTable.equals(fk.getPkTable())?fk.getFkTable():fk.getPkTable());
+			if(tableJoin.equals(t.getName())) {
+				log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
+				continue;
+			}
+			sb.append("\ninner join "+tableJoin);
+			for(int ci=0;ci<fk.getPkColumns().size();ci++) {
+				if(ci==0) { sb.append(" on "); }
+				else { sb.append(" and "); }
+				sb.append(fk.getPkTable()+"."+fk.getPkColumns().get(ci) +" = "+ fk.getFkTable()+"."+fk.getFkColumns().get(ci));
+			}
+			lastTable = tableJoin;
+		}
+		if(filter!=null) {
+			String newFilter = filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(lastTable));
+			sb.append("\nwhere "+newFilter);
+			//sb.append("\nwhere "+lastTable+"."+filter);
+		}
+		return sb.toString();
 	}
 	
 	String qualifiedColName(Table t, String col) {
