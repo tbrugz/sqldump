@@ -241,6 +241,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		
 		for(String tname: queries4dump.keySet()) {
 			List<Query4CDD> qs = queries4dump.get(tname);
+			Constraint pk = tablePKs.get(tname);
 			if(qs.size()==0) {
 				log.warn("0 queries for table '"+tname+"'");
 			}
@@ -248,7 +249,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				Query4CDD q4cdd = qs.get(0);
 				String sql = q4cdd.sql;
 				if(orderByPK) {
-					Constraint pk = tablePKs.get(tname);
 					sql = addOrderBy(sql, pk);
 				}
 				log.debug("simple-sql["+tname+"]:\n"+sql);
@@ -258,6 +258,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			else {
 				log.debug("many queries for table '"+tname+"': "+qs.size());
 				String setOperation = null;
+				StringBuilder sb = new StringBuilder();
 				if(areAllImported(qs)) {
 					//union
 					setOperation = "union";
@@ -267,28 +268,47 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					setOperation = "intersect";
 				}
 				else {
-					//XXX what??
-					//continue;
-					setOperation = "union";
-					log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to '"+setOperation+"' operation");
+					//setOperation = "union";
+					//log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to '"+setOperation+"' operation");
+					log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property");
 
 					//XXX (i1 intersect i2 intersect i3) union u1 union u2
+					String oper = "intersect";
+					int count = 0;
+					for(int i=0;i<qs.size();i++) {
+						Query4CDD q = qs.get(i);
+						if(q.exported!=null && !q.exported) { continue; }
+						if(count>0) { sb.append("\n"+oper+"\n"); }
+						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
+						sb.append(q.sql);
+						count++;
+					}
 					
-					/*//dump 1st?
-					dd.runQuery(conn, qs.get(0).sql, null, prop, tname, tname);
-					dumpedTables.add(tname);
-					continue;*/
+					if(count>0) {
+						sb.insert(0, "(\n");
+						sb.append("\n)");
+					}
+
+					oper = "union";
+					for(int i=0;i<qs.size();i++) {
+						Query4CDD q = qs.get(i);
+						if(q.exported==null || q.exported) { continue; }
+						sb.append("\n"+oper+"\n");
+						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
+						sb.append(q.sql);
+						count++;
+					}
 				}
-				
-				StringBuilder sb = new StringBuilder();
-				//XXX: test for equality between sql parts?
-				for(int i=0;i<qs.size();i++) {
-					if(i>0) { sb.append("\n"+setOperation+"\n"); }
-					Query4CDD q = qs.get(i);
-					if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
-					sb.append(q.sql);
+
+				if(setOperation!=null) {
+					//XXX: test for equality between sql parts?
+					for(int i=0;i<qs.size();i++) {
+						if(i>0) { sb.append("\n"+setOperation+"\n"); }
+						Query4CDD q = qs.get(i);
+						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
+						sb.append(q.sql);
+					}
 				}
-				Constraint pk = tablePKs.get(tname);
 				if(orderByPK && pk!=null) {
 					addOrderBy(sb, pk);
 				}
