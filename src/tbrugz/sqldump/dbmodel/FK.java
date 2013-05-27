@@ -79,12 +79,12 @@ public class FK extends DBIdentifiable implements Serializable {
 	
 	@Override
 	public String toString() {
-		return name+"["+fkTable+"<-"+pkTable+"]";
+		return name+"["+fkTable+">-"+pkTable+"]";
 		//return "fk:"+name+"["+fkTable+"<-"+pkTable+"]";
 	}
 
 	public String toStringFull() {
-		return name+"["+fkTable+"("+fkColumns+")"+"<-"+pkTable+"("+pkColumns+")"+"]";
+		return name+"["+fkTable+"("+fkColumns+")"+">-"+pkTable+"("+pkColumns+")"+"]";
 	}
 	
 	/*public String getName() {

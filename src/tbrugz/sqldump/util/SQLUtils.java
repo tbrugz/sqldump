@@ -102,7 +102,7 @@ public class SQLUtils {
 					log.info("init sql [count="+count+"]: "+dbInitSql);
 				}
 				catch(SQLException e) {
-					log.warn("error in init sql: "+dbInitSql);
+					log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
 					try { conn.rollback(); }
 					catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
 				}
