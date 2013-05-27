@@ -45,6 +45,7 @@ class Query4CDD {
  * - if table is parent of multiple other tables, union 
  * XXXdone: go into all directions (follow FK-IM after FM-EX - DONE)?
  * ~XXX: option to follow FM-EX after FK-IM?
+ * XXX?: first follow all exported, then use generated 'intersect' queries to grab imported/parent tables with 'union' queries 
  */
 public class SchemaPartitionDataDump extends AbstractSQLProc {
 
@@ -146,6 +147,14 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					return;
 				}
 			}*/
+		}
+		//stop at starting tables if comming from 'importing' FK
+		if(fks!=null && startTables.contains(t.getName()) && followExportedKeys!=null && !followExportedKeys) {
+			//add empty list to keep proper dump order
+			if(queries4dump.get(t.getName())==null) {
+				queries4dump.put(t.getName(), new ArrayList<Query4CDD>());
+			}
+			return;
 		}
 		if(stopTables.contains(t.getName())) {
 			return;
