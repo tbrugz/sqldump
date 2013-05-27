@@ -14,6 +14,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
@@ -117,13 +118,14 @@ public class SQLDump {
 		
 		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;
+		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
 		//DBMSResources.instance().updateMetaData(null);
 		
 		//class names
 		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
 		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
-		String processingClassesAfterDumpersStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
 		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+		String processingClassesAfterDumpersStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
 		
 		if(grabClassName!=null && dumpSchemaClasses==null && processingClassesStr==null) {
 			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
@@ -138,28 +140,11 @@ public class SQLDump {
 			if(failonerror) { throw new ProcessingException(message); }
 		}
 		
-		//XXX: log (info): grabber, processing & dumper classes
-		
 		//grabbing model
 		if(grabClassName!=null) {
 			grabClassName = grabClassName.trim();
 			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
-			if(schemaGrabber!=null) {
-				schemaGrabber.setProperties(sdd.papp);
-				if(schemaGrabber.needsConnection()) {
-					if(sdd.conn==null) { sdd.setupConnection(); }
-					schemaGrabber.setConnection(sdd.conn);
-					schemaGrabber.setFailOnError(failonerror);
-				}
-				sm = schemaGrabber.grabSchema();
-				if(sm!=null) {
-					DBMSResources.instance().updateDbId(sm.getSqlDialect());
-				}
-				else {
-					log.warn("no model grabbed!");
-				}
-			}
-			else {
+			if(schemaGrabber==null) {
 				log.error("schema grabber class '"+grabClassName+"' not found");
 			}
 		}
@@ -167,18 +152,9 @@ public class SQLDump {
 			log.debug("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
-		String dirToDeleteFiles = sdd.papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
-		if(dirToDeleteFiles!=null) {
-			Utils.deleteDirRegularContents(dirToDeleteFiles);
-		}
-		
-		//inits DBMSFeatures if not already initted
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
-		log.debug("DBMSFeatures: "+feats);
-		
 		//processing classes
 		if(processingClassesStr!=null) {
-			sdd.processClasses(processingClassesStr, sm);
+			processors.addAll(sdd.getProcessComponentClasses(processingClassesStr, sm));
 		}
 		
 		//dumping model
@@ -188,9 +164,7 @@ public class SQLDump {
 				dumpClass = dumpClass.trim();
 				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
-					schemaDumper.setProperties(sdd.papp);
-					schemaDumper.setFailOnError(failonerror);
-					schemaDumper.dumpSchema(sm);
+					processors.add(schemaDumper);
 				}
 				else {
 					log.error("Error initializing dump class: '"+dumpClass+"'");
@@ -203,14 +177,93 @@ public class SQLDump {
 
 		//processing classes after dumpers
 		if(processingClassesAfterDumpersStr!=null) {
-			sdd.processClasses(processingClassesAfterDumpersStr, sm);
+			processors.addAll(sdd.getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
 		}
+		
+		//XXX: add schemaGrabber to processors list?
+		doMainProcess(schemaGrabber, processors);
 		
 		}
 		finally {
 			sdd.end(c==null);
 			log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		}
+	}
+	
+	void doMainProcess(SchemaModelGrabber schemaGrabber, List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
+		//TODO add JMX...
+
+		//XXX: log (info): grabber, processing & dumper classes
+		int numOfComponents = processors.size() + (schemaGrabber!=null?1:0);
+		log.info("sqldump process: "+(schemaGrabber!=null?"1 grabber, ":"")+processors.size()+" processors ["+numOfComponents+" total]");
+		int count = 0;
+		
+		SchemaModel sm = null;
+		if(schemaGrabber!=null) {
+			sm = doProcessGrabber(schemaGrabber);
+			count++;
+			log.debug("processor '"+schemaGrabber.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
+		}
+		
+		String dirToDeleteFiles = papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
+		if(dirToDeleteFiles!=null) {
+			Utils.deleteDirRegularContents(dirToDeleteFiles);
+		}
+		
+		//inits DBMSFeatures if not already initted
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
+		log.debug("DBMSFeatures: "+feats);
+		
+		for(ProcessComponent pc: processors) {
+			if(pc instanceof SchemaModelDumper) {
+				doProcessDumper((SchemaModelDumper)pc, sm);
+			}
+			else if(pc instanceof Processor) {
+				doProcessProcessor((Processor)pc, sm);
+			}
+			else {
+				log.warn("unknown processor type: "+pc.getClass().getName());
+			}
+			count++;
+			log.debug("processor '"+pc.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
+		}
+	}
+	
+	SchemaModel doProcessGrabber(SchemaModelGrabber schemaGrabber) throws ClassNotFoundException, SQLException, NamingException {
+		SchemaModel sm = null;
+		
+		if(schemaGrabber!=null) {
+			schemaGrabber.setProperties(papp);
+			if(schemaGrabber.needsConnection()) {
+				if(conn==null) { setupConnection(); }
+				schemaGrabber.setConnection(conn);
+				schemaGrabber.setFailOnError(failonerror);
+			}
+			sm = schemaGrabber.grabSchema();
+		}
+		
+		if(sm!=null) {
+			DBMSResources.instance().updateDbId(sm.getSqlDialect());
+		}
+		else {
+			log.warn("no model grabbed!");
+		}
+		return sm;
+	}
+	
+	void doProcessProcessor(Processor sqlproc, SchemaModel sm) {
+		sqlproc.setProperties(papp);
+		sqlproc.setConnection(conn);
+		sqlproc.setSchemaModel(sm);
+		//TODO: set fail on error based on (processor) properties ?
+		sqlproc.setFailOnError(failonerror);
+		sqlproc.process();
+	}
+	
+	void doProcessDumper(SchemaModelDumper schemaDumper, SchemaModel sm) {
+		schemaDumper.setProperties(papp);
+		schemaDumper.setFailOnError(failonerror);
+		schemaDumper.dumpSchema(sm);
 	}
 	
 	void setupConnection() throws ClassNotFoundException, SQLException, NamingException {
@@ -225,25 +278,23 @@ public class SQLDump {
 		DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
 	}
 	
-	void processClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
+	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
+		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
+		
 		if(conn==null) { setupConnection(); }
 		
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
 			procClass = procClass.trim();
-			Processor sqlproc = (Processor) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
+			ProcessComponent sqlproc = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(sqlproc!=null) {
-				sqlproc.setProperties(papp);
-				sqlproc.setConnection(conn);
-				sqlproc.setSchemaModel(sm);
-				//TODO: set fail on error based on (processor) properties ?
-				sqlproc.setFailOnError(failonerror);
-				sqlproc.process();
+				processors.add(sqlproc);
 			}
 			else {
 				log.error("Error initializing processing class: '"+procClass+"'");
 			}
 		}
+		return processors;
 	}
 	
 }
