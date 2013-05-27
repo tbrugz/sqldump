@@ -47,19 +47,20 @@ class Query4CDD {
  * ~XXX: option to follow FM-EX after FK-IM?
  * XXX?: first follow all exported, then use generated 'intersect' queries to grab imported/parent tables with 'union' queries
  * TODO: add test case!
+ * TODO: 'exported' property for each start-table
  */
-public class SchemaPartitionDataDump extends AbstractSQLProc {
+public class CascadingDataDump extends AbstractSQLProc {
 
-	static final Log log = LogFactory.getLog(SchemaPartitionDataDump.class);
+	static final Log log = LogFactory.getLog(CascadingDataDump.class);
 	
 	//prefix
-	static final String SPDD_PROP_PREFIX = "sqldump.schemapartitiondd";
+	static final String CDD_PROP_PREFIX = "sqldump.cascadingdd";
 	
 	//generic props
-	static final String PROP_SPDD_STARTTABLES = SPDD_PROP_PREFIX+".starttables";
-	static final String PROP_SPDD_STOPTABLES = SPDD_PROP_PREFIX+".stoptables";
-	static final String PROP_SPDD_ORDERBYPK = SPDD_PROP_PREFIX+".orderbypk";
-	static final String PROP_SPDD_EXPORTEDKEYS = SPDD_PROP_PREFIX+".exportedkeys";
+	static final String PROP_CDD_STARTTABLES = CDD_PROP_PREFIX+".starttables";
+	static final String PROP_CDD_STOPTABLES = CDD_PROP_PREFIX+".stoptables";
+	static final String PROP_CDD_ORDERBYPK = CDD_PROP_PREFIX+".orderbypk";
+	static final String PROP_CDD_EXPORTEDKEYS = CDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
 	static boolean addAlias = true;
 	static boolean addSQLremarks = true;
@@ -80,10 +81,10 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
-		startTables = Utils.getStringListFromProp(prop, PROP_SPDD_STARTTABLES, ",");
-		stopTables = Utils.getStringListFromProp(prop, PROP_SPDD_STOPTABLES, ",");
-		orderByPK = Utils.getPropBoolean(prop, PROP_SPDD_ORDERBYPK, orderByPK);
-		exportedKeys = Utils.getPropBoolean(prop, PROP_SPDD_EXPORTEDKEYS, null);
+		startTables = Utils.getStringListFromProp(prop, PROP_CDD_STARTTABLES, ",");
+		stopTables = Utils.getStringListFromProp(prop, PROP_CDD_STOPTABLES, ",");
+		orderByPK = Utils.getPropBoolean(prop, PROP_CDD_ORDERBYPK, orderByPK);
+		exportedKeys = Utils.getPropBoolean(prop, PROP_CDD_EXPORTEDKEYS, null);
 	}
 
 	@Override
@@ -96,7 +97,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				continue;
 			}
 			
-			String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
+			String filter = prop.getProperty(CDD_PROP_PREFIX+".filter@"+t.getName());
 			dumpTable(t, null, t, filter, null, false);
 			count++;
 		}
@@ -114,7 +115,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			}
 		}
 		
-		log.info("partitioned dump done [#start points="+count+"]");
+		log.info("cascading datadump done [#start points="+count+"]");
 		log.info("dumped tables [#"+dumpedTables.size()+"]: "+dumpedTables);
 	}
 
@@ -171,7 +172,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		//importedKeys recursive dump
 		procFKs4Dump(t, fks, filterTable, filter, false, (followExportedKeys!=null && followExportedKeys)?true:doIntersect);
 		
-		//do dump
+		//add query to dump list
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
 				+(join!=null?join:
 					(filter!=null?
@@ -218,6 +219,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					continue;
 				}
 				if(fk.getFkTable().equals(fk.getPkTable())) {
+					//XXX: dump self-relationship
 					log.warn("self-relationship [loop] detected: "+fk.toStringFull()+" [not yet implemented]");
 					continue;
 				}
@@ -364,7 +366,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 				filterAlias = alias;
 			} 
 			sb.append("\ninner join "+tableJoin+" "+alias);
-			//sb.append("\ninner join "+tableJoin);
 			for(int ci=0;ci<fk.getPkColumns().size();ci++) {
 				if(ci==0) { sb.append(" on "); }
 				else { sb.append(" and "); }
@@ -383,6 +384,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		return sb.toString();
 	}
 
+	@Deprecated
 	static String getSQLNoAlias(final Table t, final List<FK> fks, final Table filterTable, String filter) {
 		if(fks==null) return null;
 		
@@ -407,7 +409,6 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		if(filter!=null) {
 			String newFilter = filter.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(lastTable));
 			sb.append("\nwhere "+newFilter);
-			//sb.append("\nwhere "+lastTable+"."+filter);
 		}
 		return sb.toString();
 	}
