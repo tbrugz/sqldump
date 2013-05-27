@@ -24,71 +24,23 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * XXXxxx (database dependent): DDL: grab contents from procedures, triggers and views 
- * XXXxxx: detach main (SQLDataDump) from data dump
- * TODOne: generate graphml from schema structure
- * TODOne: column type mapping
- * TODOne: FK constraints at end of schema dump script?
- * TODOne: unique constraints? indexes? 
- * TODOne: sequences?
- * XXXdone: include Grants into SchemaModel?
- * TODOne: recursive dump based on FKs
  * XXX(later): usePrecision should be defined by java code (not .properties)
- * XXXdone: dump dbobjects ordered by type (tables, fks, views, triggers, etc(functions, procedures, packages)), name
- * XXXdone: dump different objects to different files (using log4j - different loggers? no!)
- * XXXdone: more flexible output options (option to group or not grants|fks|index with tables - "group" means same file)
- * XXXdone: script output: option to group specific objects (fk, grants, index) with referencing table
- * XXXdone: script output: option to output specific objects (eg FK or Grants) with specific pattern 
- * XXXdone: compact grant syntax
- * TODOne: postgresql/ansi specific features
- * XXXxx: derby specific features?
- * TODOne: grab specific table info (Oracle)
- * TODOne: grab constraints: ~UNIQUE, ~CHECK, xPK, xFK, xNOT NULL ; UNIQUE & CHECK for Oracle!
- * XXXdone: DEFAULT for columns 
- * XXXdone: COMMENT/REMARKS for columns (Oracle) 
- * XXXdone: COMMENT/REMARKS for tables (Oracle)
- * TODOne: bitbucket project's wiki
- * TODOne: main(): args: point to different .properties init files. 
- * XXXdone: Use ${xxx} params inside Properties
- * XXXdone: data dump: limit tables to dump 
- * XXXxx: define output patterns for data dump
  * !TODO: include demo schema and data
- * XXXdone: option to delete initial output dir contents (except special hidden files (unix dotfiles) eg: .svn, .git, .hg)?
- * ---
- * XXXxxx: compare 2 schema models? generate "alter table" database script... see SQLDiff
  * XXX(later): generate schema model from graphML file (XMLUnit?). may be used for model comparison 
  * XXX: new grabber: scriptGrabber - antlr?
- * XXXdone: serialize model (for later comparison)
- * XXXdone: XML schema model grabber/dumper - http://en.wikipedia.org/wiki/XML_data_binding, http://stackoverflow.com/questions/35785/xml-serialization-in-java, http://www.castor.org/xml-framework.html
- *   - x jaxb, xtream, xmlbeans, x castor, jibx
- * XXXdone: new dumper: generate mondrian schema
- * XXXdone: test with sqlite - http://code.google.com/p/sqlite-jdbc/
- * XXX: luciddb?
  * XXX!: new dumper: test case dumper: dumps defined records and its parent/child records based on FKs (needs schema and connection)
- * XXXdone: new dumper: alter schema suggestions (PKs, FKs, "create index"s)
- * XXXdone: fixed prop 'propfilebasedir'/'basepropdir': properties file directory
  * XXX: add shutdown option (Derby). see JDBCSchemaGrabber.grabDbSpecificFeaturesClass()
  * XXX: add startup option, before opening connection (SQLite, ...) - readOnlyConnection , ...
- * TODOne: sqlregen/sqlrun/sqlexec/sqlcmd // SQLCreate/SQLRecreate/SQLGenerate/SQLRegenerate: command for sending sql statements to database (re-generate database). order for sending statements based on regex
- * XXXxx: default value for 'sqldump.dumpschemapattern'? user? upper(user)/(oracle)? public (postgresql)? only if contained in MetaData().getSchemas()
  * TODO: more transparent way of selecting index grabbing strategy: 'sqldump.dbspecificfeatures.grabindexes' / 'sqldump.doschemadump.indexes'
  * XXX: FK 'on delete cascade'? UNIQUE constraints 'not null'? other modifiers?
  * ~XXX: create view WITH CHECK OPTION - can only update rows thar are accessible through the view (+ WITH READ ONLY)
  * XXX: add junit tests for all "supported" databases (needs sqlregen first?)
- * XXXxx: error dumping blobs
- * XXXxx: add support for blobs (BlobDataDump)
- * XXXxx: add support for cursor in sql (ResultSet as a column type): [x] xml, [x] html, [x] json dumpers
- * XXX: option for queries to have specific syntax-dumpers
+ * XXX?: option for queries to have specific syntax-dumpers
  * XXXdone: option for specific queries to have specific syntax-dumpers
  * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
- * XXXdone: move to tbrugz.sqldump.util: IOUtil, Utils, ParametrizedProperties
- * TODOne: add SQLDialectTransformer
- * XXXdone: log4j -> commons logging ( static Log log = LogFactory.getLog(XXX.class) )
- * TODOne: sqldump.schemagrab.tablefilter=<schema>.<table>, <table2> 
  * ~TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
- * TODOne: warnings: grabber with no dumper or processor || dumper with no grabber || no dumper, no grabber, no processor
  */
 public class SQLDump {
 	
