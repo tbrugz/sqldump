@@ -157,7 +157,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		this.prop = prop;
 		fileOutput = prop.getProperty(PROP_MONDRIAN_SCHEMA_OUTFILE);
 		mondrianSchemaName = prop.getProperty(PROP_MONDRIAN_SCHEMA_NAME, "sqldumpSchema");

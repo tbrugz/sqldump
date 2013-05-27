@@ -96,7 +96,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	CategorizedOut cout;
 
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		fileOutput = prop.getProperty(PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN);
 		String schemas = prop.getProperty(PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS);
 		if(schemas!=null) {

@@ -173,7 +173,7 @@ public class SQLDiff {
 			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
 			schemaGrabber.setConnection(conn);
 		}
-		schemaGrabber.procProperties(prop);
+		schemaGrabber.setProperties(prop);
 		return schemaGrabber;
 	}
 	

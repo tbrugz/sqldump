@@ -369,7 +369,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	}
 	
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		String outFileStr = prop.getProperty(PROP_OUTPUTFILE);
 		if(outFileStr==null) {
 			log.warn("graphml output file ["+PROP_OUTPUTFILE+"] not defined");

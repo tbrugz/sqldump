@@ -5,7 +5,7 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
-public interface Processor {
+public interface Processor extends ProcessComponent {
 
 	public void setProperties(Properties prop);
 

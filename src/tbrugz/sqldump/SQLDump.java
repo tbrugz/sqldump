@@ -193,7 +193,7 @@ public class SQLDump {
 			grabClassName = grabClassName.trim();
 			schemaGrabber = (SchemaModelGrabber) Utils.getClassInstance(grabClassName, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 			if(schemaGrabber!=null) {
-				schemaGrabber.procProperties(sdd.papp);
+				schemaGrabber.setProperties(sdd.papp);
 				if(schemaGrabber.needsConnection()) {
 					if(sdd.conn==null) { sdd.setupConnection(); }
 					schemaGrabber.setConnection(sdd.conn);
@@ -236,7 +236,7 @@ public class SQLDump {
 				dumpClass = dumpClass.trim();
 				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
 				if(schemaDumper!=null) {
-					schemaDumper.procProperties(sdd.papp);
+					schemaDumper.setProperties(sdd.papp);
 					schemaDumper.setFailOnError(failonerror);
 					schemaDumper.dumpSchema(sm);
 				}

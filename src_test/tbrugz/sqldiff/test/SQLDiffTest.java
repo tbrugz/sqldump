@@ -61,7 +61,7 @@ public class SQLDiffTest {
 				"-Dsqldump.usedbspecificfeatures=true",
 		};
 		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
-		schemaJdbcGrabber.procProperties(jdbcPropNew);
+		schemaJdbcGrabber.setProperties(jdbcPropNew);
 		
 		conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
 		

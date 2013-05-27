@@ -9,7 +9,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 public class EmptyModelGrabber implements SchemaModelGrabber {
 
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 	}
 
 	@Override

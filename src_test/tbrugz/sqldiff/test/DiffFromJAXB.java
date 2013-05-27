@@ -21,14 +21,14 @@ public class DiffFromJAXB {
 		SchemaModelGrabber schemaSerialGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
 		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropOrig);
+		schemaSerialGrabber.setProperties(jaxbPropOrig);
 		SchemaModel smOrig = schemaSerialGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
 
 		//xml serializer input New
 		Properties jaxbPropNew = new Properties();
 		jaxbPropNew.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
-		schemaSerialGrabber.procProperties(jaxbPropNew);
+		schemaSerialGrabber.setProperties(jaxbPropNew);
 		SchemaModel smNew = schemaSerialGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
 		
@@ -48,7 +48,7 @@ public class DiffFromJAXB {
 		SchemaModelGrabber jaxbGrabber = new JAXBSchemaXMLSerializer();
 		Properties jaxbPropOrig = new Properties();
 		jaxbPropOrig.setProperty(JAXBSchemaXMLSerializer.XMLSERIALIZATION_JAXB_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/jaxb/empdept.jaxb.xml");
-		jaxbGrabber.procProperties(jaxbPropOrig);
+		jaxbGrabber.setProperties(jaxbPropOrig);
 		smOrig = jaxbGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
 		}
@@ -59,7 +59,7 @@ public class DiffFromJAXB {
 		SchemaModelGrabber jsonGrabber = new JSONSchemaSerializer();
 		Properties jsonPropNew = new Properties();
 		jsonPropNew.setProperty(JSONSchemaSerializer.JSONSERIALIZATION_DEFAULT_PREFIX+JAXBSchemaXMLSerializer.PROP_XMLSERIALIZATION_JAXB_INFILE, "test/json/empdept.json");
-		jsonGrabber.procProperties(jsonPropNew);
+		jsonGrabber.setProperties(jsonPropNew);
 		smNew = jsonGrabber.grabSchema();
 		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
 		}

@@ -31,7 +31,7 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 	String outfilePattern = null;
 
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
 		if(outfilePattern==null) {
 			log.warn("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump drop script");

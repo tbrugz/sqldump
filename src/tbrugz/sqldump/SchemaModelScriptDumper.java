@@ -125,7 +125,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		//init control vars
 		doSchemaDumpPKs = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");

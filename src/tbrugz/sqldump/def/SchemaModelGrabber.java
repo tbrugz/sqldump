@@ -5,9 +5,9 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
-public interface SchemaModelGrabber {
+public interface SchemaModelGrabber /* extends ProcessComponent? */ {
 
-	public void procProperties(Properties prop);
+	public void setProperties(Properties prop);
 
 	public void setPropertiesPrefix(String propertiesPrefix);
 	

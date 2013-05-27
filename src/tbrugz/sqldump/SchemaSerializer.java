@@ -34,7 +34,7 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 	String fileOutput;
 	
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		fileOutput = prop.getProperty(PROP_SERIALIZATION_OUTFILE);
 		String fileInputStr = prop.getProperty(PROP_SERIALIZATION_INFILE);
 		if(fileInputStr==null) {

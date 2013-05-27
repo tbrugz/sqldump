@@ -50,7 +50,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	}
 	
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
 		String fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
 		if(fileInputStr==null) {

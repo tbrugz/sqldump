@@ -84,7 +84,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(jdbcPropOrig, vmparams);
 		schemaGrabber.procProperties(jdbcPropOrig);
 		schemaGrabber.setConnection(TestUtil.getConn(jdbcPropOrig, "sqldump"));*/
-		schemaGrabber.procProperties(new Properties());
+		schemaGrabber.setProperties(new Properties());
 		schemaGrabber.setConnection(conn);
 		SchemaModel smOrig = schemaGrabber.grabSchema();
 		System.out.println("smOrig: "+smOrig);

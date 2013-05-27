@@ -120,7 +120,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	Long maxLevel = null;
 	
 	@Override
-	public void procProperties(Properties prop) {
+	public void setProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
 		
 		propOriginal = prop;
