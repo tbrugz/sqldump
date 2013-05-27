@@ -56,11 +56,15 @@ public class DBMSResources {
 	}*/
 	
 	public void updateMetaData(DatabaseMetaData dbmd) {
+		updateMetaData(dbmd, false);
+	}
+	
+	public void updateMetaData(DatabaseMetaData dbmd, boolean quiet) {
 		String dbIdTmp = papp.getProperty(Defs.PROP_FROM_DB_ID);
 		if( (Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) || dbIdTmp==null) && dbmd != null) {
-			String dbid = detectDbId(dbmd);
+			String dbid = detectDbId(dbmd, quiet);
 			if(dbid!=null) {
-				log.info("database type identifier: "+dbid);
+				if(!quiet) { log.info("database type identifier: "+dbid); }
 				updateDbId(dbid);
 			}
 			else {
@@ -70,7 +74,7 @@ public class DBMSResources {
 		}
 		else {
 			updateDbId(dbIdTmp);
-			log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId);
+			if(!quiet) { log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId); }
 		}
 
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
@@ -82,7 +86,7 @@ public class DBMSResources {
 			return;
 		}
 		
-		log.info("updating dbid: '"+newid+"' [old="+dbId+"]");
+		log.debug("updating dbid: '"+newid+"' [old="+dbId+"]");
 		if(dbIds.contains(newid) || newid==null) {
 			dbId = newid;
 			updateIdentifierQuoteString();
@@ -99,7 +103,7 @@ public class DBMSResources {
 	}
 	
 	//TODO: also detect by getUrl()...
-	String detectDbId(DatabaseMetaData dbmd) {
+	String detectDbId(DatabaseMetaData dbmd, boolean quiet) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
 			int dbMajorVersion = -1;
@@ -114,7 +118,7 @@ public class DBMSResources {
 			catch(LinkageError e) {
 				log.warn("error getting metadata: "+e);
 			}
-			log.info("detectDbId: product = "+dbProdName+"; majorVersion = "+dbMajorVersion+"; minorVersion = "+dbMinorVersion);
+			if(!quiet) { log.info("detectDbId: product = "+dbProdName+"; majorVersion = "+dbMajorVersion+"; minorVersion = "+dbMinorVersion); }
 			//String dbIdsProp = dbmsSpecificResource.getProperty("dbids");
 			//String[] dbIds = dbIdsProp.split(",");
 			for(String dbid: dbIds) {

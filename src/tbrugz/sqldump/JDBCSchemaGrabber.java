@@ -224,7 +224,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			else { log.warn("can't detect database type"); }
 		}*/
 
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
 		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
