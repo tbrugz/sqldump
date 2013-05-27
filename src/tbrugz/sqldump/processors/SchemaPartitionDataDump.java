@@ -45,7 +45,8 @@ class Query4CDD {
  * - if table is parent of multiple other tables, union 
  * XXXdone: go into all directions (follow FK-IM after FM-EX - DONE)?
  * ~XXX: option to follow FM-EX after FK-IM?
- * XXX?: first follow all exported, then use generated 'intersect' queries to grab imported/parent tables with 'union' queries 
+ * XXX?: first follow all exported, then use generated 'intersect' queries to grab imported/parent tables with 'union' queries
+ * TODO: add test case!
  */
 public class SchemaPartitionDataDump extends AbstractSQLProc {
 
@@ -96,7 +97,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 			}
 			
 			String filter = prop.getProperty(SPDD_PROP_PREFIX+".filter@"+t.getName());
-			dumpTable(t, null, t, filter, null);
+			dumpTable(t, null, t, filter, null, false);
 			count++;
 		}
 		//XXX: warn for filters not used (for tables not in starttables)
@@ -120,7 +121,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 	List<String> dumpedTablesList = new ArrayList<String>();
 	//Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
-	void dumpTable(final Table t, final List<FK> fks, final Table filterTable, final String filter, final Boolean followExportedKeys) {
+	void dumpTable(final Table t, final List<FK> fks, final Table filterTable, final String filter, final Boolean followExportedKeys, final boolean doIntersect) {
 		if(fks!=null) {
 			//prevents infinite recursion... remove this?
 			/*if(!dumpedFKs.add(fks.get(0).toStringFull())) {
@@ -168,7 +169,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		String join = getSQL(t,fks,filterTable,filter);
 		
 		//importedKeys recursive dump
-		procFKs4Dump(t, fks, filterTable, filter, false);
+		procFKs4Dump(t, fks, filterTable, filter, false, (followExportedKeys!=null && followExportedKeys)?true:doIntersect);
 		
 		//do dump
 		String sql = "select distinct "+t.getName()+".* from "+t.getName()
@@ -182,8 +183,8 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		if(ctt!=null) {
 			tablePKs.put(t.getName(), ctt);				
 		}
-		log.debug("sql[followEx="+followExportedKeys+"]: "+sql);
-		Query4CDD qd = new Query4CDD(sql, followExportedKeys);
+		log.debug("sql[followEx="+followExportedKeys+";doIntersect="+doIntersect+"]: "+sql);
+		Query4CDD qd = new Query4CDD(sql, doIntersect?(Boolean)doIntersect:followExportedKeys);
 		List<Query4CDD> qs = queries4dump.get(t.getName());
 		if(qs==null) {
 			qs = new ArrayList<Query4CDD>();
@@ -194,11 +195,11 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 		
 		//exportedKeys recursive dump
 		if(exportedKeys!=null && exportedKeys && (followExportedKeys==null || followExportedKeys)) {
-			procFKs4Dump(t, fks, filterTable, filter, true);
+			procFKs4Dump(t, fks, filterTable, filter, true, doIntersect);
 		}
 	}
 	
-	void procFKs4Dump(final Table t, final List<FK> fks, final Table filterTable, final String filter, final boolean exportedKeys) {
+	void procFKs4Dump(final Table t, final List<FK> fks, final Table filterTable, final String filter, final boolean exportedKeys, final boolean doIntersect) {
 		List<FK> fki = null;
 		if(exportedKeys) {
 			fki = DBIdentifiable.getExportedKeys(t, model.getForeignKeys());
@@ -240,7 +241,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					//newFKs.addAll(fks);
 				}
 				//if(exportedKeys) {newFKs.add(fk);}
-				dumpTable(pkt, newFKs, filterTable, filter, exportedKeys);
+				dumpTable(pkt, newFKs, filterTable, filter, exportedKeys, doIntersect);
 			}
 		}
 	}
@@ -277,32 +278,35 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 					setOperation = "intersect";
 				}
 				else {
-					//setOperation = "union";
-					//log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property - defaulting to '"+setOperation+"' operation");
 					log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property");
 
 					//XXX (i1 intersect i2 intersect i3) union u1 union u2
-					String oper = "intersect";
+					// or (u1 union u2) intersect i1 intersect i2 intersect i3 ?
+					String oper = null;
 					int count = 0;
+
+					//1st operation
+					oper = "union";
 					for(int i=0;i<qs.size();i++) {
 						Query4CDD q = qs.get(i);
-						if(q.exported!=null && !q.exported) { continue; }
+						if(q.exported==null || q.exported) { continue; }
 						if(count>0) { sb.append("\n"+oper+"\n"); }
 						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
 						sb.append(q.sql);
 						count++;
 					}
 					
-					if(count>0) {
+					if(count>1) {
 						sb.insert(0, "(\n");
 						sb.append("\n)");
 					}
 
-					oper = "union";
+					//2nd operation
+					oper = "intersect";
 					for(int i=0;i<qs.size();i++) {
 						Query4CDD q = qs.get(i);
-						if(q.exported==null || q.exported) { continue; }
-						sb.append("\n"+oper+"\n");
+						if(q.exported!=null && !q.exported) { continue; }
+						if(count>0) { sb.append("\n"+oper+"\n"); }
 						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
 						sb.append(q.sql);
 						count++;
@@ -318,6 +322,7 @@ public class SchemaPartitionDataDump extends AbstractSQLProc {
 						sb.append(q.sql);
 					}
 				}
+				
 				if(orderByPK && pk!=null) {
 					addOrderBy(sb, pk);
 				}
