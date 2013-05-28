@@ -19,7 +19,9 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.jmx.SQLD;
 import tbrugz.sqldump.util.CLIProcessor;
+import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -192,7 +194,6 @@ public class SQLDump {
 	}
 	
 	void doMainProcess(List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
-		//TODO add JMX...
 
 		int numOfComponents = processors.size();
 		StringBuilder sb = new StringBuilder();
@@ -202,6 +203,10 @@ public class SQLDump {
 		}
 		log.info("sqldump processors [#"+numOfComponents+"]: "+sb.toString());
 
+		//jmx
+		SQLD sqldmbean = new SQLD(numOfComponents, (conn!=null)?conn.getMetaData():null );
+		JMXUtil.registerMBeanSimple(SQLD.MBEAN_NAME, sqldmbean);
+		
 		int count = 0;
 		SchemaModel sm = null;
 		
@@ -213,6 +218,8 @@ public class SQLDump {
 		log.debug("DBMSFeatures: "+feats);
 		
 		for(ProcessComponent pc: processors) {
+			sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
+			
 			if(pc instanceof SchemaModelGrabber) {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
 				if(dirToDeleteFiles!=null) {
@@ -232,6 +239,11 @@ public class SQLDump {
 					throw new ProcessingException("unknown processor type: "+pc.getClass().getName());
 				}
 			}
+			
+			if(conn!=null) {
+				sqldmbean.dbmdUpdate(conn.getMetaData());
+			}
+			
 			count++;
 			log.debug("processor '"+pc.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
 		}

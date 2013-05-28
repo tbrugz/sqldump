@@ -29,6 +29,7 @@ import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.util.CLIProcessor;
+import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -127,7 +128,7 @@ public class SQLRun {
 		}
 		
 		SQLR sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
-		SQLR.registerMBeanSimple(sqlrmbean);
+		JMXUtil.registerMBeanSimple(SQLR.MBEAN_NAME, sqlrmbean);
 		
 		String defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		
