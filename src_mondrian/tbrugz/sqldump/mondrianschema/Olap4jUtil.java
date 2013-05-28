@@ -35,4 +35,8 @@ public class Olap4jUtil {
 		
 		return oConnection;
 	}
+	
+	public static boolean isOlapConnection(Connection conn) {
+		return conn instanceof OlapConnection;
+	}
 }
