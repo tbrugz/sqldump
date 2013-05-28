@@ -19,4 +19,6 @@ public interface Processor extends ProcessComponent {
 	
 	public void process();
 
+	public Connection getConnection();
+
 }

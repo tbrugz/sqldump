@@ -231,7 +231,10 @@ public class SQLDump {
 				doProcessDumper((SchemaModelDumper)pc, sm);
 			}
 			else if(pc instanceof Processor) {
-				doProcessProcessor((Processor)pc, sm);
+				Connection newConn = doProcessProcessor((Processor)pc, sm);
+				if(newConn!=null) {
+					conn = newConn;
+				}
 			}
 			else {
 				log.warn("unknown processor type: "+pc.getClass().getName());
@@ -271,13 +274,14 @@ public class SQLDump {
 		return sm;
 	}
 	
-	void doProcessProcessor(Processor sqlproc, SchemaModel sm) {
+	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) {
 		sqlproc.setProperties(papp);
 		sqlproc.setConnection(conn);
 		sqlproc.setSchemaModel(sm);
 		//TODO: set fail on error based on (processor) properties ?
 		sqlproc.setFailOnError(failonerror);
 		sqlproc.process();
+		return sqlproc.getConnection();
 	}
 	
 	void doProcessDumper(SchemaModelDumper schemaDumper, SchemaModel sm) {

@@ -32,4 +32,9 @@ public abstract class AbstractSQLProc extends AbstractFailable implements Proces
 	@Override
 	public abstract void process();
 	
+	@Override
+	public Connection getConnection() {
+		return null;
+	}
+	
 }
