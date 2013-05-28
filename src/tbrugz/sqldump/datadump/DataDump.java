@@ -48,7 +48,6 @@ import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
-import tbrugz.util.GenericFactory;
 import tbrugz.util.LongFactory;
 import tbrugz.util.NonNullGetMap;
 

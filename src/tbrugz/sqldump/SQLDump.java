@@ -101,17 +101,16 @@ public class SQLDump {
 	}
 	
 	public void doMain(String[] args, Properties prop, Connection c) throws ClassNotFoundException, SQLException, NamingException, IOException {
-		SQLDump sdd = this;
-		if(c!=null) { sdd.conn = c; }
+		if(c!=null) { conn = c; }
 		
 		long initTime = System.currentTimeMillis();
 		
 		try {
 
-		sdd.init(args);
+		init(args);
 		
 		if(prop!=null) {
-			sdd.papp.putAll(prop);
+			papp.putAll(prop);
 		}
 		
 		//Utils.showSysProperties();
@@ -122,10 +121,10 @@ public class SQLDump {
 		//DBMSResources.instance().updateMetaData(null);
 		
 		//class names
-		String grabClassName = sdd.papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
-		String processingClassesStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES);
-		String dumpSchemaClasses = sdd.papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
-		String processingClassesAfterDumpersStr = sdd.papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
+		String grabClassName = papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
+		String processingClassesStr = papp.getProperty(PROP_PROCESSINGCLASSES);
+		String dumpSchemaClasses = papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
+		String processingClassesAfterDumpersStr = papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
 		
 		if(grabClassName!=null && dumpSchemaClasses==null && processingClassesStr==null) {
 			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
@@ -157,7 +156,7 @@ public class SQLDump {
 		
 		//processing classes
 		if(processingClassesStr!=null) {
-			processors.addAll(sdd.getProcessComponentClasses(processingClassesStr, sm));
+			processors.addAll(getProcessComponentClasses(processingClassesStr, sm));
 		}
 		
 		//dumping model
@@ -180,15 +179,14 @@ public class SQLDump {
 
 		//processing classes after dumpers
 		if(processingClassesAfterDumpersStr!=null) {
-			processors.addAll(sdd.getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
+			processors.addAll(getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
 		}
 		
-		//XXXdone: add schemaGrabber to processors list?
 		doMainProcess(processors);
 		
 		}
 		finally {
-			sdd.end(c==null);
+			end(c==null);
 			log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		}
 	}
