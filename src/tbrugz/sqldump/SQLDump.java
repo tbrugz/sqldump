@@ -147,6 +147,9 @@ public class SQLDump {
 			if(schemaGrabber==null) {
 				log.error("schema grabber class '"+grabClassName+"' not found");
 			}
+			else {
+				processors.add(schemaGrabber);
+			}
 		}
 		else {
 			log.debug("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
@@ -180,8 +183,8 @@ public class SQLDump {
 			processors.addAll(sdd.getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
 		}
 		
-		//XXX: add schemaGrabber to processors list?
-		doMainProcess(schemaGrabber, processors);
+		//XXXdone: add schemaGrabber to processors list?
+		doMainProcess(processors);
 		
 		}
 		finally {
@@ -190,32 +193,36 @@ public class SQLDump {
 		}
 	}
 	
-	void doMainProcess(SchemaModelGrabber schemaGrabber, List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
+	void doMainProcess(List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
 		//TODO add JMX...
 
-		//XXX: log (info): grabber, processing & dumper classes
-		int numOfComponents = processors.size() + (schemaGrabber!=null?1:0);
-		log.info("sqldump process: "+(schemaGrabber!=null?"1 grabber, ":"")+processors.size()+" processors ["+numOfComponents+" total]");
+		int numOfComponents = processors.size();
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<numOfComponents;i++) {
+			ProcessComponent pc = processors.get(i);
+			sb.append((i>0?", ":"")+pc.getClass().getSimpleName());
+		}
+		log.info("sqldump processors [#"+numOfComponents+"]: "+sb.toString());
+
 		int count = 0;
-		
 		SchemaModel sm = null;
-		if(schemaGrabber!=null) {
-			sm = doProcessGrabber(schemaGrabber);
-			count++;
-			log.debug("processor '"+schemaGrabber.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
-		}
 		
+		//XXX change 'dirtodelete' to processor?
 		String dirToDeleteFiles = papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
-		if(dirToDeleteFiles!=null) {
-			Utils.deleteDirRegularContents(dirToDeleteFiles);
-		}
 		
 		//inits DBMSFeatures if not already initted
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
 		log.debug("DBMSFeatures: "+feats);
 		
 		for(ProcessComponent pc: processors) {
-			if(pc instanceof SchemaModelDumper) {
+			if(pc instanceof SchemaModelGrabber) {
+				sm = doProcessGrabber((SchemaModelGrabber)pc);
+				if(dirToDeleteFiles!=null) {
+					Utils.deleteDirRegularContents(dirToDeleteFiles);
+					dirToDeleteFiles = null;
+				}
+			}
+			else if(pc instanceof SchemaModelDumper) {
 				doProcessDumper((SchemaModelDumper)pc, sm);
 			}
 			else if(pc instanceof Processor) {
