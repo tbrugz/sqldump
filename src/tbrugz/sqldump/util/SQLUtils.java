@@ -99,7 +99,7 @@ public class SQLUtils {
 			if(dbInitSql!=null) {
 				try {
 					int count = conn.createStatement().executeUpdate(dbInitSql);
-					log.info("init sql [count="+count+"]: "+dbInitSql);
+					log.info("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
 				}
 				catch(SQLException e) {
 					log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");

@@ -228,6 +228,9 @@ public class SQLDump {
 			}
 			else {
 				log.warn("unknown processor type: "+pc.getClass().getName());
+				if(failonerror) {
+					throw new ProcessingException("unknown processor type: "+pc.getClass().getName());
+				}
 			}
 			count++;
 			log.debug("processor '"+pc.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
