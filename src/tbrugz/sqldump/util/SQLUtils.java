@@ -182,7 +182,12 @@ public class SQLUtils {
 			if(conn!=null) {
 				log.info("closing connection: "+conn);
 				try {
-					conn.rollback();
+					try {
+						conn.rollback();
+					}
+					catch(Exception e) {
+						log.warn("error trying to 'rollback': "+e);
+					}
 					conn.close();
 				} catch (SQLException e) {
 					log.warn("error trying to close connection: "+e);
