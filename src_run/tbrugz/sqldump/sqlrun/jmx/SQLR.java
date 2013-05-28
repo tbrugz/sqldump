@@ -40,7 +40,7 @@ public class SQLR implements SQLRMBean {
 	
 	@Override
 	public double getFinishedPercentage() {
-		return ((double)currentPosition)/((double)maxPosition);
+		return ((double)currentPosition-1)/((double)maxPosition);
 	}
 
 	@Override

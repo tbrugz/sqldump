@@ -218,6 +218,7 @@ public class SQLDump {
 		log.debug("DBMSFeatures: "+feats);
 		
 		for(ProcessComponent pc: processors) {
+			count++;
 			sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
 			
 			if(pc instanceof SchemaModelGrabber) {
@@ -247,7 +248,6 @@ public class SQLDump {
 				sqldmbean.dbmdUpdate(conn.getMetaData());
 			}
 			
-			count++;
 			log.debug("processor '"+pc.getClass().getSimpleName()+"' ended ["+count+"/"+numOfComponents+"]");
 		}
 	}
