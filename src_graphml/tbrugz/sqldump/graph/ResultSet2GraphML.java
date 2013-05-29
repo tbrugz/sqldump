@@ -141,7 +141,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		
 		if(!edgeOnlyStrategy) {
 			List<String> allNodeCols = Arrays.asList(NODE_COLS);
-			if(!hasAllColumns(rsNodes.getMetaData(), allNodeCols)) { return null; }
+			if(!hasAllColumns(rsNodes.getMetaData(), allNodeCols, qid, "nodesql")) { return null; }
 			
 			boolean hasObjectX = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_X, qid);
 			boolean hasObjectY = hasOptionalColumn(rsNodes.getMetaData(), COL_OBJECT_Y, qid);
@@ -203,7 +203,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		hasEdgeWidth = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_WIDTH, qid);
 		hasEdgeType = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_TYPE, qid);
 		hasEdgeLabel = hasOptionalColumn(rsEdges.getMetaData(), COL_EDGE_LABEL, qid);
-		if(!hasAllColumns(rsEdges.getMetaData(), allCols)) { return null; }
+		if(!hasAllColumns(rsEdges.getMetaData(), allCols, qid, "edgesql")) { return null; }
 		
 		while(rsEdges.next()) {
 			String source = rsEdges.getString(COL_SOURCE);
@@ -283,7 +283,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return graphModel;
 	}
 	
-	static boolean hasAllColumns(ResultSetMetaData rsmd, List<String> allCols) throws SQLException {
+	static boolean hasAllColumns(ResultSetMetaData rsmd, List<String> allCols, String queryId, String queryType) throws SQLException {
 		//test columns
 		int colCount = rsmd.getColumnCount();
 		List<String> allRSCols = new ArrayList<String>();
@@ -291,7 +291,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			allRSCols.add(rsmd.getColumnLabel(i+1));
 		}
 		if(!allRSCols.containsAll(allCols)) {
-			log.warn("query doesn't contain all required columns [required cols are: "+allCols+"; avaiable cols are: "+allRSCols+"]");
+			log.warn("query '"+queryId+"' ["+queryType+"] doesn't contain all required columns [required cols are: "+allCols+"; avaiable cols are: "+allRSCols+"]");
 			return false;
 		}
 		return true;

@@ -8,9 +8,10 @@ public class DumpResultSetGraphMLModel extends DumpGraphMLModel {
 	@Override
 	public void outEdgeContents(Edge l, int level) {
 		WeightedEdge we = (WeightedEdge) l;
-		String label = we.getName();
-		String snippetId = (label==null || label.trim().equals(""))?
-				getSnippetId(we, "edge.nolabel"):getSnippetId(we, "edge");
+		
+		String snippetId = null;
+		snippetId = getSnippetId(we, "edge");
+		
 		if(we.getWidth()!=null) {
 			outSnippet(snippetId, level, we.getName(), ""+we.getWidth());
 		}
