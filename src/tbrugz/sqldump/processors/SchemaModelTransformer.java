@@ -28,6 +28,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	
 	static final String SUFFIX_REMOVE_SCHEMANAME = ".removeschemaname";
 	static final String SUFFIX_REMOVE_FKS_BYNAME = ".removefksbyname";
+	//TODO: prop to remove tables-with-its-fks by tablename
 
 	SchemaModel schemaModel;
 	List<FK> addedFKs;

@@ -5,6 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -14,6 +17,7 @@ import tbrugz.sqldump.dbmodel.Table;
  * see: http://www.h2database.com/html/grammar.html#information_schema
  */
 public class H2Features extends InformationSchemaFeatures {
+	static Log log = LogFactory.getLog(H2Features.class);
 
 	@Override
 	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {

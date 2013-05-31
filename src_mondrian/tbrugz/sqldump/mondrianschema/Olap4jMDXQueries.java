@@ -37,7 +37,6 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	OlapConnection olapConnection = null;
 	MdxParser parser = null;
 	MdxValidator validator = null;
-	//DataDump dd = new DataDump();
 	
 	//XXX: prop to parse & validate query
 	boolean validate = true;
@@ -102,7 +101,6 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		log.info(count+" queries [of "+queryIds.size()+"] dumped");
 	}
 
-	//TODOne: add COut
 	void dumpQuery(String id, String query, Writer w) throws SQLException, IOException {
 		if(validate) {
 			log.info("validating query '"+id+"'");
@@ -114,22 +112,8 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		log.info("mdx query ["+id+"]: "+query);
 		CellSet cellSet = olapConnection.prepareOlapStatement(query).executeQuery();
 		
-		/*
-		dd.dumpResultSet(cellSet, prop, id, id,
-				null, //charset, XXX?
-				0, //rowlimit, 
-				null, //syntaxList, XXX?
-				null, //partitionByPatterns, XXX?
-				null, //keyColumns,
-				null, //importedFKs,
-				null, //uniqueKeys,
-				null, //rsDecoratorFactory,
-				initTime //initTime
-				);
-		*/
 		CellSetFormatter formatter = new RectangularCellSetFormatter(false);
 		formatter.format(cellSet, new PrintWriter(w));
-		//w.close();
 		log.info("query ["+id+"] dumped [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		//formatter.format(cellSet, new PrintWriter(System.out, true));
 	}
