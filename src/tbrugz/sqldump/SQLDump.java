@@ -221,7 +221,7 @@ public class SQLDump {
 			count++;
 			sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
 			
-			if(pc instanceof SchemaModelGrabber) {
+			if((count==1) && (pc instanceof SchemaModelGrabber)) {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
 				if(dirToDeleteFiles!=null) {
 					Utils.deleteDirRegularContents(dirToDeleteFiles);
