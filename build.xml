@@ -199,7 +199,9 @@
 	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
-			includes="**/*.class, *.properties, **/jaxb.index">
+			includes="**/*.class, **/*.properties, **/jaxb.index">
+			<exclude name="log4j.properties"/>
+			<exclude name="**/jaxb.properties"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${ant.project.name}"/>
 				<attribute name="Implementation-Version" value="${version}"/> 
@@ -213,14 +215,25 @@
 	</target>
 	
 	<target name="jar-source" depends="prepare" description="builds sources jar">
-		<jar destfile="${dist.dir}/sources/sqldump.jar"
-			basedir="${basedir}">
-			<include name="${src.dir}/**"/>
-			<include name="${src.graphml.dir}/**"/>
-			<include name="${src.diff.dir}/**"/>
-			<include name="${src.run.dir}/**"/>
-			<include name="${src.mondrian.dir}/**"/>
-			<include name="${src.xtra.dir}/**"/>
+		<jar destfile="${dist.dir}/sources/sqldump.jar">
+			<fileset dir="${src.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.graphml.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.diff.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.run.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.mondrian.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.xtra.dir}">
+				<include name="**/*.java"/>
+			</fileset>
 		</jar>
 	</target>
 
@@ -238,9 +251,9 @@
 		</jar>
 	</target>
 	
-	<target name="dist" depends="jar" description="builds jar"/>
+	<target name="dist" depends="jar,jar-source" description="builds jars"/>
 	
-	<target name="all" depends="clean,javadoc,jar-source,publish" description="clean, build and publish project"/>
+	<target name="all" depends="clean,javadoc,publish" description="clean, build and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
@@ -323,10 +336,9 @@
 		</ivy:makepom>
 		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true" forcedeliver="true"
 			artifactsPattern="${dist.dir}/[type]s/[artifact].[ext]">
-			<!--artifacts pattern="${dist.dir}/[type]s/[module].[ext]" /-->
 			<artifact name="${ivy.module}" ext="pom" type="pom" />
-			<artifact name="${ivy.module}" ext="jar" type="source" classifier="source"/>
-			<artifact name="${ivy.module}" ext="jar" type="javadoc" classifier="javadoc"/>
+			<!--artifact name="${ivy.module}" ext="jar" type="source" classifier="sources"/-->
+			<!--artifact name="${ivy.module}" ext="jar" type="javadoc" classifier="javadoc"/-->
 		</ivy:publish>
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>

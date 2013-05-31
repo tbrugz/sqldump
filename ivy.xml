@@ -1,5 +1,6 @@
 <ivy-module version="2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd">
+		xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"
+		xmlns:m="http://ant.apache.org/ivy/maven">
 	<info organisation="org.bitbucket.tbrugz" module="sqldump"/>
 	<configurations>
 		<conf name="default"/>
@@ -7,6 +8,7 @@
 	</configurations>
 	<publications>
 		<artifact name="sqldump" type="jar" conf="default"/>
+		<artifact name="sqldump" type="source" ext="jar" conf="default" m:classifier="sources"/>
 	</publications>
 	<dependencies>
 		<dependency org="commons-logging" name="commons-logging" rev="1.1.1" conf="default->default"/>
