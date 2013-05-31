@@ -216,4 +216,24 @@ public class CategorizedOut {
 		return outpattern;
 	}
 
+	public static void closeWriter(Writer w) throws IOException {
+		if(pwSTDOUT.equals(w)) {
+			//log.debug("--stdout");
+			w.flush();
+		}
+		else if(pwSTDERR.equals(w)) {
+			//log.debug("--stderr");
+			w.flush();
+		}
+		else if(nullWriter.equals(w)) {
+			//log.debug("--nullout");
+			w.flush();
+		}
+		else {
+			//log.debug("--other out");
+			w.flush();
+			w.close();
+		}
+	}
+	
 }
