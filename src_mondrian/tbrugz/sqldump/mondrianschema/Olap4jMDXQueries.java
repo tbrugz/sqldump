@@ -37,6 +37,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	static final String SUFFIX_MDXQUERIES_QUERY = ".query";
 	static final String SUFFIX_MDXQUERIES_NAME = ".name";
 	static final String SUFFIX_MDXQUERIES_OUTFILEPATTERN = ".outfilepattern";
+	static final String SUFFIX_MDXQUERIES_VALIDATE = ".validate";
 	static final String SUFFIX_MDXQUERIES_X_COMPACT = ".x-compactmode";
 
 	OlapConnection olapConnection = null;
@@ -53,6 +54,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		super.setProperties(prop);
 		
 		fileOutputPattern = prop.getProperty(PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_OUTFILEPATTERN);
+		validate = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_VALIDATE, validate);
 		compactMode = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_X_COMPACT, compactMode);
 	}
 	
