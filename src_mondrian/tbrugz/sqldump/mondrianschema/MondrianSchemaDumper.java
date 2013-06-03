@@ -43,6 +43,7 @@ class HierarchyLevelData {
 	String levelNameColumn;
 	String levelType;
 	String levelTable;
+	String levelColumnDataType; //Levels contain a type attribute, which can have values "String", "Integer", "Numeric", "Boolean", "Date", "Time", and "Timestamp". The default value is "Numeric" because key columns generally have a numeric type
 
 	//String joinPKTable;
 	String joinLeftKey;
@@ -117,8 +118,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	static Log log = LogFactory.getLog(MondrianSchemaDumper.class);
 	
+	static List<String> numericTypes = new ArrayList<String>();
+	static List<String> integerTypes = new ArrayList<String>();
+
 	Properties prop;
-	List<String> numericTypes = new ArrayList<String>();
 	String fileOutput = "mondrian-schema.xml";
 	boolean validateSchema = false;
 	
@@ -133,6 +136,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	boolean hierarchyHasAll = true;
 	boolean addAllDegenerateDimCandidates = false;
 	boolean detectParentChildHierarchies = true;
+	boolean setLevelType = true; //XXX: add prop?
 	
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
@@ -146,10 +150,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		try {
 			Properties mondrianProp = new Properties();
 			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("mondrianxsd.properties"));
-			String[] ntypes = mondrianProp.getProperty("type.numeric").split(",");
-			for(String s: ntypes) {
-				numericTypes.add(s.toUpperCase().trim());
-			}
+			numericTypes = Utils.getStringListFromProp(mondrianProp, "type.numeric", ",");
+			integerTypes = Utils.getStringListFromProp(mondrianProp, "type.integer", ",");
 			//log.debug("numeric types: "+numericTypes);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -635,12 +637,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				log.warn("table not found [2]: "+schemaName+"."+fk.getPkTable());
 			}*/
 		}
-		level.levelColumn = fk.getPkColumns().iterator().next();
+		String pkColStr = fk.getPkColumns().iterator().next();
+		level.levelColumn = pkColStr;
 		level.levelType = "Regular";
 		level.joinLeftKey = fk.getFkColumns().iterator().next();
-		level.joinRightKey = fk.getPkColumns().iterator().next();
+		level.joinRightKey = pkColStr;
 		//level.joinPKTable = fk.pkTable;
 		level.levelTable = fk.getPkTable();
+		Column pkCol = pkTable.getColumn(pkColStr);
+		if(setLevelType) { setLevelType(level, pkCol); }
 
 		// parent-child hierarchies properties
 		String levelParentColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelparentcol");
@@ -769,8 +774,13 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				log.debug("add level: "+l.getName());
 				int numOfParentLevels = 0;
 				if(levelCounter == 1) {
-					numOfParentLevels = createParentLevels(hier, thisLevels.get(i).levelTable);
+					numOfParentLevels = createParentLevels(hier, pkTable, thisLevels.get(i).levelTable);
 				}
+				
+				//XXX: add parentLevels to other levels? "showflake" it?
+				//Table parentTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, thisLevels.get(i).levelTable);
+				//numOfParentLevels = createParentLevels(hier, parentTable, thisLevels.get(i).levelTable);
+				
 				if((numOfParentLevels==0) && (levelCounter == 1)) {
 					l.setUniqueMembers(true);
 				}
@@ -805,6 +815,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		lret.setNameColumn(sqlIdDecorator.get( l.levelNameColumn ));
 		lret.setLevelType(l.levelType);
 		lret.setTable(sqlIdDecorator.get( l.levelTable ));
+		lret.setType(l.levelColumnDataType);
 		//XXX: lret.setNameExpression(value)
 		if(l.recursiveHierarchy!=null) {
 			lret.setParentColumn(l.recursiveHierarchy.levelParentColumn);
@@ -825,8 +836,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		return lret;
 	}
 	
-	//TODO: test column existence
-	int createParentLevels(Hierarchy hier, String levelTable) {
+	//TODOne: test column existence
+	int createParentLevels(Hierarchy hier, Table table, String levelTable) {
 		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
 		if(parentLevels==null) {
 			return 0;
@@ -837,6 +848,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			count++;
 			String[] tuple = pair.split(":");
 			String column = tuple[0].trim();
+			Column col = table.getColumn(column);
+			//log.info("level:: '"+column+"' / '"+col+"'");
+			if(col==null) {
+				log.warn("level column '"+column+"' for table '"+table.getName()+"' does not exist");
+				continue;
+			}
 
 			Level level = new Level();
 			level.setName(column);
@@ -844,11 +861,17 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			level.setTable(sqlIdDecorator.get( levelTable ));
 			if(tuple.length>1) {
 				String nameColumn = tuple[1].trim();
-				level.setNameColumn(nameColumn);
+				if(table.getColumn(nameColumn)==null) {
+					log.warn("level nameColumn '"+nameColumn+"' for table '"+table.getName()+"' does not exist");
+				}
+				else {
+					level.setNameColumn(nameColumn);
+				}
 			}
 			if(count==1) {
 				level.setUniqueMembers(true);
 			}
+			if(setLevelType) { setLevelType(level, col); }
 			//level.setUniqueMembers(true);
 			hier.getLevel().add(level);
 		}
@@ -895,5 +918,34 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
+	}
+	
+	static void setLevelType(HierarchyLevelData level, Column col) {
+		if(isInteger(col)) {
+			level.levelColumnDataType = "Integer";
+		}
+		else if(isNumeric(col)) {
+			level.levelColumnDataType = "Numeric";
+		}
+	}
+
+	static void setLevelType(Level level, Column col) {
+		if(isInteger(col)) {
+			level.setType("Integer");
+		}
+		else if(isNumeric(col)) {
+			level.setType("Numeric");
+		}
+	}
+	
+	static boolean isNumeric(Column c) {
+		if(c==null || c.type==null) { return false; }
+		return Utils.getEqualIgnoreCaseFromList(numericTypes, c.type)!=null;
+	}
+	
+	static boolean isInteger(Column c) {
+		if(c==null || c.type==null) { return false; }
+		return Utils.getEqualIgnoreCaseFromList(integerTypes, c.type)!=null
+				|| (isNumeric(c) && (c.decimalDigits==null || c.decimalDigits<=0));
 	}
 }
