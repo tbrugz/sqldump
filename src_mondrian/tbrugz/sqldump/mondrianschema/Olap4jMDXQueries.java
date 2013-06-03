@@ -24,6 +24,10 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * TODO: add ResultSetCellSetAdapter
+ * XXX: add csv exporter?
+ */
 public class Olap4jMDXQueries extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(Olap4jMDXQueries.class);
@@ -33,6 +37,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	static final String SUFFIX_MDXQUERIES_QUERY = ".query";
 	static final String SUFFIX_MDXQUERIES_NAME = ".name";
 	static final String SUFFIX_MDXQUERIES_OUTFILEPATTERN = ".outfilepattern";
+	static final String SUFFIX_MDXQUERIES_X_COMPACT = ".x-compactmode";
 
 	OlapConnection olapConnection = null;
 	MdxParser parser = null;
@@ -41,12 +46,14 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	//XXX: prop to parse & validate query
 	boolean validate = true;
 	String fileOutputPattern = null;
+	boolean compactMode = false;
 	
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 		
 		fileOutputPattern = prop.getProperty(PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_OUTFILEPATTERN);
+		compactMode = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_X_COMPACT, compactMode);
 	}
 	
 	@Override
@@ -111,8 +118,10 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		long initTime = System.currentTimeMillis();
 		log.info("mdx query ["+id+"]: "+query);
 		CellSet cellSet = olapConnection.prepareOlapStatement(query).executeQuery();
+		//log.info("cellSet: "+cellSet.getClass()+" / "+cellSet.getMetaData().getClass());
 		
-		CellSetFormatter formatter = new RectangularCellSetFormatter(false);
+		CellSetFormatter formatter = new RectangularCellSetFormatter(compactMode);
+		//CellSetFormatter formatter = new TraditionalCellSetFormatter();
 		formatter.format(cellSet, new PrintWriter(w));
 		log.info("query ["+id+"] dumped [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		//formatter.format(cellSet, new PrintWriter(System.out, true));
