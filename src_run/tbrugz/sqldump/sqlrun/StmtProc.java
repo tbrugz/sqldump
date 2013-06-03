@@ -25,6 +25,7 @@ import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -258,7 +259,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				
 				if((batchExecCounter%batchSize)==0) {
 					int[] updateCounts = batchStmt.executeBatch();
-					int updateCount = tbrugz.sqldump.sqlrun.def.Util.sumInts(updateCounts);
+					int updateCount = MathUtil.sumInts(updateCounts);
 					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
 					tbrugz.sqldump.sqlrun.def.Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
 					return updateCount;
@@ -336,7 +337,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	int closeStatement() throws SQLException {
 		if(batchStmt!=null) {
 			int[] updateCounts = batchStmt.executeBatch();
-			int updateCount = tbrugz.sqldump.sqlrun.def.Util.sumInts(updateCounts);
+			int updateCount = MathUtil.sumInts(updateCounts);
 			logStmt.debug("executeBatch(): "+updateCount+" rows updated");
 			
 			batchStmt.close(); batchStmt = null; batchExecCounter = 0;

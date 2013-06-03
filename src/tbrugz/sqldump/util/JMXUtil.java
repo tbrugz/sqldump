@@ -12,19 +12,17 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.sqlrun.jmx.SQLRMBean;
-
 public class JMXUtil {
 
-	static final Log log = LogFactory.getLog(SQLRMBean.class);
+	static final Log log = LogFactory.getLog(JMXUtil.class);
 	
-	public static void registerMBean(String mBeanName, SQLRMBean mbean) throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+	public static void registerMBean(String mBeanName, Object mbean) throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		ObjectName name = new ObjectName(mBeanName);
 		mbs.registerMBean(mbean, name);
 	}
 
-	public static void registerMBeanSimple(String mBeanName, SQLRMBean mbean) {
+	public static void registerMBeanSimple(String mBeanName, Object mbean) {
 		try {
 			registerMBean(mBeanName, mbean);
 		} catch (Exception e) {

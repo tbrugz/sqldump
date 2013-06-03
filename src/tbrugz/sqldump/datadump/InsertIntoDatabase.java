@@ -15,7 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.ProcessingException;
-import tbrugz.sqldump.sqlrun.def.Util;
+import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -131,7 +131,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		if( (commitSize<=1) || (( (count+1) % commitSize)==0) ) {
 			if(batchMode) {
 				int[] updateCounts = stmt.executeBatch();
-				updated += Util.sumInts(updateCounts);
+				updated += MathUtil.sumInts(updateCounts);
 			}
 			if(!autoCommit) {
 				conn.commit();
