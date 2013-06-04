@@ -28,7 +28,9 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	
 	static final String SUFFIX_REMOVE_SCHEMANAME = ".removeschemaname";
 	static final String SUFFIX_REMOVE_FKS_BYNAME = ".removefksbyname";
-	//TODO: prop to remove tables-with-its-fks by tablename
+	static final String SUFFIX_REMOVE_TABLES_WITH_FKS = ".removetableswithfks";
+	
+	//XXX option to remove FKs that references non-existent tables?
 
 	SchemaModel schemaModel;
 	List<FK> addedFKs;
@@ -50,11 +52,20 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 
 	@Override
 	public void process() {
+		//tables
+		List<String> tablesToRemove = Utils.getStringListFromProp(prop, prefix+SUFFIX_REMOVE_TABLES_WITH_FKS, ",");
+		if(tablesToRemove!=null) {
+			removeTablesWithFKs(tablesToRemove);
+		}
+		
+		//fks
 		removeFKs();
 		addFKs();
 		
+		//columns
 		alterColymnType();
 		
+		//other metadata
 		if(doRemoveSchemaName) {
 			removeSchemaname();
 		}
@@ -176,6 +187,35 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	void removeSchemaname(Set<? extends DBIdentifiable> list) {
 		for(DBIdentifiable o: list) {
 			o.setSchemaName(null);
+		}
+	}
+	
+	void removeTablesWithFKs(List<String> removeTables) {
+		int tablecount = 0, fkcount = 0;
+		Iterator<Table> ti = schemaModel.getTables().iterator();
+		while (ti.hasNext()) {
+			Table t = ti.next();
+			if(removeTables.contains(t.getName())) {
+				Iterator<FK> fi = schemaModel.getForeignKeys().iterator();
+				while (fi.hasNext()) {
+					FK fk = fi.next();
+					if(fk.getPkTable().equals(t.getName()) || fk.getFkTable().equals(t.getName())) { //XXX: fkTable-only or pkTable-only?
+						fi.remove();
+						fkcount++;
+						log.debug("fk removed: "+fk);
+					}
+				}
+				ti.remove();
+				tablecount++;
+				removeTables.remove(t.getName());
+				log.debug("table removed: "+t);
+			}
+		}
+		if(tablecount>0) {
+			log.info("removed "+tablecount+" tables with "+fkcount+" FKs");
+		}
+		if(removeTables.size()>0) {
+			log.info("remove: tables not found: "+removeTables);
 		}
 	}
 }
