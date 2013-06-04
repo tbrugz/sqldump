@@ -31,7 +31,6 @@ import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
-import tbrugz.sqldump.sqlrun.QueryDumper;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -395,7 +394,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				//XXX filter by GRANTEE, not GRANTOR/SCHEMA ? schema != user (in some databases?)
 				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaName, null);
 				//List<Grant> grants = grabSchemaGrants(grantrs); //table.setGrants(  );
-				QueryDumper.simplerRSDump(grantrs);
 				closeResultSetAndStatement(grantrs);
 			}
 			//log.info("getting grants from all schemas ");

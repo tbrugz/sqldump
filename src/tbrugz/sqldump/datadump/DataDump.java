@@ -328,7 +328,7 @@ public class DataDump extends AbstractSQLProc {
 	
 	final Set<String> deprecatedPatternWarnedFiles = new HashSet<String>();
 	
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
+	void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
 			String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
@@ -360,6 +360,10 @@ public class DataDump extends AbstractSQLProc {
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
 					initTime);
+		}
+		catch(SQLException e) {
+			log.warn("error in sql: "+sql);
+			throw e;
 		}
 		finally {
 			if(log.isDebugEnabled()) { SQLUtils.logWarnings(st.getWarnings(), log); }
