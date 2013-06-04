@@ -159,6 +159,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 			return;
 		}
 		if(stopTables.contains(t.getName())) {
+			//XXX: only stop at stopTables when followExportedKeys is true?
 			return;
 		}
 		
