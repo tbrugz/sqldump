@@ -110,6 +110,13 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 		for(Cube cube: cubes) {
 			cubeNames.add(cube.getUniqueName());
 		}
+		
+		int cubeCount = cubeNames.size();
+		if(cubeCount==0) {
+			log.warn("schema is valid but has no cubes!");
+			return;
+		}
+		
 		log.info("cubes [#"+cubeNames.size()+"]: "+Utils.join(cubeNames, ", "));
 	}
 

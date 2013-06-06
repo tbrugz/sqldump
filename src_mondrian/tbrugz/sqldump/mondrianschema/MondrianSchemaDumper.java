@@ -1,7 +1,9 @@
 package tbrugz.sqldump.mondrianschema;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +16,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import mondrian.olap.MondrianDef;
 import mondrian.olap.MondrianDef.Closure;
 import mondrian.olap.MondrianDef.Cube;
 import mondrian.olap.MondrianDef.Dimension;
@@ -26,7 +27,10 @@ import mondrian.olap.MondrianDef.Schema;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eigenbase.xom.ElementDef;
+import org.eigenbase.xom.XMLOutput;
 import org.eigenbase.xom.XOMException;
+import org.eigenbase.xom.XOMUtil;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -134,7 +138,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	List<String> factTables = null;
 	List<String> extraFactTables = new ArrayList<String>();
 	List<String> ignoreDims = new ArrayList<String>();
-	boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
+	//boolean oneHierarchyPerDim = false; //oneHierarchyPerFactTableFK
 	boolean addDimForEachHierarchy = false;
 	boolean ignoreCubesWithNoMeasure = true;
 	boolean ignoreCubesWithNoDimension = true;
@@ -196,7 +200,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		preferredLevelNameColumns = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS, ",");
 		
-		oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
+		//oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
+		if(prop.getProperty(PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM)!=null) {
+			log.warn("prop '"+PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM+"' not avaiable");
+		}
+		
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
 		ignoreCubesWithNoMeasure = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE, ignoreCubesWithNoMeasure);
 		ignoreCubesWithNoDimension = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNODIMENSION, ignoreCubesWithNoDimension);
@@ -225,6 +233,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
+		try {
+			dumpSchemaInternal(schemaModel);
+		} catch (XOMException e) {
+			log.warn("error: "+e);
+			log.debug("error: "+e.getMessage(), e);
+			e.printStackTrace();
+		}
+	}
+	
+	void dumpSchemaInternal(SchemaModel schemaModel) throws XOMException {
 		if(fileOutput==null) {
 			log.error("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
 			if(failonerror) { throw new ProcessingException("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined"); }
@@ -281,6 +299,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			List<FK> fks = new ArrayList<FK>();
 			boolean isRoot = true;
 			boolean isLeaf = true;
+			
 			for(FK fk: schemaModel.getForeignKeys()) {
 				if(fk.getPkTable().equals(t.getName())) {
 					isRoot = false;
@@ -302,7 +321,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			mondrian.olap.MondrianDef.Table xt = new mondrian.olap.MondrianDef.Table();
 			xt.name = sqlIdDecorator.get( t.getName() );
 			xt.schema = t.getSchemaName();
-			cube.addChild(xt); //FIXME?
+			cube.fact = xt;
 
 			List<String> measureCols = new ArrayList<String>();
 			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecols");
@@ -310,7 +329,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				String[] cols = measureColsStr.split(",");
 				for(String c: cols) {
 					measureCols.add(c.trim());
-					log.debug("cube "+cube.getName()+": add measure: "+c.trim());
+					log.debug("cube "+cube.name+": add measure: "+c.trim());
 				}
 			}
 			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecolsregex", "\\|");
@@ -319,11 +338,13 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			//columnloop:
 			//measures
 			for(Column c: t.getColumns()) {
-				procMeasure(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
+				procMeasures(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
-			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".factcountmeasure",
+			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
 					prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
+			List<Measure> measures = new ArrayList<Measure>();
+			
 			if(descFactCountMeasure!=null) {
 				Constraint c = t.getPKConstraint();
 				if(c==null) {
@@ -333,7 +354,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 						if(col.nullable!=null && !col.nullable) { notNullCol = col; }
 					}
 					if(notNullCol!=null) {
-						addMeasure(cube, notNullCol.getName(), descFactCountMeasure, "count");
+						measures.add(newMeasure(notNullCol.getName(), descFactCountMeasure, "count"));
 					}
 					else {
 						log.warn("table '"+t.getName()+"' has no PK nor not-null-column for fact count measure");
@@ -341,29 +362,34 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 				else {
 					String pk1stCol = c.uniqueColumns.get(0);
-					addMeasure(cube, pk1stCol, descFactCountMeasure, "count");
+					measures.add(newMeasure(pk1stCol, descFactCountMeasure, "count"));
 				}
 			}
 			
-			List<String> addMeasures = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
+			List<String> addMeasures = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
 			if(addMeasures!=null) {
 				for(String addM: addMeasures) {
 					String[] parts = addM.split(":");
 					if(parts.length<2) {
-						log.warn("addmeasures for cube '"+cube.getName()+"' not well defined: "+addM);
+						log.warn("addmeasures for cube '"+cube.name+"' not well defined: "+addM);
 						continue;
 					}
 					String label = parts.length>=3?parts[2]:parts[0]+"_"+parts[1]; 
-					addMeasure(cube, parts[0], label, parts[1]);
+					measures.add(newMeasure(parts[0], label, parts[1]));
 				}
 			}
 			
-			if(cube.getMeasure().size()==0) {
+			int cubeMeasuresCount = cube.measures.length;
+			
+			if(cubeMeasuresCount==0) {
 				if(ignoreCubesWithNoMeasure) {
-					log.info("cube '"+cube.getName()+"' has no measure: ignoring");
+					log.info("cube '"+cube.name+"' has no measure: ignoring");
 					continue;
 				}
-				log.warn("cube '"+cube.getName()+"' has no measure...");
+				log.warn("cube '"+cube.name+"' has no measure...");
+			}
+			else {
+				cube.measures = (Measure[]) concatenate(cube.measures, measures.toArray(new Measure[0]));
 			}
 			
 			//dimensions
@@ -393,32 +419,34 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 					degenerateDimCandidates.remove(col);
 					if(nameColumn!=null) { degenerateDimCandidates.remove(nameColumn); }
-					cube.getDimensionUsageOrDimension().add(genDegeneratedDim(col, nameColumn, col));
+					cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(col, nameColumn, col)});
 				}
 			}
 			
-			if(cube.getDimensionUsageOrDimension().size()==0) {
+			int cubeDimensionsCount = cube.dimensions.length;
+			
+			if(cubeDimensionsCount==0) {
 				if(ignoreCubesWithNoDimension) {
-					log.info("cube '"+cube.getName()+"' has no dimension: ignoring");
+					log.info("cube '"+cube.name+"' has no dimension: ignoring");
 					continue;
 				}
-				log.warn("cube '"+cube.getName()+"' has no dimensions");
+				log.warn("cube '"+cube.name+"' has no dimensions");
 			}
 			
 			if(degenerateDimCandidates.size()>0) {
 				if(addAllDegenerateDimCandidates) {
-					log.info("adding degenerated dim candidates for cube '"+cube.getName()+"': "+degenerateDimCandidates);
+					log.info("adding degenerated dim candidates for cube '"+cube.name+"': "+degenerateDimCandidates);
 					for(String c: degenerateDimCandidates) {
 						//log.debug("adding degeneraded dim '"+c+" for cube '"+cube.getName()+"'");
-						cube.getDimensionUsageOrDimension().add(genDegeneratedDim(c, null, "degenerate_dim_"+c));
+						cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(c, null, "degenerate_dim_"+c)});
 					}
 				}
 				else {
-					log.info("degenerated dim candidates for cube '"+cube.getName()+"': "+degenerateDimCandidates);
+					log.info("degenerated dim candidates for cube '"+cube.name+"': "+degenerateDimCandidates);
 				}
 			}
 			
-			schema.getCube().add(cube);
+			schema.cubes = (Cube[]) concatenate(schema.cubes, new Cube[]{cube});
 		}
 		
 		if(factTables!=null && factTables.size()>0) {
@@ -434,14 +462,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		schemaModel.getForeignKeys().removeAll(addFKs);
 		
 		try {
-			jaxbOutput(schema, new File(fileOutput));
+			
+			//jaxbOutput(schema, new File(fileOutput));
+			xomOutput(schema, new File(fileOutput));
 			
 			if(validateSchema) {
 				Processor msv = new MondrianSchemaValidator();
 				msv.setProperties(prop);
 				msv.process();
 			}
-		} catch (JAXBException e) {
+		} catch (Exception e) {
 			log.warn("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
@@ -450,7 +480,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	Set<String> noMeasureTypeWarned = new TreeSet<String>();
 	
-	void procMeasure(Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) throws XOMException {
+	void procMeasures(Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) throws XOMException {
 		//XXXxx: if column is FK, do not add to measures
 		boolean ok = true;
 		
@@ -491,32 +521,36 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			return;
 		}
 		
-		List<String> aggs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.getName())+".aggregators", ",");
+		List<String> aggs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".aggregators", ",");
 		if(aggs==null || aggs.size()==0) { aggs = defaultAggregators; }
 
 		if(aggs==null || aggs.size()==0) {
 			log.warn("no measure aggregators defined [cube = "+cube+"]");
 			return;
 		}
+
+		List<Measure> newMeasures = new ArrayList<Measure>();
 		if(aggs.size()==1) {
-			addMeasure(cube, c.getName(), c.getName(), defaultAggregators.get(0));
-			return;
+			newMeasures.add(newMeasure(c.getName(), c.getName(), defaultAggregators.get(0)));
 		}
-		for(String agg: aggs) {
-			addMeasure(cube, c.getName(), c.getName()+"_"+agg, agg);
+		else {
+			for(String agg: aggs) {
+				newMeasures.add(newMeasure(c.getName(), c.getName()+"_"+agg, agg));
+			}
 		}
+		cube.measures = (Measure[]) concatenate(cube.measures, newMeasures.toArray(new Measure[0]));
 	}
 	
-	void addMeasure(Cube cube, String column, String name, String aggregator) throws XOMException {
+	Measure newMeasure(String column, String name, String aggregator) throws XOMException {
 		Measure measure = new Measure();
 		measure.name = name;
 		measure.column = sqlIdDecorator.get(column);
 		measure.aggregator = aggregator;
 		measure.visible = true;
-		cube.addChild(measure);
+		return measure;
 	}
 	
-	void procDimension(Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) {
+	void procDimension(Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) throws XOMException {
 		if(fk.getFkColumns().size()>1) {
 			log.debug("fk "+fk+" is composite. ignoring");
 			return;
@@ -559,7 +593,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		cube.getDimensionUsageOrDimension().add(dim);*/
 	}
 	
-	Dimension genDegeneratedDim(String column, String nameColumn, String dimName) {
+	Dimension genDegeneratedDim(String column, String nameColumn, String dimName) throws XOMException {
 		Level level = new Level();
 		level.name = column;
 		level.column = sqlIdDecorator.get(column);
@@ -571,12 +605,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		Hierarchy hier = new Hierarchy();
 		hier.name = column;
 		hier.hasAll = hierarchyHasAll;
-		hier.getLevel().add(level);
+		hier.levels = (Level[]) concatenate(hier.levels, new Level[]{level});
 		
 		Dimension dim = new Dimension();
 		dim.name = dimName;
 		//dim.setType("StandardDimension");
-		dim.getHierarchy().add(hier);
+		dim.hierarchies = (Hierarchy[]) concatenate(dim.hierarchies, new Hierarchy[]{hier});
 		
 		return dim;
 	}
@@ -588,7 +622,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	/*
 	 * snowflake: travels the 'tree': when reaches a leaf, adds hierarchy
 	 */
-	void procHierRecursiveInit(SchemaModel schemaModel, Cube cube, FK fk, String dimName) {
+	void procHierRecursiveInit(SchemaModel schemaModel, Cube cube, FK fk, String dimName) throws XOMException {
 		Dimension dim = new Dimension();
 		dim.name = dimName;
 		dim.foreignKey = sqlIdDecorator.get( fk.getFkColumns().iterator().next() );
@@ -597,7 +631,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
 		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.getPkTable(), levels);
 		
-		if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
+		//TODO: re-enable oneHierarchyPerDim
+		/*if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
 			for(int i=dim.getHierarchy().size()-1; i >= 0; i--) {
 				//XXX one hierarchy per dimension (keep first? last? longest? preferwithtable[X]?)
 				if(i!=0) { //first
@@ -605,11 +640,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					dim.getHierarchy().remove(i);
 				}
 			}	
-		}
+		}*/
 		//dim.getHierarchy().add(hier);
 		
 		if(!addDimForEachHierarchy) {
-			cube.getDimensionUsageOrDimension().add(dim);
+			cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{dim});
 		}
 	}
 	
@@ -681,7 +716,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 	
 	void procHierRecursive(SchemaModel schemaModel, Cube cube, Dimension dim, FK fk, String schemaName, 
-			String pkTableName, List<HierarchyLevelData> levelsData) {
+			String pkTableName, List<HierarchyLevelData> levelsData) throws XOMException {
 		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
 		thisLevels.addAll(levelsData);
 		boolean isLevelLeaf = true;
@@ -729,7 +764,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				table.schema = schemaName;
 				table.name = sqlIdDecorator.get( pkTableName );
 				
-				hier.setTable(table);
+				hier.relation = table;
 			}
 			else {
 				//hier.setPrimaryKeyTable(fk.pkTable); //FIXedME!
@@ -744,7 +779,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					table.name = sqlIdDecorator.get( l.levelName );
 
 					Join join = new Join();
-					join.getRelation().add(table);
+					join.left = table; //XXX: left or right?
 
 					if(i+1 == thisLevels.size()) {
 						log.debug("no nextlevel?");
@@ -762,9 +797,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 						//thisLevels.get(i-1).getColumn(); 
 					}
 					
-					if(i==0) { hier.setJoin(join); }
-					else if(i==thisLevels.size()-1) { lastJoin.getRelation().add(table); }
-					else { lastJoin.getRelation().add(join); }
+					if(i==0) {
+						hier.relation = join;
+					}
+					else if(i==thisLevels.size()-1) {
+						lastJoin.right = table; //XXX: left or rigth?
+					}
+					else {
+						lastJoin.right = join; //XXX: left or rigth?
+					}
 					
 					lastJoin = join;
 				}
@@ -776,7 +817,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				levelCounter++;
 				//HierarchyLevelData xlevel = thisLevels.get(i);
 				Level l = cloneAsLevel(thisLevels.get(i));
-				log.debug("add level: "+l.getName());
+				log.debug("add level: "+l.name);
 				int numOfParentLevels = 0;
 				if(levelCounter == 1) {
 					numOfParentLevels = createParentLevels(hier, pkTable, thisLevels.get(i).levelTable);
@@ -789,31 +830,31 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				if((numOfParentLevels==0) && (levelCounter == 1)) {
 					l.uniqueMembers = true;
 				}
-				hier.getLevel().add(l);
+				hier.levels = (Level[]) concatenate(hier.levels, new Level[]{l});
 				if(hierName.length() > 0) {
 					hierName += "+";
 				}
-				hierName += l.getName();
+				hierName += l.name;
 			}
 			hier.name = hierName;
-			log.debug("add hier: "+hier.getName());
+			log.debug("add hier: "+hier.name);
 			
 			if(addDimForEachHierarchy) {
 				Dimension newDim = new Dimension();
 				//dim.setName(dimName);
-				newDim.setForeignKey(sqlIdDecorator.get( dim.getForeignKey() ));
-				newDim.type = dim.getType();
-				newDim.getHierarchy().add(hier);
-				newDim.name = hier.getName();
-				cube.getDimensionUsageOrDimension().add(newDim);
+				newDim.foreignKey = sqlIdDecorator.get( dim.foreignKey );
+				newDim.type = dim.type;
+				newDim.hierarchies = (Hierarchy[]) concatenate(newDim.hierarchies, new Hierarchy[]{hier});
+				newDim.name = hier.name;
+				cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{newDim});
 			}
 			else {
-				dim.getHierarchy().add(hier);
+				dim.hierarchies = (Hierarchy[]) concatenate(dim.hierarchies, new Hierarchy[]{hier});
 			}
 		}
 	}
 	
-	Level cloneAsLevel(HierarchyLevelData l) {
+	Level cloneAsLevel(HierarchyLevelData l) throws XOMException {
 		Level lret = new Level();
 		lret.column = sqlIdDecorator.get( l.levelColumn );
 		lret.name = l.levelName;
@@ -834,7 +875,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				closure.table = t;
 				closure.parentColumn = l.recursiveHierarchy.closureParentColumn;
 				closure.childColumn = l.recursiveHierarchy.closureChildColumn;
-				lret.setClosure(closure);
+				lret.closure = closure;
 			}
 			
 		}
@@ -842,7 +883,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 	
 	//TODOne: test column existence
-	int createParentLevels(Hierarchy hier, Table table, String levelTable) {
+	int createParentLevels(Hierarchy hier, Table table, String levelTable) throws XOMException {
 		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
 		if(parentLevels==null) {
 			return 0;
@@ -878,7 +919,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			if(setLevelType) { setLevelType(level, col); }
 			//level.setUniqueMembers(true);
-			hier.getLevel().add(level);
+			hier.levels = (Level[]) concatenate(hier.levels, new Level[]{level});
 		}
 		return count;
 	}
@@ -903,10 +944,20 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 	
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance( "tbrugz.mondrian.xsdmodel" );
+		//JAXBContext jc = JAXBContext.newInstance( "tbrugz.mondrian.xsdmodel" );
+		JAXBContext jc = JAXBContext.newInstance( "tbrugz.sqldump.mondrianschema:mondrian.olap" );
+		
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
 		m.marshal(o, fileOutput);
+		log.info("mondrian schema model dumped to '"+fileOutput+"'");
+	}
+
+	void xomOutput(ElementDef e, File fileOutput) throws FileNotFoundException {
+		PrintWriter pw = new PrintWriter(fileOutput);
+		XMLOutput out = new XMLOutput(pw);
+		e.displayXML(out, 4);
+		pw.close();
 		log.info("mondrian schema model dumped to '"+fileOutput+"'");
 	}
 	
@@ -953,4 +1004,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		return Utils.getEqualIgnoreCaseFromList(integerTypes, c.type)!=null
 				|| (isNumeric(c) && (c.decimalDigits==null || c.decimalDigits<=0));
 	}
+	
+	static Object[] concatenate(Object[] a, Object[] b) {
+		if(a==null) return b;
+		return XOMUtil.concatenate(a, b);
+	}
+
 }
