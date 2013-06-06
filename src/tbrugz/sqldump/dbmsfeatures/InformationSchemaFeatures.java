@@ -25,7 +25,7 @@ import tbrugz.sqldump.def.DefaultDBMSFeatures;
 import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
-	static Log log = LogFactory.getLog(InformationSchemaFeatures.class);
+	private static Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;
 	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");

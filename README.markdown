@@ -64,14 +64,19 @@ Dependencies
 ------------
 - [apache-commons-logging](http://commons.apache.org/logging/)
 - [log4j](http://logging.apache.org/log4j/1.2/) (recommended)
-- database-dependent JDBC jars (e.g. 
-	[PostgreSQL](http://jdbc.postgresql.org/download.html), 
-	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html), 
+- database-dependent JDBC jars (e.g.
+	[PostgreSQL](http://jdbc.postgresql.org/download.html),
+	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html),
 	[Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html),
 	[Derby](http://db.apache.org/derby/derby_downloads.html),
 	[HSQLDB](http://hsqldb.org/),
 	[H2](http://www.h2database.com/),
-	[SQLite](http://code.google.com/p/sqlite-jdbc/))
+	[SQLite](http://code.google.com/p/sqlite-jdbc/),
+	[MariaDB](https://downloads.mariadb.org/client-java/),
+	[Drizzle](http://www.drizzle.org/content/download), 
+	[MonetDB](http://dev.monetdb.org/downloads/Java/Latest/),
+	[Firebird](http://jaybirdwiki.firebirdsql.org/jaybird/doku.php?id=download:start)
+	)
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
 - [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - optional, for Mondrian Schema output
 - [ant](http://ant.apache.org/) (recommended)
@@ -87,15 +92,6 @@ Building from sources (with ant & ivy)
 - Edit `build.properties`
 - Run `ant resolve`
 - Run `ant dist`
-- Copy `sqldump.template.properties` to `sqldump.properties`
-
-
-Building (method 2 - without ant)
----------------------------------
-- Download dependencies to `<project-dir>/lib`
-- `cd` to `<project-dir>` 
-- Copy `sqldump.template.properties` to `sqldump.properties`
-- Compile sources into `bin`
 
 
 Running (with sources)

@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
 /*
@@ -11,6 +14,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
  * http://www.monetdb.org/Documentation/SQLcatalog
  */
 public class MonetDBFeatures extends InformationSchemaFeatures {
+	static Log log = LogFactory.getLog(MonetDBFeatures.class);
 	
 	@Override
 	public void procProperties(Properties prop) {
