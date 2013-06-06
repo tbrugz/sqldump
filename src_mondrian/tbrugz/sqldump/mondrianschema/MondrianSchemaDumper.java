@@ -14,15 +14,20 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import mondrian.olap.MondrianDef;
+import mondrian.olap.MondrianDef.Closure;
+import mondrian.olap.MondrianDef.Cube;
+import mondrian.olap.MondrianDef.Dimension;
+import mondrian.olap.MondrianDef.Hierarchy;
+import mondrian.olap.MondrianDef.Join;
+import mondrian.olap.MondrianDef.Level;
+import mondrian.olap.MondrianDef.Measure;
+import mondrian.olap.MondrianDef.Schema;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eigenbase.xom.XOMException;
 
-import tbrugz.mondrian.xsdmodel.Hierarchy;
-import tbrugz.mondrian.xsdmodel.Hierarchy.Join;
-import tbrugz.mondrian.xsdmodel.Hierarchy.Level;
-import tbrugz.mondrian.xsdmodel.Hierarchy.Level.Closure;
-import tbrugz.mondrian.xsdmodel.PrivateDimension;
-import tbrugz.mondrian.xsdmodel.Schema;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -227,7 +232,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		
 		Schema schema = new Schema();
-		schema.setName(mondrianSchemaName);
+		schema.name = mondrianSchemaName;
 		
 		//XXX~: snowflake
 		//XXX: virtual cubes / shared dimensions
@@ -292,12 +297,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				else { factTables.remove(t.getName()); }
 			}
 
-			Schema.Cube cube = new Schema.Cube();
-			cube.setName(t.getName());
-			tbrugz.mondrian.xsdmodel.Table xt = new tbrugz.mondrian.xsdmodel.Table();
-			xt.setName(sqlIdDecorator.get( t.getName() ));
-			xt.setSchema(t.getSchemaName());
-			cube.setTable(xt);
+			Cube cube = new Cube();
+			cube.name = t.getName();
+			mondrian.olap.MondrianDef.Table xt = new mondrian.olap.MondrianDef.Table();
+			xt.name = sqlIdDecorator.get( t.getName() );
+			xt.schema = t.getSchemaName();
+			cube.addChild(xt); //FIXME?
 
 			List<String> measureCols = new ArrayList<String>();
 			String measureColsStr = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecols");
@@ -445,7 +450,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	Set<String> noMeasureTypeWarned = new TreeSet<String>();
 	
-	void procMeasure(Schema.Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) {
+	void procMeasure(Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) throws XOMException {
 		//XXXxx: if column is FK, do not add to measures
 		boolean ok = true;
 		
@@ -502,16 +507,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 	}
 	
-	void addMeasure(Schema.Cube cube, String column, String name, String aggregator) {
-		Schema.Cube.Measure measure = new Schema.Cube.Measure();
-		measure.setName(name);
-		measure.setColumn(sqlIdDecorator.get(column));
-		measure.setAggregator(aggregator);
-		measure.setVisible(true);
-		cube.getMeasure().add(measure);
+	void addMeasure(Cube cube, String column, String name, String aggregator) throws XOMException {
+		Measure measure = new Measure();
+		measure.name = name;
+		measure.column = sqlIdDecorator.get(column);
+		measure.aggregator = aggregator;
+		measure.visible = true;
+		cube.addChild(measure);
 	}
 	
-	void procDimension(Schema.Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) {
+	void procDimension(Cube cube, FK fk, List<String> degenerateDimCandidates, SchemaModel schemaModel) {
 		if(fk.getFkColumns().size()>1) {
 			log.debug("fk "+fk+" is composite. ignoring");
 			return;
@@ -554,22 +559,22 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		cube.getDimensionUsageOrDimension().add(dim);*/
 	}
 	
-	PrivateDimension genDegeneratedDim(String column, String nameColumn, String dimName) {
+	Dimension genDegeneratedDim(String column, String nameColumn, String dimName) {
 		Level level = new Level();
-		level.setName(column);
-		level.setColumn(sqlIdDecorator.get(column));
+		level.name = column;
+		level.column = sqlIdDecorator.get(column);
 		if(nameColumn!=null) {
-			level.setNameColumn(sqlIdDecorator.get(nameColumn));
+			level.nameColumn = sqlIdDecorator.get(nameColumn);
 		}
-		level.setUniqueMembers(true);
+		level.uniqueMembers = true;
 
 		Hierarchy hier = new Hierarchy();
-		hier.setName(column);
-		hier.setHasAll(hierarchyHasAll);
+		hier.name = column;
+		hier.hasAll = hierarchyHasAll;
 		hier.getLevel().add(level);
 		
-		PrivateDimension dim = new PrivateDimension();
-		dim.setName(dimName);
+		Dimension dim = new Dimension();
+		dim.name = dimName;
 		//dim.setType("StandardDimension");
 		dim.getHierarchy().add(hier);
 		
@@ -583,11 +588,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	/*
 	 * snowflake: travels the 'tree': when reaches a leaf, adds hierarchy
 	 */
-	void procHierRecursiveInit(SchemaModel schemaModel, Schema.Cube cube, FK fk, String dimName) {
-		PrivateDimension dim = new PrivateDimension();
-		dim.setName(dimName);
-		dim.setForeignKey(sqlIdDecorator.get( fk.getFkColumns().iterator().next() ));
-		dim.setType("StandardDimension");
+	void procHierRecursiveInit(SchemaModel schemaModel, Cube cube, FK fk, String dimName) {
+		Dimension dim = new Dimension();
+		dim.name = dimName;
+		dim.foreignKey = sqlIdDecorator.get( fk.getFkColumns().iterator().next() );
+		dim.type = "StandardDimension";
 		
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
 		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.getPkTable(), levels);
@@ -675,7 +680,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 	}
 	
-	void procHierRecursive(SchemaModel schemaModel, Schema.Cube cube, PrivateDimension dim, FK fk, String schemaName, 
+	void procHierRecursive(SchemaModel schemaModel, Cube cube, Dimension dim, FK fk, String schemaName, 
 			String pkTableName, List<HierarchyLevelData> levelsData) {
 		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
 		thisLevels.addAll(levelsData);
@@ -715,28 +720,28 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			Hierarchy hier = new Hierarchy();
 			String hierName = "";
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
-			hier.setPrimaryKey(sqlIdDecorator.get( thisLevels.get(0).levelColumn ));
-			hier.setHasAll(hierarchyHasAll);
+			hier.primaryKey = sqlIdDecorator.get( thisLevels.get(0).levelColumn );
+			hier.hasAll = hierarchyHasAll;
 			
 			//Table / Join
 			if(thisLevels.size()==1) {
-				tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
-				table.setSchema(schemaName);
-				table.setName(sqlIdDecorator.get( pkTableName ));
+				mondrian.olap.MondrianDef.Table table = new mondrian.olap.MondrianDef.Table();
+				table.schema = schemaName;
+				table.name = sqlIdDecorator.get( pkTableName );
 				
 				hier.setTable(table);
 			}
 			else {
 				//hier.setPrimaryKeyTable(fk.pkTable); //FIXedME!
-				hier.setPrimaryKeyTable(sqlIdDecorator.get( thisLevels.get(0).levelTable ));
+				hier.primaryKeyTable = sqlIdDecorator.get( thisLevels.get(0).levelTable );
 				
 				Join lastJoin = null;
 				for(int i=0; i < thisLevels.size(); i++) {
 					HierarchyLevelData l = thisLevels.get(i);
 
-					tbrugz.mondrian.xsdmodel.Table table = new tbrugz.mondrian.xsdmodel.Table();
-					table.setSchema(schemaName);
-					table.setName(sqlIdDecorator.get( l.levelName ));
+					mondrian.olap.MondrianDef.Table table = new mondrian.olap.MondrianDef.Table();
+					table.schema = schemaName;
+					table.name = sqlIdDecorator.get( l.levelName );
 
 					Join join = new Join();
 					join.getRelation().add(table);
@@ -746,8 +751,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					}
 					else {
 						HierarchyLevelData nextl = thisLevels.get(i+1);
-						join.setLeftKey(sqlIdDecorator.get( nextl.joinLeftKey ));
-						join.setRightKey(sqlIdDecorator.get( nextl.joinRightKey ));
+						join.leftKey = sqlIdDecorator.get( nextl.joinLeftKey );
+						join.rightKey = sqlIdDecorator.get( nextl.joinRightKey );
 					}
 
 					//if(i!=0) {
@@ -782,7 +787,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				//numOfParentLevels = createParentLevels(hier, parentTable, thisLevels.get(i).levelTable);
 				
 				if((numOfParentLevels==0) && (levelCounter == 1)) {
-					l.setUniqueMembers(true);
+					l.uniqueMembers = true;
 				}
 				hier.getLevel().add(l);
 				if(hierName.length() > 0) {
@@ -790,16 +795,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 				hierName += l.getName();
 			}
-			hier.setName(hierName);
+			hier.name = hierName;
 			log.debug("add hier: "+hier.getName());
 			
 			if(addDimForEachHierarchy) {
-				PrivateDimension newDim = new PrivateDimension();
+				Dimension newDim = new Dimension();
 				//dim.setName(dimName);
 				newDim.setForeignKey(sqlIdDecorator.get( dim.getForeignKey() ));
-				newDim.setType(dim.getType());
+				newDim.type = dim.getType();
 				newDim.getHierarchy().add(hier);
-				newDim.setName(hier.getName());
+				newDim.name = hier.getName();
 				cube.getDimensionUsageOrDimension().add(newDim);
 			}
 			else {
@@ -810,25 +815,25 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	Level cloneAsLevel(HierarchyLevelData l) {
 		Level lret = new Level();
-		lret.setColumn(sqlIdDecorator.get( l.levelColumn ));
-		lret.setName(l.levelName);
-		lret.setNameColumn(sqlIdDecorator.get( l.levelNameColumn ));
-		lret.setLevelType(l.levelType);
-		lret.setTable(sqlIdDecorator.get( l.levelTable ));
-		lret.setType(l.levelColumnDataType);
+		lret.column = sqlIdDecorator.get( l.levelColumn );
+		lret.name = l.levelName;
+		lret.nameColumn = sqlIdDecorator.get( l.levelNameColumn );
+		lret.levelType = l.levelType;
+		lret.table = sqlIdDecorator.get( l.levelTable );
+		lret.type = l.levelColumnDataType;
 		//XXX: lret.setNameExpression(value)
 		if(l.recursiveHierarchy!=null) {
-			lret.setParentColumn(l.recursiveHierarchy.levelParentColumn);
+			lret.parentColumn = l.recursiveHierarchy.levelParentColumn;
 			if(l.recursiveHierarchy.levelNullParentValue!=null) {
-				lret.setNullParentValue(l.recursiveHierarchy.levelNullParentValue);
+				lret.nullParentValue = l.recursiveHierarchy.levelNullParentValue;
 			}
 			if(l.recursiveHierarchy.closureTable!=null) {
 				Closure closure = new Closure();
-				tbrugz.mondrian.xsdmodel.Table t = new tbrugz.mondrian.xsdmodel.Table();
-				t.setName(l.recursiveHierarchy.closureTable);
-				closure.setTable(t);
-				closure.setParentColumn(l.recursiveHierarchy.closureParentColumn);
-				closure.setChildColumn(l.recursiveHierarchy.closureChildColumn);
+				mondrian.olap.MondrianDef.Table t = new mondrian.olap.MondrianDef.Table();
+				t.name = l.recursiveHierarchy.closureTable;
+				closure.table = t;
+				closure.parentColumn = l.recursiveHierarchy.closureParentColumn;
+				closure.childColumn = l.recursiveHierarchy.closureChildColumn;
 				lret.setClosure(closure);
 			}
 			
@@ -856,20 +861,20 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 
 			Level level = new Level();
-			level.setName(column);
-			level.setColumn(sqlIdDecorator.get( column ));
-			level.setTable(sqlIdDecorator.get( levelTable ));
+			level.name = column;
+			level.column = sqlIdDecorator.get( column );
+			level.table = sqlIdDecorator.get( levelTable );
 			if(tuple.length>1) {
 				String nameColumn = tuple[1].trim();
 				if(table.getColumn(nameColumn)==null) {
 					log.warn("level nameColumn '"+nameColumn+"' for table '"+table.getName()+"' does not exist");
 				}
 				else {
-					level.setNameColumn(nameColumn);
+					level.nameColumn = nameColumn;
 				}
 			}
 			if(count==1) {
-				level.setUniqueMembers(true);
+				level.uniqueMembers = true;
 			}
 			if(setLevelType) { setLevelType(level, col); }
 			//level.setUniqueMembers(true);
@@ -931,10 +936,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 	static void setLevelType(Level level, Column col) {
 		if(isInteger(col)) {
-			level.setType("Integer");
+			level.type = "Integer";
 		}
 		else if(isNumeric(col)) {
-			level.setType("Numeric");
+			level.type = "Numeric";
 		}
 	}
 	
