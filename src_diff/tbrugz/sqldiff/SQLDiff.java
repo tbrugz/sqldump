@@ -56,7 +56,6 @@ public class SQLDiff {
 	String xmloutfile = null;
 	
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
-		if(outfilePattern==null) { return; }
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -94,20 +93,22 @@ public class SQLDiff {
 		}
 
 		//dump diff
-		String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
-				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
-				new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
-				new String[]{Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME)},
-				new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
-				);
-		CategorizedOut co = new CategorizedOut(finalPattern);
-		log.debug("final pattern: "+finalPattern);
-		
-		co.setFilePathPattern(finalPattern);
-
-		//co.categorizedOut(diff.getDiff());
-		//log.info("dumping diff...");
-		diff.outDiffs(co);
+		if(outfilePattern!=null) {
+			String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
+					new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
+					new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
+					new String[]{Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME)},
+					new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
+					);
+			CategorizedOut co = new CategorizedOut(finalPattern);
+			log.debug("final pattern: "+finalPattern);
+			
+			co.setFilePathPattern(finalPattern);
+	
+			//co.categorizedOut(diff.getDiff());
+			//log.info("dumping diff...");
+			diff.outDiffs(co);
+		}
 		
 		if(xmloutfile!=null) {
 			try {
@@ -185,13 +186,15 @@ public class SQLDiff {
 		DBObject.dumpCreateOrReplace = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 		sqldiff.outfilePattern = sqldiff.prop.getProperty(PROP_OUTFILEPATTERN);
-		if(sqldiff.outfilePattern==null) {
-			log.error("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script");
-			if(sqldiff.failonerror) { throw new ProcessingException("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump diff script"); }
-			return;
-		}
 		sqldiff.xmlinfile = sqldiff.prop.getProperty(PROP_XMLINFILE);
 		sqldiff.xmloutfile = sqldiff.prop.getProperty(PROP_XMLOUTFILE);
+
+		if(sqldiff.outfilePattern==null && sqldiff.xmloutfile==null) {
+			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] defined. can't dump diff script";
+			log.error(message);
+			if(sqldiff.failonerror) { throw new ProcessingException(message); }
+			return;
+		}
 		
 		sqldiff.doIt();
 	}
