@@ -173,7 +173,8 @@ public class CascadingDataDump extends AbstractSQLProc {
 		//get filter/sql
 		if(fks==null) {
 			log.info("start table '"+t.getName()+"'"
-					+(filter!=null?" [filter: "+filter+"]":""));
+					+(filter!=null?" [filter: "+filter+"]":"")
+					+" [follow-exported-keys: "+exportedKeys+"]");
 		}
 		String join = getSQL(t,fks,filterTable,filter);
 		

@@ -37,10 +37,25 @@ public class CascadingDataDumpTest {
 		
 		//added "2" to linecount: header line + last linefeed
 		
-		int countE = TestUtil.countLines(OUTDIR+"/data_EMP.csv");
+		int countE = TestUtil.countLines(OUTDIR+"/t1/data_EMP.csv");
 		Assert.assertEquals(3+2, countE); //3 EMPs
 
-		int countD = TestUtil.countLines(OUTDIR+"/data_DEPT.csv");
+		int countD = TestUtil.countLines(OUTDIR+"/t1/data_DEPT.csv");
+		Assert.assertEquals(1+2, countD); //1 DEPT
+	}
+
+	@Test
+	public void dumpCascadingFromEmpWithDept2AndEmpSalaryLessThan1500() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		Properties p = new ParametrizedProperties();
+		p.load(CascadingDataDump.class.getResourceAsStream("cdd2.properties"));
+		p.setProperty("baseoutdir", OUTDIR);
+		SQLDump sqld = new SQLDump();
+		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		
+		int countE = TestUtil.countLines(OUTDIR+"/t2/data_EMP.csv");
+		Assert.assertEquals(2+2, countE); //2 EMPs
+
+		int countD = TestUtil.countLines(OUTDIR+"/t2/data_DEPT.csv");
 		Assert.assertEquals(1+2, countD); //1 DEPT
 	}
 	
