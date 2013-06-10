@@ -299,7 +299,14 @@ public class SQLDump {
 			log.info("connection properties prefix: '"+connPrefix+"'");
 		}
 		conn = SQLUtils.ConnectionUtil.initDBConnection(connPrefix, papp);
-		DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
+		if(conn==null) {
+			if(failonerror) {
+				throw new ProcessingException("can't init connection [prefix="+connPrefix+"]");
+			}
+		}
+		else {
+			DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
+		}
 	}
 	
 	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {

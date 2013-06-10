@@ -89,6 +89,13 @@ public class CascadingDataDump extends AbstractSQLProc {
 
 	@Override
 	public void process() {
+		if(startTables==null) {
+			String message = "no start-tables defined [prop '"+PROP_CDD_STARTTABLES+"']";
+			log.warn(message);
+			if(failonerror) { throw new ProcessingException(message); }
+			return;
+		}
+		
 		int count=0;
 		for(String tablename: startTables) {
 			Table t = DBIdentifiable.getDBIdentifiableByName(model.getTables(), tablename);
@@ -158,7 +165,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 			}
 			return;
 		}
-		if(stopTables.contains(t.getName())) {
+		if(stopTables!=null && stopTables.contains(t.getName())) {
 			//XXX: only stop at stopTables when followExportedKeys is true?
 			return;
 		}
