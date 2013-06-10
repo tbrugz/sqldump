@@ -72,7 +72,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	List<String> startTables = null;
 	List<String> stopTables = null; //XXX for exported FKs only?
 	boolean orderByPK = true;
-	Boolean exportedKeys = null;
+	boolean exportedKeys = false;
 
 	Map<String, List<Query4CDD>> queries4dump = new LinkedHashMap<String, List<Query4CDD>>();
 	//Map<String, List<Query4CDD>> queries4dump = new NonNullGetMap<String, List<Query4CDD>>(new LinkedHashMap<String, List<Query4CDD>>(), ArrayList<Query4CDD>.class);
@@ -83,8 +83,8 @@ public class CascadingDataDump extends AbstractSQLProc {
 		super.setProperties(prop);
 		startTables = Utils.getStringListFromProp(prop, PROP_CDD_STARTTABLES, ",");
 		stopTables = Utils.getStringListFromProp(prop, PROP_CDD_STOPTABLES, ",");
-		orderByPK = Utils.getPropBoolean(prop, PROP_CDD_ORDERBYPK, orderByPK);
-		exportedKeys = Utils.getPropBoolean(prop, PROP_CDD_EXPORTEDKEYS, null);
+		orderByPK = Utils.getPropBool(prop, PROP_CDD_ORDERBYPK, orderByPK);
+		exportedKeys = Utils.getPropBool(prop, PROP_CDD_EXPORTEDKEYS, exportedKeys);
 	}
 
 	@Override
@@ -174,7 +174,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		if(fks==null) {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":"")
-					+" [follow-exported-keys: "+exportedKeys+"]");
+					+" [exported-keys? "+exportedKeys+"]");
 		}
 		String join = getSQL(t,fks,filterTable,filter);
 		
@@ -204,7 +204,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		dumpedTablesList.add(t.getName());
 		
 		//exportedKeys recursive dump
-		if(exportedKeys!=null && exportedKeys && (followExportedKeys==null || followExportedKeys)) {
+		if(exportedKeys && (followExportedKeys==null || followExportedKeys)) {
 			procFKs4Dump(t, fks, filterTable, filter, true, doIntersect);
 		}
 	}
