@@ -11,6 +11,7 @@ import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.processors.CascadingDataDumpTest;
 import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
@@ -24,7 +25,6 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 @RunWith(Suite.class)
 @SuiteClasses({
 	//"unit" tests
-	DataDumpTest.class,
 	ParametrizedPropertiesTest.class,
 	//SQLTokenizerTest.class,
 	SQLTokenizersTest.class,
@@ -48,6 +48,10 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	SQLDiffTest.class,
 	//DerbyDiffTest.class, //taking too long...
 	HSQLDBDiffTest.class,
+	
+	//datadump
+	DataDumpTest.class,
+	CascadingDataDumpTest.class,
 	
 	//roundtrip
 	SQLRunAndDumpTest.class,
