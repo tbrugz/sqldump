@@ -3,6 +3,7 @@ package tbrugz.sqldump.processors;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
@@ -62,6 +64,10 @@ public class CascadingDataDump extends AbstractSQLProc {
 	static final String PROP_CDD_ORDERBYPK = CDD_PROP_PREFIX+".orderbypk";
 	static final String PROP_CDD_EXPORTEDKEYS = CDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
+	
+	static final String[] nonDistinctableColumnTypesArr = { "BLOB", "CLOB" };
+	static final List<String> nonDistinctableColumnTypes = Arrays.asList(nonDistinctableColumnTypesArr);
+	
 	static boolean addAlias = true;
 	static boolean addSQLremarks = true;
 	
@@ -136,7 +142,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				return;
 			}*/
 			
-			//TODO: detect cycles (source of 1st fk equals target of last) - use CTE (common table expressions)?
+			//TODO: detect cycles (source of 1st fk equals target of last, if all are imported or all exported) - use CTE (common table expressions)?
 			/*
 			FK fkOne = fks.get(0);
 			FK fkLast = fks.get(fks.size()-1);
@@ -174,7 +180,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		if(fks==null) {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":"")
-					+" [exported-keys? "+exportedKeys+"]");
+					+" [.exportedkeys? "+exportedKeys+"]");
 		}
 		String join = getSQL(t,fks,filterTable,filter);
 		
@@ -182,7 +188,8 @@ public class CascadingDataDump extends AbstractSQLProc {
 		procFKs4Dump(t, fks, filterTable, filter, false, (followExportedKeys!=null && followExportedKeys)?true:doIntersect);
 		
 		//add query to dump list
-		String sql = "select distinct "+t.getName()+".* from "+t.getName()
+		//FIXedME: not all columns can be 'distincted' - select only those that can
+		String sql = "select distinct "+getProjectionForDistinct(t)+" from "+t.getName()
 				+(join!=null?join:
 					(filter!=null?
 						(addSQLremarks?"\n/* original filter start table */":"")+
@@ -228,7 +235,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 					continue;
 				}
 				if(fk.getFkTable().equals(fk.getPkTable())) {
-					//XXX: dump self-relationship
+					//XXX: dump self-relationship - warn once for each FK?
 					log.warn("self-relationship [loop] detected: "+fk.toStringFull()+" [not yet implemented]");
 					continue;
 				}
@@ -242,7 +249,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				if(fks!=null) {
 					for(FK xfk: fks) {
 						if(fk.equals(xfk)) {
-							log.warn("existing FK["+t.getName()+"]: "+xfk+" <newFKs:"+newFKs+"> <origFKs:"+fks+">");
+							log.debug("existing FK["+t.getName()+"]: "+xfk+" <newFKs:"+newFKs+"> <origFKs:"+fks+">");
 							//XXX continue OUTER; //or just if "last" FK?
 						}
 						else {
@@ -252,7 +259,16 @@ public class CascadingDataDump extends AbstractSQLProc {
 					//newFKs.addAll(fks);
 				}
 				//if(exportedKeys) {newFKs.add(fk);}
-				dumpTable(pkt, newFKs, filterTable, filter, exportedKeys, doIntersect);
+				try {
+					dumpTable(pkt, newFKs, filterTable, filter, exportedKeys, doIntersect);
+				}
+				catch(StackOverflowError err) {
+					try {
+						System.err.println("CascadingDataDump: stack overflow error: table: "+t.getName());
+					}
+					catch (Error e) {}
+					throw err;
+				}
 			}
 		}
 	}
@@ -367,8 +383,8 @@ public class CascadingDataDump extends AbstractSQLProc {
 			boolean joinWithFKT = lastTable.equals(fk.getPkTable());
 			String tableJoin = joinWithFKT?fk.getFkTable():fk.getPkTable();
 			if(tableJoin.equals(t.getName())) {
-				//log.warn("-->>>>> autojoin '"+tableJoin+"': "+sb.toString());
-				continue;
+				log.debug("--> autojoin '"+tableJoin+"': "+sb.toString());
+				//continue;
 			}
 			String alias = "A"+i;
 			if(tableJoin.equals(filterTable.getName())) {
@@ -440,7 +456,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 			//if(q.exported==null || q.exported) { return false; }
 		}
 		if(!ret) {
-			log.info("allImported/union[all-should-be-false]? exported="+sb.toString());
+			log.debug("allImported/union[all-should-be-false]? exported="+sb.toString());
 		}
 		return ret;
 	}
@@ -456,7 +472,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 			//if(q.exported==null || !q.exported) { return false; }
 		}
 		if(!ret) {
-			log.info("allExported/intersect[all-should-be-true]? exported="+sb.toString());
+			log.debug("allExported/intersect[all-should-be-true]? exported="+sb.toString());
 		}
 		return ret;
 	}
@@ -475,6 +491,27 @@ public class CascadingDataDump extends AbstractSQLProc {
 		sb.append(s);
 		addOrderBy(sb, pk);
 		return sb.toString();
+	}
+	
+	static String getProjectionForDistinct(Table t) {
+		String tname = t.getName();
+		StringBuilder sb = new StringBuilder();
+		int countDistinctableCols = 0;
+		int countNonDistinctable = 0;
+		for(Column c: t.getColumns()) {
+			if(nonDistinctableColumnTypes.contains(c.type.toUpperCase())) {
+				countNonDistinctable++;
+			}
+			else {
+				if(countDistinctableCols!=0) { sb.append(", "); }
+				sb.append(tname+"."+c.getName());
+				countDistinctableCols++;
+			}
+		}
+		if(countNonDistinctable>0) {
+			return sb.toString();
+		}
+		return tname+".*";
 	}
 	
 }
