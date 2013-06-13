@@ -73,6 +73,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	boolean dumpRemarks = true;
 	//boolean dumpWriteAppend = false;
 	
+	boolean dumpFKs = true;
+	
 	//Properties dbmsSpecificsProperties;
 	String fromDbId, toDbId;
 	
@@ -120,6 +122,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	public static final String PROP_SCHEMADUMP_DUMPREMARKS = "sqldump.schemadump.dumpremarks";
 	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
 	public static final String PROP_SCHEMADUMP_INDEXORDERBY = "sqldump.schemadump.index.orderby";
+	public static final String PROP_SCHEMADUMP_FKs = "sqldump.schemadump.fks";
 	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
@@ -141,6 +144,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		dumpRemarks = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPREMARKS, dumpRemarks);
 		String dumpIndexOrderBy = prop.getProperty(PROP_SCHEMADUMP_INDEXORDERBY);
 		dumpIndexesSortedByTableName = "tablename".equalsIgnoreCase(dumpIndexOrderBy);
+		dumpFKs = Utils.getPropBool(prop, PROP_SCHEMADUMP_FKs, dumpFKs);
 		
 		//dumpWriteAppend = Utils.getPropBool(prop, PROP_SCHEMADUMP_WRITEAPPEND, dumpWriteAppend);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
@@ -261,7 +265,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				//default: break;
 			}
 			
-			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, dumpDropStatements, dumpScriptComments, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
+			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable && dumpFKs, dumpDropStatements, dumpScriptComments, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
 			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName, dumpRemarks);
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);
@@ -271,7 +275,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			//categorizedOut(table.schemaName, table.name, DBObjectType.TABLE, ";\n");
 
 			//FK outside table, with referencing table
-			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable) {
+			if(dumpFKsWithReferencingTable && !dumpFKsInsideTable && dumpFKs) {
 				for(FK fk: schemaModel.getForeignKeys()) {
 					if(fk.getFkTable().equals(table.getName())) {
 						String fkscript = fk.fkScriptWithAlterTable(dumpDropStatements, dumpWithSchemaName);
@@ -316,7 +320,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 		
 		//FKs
-		if(!dumpFKsInsideTable && !dumpFKsWithReferencingTable) {
+		if(!dumpFKsInsideTable && !dumpFKsWithReferencingTable && dumpFKs) {
 			dumpFKsOutsideTable(schemaModel.getForeignKeys());
 		}
 		
@@ -399,7 +403,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(failonerror) { throw new ProcessingException(e); }
 		}
 		finally {
-			if(outputConnPropPrefix!=null) {
+			if(outputConnPropPrefix!=null && outputConn!=null) {
 				try {
 					outputConn.close();
 				} catch (SQLException e) {
