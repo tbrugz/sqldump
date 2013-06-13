@@ -21,6 +21,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Util;
@@ -168,6 +169,9 @@ public class SQLRun {
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
 					log.debug("file not found", e);
+					if(failonerror) {
+						throw new ProcessingException(e);
+					}
 				}
 			}
 			// .files
