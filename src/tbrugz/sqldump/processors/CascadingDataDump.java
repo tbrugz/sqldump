@@ -61,6 +61,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	//generic props
 	static final String PROP_CDD_STARTTABLES = CDD_PROP_PREFIX+".starttables";
 	static final String PROP_CDD_STOPTABLES = CDD_PROP_PREFIX+".stoptables";
+	static final String PROP_CDD_NOEXPORTTABLES = "sqldump.cascadingdd.noexporttables";
 	static final String PROP_CDD_ORDERBYPK = CDD_PROP_PREFIX+".orderbypk";
 	static final String PROP_CDD_EXPORTEDKEYS = CDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
@@ -77,6 +78,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	
 	List<String> startTables = null;
 	List<String> stopTables = null; //XXX for exported FKs only?
+	List<String> noExportTables = null; //do not follow exported keys for these tables
 	boolean orderByPK = true;
 	boolean exportedKeys = false;
 
@@ -89,6 +91,8 @@ public class CascadingDataDump extends AbstractSQLProc {
 		super.setProperties(prop);
 		startTables = Utils.getStringListFromProp(prop, PROP_CDD_STARTTABLES, ",");
 		stopTables = Utils.getStringListFromProp(prop, PROP_CDD_STOPTABLES, ",");
+		noExportTables = Utils.getStringListFromProp(prop, PROP_CDD_NOEXPORTTABLES, ",");
+		if(noExportTables==null) { noExportTables = new ArrayList<String>(); }
 		orderByPK = Utils.getPropBool(prop, PROP_CDD_ORDERBYPK, orderByPK);
 		exportedKeys = Utils.getPropBool(prop, PROP_CDD_EXPORTEDKEYS, exportedKeys);
 	}
@@ -180,7 +184,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		if(fks==null) {
 			log.info("start table '"+t.getName()+"'"
 					+(filter!=null?" [filter: "+filter+"]":"")
-					+" [.exportedkeys? "+exportedKeys+"]");
+					+" [follow-exported? "+ (exportedKeys && !noExportTables.contains(t.getName()))+"]");
 		}
 		String join = getSQL(t,fks,filterTable,filter);
 		
@@ -212,7 +216,12 @@ public class CascadingDataDump extends AbstractSQLProc {
 		
 		//exportedKeys recursive dump
 		if(exportedKeys && (followExportedKeys==null || followExportedKeys)) {
-			procFKs4Dump(t, fks, filterTable, filter, true, doIntersect);
+			if(!noExportTables.contains(t.getName())) {
+				procFKs4Dump(t, fks, filterTable, filter, true, doIntersect);
+			}
+			else {
+				log.debug("not following exported keys for table '"+t.getName()+"'");
+			}
 		}
 	}
 	
