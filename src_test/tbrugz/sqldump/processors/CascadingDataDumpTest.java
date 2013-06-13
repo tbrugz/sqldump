@@ -58,5 +58,17 @@ public class CascadingDataDumpTest {
 		int countD = TestUtil.countLines(OUTDIR+"/t2/data_DEPT.csv");
 		Assert.assertEquals(1+2, countD); //1 DEPT
 	}
+
+	@Test
+	public void dumpCascadingFromEmp1AndProj3() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		Properties p = new ParametrizedProperties();
+		p.load(CascadingDataDump.class.getResourceAsStream("cdd3.properties"));
+		p.setProperty("baseoutdir", OUTDIR);
+		SQLDump sqld = new SQLDump();
+		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		
+		int countE = TestUtil.countLines(OUTDIR+"/t3/data_DEPT.csv");
+		Assert.assertEquals(2+2, countE); //2 DEPTs
+	}
 	
 }
