@@ -104,6 +104,7 @@ public class DataDump extends AbstractSQLProc {
 	
 	static Log log = LogFactory.getLog(DataDump.class);
 	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
+	static Log log1stRow = LogFactory.getLog(DataDump.class.getName()+".datadump-1st");
 	static Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
 	
 	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -349,7 +350,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			long initTime = System.currentTimeMillis();
-			logRow.info("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
+			logRow.debug("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
 			ResultSet rs = st.executeQuery();
 			if(log.isDebugEnabled()) { SQLUtils.logWarnings(rs.getWarnings(), log); }
 			if(rsDecoratorFactory!=null) {
@@ -422,7 +423,7 @@ public class DataDump extends AbstractSQLProc {
 			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
 			boolean writeAppend = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEAPPEND, false);
 			
-			boolean log1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
+			boolean dolog1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			boolean logNumberOfOpenedWriters = true;
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 			
@@ -565,13 +566,13 @@ public class DataDump extends AbstractSQLProc {
 				
 				if(count==1) {
 					dump1stRowTime = System.currentTimeMillis();
-					if(log1stRow) {
-						logRow.info("[qid="+tableOrQueryId+"] 1st row dumped" + 
+					if(dolog1stRow) {
+						log1stRow.debug("[qid="+tableOrQueryId+"] 1st row dumped" + 
 							" ["+(dump1stRowTime-initTime)+"ms elapsed]");
 					}
 				}
 				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) { 
-					logRow.info("[qid="+tableOrQueryId+"] "+count+" rows dumped"
+					logRow.debug("[qid="+tableOrQueryId+"] "+count+" rows dumped"
 							+(logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"") );
 				}
 				if(rowlimit<=count) { break; }

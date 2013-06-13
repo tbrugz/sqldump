@@ -55,7 +55,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		fallbackToFile = Utils.getPropBool(prop, PROP_IIDB_FALLBACK_TO_FILE, fallbackToFile);
 		String connPropPrefix = prop.getProperty(PROP_IIDB_CONN_PREFIX);
 		if(connPropPrefix==null) {
-			throw new ProcessingException("connection prefix is null, can't proceed");
+			throw new ProcessingException("connection prefix is null [prop '"+PROP_IIDB_CONN_PREFIX+"'], can't proceed");
 		}
 		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
 		updated = 0;
