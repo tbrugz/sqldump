@@ -285,6 +285,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	void dumpQueries(List<String> dumpedTables) throws SQLException, IOException {
 		DataDump dd = new DataDump();
 		
+		//XXX: option to invert 'queries4dump.keySet()' order [ Collections.reverse(<list>)? ] - for delete?
 		for(String tname: queries4dump.keySet()) {
 			List<Query4CDD> qs = queries4dump.get(tname);
 			Constraint pk = tablePKs.get(tname);
@@ -298,7 +299,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 					sql = addOrderBy(sql, pk);
 				}
 				log.debug("simple-sql["+tname+"]:\n"+sql);
-				dd.runQuery(conn, sql, null, prop, tname, tname);
+				dd.runQuery(conn, sql, null, prop, tname, tname, null, pk!=null?pk.uniqueColumns:null);
 				dumpedTables.add(tname);
 			}
 			else {
@@ -364,7 +365,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				}
 				
 				log.debug("join-sql["+tname+"]:\n"+sb.toString());
-				dd.runQuery(conn, sb.toString(), null, prop, tname, tname);
+				dd.runQuery(conn, sb.toString(), null, prop, tname, tname, null, pk!=null?pk.uniqueColumns:null);
 				dumpedTables.add(tname);
 			}
 		}

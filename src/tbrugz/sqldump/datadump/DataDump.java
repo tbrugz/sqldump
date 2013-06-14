@@ -305,7 +305,7 @@ public class DataDump extends AbstractSQLProc {
 	} 
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
-			String tableOrQueryId, String tableOrQueryName
+			String tableOrQueryId, String tableOrQueryName, String[] partitionByPatterns, List<String> keyColumns
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
@@ -317,7 +317,13 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
+		runQuery(conn, sql, params, prop, tableOrQueryId,
+				tableOrQueryName, charset, rowlimit, syntaxList, 
+				partitionByPatterns, keyColumns, 
+				null, //List<FK> importedFKs
+				null, //List<Constraint> uniqueKeys
+				null  //ResultSetDecoratorFactory rsDecoratorFactory
+				);
 	}
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
