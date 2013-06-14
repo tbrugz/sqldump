@@ -55,6 +55,7 @@ public class DataDumpTest {
 				"-Dsqlrun.exec.05.inserttable=emp",
 				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
 				"-Dsqlrun.exec.05.skipnlines=1",
+				//"-Dsqlrun.exec.05.emptystringasnull=true",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+dbpath,
 				"-Dsqlrun.user=h",

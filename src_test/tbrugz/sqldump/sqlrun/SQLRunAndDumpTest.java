@@ -105,6 +105,7 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=emp",
 				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
+				//"-Dsqlrun.exec.05.emptystringasnull=true",
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
