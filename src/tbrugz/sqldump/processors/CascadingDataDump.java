@@ -315,18 +315,29 @@ public class CascadingDataDump extends AbstractSQLProc {
 					setOperation = "intersect";
 				}
 				else {
-					log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property");
+					boolean intersectPriority = true;
+					log.warn("many queries for table '"+tname+"' ["+qs.size()+"] with different import/export property [using '"+(intersectPriority?"intersect":"union")+"' priority]");
 
-					//XXX (i1 intersect i2 intersect i3) union u1 union u2
-					// or (u1 union u2) intersect i1 intersect i2 intersect i3 ?
+					//XXX (i1 intersect i2 intersect i3) union u1 union u2 [intersectPriority == true]
+					// or (u1 union u2) intersect i1 intersect i2 intersect i3 [intersectPriority == false] ?
+					
 					String oper = null;
 					int count = 0;
 
 					//1st operation
+					if(intersectPriority) {
+					oper = "intersect";
+					} else {
 					oper = "union";
+					}
 					for(int i=0;i<qs.size();i++) {
 						Query4CDD q = qs.get(i);
+						if(intersectPriority) {
+						if(q.exported!=null && !q.exported) { continue; }
+						}
+						else {
 						if(q.exported==null || q.exported) { continue; }
+						}
 						if(count>0) { sb.append("\n"+oper+"\n"); }
 						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
 						sb.append(q.sql);
@@ -339,10 +350,19 @@ public class CascadingDataDump extends AbstractSQLProc {
 					}
 
 					//2nd operation
+					if(intersectPriority) {
+					oper = "union";
+					} else {
 					oper = "intersect";
+					}
 					for(int i=0;i<qs.size();i++) {
 						Query4CDD q = qs.get(i);
+						if(intersectPriority) {
+						if(q.exported==null || q.exported) { continue; }
+						}
+						else {
 						if(q.exported!=null && !q.exported) { continue; }
+						}
 						if(count>0) { sb.append("\n"+oper+"\n"); }
 						if(addSQLremarks) { sb.append("/* ex="+q.exported+" */\n"); }
 						sb.append(q.sql);
