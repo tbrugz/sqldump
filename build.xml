@@ -37,9 +37,10 @@
 		<!--path refid="classpath.compile.ivy"/-->
 		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
 		<pathelement location="${lib.dir}/kmlutils-0.5.2.jar"/>
-		<pathelement location="${lib.dir}/mondrianschema2graphml-0.5.1.jar"/>
 		<pathelement location="${lib.dir}/jettison-1.3.3.jar"/>
 		<pathelement location="${lib.dir}/olap4j-1.1.0.jar"/>
+		<pathelement location="${lib.dir}/mondrian-3.5.7.jar"/>
+		<pathelement location="${lib.dir}/eigenbase-xom-1.3.1.jar"/>
 	</path>
 
 	<path id="classpath.compiletest">
@@ -119,7 +120,6 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
-				<exclude name="**/log4j.properties"/>
 			</fileset>
 			<fileset dir="${src.graphml.dir}">
 				<include name="**/*.properties"/>

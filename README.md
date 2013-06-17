@@ -40,10 +40,13 @@ SQLDump processing consists of:
 
 *Processors* can be:
 
-- `DataDump` - Dumps data based on grabbed schema (can partition data from 1 table in different files, can dump in different formats) 
-- `SQLQueries` - Dumps data based on SQL-queries (same as `DataDump` - for each query) 
+- `DataDump` - Dumps data based on grabbed schema (can partition data from 1 table in different files, can dump in different formats)
+- `SQLQueries` - Dumps data based on SQL-queries (same as `DataDump` - for each query)
+- `CascadingDataDump` - Dumps data based on table relationships (FKs), given initial tables/filters
 - `graph.ResultSet2GraphML` - Dumps a graphML diagram based on a SQL-query
-- `SQLDialectTransformer` - Transforms schema models between different sql-dialects 
+- `SQLDialectTransformer` - Transforms schema models between different sql-dialects
+- `mondrianschema.Olap4jMDXQueries` - Dumps data from olap4j/mondrian engine
+- `mondrianschema.MondrianSchema2GraphProcessor` - Dumps a graphML diagram based on a Mondrian Schema file
 
 *Dumpers* can be:
 
@@ -63,8 +66,8 @@ Usage examples can be found at [doc/examples](https://bitbucket.org/tbrugz/sqldu
 Dependencies
 ------------
 - [apache-commons-logging](http://commons.apache.org/logging/)
-- [log4j](http://logging.apache.org/log4j/1.2/) (recommended)
-- database-dependent JDBC jars (e.g.
+- [log4j](http://logging.apache.org/log4j/1.2/) - optional but recommended
+- database-dependent JDBC jars ( e.g.
 	[PostgreSQL](http://jdbc.postgresql.org/download.html),
 	[MySQL](http://dev.mysql.com/downloads/connector/j/5.0.html),
 	[Oracle](http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html),
@@ -78,7 +81,7 @@ Dependencies
 	[Firebird](http://jaybirdwiki.firebirdsql.org/jaybird/doku.php?id=download:start)
 	)
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
-- [mondrianschema2graphml](https://bitbucket.org/tbrugz/mondrianschema2graphml/) - optional, for Mondrian Schema output
+- [olap4j](http://www.olap4j.org/) & [mondrian](http://mondrian.pentaho.com/) - optional, for Mondrian Schema output, validation & data dump
 - [ant](http://ant.apache.org/) (recommended)
 - [ivy](http://ant.apache.org/ivy/) (recommended)
 
