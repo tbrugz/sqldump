@@ -1,5 +1,6 @@
 package tbrugz.sqldump.util;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -23,6 +24,7 @@ public class IOUtilTest {
 	@Test
 	public void writeAndRead() throws IOException {
 		String file = "work/output/util-ioutiltest.txt";
+		Utils.prepareDir(new File(file));
 		Writer w = new FileWriter(file);
 		IOUtil.writeFile("abc123", w);
 		w.close();
