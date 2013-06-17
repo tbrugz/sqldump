@@ -61,11 +61,19 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	@Override
 	public void process() {
 		if(!Olap4jUtil.isOlapConnection(conn)) {
-			log.warn("connection is not instance of OlapConnection");
+			String message = "connection is not instance of OlapConnection";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return;
 		}
 		if(fileOutputPattern==null) {
-			log.warn("no outfilepattern defined (suffix '"+SUFFIX_MDXQUERIES_OUTFILEPATTERN+"')");
+			String message = "no outfilepattern defined (suffix '"+SUFFIX_MDXQUERIES_OUTFILEPATTERN+"')";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return;
 		}
 		
@@ -76,7 +84,11 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		
 		List<String> queryIds = Utils.getStringListFromProp(prop, PROP_MDXQUERIES_IDS, ",");
 		if(queryIds==null) {
-			log.warn("no mdx queries defined (prop '"+PROP_MDXQUERIES_IDS+"')");
+			String message = "no mdx queries defined (prop '"+PROP_MDXQUERIES_IDS+"')";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return;
 		}
 		
@@ -91,13 +103,17 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 				String query = prop.getProperty(PREFIX_MDXQUERIES+"."+id+SUFFIX_MDXQUERIES_QUERY);
 				String queryName = prop.getProperty(PREFIX_MDXQUERIES+"."+id+SUFFIX_MDXQUERIES_NAME);
 				if(query==null) {
-					log.warn("null query ["+id+"]");
+					String message = "null query '"+id+"'";
+					log.warn(message);
+					if(failonerror) {
+						throw new ProcessingException(message);
+					}
+					continue;
 				}
-				else {
-					Writer w = co.getCategorizedWriter(queryName!=null?queryName:id);
-					dumpQuery(id, query, w);
-					CategorizedOut.closeWriter(w);
-				}
+				
+				Writer w = co.getCategorizedWriter(queryName!=null?queryName:id);
+				dumpQuery(id, query, w);
+				CategorizedOut.closeWriter(w);
 				count++;
 			}
 			catch (Exception e) {

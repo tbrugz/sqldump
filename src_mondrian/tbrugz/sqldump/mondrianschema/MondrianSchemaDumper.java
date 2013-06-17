@@ -463,9 +463,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		setPropertiesBeforeSerialization(schema);
 		
 		try {
+			File fout = new File(fileOutput);
+			Utils.prepareDir(fout);
 			
 			//jaxbOutput(schema, new File(fileOutput));
-			xomOutput(schema, new File(fileOutput));
+			xomOutput(schema, fout);
 			
 			if(validateSchema) {
 				Processor msv = new MondrianSchemaValidator();
