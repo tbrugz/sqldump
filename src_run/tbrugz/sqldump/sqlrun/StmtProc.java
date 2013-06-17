@@ -39,9 +39,11 @@ public class StmtProc extends AbstractFailable implements Executor {
 	//properties
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 	static final String PROP_USE_PREPARED_STATEMENT = "sqlrun.usepreparedstatement";
+	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = ".escapebackslashedapos";
 	
 	boolean useBatchUpdate = false;
 	boolean usePreparedStatement = true;
+	boolean escapeBackslashedApos = false;
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
@@ -104,7 +106,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER:
 			//XXX option to define charset
-			stmtTokenizer = new SQLStmtScanner(file, inputEncoding);
+			stmtTokenizer = new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
 			break;
 		default:
 			FileReader reader = new FileReader(file);
@@ -341,6 +343,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_SIZE, batchSize);
 		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_ENCODING, defaultInputEncoding);
+		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SUFFIX_ESCAPE_BACKSLASHED_APOS, escapeBackslashedApos);
 	}
 	
 	int closeStatement() throws SQLException {

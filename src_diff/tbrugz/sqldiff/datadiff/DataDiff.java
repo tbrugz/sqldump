@@ -305,7 +305,7 @@ public class DataDiff extends AbstractFailable {
 				.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(table.getName()) );
 		File file = new File(fileName);
 		log.debug("importing data from file: "+file);
-		SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset);
+		SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset, false);
 		long updateCount = 0;
 		for(String sql: scanner) {
 			updateCount += st.executeUpdate(sql);

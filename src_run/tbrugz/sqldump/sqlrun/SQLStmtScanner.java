@@ -14,7 +14,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	//TODOne: option to define inputEncoding
 	//XXX: option to define recordDelimiter?
 	final static String recordDelimiter = ";";
-	static boolean escapeBackslashApos = false; //mysql uses this escape
+	final boolean escapeBackslashApos; //mysql uses this escape - default is false
 	final String inputEncoding;
 	final Scanner scan;
 	final InputStream is;
@@ -23,13 +23,14 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 		this(file, DEFAULT_CHARSET);
 	}*/
 
-	public SQLStmtScanner(File file, String charset) throws FileNotFoundException {
-		this(new BufferedInputStream(new FileInputStream(file)), charset);
+	public SQLStmtScanner(File file, String charset, boolean escapeBackslashApos) throws FileNotFoundException {
+		this(new BufferedInputStream(new FileInputStream(file)), charset, escapeBackslashApos);
 	}
 	
-	public SQLStmtScanner(InputStream is, String charset) {
+	SQLStmtScanner(InputStream is, String charset, boolean escapeBackslashApos) {
 		this.is = is;
-		inputEncoding = charset;
+		this.inputEncoding = charset;
+		this.escapeBackslashApos= escapeBackslashApos; 
 		scan = new Scanner(is, inputEncoding);
 		scan.useDelimiter(recordDelimiter);
 	}
@@ -71,7 +72,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	}
 	
 	//TODO: ignore apos inside comments: "--;\n", "/*;*/" - if the comments are not inside strings...
-	static int countApos(String str) {
+	int countApos(String str) {
 		int occurences = -1;
 		int fromIndex = 0;
 		do {
