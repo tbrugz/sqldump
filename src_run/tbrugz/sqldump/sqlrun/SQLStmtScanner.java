@@ -14,6 +14,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	//TODOne: option to define inputEncoding
 	//XXX: option to define recordDelimiter?
 	final static String recordDelimiter = ";";
+	static boolean escapeBackslashApos = false; //mysql uses this escape
 	final String inputEncoding;
 	final Scanner scan;
 	final InputStream is;
@@ -53,7 +54,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 		int countApos = countApos(token);
 		StringBuilder sb = new StringBuilder();
 		sb.append(token);
-		while (countApos%2==1) {
+		while (countApos>0 && countApos%2==1) {
 			if(!scan.hasNext()) {
 				//XXX maybe an error in the imput file? log.debug() ?
 				break;
@@ -69,14 +70,18 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	public void remove() {
 	}
 	
-	//TODO: ignore apos inside comments: "--;\n", "/*;*/" - if they are not inside strings...
+	//TODO: ignore apos inside comments: "--;\n", "/*;*/" - if the comments are not inside strings...
 	static int countApos(String str) {
 		int occurences = -1;
 		int fromIndex = 0;
 		do {
 			int index = str.indexOf('\'', fromIndex);
-			fromIndex = index+1;
 			occurences++;
+			//test for "\'" &apos; escapes
+			if(escapeBackslashApos && index>=0 && str.charAt(index-1)=='\\') {
+				occurences--;
+			}
+			fromIndex = index+1;
 		} while(fromIndex>0);
 		return occurences;
 	}

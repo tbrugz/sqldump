@@ -34,6 +34,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	static final Log log = LogFactory.getLog(StmtProc.class);
 	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static final Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
+	static final Log logUpdates = LogFactory.getLog(StmtProc.class.getName()+"-updates");
 	
 	//properties
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
@@ -269,17 +270,25 @@ public class StmtProc extends AbstractFailable implements Executor {
 					return 0;
 				}
 			}
-			else if(usePreparedStatement){
-				PreparedStatement stmt = conn.prepareStatement(stmtStr);
-				setParameters(stmt);
-				int urows = stmt.executeUpdate();
-				logStmt.debug("updated "+urows+" rows");
-				return urows;
-			}
 			else {
-				Statement stmt = conn.createStatement();
-				int urows = stmt.executeUpdate(replaceParameters(stmtStr));
-				logStmt.debug("updated "+urows+" rows");
+				int urows = -1;
+				if(usePreparedStatement){
+					PreparedStatement stmt = conn.prepareStatement(stmtStr);
+					setParameters(stmt);
+					urows = stmt.executeUpdate();
+				}
+				else {
+					Statement stmt = conn.createStatement();
+					urows = stmt.executeUpdate(replaceParameters(stmtStr));
+				}
+				
+				if(logStmt.isDebugEnabled()) {
+					logStmt.debug("updated "+urows+" rows");
+				}
+				else if(logUpdates.isDebugEnabled() && urows>0) {
+					logUpdates.debug("updated "+urows+" rows");
+				}
+				
 				return urows;
 			}
 		}
