@@ -44,6 +44,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -157,7 +158,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	{
 		try {
-			Properties mondrianProp = new Properties();
+			Properties mondrianProp = new ParametrizedProperties();
 			mondrianProp.load(MondrianSchemaDumper.class.getResourceAsStream("mondrianxsd.properties"));
 			numericTypes = Utils.getStringListFromProp(mondrianProp, "type.numeric", ",");
 			integerTypes = Utils.getStringListFromProp(mondrianProp, "type.integer", ",");
@@ -926,7 +927,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
 		m.marshal(o, fileOutput);
-		log.info("mondrian schema model dumped to '"+fileOutput+"'");
+		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
 	}
 
 	void xomOutput(ElementDef e, File fileOutput) throws FileNotFoundException {
@@ -934,7 +935,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		XMLOutput out = new XMLOutput(pw);
 		e.displayXML(out, 4);
 		pw.close();
-		log.info("mondrian schema model dumped to '"+fileOutput+"'");
+		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
 	}
 	
 	boolean stringEquals(String s1, String s2) {
