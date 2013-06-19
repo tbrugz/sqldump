@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -46,5 +47,10 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 			+"and tc.table_name = ccu.table_name " 
 			+"and constraint_type = 'UNIQUE' "
 			+"order by table_name, constraint_name, column_name";
+	}
+	
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
+		return new MySQLDatabaseMetaData(metadata);
 	}
 }
