@@ -11,6 +11,8 @@ public interface Processor extends ProcessComponent {
 
 	public void setPropertiesPrefix(String propertiesPrefix);
 
+	public boolean needsConnection();
+
 	public void setConnection(Connection conn);
 
 	public void setSchemaModel(SchemaModel schemamodel);

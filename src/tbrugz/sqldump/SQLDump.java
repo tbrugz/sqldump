@@ -274,8 +274,11 @@ public class SQLDump {
 		return sm;
 	}
 	
-	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) {
+	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
 		sqlproc.setProperties(papp);
+		if(sqlproc.needsConnection() && conn==null) {
+			setupConnection();
+		}
 		sqlproc.setConnection(conn);
 		sqlproc.setSchemaModel(sm);
 		//TODO: set fail on error based on (processor) properties ?
@@ -311,8 +314,6 @@ public class SQLDump {
 	
 	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
 		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
-		
-		if(conn==null) { setupConnection(); }
 		
 		String processingClasses[] = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {

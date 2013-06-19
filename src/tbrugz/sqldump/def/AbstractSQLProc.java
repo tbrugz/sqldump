@@ -37,4 +37,9 @@ public abstract class AbstractSQLProc extends AbstractFailable implements Proces
 		return null;
 	}
 	
+	@Override
+	public boolean needsConnection() {
+		return true;
+	}
+	
 }

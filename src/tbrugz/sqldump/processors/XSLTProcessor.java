@@ -45,4 +45,9 @@ public abstract class XSLTProcessor extends AbstractSQLProc {
 		transformer.transform(text, new StreamResult(out));		
 	}
 	
+	@Override
+	public boolean needsConnection() {
+		return false;
+	}
+	
 }
