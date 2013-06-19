@@ -347,6 +347,11 @@ public class SQLRun {
 		else {
 			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
 		}
+		
+		if(conn==null) {
+			throw new ProcessingException("null connection [prop prefix: '"+CONN_PROPS_PREFIX+"']");
+		}
+
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
 
 		//inits DBMSResources
