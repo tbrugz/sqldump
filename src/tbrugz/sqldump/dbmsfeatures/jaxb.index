@@ -1,5 +1,4 @@
 # package tbrugz.sqldump.dbmsfeatures
-DerbyView
 InformationSchemaRoutine
 InformationSchemaTrigger
 OracleTable
