@@ -1,4 +1,4 @@
-package tbrugz.sqldump.util;
+package tbrugz.util;
 
 //XXX: better class name is welcome
 public interface GenericDecoratorFactory<T> {
