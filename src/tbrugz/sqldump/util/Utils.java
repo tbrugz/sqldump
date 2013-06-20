@@ -432,15 +432,14 @@ public class Utils {
 		return null;
 	}
 	
-	public static void deleteDirRegularContents(String s) {
-		deleteDirRegularContents(s, 0);
+	public static int deleteDirRegularContents(File f) {
+		return deleteDirRegularContents(f, 0);
 	}
 	
-	static int deleteDirRegularContents(String s, int level) {
+	static int deleteDirRegularContents(File f, int level) {
 		if(level==0) {
 			log.info("deleting regular files from dir: "+s);
 		}
-		File f = new File(s);
 		File files[] = f.listFiles(new RegularFileFilter());
 		if(files==null) {
 			if(level==0) {
@@ -458,7 +457,7 @@ public class Utils {
 			}
 			else if(ff.isDirectory()) {
 				//XXXxx: deleteDirRegularContents: recurse int subdirs
-				delCount += deleteDirRegularContents(ff.getAbsolutePath(), level+1);
+				delCount += deleteDirRegularContents(ff, level+1);
 				log.debug("dir to delete: "+ff);
 				boolean deleted = ff.delete();
 				if(!deleted) { log.warn("can't delete dir: "+ff); }

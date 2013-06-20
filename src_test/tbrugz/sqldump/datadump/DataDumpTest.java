@@ -1,5 +1,6 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -70,7 +71,7 @@ public class DataDumpTest {
 	
 	@Before
 	public void beforeTest() {
-		Utils.deleteDirRegularContents(DIR_OUT);
+		Utils.deleteDirRegularContents(new File(DIR_OUT));
 	}
 	
 	@Test

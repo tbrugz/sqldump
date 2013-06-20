@@ -224,7 +224,7 @@ public class SQLDump {
 			if((count==1) && (pc instanceof SchemaModelGrabber)) {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
 				if(dirToDeleteFiles!=null) {
-					Utils.deleteDirRegularContents(dirToDeleteFiles);
+					Utils.deleteDirRegularContents(new File(dirToDeleteFiles));
 					dirToDeleteFiles = null;
 				}
 			}
