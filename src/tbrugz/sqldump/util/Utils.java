@@ -433,18 +433,20 @@ public class Utils {
 	}
 	
 	public static int deleteDirRegularContents(File f) {
-		return deleteDirRegularContents(f, 0);
+		log.debug("deleting regular files from dir: "+f.getAbsolutePath());
+		int delCount = deleteDirRegularContents(f, 0);
+		if(delCount==0) {
+			log.debug("no files deteted");
+		}
+		else {
+			log.debug(delCount+" files deteted");
+		}
+		return delCount;
 	}
 	
 	static int deleteDirRegularContents(File f, int level) {
-		if(level==0) {
-			log.info("deleting regular files from dir: "+s);
-		}
 		File files[] = f.listFiles(new RegularFileFilter());
 		if(files==null) {
-			if(level==0) {
-				log.info("no files deteted");
-			}
 			return 0;
 		}
 		int delCount = 0;
@@ -463,9 +465,6 @@ public class Utils {
 				if(!deleted) { log.warn("can't delete dir: "+ff); }
 				else { delCount++; }
 			}
-		}
-		if(level==0) {
-			log.info(delCount+" files deteted");
 		}
 		return delCount;
 	}

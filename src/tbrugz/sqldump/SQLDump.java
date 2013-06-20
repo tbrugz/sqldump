@@ -20,6 +20,7 @@ import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.jmx.SQLD;
+import tbrugz.sqldump.processors.DirectoryCleaner;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -156,6 +157,14 @@ public class SQLDump {
 			log.debug("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
 		}
 		
+		//processor: DirectoryCleaner (deleteDirContents)
+		String dirToDeleteFiles = papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
+		if(dirToDeleteFiles!=null) {
+			DirectoryCleaner delDirProc = new DirectoryCleaner();
+			delDirProc.setDirToDeleteFiles(new File(dirToDeleteFiles));
+			processors.add(delDirProc);
+		}
+		
 		//processing classes
 		if(processingClassesStr!=null) {
 			processors.addAll(getProcessComponentClasses(processingClassesStr, sm));
@@ -210,9 +219,6 @@ public class SQLDump {
 		int count = 0;
 		SchemaModel sm = null;
 		
-		//XXX change 'dirtodelete' to processor?
-		String dirToDeleteFiles = papp.getProperty(PROP_DO_DELETEREGULARFILESDIR);
-		
 		//inits DBMSFeatures if not already initted
 		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
 		log.debug("DBMSFeatures: "+feats);
@@ -223,10 +229,6 @@ public class SQLDump {
 			
 			if((count==1) && (pc instanceof SchemaModelGrabber)) {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
-				if(dirToDeleteFiles!=null) {
-					Utils.deleteDirRegularContents(new File(dirToDeleteFiles));
-					dirToDeleteFiles = null;
-				}
 			}
 			else if(pc instanceof SchemaModelDumper) {
 				doProcessDumper((SchemaModelDumper)pc, sm);
