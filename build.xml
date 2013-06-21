@@ -28,11 +28,6 @@
 	<property name="lib.junit" value="${lib.dir}/junit-4.11.jar"/>
 	<property name="lib.hamcrest" value="${lib.dir}/hamcrest-core-1.3.jar"/>
 	
-	<!--
-	<ivy:cachepath pathid="classpath.compile.ivy" conf="default"  keep="true" transitive="false" type="jar,bundle" log="download-only" useOrigin="true" />
-	<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="false" type="jar,bundle" log="download-only" useOrigin="true" />
-	-->
-	
 	<path id="classpath.compile">
 		<!--path refid="classpath.compile.ivy"/-->
 		<pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
@@ -318,6 +313,20 @@
 	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
+		<antcall target="resolve-ivy-classpath"/>
+	</target>
+	
+	<target name="resolve-ivy-classpath">
+		<ivy:cachepath pathid="classpath.compile.ivy" conf="default"  keep="true" transitive="false" type="jar,bundle" log="download-only" />
+		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="false" type="jar,bundle" log="download-only" />
+		<property name="ivy.compile.classpath" refid="classpath.compile.ivy"/>
+		<property name="ivy.test.classpath" refid="classpath.compiletest.ivy"/>
+		<echo message="ivy.compile.classpath: ${ivy.compile.classpath}"/>
+		<echo message="ivy.test.classpath: ${ivy.test.classpath}"/>
+		<propertyfile file="ivy.classpath.properties">
+			<entry key="ivy.compile.classpath" value="${ivy.compile.classpath}"/>
+			<entry key="ivy.test.classpath" value="${ivy.test.classpath}"/>
+		</propertyfile>
 	</target>
 
 	<!--target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
