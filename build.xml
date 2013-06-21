@@ -8,8 +8,8 @@
 	<property name="src.test.dir" value="src_test"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
 	
-	<property name="bin.dir"  value="bin/main"/>
-	<property name="bin.test.dir"  value="bin/test"/>
+	<property name="bin.dir" value="bin/main"/>
+	<property name="bin.test.dir" value="bin/test"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="javadoc.dir" value="dist/javadocs"/>
@@ -23,9 +23,7 @@
 	<property file="ivysettings.properties"/>
 	<property file="ivy.classpath.properties"/>
 
-	<!--property name="lib.derby" value="${lib.dir}/derby-10.9.1.0.jar"/>
-	<property name="lib.h2" value="${lib.dir}/h2-1.3.170.jar"/>
-	<property name="lib.hsqldb" value="${lib.dir}/hsqldb-2.2.8.jar"/>
+	<!--property name="lib.h2" value="${lib.dir}/h2-1.3.170.jar"/>
 	<property name="lib.junit" value="${lib.dir}/junit-4.11.jar"/>
 	<property name="lib.hamcrest" value="${lib.dir}/hamcrest-core-1.3.jar"/-->
 	
@@ -60,16 +58,6 @@
 		<pathelement location="${jaxb.lib}"/>
 	</path>
 
-	<!--path id="classpath.run.derby">
-		<path refid="classpath.run"/>
-		<pathelement location="${lib.derby}"/>
-	</path>
-
-	<path id="classpath.run.hsqldb">
-		<path refid="classpath.run"/>
-		<pathelement location="${lib.hsqldb}"/>
-	</path-->
-
 	<path id="classpath.run.h2">
 		<path refid="classpath.run"/>
 		<!--pathelement location="${lib.h2}"/-->
@@ -77,8 +65,8 @@
 	
 	<path id="classpath.test">
 		<path refid="classpath.run.h2"/>
-		<!--pathelement location="${bin.test.dir}"/>
-		<pathelement location="${lib.derby}"/>
+		<pathelement location="${bin.test.dir}"/>
+		<!--pathelement location="${lib.derby}"/>
 		<pathelement location="${lib.hsqldb}"/>
 		<pathelement location="${lib.junit}"/>
 		<pathelement location="${lib.hamcrest}"/>
@@ -150,51 +138,6 @@
 		<echo message="run finished" />
 	</target>
 	
-	<!-- full test: 
-		1- dump jaxb model
-		2- load into different databases (sqlrun)
-		3- dump from all databases
-		4- compare with original (sqldiff) --> 
-	<!--
-		-> moved to RoundTripTest unit test class
-		target name="test-roundtrip1" depends="compile">
-		<echo message="roundtrip1: phase 1: dump [jaxb]" />
-		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}">
-			<arg value="-propfile=test/r1-sqldump-jaxb-test.properties"/>
-		</java>
-
-		<echo message="roundtrip1: phase 2: run [derby]" />
-		<java classpathref="classpath.run.derby" classname="${sqldump.sqlrun.mainclass}" fork="true">
-			<arg value="-propfile=test/r2-sqlrun-derby-test.properties"/>
-		</java>
-		<echo message="roundtrip1: phase 2: run [hsqldb]" />
-		<java classpathref="classpath.run.hsqldb" classname="${sqldump.sqlrun.mainclass}" fork="true">
-			<arg value="-propfile=test/r2-sqlrun-hsqldb-test.properties"/>
-		</java>
-
-		<echo message="roundtrip1: phase 3: dump [derby]" />
-		<java classpathref="classpath.run.derby" classname="${sqldump.mainclass}" fork="true">
-			<arg value="-propfile=test/r3-sqldump-derby-test.properties"/>
-		</java>
-		<echo message="roundtrip1: phase 3: dump [hsqldb]" />
-		<java classpathref="classpath.run.hsqldb" classname="${sqldump.mainclass}" fork="true">
-			<arg value="-propfile=test/r3-sqldump-hsqldb-test.properties"/>
-		</java>
-
-		<echo message="roundtrip1: phase 4: diff [jaxb/jaxb-derby]" />
-		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
-			<arg value="-propfile=test/r4-sqldiff-test1.properties"/>
-		</java>
-		<echo message="roundtrip1: phase 4: diff [jaxb/jaxb-hsqldb]" />
-		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
-			<arg value="-propfile=test/r4-sqldiff-test2.properties"/>
-		</java>
-		<echo message="roundtrip1: phase 4: diff [jaxb-derby/jaxb-hsqldb]" />
-		<java classpathref="classpath.run.jaxb" classname="${sqldump.sqldiff.mainclass}">
-			<arg value="-propfile=test/r4-sqldiff-test3.properties"/>
-		</java>
-	</target-->
-	
 	<target name="test" depends="compile" description="run junit tests">
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
 			<classpath refid="classpath.test" />
@@ -260,7 +203,7 @@
 	
 	<target name="dist" depends="jar,jar-source" description="builds jars"/>
 	
-	<target name="all" depends="clean,javadoc,publish" description="clean, build and publish project"/>
+	<target name="all" depends="clean,javadoc,test,publish" description="clean, build, test and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
@@ -277,28 +220,6 @@
 	</target>
 	
 	<!-- ========= dependencies tasks ========== -->
-	<!-- use: resolve-ivy OR resolve-get -->
-	<!-- hint: ant -autoproxy -lib <ivy-dir> resolve -->
-	<!-- XXX: install ivy? see: ivy/example/go-ivy -->
-	
-	<!--target name="check-kmlutils" description="checks existence of kmlutils.jar">
-		<available file="${lib.dir}/kmlutils.jar" property="kmlutils.present"/>
-	</target>
-
-	<target name="resolve-kmlutils" depends="check-kmlutils" description="retrieve kmlutils dependency" unless="kmlutils.present">
-		<get dest="${lib.dir}/kmlutils.jar" src="http://cdn.bitbucket.org/tbrugz/kmlutils/downloads/svg2kml.jar" verbose="true"/>
-	</target-->
-
-	<!--target name="check-mondrianschema2graphml" description="checks existence of mondrianschema2graphml.jar">
-		<available file="${lib.dir}/mondrianschema2graphml.jar" property="mondrianschema2graphml.present"/>
-	</target>
-	
-	<target name="resolve-mondrianschema2graphml" depends="check-mondrianschema2graphml" description="retrieve kmlutils dependency" unless="mondrianschema2graphml.present">
-		<get dest="${lib.dir}" src="http://cdn.bitbucket.org/tbrugz/mondrianschema2graphml/downloads/mondrianschema2graphml.jar" verbose="true"/>
-	</target>
-	
-	<target name="resolve-base" depends="resolve-mondrianschema2graphml">
-	</target-->
 
 	<target name="config-ivy-file" if="ivy.settings.file">
 		<echo message="setting ivy file: ${ivy.settings.file}"/>
@@ -319,28 +240,19 @@
 	</target>
 	
 	<target name="resolve-ivy-classpath">
-		<ivy:cachepath pathid="classpath.compile.ivy" conf="default"  keep="true" transitive="false" type="jar,bundle" log="download-only" />
-		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="false" type="jar,bundle" log="download-only" />
-		<property name="ivy.compile.classpath" refid="classpath.compile.ivy"/>
-		<property name="ivy.test.classpath" refid="classpath.compiletest.ivy"/>
-		<echo message="ivy.compile.classpath: ${ivy.compile.classpath}"/>
-		<echo message="ivy.test.classpath: ${ivy.test.classpath}"/>
-		<delete file="ivy.classpath.properties"/>
+		<ivy:cachepath pathid="classpath.compile.ivy" conf="default" keep="true" transitive="true" type="jar,bundle" log="download-only" />
+		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="true" type="jar,bundle" log="download-only" />
+		<property name="new-ivy.compile.classpath" refid="classpath.compile.ivy"/>
+		<property name="new-ivy.test.classpath" refid="classpath.compiletest.ivy"/>
+		<echo message="ivy.compile.classpath: ${new-ivy.compile.classpath}"/>
+		<echo message="ivy.test.classpath: ${new-ivy.test.classpath}"/>
+		<!--delete file="ivy.classpath.properties"/-->
 		<propertyfile file="ivy.classpath.properties">
-			<entry key="ivy.compile.classpath" value="${ivy.compile.classpath}"/>
-			<entry key="ivy.test.classpath" value="${ivy.test.classpath}"/>
+			<entry key="ivy.compile.classpath" value="${new-ivy.compile.classpath}"/>
+			<entry key="ivy.test.classpath" value="${new-ivy.test.classpath}"/>
 		</propertyfile>
 	</target>
 
-	<!--target name="resolve-get" description="retrieve dependencies with 'get'" depends="resolve-base">
-		<get dest="${lib.dir}">
-			<url url="http://repo1.maven.org/maven2/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar"/>
-			<url url="http://repo1.maven.org/maven2/log4j/log4j/1.2.16/log4j-1.2.16.jar"/>
-		</get>
-		<!- - markdownj: markdown testing - ->
-		<get dest="${lib.dir}/markdownj-1.0.2b4-0.3.0.jar" src="http://code.google.com/p/markdownj/downloads/detail?name=markdownj-1.0.2b4-0.3.0.jar&amp;can=2&amp;q=" verbose="true"/>
-	</target-->
-	
 	<target name="report-ivy" depends="resolve">
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
