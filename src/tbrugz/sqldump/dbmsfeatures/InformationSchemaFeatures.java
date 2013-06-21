@@ -310,6 +310,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	//order by "column_position"? see grabDBUniqueConstraints()
+	//XXX use key_column_usage? see http://www.postgresql.org/docs/9.1/static/infoschema-key-column-usage.html
 	String grabDBUniqueConstraintsQuery(String schemaPattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "

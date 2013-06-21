@@ -49,8 +49,12 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 
 	@Override
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
-		log.warn("grabDBUniqueConstraints: not implemented");
+	String grabDBUniqueConstraintsQuery(String schemaPattern) {
+		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
+				+"from information_schema.table_constraints tc, information_schema.key_column_usage kcu "
+				+"where tc.constraint_name = kcu.constraint_name "
+				+"and tc.constraint_schema = '"+schemaPattern+"' "
+				+"and v_key_is_main = 0 "
+				+"order by tc.table_name, tc.constraint_name, ordinal_position ";
 	}
 }
