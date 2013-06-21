@@ -21,6 +21,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.processors.DirectoryCleaner;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -45,6 +46,7 @@ public class SQLDiff {
 	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
+	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -90,6 +92,14 @@ public class SQLDiff {
 		log.info("diffing...");
 		diff = SchemaDiff.diff(fromSM, toSM);
 		
+		}
+		
+		//delete files from dir...
+		String dirToDeleteFiles = prop.getProperty(PROP_DELETEREGULARFILESDIR);
+		if(dirToDeleteFiles!=null) {
+			DirectoryCleaner dc = new DirectoryCleaner();
+			dc.setDirToDeleteFiles(new File(dirToDeleteFiles));
+			dc.process();
 		}
 
 		//dump diff

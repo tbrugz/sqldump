@@ -56,7 +56,7 @@ public class SQLDump {
 	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";  //.(pre)processors?
 	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
 
-	static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
+	public static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
