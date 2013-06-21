@@ -25,7 +25,7 @@ import tbrugz.sqldump.def.DefaultDBMSFeatures;
 import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
-	private static Log log = LogFactory.getLog(InformationSchemaFeatures.class);
+	private static final Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;
 	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");
@@ -86,7 +86,15 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				v.query = v.query.substring(0, v.query.length()-1);
 			}*/
 			v.setSchemaName( schemaPattern );
-			v.checkOption = View.CheckOptionType.valueOf(rs.getString(5)); //"YES".equalsIgnoreCase(rs.getString(5));
+			String checkOption = rs.getString(5);
+			if(checkOption!=null) {
+				try {
+					v.checkOption = View.CheckOptionType.valueOf(checkOption); //"YES".equalsIgnoreCase(rs.getString(5));
+				}
+				catch (Exception e) {
+					log.warn("unknown check option: "+checkOption+" [view '"+v.getName()+"']");
+				}
+			}
 			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));
 			model.getViews().add(v);
 			count++;
