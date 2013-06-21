@@ -19,6 +19,7 @@
 		<!-- mondrian deps -->
 		<dependency org="org.olap4j" name="olap4j" rev="1.1.0"/> <!-- XXX conf="default->default" ? -->
 		<dependency org="pentaho" name="mondrian" rev="3.5.8" conf="test->default"/>
+		<dependency org="eigenbase" name="eigenbase-xom" rev="1.3.1" conf="test->default"/>
 
 		<!-- optional deps -->
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>
