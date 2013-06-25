@@ -20,6 +20,9 @@ public class InsertIntoDataDump extends DumpSyntax {
 	//XXX: option/prop to include or not columns that are cursor expressions (ResultSets) as null
 	static final String PROP_INSERTINTO_HEADER = "sqldump.datadump.insertinto.header";
 	static final String PROP_INSERTINTO_FOOTER = "sqldump.datadump.insertinto.footer";
+	static final String PROP_INSERTINTO_COMPACT = "sqldump.datadump.insertinto.compactmode";
+	
+	static final String COMPACTMODE_IDENT = "  ";
 
 	protected String tableName;
 	protected int numCol;
@@ -30,6 +33,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	
 	boolean doColumnNamesDump = true;
 	boolean doDumpCursors = false;
+	boolean dumpCompactMode = false;
 	String header;
 	String footer;
 	
@@ -40,6 +44,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
+		dumpCompactMode = Utils.getPropBool(prop, PROP_INSERTINTO_COMPACT, dumpCompactMode);
 		//XXX replace [schemaname], [tablename] in header & footer
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
@@ -72,11 +77,20 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, doDumpCursors);
-		out("insert into "+tableName+
-			(doColumnNamesDump?" "+colNames:"")+
-			" values ("+
-			DataDumpUtils.join4sql(vals, dateFormatter, ", ")+
-			");", fos);
+		String valsStr = DataDumpUtils.join4sql(vals, dateFormatter, ", ");
+		if(dumpCompactMode) {
+			out((count>0?COMPACTMODE_IDENT+",":COMPACTMODE_IDENT+" ")+
+				"("+
+				valsStr+
+				")", fos);
+		}
+		else {
+			out("insert into "+tableName+
+				(doColumnNamesDump?" "+colNames:"")+
+				" values ("+
+				valsStr+
+				");", fos);
+		}
 		
 		if(doDumpCursors) {
 			for(int i=0;i<lsColNames.size();i++) {
@@ -100,10 +114,18 @@ public class InsertIntoDataDump extends DumpSyntax {
 		if(header!=null) {
 			out(header, fos);
 		}
+		if(dumpCompactMode) {
+			out("insert into "+tableName+
+				(doColumnNamesDump?" "+colNames:"")+
+				" values", fos);
+		}
 	}
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
+		if(dumpCompactMode) {
+			out(COMPACTMODE_IDENT+";", fos);
+		}
 		if(footer!=null) {
 			out(footer, fos);
 		}
