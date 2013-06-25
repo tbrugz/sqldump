@@ -45,6 +45,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
+import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -437,7 +438,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			try {
 
-			//header
+			//headers
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
 				ds.initDump(tableOrQueryName, keyColumns, md);
@@ -523,8 +524,12 @@ public class DataDump extends AbstractSQLProc {
 							}
 							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
-							boolean newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM, writeAppend);
-							Writer w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
+							boolean newFilename = count==0;
+							Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
+							if(w==null) {
+								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM, writeAppend);
+								w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
+							}
 							long countInFilename = countByPatternFinalFilename.get(finalFilename);
 							
 							//XXX: close writers? there will be problems if query is not ordered by columns used by [partitionby]
@@ -593,7 +598,7 @@ public class DataDump extends AbstractSQLProc {
 				(elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
 				);
 
-			//footer
+			//footers
 			Set<String> filenames = writersOpened.keySet();
 			for(String filename: filenames) {
 				//for(String partitionByPattern: partitionByPatterns) {
@@ -602,12 +607,19 @@ public class DataDump extends AbstractSQLProc {
 			}
 			writersOpened.clear();
 			writersSyntaxes.clear();
-			//writer-independent footers
+			
+			//other footers
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
 				if(doSyntaxDumpList.get(i)) {
+					//writer-independent footers
 					if(ds.isWriterIndependent()) {
 						ds.dumpFooter(count, null);
+					}
+					//static writers footers
+					Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
+					if(w!=null) {
+						ds.dumpFooter(count, w);
 					}
 				}
 			}

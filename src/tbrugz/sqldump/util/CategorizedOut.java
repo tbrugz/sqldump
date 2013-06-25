@@ -228,5 +228,18 @@ public class CategorizedOut {
 			w.close();
 		}
 	}
+
+	public static Writer getStaticWriter(String outPattern) throws IOException {
+		if(STDOUT.equals(outPattern)) {
+			return pwSTDOUT;
+		}
+		if(STDERR.equals(outPattern)) {
+			return pwSTDERR;
+		}
+		if(NULL_WRITER.equals(outPattern)) {
+			return nullWriter;
+		}
+		return null;
+	}
 	
 }

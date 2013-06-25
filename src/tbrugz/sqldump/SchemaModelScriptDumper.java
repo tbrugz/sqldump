@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,6 +41,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
+import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
@@ -394,6 +396,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			categorizedOut(s.getSchemaName(), s.getName(), DBObjectType.SEQUENCE, s.getDefinition(dumpWithSchemaName)+";\n");
 		}
 
+		//XXX: log: 'n' objects dumped...
 		log.info("...schema dumped");
 		
 		}
@@ -477,6 +480,15 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			throw new RuntimeException("output file patterns (e.g. 'sqldump.mainoutputfilepattern') not defined, aborting");
 		}
 		
+		//if 'static' writer
+		Writer w = CategorizedOut.getStaticWriter(outFilePattern);
+		if(w!=null) {
+			w.write(message);
+			w.write("\n");
+			w.flush();
+			return;
+		}
+		
 		//objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
 		if(schemaName==null) { schemaName = ""; };
 		schemaName = Matcher.quoteReplacement(schemaName);
@@ -505,7 +517,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		File f = new File(outFile);
 		//String dirStr = f.getParent();
-		File dir = new File(f.getParent());
+		File dir = f.getParentFile();
+		if(dir!=null) {
 		if(!dir.exists()) {
 			dir.mkdirs();
 		}
@@ -513,6 +526,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(!dir.isDirectory()) {
 				throw new IOException(dir+" already exists and is not a directory");
 			}
+		}
 		}
 		FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
 		//XXX: remove '\n'?
