@@ -24,7 +24,7 @@ public class InformationSchemaTrigger extends Trigger {
 		if(actionStatement!=null && PATTERN_CREATE_TRIGGER.matcher(actionStatement).find()) {
 			return actionStatement;
 		}
-			
+		
 		return "create trigger "+getName()
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
 				+"\n  on "+tableName

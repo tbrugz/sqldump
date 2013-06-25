@@ -79,7 +79,8 @@ Dependencies
 	[Drizzle](http://www.drizzle.org/content/download), 
 	[MonetDB](http://dev.monetdb.org/downloads/Java/Latest/),
 	[Firebird](http://jaybirdwiki.firebirdsql.org/jaybird/doku.php?id=download:start),
-	[Virtuoso](http://docs.openlinksw.com/virtuoso/VirtuosoDriverJDBC.html)
+	[Virtuoso](http://docs.openlinksw.com/virtuoso/VirtuosoDriverJDBC.html),
+	[jTDS/SQLServer](http://jtds.sourceforge.net/)
 	)
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
 - [olap4j](http://www.olap4j.org/) & [mondrian](http://mondrian.pentaho.com/) - optional, for Mondrian Schema output, validation & data dump

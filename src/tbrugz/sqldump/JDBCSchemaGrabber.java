@@ -757,7 +757,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					ep.position = rs.getInt("SEQUENCE"); //XXX: oracle-only?
 				}
 				catch(SQLException e2) {
-					log.warn("unknown column name for procedure parameter ordinal position: "+e2);
+					log.warn("column name for procedure parameter ordinal position not found: "+e);
+					log.debug("grabProceduresColumns: columns avaiable: "+SQLUtils.getColumnNames(rs.getMetaData()));
 				}
 			}
 			
