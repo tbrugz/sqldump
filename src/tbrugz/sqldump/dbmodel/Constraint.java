@@ -7,13 +7,14 @@ import java.util.List;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class Constraint extends DBIdentifiable implements Serializable {
+public class Constraint extends AbstractConstraint implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static enum ConstraintType {
 		PK,     //CONSTRAINT pk1 PRIMARY KEY ("MANAGER_NAME", "EMAIL");
 		UNIQUE, //CONSTRAINT unique1 UNIQUE ("MANAGER_NAME", "EMAIL");
-		CHECK;  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5); 
+		CHECK;  //CONSTRAINT check1 CHECK (char_length("EMAIL") > 5);
+		//XXX: new class for check constraint?
 		
 		public String fullName() {
 			switch (this) {

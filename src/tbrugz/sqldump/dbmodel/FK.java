@@ -10,7 +10,7 @@ import tbrugz.sqldump.util.Utils;
 
 //XXX~: extends DBObject?
 //XXX: should be constraint?
-public class FK extends DBIdentifiable implements Serializable {
+public class FK extends AbstractConstraint implements Serializable {
 	
 	public static enum UpdateRule {
 		NO_ACTION,
