@@ -14,3 +14,7 @@ This folder contains some usage examples of SQLDump
 
 - `rs2graphml/sqldump-oracle-deps.properties` - usage of ResultSet2GraphML to
   generate a graph of database object's dependencies on an Oracle Database
+
+- `mysqldump-like` - configuration that makes sqldump behave like mysqldump.
+  Writes schema & data to <STDOUT>.
+
