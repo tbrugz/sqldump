@@ -54,7 +54,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SchemaModelScriptDumper extends AbstractFailable implements SchemaModelDumper {
 	
-	static Log log = LogFactory.getLog(SchemaModelScriptDumper.class);
+	private static final Log log = LogFactory.getLog(SchemaModelScriptDumper.class);
 
 	boolean dumpWithSchemaName = false;
 	boolean doSchemaDumpPKs = true;

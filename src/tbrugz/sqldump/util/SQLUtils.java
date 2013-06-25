@@ -474,7 +474,7 @@ public class SQLUtils {
 		List<String> ret = null;
 		ResultSet rsSchemas = dbmd.getSchemas();
 		ret = getColumnValues(rsSchemas, "table_schem");
-		if(ret.size()==0) {
+		if(ret.size()==0) { //XXX: remove?
 			log.info("no schemas found, getting schemas from catalog names...");
 			ResultSet rsCatalogs = dbmd.getCatalogs();
 			ret = getColumnValues(rsCatalogs, "table_cat");
@@ -483,6 +483,14 @@ public class SQLUtils {
 			}
 		}
 		log.debug("schemas: "+ret);
+		return ret;
+	}
+
+	public static List<String> getCatalogNames(DatabaseMetaData dbmd) throws SQLException {
+		List<String> ret = null;
+		ResultSet rsCatalogs = dbmd.getCatalogs();
+		ret = getColumnValues(rsCatalogs, "table_cat");
+		//log.debug("catalogs: "+ret);
 		return ret;
 	}
 	

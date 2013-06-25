@@ -2,6 +2,9 @@ package tbrugz.sqldump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -9,6 +12,8 @@ import tbrugz.sqldump.def.ProcessingException;
 
 public class FKScriptDumper extends SchemaModelScriptDumper {
 
+	static final Log log = LogFactory.getLog(FKScriptDumper.class);
+	
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {

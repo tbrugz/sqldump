@@ -89,7 +89,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static String[] DEFAULT_SCHEMA_NAMES = {
 		"public", //postgresql, h2, hsqldb
 		"APP",    //derby
-		"",       //"schema-less" databases
+		"",       //'schema-less' databases
 	};
 	
 	Connection conn;
@@ -228,6 +228,14 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
 		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
+		if(log.isInfoEnabled()) {
+			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
+			if(catalogs!=null && catalogs.size()>0) {
+				log.info("catalogs: "+catalogs);
+			}
+			//log.debug("schemas: "+SQLUtils.getSchemaNames(dbmd));
+			//XXX: show current catalog/schema? maybe not: https://forums.oracle.com/thread/1097687
+		}
 		
 		SchemaModel schemaModel = new SchemaModel();
 		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
