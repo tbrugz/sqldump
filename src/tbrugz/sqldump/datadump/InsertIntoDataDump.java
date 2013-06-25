@@ -8,7 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -21,6 +24,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final String PROP_INSERTINTO_HEADER = "sqldump.datadump.insertinto.header";
 	static final String PROP_INSERTINTO_FOOTER = "sqldump.datadump.insertinto.footer";
 	static final String PROP_INSERTINTO_COMPACT = "sqldump.datadump.insertinto.compactmode";
+	
+	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
 	static final String COMPACTMODE_IDENT = "  ";
 
@@ -45,7 +50,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
 		dumpCompactMode = Utils.getPropBool(prop, PROP_INSERTINTO_COMPACT, dumpCompactMode);
-		//XXX replace [schemaname], [tablename] in header & footer
+		//XXX replace [schemaname] in header & footer ?
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
 		this.prop = prop;
@@ -112,7 +117,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		if(header!=null) {
-			out(header, fos);
+			String thisHeader = header.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(tableName));
+			out(thisHeader, fos);
 		}
 		if(dumpCompactMode) {
 			out("insert into "+tableName+
@@ -127,7 +133,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 			out(COMPACTMODE_IDENT+";", fos);
 		}
 		if(footer!=null) {
-			out(footer, fos);
+			String thisFooter = footer.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(tableName));
+			out(thisFooter, fos);
 		}
 		//always add (empty) footer?
 		/*
