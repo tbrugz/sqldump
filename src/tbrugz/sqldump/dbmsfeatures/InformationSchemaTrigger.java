@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.util.Utils;
@@ -16,8 +17,14 @@ public class InformationSchemaTrigger extends Trigger {
 	@Deprecated
 	static boolean addSplitter = true; //XXX: should be static? or belongs to model?
 	
+	static final Pattern PATTERN_CREATE_TRIGGER = Pattern.compile("\\s*create\\s+trigger\\s+", Pattern.CASE_INSENSITIVE);
+	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
+		if(actionStatement!=null && PATTERN_CREATE_TRIGGER.matcher(actionStatement).find()) {
+			return actionStatement;
+		}
+			
 		return "create trigger "+getName()
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
 				+"\n  on "+tableName
