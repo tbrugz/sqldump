@@ -40,6 +40,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
+		//XXX replace [schemaname], [tablename] in header & footer
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
 		this.prop = prop;
@@ -71,8 +72,9 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, doDumpCursors);
-		out("insert into "+tableName+" "+
-			colNames+" values ("+
+		out("insert into "+tableName+
+			(doColumnNamesDump?" "+colNames:"")+
+			" values ("+
 			DataDumpUtils.join4sql(vals, dateFormatter, ", ")+
 			");", fos);
 		
