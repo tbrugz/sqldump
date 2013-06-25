@@ -150,7 +150,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) {
+	public void dumpFooter(long count, Writer fos) throws IOException {
 		try {
 			//dumpFooterInternal(count);
 			
