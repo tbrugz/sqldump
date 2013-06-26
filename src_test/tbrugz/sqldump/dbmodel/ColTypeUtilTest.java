@@ -39,8 +39,8 @@ public class ColTypeUtilTest {
 		assertIt("integer", false);
 		assertIt("bit", true);
 		
-		//XXX not ansi-sql92 compatible (yet?)
-		assertIt("real", true);
+		//XXXxx ansi-sql92 compatible
+		assertIt("real", false);
 	}
 
 	@Test
