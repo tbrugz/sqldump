@@ -42,9 +42,9 @@ import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -225,7 +225,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		try {
 		
 		if(outputConnPropPrefix!=null) {
-			outputConn = SQLUtils.ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
+			outputConn = ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
 		}
 		
 		log.info("dumping schema..."

@@ -22,7 +22,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
-import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.ConnectionUtil;
 
 public class SQLDiffTest {
 	
@@ -63,7 +63,7 @@ public class SQLDiffTest {
 		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
 		schemaJdbcGrabber.setProperties(jdbcPropNew);
 		
-		conn = SQLUtils.ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
+		conn = ConnectionUtil.initDBConnection("sqldump", jdbcPropNew);
 		
 		SQLRunAndDumpTest.setupModel(conn);
 		

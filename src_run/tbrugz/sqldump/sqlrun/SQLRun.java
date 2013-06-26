@@ -30,9 +30,9 @@ import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.util.CLIProcessor;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -345,14 +345,14 @@ public class SQLRun {
 			conn = c;
 		}
 		else {
-			conn = SQLUtils.ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
+			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
 		}
 		
 		if(conn==null) {
 			throw new ProcessingException("null connection [prop prefix: '"+CONN_PROPS_PREFIX+"']");
 		}
 
-		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
+		ConnectionUtil.showDBInfo(conn.getMetaData());
 
 		//inits DBMSResources
 		DBMSResources.instance().setup(papp);

@@ -15,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -63,7 +64,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		
 		//create connection
 		try {
-			conn = SQLUtils.ConnectionUtil.initDBConnection(connPropPrefix, prop, autoCommit);
+			conn = ConnectionUtil.initDBConnection(connPropPrefix, prop, autoCommit);
 		} catch (Exception e) {
 			log.warn("error: "+e);
 			throw new RuntimeException(e);

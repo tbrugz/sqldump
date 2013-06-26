@@ -30,7 +30,7 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.sqlrun.SQLStmtScanner;
 import tbrugz.sqldump.util.CategorizedOut;
-import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -233,10 +233,10 @@ public class DataDiff extends AbstractFailable {
 		}
 
 		if(sourceConnCreated) {
-			SQLUtils.ConnectionUtil.closeConnection(sourceConn);
+			ConnectionUtil.closeConnection(sourceConn);
 		}
 		if(targetConnCreated) {
-			SQLUtils.ConnectionUtil.closeConnection(targetConn);
+			ConnectionUtil.closeConnection(targetConn);
 		}
 	}
 	
@@ -249,14 +249,14 @@ public class DataDiff extends AbstractFailable {
 	Connection getConn(String grabberId) {
 		try {
 			if(mustImportData(grabberId)) {
-				Connection conn =  SQLUtils.ConnectionUtil.initDBConnection("", getTempDBConnProperties(grabberId));
+				Connection conn =  ConnectionUtil.initDBConnection("", getTempDBConnProperties(grabberId));
 				log.info("new connection [grabberId="+grabberId+"]: "+conn);
 				return conn;
 			}
 			else {
 				String propsPrefix = "sqldiff."+grabberId;
-				if(SQLUtils.ConnectionUtil.isBasePropertiesDefined(propsPrefix, prop)) {
-					Connection conn = SQLUtils.ConnectionUtil.initDBConnection(propsPrefix, prop);
+				if(ConnectionUtil.isBasePropertiesDefined(propsPrefix, prop)) {
+					Connection conn = ConnectionUtil.initDBConnection(propsPrefix, prop);
 					log.info("database connection created [grabberId="+grabberId+"]");
 					return conn;
 				}

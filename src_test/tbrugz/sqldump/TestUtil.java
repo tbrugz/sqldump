@@ -10,15 +10,15 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
-import tbrugz.sqldump.util.SQLUtils;
 
 public class TestUtil {
 
 	public static final String[] NULL_PARAMS = {};		
 
 	public static Connection getConn(Properties prop, String prefix) throws ClassNotFoundException, SQLException, NamingException {
-		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(prefix, prop);
+		Connection conn = ConnectionUtil.initDBConnection(prefix, prop);
 		DBMSResources.instance().setup(prop);
 		DBMSResources.instance().updateMetaData(conn.getMetaData());
 		return conn;

@@ -24,9 +24,9 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.processors.DirectoryCleaner;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -181,7 +181,7 @@ public class SQLDiff {
 		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
 		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
 		if(schemaGrabber.needsConnection()) {
-			Connection conn = SQLUtils.ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
+			Connection conn = ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
 			schemaGrabber.setConnection(conn);
 		}
 		schemaGrabber.setProperties(prop);

@@ -31,6 +31,7 @@ import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -227,7 +228,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
-		SQLUtils.ConnectionUtil.showDBInfo(conn.getMetaData());
+		ConnectionUtil.showDBInfo(conn.getMetaData());
 		if(log.isInfoEnabled()) {
 			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
 			if(catalogs!=null && catalogs.size()>0) {
@@ -243,7 +244,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
 			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
-			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + SQLUtils.ConnectionUtil.SUFFIX_USER));
+			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
 			if(schemaPattern!=null) { equalsUsername = true; }
 			

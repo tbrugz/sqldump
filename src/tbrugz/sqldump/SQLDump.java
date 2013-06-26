@@ -22,9 +22,9 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.jmx.SQLD;
 import tbrugz.sqldump.processors.DirectoryCleaner;
 import tbrugz.sqldump.util.CLIProcessor;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -83,7 +83,7 @@ public class SQLDump {
 
 	void end(boolean closeConnection) throws SQLException {
 		if(closeConnection) {
-			SQLUtils.ConnectionUtil.closeConnection(conn);
+			ConnectionUtil.closeConnection(conn);
 		}
 	}
 	
@@ -303,7 +303,7 @@ public class SQLDump {
 		else {
 			log.info("connection properties prefix: '"+connPrefix+"'");
 		}
-		conn = SQLUtils.ConnectionUtil.initDBConnection(connPrefix, papp);
+		conn = ConnectionUtil.initDBConnection(connPrefix, papp);
 		if(conn==null) {
 			if(failonerror) {
 				throw new ProcessingException("can't init connection [prefix="+connPrefix+"]");

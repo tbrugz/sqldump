@@ -14,7 +14,7 @@ import org.olap4j.metadata.NamedList;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.def.AbstractSQLProc;
-import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -51,11 +51,11 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 			connPrefix = SQLDump.CONN_PROPS_PREFIX;
 		}
 
-		dataSource = prop.getProperty(connPrefix+SQLUtils.ConnectionUtil.SUFFIX_CONNECTION_DATASOURCE);
-		driverClass = prop.getProperty(connPrefix+SQLUtils.ConnectionUtil.SUFFIX_DRIVERCLASS);
-		url = prop.getProperty(connPrefix+SQLUtils.ConnectionUtil.SUFFIX_URL);
-		username = prop.getProperty(connPrefix+SQLUtils.ConnectionUtil.SUFFIX_USER);
-		password = prop.getProperty(connPrefix+SQLUtils.ConnectionUtil.SUFFIX_PASSWD);
+		dataSource = prop.getProperty(connPrefix+ConnectionUtil.SUFFIX_CONNECTION_DATASOURCE);
+		driverClass = prop.getProperty(connPrefix+ConnectionUtil.SUFFIX_DRIVERCLASS);
+		url = prop.getProperty(connPrefix+ConnectionUtil.SUFFIX_URL);
+		username = prop.getProperty(connPrefix+ConnectionUtil.SUFFIX_USER);
+		password = prop.getProperty(connPrefix+ConnectionUtil.SUFFIX_PASSWD);
 		
 		schemaFile = prop.getProperty(PROP_MONDRIAN_VALIDATOR_SCHEMAFILE);
 		if(schemaFile==null) {
