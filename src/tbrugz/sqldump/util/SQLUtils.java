@@ -251,9 +251,11 @@ public class SQLUtils {
 		return getRowObjectListFromRS(rs, colTypes, numCol, false);
 	}
 	
-	static String errorGettingValueValue = "###";
-	//static int errorGettingValueWarnCount = 0;
-	//static int errorGettingValueWarnMaxCount = 20;
+	//static String errorGettingValueValue = "###";
+	static final String errorGettingValueValue = null;
+	static int errorGettingValueWarnCount = 0;
+	static final int errorGettingValueWarnMaxCount = 10;
+	
 	static boolean is1stRow = true;
 	static Map<Class<?>, Class<?>> colTypeMapper = null;
 	
@@ -261,8 +263,8 @@ public class SQLUtils {
 		/*if(numCol>0) {
 			errorGettingValueWarnMaxCount = numCol;
 			log.info("setupForNewQuery: numCol = "+numCol);
-		}
-		errorGettingValueWarnCount = 0;*/
+		}*/
+		errorGettingValueWarnCount = 0;
 		is1stRow = true;
 	}
 
@@ -367,11 +369,13 @@ public class SQLUtils {
 			}
 			catch(SQLException e) {
 				value = errorGettingValueValue;
-				//if(errorGettingValueWarnCount<errorGettingValueWarnMaxCount) {
-				if(is1stRow) {
-					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()+"]: "+e);
+				errorGettingValueWarnCount++;
+				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {  //|| is1stRow
+					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()
+							+", count = "+errorGettingValueWarnCount
+							+(errorGettingValueWarnCount==errorGettingValueWarnMaxCount?"; max warn count ["+errorGettingValueWarnMaxCount+"] reached":"")
+							+"]: "+e);
 					log.debug("error getting value [col="+i+"]", e);
-					//errorGettingValueWarnCount++;
 				}
 			}
 			
@@ -383,6 +387,7 @@ public class SQLUtils {
 	
 	static Set<Integer> unknownSQLTypes = new HashSet<Integer>(); 
 	//TODOne: Date class type for dump?
+	//XXX: add BigDecimal (for NUMERIC & DECIMAL), TIMESTAMP (for TIMESTAMP)
 	public static Class<?> getClassFromSqlType(int type, int precision, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
