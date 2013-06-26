@@ -12,7 +12,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class ConnectionUtil {
+	
+	static final Log log = LogFactory.getLog(ConnectionUtil.class);
 	
 	//connection props
 	public static final String CONN_PROP_USER = "user";
@@ -38,7 +43,7 @@ public class ConnectionUtil {
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
 		//init database
-		SQLUtils.log.debug("initDBConnection...");
+		log.debug("initDBConnection...");
 		
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 		String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
@@ -51,23 +56,23 @@ public class ConnectionUtil {
 			conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
 		}
 		
-		if(SQLUtils.log.isDebugEnabled()) {
+		if(log.isDebugEnabled()) {
 			try {
 				Properties pclient = conn.getClientInfo();
 				if(pclient.size()==0) {
-					SQLUtils.log.debug("no Connection.getClientInfo() info avaiable");
+					log.debug("no Connection.getClientInfo() info avaiable");
 				}
 				else {
 					for(Object key: pclient.keySet()) {
-						SQLUtils.log.debug("client-info: "+key+" = "+pclient.getProperty((String)key));
+						log.debug("client-info: "+key+" = "+pclient.getProperty((String)key));
 					}
 				}
 			}
 			catch(Exception ex) {
-				SQLUtils.log.warn("exception on Connection.getClientInfo: "+ex);
+				log.warn("exception on Connection.getClientInfo: "+ex);
 			}
 			catch(LinkageError e) {
-				SQLUtils.log.warn("error on Connection.getClientInfo: "+e);
+				log.warn("error on Connection.getClientInfo: "+e);
 			}
 		}
 		
@@ -79,12 +84,12 @@ public class ConnectionUtil {
 		if(dbInitSql!=null) {
 			try {
 				int count = conn.createStatement().executeUpdate(dbInitSql);
-				SQLUtils.log.info("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
+				log.info("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
 			}
 			catch(SQLException e) {
-				SQLUtils.log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
+				log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
 				try { conn.rollback(); }
-				catch(SQLException ee) { SQLUtils.log.warn("error in rollback(): "+ee.getMessage()); }
+				catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
 			}
 		}
 		return conn;
@@ -103,11 +108,11 @@ public class ConnectionUtil {
 	
 	static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 		if(driverClass==null) {
-			SQLUtils.log.error("driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed");
+			log.error("driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed");
 			return null;
 		}
 		if(dbUrl==null) {
-			SQLUtils.log.error("db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed");
+			log.error("db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed");
 			return null;
 		}
 
@@ -115,10 +120,10 @@ public class ConnectionUtil {
 		
 		Driver driver = DriverManager.getDriver(dbUrl);
 		if(driver!=null) {
-			SQLUtils.log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
+			log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
 		}
 		else {
-			SQLUtils.log.warn("jdbc driver not found [url: "+dbUrl+"]");
+			log.warn("jdbc driver not found [url: "+dbUrl+"]");
 		} 
 		
 		Properties p = new Properties();
@@ -143,7 +148,7 @@ public class ConnectionUtil {
 		}
 
 		//use DatabaseMetaData: getUserName() & getUrl()?
-		SQLUtils.log.debug("conn: "+user+"@"+dbUrl);
+		log.debug("conn: "+user+"@"+dbUrl);
 		
 		return DriverManager.getConnection(dbUrl, p);
 	}
@@ -151,7 +156,7 @@ public class ConnectionUtil {
 	// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 	//XXX: prop for initial context lookup? like "java:/comp/env"...
 	static Connection getConnectionFromDataSource(String dataSource) throws SQLException, NamingException {
-		SQLUtils.log.debug("getting connection from datasource: "+dataSource);
+		log.debug("getting connection from datasource: "+dataSource);
 		Context initContext = new InitialContext();
 		Context envContext  = (Context) initContext.lookup("java:/comp/env");
 		DataSource datasource = (DataSource) envContext.lookup(dataSource);
@@ -160,32 +165,32 @@ public class ConnectionUtil {
 	
 	public static void closeConnection(Connection conn) {
 		if(conn!=null) {
-			SQLUtils.log.info("closing connection: "+conn);
+			log.info("closing connection: "+conn);
 			try {
 				try {
 					conn.rollback();
 				}
 				catch(Exception e) {
-					SQLUtils.log.warn("error trying to 'rollback': "+e);
+					log.warn("error trying to 'rollback': "+e);
 				}
 				conn.close();
 			} catch (SQLException e) {
-				SQLUtils.log.warn("error trying to close connection: "+e);
-				SQLUtils.log.debug("error trying to close connection [conn="+conn+"]", e);
+				log.warn("error trying to close connection: "+e);
+				log.debug("error trying to close connection [conn="+conn+"]", e);
 			}
 		}
 	}
 	
 	public static void showDBInfo(DatabaseMetaData dbmd) {
 		try {
-			SQLUtils.log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
-			SQLUtils.log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
-			SQLUtils.log.debug("jdbc version: "+dbmd.getJDBCMajorVersion()+"."+dbmd.getJDBCMinorVersion());
+			log.info("database info: "+dbmd.getDatabaseProductName()+"; "+dbmd.getDatabaseProductVersion()+" ["+dbmd.getDatabaseMajorVersion()+"."+dbmd.getDatabaseMinorVersion()+"]");
+			log.info("jdbc driver info: "+dbmd.getDriverName()+"; "+dbmd.getDriverVersion()+" ["+dbmd.getDriverMajorVersion()+"."+dbmd.getDriverMinorVersion()+"]");
+			log.debug("jdbc version: "+dbmd.getJDBCMajorVersion()+"."+dbmd.getJDBCMinorVersion());
 		} catch (Exception e) {
-			SQLUtils.log.warn("error grabbing database/jdbc driver info: "+e);
+			log.warn("error grabbing database/jdbc driver info: "+e);
 			//e.printStackTrace();
 		} catch (LinkageError e) {
-			SQLUtils.log.warn("error grabbing database/jdbc driver info: "+e);
+			log.warn("error grabbing database/jdbc driver info: "+e);
 		}
 	}
 }

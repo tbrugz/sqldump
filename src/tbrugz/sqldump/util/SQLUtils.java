@@ -25,7 +25,6 @@ import org.apache.commons.logging.LogFactory;
 public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
-	static final StringBuffer sbTmp = new StringBuffer();
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
 		return getRowFromRS(rs, numCol, table, ";");
@@ -36,7 +35,7 @@ public class SQLUtils {
 	}
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table, String delimiter, String enclosing) throws SQLException {
-		sbTmp.setLength(0);
+		StringBuffer sbTmp = new StringBuffer();
 		for(int i=1;i<=numCol;i++) {
 			String value = rs.getString(i);
 			sbTmp.append(enclosing+value+enclosing);
@@ -240,6 +239,8 @@ public class SQLUtils {
 				return String.class;
 		}
 	}
+	
+	//XXX: remove all dumpRS() ?
 	
 	public static void dumpRS(ResultSet rs) throws SQLException {
 		dumpRS(rs, rs.getMetaData(), System.out);
