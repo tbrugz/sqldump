@@ -282,7 +282,7 @@ public class DataDiff extends AbstractFailable {
 		return getImportDataPattern(grabberId)!=null;
 	}
 	
-	static final String SCEHMANAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME));
+	static final String SCHEMANAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME));
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
 	void importData(Table table, Connection conn, String grabberId) throws SQLException, FileNotFoundException {
@@ -301,7 +301,7 @@ public class DataDiff extends AbstractFailable {
 		String dataPattern = getImportDataPattern(grabberId);
 		//log.info("importing data for datadiff from: "+dataPattern);
 		String fileName = dataPattern
-				.replaceAll(SCEHMANAME_PATTERN, Matcher.quoteReplacement(table.getSchemaName()) )
+				.replaceAll(SCHEMANAME_PATTERN, Matcher.quoteReplacement(table.getSchemaName()) )
 				.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(table.getName()) );
 		File file = new File(fileName);
 		log.debug("importing data from file: "+file);

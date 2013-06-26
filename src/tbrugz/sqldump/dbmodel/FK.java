@@ -9,7 +9,6 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
 //XXX~: extends DBObject?
-//XXX: should be constraint?
 public class FK extends AbstractConstraint implements Serializable {
 	
 	public static enum UpdateRule {
@@ -186,10 +185,12 @@ public class FK extends AbstractConstraint implements Serializable {
 		return fkTableSchemaName;
 	}
 
+	//XXX: remove dumpDropStatements?
 	public String fkScriptWithAlterTable(boolean dumpDropStatements, boolean dumpWithSchemaName) {
 		String fkTableName = DBObject.getFinalName(getFkTableSchemaName(), getFkTable(), dumpWithSchemaName);
+		// mysql: the "-- " (double-dash) comment style requires the second dash to be followed by at least one whitespace or control character
 		return
-			(dumpDropStatements?"--alter table "+fkTableName+" drop constraint "+getName()+";\n":"")
+			(dumpDropStatements?"-- alter table "+fkTableName+" drop constraint "+getName()+"\n":"")
 			+"alter table "+fkTableName
 			+"\n\tadd "+fkSimpleScript("\n\t", dumpWithSchemaName)+";\n";
 	}

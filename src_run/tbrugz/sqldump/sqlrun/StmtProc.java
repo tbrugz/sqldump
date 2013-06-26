@@ -145,7 +145,6 @@ public class StmtProc extends AbstractFailable implements Executor {
 				countOk++;
 			}
 			catch(SQLException e) {
-				logStmt.warn("error executing updates [stmt = "+stmtStr+"]: "+e);
 				if(logerror==null) {
 					logerror = getErrorLogHandler(errorLogKey);
 				}
@@ -153,6 +152,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 					logerror.write(stmtStr+";\n");
 				}
 				countError++;
+				logStmt.warn("error executing updates [#ok = "+countOk+",#error = "+countError+"][stmt = "+stmtStr+"]: "+e);
 				logStmt.debug("error executing updates", e);
 				SQLUtils.xtraLogSQLException(e, log);
 				if(failonerror) { throw new ProcessingException(e); }
