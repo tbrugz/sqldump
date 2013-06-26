@@ -31,6 +31,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	static final String SUFFIX_REMOVE_TABLES_WITH_FKS = ".removetableswithfks";
 	
 	//XXX option to remove FKs that references non-existent tables?
+	//XXX option to remove FKs from/to table?
 
 	SchemaModel schemaModel;
 	List<FK> addedFKs;
@@ -134,6 +135,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 				//boolean removeFK = Utils.getPropBool(prop, prefix+".fk@"+fk.getName()+".remove", false);
 				//if(removeFK) {
 				if(fksToRemove.contains(fk.getName())) {
+					log.debug("FK removed: "+fk);
 					i.remove();
 					count++;
 				}
