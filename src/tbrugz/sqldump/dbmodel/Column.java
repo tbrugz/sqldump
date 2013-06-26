@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Properties;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,24 +23,26 @@ public class Column extends DBIdentifiable implements Serializable {
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
 		public static final String PROP_DONOTUSEPRECISION = "type.donotuseprecision";
 		
-		static Properties dbmsSpecificProps;
-		static List<String> doNotUsePrecision;
+		static final Properties dbmsSpecificProps = new ParametrizedProperties();
+		static final List<String> doNotUsePrecision = new Vector<String>();
 		
 		static {
 			init();
 		}
 		
 		static void init() {
-			dbmsSpecificProps = new ParametrizedProperties();
-			doNotUsePrecision = null;
 			try {
 				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE);
 				if(is==null) throw new IOException("resource "+Defs.DBMS_SPECIFIC_RESOURCE+" not found");
 				dbmsSpecificProps.load(is);
 				
-				doNotUsePrecision = Utils.getStringListFromProp(dbmsSpecificProps, PROP_DONOTUSEPRECISION, ",");
+				doNotUsePrecision.clear();
+				List<String> doNotUsePrecisionTypeList = Utils.getStringListFromProp(dbmsSpecificProps, PROP_DONOTUSEPRECISION, ",");
+				if(doNotUsePrecisionTypeList!=null) {
+					doNotUsePrecision.addAll(doNotUsePrecisionTypeList);
+				}
 			}
-			catch(IOException e) {
+			catch(Exception e) {
 				log.warn("Error loading typeMapping from resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 				e.printStackTrace();
 			}
