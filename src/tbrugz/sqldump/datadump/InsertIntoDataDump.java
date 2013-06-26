@@ -23,6 +23,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	//XXX: option/prop to include or not columns that are cursor expressions (ResultSets) as null
 	static final String PROP_INSERTINTO_HEADER = "sqldump.datadump.insertinto.header";
 	static final String PROP_INSERTINTO_FOOTER = "sqldump.datadump.insertinto.footer";
+	//compactmode/multiple rows: compatible with mysql, sqlserver, postgresql, ...?
+	//XXX: compactmode: maximum number of rows in one insert statement?
 	static final String PROP_INSERTINTO_COMPACT = "sqldump.datadump.insertinto.compactmode";
 	
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
