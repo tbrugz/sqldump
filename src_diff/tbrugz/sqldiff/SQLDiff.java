@@ -14,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
-import tbrugz.sqldiff.model.TableColumnDiff;
+import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -200,10 +200,10 @@ public class SQLDiff {
 		String colDiffTempStrategy = prop.getProperty(PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
 		if(colDiffTempStrategy!=null) {
 			try {
-				TableColumnDiff.useTempColumnStrategy = TableColumnDiff.TempColumnAlterStrategy.valueOf(colDiffTempStrategy.toUpperCase());
+				ColumnDiff.useTempColumnStrategy = ColumnDiff.TempColumnAlterStrategy.valueOf(colDiffTempStrategy.toUpperCase());
 			}
 			catch(IllegalArgumentException e) {
-				String message = "illegal value '"+colDiffTempStrategy+"' to prop '"+PROP_COLUMNDIFF_TEMPCOLSTRATEGY+"' [default is '"+TableColumnDiff.useTempColumnStrategy+"']";
+				String message = "illegal value '"+colDiffTempStrategy+"' to prop '"+PROP_COLUMNDIFF_TEMPCOLSTRATEGY+"' [default is '"+ColumnDiff.useTempColumnStrategy+"']";
 				log.warn(message);
 				if(failonerror) {
 					throw new ProcessingException(message, e);

@@ -45,7 +45,7 @@ public class SchemaDiff implements Diff {
 	@XmlElement(name="tableDiff")
 	final Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
 	@XmlElement(name="columnDiff")
-	final Set<TableColumnDiff> columnDiffs = new TreeSet<TableColumnDiff>();
+	final Set<ColumnDiff> columnDiffs = new TreeSet<ColumnDiff>();
 	@XmlElement(name="dbidDiff")
 	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 
@@ -93,8 +93,8 @@ public class SchemaDiff implements Diff {
 					if(dt instanceof TableDiff) {
 						added = diff.tableDiffs.add((TableDiff)dt);
 					}
-					else if(dt instanceof TableColumnDiff) {
-						added = diff.columnDiffs.add((TableColumnDiff)dt);
+					else if(dt instanceof ColumnDiff) {
+						added = diff.columnDiffs.add((ColumnDiff)dt);
 					}
 					else if(dt instanceof DBIdentifiableDiff) {
 						added = diff.dbidDiffs.add((DBIdentifiableDiff)dt);
@@ -364,7 +364,7 @@ public class SchemaDiff implements Diff {
 		for(TableDiff d: tableDiffs) {
 			inv.tableDiffs.add(d.inverse());
 		}
-		for(TableColumnDiff d: columnDiffs) {
+		for(ColumnDiff d: columnDiffs) {
 			inv.columnDiffs.add(d.inverse());
 		}
 		for(DBIdentifiableDiff d: dbidDiffs) {

@@ -70,7 +70,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				if(!equal) {
 					//alter column
 					log.debug("alter column: orig: "+cOrig+" new: "+cNew);
-					TableColumnDiff tcd = new TableColumnDiff(ChangeType.ALTER, newTable, cOrig, cNew);
+					ColumnDiff tcd = new ColumnDiff(ChangeType.ALTER, newTable, cOrig, cNew);
 					diffs.add(tcd);
 				}
 				//else {
@@ -79,14 +79,14 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			}
 			else {
 				log.debug("drop column: orig: "+cOrig);
-				TableColumnDiff tcd = new TableColumnDiff(ChangeType.DROP, origTable, cOrig, null);
+				ColumnDiff tcd = new ColumnDiff(ChangeType.DROP, origTable, cOrig, null);
 				diffs.add(tcd);
 			}
 		}
 		for(Column cNew: newTable.getColumns()) {
 			if(newColumnsThatExistsInOrigModel.contains(cNew)) { continue; }
 			log.debug("add column: new: "+cNew);
-			TableColumnDiff tcd = new TableColumnDiff(ChangeType.ADD, newTable, null, cNew);
+			ColumnDiff tcd = new ColumnDiff(ChangeType.ADD, newTable, null, cNew);
 			diffs.add(tcd);
 		}
 		

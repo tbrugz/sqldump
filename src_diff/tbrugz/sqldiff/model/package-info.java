@@ -5,7 +5,7 @@
  */
 @XmlJavaTypeAdapters({ 
 	@XmlJavaTypeAdapter(value = DBIdentifiableDiffAdapter.class, type = DBIdentifiableDiff.class),
-	@XmlJavaTypeAdapter(value = TableColumnDiffAdapter.class, type = TableColumnDiff.class),
+	@XmlJavaTypeAdapter(value = ColumnDiffAdapter.class, type = ColumnDiff.class),
 	@XmlJavaTypeAdapter(value = TableDiffAdapter.class, type = TableDiff.class)
 })
 package tbrugz.sqldiff.model;

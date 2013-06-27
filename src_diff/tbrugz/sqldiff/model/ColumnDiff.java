@@ -11,10 +11,9 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 
-//XXX: rename to ColumnDiff?
 //@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
-public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
-	static final Log log = LogFactory.getLog(TableColumnDiff.class);
+public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
+	static final Log log = LogFactory.getLog(ColumnDiff.class);
 	
 	public enum TempColumnAlterStrategy {
 		//ALWAYS > TYPESDIFFER > NEWPRECISIONSMALLER > NEVER
@@ -33,7 +32,7 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	static DBMSFeatures features;
 	public static TempColumnAlterStrategy useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 
-	public TableColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
+	public ColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
 		this.type = changeType;
 		this.table = table;
 		this.column = newColumn;
@@ -107,8 +106,8 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	@Override
 	public boolean equals(Object obj) {
 		if(super.equals(obj)) {
-			if(obj instanceof TableColumnDiff) {
-				TableColumnDiff tcd = (TableColumnDiff) obj;
+			if(obj instanceof ColumnDiff) {
+				ColumnDiff tcd = (ColumnDiff) obj;
 				if(type.equals(tcd.type)) {
 					return column.equals(tcd.column);
 				}
@@ -118,7 +117,7 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	}
 	
 	@Override
-	public int compareTo(TableColumnDiff o) {
+	public int compareTo(ColumnDiff o) {
 		int comp = type.compareTo(o.type);
 		if(comp==0) { comp = table.compareTo(o.table); }
 		if(comp==0) {
@@ -150,8 +149,8 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	}
 	
 	@Override
-	public TableColumnDiff inverse() {
-		return new TableColumnDiff(type.inverse(), table, column, previousColumn);
+	public ColumnDiff inverse() {
+		return new ColumnDiff(type.inverse(), table, column, previousColumn);
 	}
 
 }
