@@ -122,6 +122,10 @@
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.properties"/>
 			</fileset>
+			<fileset dir="${src.diff.dir}">
+				<include name="**/*.properties"/>
+				<include name="**/jaxb.index"/>
+			</fileset>
 		</copy>
 		<copy todir="${bin.test.dir}" >
 			<fileset dir="${src.test.dir}">

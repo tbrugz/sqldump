@@ -77,7 +77,6 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	 * Should return true if responsable for creating output files
 	 * 
 	 * BlobDataDump will return true (writes 1 file per table row, partitioning doesn't make sense)
-	 * @return
 	 */
 	public boolean isWriterIndependent() {
 		return false;
@@ -94,8 +93,6 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 
 	/**
 	 * Should return true if imported FKs are used for datadump
-	 * 
-	 * @return
 	 */
 	public boolean usesImportedFKs() {
 		return false;
@@ -103,8 +100,6 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 
 	/**
 	 * Should return true if all Unique Keys are used for datadump
-	 * 
-	 * @return
 	 */
 	public boolean usesAllUKs() {
 		return false;

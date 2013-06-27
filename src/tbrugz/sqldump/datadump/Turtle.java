@@ -19,7 +19,7 @@ import tbrugz.sqldump.util.Utils;
 /**
  * RDB2RDF Direct Mapping Turtle dump syntax
  * 
- * @see http://en.wikipedia.org/wiki/Turtle_(syntax)
+ * @see <a href="http://en.wikipedia.org/wiki/Turtle_(syntax)">Turtle_(syntax)</a>
  */
 /*
  * TODOne if have +1 PK/UK: use owl:sameAs ?
