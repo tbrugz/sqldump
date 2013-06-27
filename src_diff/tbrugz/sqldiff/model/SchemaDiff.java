@@ -32,13 +32,14 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.Utils;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SchemaDiff implements Diff {
-	static Log log = LogFactory.getLog(SchemaDiff.class);
+	static final Log log = LogFactory.getLog(SchemaDiff.class);
 
 	//XXX: should be List<>?
 	@XmlElement(name="tableDiff")
@@ -293,7 +294,9 @@ public class SchemaDiff implements Diff {
 		JAXBContext jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures:tbrugz.sqldiff.model" );
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		Utils.prepareDir(fout);
 		m.marshal(this, fout);
+		log.info("xml diff written to: "+fout.getAbsolutePath());
 	}
 
 	public static SchemaDiff grabDiffsFromXML(File fin) throws IOException, JAXBException {
