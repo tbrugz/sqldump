@@ -5,12 +5,12 @@ import javax.xml.bind.annotation.XmlAccessorType;
 
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldump.dbmodel.Column;
-import tbrugz.sqldump.dbmodel.Table;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TCDiff {
 	public ChangeType changeType;
-	public Table table;
+	public String schemaName;
+	public String tableName;
 	public Column column;
 	public Column previousColumn;
 }

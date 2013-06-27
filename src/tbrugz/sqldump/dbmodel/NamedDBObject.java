@@ -1,6 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
-public interface NamedDBObject {
+public interface NamedDBObject /* extends Comparable<NamedDBObject>? */ {
 	public String getName();
 	public String getSchemaName();
 }

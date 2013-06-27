@@ -23,20 +23,46 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		ALWAYS;
 	}
 	
+	class NamedTable implements NamedDBObject {
+		@Override
+		public String getName() {
+			return tableName;
+		}
+		
+		@Override
+		public String getSchemaName() {
+			return schemaName;
+		}
+		
+		public int compareTo(NamedDBObject o) {
+			int comp = schemaName!=null?schemaName.compareTo(o.getSchemaName()):o.getSchemaName()!=null?1:0; //XXX: return -1? 1?
+			if(comp!=0) return comp;
+			return tableName.compareTo(o.getName());
+		}
+	}
+	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
-	final Table table; //TODO: change to tableName & schemaName?
+	final String schemaName;
+	final String tableName;
 	final Column column;
 	final Column previousColumn;
+	final transient NamedTable table;
 	
 	static boolean addComments = true;
 	static DBMSFeatures features;
 	public static TempColumnAlterStrategy useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 
 	public ColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
+		this(changeType, table.getSchemaName(), table.getName(), oldColumn, newColumn);
+	}
+
+	public ColumnDiff(ChangeType changeType, String schemaName, String tableName, Column oldColumn, Column newColumn) {
 		this.type = changeType;
-		this.table = table;
+		this.schemaName = schemaName;
+		this.tableName = tableName;
 		this.column = newColumn;
 		this.previousColumn = oldColumn;
+		this.table = new NamedTable();
 		
 		if(features==null) {
 			features = DBMSResources.instance().databaseSpecificFeaturesClass();
@@ -130,7 +156,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public String toString() {
-		return "[ColDiff:"+table.getQualifiedName()+","+type+","+column+"]";
+		return "[ColDiff:"+DBObject.getFinalName(table, true)+","+type+","+column+"]";
 	}
 
 	@Override
@@ -150,7 +176,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public ColumnDiff inverse() {
-		return new ColumnDiff(type.inverse(), table, column, previousColumn);
+		return new ColumnDiff(type.inverse(), schemaName, tableName, column, previousColumn);
 	}
 
 }

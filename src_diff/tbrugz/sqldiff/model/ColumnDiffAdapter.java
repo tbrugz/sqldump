@@ -8,14 +8,15 @@ public class ColumnDiffAdapter extends XmlAdapter<TCDiff, ColumnDiff> {
 	
 	@Override
 	public ColumnDiff unmarshal(TCDiff v) throws Exception {
-		return new ColumnDiff(v.changeType, v.table, v.previousColumn, v.column);
+		return new ColumnDiff(v.changeType, v.schemaName, v.tableName, v.previousColumn, v.column);
 	}
 
 	@Override
 	public TCDiff marshal(ColumnDiff v) throws Exception {
 		TCDiff adapted = new TCDiff();
 		adapted.changeType = v.getChangeType();
-		adapted.table = v.table;
+		adapted.schemaName = v.schemaName;
+		adapted.tableName = v.tableName;
 		adapted.column = v.column;
 		adapted.previousColumn = v.previousColumn;
 		return adapted;
