@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
+import tbrugz.sqldiff.model.TableColumnDiff;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -47,6 +48,7 @@ public class SQLDiff {
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
+	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndifftempcolstrategy";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -188,16 +190,33 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
+	void procProterties() {
+		failonerror = Utils.getPropBool(prop, PROP_FAILONERROR, failonerror);
+		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
+		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
+		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
+		xmlinfile = prop.getProperty(PROP_XMLINFILE);
+		xmloutfile = prop.getProperty(PROP_XMLOUTFILE);
+		String colDiffTempStrategy = prop.getProperty(PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
+		if(colDiffTempStrategy!=null) {
+			try {
+				TableColumnDiff.useTempColumnStrategy = TableColumnDiff.TempColumnAlterStrategy.valueOf(colDiffTempStrategy.toUpperCase());
+			}
+			catch(IllegalArgumentException e) {
+				String message = "illegal value '"+colDiffTempStrategy+"' to prop '"+PROP_COLUMNDIFF_TEMPCOLSTRATEGY+"' [default is '"+TableColumnDiff.useTempColumnStrategy+"']";
+				log.warn(message);
+				if(failonerror) {
+					throw new ProcessingException(message, e);
+				}
+			}
+		}
+	}
+	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
 		SQLDiff sqldiff = new SQLDiff();
 		
 		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
-		sqldiff.failonerror = Utils.getPropBool(sqldiff.prop, PROP_FAILONERROR, sqldiff.failonerror);
-		DBObject.dumpCreateOrReplace = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
-		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(sqldiff.prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
-		sqldiff.outfilePattern = sqldiff.prop.getProperty(PROP_OUTFILEPATTERN);
-		sqldiff.xmlinfile = sqldiff.prop.getProperty(PROP_XMLINFILE);
-		sqldiff.xmloutfile = sqldiff.prop.getProperty(PROP_XMLOUTFILE);
+		sqldiff.procProterties();
 
 		if(sqldiff.outfilePattern==null && sqldiff.xmloutfile==null) {
 			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] defined. can't dump diff script";

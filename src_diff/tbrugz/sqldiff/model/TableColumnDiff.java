@@ -14,7 +14,15 @@ import tbrugz.sqldump.def.DBMSResources;
 //XXX: rename to ColumnDiff?
 //@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
 public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
-	static Log log = LogFactory.getLog(TableColumnDiff.class);
+	static final Log log = LogFactory.getLog(TableColumnDiff.class);
+	
+	public enum TempColumnAlterStrategy {
+		//ALWAYS > TYPESDIFFER > NEWPRECISIONSMALLER > NEVER
+		NEVER,
+		NEWPRECISIONSMALLER,
+		TYPESDIFFER,
+		ALWAYS;
+	}
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
 	final Table table; //TODO: change to tableName & schemaName?
@@ -23,6 +31,7 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	
 	static boolean addComments = true;
 	static DBMSFeatures features;
+	public static TempColumnAlterStrategy useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 
 	public TableColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
 		this.type = changeType;
@@ -38,17 +47,16 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 	
 	@Override
 	public String getDiff() {
+		return getDiff(type, previousColumn, column);
+	}
+	
+	public String getDiff(ChangeType changeType, Column previousColumn, Column column) {
 		String colChange = null;
-		switch(type) {
+		switch(changeType) {
 			case ADD:
 				colChange = features.sqlAddColumnClause()+" "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
-				//XXX: option: rename old, create new, update new from old, drop old
-				colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
-				if(addComments) {
-					colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
-				}
-				break; //COLUMN "+column.name+" "+column.type; break;
+				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
 				colChange = "rename column "+DBObject.getFinalIdentifier(previousColumn.getName())
@@ -59,6 +67,35 @@ public class TableColumnDiff implements Diff, Comparable<TableColumnDiff> {
 				break;
 		}
 		return "alter table "+DBObject.getFinalName(table, true)+" "+colChange;
+	}
+	
+	String getAlterColumn() {
+		switch(useTempColumnStrategy) {
+		case ALWAYS: break;
+		case TYPESDIFFER:
+			//if(! column.type.equals(previousColumn.type)) break;
+		case NEWPRECISIONSMALLER:
+			if(! column.type.equals(previousColumn.type)) break;
+			if(useTempColumnStrategy==TempColumnAlterStrategy.NEWPRECISIONSMALLER
+				&& column.columSize!=null && previousColumn.columSize!=null
+				&& previousColumn.columSize>column.columSize) break;
+		case NEVER:
+			String colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
+			if(addComments) {
+				colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
+			}
+			return colChange;
+		}
+		
+		//rename old to temp, create new, update new from old, drop temp
+		Column tmpColumn = previousColumn.clone();
+		tmpColumn.setName(tmpColumn.getName()+"_TMP");
+		String ret = getDiff(ChangeType.RENAME, previousColumn, tmpColumn)+";\n"+
+				getDiff(ChangeType.ADD, null, column)+";\n"+
+				"update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName()+";\n"+
+				getDiff(ChangeType.DROP, tmpColumn, null)+
+				(addComments?" /* from: "+Column.getColumnDesc(previousColumn)+" */":"");
+		return ret;
 	}
 
 	/*public static List<TableColumnDiff> tableDiffs(Table origTable, Table newTable) {

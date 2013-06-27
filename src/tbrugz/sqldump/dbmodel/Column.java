@@ -15,7 +15,7 @@ import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
-public class Column extends DBIdentifiable implements Serializable {
+public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	
 	//XXX: refactoring: move to another package?
 	public static class ColTypeUtil {
@@ -160,6 +160,15 @@ public class Column extends DBIdentifiable implements Serializable {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		return getColumnDesc(this);
+	}
+	
+	@Override
+	public Column clone() {
+		try {
+			return (Column) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 }
