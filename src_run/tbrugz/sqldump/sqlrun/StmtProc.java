@@ -173,13 +173,17 @@ public class StmtProc extends AbstractFailable implements Executor {
 		long totalTime = System.currentTimeMillis() - initTime;
 		//commit?
 		double statementsPerSec = Double.NaN;
+		double updatesPerSec = Double.NaN;
 		try {
 			statementsPerSec = ((double) countExec) / ( ((double) totalTime) / 1000 );
+			updatesPerSec = ((double) urowsTotal) / ( ((double) totalTime) / 1000 );
 		}
 		catch(ArithmeticException e) {}
 		
 		log.info("exec = "+countExec+" [ok = "+countOk+", error = "+countError+"], rows updated = "+urowsTotal
-				+", elapsed = "+totalTime+"ms, statements/sec = "+statementsPerSec
+				+", elapsed = "+totalTime+"ms"
+				+", stmt/s = "+((int)statementsPerSec)
+				+", updates/s = "+((int)updatesPerSec)
 				+" [file = '"+file.getAbsolutePath()+"']");
 		if(logerror!=null) {
 			logerror.close();
