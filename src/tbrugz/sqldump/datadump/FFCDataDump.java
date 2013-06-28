@@ -317,7 +317,8 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
-		FFCDataDump newffc = new FFCDataDump();
+		return super.clone();
+		/*FFCDataDump newffc = new FFCDataDump();
 		super.copyPropsTo(newffc);
 		
 		//procproperties props
@@ -333,7 +334,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		//setup
 		newffc.clearBuffer();
 		
-		return newffc;
+		return newffc;*/
 	}
 
 	@Override

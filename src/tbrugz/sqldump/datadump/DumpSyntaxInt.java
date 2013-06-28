@@ -45,7 +45,7 @@ public interface DumpSyntaxInt {
 	public boolean isWriterIndependent();
 
 	/**
-	 * Should return true if dumpsyntax has buffer
+	 * Should return true if dumpsyntax has buffer. Stateful dumpers should implement clone()
 	 * 
 	 * FFCDataDump is stateful
 	 */
@@ -61,6 +61,11 @@ public interface DumpSyntaxInt {
 	 */
 	public boolean usesAllUKs();
 	
+	/**
+	 * Stateful dumpers should implement {@link java.lang.Cloneable}.
+	 * Clone() should ideally only copy spec fields (defined by properties) 
+	 */
 	// making clone() public instead of protected
+	// public DumpSyntaxInt cloneSpec();
 	public Object clone() throws CloneNotSupportedException;
 }
