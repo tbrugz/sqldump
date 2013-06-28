@@ -61,5 +61,6 @@ public interface DumpSyntaxInt {
 	 */
 	public boolean usesAllUKs();
 	
+	// making clone() public instead of protected
 	public Object clone() throws CloneNotSupportedException;
 }

@@ -107,14 +107,20 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	@Override
 	public Object clone() throws CloneNotSupportedException {
+		//throw CloneNotSupportedException?
+		//try {
 		return super.clone();
+		/*} catch (CloneNotSupportedException e) {
+			//e.printStackTrace();
+			throw new RuntimeException(e);
+		}*/
 	}
 	
-	public void copyPropsTo(DumpSyntax ds) {
+	/*public void copyPropsTo(DumpSyntax ds) {
 		ds.dateFormatter = this.dateFormatter;
 		ds.floatFormatter = this.floatFormatter;
 		ds.nullValueStr = this.nullValueStr;
-	}
+	}*/
 	
 	//XXX: methods dumpDocHeader, dumpDocFooter -- before dumpHeader/Footer, for dumps with multiple ResultSet
 	
