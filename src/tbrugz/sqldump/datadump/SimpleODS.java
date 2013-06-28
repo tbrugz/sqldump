@@ -7,6 +7,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -78,13 +81,6 @@ public class SimpleODS extends DumpSyntax {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 		this.tableName = tableName;
-		try {
-			sd = newSpreadSheet();
-			t = sd.addTable();
-			t.setTableName(tableName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	static SpreadsheetDocument newSpreadSheet() throws Exception {
@@ -105,15 +101,21 @@ public class SimpleODS extends DumpSyntax {
 
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		//dumping header...
 		try {
-			//XXX: add header style
+			sd = newSpreadSheet();
+			t = sd.addTable();
+			t.setTableName(tableName);
+
+			//dumping header...
+			//XXX: add header style - t.getRowByIndex(0).setDefaultCellStyle()?
 			for(int i=0;i<numCol;i++) {
 				String s = lsColNames.get(i);
 				t.getCellByPosition(i, 0).setStringValue(s);
+				//t.getColumnByIndex(i).setUseOptimalWidth(true); //set width?
+				//log.debug("col: "+lsColNames.get(i)+" / "+t.getColumnByIndex(i).getWidth());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn("error: "+e);
 		}
 	}
 
@@ -123,18 +125,30 @@ public class SimpleODS extends DumpSyntax {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, false);
 		int row = (int)count+1;
 		for(int i=0;i<vals.size();i++) {
-			String s = String.valueOf(vals.get(i));
-			if(t==null) {
-				//log.warn("null table?");
-				break;
-			}
+			Object o = vals.get(i);
+			//Class<?> colType = lsColTypes.get(i);
 			Cell c = t.getCellByPosition(i, row);
-			if(c==null) {
-				log.warn("null! "+i+" / "+row);
+			//XXXxx: set specific value type based on column type
+			if(o == null) {}
+			else if(o instanceof Long) {
+				Long ii = (Long)o;
+				//log.info("long "+i+" / "+lsColTypes.get(i)+" / "+ii.doubleValue()+" / "+lsColNames.get(i));
+				c.setDoubleValue(ii.doubleValue());
+			}
+			else if(o instanceof Integer) {
+				Integer ii = (Integer)o;
+				c.setDoubleValue(ii.doubleValue());
+			}
+			else if(o instanceof Double) {
+				c.setDoubleValue((Double)o);
+			}
+			else if(o instanceof Date) {
+				Calendar cal = new GregorianCalendar();
+				cal.setTime((Date)o);
+				c.setDateValue(cal);
 			}
 			else {
-				//XXX: set specific value type based on column type
-				c.setStringValue(s);
+				c.setStringValue(String.valueOf(o));
 			}
 		}
 	}
@@ -144,17 +158,13 @@ public class SimpleODS extends DumpSyntax {
 		try {
 			// commons-io...
 			//WriterOutputStream out = new WriterOutputStream(fos);
+			//XXX: set column width?
+			
 			String filename = outFilePattern
 					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
 					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, ODS_SYNTAX_ID);
 			
 			FileOutputStream out = new FileOutputStream(filename);
-			//System.err.println("fout: "+filename);
-			/*if(sd==null) {
-				log.warn("null document?");
-				out.close();
-				return;
-			}*/
 			sd.save(out);
 			out.close();
 		} catch (Exception e) {
