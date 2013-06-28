@@ -455,6 +455,7 @@ public class DataDump extends AbstractSQLProc {
 				
 				if(ds.isWriterIndependent()) { 
 					doSyntaxDumpList.set(i, true);
+					ds.dumpHeader(null);
 					continue;
 				}
 				
@@ -616,10 +617,12 @@ public class DataDump extends AbstractSQLProc {
 					if(ds.isWriterIndependent()) {
 						ds.dumpFooter(count, null);
 					}
-					//static writers footers
-					Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
-					if(w!=null) {
-						ds.dumpFooter(count, w);
+					else {
+						//static writers footers
+						Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
+						if(w!=null) {
+							ds.dumpFooter(count, w);
+						}
 					}
 				}
 			}
