@@ -78,7 +78,7 @@ Dependencies
 	[MariaDB](https://downloads.mariadb.org/client-java/),
 	[Drizzle](http://www.drizzle.org/content/download), 
 	[MonetDB](http://dev.monetdb.org/downloads/Java/Latest/),
-	[Firebird](http://jaybirdwiki.firebirdsql.org/jaybird/doku.php?id=download:start),
+	[Firebird](http://jaybirdwiki.firebirdsql.org/),
 	[Virtuoso](http://docs.openlinksw.com/virtuoso/VirtuosoDriverJDBC.html),
 	[jTDS/SQLServer](http://jtds.sourceforge.net/)
 	)

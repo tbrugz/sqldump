@@ -93,6 +93,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PATTERN_PARTITIONBY_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_PARTITIONBY));
 	static final String PATTERN_SYNTAXFILEEXT_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_SYNTAXFILEEXT));
 	//XXX add [tabletype] pattern - TABLE, VIEW, QUERY ?
+	//XXX add [syntaxid] pattern - may be different from [syntaxfileext]
 		
 	@Deprecated
 	static final String FILENAME_PATTERN_TABLE_QUERY_ID = "\\$\\{id\\}";

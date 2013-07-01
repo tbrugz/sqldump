@@ -58,7 +58,9 @@ public class DumpSyntaxRegistry {
 		}
 		String ss[] = classes.split(",");
 		for(String s: ss) {
-			loadClass(s.trim());
+			s = s.trim();
+			loadClass(s);
+			log.info("xtra syntax '"+s+"' loaded");
 		}
 	}
 	
