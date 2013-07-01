@@ -84,8 +84,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
-				colChange = "rename column "+DBObject.getFinalIdentifier(previousColumn.getName())
-					+" TO "+DBObject.getFinalIdentifier(column.getName());
+				colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
+					+" rename to "+DBObject.getFinalIdentifier(column.getName());
 				break;
 			case DROP:
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
@@ -109,7 +109,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(addComments) {
 				colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
 			}
-			return colChange;
+			return "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
 		}
 		
 		//rename old to temp, create new, update new from old, drop temp

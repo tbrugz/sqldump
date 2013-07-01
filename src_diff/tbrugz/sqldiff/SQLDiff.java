@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -13,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
+import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.SchemaModelScriptDumper;
@@ -42,6 +44,7 @@ public class SQLDiff {
 	public static final String PROP_PREFIX = "sqldiff";
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
+	
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
 	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
@@ -49,6 +52,9 @@ public class SQLDiff {
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
 	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndifftempcolstrategy";
+	
+	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
+	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydifftosource";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -149,6 +155,24 @@ public class SQLDiff {
 			dd.process();
 		}
 		
+		//apply diff to database?
+		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
+		if(doApplyDiff) {
+			boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+			if(applyToSource) {
+				Connection conn = null;
+				if(fromSchemaGrabber!=null) {
+					conn = fromSchemaGrabber.getConnection();
+				}
+				applyDiffToDB(diff, conn);
+			}
+			else {
+				//XXX apply to other target/id?
+				log.warn("applydiff (ditt-to-db) target not defined");
+			}
+			//XXX apply data diff?
+		}
+		
 		//XXX close connections if open?
 		
 		log.info("...done dumping");
@@ -209,6 +233,33 @@ public class SQLDiff {
 					throw new ProcessingException(message, e);
 				}
 			}
+		}
+	}
+	
+	void applyDiffToDB(SchemaDiff diff, Connection conn) {
+		List<Diff> diffs = diff.getChildren();
+
+		int execCount = 0;
+		int errorCount = 0;
+		int updateCount = 0;
+		for(Diff d: diffs) {
+			try {
+				String sql = d.getDiff();
+				log.info("executing diff: "+sql);
+				execCount++;
+				updateCount += conn.createStatement().executeUpdate(sql);
+			} catch (SQLException e) {
+				errorCount++;
+				log.warn("error executing diff: "+e);
+			}
+		}
+		if(execCount>0) {
+			log.info(execCount+" statements executed"
+				+(errorCount>0?" [#errors = "+errorCount+"]":"")
+				+" [#update = "+updateCount+"]");
+		}
+		else {
+			log.info("no diff statements executed");
 		}
 	}
 	
