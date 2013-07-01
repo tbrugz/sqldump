@@ -27,19 +27,38 @@ public class DumpSyntaxRegistry {
 		initted = true;
 	}
 	
-	@SuppressWarnings("unchecked")
 	static void loadClasses(List<String> classes) {
 		for(String c: classes) {
-			Class<?> cc = Utils.getClassWithinPackages(c, "tbrugz.sqldump.datadump", null);
-			if(cc==null) {
-				log.warn("dum syntax class '"+c+"' was not found");
+			loadClass(c);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	static void loadClass(String c) {
+		Class<?> cc = Utils.getClassWithinPackages(c, "tbrugz.sqldump.datadump", null);
+		if(cc==null) {
+			log.warn("dum syntax class '"+c+"' was not found");
+		}
+		else if (DumpSyntax.class.isAssignableFrom(cc)) {
+			syntaxes.add((Class<? extends DumpSyntax>)cc);
+		}
+		else {
+			log.warn("class '"+c+"' is not a subclass of DumpSyntax");
+		}
+	}
+	
+	public static void addSyntaxes(String classes) {
+		if(classes==null) { return; }
+		if(!initted) {
+			try {
+				init();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-			else if (DumpSyntax.class.isAssignableFrom(cc)) {
-				syntaxes.add((Class<? extends DumpSyntax>)cc);
-			}
-			else {
-				log.warn("class '"+c+"' is not a subclass of DumpSyntax");
-			}
+		}
+		String ss[] = classes.split(",");
+		for(String s: ss) {
+			loadClass(s.trim());
 		}
 	}
 	

@@ -9,6 +9,7 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSFeatures;
@@ -60,6 +61,7 @@ public class SQLDump {
 	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
+	static final String PROP_DATADUMP_XTRASYNTAXES = "sqldump.datadump.xtrasyntaxes";
 	
 	//properties files filenames
 	static final String PROPERTIES_FILENAME = "sqldump.properties";
@@ -79,6 +81,7 @@ public class SQLDump {
 		
 		ColTypeUtil.setProperties(papp);
 		DBMSResources.instance().setup(papp);
+		DumpSyntaxRegistry.addSyntaxes(papp.getProperty(PROP_DATADUMP_XTRASYNTAXES));
 	}
 
 	void end(boolean closeConnection) throws SQLException {
