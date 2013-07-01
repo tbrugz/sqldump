@@ -31,8 +31,9 @@ public class SimpleODS extends DumpSyntax {
 
 	static final Log log = LogFactory.getLog(SimpleODS.class);
 	
-	static final String ODS_SYNTAX_ID = "ods";
-	static final String PROP_ODS_OUTFILEPATTERN = "sqldump.datadump.ods.outfilepattern";
+	static final String ODS_SYNTAX_ID = "simple-ods";
+	static final String ODS_FILEEXT = "ods";
+	static final String PROP_ODS_OUTFILEPATTERN = "sqldump.datadump."+ODS_SYNTAX_ID+".outfilepattern";
 	
 	protected int numCol;
 	protected final List<String> lsColNames = new ArrayList<String>();
@@ -55,12 +56,12 @@ public class SimpleODS extends DumpSyntax {
 
 	@Override
 	public String getSyntaxId() {
-		return "simple-ods";
+		return ODS_SYNTAX_ID;
 	}
 	
 	@Override
 	public String getDefaultFileExtension() {
-		return "ods";
+		return ODS_FILEEXT;
 	}
 
 	@Override
@@ -162,7 +163,7 @@ public class SimpleODS extends DumpSyntax {
 			
 			String filename = outFilePattern
 					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
-					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, ODS_SYNTAX_ID);
+					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, ODS_FILEEXT);
 			
 			FileOutputStream out = new FileOutputStream(filename);
 			sd.save(out);

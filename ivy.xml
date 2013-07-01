@@ -15,6 +15,7 @@
 		<dependency name="kmlutils" rev="0.5.3" conf="default->default"/>
 		<dependency org="org.codehaus.jettison" name="jettison" rev="1.3.3" conf="default->default"/>
 		<dependency org="org.odftoolkit" name="simple-odf" rev="0.6.6"/>
+		<dependency org="org.jopendocument" name="jOpenDocument" rev="1.2"/>
 		
 		<!-- mondrian deps -->
 		<dependency org="org.olap4j" name="olap4j" rev="1.1.0"/> <!-- XXX conf="default->default" ? -->
