@@ -83,10 +83,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			case ALTER:
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
+				return features.sqlRenameColumnDefinition(table, previousColumn, column.getName());
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
-				colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
+				/*colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
 					+" rename to "+DBObject.getFinalIdentifier(column.getName());
-				break;
+				break;*/
 			case DROP:
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;

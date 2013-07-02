@@ -8,8 +8,11 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -91,5 +94,12 @@ public class H2Features extends InformationSchemaFeatures {
 		rs.close();
 		st.close();
 		log.info(countUKs+" unique constraints grabbed [colcount="+countCols+"]");
+	}
+	
+	@Override
+	public String sqlRenameColumnDefinition(NamedDBObject t, Column c,
+			String newName) {
+		return "alter table "+DBObject.getFinalName(t, true)+" alter column "+DBObject.getFinalIdentifier(c.getName())
+				+" rename to "+DBObject.getFinalIdentifier(newName);
 	}
 }
