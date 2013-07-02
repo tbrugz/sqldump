@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -45,4 +46,5 @@ public interface DBMSFeatures {
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
+	String sqlRenameColumnDefinition(NamedDBObject t, Column c, String newName);
 }

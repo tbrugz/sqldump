@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.Utils;
 
@@ -62,6 +64,12 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	@Override
 	public String sqlAddColumnClause() {
 		return "add column";
+	}
+	
+	@Override
+	public String sqlRenameColumnDefinition(NamedDBObject t, Column c, String newName) {
+		//oracle & postgresql syntax
+		return "alter table "+DBObject.getFinalName(t, true)+" rename column "+c.getName()+" TO "+newName;
 	}
 	
 }
