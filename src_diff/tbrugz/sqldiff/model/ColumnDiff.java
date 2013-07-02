@@ -75,7 +75,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		return getDiff(type, previousColumn, column);
 	}
 	
-	public String getDiff(ChangeType changeType, Column previousColumn, Column column) {
+	//XXX: return List<String>? - in case of multiple statements for 1 change
+	String getDiff(ChangeType changeType, Column previousColumn, Column column) {
 		String colChange = null;
 		switch(changeType) {
 			case ADD:
@@ -94,7 +95,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 		return "alter table "+DBObject.getFinalName(table, true)+" "+colChange;
 	}
-	
+
+	//XXX: return List<String>?
 	String getAlterColumn() {
 		switch(useTempColumnStrategy) {
 		case ALWAYS: break;
@@ -114,6 +116,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 		
 		//rename old to temp, create new, update new from old, drop temp
+		//- option2: add temp, update temp from old, drop old, rename temp to new 
+		//XXX what if column is not null & table has data?
 		Column tmpColumn = previousColumn.clone();
 		tmpColumn.setName(tmpColumn.getName()+"_TMP");
 		String ret = getDiff(ChangeType.RENAME, previousColumn, tmpColumn)+";\n"+
