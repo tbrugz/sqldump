@@ -24,6 +24,7 @@ public class ResultSetDiff {
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
 	//XXX: add schemaName ?
+	//XXX: param DiffSyntax ds -> List<DiffSyntax> dss ?
 	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
 			DiffSyntax ds, CategorizedOut cout) throws SQLException, IOException {

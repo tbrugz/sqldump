@@ -159,16 +159,22 @@ public class SQLDiff {
 		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
 		if(doApplyDiff) {
 			boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+			Connection applyToConn = null;
 			if(applyToSource) {
-				Connection conn = null;
 				if(fromSchemaGrabber!=null) {
-					conn = fromSchemaGrabber.getConnection();
+					applyToConn = fromSchemaGrabber.getConnection();
 				}
-				applyDiffToDB(diff, conn);
 			}
 			else {
 				//XXX apply to other target/id?
 				log.warn("applydiff (ditt-to-db) target not defined");
+			}
+				
+			if(applyToConn==null) {
+				log.warn("connection is null!");
+			}
+			else {
+				applyDiffToDB(diff, applyToConn);
 			}
 			//XXX apply data diff?
 		}
