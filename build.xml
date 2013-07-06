@@ -100,7 +100,7 @@
 	<target name="compile" depends="prepare">
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" source="1.6" target="1.6">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
@@ -108,7 +108,7 @@
 			<src path="${src.mondrian.dir}"/>
 			<src path="${src.xtra.dir}"/>
 		</javac>
-		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" source="1.6" target="1.6">
+		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
 			<src path="${src.test.dir}"/>
 		</javac>
 		<copy todir="${bin.dir}" >
