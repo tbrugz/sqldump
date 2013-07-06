@@ -248,8 +248,8 @@
 		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="true" type="jar,bundle" log="download-only" />
 		<property name="new-ivy.compile.classpath" refid="classpath.compile.ivy"/>
 		<property name="new-ivy.test.classpath" refid="classpath.compiletest.ivy"/>
-		<echo message="ivy.compile.classpath: ${new-ivy.compile.classpath}"/>
-		<echo message="ivy.test.classpath: ${new-ivy.test.classpath}"/>
+		<!--echo message="ivy.compile.classpath: ${new-ivy.compile.classpath}"/>
+		<echo message="ivy.test.classpath: ${new-ivy.test.classpath}"/-->
 		<!--delete file="ivy.classpath.properties"/-->
 		<propertyfile file="ivy.classpath.properties">
 			<entry key="ivy.compile.classpath" value="${new-ivy.compile.classpath}"/>
