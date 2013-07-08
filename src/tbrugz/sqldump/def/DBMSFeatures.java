@@ -46,5 +46,5 @@ public interface DBMSFeatures {
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
-	String sqlRenameColumnDefinition(NamedDBObject t, Column c, String newName);
+	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);
 }

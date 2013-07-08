@@ -97,9 +97,9 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public String sqlRenameColumnDefinition(NamedDBObject t, Column c,
+	public String sqlRenameColumnDefinition(NamedDBObject table, Column column,
 			String newName) {
-		return "alter table "+DBObject.getFinalName(t, true)+" alter column "+DBObject.getFinalIdentifier(c.getName())
+		return "alter table "+DBObject.getFinalName(table, true)+" alter column "+DBObject.getFinalIdentifier(column.getName())
 				+" rename to "+DBObject.getFinalIdentifier(newName);
 	}
 }
