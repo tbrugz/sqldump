@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import tbrugz.sqldiff.datadiff.ResultSetDiffTest;
+import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
@@ -33,6 +34,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	PivotRSTest.class,
 	IOUtilTest.class,
 	CategorizedOutTest.class,
+	ColumnDiffTest.class,
 
 	//import
 	CSVImportTest.class,
