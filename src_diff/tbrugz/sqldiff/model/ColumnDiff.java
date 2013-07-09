@@ -1,5 +1,8 @@
 package tbrugz.sqldiff.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -10,6 +13,7 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.Utils;
 
 //@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
 public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
@@ -76,11 +80,22 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public String getDiff() {
+		return Utils.join(getDiffList(), ";\n");
+		/*StringBuilder sb = new StringBuilder();
+		List<String> dl = getDiffList();
+		for(int i=0;i<dl.size();i++) {
+			if(i>0) { sb.append(";\n"); }
+			sb.append(dl.get(i));
+		}
+		return sb.toString();*/
+	}
+
+	@Override
+	public List<String> getDiffList() {
 		return getDiff(type, previousColumn, column);
 	}
 	
-	//XXX: return List<String>? - in case of multiple statements for 1 change
-	String getDiff(ChangeType changeType, Column previousColumn, Column column) {
+	List<String> getDiff(ChangeType changeType, Column previousColumn, Column column) {
 		String colChange = null;
 		switch(changeType) {
 			case ADD:
@@ -88,7 +103,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			case ALTER:
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
-				return features.sqlRenameColumnDefinition(table, previousColumn, column.getName());
+				return singleElemList( features.sqlRenameColumnDefinition(table, previousColumn, column.getName()) );
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
 				/*colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
 					+" rename to "+DBObject.getFinalIdentifier(column.getName());
@@ -97,11 +112,12 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
 		}
-		return "alter table "+DBObject.getFinalName(table, true)+" "+colChange;
+		return singleElemList( "alter table "+DBObject.getFinalName(table, true)+" "+colChange );
 	}
 
-	//XXX: return List<String>?
-	String getAlterColumn() {
+	List<String> getAlterColumn() {
+		List<String> ret = new ArrayList<String>();
+		
 		switch(useTempColumnStrategy) {
 		case ALWAYS: break;
 		case NEWPRECISIONSMALLER:
@@ -115,7 +131,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(addComments) {
 				colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
 			}
-			return "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
+			
+			String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
+			ret.add(alterSql);
+			return ret;
 		}
 		
 		//rename old to temp, create new, update new from old, drop temp
@@ -123,11 +142,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		//XXX what if column is not null & table has data?
 		Column tmpColumn = previousColumn.clone();
 		tmpColumn.setName(tmpColumn.getName()+"_TMP");
-		String ret = getDiff(ChangeType.RENAME, previousColumn, tmpColumn)+";\n"+
-				getDiff(ChangeType.ADD, null, column)+";\n"+
-				"update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName()+";\n"+
-				getDiff(ChangeType.DROP, tmpColumn, null)+
-				(addComments?" /* from: "+Column.getColumnDesc(previousColumn)+" */":"");
+		ret.add( getDiff(ChangeType.RENAME, previousColumn, tmpColumn).get(0) );
+		ret.add( getDiff(ChangeType.ADD, null, column).get(0) );
+		ret.add( "update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName() );
+		ret.add( getDiff(ChangeType.DROP, tmpColumn, null).get(0)+
+				(addComments?" /* from: "+Column.getColumnDesc(previousColumn)+" */":"") );
 		return ret;
 	}
 
@@ -185,6 +204,12 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	@Override
 	public ColumnDiff inverse() {
 		return new ColumnDiff(type.inverse(), schemaName, tableName, column, previousColumn);
+	}
+	
+	List<String> singleElemList(String s) {
+		List<String> ret = new ArrayList<String>();
+		ret.add(s);
+		return ret;
 	}
 
 }

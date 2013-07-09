@@ -315,6 +315,7 @@ public class SchemaDiff implements Diff {
 
 		for(Diff d: diffs) {
 			//XXX: if diff is ADD+EXECUTABLE, not to include ';'?
+			//XXX: use getDiffList()?
 			sb.append(d.getDiff()+";\n\n");
 		}
 
@@ -334,6 +335,20 @@ public class SchemaDiff implements Diff {
 		*/
 		
 		return sb.toString();
+	}
+	
+	@Override
+	public List<String> getDiffList() {
+		List<Diff> diffs = getChildren();
+		List<String> diffStrs = new ArrayList<String>();
+
+		for(Diff d: diffs) {
+			for(String s: d.getDiffList()) {
+				diffStrs.add(s);
+			}
+		}
+		
+		return diffStrs;
 	}
 	
 	@Override

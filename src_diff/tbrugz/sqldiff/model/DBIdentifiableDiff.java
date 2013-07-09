@@ -1,5 +1,8 @@
 package tbrugz.sqldiff.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -55,6 +58,13 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 			default:
 				throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
 		}
+	}
+	
+	@Override
+	public List<String> getDiffList() {
+		List<String> ret = new ArrayList<String>();
+		ret.add(getDiff());
+		return ret;
 	}
 	
 	@Override

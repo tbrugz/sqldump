@@ -46,6 +46,13 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		return null;
 	}
 	
+	@Override
+	public List<String> getDiffList() {
+		List<String> dl = new ArrayList<String>();
+		dl.add(getDiff());
+		return dl;
+	}
+	
 	//XXX: move to SchemaDiff or other class?
 	public static List<Diff> tableDiffs(Table origTable, Table newTable) {
 		//log.debug("difftable:\n"+origTable.getDefinition(true)+"\n"+newTable.getDefinition(true));
