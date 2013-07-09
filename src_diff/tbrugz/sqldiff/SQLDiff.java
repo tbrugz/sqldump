@@ -245,15 +245,23 @@ public class SQLDiff {
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {
 		List<Diff> diffs = diff.getChildren();
 
+		int diffCount = 0;
 		int execCount = 0;
 		int errorCount = 0;
 		int updateCount = 0;
 		for(Diff d: diffs) {
 			try {
-				String sql = d.getDiff();
-				log.info("executing diff: "+sql);
-				execCount++;
-				updateCount += conn.createStatement().executeUpdate(sql);
+				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
+				diffCount++;
+				List<String> sqls = d.getDiffList();
+				for(int i=0;i<sqls.size();i++) {
+					String sql = sqls.get(i);
+					log.info("executing diff #"+diffCount
+						+(sqls.size()>1?" ["+(i+1)+"/"+sqls.size()+"]: ":": ")
+						+sql);
+					execCount++;
+					updateCount += conn.createStatement().executeUpdate(sql);
+				}
 			} catch (SQLException e) {
 				errorCount++;
 				log.warn("error executing diff: "+e);
