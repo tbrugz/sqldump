@@ -16,10 +16,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	static final Log log = LogFactory.getLog(ColumnDiff.class);
 	
 	public enum TempColumnAlterStrategy {
-		//ALWAYS > TYPESDIFFER > NEWPRECISIONSMALLER > NEVER
+		//ALWAYS > NEWPRECISIONSMALLER > TYPESDIFFER > NEVER
 		NEVER,
-		NEWPRECISIONSMALLER,
 		TYPESDIFFER,
+		NEWPRECISIONSMALLER,
 		ALWAYS;
 	}
 	
@@ -56,7 +56,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this(changeType, table.getSchemaName(), table.getName(), oldColumn, newColumn);
 	}
 
-	public ColumnDiff(ChangeType changeType, String schemaName, String tableName, Column oldColumn, Column newColumn) {
+	ColumnDiff(ChangeType changeType, String schemaName, String tableName, Column oldColumn, Column newColumn) {
 		this.type = changeType;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
@@ -65,9 +65,13 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this.table = new NamedTable();
 		
 		if(features==null) {
-			features = DBMSResources.instance().databaseSpecificFeaturesClass();
+			updateFeatures();
 			log.debug("DBMSFeatures class: "+features);
 		}
+	}
+	
+	public static void updateFeatures() {
+		features = DBMSResources.instance().databaseSpecificFeaturesClass();
 	}
 	
 	@Override
@@ -100,13 +104,12 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	String getAlterColumn() {
 		switch(useTempColumnStrategy) {
 		case ALWAYS: break;
-		case TYPESDIFFER:
-			//if(! column.type.equals(previousColumn.type)) break;
 		case NEWPRECISIONSMALLER:
-			if(! column.type.equals(previousColumn.type)) break;
-			if(useTempColumnStrategy==TempColumnAlterStrategy.NEWPRECISIONSMALLER
-				&& column.columSize!=null && previousColumn.columSize!=null
+			if(column.columSize!=null && previousColumn.columSize!=null
 				&& previousColumn.columSize>column.columSize) break;
+		case TYPESDIFFER:
+			if(! column.type.equals(previousColumn.type)) break;
+			//if(! column.type.equals(previousColumn.type)) break;
 		case NEVER:
 			String colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
 			if(addComments) {
