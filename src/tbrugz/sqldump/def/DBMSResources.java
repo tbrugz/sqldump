@@ -204,7 +204,7 @@ public class DBMSResources {
 				e.printStackTrace();
 			}
 		}
-		log.info("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
+		log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
 		return new DefaultDBMSFeatures();
 	}
 	

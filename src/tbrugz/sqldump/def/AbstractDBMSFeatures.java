@@ -69,7 +69,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	@Override
 	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
 		//oracle & postgresql syntax
-		return "alter table "+DBObject.getFinalName(table, true)+" rename column "+column.getName()+" TO "+newName;
+		return "alter table "+DBObject.getFinalName(table, true)+" rename column "+column.getName()+" to "+newName;
 	}
 	
 }
