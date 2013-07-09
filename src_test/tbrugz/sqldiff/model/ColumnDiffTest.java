@@ -1,5 +1,8 @@
 package tbrugz.sqldiff.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -9,6 +12,7 @@ import tbrugz.sqldiff.model.ColumnDiff.TempColumnAlterStrategy;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.Utils;
 
 public class ColumnDiffTest {
 	
@@ -69,8 +73,19 @@ public class ColumnDiffTest {
 	}
 
 	String alterSimple = "alter table a alter column cx varchar(20)";
-	String alterWithTempCol = "alter table a rename column cx to cx_TMP;\nalter table a add column cx varchar(20);\nupdate a set cx = cx_TMP;\nalter table a drop column cx_TMP";
-	String alterWithTempColInv = "alter table a rename column cx to cx_TMP;\nalter table a add column cx varchar(10);\nupdate a set cx = cx_TMP;\nalter table a drop column cx_TMP";
+	String[] alterWithTempColList = {
+			"alter table a rename column cx to cx_TMP",
+			"alter table a add column cx varchar(20)",
+			"update a set cx = cx_TMP",
+			"alter table a drop column cx_TMP"
+	};
+	String alterWithTempCol = Utils.join(Arrays.asList(alterWithTempColList), ";\n");
+	String alterWithTempColInv = null;
+	{
+		String[] alterWithTempColListInv = Arrays.copyOf(alterWithTempColList, alterWithTempColList.length);
+		alterWithTempColListInv[1] = "alter table a add column cx varchar(10)";
+		alterWithTempColInv = Utils.join(Arrays.asList(alterWithTempColListInv), ";\n");
+	}
 	
 	@Test
 	public void testAlter() {
@@ -91,6 +106,19 @@ public class ColumnDiffTest {
 		String diff = cd.getDiff();
 		out(diff);
 		Assert.assertEquals(alterWithTempCol, diff);
+	}
+
+	@Test
+	public void testAlterTempColAlwaysWithList() {
+		ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.ALWAYS;
+		Column c1 = newColumn("cx","varchar",10);
+		Column c2 = newColumn("cx","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		List<String> diff = cd.getDiffList();
+		Assert.assertEquals(alterWithTempColList[0], diff.get(0));
+		Assert.assertEquals(alterWithTempColList[1], diff.get(1));
+		Assert.assertEquals(alterWithTempColList[2], diff.get(2));
+		Assert.assertEquals(alterWithTempColList[3], diff.get(3));
 	}
 	
 	@Test
