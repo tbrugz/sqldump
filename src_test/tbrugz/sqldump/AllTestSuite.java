@@ -12,6 +12,7 @@ import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
 import tbrugz.sqldump.processors.CascadingDataDumpTest;
 import tbrugz.sqldump.resultset.pivot.PivotRSTest;
@@ -55,6 +56,9 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//datadump
 	DataDumpTest.class,
 	CascadingDataDumpTest.class,
+	
+	//graph
+	R2GTest.class,
 	
 	//mondrian
 	MondrianTests.class,
