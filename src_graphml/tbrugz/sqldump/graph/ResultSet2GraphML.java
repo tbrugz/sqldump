@@ -130,7 +130,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	Root getGraphMlModel(String qid, ResultSet rsEdges, ResultSet rsNodes) throws SQLException {
 		Root graphModel = new Root();
 		Set<Node> nodes = new HashSet<Node>();
-		Set<WeightedEdge> edges = new HashSet<WeightedEdge>();
+		List<WeightedEdge> edges = new ArrayList<WeightedEdge>();
 		
 		boolean edgeOnlyStrategy = isEdgeOnlyStrategy(rsEdges, rsNodes);
 		
@@ -219,9 +219,14 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 					String sourceType = rsEdges.getString(COL_SOURCE_TYPE);
 					sourceNode.setStereotype(normalize(sourceType));
 				}
-				nodes.add(sourceNode);
-				nodeSet.add(sourceNode.getId());
-				log.debug("source node "+source+" of stereotype "+sourceNode.getStereotype());
+				
+				if(nodeSet.add(sourceNode.getId())) {
+					nodes.add(sourceNode);
+					log.debug("source node "+source+" of stereotype "+sourceNode.getStereotype());
+				}
+				else {
+					log.debug("source node "+source+" already processed");
+				}
 	
 				Node targetNode = newNode();
 				targetNode.setId(target);
@@ -230,9 +235,14 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 					String targetType = rsEdges.getString(COL_TARGET_TYPE);
 					targetNode.setStereotype(normalize(targetType));
 				}
-				nodes.add(targetNode);
-				nodeSet.add(targetNode.getId());
-				log.debug("target node "+target+" of stereotype "+targetNode.getStereotype());
+				
+				if(nodeSet.add(targetNode.getId())) {
+					nodes.add(targetNode);
+					log.debug("target node "+target+" of stereotype "+targetNode.getStereotype());
+				}
+				else {
+					log.debug("target node "+target+" already processed");
+				}
 			}
 			
 			WeightedEdge edge = new WeightedEdge();

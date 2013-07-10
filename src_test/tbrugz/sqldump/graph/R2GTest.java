@@ -41,8 +41,6 @@ public class R2GTest {
 		*/
 		Document doc = XMLUtil.getDoc(new File("work/output/graph/r2g.graphml"));
 		
-		//FIXME should have 2 nodes & 3 edges!
-		
 		//List ln = e.selectNodes("//node");//graphml/graph/node
 		NodeList ln = XMLUtil.getList(doc, "node");
 		Assert.assertEquals(2, ln.getLength());
