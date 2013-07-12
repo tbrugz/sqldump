@@ -51,6 +51,7 @@ public class DataDiff extends AbstractFailable {
 	List<String> tablesToIgnore = new ArrayList<String>();
 	String outFilePattern = null;
 	long loopLimit = 0;
+	boolean applyDataDiff = false;
 	
 	SchemaModel sourceSchemaModel = null;
 	SchemaModel targetSchemaModel = null;
@@ -215,8 +216,8 @@ public class DataDiff extends AbstractFailable {
 			}
 			
 			log.debug("diff for table '"+table+"'...");
-			DiffSyntax ds = getSyntax(prop);
-			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, ds, cout);
+			List<DiffSyntax> dss = getSyntaxes(prop, applyDataDiff);
+			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, cout);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsSource.close(); rsTarget.close();
@@ -240,10 +241,21 @@ public class DataDiff extends AbstractFailable {
 		}
 	}
 	
-	static DiffSyntax getSyntax(Properties prop) throws SQLException {
-		DiffSyntax ds = new SQLDataDiffSyntax(); //XXX: option/prop to select DiffSyntax (based on properties?)?
-		ds.procProperties(prop);
-		return ds;
+	static List<DiffSyntax> getSyntaxes(Properties prop, boolean applyDataDiff) throws SQLException {
+		List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
+		//FIXME: select DiffSyntax (based on properties?)
+		// maybe add SQLDataDiffSyntax only if 'sqldiff.datadiff.outfilepattern' is set?
+		if(true) {
+			DiffSyntax ds = new SQLDataDiffSyntax();
+			ds.procProperties(prop);
+			dss.add(ds);
+		}
+		if(applyDataDiff) {
+			DiffSyntax sdd2db = new SQLDataDiffToDBSyntax();
+			sdd2db.procProperties(prop);
+			dss.add(sdd2db);
+		}
+		return dss;
 	}
 	
 	Connection getConn(String grabberId) {
@@ -325,6 +337,14 @@ public class DataDiff extends AbstractFailable {
 			prop.put(sarr[0], sarr[1]);
 		}
 		return prop;
+	}
+
+	public boolean isApplyDataDiff() {
+		return applyDataDiff;
+	}
+
+	public void setApplyDataDiff(boolean applyDataDiff) {
+		this.applyDataDiff = applyDataDiff;
 	}
 	
 }

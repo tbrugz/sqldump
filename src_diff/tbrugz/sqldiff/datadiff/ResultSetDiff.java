@@ -24,10 +24,9 @@ public class ResultSetDiff {
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
 	//XXX: add schemaName ?
-	//XXX: param DiffSyntax ds -> List<DiffSyntax> dss ?
 	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
-			DiffSyntax ds, CategorizedOut cout) throws SQLException, IOException {
+			List<DiffSyntax> dss, CategorizedOut cout) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
 		boolean hasNextSource = true;
@@ -52,11 +51,20 @@ public class ResultSetDiff {
 			keyIndexes[i] = lsColNames.indexOf(key);
 		}
 		
-		ds.initDump(tableName, keyCols, md);
+		for(DiffSyntax ds: dss) {
+			ds.initDump(tableName, keyCols, md);
+		}
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;
 		long count = 0;
-		
+
+		//header fos writer-independent syntaxes
+		//XXX: what about stateful syntaxes?
+		for(DiffSyntax ds: dss) {
+			if(ds.isWriterIndependent()) {
+				ds.dumpHeader(null);
+			}
+		}
 		while(true) {
 			if(readSource) {
 				hasNextSource = source.next();
@@ -87,7 +95,11 @@ public class ResultSetDiff {
 			if(compare==0) {
 				//same key
 				readSource = readTarget = true;
-				boolean updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
+				boolean updated = false;
+				for(DiffSyntax ds: dss) {
+					//last 'updated' that counts...
+					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
+				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				if(updated) { updateCount++; }
 				else { identicalRowsCount++; }
@@ -96,13 +108,17 @@ public class ResultSetDiff {
 				readSource = true; readTarget = false;
 				if(hasNextSource) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					for(DiffSyntax ds: dss) {
+						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					}
 					deleteCount++;
 				}
 				else {
 					readSource = false; readTarget = true;
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					for(DiffSyntax ds: dss) {
+						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					}
 					dumpCount++;
 				}
 			}
@@ -110,13 +126,17 @@ public class ResultSetDiff {
 				readSource = false; readTarget = true;
 				if(hasNextTarget) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					for(DiffSyntax ds: dss) {
+						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					}
 					dumpCount++;
 				}
 				else {
 					readSource = true; readTarget = false;
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
-					ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					for(DiffSyntax ds: dss) {
+						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					}
 					deleteCount++;
 				}
 				
@@ -134,6 +154,14 @@ public class ResultSetDiff {
 				break;
 			}
 		}
+		//footer for writer-independent syntaxes
+		//XXX: what about stateful syntaxes?
+		for(DiffSyntax ds: dss) {
+			if(ds.isWriterIndependent()) {
+				ds.dumpFooter(sourceRowCount, null); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
+			}
+		}
+		
 		//XXX ds.dumpFooter(w); ??? cout.getAllWriters() ?
 		//w.flush();
 	}

@@ -54,7 +54,7 @@ public class ResultSetDiffTest {
 
 		CategorizedOut cout = new CategorizedOut(CategorizedOut.NULL_WRITER);
 		
-		DiffSyntax ds = DataDiff.getSyntax(new Properties());
+		List<DiffSyntax> ds = DataDiff.getSyntaxes(new Properties(), false);
 		
 		log.info("s: 1 t: 2");
 		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), ds, cout);

@@ -55,6 +55,8 @@ public class SQLDiff {
 	
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
 	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydifftosource";
+	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
+	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -137,13 +139,30 @@ public class SQLDiff {
 				log.debug("error writing xml: "+e.getMessage(),e);
 			}
 		}
+
+		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
+		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
+		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
+		boolean doApplyDataDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_DATADIFF, false);
+		boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+		
+		if(doApplyDiff && !doApplySchemaDiff && !doApplyDataDiff) {
+			log.warn("apply diff prop defined, but no schemadiff ('"+PROP_APPLYDIFF_SCHEMADIFF+"') nor datadiff ('"+PROP_APPLYDIFF_DATADIFF+"') properties defined");
+		}
+		
+		//XXX: apply schemadiff or datadiff first?
 		
 		//data diff!
-		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
 		if(doDataDiff) {
 			DataDiff dd = new DataDiff();
 			dd.setFailOnError(failonerror);
+			//XXX: some refactoring would be nice...
+			if(applyToSource) {
+				String sourceGrabberId = prop.getProperty(PROP_SOURCE);
+				prop.setProperty("sqldiff.datadiff.sdd2db.connpropprefix", "sqldiff."+sourceGrabberId);
+			}
 			dd.setProperties(prop);
+			dd.setApplyDataDiff(doApplyDataDiff);
 			dd.setSourceSchemaModel(fromSM);
 			if(fromSchemaGrabber!=null) {
 				dd.setSourceConnection(fromSchemaGrabber.getConnection());
@@ -154,11 +173,9 @@ public class SQLDiff {
 			}
 			dd.process();
 		}
-		
-		//apply diff to database?
-		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
-		if(doApplyDiff) {
-			boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+
+		//apply schema diff to database?
+		if(doApplySchemaDiff) {
 			Connection applyToConn = null;
 			if(applyToSource) {
 				if(fromSchemaGrabber!=null) {
@@ -176,7 +193,6 @@ public class SQLDiff {
 			else {
 				applyDiffToDB(diff, applyToConn);
 			}
-			//XXX apply data diff?
 		}
 		
 		//XXX close connections if open?
