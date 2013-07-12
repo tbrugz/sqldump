@@ -58,7 +58,6 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		if(connPropPrefix==null) {
 			throw new ProcessingException("connection prefix is null [prop '"+PROP_IIDB_CONN_PREFIX+"'], can't proceed");
 		}
-		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
 		updated = 0;
 		//log.info("ac="+autoCommit+";batch="+batchMode+";commitsize="+commitSize+";fallback="+fallbackToFile);
 		
@@ -74,6 +73,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		}
 		
 		//drop & create table
+		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
 		if(dropCreateTables) {
 			execSimpleSQL("drop table "+tableName, false);
 			List<String> newcols = new ArrayList<String>();
