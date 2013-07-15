@@ -86,6 +86,8 @@ public class SQLDiff {
 		
 		SchemaDiff diff = null;
 		
+		long initTime = System.currentTimeMillis();
+		
 		if(xmlinfile!=null) {
 			diff = SchemaDiff.grabDiffsFromXML(new File(xmlinfile));
 		}
@@ -200,7 +202,7 @@ public class SQLDiff {
 			}
 			else {
 				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
-				ColumnDiff.updateFeatures(); //XXX: some better way?
+				ColumnDiff.updateFeatures(); //XXX: some better way / refactoring?
 				applyDiffToDB(diff, applyToConn);
 			}
 		}
@@ -229,7 +231,7 @@ public class SQLDiff {
 		
 		//XXX close connections if open?
 		
-		log.info("...done dumping");
+		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {

@@ -40,6 +40,7 @@ public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax {
 		super.procProperties(prop);
 		this.prop = prop;
 		connPropPrefix = prop.getProperty(PROP_SDD2DB_CONN_PREFIX);
+		//XXX: option to use props 'sqldiff.applydifftosource' & 'sqldiff.applydiffto' ?
 		if(connPropPrefix==null) {
 			throw new ProcessingException("connection prefix is null [prop '"+PROP_SDD2DB_CONN_PREFIX+"'], can't proceed");
 		}

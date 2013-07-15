@@ -144,19 +144,7 @@ public class DataDiff extends AbstractFailable {
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
 		
-		if(outFilePattern==null) {
-			log.error("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)");
-			if(failonerror) { throw new ProcessingException("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)"); }
-			return;
-		}
-		
-		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
-		
-		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
-				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
-				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
-				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
-		CategorizedOut cout = new CategorizedOut(finalPattern);
+		CategorizedOut cout = getCOut();
 		
 		if(sourceMustImportData) {
 			log.info("[source] importing data for datadiff from: "+getImportDataPattern(sourceId));
@@ -164,6 +152,14 @@ public class DataDiff extends AbstractFailable {
 		if(targetMustImportData) {
 			log.info("[target] importing data for datadiff from: "+getImportDataPattern(targetId));
 		}
+
+		List<DiffSyntax> dss = getSyntaxes(prop, applyDataDiff);
+		if(dss.size()==0) {
+			String message = "no datadiff syntaxes defined: no table's data will be diffed..."; 
+			log.error(message);
+			if(failonerror) { throw new ProcessingException(message); }
+		}
+		else {
 		
 		for(Table table: tablesToDiff) {
 			if(tablesToDiffFilter!=null) {
@@ -216,7 +212,6 @@ public class DataDiff extends AbstractFailable {
 			}
 			
 			log.debug("diff for table '"+table+"'...");
-			List<DiffSyntax> dss = getSyntaxes(prop, applyDataDiff);
 			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, cout);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
@@ -224,13 +219,13 @@ public class DataDiff extends AbstractFailable {
 			
 			//XXX: drop table if imported?
 		}
-		
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
 			log.warn("tables not found for diff: "+Utils.join(tablesToDiffFilter, ", "));
 		}
-
 		if(tablesToIgnore!=null && tablesToIgnore.size()>0) {
 			log.warn("tables to ignore that were not found: "+Utils.join(tablesToIgnore, ", "));
+		}
+		
 		}
 
 		if(sourceConnCreated) {
@@ -243,19 +238,42 @@ public class DataDiff extends AbstractFailable {
 	
 	static List<DiffSyntax> getSyntaxes(Properties prop, boolean applyDataDiff) throws SQLException {
 		List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
-		//FIXME: select DiffSyntax (based on properties?)
+		List<String> dsStrs = new ArrayList<String>();
+		//FIXedME: select DiffSyntax (based on properties?)
 		// maybe add SQLDataDiffSyntax only if 'sqldiff.datadiff.outfilepattern' is set?
-		if(true) {
+		if(prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN)!=null) {
 			DiffSyntax ds = new SQLDataDiffSyntax();
 			ds.procProperties(prop);
 			dss.add(ds);
+			dsStrs.add(ds.getClass().getSimpleName());
 		}
 		if(applyDataDiff) {
 			DiffSyntax sdd2db = new SQLDataDiffToDBSyntax();
 			sdd2db.procProperties(prop);
 			dss.add(sdd2db);
+			dsStrs.add(sdd2db.getClass().getSimpleName());
+		}
+		
+		if(dss.size()>0) {
+			log.info("datadiff syntaxes: "+dsStrs);
 		}
 		return dss;
+	}
+	
+	CategorizedOut getCOut() {
+		if(outFilePattern==null) {
+			log.warn("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?) - using 'null' writer"); //XXX should be 'warn' level?
+			//if(failonerror) { throw new ProcessingException("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)"); }
+			return new CategorizedOut(CategorizedOut.NULL_WRITER);
+		}
+		
+		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
+		
+		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
+				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
+				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
+				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
+		return new CategorizedOut(finalPattern);
 	}
 	
 	Connection getConn(String grabberId) {
