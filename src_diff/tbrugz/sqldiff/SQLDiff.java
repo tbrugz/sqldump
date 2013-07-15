@@ -9,9 +9,11 @@ import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jettison.json.JSONException;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.Diff;
@@ -45,9 +47,12 @@ public class SQLDiff {
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	
-	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
-	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
 	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
+	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
+	public static final String PROP_JSONINFILE = PROP_PREFIX+".jsoninfile";
+	public static final String PROP_JSONOUTFILE = PROP_PREFIX+".jsonoutfile";
+
+	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
@@ -64,10 +69,14 @@ public class SQLDiff {
 
 	boolean failonerror = true;
 	String outfilePattern = null;
+	
 	String xmlinfile = null;
 	String xmloutfile = null;
+
+	String jsoninfile = null;
+	String jsonoutfile = null;
 	
-	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
+	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, JSONException, XMLStreamException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -78,6 +87,9 @@ public class SQLDiff {
 		
 		if(xmlinfile!=null) {
 			diff = SchemaDiff.grabDiffsFromXML(new File(xmlinfile));
+		}
+		else if(jsoninfile!=null) {
+			diff = SchemaDiff.grabDiffsFromJSON(new File(jsoninfile));
 		}
 		else {
 		
@@ -140,6 +152,16 @@ public class SQLDiff {
 			}
 		}
 
+		if(jsonoutfile!=null) {
+			try {
+				File f = new File(jsonoutfile);
+				diff.outDiffsJSON(f);
+			} catch (JAXBException e) {
+				log.warn("error writing json: "+e);
+				log.debug("error writing json: "+e.getMessage(),e);
+			}
+		}
+
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
 		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
 		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
@@ -150,8 +172,27 @@ public class SQLDiff {
 			log.warn("apply diff prop defined, but no schemadiff ('"+PROP_APPLYDIFF_SCHEMADIFF+"') nor datadiff ('"+PROP_APPLYDIFF_DATADIFF+"') properties defined");
 		}
 		
-		//XXX: apply schemadiff or datadiff first?
-		
+		//apply schema diff to database?
+		if(doApplySchemaDiff) {
+			Connection applyToConn = null;
+			if(applyToSource) {
+				if(fromSchemaGrabber!=null) {
+					applyToConn = fromSchemaGrabber.getConnection();
+				}
+			}
+			else {
+				//XXX apply to other target/id?
+				log.warn("applydiff (ditt-to-db) target not defined");
+			}
+				
+			if(applyToConn==null) {
+				log.warn("connection is null!");
+			}
+			else {
+				applyDiffToDB(diff, applyToConn);
+			}
+		}
+
 		//data diff!
 		if(doDataDiff) {
 			DataDiff dd = new DataDiff();
@@ -172,27 +213,6 @@ public class SQLDiff {
 				dd.setTargetConnection(toSchemaGrabber.getConnection());
 			}
 			dd.process();
-		}
-
-		//apply schema diff to database?
-		if(doApplySchemaDiff) {
-			Connection applyToConn = null;
-			if(applyToSource) {
-				if(fromSchemaGrabber!=null) {
-					applyToConn = fromSchemaGrabber.getConnection();
-				}
-			}
-			else {
-				//XXX apply to other target/id?
-				log.warn("applydiff (ditt-to-db) target not defined");
-			}
-				
-			if(applyToConn==null) {
-				log.warn("connection is null!");
-			}
-			else {
-				applyDiffToDB(diff, applyToConn);
-			}
 		}
 		
 		//XXX close connections if open?
@@ -243,6 +263,8 @@ public class SQLDiff {
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
 		xmlinfile = prop.getProperty(PROP_XMLINFILE);
 		xmloutfile = prop.getProperty(PROP_XMLOUTFILE);
+		jsoninfile = prop.getProperty(PROP_JSONINFILE);
+		jsonoutfile = prop.getProperty(PROP_JSONOUTFILE);
 		String colDiffTempStrategy = prop.getProperty(PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
 		if(colDiffTempStrategy!=null) {
 			try {
@@ -293,14 +315,14 @@ public class SQLDiff {
 		}
 	}
 	
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, JSONException, XMLStreamException {
 		SQLDiff sqldiff = new SQLDiff();
 		
 		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
 		sqldiff.procProterties();
 
 		if(sqldiff.outfilePattern==null && sqldiff.xmloutfile==null) {
-			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] defined. can't dump diff script";
+			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"'] defined. can't dump diff script";
 			log.error(message);
 			if(sqldiff.failonerror) { throw new ProcessingException(message); }
 			return;

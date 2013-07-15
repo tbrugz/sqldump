@@ -5,7 +5,9 @@ import java.sql.SQLException;
 
 import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 
+import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
 
 import tbrugz.sqldiff.SQLDiff;
@@ -21,7 +23,7 @@ public class RoundTripTest {
 		4- compare with original (sqldiff)
 	*/
 	@Test
-	public void testRoundtrip() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
+	public void testRoundtrip() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, JSONException, XMLStreamException {
 		//<echo message="roundtrip1: phase 1: dump [jaxb]" />
 		String[] args1 = { "-propfile=test/r1-sqldump-jaxb-test.properties" };
 		SQLDump.main(args1);
