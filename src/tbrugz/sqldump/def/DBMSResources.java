@@ -15,6 +15,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
+//TODO: add addUpdateListener() ? so DBMSResources may notify others that need its info
 public class DBMSResources {
 
 	static final Log log = LogFactory.getLog(DBMSResources.class);

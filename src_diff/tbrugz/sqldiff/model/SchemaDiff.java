@@ -60,6 +60,8 @@ public class SchemaDiff implements Diff {
 	final Set<ColumnDiff> columnDiffs = new TreeSet<ColumnDiff>();
 	@XmlElement(name="dbidDiff")
 	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
+	
+	//XXX add String sqlDialect; ?
 
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {

@@ -60,6 +60,7 @@ public class SQLDiff {
 	
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
 	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydifftosource";
+	static final String PROP_APPLYDIFF_TO = PROP_PREFIX+".applydiffto";
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 
@@ -167,6 +168,7 @@ public class SQLDiff {
 		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
 		boolean doApplyDataDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_DATADIFF, false);
 		boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+		String applyTo = prop.getProperty(PROP_APPLYDIFF_TO);
 		
 		if(doApplyDiff && !doApplySchemaDiff && !doApplyDataDiff) {
 			log.warn("apply diff prop defined, but no schemadiff ('"+PROP_APPLYDIFF_SCHEMADIFF+"') nor datadiff ('"+PROP_APPLYDIFF_DATADIFF+"') properties defined");
@@ -179,16 +181,26 @@ public class SQLDiff {
 				if(fromSchemaGrabber!=null) {
 					applyToConn = fromSchemaGrabber.getConnection();
 				}
+				if(applyToConn==null) {
+					String connPrefix = "sqldiff."+prop.getProperty(PROP_SOURCE);
+					log.info("initting 'source' connection to apply diff [prefix = '"+connPrefix+"']");
+					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
+				}
+			}
+			else if(applyTo!=null) {
+				log.info("initting connection to apply diff [prefix = '"+applyTo+"']");
+				applyToConn = ConnectionUtil.initDBConnection(applyTo, prop);
 			}
 			else {
-				//XXX apply to other target/id?
-				log.warn("applydiff (ditt-to-db) target not defined");
+				log.warn("applydiff (ditt-to-db) target (prop '"+PROP_APPLYDIFF_TOSOURCE+"' or '"+PROP_APPLYDIFF_TO+"') not defined");
 			}
 				
 			if(applyToConn==null) {
 				log.warn("connection is null!");
 			}
 			else {
+				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
+				ColumnDiff.updateFeatures(); //XXX: some better way?
 				applyDiffToDB(diff, applyToConn);
 			}
 		}
@@ -287,6 +299,7 @@ public class SQLDiff {
 		int execCount = 0;
 		int errorCount = 0;
 		int updateCount = 0;
+		SQLException lastEx = null; 
 		for(Diff d: diffs) {
 			try {
 				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
@@ -302,7 +315,9 @@ public class SQLDiff {
 				}
 			} catch (SQLException e) {
 				errorCount++;
+				lastEx = e;
 				log.warn("error executing diff: "+e);
+				if(failonerror) { break; }
 			}
 		}
 		if(execCount>0) {
@@ -312,6 +327,10 @@ public class SQLDiff {
 		}
 		else {
 			log.info("no diff statements executed");
+		}
+		
+		if(failonerror && errorCount>0) {
+			throw new ProcessingException(errorCount+" sqlExceptions occured", lastEx);
 		}
 	}
 	
