@@ -54,7 +54,10 @@ public class ResultSetDiffTest {
 
 		CategorizedOut cout = new CategorizedOut(CategorizedOut.NULL_WRITER);
 		
-		List<DiffSyntax> ds = DataDiff.getSyntaxes(new Properties(), false);
+		Properties prop = new Properties();
+		prop.setProperty(DataDiff.PROP_DATADIFF_OUTFILEPATTERN, "");
+		List<DiffSyntax> ds = DataDiff.getSyntaxes(prop, false);
+		Assert.assertEquals(1, ds.size());
 		
 		log.info("s: 1 t: 2");
 		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), ds, cout);
