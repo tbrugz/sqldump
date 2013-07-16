@@ -59,8 +59,8 @@ public class SQLDiff {
 	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndifftempcolstrategy";
 	
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
-	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydifftosource";
-	static final String PROP_APPLYDIFF_TO = PROP_PREFIX+".applydiffto";
+	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydiff.tosource";
+	static final String PROP_APPLYDIFF_TOCONN = PROP_PREFIX+".applydiff.toconn";
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 
@@ -170,10 +170,12 @@ public class SQLDiff {
 		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
 		boolean doApplyDataDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_DATADIFF, false);
 		boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
-		String applyTo = prop.getProperty(PROP_APPLYDIFF_TO);
+		String applyToConnPrefix = prop.getProperty(PROP_APPLYDIFF_TOCONN);
 		
 		if(doApplyDiff && !doApplySchemaDiff && !doApplyDataDiff) {
-			log.warn("apply diff prop defined, but no schemadiff ('"+PROP_APPLYDIFF_SCHEMADIFF+"') nor datadiff ('"+PROP_APPLYDIFF_DATADIFF+"') properties defined");
+			String message = "apply diff prop defined, but no schemadiff ('"+PROP_APPLYDIFF_SCHEMADIFF+"') nor datadiff ('"+PROP_APPLYDIFF_DATADIFF+"') properties defined";
+			log.warn(message);
+			if(failonerror) { throw new ProcessingException(message); }
 		}
 		
 		//apply schema diff to database?
@@ -189,16 +191,19 @@ public class SQLDiff {
 					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
 				}
 			}
-			else if(applyTo!=null) {
-				log.info("initting connection to apply diff [prefix = '"+applyTo+"']");
-				applyToConn = ConnectionUtil.initDBConnection(applyTo, prop);
+			else if(applyToConnPrefix!=null) {
+				log.info("initting connection to apply diff [prefix = '"+applyToConnPrefix+"']");
+				applyToConn = ConnectionUtil.initDBConnection(applyToConnPrefix, prop);
 			}
 			else {
-				log.warn("applydiff (ditt-to-db) target (prop '"+PROP_APPLYDIFF_TOSOURCE+"' or '"+PROP_APPLYDIFF_TO+"') not defined");
+				String message = "applydiff (ditt-to-db) target (prop '"+PROP_APPLYDIFF_TOSOURCE+"' or '"+PROP_APPLYDIFF_TOCONN+"') not defined";
+				log.warn(message);
+				if(failonerror) { throw new ProcessingException(message); }
 			}
 				
 			if(applyToConn==null) {
 				log.warn("connection is null!");
+				//XXX: throw exception?
 			}
 			else {
 				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
