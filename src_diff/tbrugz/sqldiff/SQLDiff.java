@@ -42,22 +42,28 @@ import tbrugz.sqldump.util.Utils;
 public class SQLDiff {
 	
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
-	
+
+	//base props
 	public static final String PROP_PREFIX = "sqldiff";
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
 	
-	public static final String PROP_XMLINFILE = PROP_PREFIX+".xmlinfile";
-	public static final String PROP_XMLOUTFILE = PROP_PREFIX+".xmloutfile";
-	public static final String PROP_JSONINFILE = PROP_PREFIX+".jsoninfile";
-	public static final String PROP_JSONOUTFILE = PROP_PREFIX+".jsonoutfile";
-
-	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
+	//schema input/output props
+	static final String PREFIX_INPUT = PROP_PREFIX+".input";
+	static final String PREFIX_OUTPUT = PROP_PREFIX+".output";
+	public static final String PROP_XMLINFILE = PREFIX_INPUT+".xmlfile";
+	public static final String PROP_XMLOUTFILE = PREFIX_OUTPUT+".xmlfile";
+	public static final String PROP_JSONINFILE = PREFIX_INPUT+".jsonfile";
+	public static final String PROP_JSONOUTFILE = PREFIX_OUTPUT+".jsonfile";
+	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern"; //XXX: rename to 'sqldiff.output.filepattern'?
+	
+	//other props
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
-	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndifftempcolstrategy";
-	
+	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
+
+	//apply diff props
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
 	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydiff.tosource";
 	static final String PROP_APPLYDIFF_TOCONN = PROP_PREFIX+".applydiff.toconn";
