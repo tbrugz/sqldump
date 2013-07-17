@@ -30,6 +30,7 @@ public class DBMSResources {
 
 	String dbId;
 	String identifierQuoteString = DEFAULT_QUOTE_STRING;
+	DBMSFeatures features;
 	
 	final List<String> dbIds; // = new ArrayList<String>();
 	
@@ -62,7 +63,7 @@ public class DBMSResources {
 	
 	public void updateMetaData(DatabaseMetaData dbmd, boolean quiet) {
 		String dbIdTmp = papp.getProperty(Defs.PROP_FROM_DB_ID);
-		if( (Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT) || dbIdTmp==null) && dbmd != null) {
+		if( (Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT, true) || dbIdTmp==null) && dbmd != null) {
 			String dbid = detectDbId(dbmd, quiet);
 			if(dbid!=null) {
 				if(!quiet) { log.info("database type identifier: "+dbid); }
@@ -71,6 +72,7 @@ public class DBMSResources {
 			else {
 				log.warn("can't detect database type");
 				updateIdentifierQuoteString();
+				updateSpecificFeaturesClass();
 			}
 		}
 		else {
@@ -91,6 +93,7 @@ public class DBMSResources {
 		if(dbIds.contains(newid) || newid==null) {
 			dbId = newid;
 			updateIdentifierQuoteString();
+			updateSpecificFeaturesClass();
 		}
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");
@@ -181,22 +184,29 @@ public class DBMSResources {
 		return dbId;
 	}
 	
-	//TODO: cache DBMSFeatures?
+	//TODOne: cache DBMSFeatures?
 	public DBMSFeatures databaseSpecificFeaturesClass() {
+		if(features!=null) { return features; }
+		
+		updateSpecificFeaturesClass();
+		
+		return features;
+	}
+	
+	synchronized void updateSpecificFeaturesClass() {
 		String dbSpecificFeaturesClass = null;
 		
 		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS,
 				dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass"));
 		
-		
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				DBMSFeatures of = (DBMSFeatures) c.newInstance();
-				initDBMSFeatures(of, papp);
+				features = (DBMSFeatures) c.newInstance();
+				initDBMSFeatures(features, papp);
 				log.debug("specific DBMS features class: "+c.getName());
-				return of;
+				return;
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (InstantiationException e) {
@@ -205,17 +215,16 @@ public class DBMSResources {
 				e.printStackTrace();
 			}
 		}
+		
 		log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
-		return new DefaultDBMSFeatures();
+		features = new DefaultDBMSFeatures();
 	}
 	
 	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
 		feats.procProperties(prop);
 		Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
-		if(mapper!=null) {
-			SQLUtils.setupColumnTypeMapper(mapper);
-			log.debug("column-mapper: "+mapper);
-		}
+		//TODO: all classes that use DBMSSpecific features should be called here? what about a listener?
+		SQLUtils.setupColumnTypeMapper(mapper);
 	}
 	
 	public String getPrivileges(String dbId) {
@@ -238,5 +247,12 @@ public class DBMSResources {
 	public Properties getProperties() {
 		return dbmsSpecificResource;
 	}
+	
+	/*void reset() {
+		dbId = null;
+		identifierQuoteString = DEFAULT_QUOTE_STRING;
+		features = new DefaultDBMSFeatures();
+		initDBMSFeatures(features, null);
+	}*/
 	
 }
