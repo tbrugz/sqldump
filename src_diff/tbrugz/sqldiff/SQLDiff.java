@@ -213,7 +213,6 @@ public class SQLDiff {
 			}
 			else {
 				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
-				ColumnDiff.updateFeatures(); //XXX: some better way / refactoring?
 				applyDiffToDB(diff, applyToConn);
 			}
 		}

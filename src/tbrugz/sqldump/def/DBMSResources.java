@@ -10,6 +10,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
@@ -218,13 +219,16 @@ public class DBMSResources {
 		
 		log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
 		features = new DefaultDBMSFeatures();
+		initDBMSFeatures(features, papp);
 	}
 	
 	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
 		feats.procProperties(prop);
 		Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
+		
 		//TODO: all classes that use DBMSSpecific features should be called here? what about a listener?
 		SQLUtils.setupColumnTypeMapper(mapper);
+		ColumnDiff.updateFeatures();
 	}
 	
 	public String getPrivileges(String dbId) {

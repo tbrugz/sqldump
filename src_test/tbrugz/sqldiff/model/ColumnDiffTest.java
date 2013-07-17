@@ -27,7 +27,6 @@ public class ColumnDiffTest {
 	@Before
 	public void before() {
 		DBMSResources.instance().updateDbId(null);
-		ColumnDiff.updateFeatures();
 		ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 	}
 	
@@ -62,7 +61,6 @@ public class ColumnDiffTest {
 	@Test
 	public void testRenameH2() {
 		DBMSResources.instance().updateDbId("h2");
-		ColumnDiff.updateFeatures();
 		
 		Column c1 = newColumn("c1","varchar",10);
 		Column c2 = newColumn("c2","varchar",20);
@@ -141,7 +139,6 @@ public class ColumnDiffTest {
 	@Test
 	public void testAlterOracle() {
 		DBMSResources.instance().updateDbId("oracle");
-		ColumnDiff.updateFeatures();
 		
 		Column c1 = newColumn("cx","varchar",10);
 		Column c2 = newColumn("cx","varchar",20);
