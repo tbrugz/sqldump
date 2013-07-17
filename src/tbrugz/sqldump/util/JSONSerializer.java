@@ -2,6 +2,7 @@ package tbrugz.sqldump.util;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 
 import javax.xml.bind.JAXBException;
@@ -17,8 +18,11 @@ import org.codehaus.jettison.mapped.Configuration;
 import org.codehaus.jettison.mapped.MappedNamespaceConvention;
 import org.codehaus.jettison.mapped.MappedXMLStreamReader;
 import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
+import org.codehaus.jettison.util.StringIndenter;
 
 public class JSONSerializer extends XMLSerializer {
+	
+	boolean indent = true;
 	
 	public JSONSerializer(String contextPath) throws JAXBException {
 		super(contextPath);
@@ -27,15 +31,33 @@ public class JSONSerializer extends XMLSerializer {
 	@Override
 	public void marshal(Object object, Writer writer) throws JAXBException {
 		Marshaller m = jc.createMarshaller();
-		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		//m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		
+		Writer sw = writer;
+		if(indent) {
+			sw = new StringWriter();
+		}
 
 		// json-specific
 		Configuration config = new Configuration();
 		MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-		XMLStreamWriter xmlStreamWriter = new MappedXMLStreamWriter(con, writer);
+		XMLStreamWriter xmlStreamWriter = new MappedXMLStreamWriter(con, sw);
 		// /json
 		
 		m.marshal(object, xmlStreamWriter); //fout
+		
+		if(!indent) {
+			return;
+		}
+		
+		StringIndenter si = new StringIndenter(sw.toString());
+		String result = si.result();
+		
+		try {
+			writer.write(result);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
