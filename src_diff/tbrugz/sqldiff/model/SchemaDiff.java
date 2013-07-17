@@ -1,8 +1,6 @@
 package tbrugz.sqldiff.model;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,26 +10,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.XMLStreamWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-import org.codehaus.jettison.mapped.Configuration;
-import org.codehaus.jettison.mapped.MappedNamespaceConvention;
-import org.codehaus.jettison.mapped.MappedXMLStreamReader;
-import org.codehaus.jettison.mapped.MappedXMLStreamWriter;
 
 import tbrugz.sqldiff.compare.ExecOrderDiffComparator;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -43,8 +29,9 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.CategorizedOut;
-import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.JSONSerializer;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.sqldump.util.XMLSerializer;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
@@ -306,52 +293,29 @@ public class SchemaDiff implements Diff {
 	static final String JAXB_DIFF_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures:tbrugz.sqldiff.model";
 
 	public void outDiffsXML(File fout) throws IOException, JAXBException {
-		//JAXBContext jc = JAXBContext.newInstance( SchemaDiff.class );
-		JAXBContext jc = JAXBContext.newInstance( JAXB_DIFF_PACKAGES );
-		Marshaller m = jc.createMarshaller();
-		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
 		Utils.prepareDir(fout);
-		m.marshal(this, fout);
+		xmlser.marshal(this, fout);
 		log.info("xml diff written to: "+fout.getAbsolutePath());
 	}
 
 	public static SchemaDiff grabDiffsFromXML(File fin) throws IOException, JAXBException {
-		JAXBContext jc = JAXBContext.newInstance( JAXB_DIFF_PACKAGES );
-		Unmarshaller u = jc.createUnmarshaller();
-		SchemaDiff sdiff = (SchemaDiff) u.unmarshal(fin);
+		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
+		SchemaDiff sdiff = (SchemaDiff) xmlser.unmarshal(fin);
 		log.info("xml diff model grabbed from '"+fin.getAbsolutePath()+"'");
 		return sdiff;
 	}
 	
-	public static SchemaDiff grabDiffsFromJSON(File fin) throws IOException, JAXBException, JSONException, XMLStreamException {
-		JAXBContext jc = JAXBContext.newInstance( JAXB_DIFF_PACKAGES );
-		
-		// json-specific
-		Configuration config = new Configuration();
-		MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-		JSONObject obj = new JSONObject(IOUtil.readFile(new FileReader(fin)));
-		XMLStreamReader xmlStreamReader = new MappedXMLStreamReader(obj, con);
-		// /json
-		
-		Unmarshaller u = jc.createUnmarshaller();
-		SchemaDiff sdiff = (SchemaDiff) u.unmarshal(xmlStreamReader);
+	public static SchemaDiff grabDiffsFromJSON(File fin) throws IOException, JAXBException {
+		JSONSerializer jsonser = new JSONSerializer(JAXB_DIFF_PACKAGES);
+		SchemaDiff sdiff = (SchemaDiff) jsonser.unmarshal(fin);
 		log.info("json diff model grabbed from '"+fin.getAbsolutePath()+"'");
 		return sdiff;
 	}
 
 	public void outDiffsJSON(File fout) throws IOException, JAXBException {
-		JAXBContext jc = JAXBContext.newInstance( JAXB_DIFF_PACKAGES );
-		Marshaller m = jc.createMarshaller();
-		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-		Utils.prepareDir(fout);
-
-		// json-specific
-		Configuration config = new Configuration();
-		MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-		XMLStreamWriter xmlStreamWriter = new MappedXMLStreamWriter(con, new FileWriter(fout));
-		// /json
-		
-		m.marshal(this, xmlStreamWriter); //fout
+		JSONSerializer jsonser = new JSONSerializer(JAXB_DIFF_PACKAGES);
+		jsonser.marshal(this, fout); //fout
 		log.info("json diff written to: "+fout.getAbsolutePath());
 	}
 
