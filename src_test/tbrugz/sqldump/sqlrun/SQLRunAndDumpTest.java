@@ -146,7 +146,7 @@ public class SQLRunAndDumpTest {
 		
 		String sqlEmp = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_EMP.sql");
 		expected = "insert into EMP (ID, NAME, SUPERVISOR_ID, DEPARTMENT_ID, SALARY) values (1, 'john', 1, 1, 2000);";
-		Assert.assertTrue(sqlEmp.startsWith(expected));
+		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
 	}
 	
 }
