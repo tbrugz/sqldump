@@ -1,7 +1,6 @@
 package tbrugz.sqldump.util;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,13 +12,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 public class XMLSerializer {
 
-	static final Log log = LogFactory.getLog(XMLSerializer.class);
-	
 	JAXBContext jc;
 	
 	public XMLSerializer(String contextPath) throws JAXBException {
