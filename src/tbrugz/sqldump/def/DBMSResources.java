@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
@@ -234,7 +233,6 @@ public class DBMSResources {
 		
 		//TODO: all classes that use DBMSSpecific features should be called here? what about a listener?
 		SQLUtils.setupColumnTypeMapper(mapper);
-		ColumnDiff.updateFeatures();
 	}
 	
 	public String getPrivileges(String dbId) {

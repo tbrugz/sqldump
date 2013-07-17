@@ -13,6 +13,7 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.DBMSUpdateListener;
 import tbrugz.sqldump.util.Utils;
 
 //@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
@@ -43,6 +44,18 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(comp!=0) return comp;
 			return tableName.compareTo(o.getName());
 		}
+	}
+	
+	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
+		@Override
+		public void dbmsUpdated() {
+			updateFeatures();
+			log.debug("DBMSUpdateListener: DBMSFeatures class: "+features);
+		}
+	};
+	
+	static {
+		DBMSResources.instance().addUpdateListener(updateListener);
 	}
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
