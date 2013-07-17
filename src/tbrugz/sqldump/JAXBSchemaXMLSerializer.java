@@ -30,6 +30,8 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INRESOURCE = ".inresource";
+	
+	static final String JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
@@ -40,8 +42,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	
 	public JAXBSchemaXMLSerializer() {
 		try {
-			//jc = JAXBContext.newInstance( "tbrugz.sqldump" );
-			jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
+			jc = JAXBContext.newInstance(JAXB_SCHEMA_PACKAGES);
 		} catch (JAXBException e) {
 			log.error("impossible to create JAXBContext: "+e);
 			log.info("impossible to create JAXBContext", e);

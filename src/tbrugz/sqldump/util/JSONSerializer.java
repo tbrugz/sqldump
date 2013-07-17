@@ -50,6 +50,7 @@ public class JSONSerializer extends XMLSerializer {
 			return;
 		}
 		
+		//see http://jira.codehaus.org/browse/JETTISON-43
 		StringIndenter si = new StringIndenter(sw.toString());
 		String result = si.result();
 		

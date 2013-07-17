@@ -37,7 +37,7 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 	public JSONSchemaSerializer() {
 		propertiesPrefix = JSONSERIALIZATION_DEFAULT_PREFIX;
 		try {
-			jc = JAXBContext.newInstance( "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures" );
+			jc = JAXBContext.newInstance(JAXB_SCHEMA_PACKAGES);
 		} catch (JAXBException e) {
 			log.error("impossible to create JAXBContext: "+e);
 			log.info("impossible to create JAXBContext", e);
