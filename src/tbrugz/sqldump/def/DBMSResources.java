@@ -3,9 +3,11 @@ package tbrugz.sqldump.def;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +18,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-//TODO: add addUpdateListener() ? so DBMSResources may notify others that need its info
+//TODOne: add addUpdateListener() ? so DBMSResources may notify others that need its info
 public class DBMSResources {
 
 	static final Log log = LogFactory.getLog(DBMSResources.class);
@@ -32,6 +34,8 @@ public class DBMSResources {
 	String dbId;
 	String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	DBMSFeatures features;
+	
+	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
 	
 	final List<String> dbIds; // = new ArrayList<String>();
 	
@@ -74,6 +78,7 @@ public class DBMSResources {
 				log.warn("can't detect database type");
 				updateIdentifierQuoteString();
 				updateSpecificFeaturesClass();
+				fireUpdateToListeners();
 			}
 		}
 		else {
@@ -95,6 +100,7 @@ public class DBMSResources {
 			dbId = newid;
 			updateIdentifierQuoteString();
 			updateSpecificFeaturesClass();
+			fireUpdateToListeners();
 		}
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");
@@ -258,5 +264,19 @@ public class DBMSResources {
 		features = new DefaultDBMSFeatures();
 		initDBMSFeatures(features, null);
 	}*/
+	
+	public void addUpdateListener(DBMSUpdateListener listener) {
+		updateListeners.add(listener);
+	}
+	
+	public boolean removeUpdateListener(DBMSUpdateListener listener) {
+		return updateListeners.remove(listener);
+	}
+	
+	void fireUpdateToListeners() {
+		for(DBMSUpdateListener listener: updateListeners) {
+			listener.dbmsUpdated();
+		}
+	}
 	
 }
