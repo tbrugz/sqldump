@@ -14,10 +14,14 @@ import javax.xml.bind.Unmarshaller;
 
 public class XMLSerializer {
 
-	JAXBContext jc;
+	final JAXBContext jc;
 	
 	public XMLSerializer(String contextPath) throws JAXBException {
-		jc = JAXBContext.newInstance( contextPath );
+		this.jc = JAXBContext.newInstance( contextPath );
+	}
+
+	public XMLSerializer(JAXBContext jc) throws JAXBException {
+		this.jc = jc;
 	}
 	
 	public Object unmarshal(Reader reader) throws JAXBException {

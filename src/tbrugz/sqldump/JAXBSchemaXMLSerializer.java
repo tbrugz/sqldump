@@ -4,13 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.util.Properties;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +19,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.XMLSerializer;
 
 public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
@@ -38,11 +37,11 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	File filenameIn;
 	InputStream fileInput;
 	String fileOutput;
-	JAXBContext jc;
+	XMLSerializer xmlser;
 	
 	public JAXBSchemaXMLSerializer() {
 		try {
-			jc = JAXBContext.newInstance(JAXB_SCHEMA_PACKAGES);
+			xmlser = new XMLSerializer(JAXB_SCHEMA_PACKAGES);
 		} catch (JAXBException e) {
 			log.error("impossible to create JAXBContext: "+e);
 			log.info("impossible to create JAXBContext", e);
@@ -85,12 +84,8 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		}
 
 		try {
-			Marshaller m = jc.createMarshaller();
-			//XXX: property for formatting or not JAXB output?
-			//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
-			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			File fout = new File(fileOutput);
-			m.marshal(schemaModel, fout);
+			xmlser.marshal(schemaModel, fout);
 			log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
 		}
 		catch(Exception e) {
@@ -108,8 +103,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		}
 
 		try {
-			Unmarshaller u = jc.createUnmarshaller();
-			SchemaModel sm = (SchemaModel) u.unmarshal(fileInput);
+			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(fileInput));
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
 			log.info("xml schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");

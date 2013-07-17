@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
+import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -26,6 +27,10 @@ public class JSONSerializer extends XMLSerializer {
 	
 	public JSONSerializer(String contextPath) throws JAXBException {
 		super(contextPath);
+	}
+	
+	public JSONSerializer(JAXBContext jc) throws JAXBException {
+		super(jc);
 	}
 	
 	@Override
