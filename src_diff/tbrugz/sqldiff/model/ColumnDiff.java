@@ -87,20 +87,13 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 	}
 	
-	public static void updateFeatures() {
+	static void updateFeatures() {
 		features = DBMSResources.instance().databaseSpecificFeaturesClass();
 	}
 	
 	@Override
 	public String getDiff() {
 		return Utils.join(getDiffList(), ";\n");
-		/*StringBuilder sb = new StringBuilder();
-		List<String> dl = getDiffList();
-		for(int i=0;i<dl.size();i++) {
-			if(i>0) { sb.append(";\n"); }
-			sb.append(dl.get(i));
-		}
-		return sb.toString();*/
 	}
 
 	@Override
@@ -163,12 +156,6 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		return ret;
 	}
 
-	/*public static List<TableColumnDiff> tableDiffs(Table origTable, Table newTable) {
-		List<TableColumnDiff> diff = new ArrayList<TableColumnDiff>();
-		//TODOxx: for each column...
-		return diff;
-	}*/
-	
 	@Override
 	public boolean equals(Object obj) {
 		if(super.equals(obj)) {
