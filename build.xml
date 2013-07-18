@@ -1,5 +1,5 @@
-<project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant">
-	
+<project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant" default="dist">
+
 	<property name="src.dir" value="src"/>
 	<property name="src.diff.dir" value="src_diff"/>
 	<property name="src.graphml.dir" value="src_graphml"/>
@@ -7,17 +7,17 @@
 	<property name="src.run.dir" value="src_run"/>
 	<property name="src.test.dir" value="src_test"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
-	
+
 	<property name="bin.dir" value="bin/main"/>
 	<property name="bin.test.dir" value="bin/test"/>
 	<property name="dist.dir" value="dist"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="javadoc.dir" value="dist/javadocs"/>
-	
+
 	<property name="sqldump.mainclass" value="tbrugz.sqldump.SQLDump"/>
 	<property name="sqldump.sqlrun.mainclass" value="tbrugz.sqldump.sqlrun.SQLRun"/>
 	<property name="sqldump.sqldiff.mainclass" value="tbrugz.sqldiff.SQLDiff"/>
-	
+
 	<property file="build.properties"/>
 	<property file="${src.dir}/sqldump-version.properties"/>
 	<property file="ivysettings.properties"/>
@@ -26,7 +26,7 @@
 	<!--property name="lib.h2" value="${lib.dir}/h2-1.3.170.jar"/>
 	<property name="lib.junit" value="${lib.dir}/junit-4.11.jar"/>
 	<property name="lib.hamcrest" value="${lib.dir}/hamcrest-core-1.3.jar"/-->
-	
+
 	<path id="classpath.compile">
 		<!--pathelement location="${lib.dir}/commons-logging-1.1.1.jar"/>
 		<pathelement location="${lib.dir}/kmlutils-0.5.2.jar"/>
@@ -45,7 +45,7 @@
 		<pathelement location="${bin.dir}"/>
 		<pathelement path="${ivy.test.classpath}"/>
 	</path>
-	
+
 	<path id="classpath.run">
 		<pathelement location="${bin.dir}"/>
 		<path refid="classpath.compile"/>
@@ -62,7 +62,7 @@
 		<path refid="classpath.run"/>
 		<!--pathelement location="${lib.h2}"/-->
 	</path>
-	
+
 	<path id="classpath.test">
 		<path refid="classpath.run.h2"/>
 		<pathelement location="${bin.test.dir}"/>
@@ -141,7 +141,7 @@
 		</java>
 		<echo message="run finished" />
 	</target>
-	
+
 	<target name="test" depends="compile" description="run junit tests">
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
 			<classpath refid="classpath.test" />
@@ -149,7 +149,7 @@
 			<test name="tbrugz.sqldump.AllTestSuite" todir="${dist.dir}"/>
 		</junit>
 	</target>
-	
+
 	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
@@ -158,7 +158,7 @@
 			<exclude name="**/jaxb.properties"/>
 			<manifest>
 				<attribute name="Implementation-Title" value="${ant.project.name}"/>
-				<attribute name="Implementation-Version" value="${version}"/> 
+				<attribute name="Implementation-Version" value="${version}"/>
 				<attribute name="Main-Class" value="${sqldump.mainclass}"/>
 			</manifest>
 		</jar>
@@ -167,7 +167,7 @@
 			includes="**/jaxb.properties">
 		</jar-->
 	</target>
-	
+
 	<target name="jar-source" depends="prepare" description="builds sources jar">
 		<jar destfile="${dist.dir}/sources/sqldump.jar">
 			<fileset dir="${src.dir}">
@@ -204,9 +204,9 @@
 			basedir="${javadoc.dir}" includes="**">
 		</jar>
 	</target>
-	
+
 	<target name="dist" depends="jar,jar-source" description="builds jars"/>
-	
+
 	<target name="all" depends="clean,javadoc,test,publish" description="clean, build, test and publish project"/>
 
 	<target name="clean">
@@ -222,27 +222,27 @@
 			</fileset>
 		</delete-->
 	</target>
-	
+
 	<!-- ========= dependencies tasks ========== -->
 
 	<target name="config-ivy-file" if="ivy.settings.file">
 		<echo message="setting ivy file: ${ivy.settings.file}"/>
 		<ivy:settings file="${ivy.settings.file}"/>
 	</target>
-	
+
 	<target name="config-ivy-dir" if="ivy.settings.dir" unless="ivy.settings.file">
 		<echo message="setting ivy file (by dir): ${ivy.settings.dir}/ivysettings.xml"/>
 		<ivy:settings file="${ivy.settings.dir}/ivysettings.xml"/>
 	</target>
 
 	<target name="config-ivy" depends="config-ivy-file,config-ivy-dir"/>
-	
+
 	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
 		<antcall target="resolve-ivy-classpath"/>
 	</target>
-	
+
 	<target name="resolve-ivy-classpath">
 		<ivy:cachepath pathid="classpath.compile.ivy" conf="default" keep="true" transitive="true" type="jar,bundle" log="download-only" />
 		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="true" type="jar,bundle" log="download-only" />
@@ -261,7 +261,7 @@
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
-	
+
 	<target name="publish" depends="dist,config-ivy" description="publish this project in the ivy repository">
 		<property name="revision" value="${version}"/>
 		<property name="resolver.publish" value="local"/>
@@ -284,6 +284,19 @@
 	</target>
 
 	<!-- ========= /dependencies tasks ========== -->
+
+	<!-- ========= code analysis tasks ========== -->
+
+	<target name="pmd">
+		<!-- see: http://pmd.sourceforge.net/ -->
+		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="classpath.test" />
+		<pmd rulesetfiles="java-imports,java-unusedcode">
+			<formatter type="xml" toFile="${dist.dir}/pmd_report.xml" toConsole="true" />
+			<fileset dir="${src.dir}">
+				<include name="**/*.java" />
+			</fileset>
+		</pmd>
+	</target>
 	
 	<!-- http://cruisecontrol.sourceforge.net/ ? jenkins? -->
 </project>

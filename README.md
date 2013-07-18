@@ -83,6 +83,7 @@ Dependencies
 	[jTDS/SQLServer](http://jtds.sourceforge.net/)
 	)
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
+- [jettison](http://jettison.codehaus.org/) - optional, for JSON output
 - [olap4j](http://www.olap4j.org/) & [mondrian](http://mondrian.pentaho.com/) - optional, for Mondrian Schema output, validation & data dump
 - [ant](http://ant.apache.org/) - recommended for building
 - [ivy](http://ant.apache.org/ivy/) - recommended for building
