@@ -25,7 +25,7 @@ public class DBMSResources {
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
 	
-	final Properties papp = new Properties();
+	final Properties papp = new Properties(); //TODO: maybe DBMSResources should not depend on processProperties...
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
 
 	String dbId;
@@ -229,9 +229,6 @@ public class DBMSResources {
 	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
 		feats.procProperties(prop);
 		//TODOne: all classes that use DBMSSpecific features should be called here? what about a listener?
-		
-		//Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
-		//SQLUtils.setupColumnTypeMapper(mapper);
 	}
 	
 	public String getPrivileges(String dbId) {

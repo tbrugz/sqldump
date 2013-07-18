@@ -433,12 +433,14 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				return;
 			}
 			
+			//XXX replace vars in sqlEdges
 			logsql.info("edges sql: "+sqlEdges);
 			Statement st = conn.createStatement();
 			ResultSet rsEdges = st.executeQuery(sqlEdges);
 			ResultSet rsNodes = null;
 
 			if(sqlNodes!=null) {
+				//XXX replace vars in sqlNodes
 				logsql.info("nodes sql: "+sqlNodes);
 				st = conn.createStatement();
 				rsNodes = st.executeQuery(sqlNodes);
