@@ -6,14 +6,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import tbrugz.sqldump.def.DBMSResources;
 
-//TODO: remove @FixMethodOrder ?
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+//@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ColTypeUtilTest {
 	
 	static final Log log = LogFactory.getLog(ColTypeUtilTest.class);

@@ -1,57 +1,61 @@
 package tbrugz.sqldump.dbmodel;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.DBMSUpdateListener;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
 public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	
-	//XXX: refactoring: move to another package?
+	//XXXxx: refactoring: move to its own class & another package?
 	public static class ColTypeUtil {
 		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
 		public static final String PROP_DONOTUSEPRECISION = "type.donotuseprecision";
 		
 		static final Properties dbmsSpecificProps = new ParametrizedProperties();
-		static final List<String> doNotUsePrecision = new Vector<String>();
+		static final Map<String, Boolean> usePrecisionMap = new HashMap<String, Boolean>();
+		
+		final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
+			@Override
+			public void dbmsUpdated() {
+				init();
+			}
+		};
 		
 		static {
 			init();
+			DBMSResources.instance().addUpdateListener(updateListener);
 		}
 		
 		static void init() {
-			try {
-				InputStream is = ColTypeUtil.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE);
-				if(is==null) throw new IOException("resource "+Defs.DBMS_SPECIFIC_RESOURCE+" not found");
-				dbmsSpecificProps.load(is);
+				dbmsSpecificProps.clear();
+				dbmsSpecificProps.putAll(DBMSResources.instance().getProperties());
 				
-				doNotUsePrecision.clear();
-				List<String> doNotUsePrecisionTypeList = Utils.getStringListFromProp(dbmsSpecificProps, PROP_DONOTUSEPRECISION, ",");
-				if(doNotUsePrecisionTypeList!=null) {
-					doNotUsePrecision.addAll(doNotUsePrecisionTypeList);
+				synchronized (usePrecisionMap) {
+					usePrecisionMap.clear();
+					List<String> doNotUsePrecisionTypeList = Utils.getStringListFromProp(dbmsSpecificProps, PROP_DONOTUSEPRECISION, ",");
+					if(doNotUsePrecisionTypeList!=null) {
+						for(String type: doNotUsePrecisionTypeList) {
+							usePrecisionMap.put(type.toUpperCase(), false);
+						}
+					}
 				}
-			}
-			catch(Exception e) {
-				log.warn("Error loading typeMapping from resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
-				e.printStackTrace();
-			}
 		}
 		
 		public static void setProperties(Properties prop) {
+			init();
 			if(prop==null) {
 				//reset...
-				init();
 				return;
 			}
 			
@@ -60,7 +64,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 				List<String> sqlTypesIgnorePrecision = Utils.getStringListFromProp(prop, PROP_IGNOREPRECISION, ",");
 				if(sqlTypesIgnorePrecision!=null) {
 					for(String s: sqlTypesIgnorePrecision) {
-						doNotUsePrecision.add(s.toUpperCase());
+						usePrecisionMap.put(s.toUpperCase(), false);
 					}
 				}
 			}
@@ -70,7 +74,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 				List<String> sqlTypesUsePrecision = Utils.getStringListFromProp(prop, PROP_USEPRECISION, ",");
 				if(sqlTypesUsePrecision!=null) {
 					for(String ctype: sqlTypesUsePrecision) {
-						doNotUsePrecision.remove(ctype.toUpperCase());
+						usePrecisionMap.remove(ctype.toUpperCase());
 						dbmsSpecificProps.remove("type."+ctype.toUpperCase()+".useprecision");
 					}
 				}
@@ -78,9 +82,9 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		}
 		
 		public static boolean usePrecision(String colType) {
-			if(colType==null) { return false; }
+			if(colType==null) { throw new IllegalArgumentException("colType should not be null"); }
 			colType = colType.toUpperCase();
-			if(doNotUsePrecision.contains(colType)) { return false; }
+			if(usePrecisionMap.containsKey(colType)) { return usePrecisionMap.get(colType); }
 			String usePrecision = dbmsSpecificProps.getProperty("type."+colType+".useprecision");
 			if(usePrecision==null) {
 				usePrecision = dbmsSpecificProps.getProperty("type."+colType+"@"+DBMSResources.instance().dbid()+".useprecision");
@@ -100,6 +104,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	String defaultValue;
 	String remarks;
 	public Boolean autoIncrement;
+	//XXX add transient String tableName; //??
 
 	public static transient boolean useAutoIncrement = false;
 	

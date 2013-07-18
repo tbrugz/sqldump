@@ -6,7 +6,7 @@ public class Defs {
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 	
-	public static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
+	static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	
 	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors" }; 
 

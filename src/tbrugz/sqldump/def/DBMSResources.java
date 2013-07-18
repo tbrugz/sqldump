@@ -48,12 +48,13 @@ public class DBMSResources {
 	}
 	
 	public void setup(Properties prop) {
-		if(prop==null) {
-			log.warn("trying to set null properties...");
-			return;
-		}
 		papp.clear();
-		papp.putAll(prop);
+		if(prop==null) {
+			log.warn("setting null properties...");
+		}
+		else {
+			papp.putAll(prop);
+		}
 	}
 
 	/*private void setup(Properties prop, DatabaseMetaData dbmd) {
