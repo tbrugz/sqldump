@@ -150,7 +150,13 @@ public class ConnectionUtil {
 		//use DatabaseMetaData: getUserName() & getUrl()?
 		log.debug("conn: "+user+"@"+dbUrl);
 		
-		return DriverManager.getConnection(dbUrl, p);
+		try {
+			return DriverManager.getConnection(dbUrl, p);
+		}
+		catch(SQLException e) {
+			log.warn("error creating connection: "+user+"@"+dbUrl);
+			throw e;
+		}
 	}
 	
 	// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency

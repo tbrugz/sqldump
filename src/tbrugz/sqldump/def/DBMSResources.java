@@ -5,7 +5,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -14,7 +13,6 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //TODOne: add addUpdateListener() ? so DBMSResources may notify others that need its info
@@ -230,10 +228,10 @@ public class DBMSResources {
 	
 	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
 		feats.procProperties(prop);
-		Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
+		//TODOne: all classes that use DBMSSpecific features should be called here? what about a listener?
 		
-		//TODO: all classes that use DBMSSpecific features should be called here? what about a listener?
-		SQLUtils.setupColumnTypeMapper(mapper);
+		//Map<Class<?>, Class<?>> mapper = feats.getColumnTypeMapper();
+		//SQLUtils.setupColumnTypeMapper(mapper);
 	}
 	
 	public String getPrivileges(String dbId) {
