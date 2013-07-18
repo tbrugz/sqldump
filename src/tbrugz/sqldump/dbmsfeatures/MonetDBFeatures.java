@@ -26,7 +26,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		grabTriggers = false; //XXX: grab from SYS.TRIGGERS
 	}
 	
-	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws java.sql.SQLException {
+	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		try {
 			conn.rollback();
 		}

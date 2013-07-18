@@ -98,7 +98,7 @@ public class NonNullGetMap<K,V> implements Map<K,V> {
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<K, V>> entrySet() {
+	public Set<Entry<K, V>> entrySet() {
 		return map.entrySet();
 	}
 

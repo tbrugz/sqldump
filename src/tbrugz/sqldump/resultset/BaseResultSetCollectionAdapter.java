@@ -14,8 +14,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.resultset.AbstractResultSet;
-
 public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractResultSet {
 	
 	static final Log log = LogFactory.getLog(BaseResultSetCollectionAdapter.class);
