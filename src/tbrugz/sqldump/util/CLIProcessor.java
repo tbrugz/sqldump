@@ -2,7 +2,6 @@ package tbrugz.sqldump.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -28,19 +27,17 @@ public class CLIProcessor {
 		log.info((productName!=null?productName+" ":"")+
 				"init... [version "+Version.getVersion()+"]");
 		boolean useSysPropSetted = false;
-		boolean propFilenameSetted = false;
-		boolean propResourceSetted = false;
-		//parse args
-		String propFilename = defaultPropFile;
-		String propResource = null;
+		int loadedCount = 0;
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
-				propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-				propFilenameSetted = true;
+				String propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+				loadFile(papp, propFilename, true);
+				loadedCount++;
 			}
 			else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
-				propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
-				propResourceSetted = true;
+				String propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
+				loadResource(papp, propResource);
+				loadedCount++;
 			}
 			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
 				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
@@ -51,64 +48,51 @@ public class CLIProcessor {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
 			}
 		}
+		if(loadedCount==0) {
+			loadFile(papp, defaultPropFile, false);
+		}
 		if(!useSysPropSetted) {
 			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
 			useSysPropSetted = true;
 		}
 		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
-		
-		InputStream propIS = null;
-		if(propResourceSetted) {
-			//XXX: set PROP_PROPFILEBASEDIR for resources?
-			
-			log.info("loading properties resource: "+propResource);
-			propIS = CLIProcessor.class.getResourceAsStream(propResource);
-			if(propIS==null) {
-				log.warn("properties resource '"+propResource+"' does not exist");
-			}
+	}
+	
+	static void loadResource(Properties p, String propResource) {
+		log.info("loading properties resource: "+propResource);
+		InputStream propIS = CLIProcessor.class.getResourceAsStream(propResource);
+		if(propIS==null) {
+			log.warn("properties resource '"+propResource+"' does not exist");
 		}
 		else {
-			File propFile = new File(propFilename);
-			
-			//init properties
-			File propFileDir = propFile.getAbsoluteFile().getParentFile();
-			log.debug("propfile base dir: "+propFileDir);
-			papp.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
-			
-			if(propFile.exists()) {
-				log.info("loading properties: "+propFile);
-				propIS = new FileInputStream(propFile);
+			try {
+				p.load(propIS);
+			}
+			catch(IOException e) {
+				log.warn("error loading resource '"+propResource+"': "+e);
+			}
+		}
+	}
+	
+	static void loadFile(Properties p, String propFilename, boolean logExceptionAsWarn) {
+		File propFile = new File(propFilename);
+		File propFileDir = propFile.getAbsoluteFile().getParentFile();
+		log.debug("propfile base dir: "+propFileDir);
+		p.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+		
+		try {
+			log.info("loading properties file: "+propFile);
+			InputStream propIS = new FileInputStream(propFile);
+			p.load(propIS);
+		}
+		catch(IOException e) {
+			if(logExceptionAsWarn) {
+				log.warn("error loading file '"+propFile+"': "+e);
 			}
 			else {
-				if(propFilenameSetted) {
-					log.warn("properties file '"+propFile+"' does not exist");
-				}
-				else {
-					log.info("properties file '"+propFile+"' does not exist"); //XXX: change to debug() ?
-				}
+				log.debug("error loading file '"+propFile+"': "+e);
 			}
 		}
-		try {
-			if(propIS!=null) {
-				papp.load(propIS);
-			}
-		}
-		catch(FileNotFoundException e) {
-			if(propResourceSetted) {
-				log.warn("prop resource not found: "+propResource);
-			}
-			else if(propFilenameSetted) {
-				log.warn("prop file not found: "+propFilename);
-			}
-		}
-		/*catch(IOException e) {
-			if(propResourceSetted) {
-				log.warn("error loading prop resource: "+propResource);
-			}
-			else if(propFilenameSetted) {
-				log.warn("error loading prop file: "+propFilename);
-			}
-		}*/
 	}
 
 }
