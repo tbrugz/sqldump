@@ -281,11 +281,15 @@ public class SQLDump {
 	
 	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
 		sqlproc.setProperties(papp);
-		if(sqlproc.needsConnection() && conn==null) {
-			setupConnection();
+		if(sqlproc.needsConnection()) {
+			if(conn==null) {
+				setupConnection();
+			}
+			sqlproc.setConnection(conn);
 		}
-		sqlproc.setConnection(conn);
-		sqlproc.setSchemaModel(sm);
+		if(sqlproc.needsSchemaModel()) {
+			sqlproc.setSchemaModel(sm);
+		}
 		//TODO: set fail on error based on (processor) properties ?
 		sqlproc.setFailOnError(failonerror);
 		sqlproc.process();
