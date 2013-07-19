@@ -12,6 +12,7 @@ import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
 import tbrugz.sqldump.processors.CascadingDataDumpTest;
@@ -38,6 +39,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	CategorizedOutTest.class,
 	ColumnDiffTest.class,
 	CLIProcessorTest.class,
+	DBMSResourcesTest.class,
 
 	//import
 	CSVImportTest.class,
