@@ -64,14 +64,6 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 	}
 
 	@Override
-	public void setPropertiesPrefix(String propertiesPrefix) {
-	}
-
-	@Override
-	public void setFailOnError(boolean failonerror) {
-	}
-
-	@Override
 	public void process() {
 		try {
 			if(conn!=null && (conn instanceof OlapConnection)) {

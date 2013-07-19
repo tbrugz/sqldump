@@ -7,11 +7,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.AbstractProcessor;
 import tbrugz.sqldump.util.Utils;
 
 //XXX: dir prop/dirToDeleteFiles must be absolute ?
-public class DirectoryCleaner extends AbstractSQLProc {
+public class DirectoryCleaner extends AbstractProcessor {
 
 	static final Log log = LogFactory.getLog(DirectoryCleaner.class);
 	

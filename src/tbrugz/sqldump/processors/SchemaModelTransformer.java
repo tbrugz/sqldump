@@ -14,14 +14,13 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
-import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.AbstractSchemaProcessor;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.LongFactory;
 import tbrugz.util.NonNullGetMap;
 
-public class SchemaModelTransformer extends AbstractSQLProc {
+public class SchemaModelTransformer extends AbstractSchemaProcessor {
 	static final Log log = LogFactory.getLog(SchemaModelTransformer.class);
 	
 	static final String DEFAULT_PREFIX = "sqldump.modeltransform";
@@ -33,21 +32,14 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	//XXX option to remove FKs that references non-existent tables?
 	//XXX option to remove FKs from/to table?
 
-	SchemaModel schemaModel;
 	List<FK> addedFKs;
 	String prefix = DEFAULT_PREFIX;
 	
 	boolean doRemoveSchemaName = false;
 	
 	@Override
-	public void setSchemaModel(SchemaModel schemamodel) {
-		super.setSchemaModel(schemamodel);
-		this.schemaModel = schemamodel; 
-	}
-	
-	@Override
 	public void setProperties(Properties prop) {
-		this.prop = prop;
+		super.setProperties(prop);
 		doRemoveSchemaName = Utils.getPropBool(prop, prefix+SUFFIX_REMOVE_SCHEMANAME, doRemoveSchemaName);
 	}
 
@@ -75,7 +67,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	//moved from SchemaModelTransformer.dumpSchema()
 	void addFKs() {
 		addedFKs = new ArrayList<FK>();
-		for(Table t: schemaModel.getTables()) {
+		for(Table t: model.getTables()) {
 			//sqldump.modeltransform.table@<fktable>.xtrafk=<fkcolumn>:[<schema>.]<pktable>:<pkcolumn>[:<fk-name>][;(...)]
 			List<String> xtraFKs = Utils.getStringListFromProp(prop, prefix+".table@"+t.getName()+".xtrafk", ";");
 			if(xtraFKs==null) { continue; }
@@ -122,13 +114,13 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 				}
 			}
 		}
-		schemaModel.getForeignKeys().addAll(addedFKs);
+		model.getForeignKeys().addAll(addedFKs);
 	}
 
 	void removeFKs() {
 		int count = 0;
 		List<String> fksToRemove = Utils.getStringListFromProp(prop, prefix+SUFFIX_REMOVE_FKS_BYNAME, ",");
-		Iterator<FK> i = schemaModel.getForeignKeys().iterator();
+		Iterator<FK> i = model.getForeignKeys().iterator();
 		if(fksToRemove!=null) {
 			while (i.hasNext()) {
 				FK fk = i.next();
@@ -151,7 +143,7 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	void alterColymnType() {
 		//sqldump.schematransform.columntype@DATE=TIMESTAMP
 		int count = 0;
-		for(Table t: schemaModel.getTables()) {
+		for(Table t: model.getTables()) {
 			for(Column c: t.getColumns()) {
 				String newColType = prop.getProperty(prefix+".columntype@"+c.type);
 				if(newColType!=null) {
@@ -176,14 +168,14 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	}
 	
 	void removeSchemaname() {
-		removeSchemaname(schemaModel.getTables());
-		removeSchemaname(schemaModel.getForeignKeys());
-		removeSchemaname(schemaModel.getIndexes());
-		removeSchemaname(schemaModel.getExecutables());
-		removeSchemaname(schemaModel.getSequences());
-		removeSchemaname(schemaModel.getSynonyms());
-		removeSchemaname(schemaModel.getTriggers());
-		removeSchemaname(schemaModel.getViews());
+		removeSchemaname(model.getTables());
+		removeSchemaname(model.getForeignKeys());
+		removeSchemaname(model.getIndexes());
+		removeSchemaname(model.getExecutables());
+		removeSchemaname(model.getSequences());
+		removeSchemaname(model.getSynonyms());
+		removeSchemaname(model.getTriggers());
+		removeSchemaname(model.getViews());
 	}
 
 	void removeSchemaname(Set<? extends DBIdentifiable> list) {
@@ -194,11 +186,11 @@ public class SchemaModelTransformer extends AbstractSQLProc {
 	
 	void removeTablesWithFKs(List<String> removeTables) {
 		int tablecount = 0, fkcount = 0;
-		Iterator<Table> ti = schemaModel.getTables().iterator();
+		Iterator<Table> ti = model.getTables().iterator();
 		while (ti.hasNext()) {
 			Table t = ti.next();
 			if(removeTables.contains(t.getName())) {
-				Iterator<FK> fi = schemaModel.getForeignKeys().iterator();
+				Iterator<FK> fi = model.getForeignKeys().iterator();
 				while (fi.hasNext()) {
 					FK fk = fi.next();
 					if(fk.getPkTable().equals(t.getName()) || fk.getFkTable().equals(t.getName())) { //XXX: fkTable-only or pkTable-only?

@@ -11,10 +11,10 @@ import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.AbstractSchemaProcessor;
 import tbrugz.sqldump.util.StringDecorator;
 
-public class ModelSQLIdTransformer extends AbstractSQLProc {
+public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 
 	static Log log = LogFactory.getLog(ModelSQLIdTransformer.class);
 

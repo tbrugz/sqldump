@@ -7,13 +7,13 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.AbstractSchemaProcessor;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
-public class SQLDialectTransformer extends AbstractSQLProc {
+public class SQLDialectTransformer extends AbstractSchemaProcessor {
 
 	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
 	

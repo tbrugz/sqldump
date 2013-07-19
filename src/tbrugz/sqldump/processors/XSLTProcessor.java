@@ -13,10 +13,10 @@ import javax.xml.transform.stream.StreamSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.AbstractProcessor;
 import tbrugz.sqldump.def.ProcessingException;
 
-public abstract class XSLTProcessor extends AbstractSQLProc {
+public abstract class XSLTProcessor extends AbstractProcessor {
 	static Log log = LogFactory.getLog(XSLTProcessor.class);
 
 	protected InputStream xsl;
