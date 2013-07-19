@@ -44,6 +44,12 @@ public class DBMSResourcesTest {
 
 		dbmd = new TestDBMD("PostgreSQL", 9, 0);
 		Assert.assertEquals("pgsql90-", res.detectDbId(dbmd, false));
+
+		dbmd = new TestDBMD("PostgreSQL", 8, 10);
+		Assert.assertEquals("pgsql90-", res.detectDbId(dbmd, false));
+
+		dbmd = new TestDBMD("PostgreSQL", 10, -1);
+		Assert.assertEquals("pgsql", res.detectDbId(dbmd, false));
 	}
 		
 	@Test

@@ -145,10 +145,7 @@ public class DBMSResources {
 				//equal major version...
 				Long minorVersionEQorLess = Utils.getPropLong(dbmsSpecificResource, "dbid."+dbid+".detectversion.minor.equalorless");
 				if(minorVersionEQorLess==null) { return dbid; }
-				//if(dbmd.getDatabaseMinorVersion() <= minorVersionEQorLess) { return dbid; }
-				if(dbMinorVersion > minorVersionEQorLess) { continue; }
-				
-				return dbid;
+				if(dbMinorVersion <= minorVersionEQorLess) { return dbid; }
 			}
 			
 			/*String dbUrl = dbmd.getURL();
