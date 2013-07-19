@@ -42,7 +42,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX: add junit tests for all "supported" databases (needs sqlregen first?)
  * XXX?: option for queries to have specific syntax-dumpers
  * XXXdone: option for specific queries to have specific syntax-dumpers
- * XXX: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
+ * TODO!: filter tables/executables/trigger (/index/view/mv/sequence ?) by name (include only/exclude)
  * TODO: output ffc with optional trimming
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
  * ~TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
@@ -152,9 +152,6 @@ public class SQLDump {
 			if(schemaGrabber==null) {
 				log.error("schema grabber class '"+grabClassName+"' not found");
 			}
-			else {
-				processors.add(schemaGrabber);
-			}
 		}
 		else {
 			log.debug("no schema grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
@@ -196,7 +193,7 @@ public class SQLDump {
 			processors.addAll(getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
 		}
 		
-		doMainProcess(processors);
+		doMainProcess(schemaGrabber, processors);
 		
 		}
 		finally {
@@ -205,13 +202,17 @@ public class SQLDump {
 		}
 	}
 	
-	void doMainProcess(List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
+	void doMainProcess(SchemaModelGrabber grabber, List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
 
 		int numOfComponents = processors.size();
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<numOfComponents;i++) {
 			ProcessComponent pc = processors.get(i);
 			sb.append((i>0?", ":"")+pc.getClass().getSimpleName());
+		}
+		if(grabber!=null) {
+			log.info("sqldump grabber: "+grabber.getClass().getSimpleName());
+			processors.add(0, grabber);
 		}
 		log.info("sqldump processors [#"+numOfComponents+"]: "+sb.toString());
 
