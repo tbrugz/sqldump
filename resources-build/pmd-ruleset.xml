@@ -7,5 +7,7 @@
 	<rule ref="rulesets/java/unusedcode.xml">
 		<exclude name="UnusedModifier" />
 	</rule>
-	<rule ref="rulesets/java/basic.xml"/>
+	<rule ref="rulesets/java/basic.xml">
+		<exclude name="AvoidDecimalLiteralsInBigDecimalConstructor" /> <!--  strange, but exceptions occur if not excluded -->
+	</rule>
 </ruleset>

@@ -293,7 +293,22 @@
 		<pmd rulesetfiles="resources-build/pmd-ruleset.xml">
 			<formatter type="xml" toFile="${dist.dir}/pmd_report.xml" toConsole="true" />
 			<fileset dir="${src.dir}">
-				<include name="**/*.java" />
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.graphml.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.diff.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.run.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.mondrian.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.xtra.dir}">
+				<include name="**/*.java"/>
 			</fileset>
 		</pmd>
 	</target>
