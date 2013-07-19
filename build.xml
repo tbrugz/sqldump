@@ -287,7 +287,10 @@
 
 	<!-- ========= code analysis tasks ========== -->
 
-	<target name="pmd">
+	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd">
+	</target>
+	
+	<target name="codeanalysis-pmd">
 		<!-- see: http://pmd.sourceforge.net/ -->
 		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="classpath.test" />
 		<pmd rulesetfiles="resources-build/pmd-ruleset.xml">
@@ -311,6 +314,31 @@
 				<include name="**/*.java"/>
 			</fileset>
 		</pmd>
+	</target>
+	
+	<target name="codeanalysis-cpd">
+		<!-- http://pmd.sourceforge.net/snapshot/cpd-usage.html -->
+		<taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" classpathref="classpath.test" />
+		<cpd minimumTokenCount="100" outputFile="${dist.dir}/cpd_report.xml" format="xml">
+			<fileset dir="${src.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.graphml.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.diff.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.run.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.mondrian.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.xtra.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+		</cpd>
 	</target>
 	
 	<!-- http://cruisecontrol.sourceforge.net/ ? jenkins? -->
