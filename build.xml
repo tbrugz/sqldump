@@ -290,7 +290,7 @@
 	<target name="pmd">
 		<!-- see: http://pmd.sourceforge.net/ -->
 		<taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="classpath.test" />
-		<pmd rulesetfiles="java-imports,java-unusedcode">
+		<pmd rulesetfiles="resources-build/pmd-ruleset.xml">
 			<formatter type="xml" toFile="${dist.dir}/pmd_report.xml" toConsole="true" />
 			<fileset dir="${src.dir}">
 				<include name="**/*.java" />
