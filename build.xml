@@ -10,6 +10,7 @@
 
 	<property name="bin.dir" value="bin/main"/>
 	<property name="bin.test.dir" value="bin/test"/>
+	<property name="bin.cobertura.dir" value="bin/cobertura"/> <!-- cobertura-instrumented -->
 	<property name="dist.dir" value="dist"/>
 	<property name="lib.dir" value="lib"/>
 	<property name="javadoc.dir" value="dist/javadocs"/>
@@ -82,6 +83,17 @@
 		<pathelement location="lib/commons-math-1.1.jar"/-->
 	</path>
 
+	<path id="classpath.cobertura">
+		<pathelement location="lib/cobertura-2.0.2.jar"/>
+		<pathelement location="lib/log4j-1.2.16.jar"/>
+		<pathelement location="lib/asm-4.1.jar"/>
+		<pathelement location="lib/asm-util-4.1.jar"/>
+		<pathelement location="lib/asm-tree-4.1.jar"/>
+		<pathelement location="lib/asm-analysis-4.1.jar"/>
+		<pathelement location="lib/asm-commons-4.1.jar"/>
+		<pathelement location="lib/oro-2.0.8.jar"/>
+	</path>
+	
 	<target name="prepare">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
@@ -142,8 +154,10 @@
 		<echo message="run finished" />
 	</target>
 
-	<target name="test" depends="compile" description="run junit tests">
+	<target name="test" depends="compile, cobertura-instrument" description="run junit tests">
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
+			<sysproperty key="net.sourceforge.cobertura.datafile" file="${basedir}/cobertura.ser" />
+			<classpath location="${bin.cobertura.dir}" />
 			<classpath refid="classpath.test" />
 			<formatter type="xml"/>
 			<test name="tbrugz.sqldump.AllTestSuite" todir="${dist.dir}"/>
@@ -287,7 +301,7 @@
 
 	<!-- ========= code analysis tasks ========== -->
 
-	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd">
+	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura">
 	</target>
 	
 	<target name="codeanalysis-pmd">
@@ -341,5 +355,49 @@
 		</cpd>
 	</target>
 	
+	<target name="codeanalysis-cobertura" depends="test">
+		<cobertura-report format="xml" destdir="${dist.dir}" >
+			<fileset dir="${src.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.graphml.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.diff.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.run.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.mondrian.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+			<fileset dir="${src.xtra.dir}">
+				<include name="**/*.java"/>
+			</fileset>
+		</cobertura-report>
+	</target>
+	
+	<!--
+	see: https://github.com/cobertura/cobertura/wiki/Ant-Task-Reference
+	-->
+	<target name="cobertura-instrument">
+		<taskdef classpathref="classpath.cobertura" resource="tasks.properties" />
+		<delete file="${basedir}/cobertura.ser" />
+
+		<cobertura-instrument todir="${bin.cobertura.dir}" ignoreTrivial="true">
+			<!--includeClasses regex=".*.class" />
+			<excludeClasses regex=".*\.Test.*" /-->
+			<fileset dir="${bin.dir}">
+				<include name="**/*.class" />
+				<exclude name="**/*Test.class" />
+			</fileset>
+
+			<!--instrumentationClasspath>
+				<pathelement location="${bin.dir}" />
+			</instrumentationClasspath-->
+		</cobertura-instrument>
+	</target>
+
 	<!-- http://cruisecontrol.sourceforge.net/ ? jenkins? -->
 </project>
