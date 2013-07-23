@@ -84,6 +84,7 @@
 	</path>
 
 	<path id="classpath.cobertura">
+		<pathelement location="lib/cobertura-2.0.3-SNAPSHOT.jar"/>
 		<pathelement location="lib/cobertura-2.0.2.jar"/>
 		<pathelement location="lib/log4j-1.2.16.jar"/>
 		<pathelement location="lib/asm-4.1.jar"/>
@@ -355,7 +356,7 @@
 		</cpd>
 	</target>
 	
-	<target name="codeanalysis-cobertura" depends="test">
+	<target name="codeanalysis-cobertura">
 		<cobertura-report format="xml" destdir="${dist.dir}" >
 			<fileset dir="${src.dir}">
 				<include name="**/*.java"/>
@@ -399,5 +400,6 @@
 		</cobertura-instrument>
 	</target>
 
-	<!-- http://cruisecontrol.sourceforge.net/ ? jenkins? -->
+	<!-- ========= /code analysis tasks ========== -->
+
 </project>
