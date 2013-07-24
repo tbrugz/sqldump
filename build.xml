@@ -95,6 +95,10 @@
 		<pathelement location="lib/oro-2.0.8.jar"/>
 	</path>
 	
+	<path id="classpath.findbugs">
+		<pathelement path="${ivy.findbugs.classpath}"/>
+	</path>
+	
 	<target name="prepare">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
@@ -261,14 +265,17 @@
 	<target name="resolve-ivy-classpath">
 		<ivy:cachepath pathid="classpath.compile.ivy" conf="default" keep="true" transitive="true" type="jar,bundle" log="download-only" />
 		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="true" type="jar,bundle" log="download-only" />
+		<ivy:cachepath pathid="classpath.findbugs.ivy" conf="findbugs" type="jar,bundle" log="download-only" />
 		<property name="new-ivy.compile.classpath" refid="classpath.compile.ivy"/>
 		<property name="new-ivy.test.classpath" refid="classpath.compiletest.ivy"/>
+		<property name="new-ivy.findbugs.classpath" refid="classpath.findbugs.ivy"/>
 		<!--echo message="ivy.compile.classpath: ${new-ivy.compile.classpath}"/>
 		<echo message="ivy.test.classpath: ${new-ivy.test.classpath}"/-->
 		<!--delete file="ivy.classpath.properties"/-->
 		<propertyfile file="ivy.classpath.properties">
 			<entry key="ivy.compile.classpath" value="${new-ivy.compile.classpath}"/>
 			<entry key="ivy.test.classpath" value="${new-ivy.test.classpath}"/>
+			<entry key="ivy.findbugs.classpath" value="${new-ivy.findbugs.classpath}"/>
 		</propertyfile>
 	</target>
 
@@ -398,6 +405,25 @@
 				<pathelement location="${bin.dir}" />
 			</instrumentationClasspath-->
 		</cobertura-instrument>
+	</target>
+	
+	<!--
+	see: http://findbugs.sourceforge.net/manual/anttask.html
+	-->
+	<target name="findbugs">
+		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath.findbugs"/>
+		<findbugs classpathref="classpath.findbugs"
+				output="xml"
+				outputFile="${dist.dir}/findbugs.xml" >
+			<auxClasspath path="${ivy.test.classpath}" />
+			<sourcePath path="${src.diff.dir}" />
+			<sourcePath path="${src.dir}" />
+			<sourcePath path="${src.graphml.dir}" />
+			<sourcePath path="${src.mondrian.dir}" />
+			<sourcePath path="${src.run.dir}" />
+			<sourcePath path="${src.xtra.dir}" />
+			<class location="${bin.dir}" />
+		</findbugs>
 	</target>
 
 	<!-- ========= /code analysis tasks ========== -->

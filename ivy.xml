@@ -5,6 +5,7 @@
 	<configurations>
 		<conf name="default"/>
 		<conf name="test" extends="default" visibility="private"/>
+		<conf name="findbugs" visibility="private"/>
 	</configurations>
 	<publications>
 		<artifact name="sqldump" type="jar" conf="default"/>
@@ -40,5 +41,6 @@
 		<!-- code analysis deps -->
 		<dependency org="net.sourceforge.pmd" name="pmd" rev="5.0.4" conf="test->default"/>
 		<dependency org="net.sourceforge.cobertura" name="cobertura" rev="2.0.2" conf="test->default"/>
+		<dependency org="com.google.code.findbugs" name="findbugs" rev="2.0.1" conf="findbugs->default"/>
 	</dependencies>
 </ivy-module>
