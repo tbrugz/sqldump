@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<schemaDiff>
+    <columnDiff>
+        <changeType>ADD</changeType>
+        <schemaName>PUBLIC</schemaName>
+        <tableName>EMP</tableName>
+        <column>
+            <name>EMAIL</name>
+            <type>VARCHAR</type>
+            <columSize>100</columSize>
+            <nullable>true</nullable>
+        </column>
+    </columnDiff>
+</schemaDiff>

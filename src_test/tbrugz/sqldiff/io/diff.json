@@ -1,0 +1,15 @@
+{
+  "schemaDiff":{
+    "columnDiff":{
+      "changeType":"ADD",
+      "schemaName":"PUBLIC",
+      "tableName":"EMP",
+      "column":{
+        "name":"EMAIL",
+        "type":"VARCHAR",
+        "columSize":100,
+        "nullable":true
+      }
+    }
+  }
+}

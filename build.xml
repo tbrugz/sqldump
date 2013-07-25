@@ -148,6 +148,8 @@
 			<fileset dir="${src.test.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
+				<include name="**/*.xml"/>
+				<include name="**/*.json"/>
 			</fileset>
 		</copy>
 	</target>
