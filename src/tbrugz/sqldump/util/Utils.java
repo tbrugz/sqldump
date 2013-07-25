@@ -419,16 +419,20 @@ public class Utils {
 
 	public static Class<?> getClassWithinPackages(String className, String... packages) {
 		Exception ex = null;
+		if(packages==null || packages.length==0) {
+			packages = new String[]{null};
+		}
 		for(String pkg: packages) {
 			try {
-				String prepend = pkg!=null?pkg+".":"";
-				Class<?> c = Class.forName(prepend+className);
+				String prepend = (pkg!=null&&pkg.length()>0) ? pkg+"." : "";
+				String classToFind = prepend+className;
+				Class<?> c = Class.forName(classToFind);
 				return c;
 			} catch (ClassNotFoundException e) {
 				if(ex==null) { ex = e; }
 			}
 		}
-		log.debug("class not found: "+className+" [ex: "+ex+"]");
+		log.debug("class not found: "+className+" [ex: "+ex+"]",ex);
 		return null;
 	}
 	
