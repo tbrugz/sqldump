@@ -1,5 +1,6 @@
 package tbrugz.sqldiff.test;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
+import javax.xml.bind.JAXBException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -121,7 +123,21 @@ public class SQLDiffTest {
 		st.executeUpdate(diff1st.getDiff());
 		st.executeUpdate(dinv.getDiff()); //XXX: remove? (restore database should not be the test responsability)
 	}
+
+	@Test
+	public void testDiffXMLAndJSONOut() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
+		setup4diff();
+		Statement st = conn.createStatement();
+		st.executeUpdate("alter table emp add column email varchar(100)");
 		
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		SchemaDiff schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		
+		//test xml & json output
+		schemaDiff.outDiffsXML(new File("work/output/SQLDiffTest/diff.xml"));
+		schemaDiff.outDiffsJSON(new File("work/output/SQLDiffTest/diff.json"));
+	}
+	
 	@Test
 	public void testDiffCreateTable() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		setup4diff();
