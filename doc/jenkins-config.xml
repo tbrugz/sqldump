@@ -40,6 +40,31 @@
     </hudson.tasks.Ant>
   </builders>
   <publishers>
+    <hudson.plugins.findbugs.FindBugsPublisher plugin="findbugs@4.48">
+      <healthy></healthy>
+      <unHealthy></unHealthy>
+      <thresholdLimit>low</thresholdLimit>
+      <pluginName>[FINDBUGS] </pluginName>
+      <defaultEncoding></defaultEncoding>
+      <canRunOnFailed>false</canRunOnFailed>
+      <useStableBuildAsReference>false</useStableBuildAsReference>
+      <useDeltaValues>false</useDeltaValues>
+      <thresholds plugin="analysis-core@1.50">
+        <unstableTotalAll></unstableTotalAll>
+        <unstableTotalHigh></unstableTotalHigh>
+        <unstableTotalNormal></unstableTotalNormal>
+        <unstableTotalLow></unstableTotalLow>
+        <failedTotalAll></failedTotalAll>
+        <failedTotalHigh></failedTotalHigh>
+        <failedTotalNormal></failedTotalNormal>
+        <failedTotalLow></failedTotalLow>
+      </thresholds>
+      <shouldDetectModules>false</shouldDetectModules>
+      <dontComputeNew>true</dontComputeNew>
+      <doNotResolveRelativePaths>true</doNotResolveRelativePaths>
+      <pattern>dist/findbugs.xml</pattern>
+      <isRankActivated>false</isRankActivated>
+    </hudson.plugins.findbugs.FindBugsPublisher>
     <hudson.plugins.pmd.PmdPublisher plugin="pmd@3.35">
       <healthy></healthy>
       <unHealthy></unHealthy>
