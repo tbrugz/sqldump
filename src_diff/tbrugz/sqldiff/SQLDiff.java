@@ -13,7 +13,6 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jettison.json.JSONException;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.Diff;
@@ -69,6 +68,9 @@ public class SQLDiff {
 	static final String PROP_APPLYDIFF_TOCONN = PROP_PREFIX+".applydiff.toconn";
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
+	
+	static final String XML_IO_CLASS = "tbrugz.sqldiff.io.XMLDiffIO";
+	static final String JSON_IO_CLASS = "tbrugz.sqldiff.io.JSONDiffIO";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -83,7 +85,7 @@ public class SQLDiff {
 	String jsoninfile = null;
 	String jsonoutfile = null;
 	
-	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, JSONException, XMLStreamException {
+	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -95,10 +97,12 @@ public class SQLDiff {
 		long initTime = System.currentTimeMillis();
 		
 		if(xmlinfile!=null) {
-			diff = SchemaDiff.grabDiffsFromXML(new File(xmlinfile));
+			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(XML_IO_CLASS);
+			diff = (SchemaDiff) dg.grabDiff(new File(xmlinfile));
 		}
 		else if(jsoninfile!=null) {
-			diff = SchemaDiff.grabDiffsFromJSON(new File(jsoninfile));
+			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(JSON_IO_CLASS);
+			diff = (SchemaDiff) dg.grabDiff(new File(jsoninfile));
 		}
 		else {
 		
@@ -154,7 +158,8 @@ public class SQLDiff {
 		if(xmloutfile!=null) {
 			try {
 				File f = new File(xmloutfile);
-				diff.outDiffsXML(f);
+				DiffDumper dd = (DiffDumper) Utils.getClassInstance(XML_IO_CLASS);
+				dd.dumpDiff(diff, f);
 			} catch (JAXBException e) {
 				log.warn("error writing xml: "+e);
 				log.debug("error writing xml: "+e.getMessage(),e);
@@ -164,7 +169,8 @@ public class SQLDiff {
 		if(jsonoutfile!=null) {
 			try {
 				File f = new File(jsonoutfile);
-				diff.outDiffsJSON(f);
+				DiffDumper dd = (DiffDumper) Utils.getClassInstance(JSON_IO_CLASS);
+				dd.dumpDiff(diff, f);
 			} catch (JAXBException e) {
 				log.warn("error writing json: "+e);
 				log.debug("error writing json: "+e.getMessage(),e);
@@ -346,7 +352,7 @@ public class SQLDiff {
 		}
 	}
 	
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, JSONException, XMLStreamException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
 		SQLDiff sqldiff = new SQLDiff();
 		
 		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);

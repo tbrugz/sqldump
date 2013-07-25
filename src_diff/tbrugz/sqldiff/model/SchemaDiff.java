@@ -1,6 +1,5 @@
 package tbrugz.sqldiff.model;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -29,9 +27,6 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.CategorizedOut;
-import tbrugz.sqldump.util.JSONSerializer;
-import tbrugz.sqldump.util.Utils;
-import tbrugz.sqldump.util.XMLSerializer;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
@@ -290,35 +285,6 @@ public class SchemaDiff implements Diff {
 		log.info(count+" diffs dumped");
 	}
 	
-	static final String JAXB_DIFF_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures:tbrugz.sqldiff.model";
-
-	public void outDiffsXML(File fout) throws IOException, JAXBException {
-		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
-		Utils.prepareDir(fout);
-		xmlser.marshal(this, fout);
-		log.info("xml diff written to: "+fout.getAbsolutePath());
-	}
-
-	public static SchemaDiff grabDiffsFromXML(File fin) throws IOException, JAXBException {
-		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
-		SchemaDiff sdiff = (SchemaDiff) xmlser.unmarshal(fin);
-		log.info("xml diff model grabbed from '"+fin.getAbsolutePath()+"'");
-		return sdiff;
-	}
-	
-	public static SchemaDiff grabDiffsFromJSON(File fin) throws IOException, JAXBException {
-		JSONSerializer jsonser = new JSONSerializer(JAXB_DIFF_PACKAGES);
-		SchemaDiff sdiff = (SchemaDiff) jsonser.unmarshal(fin);
-		log.info("json diff model grabbed from '"+fin.getAbsolutePath()+"'");
-		return sdiff;
-	}
-
-	public void outDiffsJSON(File fout) throws IOException, JAXBException {
-		JSONSerializer jsonser = new JSONSerializer(JAXB_DIFF_PACKAGES);
-		jsonser.marshal(this, fout); //fout
-		log.info("json diff written to: "+fout.getAbsolutePath());
-	}
-
 	@Override
 	public String getDiff() {
 		StringBuffer sb = new StringBuffer();

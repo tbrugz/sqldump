@@ -15,6 +15,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import tbrugz.sqldiff.io.JSONDiffIO;
+import tbrugz.sqldiff.io.XMLDiffIO;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
@@ -30,6 +32,8 @@ public class SQLDiffTest {
 	
 	//TODO: test with different databases
 	//see: http://www.mkyong.com/unittest/junit-4-tutorial-6-parameterized-test/
+	
+	static String DIR_OUT = "work/output/SQLDiffTest";
 	
 	static String dbURL = null;
 	static String dbDriver = null;
@@ -134,8 +138,10 @@ public class SQLDiffTest {
 		SchemaDiff schemaDiff = SchemaDiff.diff(smOriginal, sm2);
 		
 		//test xml & json output
-		schemaDiff.outDiffsXML(new File("work/output/SQLDiffTest/diff.xml"));
-		schemaDiff.outDiffsJSON(new File("work/output/SQLDiffTest/diff.json"));
+		XMLDiffIO xmlio = new XMLDiffIO();
+		xmlio.dumpDiff(schemaDiff, new File(DIR_OUT+"/diff.xml"));
+		JSONDiffIO jsonio = new JSONDiffIO();
+		jsonio.dumpDiff(schemaDiff, new File(DIR_OUT+"/diff.json"));
 	}
 	
 	@Test
