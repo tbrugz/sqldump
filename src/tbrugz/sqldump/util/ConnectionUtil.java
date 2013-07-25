@@ -127,25 +127,29 @@ public class ConnectionUtil {
 		} 
 		
 		Properties p = new Properties();
-		String user = papp.getProperty(propsPrefix+SUFFIX_USER, "");
-		p.setProperty(CONN_PROP_USER, user);
-		p.setProperty(CONN_PROP_PASSWORD, papp.getProperty(propsPrefix+SUFFIX_PASSWD, ""));
+		String user = papp.getProperty(propsPrefix+SUFFIX_USER);
+		String password = papp.getProperty(propsPrefix+SUFFIX_PASSWD);
 		
+		if(user==null) {
 		if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME)) {
 			user = Utils.readText("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
-			p.setProperty(CONN_PROP_USER, user);
 		}
 		else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME_GUI)) {
 			user = Utils.readTextGUI("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
-			p.setProperty(CONN_PROP_USER, user);
+		}
 		}
 
+		if(password==null) {
 		if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
-			p.setProperty(CONN_PROP_PASSWORD, Utils.readPassword("password [user="+user+"]: "));
+			password = Utils.readPassword("password [user="+user+"]: ");
 		}
 		else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD_GUI)) {
-			p.setProperty(CONN_PROP_PASSWORD, Utils.readPasswordGUI("password [user="+user+"]: "));
+			password = Utils.readPasswordGUI("password [user="+user+"]: ");
 		}
+		}
+		
+		if(user!=null) { p.setProperty(CONN_PROP_USER, user); }
+		if(password!=null) { p.setProperty(CONN_PROP_PASSWORD, password); }
 
 		//use DatabaseMetaData: getUserName() & getUrl()?
 		log.debug("conn: "+user+"@"+dbUrl);
@@ -154,7 +158,9 @@ public class ConnectionUtil {
 			return DriverManager.getConnection(dbUrl, p);
 		}
 		catch(SQLException e) {
-			log.warn("error creating connection: "+user+"@"+dbUrl);
+			log.warn("error creating connection: '"+user+"@"+dbUrl+"'"
+					+((password==null)?" [null password]":"")
+					);
 			throw e;
 		}
 	}
