@@ -66,6 +66,8 @@ public class SQLDiff {
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
 	static final String PROP_APPLYDIFF_TOSOURCE = PROP_PREFIX+".applydiff.tosource";
 	static final String PROP_APPLYDIFF_TOCONN = PROP_PREFIX+".applydiff.toconn";
+	static final String PROP_APPLYDIFF_TOID = PROP_PREFIX+".applydiff.toid";
+	static final String PROP_APPLYDIFF_VALIDATE = PROP_PREFIX+".applydiff.validate";
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 	
@@ -91,6 +93,8 @@ public class SQLDiff {
 		SchemaModelGrabber toSchemaGrabber = null;
 		SchemaModel fromSM = null;
 		SchemaModel toSM = null;
+		String sourceId = null;
+		String targetId = null;
 		
 		SchemaDiff diff = null;
 		
@@ -107,15 +111,17 @@ public class SQLDiff {
 		else {
 		
 		//from
-		fromSchemaGrabber = initGrabber("source", PROP_SOURCE, prop);
+		sourceId = prop.getProperty(PROP_SOURCE);
+		fromSchemaGrabber = initGrabber("source", sourceId, prop);
 		
 		//to
-		toSchemaGrabber = initGrabber("target", PROP_TARGET, prop);
+		targetId = prop.getProperty(PROP_TARGET);
+		toSchemaGrabber = initGrabber("target", targetId, prop);
 		
 		//grab schemas
-		log.info("grabbing 'source' model");
+		log.info("grabbing 'source' model ["+sourceId+"]");
 		fromSM = fromSchemaGrabber.grabSchema();
-		log.info("grabbing 'target' model");
+		log.info("grabbing 'target' model ["+targetId+"]");
 		toSM = toSchemaGrabber.grabSchema();
 		
 		//XXX: option to set dialect from properties?
@@ -181,7 +187,10 @@ public class SQLDiff {
 		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
 		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
 		boolean doApplyDataDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_DATADIFF, false);
+		boolean doApplyValidate = Utils.getPropBool(prop, PROP_APPLYDIFF_VALIDATE, true);
+		
 		boolean applyToSource = Utils.getPropBool(prop, PROP_APPLYDIFF_TOSOURCE, false);
+		String applyToId = prop.getProperty(PROP_APPLYDIFF_TOID);
 		String applyToConnPrefix = prop.getProperty(PROP_APPLYDIFF_TOCONN);
 		
 		if(doApplyDiff && !doApplySchemaDiff && !doApplyDataDiff) {
@@ -193,13 +202,36 @@ public class SQLDiff {
 		//apply schema diff to database?
 		if(doApplySchemaDiff) {
 			Connection applyToConn = null;
+			SchemaModel applyToModel = null;
+			
 			if(applyToSource) {
 				if(fromSchemaGrabber!=null) {
 					applyToConn = fromSchemaGrabber.getConnection();
+					applyToModel = fromSM;
 				}
 				if(applyToConn==null) {
+					//if source was not grabbed from JDBC/connection
 					String connPrefix = "sqldiff."+prop.getProperty(PROP_SOURCE);
 					log.info("initting 'source' connection to apply diff [prefix = '"+connPrefix+"']");
+					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
+				}
+			}
+			else if(applyToId!=null) {
+				if(applyToId.equals(sourceId)) {
+					applyToModel = fromSM;
+				}
+				else if(applyToId.equals(targetId)) {
+					applyToModel = toSM;
+				}
+				else {
+					SchemaModelGrabber applyToGrabber = initGrabber("apply-to", applyToId, prop);
+					log.info("grabbing 'apply-to' model ["+applyToId+"]");
+					applyToModel = applyToGrabber.grabSchema();
+					applyToConn = applyToGrabber.getConnection();
+				}
+				if(applyToConn==null) {
+					String connPrefix = "sqldiff."+applyToId;
+					log.info("initting 'apply-to' connection to apply diff [prefix = '"+connPrefix+"']");
 					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
 				}
 			}
@@ -218,6 +250,14 @@ public class SQLDiff {
 				//XXX: throw exception?
 			}
 			else {
+				if(applyToModel!=null) {
+					if(doApplyValidate) {
+						validateDiffAgainstModel(diff, applyToModel);
+					}
+				}
+				else {
+					log.info("no 'apply-to' model defined, diff may not be validated");
+				}
 				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
 				applyDiffToDB(diff, applyToConn);
 			}
@@ -264,8 +304,7 @@ public class SQLDiff {
 		return schemaGrabber;
 	}
 	
-	static SchemaModelGrabber initGrabber(String grabberLabel, String propKey, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
-		String grabberId = prop.getProperty(propKey);
+	static SchemaModelGrabber initGrabber(String grabberLabel, String grabberId, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
 		if(grabberId==null || "".equals(grabberId)) {
 			throw new ProcessingException("'"+grabberLabel+"' grabber id not defined");
 		}
@@ -350,6 +389,20 @@ public class SQLDiff {
 		if(failonerror && errorCount>0) {
 			throw new ProcessingException(errorCount+" sqlExceptions occured", lastEx);
 		}
+	}
+
+	void validateDiffAgainstModel(SchemaDiff diff, SchemaModel sm) {
+		//TODO: validate diff with/against model
+		
+		//add table: model must not contain table 
+		//drop table: model must contain table
+		
+		//add column: model must not contain column 
+		//drop column: model must contain column
+		//rename column: model must contain original column & not contain new column
+		//alter column: model must contain column
+		
+		//others?
 	}
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
