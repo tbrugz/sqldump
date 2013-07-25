@@ -1,6 +1,7 @@
 package tbrugz.sqldump;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.xml.bind.JAXBContext;
@@ -40,16 +41,17 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 	
 	@Override
 	public SchemaModel grabSchema() {
-		if(fileInput==null) {
-			log.warn("json serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
+		InputStream is = getInputStream();
+		if(is==null) {
+			log.warn("json serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] nor resource ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"] are valid");
 			return null;
 		}
 
 		try {
-			SchemaModel sm = (SchemaModel) jsonser.unmarshal(new InputStreamReader(fileInput));
+			SchemaModel sm = (SchemaModel) jsonser.unmarshal(new InputStreamReader(is));
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
-			log.info("json schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
+			log.info("json schema model grabbed from '"+inputDescription+"'");
 			return sm;
 		}
 		catch(Exception e) {

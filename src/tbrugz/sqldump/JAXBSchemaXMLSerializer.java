@@ -34,8 +34,9 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
-	File filenameIn;
-	InputStream fileInput;
+	String filenameIn;
+	String resourceIn;
+	String inputDescription;
 	String fileOutput;
 	XMLSerializer xmlser;
 	
@@ -52,22 +53,8 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	@Override
 	public void setProperties(Properties prop) {
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
-		String fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
-		if(fileInputStr==null) {
-			fileInputStr = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
-			if(fileInputStr!=null) {
-				filenameIn = new File(fileInputStr);
-				fileInput = JAXBSchemaXMLSerializer.class.getResourceAsStream(fileInputStr);
-			}
-		}
-		else {
-			try {
-				filenameIn = new File(fileInputStr);
-				fileInput = new FileInputStream(new File(fileInputStr));
-			} catch (FileNotFoundException e) {
-				log.warn("procproperties: File not found: "+fileInputStr);
-			}
-		}
+		filenameIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
+		resourceIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
 	}
 	
 	@Override
@@ -97,16 +84,17 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 
 	@Override
 	public SchemaModel grabSchema() {
-		if(fileInput==null) {
-			log.warn("xml serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] not defined");
+		InputStream is = getInputStream();
+		if(is==null) {
+			log.warn("xml serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] nor resource ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"] are valid");
 			return null;
 		}
 
 		try {
-			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(fileInput));
+			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(is));
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
-			log.info("xml schema model grabbed from '"+filenameIn.getAbsolutePath()+"'");
+			log.info("xml schema model grabbed from '"+inputDescription+"'");
 			return sm;
 		}
 		catch(Exception e) {
@@ -116,6 +104,36 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			return null;
 		}
 		
+	}
+	
+	InputStream getInputStream() {
+		InputStream is = null;
+		if(filenameIn!=null) {
+			try {
+				is = new FileInputStream(filenameIn);
+				inputDescription = new File(filenameIn).getAbsolutePath();
+			} catch (FileNotFoundException e) {
+				String message = "file not found: "+filenameIn;
+				log.warn(message);
+				if(failonerror) { throw new ProcessingException(message, e); }
+			}
+		}
+		else if(resourceIn!=null) {
+			is = JAXBSchemaXMLSerializer.class.getResourceAsStream(resourceIn);
+			inputDescription = resourceIn;
+			if(is==null) {
+				String message = "resource not found: "+resourceIn;
+				log.warn(message);
+				if(failonerror) { throw new ProcessingException(message); }
+			}
+		}
+		else {
+			String message = "props '"+PROP_XMLSERIALIZATION_JAXB_INFILE+"' nor '"+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"' defined";
+			log.warn(message);
+			if(failonerror) { throw new ProcessingException(message); }
+		}
+		
+		return is;
 	}
 	
 	void validateSchema(SchemaModel sm) {
