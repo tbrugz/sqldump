@@ -103,6 +103,7 @@ public class SQLDump implements Executor {
 		sdd.doMain(args, null, null);
 	}
 
+	@Override
 	public void doMain(String[] args, Properties prop) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		doMain(args, prop, null);
 	}
@@ -338,6 +339,11 @@ public class SQLDump implements Executor {
 			}
 		}
 		return processors;
+	}
+	
+	@Override
+	public void setFailOnError(boolean failonerror) {
+		this.failonerror = failonerror;
 	}
 	
 }

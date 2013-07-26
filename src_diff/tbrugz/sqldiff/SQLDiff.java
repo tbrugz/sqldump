@@ -417,4 +417,8 @@ public class SQLDiff implements Executor {
 		sqldiff.doMain(args, sqldiff.prop);
 	}
 	
+	@Override
+	public void setFailOnError(boolean failonerror) {
+		this.failonerror = failonerror;
+	}
 }

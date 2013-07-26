@@ -380,6 +380,7 @@ public class SQLRun implements Executor {
 		sqlr.doMain(args, null, null);
 	}
 	
+	@Override
 	public void doMain(String[] args, Properties p) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		doMain(args, p, null);
 	}
@@ -396,4 +397,9 @@ public class SQLRun implements Executor {
 		}
 	}
 
+	@Override
+	public void setFailOnError(boolean failonerror) {
+		this.failonerror = failonerror;
+	}
+	
 }
