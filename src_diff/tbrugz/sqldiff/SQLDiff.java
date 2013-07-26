@@ -18,6 +18,7 @@ import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -252,7 +253,8 @@ public class SQLDiff {
 			else {
 				if(applyToModel!=null) {
 					if(doApplyValidate) {
-						validateDiffAgainstModel(diff, applyToModel);
+						DiffValidator dv = new DiffValidator(applyToModel);
+						dv.validateDiff(diff);
 					}
 				}
 				else {
@@ -391,20 +393,6 @@ public class SQLDiff {
 		}
 	}
 
-	void validateDiffAgainstModel(SchemaDiff diff, SchemaModel sm) {
-		//TODO: validate diff with/against model
-		
-		//add table: model must not contain table 
-		//drop table: model must contain table
-		
-		//add column: model must not contain column 
-		//drop column: model must contain column
-		//rename column: model must contain original column & not contain new column
-		//alter column: model must contain column
-		
-		//others?
-	}
-	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
 		SQLDiff sqldiff = new SQLDiff();
 		
