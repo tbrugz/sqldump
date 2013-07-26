@@ -10,6 +10,7 @@ import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
+import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.AbstractFailable;
@@ -32,16 +33,18 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 @SuiteClasses({
 	//"unit" tests
 	ParametrizedPropertiesTest.class,
-	//SQLTokenizerTest.class,
 	SQLTokenizersTest.class,
 	ColTypeUtilTest.class,
 	PivotRSTest.class,
 	IOUtilTest.class,
 	CategorizedOutTest.class,
-	ColumnDiffTest.class,
 	CLIProcessorTest.class,
 	DBMSResourcesTest.class,
+
+	//diff "unit" tests
+	ColumnDiffTest.class,
 	DiffIOTest.class,
+	DiffValidatorTest.class,
 
 	//import
 	CSVImportTest.class,

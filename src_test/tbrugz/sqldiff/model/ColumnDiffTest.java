@@ -148,7 +148,7 @@ public class ColumnDiffTest {
 		Assert.assertEquals("alter table a modify cx varchar(20)", diff);
 	}
 	
-	Column newColumn(String name, String type, int precision) {
+	public static Column newColumn(String name, String type, int precision) {
 		Column c = new Column();
 		c.setName(name);
 		c.type = type;
