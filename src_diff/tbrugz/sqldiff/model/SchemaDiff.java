@@ -182,9 +182,9 @@ public class SchemaDiff implements Diff {
 	static void logInfoByObjectAndChangeType(Collection<? extends Diff> diffs, int labelSize) {
 		//Map<DBObjectType, Integer> map = new NeverNullGetMap<DBObjectType, Integer>(Integer.class);
 		//String format = "changes [%-12s]: ";
-		String formatStr = "changes [%-"+labelSize+"s]: ";
+		String formatStr = "changes [%-"+labelSize+"s]:";
 		if(labelSize<=0) {
-			formatStr = "changes [%s]: ";
+			formatStr = "changes [%s]:";
 		}
 		for(DBObjectType type: DBObjectType.values()) {
 			List<Diff> diffsoftype = getDiffsByDBObjectType(diffs, type);

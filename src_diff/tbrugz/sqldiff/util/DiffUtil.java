@@ -1,6 +1,8 @@
 package tbrugz.sqldiff.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -18,6 +20,12 @@ public class DiffUtil {
 				return (T) d;
 		}
 		return null;
+	}
+	
+	public static <T extends Object> List<T> singleElemList(T s) {
+		List<T> ret = new ArrayList<T>();
+		ret.add(s);
+		return ret;
 	}
 
 }

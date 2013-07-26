@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -109,7 +110,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			case ALTER:
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
-				return singleElemList( features.sqlRenameColumnDefinition(table, previousColumn, column.getName()) );
+				return DiffUtil.singleElemList( features.sqlRenameColumnDefinition(table, previousColumn, column.getName()) );
 				//colChange = "rename column "+(previousColumn!=null?previousColumn.getName():"[unknown]")+" TO "+column.getName(); break;
 				/*colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
 					+" rename to "+DBObject.getFinalIdentifier(column.getName());
@@ -118,7 +119,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
 		}
-		return singleElemList( "alter table "+DBObject.getFinalName(table, true)+" "+colChange );
+		return DiffUtil.singleElemList( "alter table "+DBObject.getFinalName(table, true)+" "+colChange );
 	}
 
 	List<String> getAlterColumn() {
@@ -212,12 +213,6 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 
 	public Column getPreviousColumn() {
 		return previousColumn;
-	}
-
-	static List<String> singleElemList(String s) {
-		List<String> ret = new ArrayList<String>();
-		ret.add(s);
-		return ret;
 	}
 
 }
