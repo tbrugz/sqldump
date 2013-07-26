@@ -79,6 +79,15 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		}
 		return null;
 	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableByNamedObject(Collection<? extends DBIdentifiable> dbids, NamedDBObject object) {
+		for(DBIdentifiable obj: dbids) {
+			if(( (object.getSchemaName()==null && obj.schemaName==null) || object.getSchemaName().equals(obj.schemaName)) 
+					&& object.getName().equals(obj.name)) return (T) obj;
+		}
+		return null;		
+	}
 	
 	public static DBObjectType getType(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }

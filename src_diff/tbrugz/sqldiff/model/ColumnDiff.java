@@ -206,7 +206,15 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		return new ColumnDiff(type.inverse(), schemaName, tableName, column, previousColumn);
 	}
 	
-	List<String> singleElemList(String s) {
+	public Column getColumn() {
+		return column;
+	}
+
+	public Column getPreviousColumn() {
+		return previousColumn;
+	}
+
+	static List<String> singleElemList(String s) {
 		List<String> ret = new ArrayList<String>();
 		ret.add(s);
 		return ret;
