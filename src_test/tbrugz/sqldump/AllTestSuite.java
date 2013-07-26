@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.sqldiff.SQLDiffMainTest;
 import tbrugz.sqldiff.datadiff.ResultSetDiffTest;
 import tbrugz.sqldiff.io.DiffIOTest;
 import tbrugz.sqldiff.model.ColumnDiffTest;
@@ -45,6 +46,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	ColumnDiffTest.class,
 	DiffIOTest.class,
 	DiffValidatorTest.class,
+	SQLDiffMainTest.class,
 
 	//import
 	CSVImportTest.class,
