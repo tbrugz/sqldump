@@ -15,6 +15,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.Processor;
@@ -47,7 +48,7 @@ import tbrugz.sqldump.util.Utils;
  * TODO: use sql quote when names are equal to sql keywords or have invalid characters (" ", "-", ...) - SchemaModelScriptDumper, AlterSchemaSuggestion
  * ~TODO: sqldump.schemagrab.xtratables=<schema>.<table>, <table2>
  */
-public class SQLDump {
+public class SQLDump implements Executor {
 	
 	public static final String CONN_PROPS_PREFIX = "sqldump";
 	

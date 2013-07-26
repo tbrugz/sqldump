@@ -24,6 +24,7 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.processors.DirectoryCleaner;
@@ -39,7 +40,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * XXX: option: [ignore|do not ignore] case; ignore schema name
  */
-public class SQLDiff {
+public class SQLDiff implements Executor {
 	
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
 
@@ -77,7 +78,7 @@ public class SQLDiff {
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
-	Properties prop = new ParametrizedProperties();
+	final Properties prop = new ParametrizedProperties();
 
 	boolean failonerror = true;
 	String outfilePattern = null;
@@ -393,19 +394,27 @@ public class SQLDiff {
 		}
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
-		SQLDiff sqldiff = new SQLDiff();
-		
-		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, sqldiff.prop);
-		sqldiff.procProterties();
+	@Override
+	public void doMain(String[] args, Properties prop) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+		if(prop!=null) {
+			this.prop.putAll(prop);
+		}
+		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, this.prop);
+		procProterties();
 
-		if(sqldiff.outfilePattern==null && sqldiff.xmloutfile==null) {
+		if(outfilePattern==null && xmloutfile==null) {
 			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"'] defined. can't dump diff script";
 			log.error(message);
-			if(sqldiff.failonerror) { throw new ProcessingException(message); }
+			if(failonerror) { throw new ProcessingException(message); }
 			return;
 		}
 		
-		sqldiff.doIt();
+		doIt();
 	}
+
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+		SQLDiff sqldiff = new SQLDiff();
+		sqldiff.doMain(args, sqldiff.prop);
+	}
+	
 }

@@ -21,6 +21,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
@@ -51,7 +52,7 @@ import tbrugz.sqldump.util.Utils;
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
-public class SQLRun {
+public class SQLRun implements Executor {
 	
 	static final Log log = LogFactory.getLog(SQLRun.class);
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
