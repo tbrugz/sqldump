@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.PropertySet;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.def.Executor;
@@ -26,6 +27,10 @@ public class SQLDumpTask extends Task {
 		this.failonerror = failonerror;
 	}
 	
+	public void addPropertyset(PropertySet sysp) {
+		//getCommandLine().addSyspropertyset(sysp);
+	}
+
 	public void execute() throws BuildException {
 		Executor sqldump = new SQLDump();
 		try {

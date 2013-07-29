@@ -174,7 +174,7 @@
 	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
-			includes="**/*.class, **/*.properties, **/jaxb.index">
+			includes="**/*.class, **/*.properties, **/jaxb.index, **/*.xml">
 			<exclude name="log4j.properties"/>
 			<exclude name="**/jaxb.properties"/>
 			<manifest>

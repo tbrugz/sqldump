@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<antlib xmlns:current="ant:current">
+	<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask"/>
+</antlib>

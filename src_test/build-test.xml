@@ -1,4 +1,6 @@
-<project name="sqldump-test" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".." >
+<project name="sqldump-test" xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:sqld="antlib:tbrugz.sqldump.ant" basedir=".." >
+	
+	<property name="sqldump.processingclasses" value="ABC" />
 	
 	<path id="sqldump.exec">
 		<pathelement location="dist/jars/sqldump.jar"/>
@@ -13,6 +15,23 @@
 	<target name="dump-fail">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		<sqldump/>
+	</target>
+
+	<target name="dump-ok-lib">
+		<sqld:sqldump failonerror="false"/>
+	</target>
+	
+	<target name="dump-j">
+		<taskdef name="sqldumpj" classname="tbrugz.sqldump.ant.xperimental.SQLDumpJavaTask" classpathref="sqldump.exec"/>
+		<sqldumpj>
+			<arg value="-propfile=z.properties"/>
+		</sqldumpj>
+	</target>
+
+	<target name="dump-ij">
+		<taskdef name="sqldumpij" classname="tbrugz.sqldump.ant.xperimental.SQLDumpInnerJavaTask" classpathref="sqldump.exec"/>
+		<sqldumpij classpath="dist/jars/sqldump.jar;lib/commons-logging-1.1.1.jar">
+		</sqldumpij>
 	</target>
 	
 </project>
