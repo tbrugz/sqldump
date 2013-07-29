@@ -115,11 +115,11 @@ public class SQLDump implements Executor {
 		
 		try {
 
-		init(args);
-		
 		if(prop!=null) {
 			papp.putAll(prop);
 		}
+
+		init(args);
 		
 		//Utils.showSysProperties();
 		

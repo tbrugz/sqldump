@@ -1,0 +1,18 @@
+<project name="sqldump-test" xmlns:ivy="antlib:org.apache.ivy.ant" basedir=".." >
+	
+	<path id="sqldump.exec">
+		<pathelement location="dist/jars/sqldump.jar"/>
+		<pathelement location="lib/commons-logging-1.1.1.jar"/>
+	</path>
+	
+	<target name="dump-ok">
+		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
+		<sqldump failonerror="false"/>
+	</target>
+	
+	<target name="dump-fail">
+		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
+		<sqldump/>
+	</target>
+	
+</project>
