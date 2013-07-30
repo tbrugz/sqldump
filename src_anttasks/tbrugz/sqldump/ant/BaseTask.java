@@ -1,4 +1,4 @@
-package tbrugz.sqldump.ant.xperimental;
+package tbrugz.sqldump.ant;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
@@ -9,13 +9,9 @@ import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.Environment.Variable;
 import org.apache.tools.ant.types.Path;
 
-import tbrugz.sqldump.SQLDump;
-
 //XXXxx: when using inner java task, how to set/inherit ant properties? using system properties...
 //XXX: add fork?
-public class SQLDumpInnerJavaTask extends Task {
-
-	static final String CLASSNAME = SQLDump.class.getName();
+public abstract class BaseTask extends Task {
 
 	Java java;
 	Path classpath;
@@ -33,7 +29,7 @@ public class SQLDumpInnerJavaTask extends Task {
 	void setup() throws BuildException {
 		// failonerror
 		if(failonerror!=null) {
-			addSysproperty("sqldump.failonerror", failonerror?"true":"false");
+			addSysproperty(getPropPrefix()+".failonerror", failonerror?"true":"false");
 		}
 		// set all properties as system properties
 		for(Object key : getProject().getProperties().keySet()) {
@@ -46,7 +42,7 @@ public class SQLDumpInnerJavaTask extends Task {
 	public void execute() throws BuildException {
 		Java java = getJava();
 		setup();
-		java.setClassname(CLASSNAME);
+		java.setClassname(getClassName());
 		if(getClasspath() != null) {
 			java.setClasspath(getClasspath());
 		}
@@ -90,5 +86,9 @@ public class SQLDumpInnerJavaTask extends Task {
 	public Commandline.Argument createArg() {
 		return getJava().getCommandLine().createArgument();
 	}
+	
+	abstract String getPropPrefix();
+	
+	abstract String getClassName();
 
 }
