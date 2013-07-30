@@ -53,4 +53,24 @@
 		</sqldumpij>
 	</target>
 	
+	<target name="run">
+		<taskdef name="sqlrun" classname="tbrugz.sqldump.ant.SQLRunTask" classpathref="sqldump.exec"/>
+		
+		<sqlrun failonerror="true"/>
+	</target>
+
+	<target name="run-lib">
+		<sqld:run/>
+	</target>
+	
+	<target name="diff">
+		<taskdef name="sqldiff" classname="tbrugz.sqldump.ant.SQLDiffTask" classpathref="sqldump.exec"/>
+		
+		<sqldiff failonerror="true"/>
+	</target>
+
+	<target name="diff-lib">
+		<sqld:diff/>
+	</target>
+	
 </project>

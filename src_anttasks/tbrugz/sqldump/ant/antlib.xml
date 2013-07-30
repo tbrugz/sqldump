@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
 <antlib xmlns:current="ant:current">
 	<taskdef name="dump" classname="tbrugz.sqldump.ant.SQLDumpTask"/>
+	<taskdef name="run" classname="tbrugz.sqldump.ant.SQLRunTask"/>
+	<taskdef name="diff" classname="tbrugz.sqldump.ant.SQLDiffTask"/>
 </antlib>
