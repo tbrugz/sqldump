@@ -30,7 +30,11 @@
 
 	<target name="dump-ij">
 		<taskdef name="sqldumpij" classname="tbrugz.sqldump.ant.xperimental.SQLDumpInnerJavaTask" classpathref="sqldump.exec"/>
-		<sqldumpij classpath="dist/jars/sqldump.jar;lib/commons-logging-1.1.1.jar">
+		<sqldumpij classpath="dist/jars/sqldump.jar;lib/commons-logging-1.1.1.jar" failonerror="true">
+			<arg value="-propfile=z2.properties"/>
+		</sqldumpij>
+		<sqldumpij classpathref="sqldump.exec" failonerror="true">
+			<arg value="-propfile=z2.properties"/>
 		</sqldumpij>
 	</target>
 	
