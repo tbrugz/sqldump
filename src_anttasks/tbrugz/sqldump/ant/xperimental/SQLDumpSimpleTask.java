@@ -1,4 +1,4 @@
-package tbrugz.sqldump.ant;
+package tbrugz.sqldump.ant.xperimental;
 
 import java.util.Hashtable;
 import java.util.Properties;
@@ -12,7 +12,7 @@ import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.def.Executor;
 
 //TODO: add classpath!
-public class SQLDumpTask extends Task {
+public class SQLDumpSimpleTask extends Task {
 
 	static final String[] NULL_PARAMS = {};
 	
