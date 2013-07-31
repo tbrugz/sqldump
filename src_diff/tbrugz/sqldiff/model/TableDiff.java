@@ -24,10 +24,14 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final String renameFrom;
 	final Table table;
 
-	public TableDiff(ChangeType changeType, Table table) {
+	public TableDiff(ChangeType changeType, Table table, String renameFrom) {
 		this.diffType = changeType;
 		this.table = table;
-		this.renameFrom = null; //XXX: add constructor parameter?
+		this.renameFrom = renameFrom;
+	}
+
+	public TableDiff(ChangeType changeType, Table table) {
+		this(changeType, table, null);
 	}
 	
 	@Override
@@ -177,6 +181,10 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	@Override
 	public TableDiff inverse() {
 		return new TableDiff(diffType.inverse(), table);
+	}
+	
+	public Table getTable() {
+		return table;
 	}
 
 }
