@@ -70,7 +70,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	static DBMSFeatures features;
 	public static TempColumnAlterStrategy useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 
-	public ColumnDiff(ChangeType changeType, Table table, Column oldColumn, Column newColumn) {
+	public ColumnDiff(ChangeType changeType, NamedDBObject table, Column oldColumn, Column newColumn) {
 		this(changeType, table.getSchemaName(), table.getName(), oldColumn, newColumn);
 	}
 
@@ -163,7 +163,18 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(obj instanceof ColumnDiff) {
 				ColumnDiff tcd = (ColumnDiff) obj;
 				if(type.equals(tcd.type)) {
-					return column.equals(tcd.column);
+					if((column!=null && tcd.column==null) || (column==null && tcd.column!=null)) {
+						return false;
+					}
+					
+					boolean equals = true;
+					if(column!=null && tcd.column!=null) {
+						equals |= column.equals(tcd.column);
+					}
+					if(previousColumn!=null && tcd.previousColumn!=null) {
+						equals |= previousColumn.equals(tcd.previousColumn);
+					}
+					return equals;
 				}
 			}
 		}

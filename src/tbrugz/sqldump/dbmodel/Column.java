@@ -97,14 +97,15 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	static Log log = LogFactory.getLog(Column.class);
 	
 	public String type;
-	public Integer columSize; //XXXdone: should be Integer? for columns that doesn't have precision could be null. yes!
+	public Integer columSize;
 	public Integer decimalDigits;
-	transient boolean pk; //XXXdone: should be transient? add PK info into constraint? yes, yes
+	transient boolean pk;
 	public Boolean nullable;
 	String defaultValue;
 	String remarks;
 	public Boolean autoIncrement;
 	//XXX add transient String tableName; //??
+	//XXX add column position in table? nice for column compare...
 
 	public static transient boolean useAutoIncrement = false;
 	
