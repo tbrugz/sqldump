@@ -9,14 +9,19 @@ import org.junit.Test;
 
 import tbrugz.sqldiff.ConflictingChangesException;
 import tbrugz.sqldiff.model.ChangeType;
+import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.model.TableDiff;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class RenameDetectorTest {
 
 	Table t1 = new Table();
 	Table t2 = new Table();
+	
+	Column c1 = ColumnDiffTest.newColumn("c", "varchar", 10);
+	Column c2 = ColumnDiffTest.newColumn("c", "varchar", 10);
 	
 	@Before
 	public void setup() {
@@ -75,5 +80,30 @@ public class RenameDetectorTest {
 		lt.add(td1); lt.add(td2); lt.add(td3); lt.add(td4);
 		
 		RenameDetector.detectAndDoTableRenames(lt, 0.5);
+	}
+
+	@Test
+	public void testDoRenameColumn1() {
+		ColumnDiff cd1 = new ColumnDiff(ChangeType.DROP, t1, c1, null);
+		ColumnDiff cd2 = new ColumnDiff(ChangeType.ADD, t1, null, c2);
+		List<ColumnDiff> lt = new ArrayList<ColumnDiff>();
+		lt.add(cd1); lt.add(cd2);
+		
+		RenameDetector.detectAndDoColumnRenames(lt, 0.5);
+		Assert.assertEquals(1, lt.size());
+		Assert.assertEquals(ChangeType.RENAME, lt.get(0).getChangeType());
+	}
+	
+	@Test(expected=ConflictingChangesException.class)
+	public void testErrorRenameColumn1() {
+		ColumnDiff cd1 = new ColumnDiff(ChangeType.DROP, t1, c1, null);
+		ColumnDiff cd2 = new ColumnDiff(ChangeType.ADD, t1, null, c2);
+		ColumnDiff cd3 = new ColumnDiff(ChangeType.ADD, t1, null, c2);
+		List<ColumnDiff> lt = new ArrayList<ColumnDiff>();
+		lt.add(cd1); lt.add(cd2); lt.add(cd3);
+		
+		RenameDetector.detectAndDoColumnRenames(lt, 0.5);
+		Assert.assertEquals(1, lt.size());
+		Assert.assertEquals(ChangeType.RENAME, lt.get(0).getChangeType());
 	}
 }

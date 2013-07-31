@@ -6,12 +6,16 @@ import org.junit.Test;
 
 import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.util.SimilarityCalculator;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 
 public class SimilarityCalculatorTest {
 	
 	Table t1 = new Table();
 	Table t2 = new Table();
+
+	Column c1 = ColumnDiffTest.newColumn("c", "varchar", 10);
+	Column c2 = ColumnDiffTest.newColumn("c", "varchar", 10);
 	
 	@Before
 	public void setup() {
@@ -55,6 +59,35 @@ public class SimilarityCalculatorTest {
 		double sim1 = SimilarityCalculator.instance().similarity(t1, t2);
 		t2.setSchemaName("abc");
 		double sim2 = SimilarityCalculator.instance().similarity(t1, t2);
+		
+		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);
+		Assert.assertTrue(sim1>sim2);
+	}
+
+	@Test
+	public void testColumnSimOtherName() {
+		double sim1 = SimilarityCalculator.instance().similarity(c1, 1, c1, 1);
+		c2.setName("c2");
+		double sim2 = SimilarityCalculator.instance().similarity(c1, 1, c2, 1);
+		
+		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);
+		Assert.assertTrue(sim1>sim2);
+	}
+
+	@Test
+	public void testColumnSimOtherPosition() {
+		double sim1 = SimilarityCalculator.instance().similarity(c1, 1, c1, 1);
+		double sim2 = SimilarityCalculator.instance().similarity(c1, 1, c1, 2);
+		
+		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);
+		Assert.assertTrue(sim1>sim2);
+	}
+
+	@Test
+	public void testColumnSimOtherType() {
+		double sim1 = SimilarityCalculator.instance().similarity(c1, 1, c1, 1);
+		c1.type = "char";
+		double sim2 = SimilarityCalculator.instance().similarity(c1, 1, c2, 1);
 		
 		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);
 		Assert.assertTrue(sim1>sim2);

@@ -11,6 +11,8 @@ import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
 import tbrugz.sqldiff.test.SQLDiffTest;
+import tbrugz.sqldiff.util.RenameDetectorTest;
+import tbrugz.sqldiff.util.SimilarityCalculatorTest;
 import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
@@ -47,6 +49,8 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	DiffIOTest.class,
 	DiffValidatorTest.class,
 	SQLDiffMainTest.class,
+	SimilarityCalculatorTest.class,
+	RenameDetectorTest.class,
 
 	//import
 	CSVImportTest.class,
