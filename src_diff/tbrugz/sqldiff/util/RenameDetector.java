@@ -56,8 +56,29 @@ public class RenameDetector {
 		return renames;
 	}
 	
-	//TODO detectColumnRenames
-	static void detectColumnRenames(Collection<ColumnDiff> tableDiffs, double minSimilarity) {
+	static List<RenameTuple> detectColumnRenames(Collection<ColumnDiff> columnDiffs, double minSimilarity) {
+		List<ColumnDiff> lcadd = getDiffsOfType(columnDiffs, ChangeType.ADD);
+		List<ColumnDiff> lcdrop = getDiffsOfType(columnDiffs, ChangeType.DROP);
+		
+		log.info("lcadd-size: '"+lcadd.size()+"' ; lcdrop-size: '"+lcdrop.size());
+		if(lcadd.size()==0 || lcdrop.size()==0) {
+			return new ArrayList<RenameTuple>();
+		}
+		
+		List<RenameTuple> renames = new ArrayList<RenameTuple>();
+		for(int i=0;i<lcadd.size();i++) {
+			ColumnDiff cadd = lcadd.get(i);
+			for(int j=0;j<lcdrop.size();j++) {
+				ColumnDiff cdrop = lcdrop.get(j);
+				double similarity = SimilarityCalculator.instance().similarity(cadd.getColumn(), i, cdrop.getPreviousColumn(), j);
+				log.info("c-add: '"+cadd.getNamedObject()+"' ; c-drop: '"+cdrop.getNamedObject()+"' ; sim: "+similarity);
+				if(similarity>=minSimilarity) {
+					renames.add(new RenameTuple(cadd, cdrop, similarity));
+				}
+			}
+		}
+		
+		return renames;
 	}
 	
 	static void doRenames(Collection/*<? extends Diff>*/ diffs, List<RenameTuple> renames) {
@@ -70,7 +91,8 @@ public class RenameDetector {
 				//TODO add & drop columns!
 			}
 			else if(rt.add instanceof ColumnDiff) {
-				//TODO: column renames
+				ColumnDiff cdrename = new ColumnDiff(ChangeType.RENAME, rt.add.getNamedObject(), ((ColumnDiff)rt.drop).getPreviousColumn(), ((ColumnDiff)rt.add).getColumn());
+				added = diffs.add(cdrename);
 			}
 			if(!added) { throw new RuntimeException("could not add rename: "+rt); }
 			removedCount += diffs.remove(rt.add)?1:0;
@@ -102,6 +124,17 @@ public class RenameDetector {
 		
 		//do renames
 		doRenames(tableDiffs, renames);
+	}
+
+	public static void detectAndDoColumnRenames(Collection<ColumnDiff> columnDiffs, double minSimilarity) {
+		//get renames
+		List<RenameTuple> renames = detectColumnRenames(columnDiffs, minSimilarity);
+		
+		//validate renames
+		validateConflictingRenames(renames);
+		
+		//do renames
+		doRenames(columnDiffs, renames);
 	}
 	
 	static <T extends Diff> List<T> getDiffsOfType(Collection<T> difflist, ChangeType type) {
