@@ -9,6 +9,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.ConflictingChangesException;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.Diff;
@@ -31,58 +32,32 @@ public class RenameDetector {
 	
 	static final Log log = LogFactory.getLog(RenameDetector.class);
 	
-	public static void detectTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
-		/*
-		List<TableDiff> ltadd = new ArrayList<TableDiff>();
-		List<TableDiff> ltdrop = new ArrayList<TableDiff>();
-		for(TableDiff td: tableDiffs) {
-			switch (td.getChangeType()) {
-			case ADD:
-				ltadd.add(td);
-				break;
-			case DROP:
-				ltdrop.add(td);
-				break;
-			default:
-				break;
-			}
-		}
-		*/
+	static List<RenameTuple> detectTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
 		List<TableDiff> ltadd = getDiffsOfType(tableDiffs, ChangeType.ADD);
 		List<TableDiff> ltdrop = getDiffsOfType(tableDiffs, ChangeType.DROP);
 		
 		log.info("ltadd-size: '"+ltadd.size()+"' ; ltdrop-size: '"+ltdrop.size());
 		if(ltadd.size()==0 || ltdrop.size()==0) {
-			return;
+			return new ArrayList<RenameTuple>();
 		}
 		
 		//if multiple renames, return ok if all that sim > minSim
 		List<RenameTuple> renames = new ArrayList<RenameTuple>();
-		Set<TableDiff> stadd = new HashSet<TableDiff>();
-		Set<TableDiff> stdrop = new HashSet<TableDiff>();
 		for(TableDiff tadd: ltadd) {
 			for(TableDiff tdrop: ltdrop) {
 				double similarity = SimilarityCalculator.instance().similarity(tadd.getTable(), tdrop.getTable());
 				log.info("t-add: '"+tadd.getNamedObject()+"' ; t-drop: '"+tdrop.getNamedObject()+"' ; sim: "+similarity);
 				if(similarity>=minSimilarity) {
 					renames.add(new RenameTuple(tadd, tdrop, similarity));
-					//throw UndecidableRenameException ?
-					if(! stadd.add(tadd)) {
-						throw new RuntimeException("can't add a table to more than one RenameTuple [table = '"+tdrop+"'; minSimilarity = "+minSimilarity+"]");
-					}
-					if(! stdrop.add(tdrop)) {
-						throw new RuntimeException("can't add a table to more than one RenameTuple [table = '"+tdrop+"'; minSimilarity = "+minSimilarity+"]");
-					}
 				}
 			}
 		}
 		
-		//do renames
-		doRenames(tableDiffs, renames);
+		return renames;
 	}
-
+	
 	//TODO detectColumnRenames
-	public static void detectColumnRenames(Collection<ColumnDiff> tableDiffs, double minSimilarity) {
+	static void detectColumnRenames(Collection<ColumnDiff> tableDiffs, double minSimilarity) {
 	}
 	
 	static void doRenames(Collection/*<? extends Diff>*/ diffs, List<RenameTuple> renames) {
@@ -102,6 +77,31 @@ public class RenameDetector {
 			removedCount += diffs.remove(rt.drop)?1:0;
 			if(removedCount!=2) { throw new RuntimeException("could not remove add/drop diffs: "+rt); }
 		}
+	}
+
+	static void validateConflictingRenames(List<RenameTuple> renames) {
+		Set<Diff> stadd = new HashSet<Diff>();
+		Set<Diff> stdrop = new HashSet<Diff>();
+		for(RenameTuple rt: renames) {
+			//throw UndecidableRenameException ?
+			if(! stadd.add(rt.add)) {
+				throw new ConflictingChangesException("a table can't be renamed more than once [add table = '"+rt.add+"'; similarity = "+rt.similarity+"]");
+			}
+			if(! stdrop.add(rt.drop)) {
+				throw new ConflictingChangesException("a table can't be renamed more than once [drop table = '"+rt.drop+"'; similarity = "+rt.similarity+"]");
+			}
+		}
+	}
+	
+	public static void detectAndDoTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
+		//get renames
+		List<RenameTuple> renames = detectTableRenames(tableDiffs, minSimilarity);
+		
+		//validate renames
+		validateConflictingRenames(renames);
+		
+		//do renames
+		doRenames(tableDiffs, renames);
 	}
 	
 	static <T extends Diff> List<T> getDiffsOfType(Collection<T> difflist, ChangeType type) {

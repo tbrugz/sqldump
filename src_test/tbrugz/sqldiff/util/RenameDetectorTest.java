@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import tbrugz.sqldiff.ConflictingChangesException;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiffTest;
 import tbrugz.sqldiff.model.TableDiff;
@@ -35,7 +36,7 @@ public class RenameDetectorTest {
 		List<TableDiff> lt = new ArrayList<TableDiff>();
 		lt.add(td1); lt.add(td2);
 		
-		RenameDetector.detectTableRenames(lt, 0.5);
+		RenameDetector.detectAndDoTableRenames(lt, 0.5);
 		Assert.assertEquals(1, lt.size());
 		Assert.assertEquals(ChangeType.RENAME, lt.get(0).getChangeType());
 	}
@@ -47,12 +48,12 @@ public class RenameDetectorTest {
 		List<TableDiff> lt = new ArrayList<TableDiff>();
 		lt.add(td1); lt.add(td2);
 		
-		RenameDetector.detectTableRenames(lt, 0.5);
+		RenameDetector.detectAndDoTableRenames(lt, 0.5);
 		Assert.assertEquals(1, lt.size());
 		Assert.assertEquals(ChangeType.RENAME, lt.get(0).getChangeType());
 	}
 
-	@Test(expected=RuntimeException.class)
+	@Test(expected=ConflictingChangesException.class)
 	public void testErrorRename1() {
 		TableDiff td1 = new TableDiff(ChangeType.ADD, t1);
 		TableDiff td2 = new TableDiff(ChangeType.DROP, t2);
@@ -61,10 +62,10 @@ public class RenameDetectorTest {
 		lt.add(td1); lt.add(td2); lt.add(td3);
 		
 		// which to rename? which to drop?
-		RenameDetector.detectTableRenames(lt, 0.5); //0.9?
+		RenameDetector.detectAndDoTableRenames(lt, 0.5); //0.9?
 	}
 
-	@Test(expected=RuntimeException.class)
+	@Test(expected=ConflictingChangesException.class)
 	public void testErrorRename2() {
 		TableDiff td1 = new TableDiff(ChangeType.ADD, t1);
 		TableDiff td2 = new TableDiff(ChangeType.DROP, t2);
@@ -73,6 +74,6 @@ public class RenameDetectorTest {
 		List<TableDiff> lt = new ArrayList<TableDiff>();
 		lt.add(td1); lt.add(td2); lt.add(td3); lt.add(td4);
 		
-		RenameDetector.detectTableRenames(lt, 0.5);
+		RenameDetector.detectAndDoTableRenames(lt, 0.5);
 	}
 }
