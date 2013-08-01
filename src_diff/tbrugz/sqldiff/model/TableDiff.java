@@ -24,6 +24,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final String renameFrom;
 	final Table table;
 
+	//XXX: add renameFromSchemaName?
 	public TableDiff(ChangeType changeType, Table table, String renameFrom) {
 		this.diffType = changeType;
 		this.table = table;
@@ -185,6 +186,10 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	
 	public Table getTable() {
 		return table;
+	}
+	
+	public String getRenameFrom() {
+		return renameFrom;
 	}
 
 }

@@ -172,7 +172,7 @@ public class SchemaDiff implements Diff {
 	}
 	
 	@SuppressWarnings("unchecked")
-	static void logInfo(SchemaDiff diff) {
+	public static void logInfo(SchemaDiff diff) {
 		int maxNameSize = getMaxDBObjectNameSize(diff.tableDiffs, diff.columnDiffs, diff.dbidDiffs);
 		logInfoByObjectAndChangeType(diff.tableDiffs, maxNameSize);
 		logInfoByObjectAndChangeType(diff.columnDiffs, maxNameSize);
@@ -365,6 +365,18 @@ public class SchemaDiff implements Diff {
 		}
 		
 		return inv;
+	}
+	
+	public Set<TableDiff> getTableDiffs() {
+		return tableDiffs;
+	}
+
+	public Set<ColumnDiff> getColumnDiffs() {
+		return columnDiffs;
+	}
+
+	public Set<DBIdentifiableDiff> getDbIdDiffs() {
+		return dbidDiffs;
 	}
 
 }
