@@ -50,17 +50,20 @@ public class DiffValidator {
 	void validateTableDiff(TableDiff td) {
 		//add table: model must not contain table 
 		//drop table: model must contain table
-		Table id = DBIdentifiable.getDBIdentifiableByNamedObject(model.getTables(), td.getNamedObject());
+		Table tNew = DBIdentifiable.getDBIdentifiableByNamedObject(model.getTables(), td.getNamedObject());
 		switch(td.getChangeType()) {
 		case ADD: 
-			if(id!=null) throw new IncompatibleChangeException("can't ADD a table that already exists ["+td.getNamedObject()+"]");
+			if(tNew!=null) throw new IncompatibleChangeException("can't ADD a table that already exists ["+tNew+"]");
 			break;
 		case DROP: 
-			if(id!=null) throw new IncompatibleChangeException("can't DROP a table that does not exists ["+td.getNamedObject()+"]");
+			if(tNew==null) throw new IncompatibleChangeException("can't DROP a table that does not exists ["+td.getNamedObject()+"]");
+			break;
+		case RENAME:
+			if(tNew!=null) throw new IncompatibleChangeException("can't RENAME a table to a name that already exists ["+tNew+"]");
+			Table tPrev = DBIdentifiable.getDBIdentifiableByName(model.getTables(), td.getRenameFrom()); //XXX: use schema name?
+			if(tPrev==null) throw new IncompatibleChangeException("can't RENAME a table that does not exists ["+td.getTable()+"]");
 			break;
 		case ALTER:
-		case RENAME:
-			//XXX: table rename?
 			throw new IllegalStateException(td.getChangeType()+" change for TableDiff not supported");
 		}
 	}
@@ -91,7 +94,7 @@ public class DiffValidator {
 			Column cPrev = table.getColumn(cd.getPreviousColumn().getName());
 			if(cPrev==null) throw new IncompatibleChangeException("can't RENAME a column that does not exists ["+cd.getPreviousColumn()+"]");
 			Column cNew = table.getColumn(cd.getColumn().getName());
-			if(cNew!=null) throw new IncompatibleChangeException("can't RENAME a column to a column that already exists ["+cd.getColumn()+"]");
+			if(cNew!=null) throw new IncompatibleChangeException("can't RENAME a column to a name that already exists ["+cd.getColumn()+"]");
 			break; }
 		}
 	}

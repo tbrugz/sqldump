@@ -15,10 +15,11 @@ public class DiffValidatorTest {
 
 	static SchemaModel sm = new SchemaModel();
 	static Table table = new Table();
+	static Column c = ColumnDiffTest.newColumn("c","varchar",10);
+	static DiffValidator dv = new DiffValidator(sm);
 	
 	@BeforeClass
 	public static void beforeClass() {
-		Column c = ColumnDiffTest.newColumn("c","varchar",10);
 		table.setName("t");
 		table.setColumns(DiffUtil.singleElemList(c));
 		sm.getTables().add(table);
@@ -28,7 +29,6 @@ public class DiffValidatorTest {
 	public void testColumnDiffAddOk() {
 		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
 		ColumnDiff cd = new ColumnDiff(ChangeType.ADD, table, null, c2);
-		DiffValidator dv = new DiffValidator(sm);
 		dv.validateDiff(cd);
 	}
 
@@ -36,7 +36,6 @@ public class DiffValidatorTest {
 	public void testColumnDiffAddError() {
 		Column c2 = ColumnDiffTest.newColumn("c","varchar",20);
 		ColumnDiff cd = new ColumnDiff(ChangeType.ADD, table, null, c2);
-		DiffValidator dv = new DiffValidator(sm);
 		dv.validateDiff(cd);
 	}
 
@@ -44,7 +43,6 @@ public class DiffValidatorTest {
 	public void testColumnDiffDropOk() {
 		Column c2 = ColumnDiffTest.newColumn("c","varchar",20);
 		ColumnDiff cd = new ColumnDiff(ChangeType.DROP, table, c2, null);
-		DiffValidator dv = new DiffValidator(sm);
 		dv.validateDiff(cd);
 	}
 
@@ -52,7 +50,26 @@ public class DiffValidatorTest {
 	public void testColumnDiffDropError() {
 		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
 		ColumnDiff cd = new ColumnDiff(ChangeType.DROP, table, c2, null);
-		DiffValidator dv = new DiffValidator(sm);
+		dv.validateDiff(cd);
+	}
+
+	@Test
+	public void testColumnDiffRenameOk() {
+		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.RENAME, table, c, c2);
+		dv.validateDiff(cd);
+	}
+
+	@Test(expected=IncompatibleChangeException.class)
+	public void testColumnDiffRenameError1() {
+		ColumnDiff cd = new ColumnDiff(ChangeType.RENAME, table, c, c);
+		dv.validateDiff(cd);
+	}
+
+	@Test(expected=IncompatibleChangeException.class)
+	public void testColumnDiffRenameError2() {
+		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.RENAME, table, c2, c2);
 		dv.validateDiff(cd);
 	}
 }
