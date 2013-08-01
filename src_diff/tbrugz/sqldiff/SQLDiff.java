@@ -18,6 +18,7 @@ import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.util.RenameDetector;
 import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -63,6 +64,10 @@ public class SQLDiff implements Executor {
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
 	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
+
+	//rename detection
+	public static final String PROP_DO_RENAMEDETECTION = PROP_PREFIX+".dorenamedetection";
+	public static final String PROP_RENAMEDETECT_MINSIMILARITY = PROP_PREFIX+".renamedetection.minsimilarity";
 
 	//apply diff props
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
@@ -134,6 +139,19 @@ public class SQLDiff implements Executor {
 		//do diff
 		log.info("diffing...");
 		diff = SchemaDiff.diff(fromSM, toSM);
+		
+		//detect renames
+		//XXX: add DiffProcessor?
+		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
+		if(doRenameDetection) {
+			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, 0.5);
+			int renames = 0;
+			renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
+			renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
+			if(renames>0) {
+				SchemaDiff.logInfo(diff);
+			}
+		}
 		
 		}
 		

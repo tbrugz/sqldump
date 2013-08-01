@@ -115,7 +115,7 @@ public class RenameDetector {
 		}
 	}
 	
-	public static void detectAndDoTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
+	public static int detectAndDoTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
 		//get renames
 		List<RenameTuple> renames = detectTableRenames(tableDiffs, minSimilarity);
 		
@@ -124,9 +124,11 @@ public class RenameDetector {
 		
 		//do renames
 		doRenames(tableDiffs, renames);
+		
+		return renames.size();
 	}
 
-	public static void detectAndDoColumnRenames(Collection<ColumnDiff> columnDiffs, double minSimilarity) {
+	public static int detectAndDoColumnRenames(Collection<ColumnDiff> columnDiffs, double minSimilarity) {
 		//get renames
 		List<RenameTuple> renames = detectColumnRenames(columnDiffs, minSimilarity);
 		
@@ -135,6 +137,8 @@ public class RenameDetector {
 		
 		//do renames
 		doRenames(columnDiffs, renames);
+
+		return renames.size();
 	}
 	
 	static <T extends Diff> List<T> getDiffsOfType(Collection<T> difflist, ChangeType type) {
