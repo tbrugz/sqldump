@@ -312,6 +312,21 @@ public class Utils {
 			return defaultValue;
 		}
 	}
+	
+	public static Double getPropDouble(Properties prop, String key) {
+		return getPropDouble(prop, key, null);
+	}
+	
+	public static Double getPropDouble(Properties prop, String key, Double defaultValue) {
+		String str = prop.getProperty(key);
+		try {
+			double d = Double.parseDouble(str);
+			return d;
+		}
+		catch(Exception e) {
+			return defaultValue;
+		}
+	}
 
 	public static boolean propertyExists(Properties prop, String key) {
 		return prop.getProperty(key)!=null;
