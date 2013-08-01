@@ -9,6 +9,7 @@ import tbrugz.sqldump.dbmodel.Table;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TDiff {
 	public ChangeType changeType;
-	public String renameFrom;
+	public String renameFromSchema;
+	public String renameFromName;
 	public Table table;
 }

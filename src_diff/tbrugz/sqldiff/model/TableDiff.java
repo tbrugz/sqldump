@@ -21,18 +21,19 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	static Log log = LogFactory.getLog(TableDiff.class);
 
 	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
-	final String renameFrom;
+	final String renameFromSchema;
+	final String renameFromName;
 	final Table table;
 
-	//XXX: add renameFromSchemaName?
-	public TableDiff(ChangeType changeType, Table table, String renameFrom) {
+	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName) {
 		this.diffType = changeType;
 		this.table = table;
-		this.renameFrom = renameFrom;
+		this.renameFromSchema = renameFromSchema;
+		this.renameFromName = renameFromName;
 	}
 
 	public TableDiff(ChangeType changeType, Table table) {
-		this(changeType, table, null);
+		this(changeType, table, null, null);
 	}
 	
 	@Override
@@ -42,9 +43,9 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				return table.getDefinition(true); //XXX: is it useful?
 				//return getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, foreignKeys);
 			case ALTER:
-				return null; //XXX: alter table...??
+				throw new IllegalStateException("cannot ALTER a table");
 			case RENAME:
-				return "alter table "+renameFrom+" rename to "+table.getFinalQualifiedName();
+				return "alter table "+(renameFromSchema!=null?renameFromSchema+".":"")+renameFromName+" rename to "+table.getFinalQualifiedName();
 			case DROP:
 				return "drop table "+table.getFinalQualifiedName();
 		}
@@ -106,7 +107,6 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		//XXX: constraints should be dumper in defined order (FKs at end)
 		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
 		diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getFinalQualifiedName(), newTable.getFinalQualifiedName());
-		//FIXedME: schemaname dumps as null
 		for(int i=0;i<dbiddiffs.size();i++) {
 			dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
 		}
@@ -188,8 +188,12 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		return table;
 	}
 	
-	public String getRenameFrom() {
-		return renameFrom;
+	public String getRenameFromSchema() {
+		return renameFromSchema;
+	}
+	
+	public String getRenameFromName() {
+		return renameFromName;
 	}
 
 }

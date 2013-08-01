@@ -60,7 +60,7 @@ public class DiffValidator {
 			break;
 		case RENAME:
 			if(tNew!=null) throw new IncompatibleChangeException("can't RENAME a table to a name that already exists ["+tNew+"]");
-			Table tPrev = DBIdentifiable.getDBIdentifiableByName(model.getTables(), td.getRenameFrom()); //XXX: use schema name?
+			Table tPrev = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), td.getRenameFromSchema(), td.getRenameFromName());
 			if(tPrev==null) throw new IncompatibleChangeException("can't RENAME a table that does not exists ["+td.getTable()+"]");
 			break;
 		case ALTER:

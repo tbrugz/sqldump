@@ -8,7 +8,7 @@ public class TableDiffAdapter extends XmlAdapter<TDiff, TableDiff> {
 	
 	@Override
 	public TableDiff unmarshal(TDiff v) throws Exception {
-		return new TableDiff(v.changeType, v.table);
+		return new TableDiff(v.changeType, v.table, v.renameFromSchema, v.renameFromName);
 	}
 
 	@Override
@@ -16,7 +16,8 @@ public class TableDiffAdapter extends XmlAdapter<TDiff, TableDiff> {
 		TDiff adapted = new TDiff();
 		adapted.changeType = v.getChangeType();
 		adapted.table = v.table;
-		adapted.renameFrom = v.renameFrom;
+		adapted.renameFromSchema = v.renameFromSchema;
+		adapted.renameFromName = v.renameFromName;
 		return adapted;
 	}
 
