@@ -36,7 +36,7 @@ public class RenameDetector {
 		List<TableDiff> ltadd = getDiffsOfType(tableDiffs, ChangeType.ADD);
 		List<TableDiff> ltdrop = getDiffsOfType(tableDiffs, ChangeType.DROP);
 		
-		log.info("ltadd-size: '"+ltadd.size()+"' ; ltdrop-size: '"+ltdrop.size());
+		log.debug("ltadd-size: '"+ltadd.size()+"' ; ltdrop-size: '"+ltdrop.size()+"'");
 		if(ltadd.size()==0 || ltdrop.size()==0) {
 			return new ArrayList<RenameTuple>();
 		}
@@ -46,7 +46,7 @@ public class RenameDetector {
 		for(TableDiff tadd: ltadd) {
 			for(TableDiff tdrop: ltdrop) {
 				double similarity = SimilarityCalculator.instance().similarity(tadd.getTable(), tdrop.getTable());
-				log.info("t-add: '"+tadd.getNamedObject()+"' ; t-drop: '"+tdrop.getNamedObject()+"' ; sim: "+similarity);
+				log.debug("t-add: '"+tadd.getNamedObject()+"' ; t-drop: '"+tdrop.getNamedObject()+"' ; sim: "+similarity);
 				if(similarity>=minSimilarity) {
 					renames.add(new RenameTuple(tadd, tdrop, similarity));
 				}
@@ -60,7 +60,7 @@ public class RenameDetector {
 		List<ColumnDiff> lcadd = getDiffsOfType(columnDiffs, ChangeType.ADD);
 		List<ColumnDiff> lcdrop = getDiffsOfType(columnDiffs, ChangeType.DROP);
 		
-		log.info("lcadd-size: '"+lcadd.size()+"' ; lcdrop-size: '"+lcdrop.size());
+		log.debug("lcadd-size: '"+lcadd.size()+"' ; lcdrop-size: '"+lcdrop.size()+"'");
 		if(lcadd.size()==0 || lcdrop.size()==0) {
 			return new ArrayList<RenameTuple>();
 		}
@@ -71,7 +71,7 @@ public class RenameDetector {
 			for(int j=0;j<lcdrop.size();j++) {
 				ColumnDiff cdrop = lcdrop.get(j);
 				double similarity = SimilarityCalculator.instance().similarity(cadd.getColumn(), i, cdrop.getPreviousColumn(), j);
-				log.info("c-add: '"+cadd.getNamedObject()+"' ; c-drop: '"+cdrop.getNamedObject()+"' ; sim: "+similarity);
+				log.debug("c-add: '"+cadd.getNamedObject()+"' ; c-drop: '"+cdrop.getNamedObject()+"' ; sim: "+similarity);
 				if(similarity>=minSimilarity) {
 					renames.add(new RenameTuple(cadd, cdrop, similarity));
 				}
@@ -119,11 +119,18 @@ public class RenameDetector {
 		//get renames
 		List<RenameTuple> renames = detectTableRenames(tableDiffs, minSimilarity);
 		
-		//validate renames
-		validateConflictingRenames(renames);
+		if(renames.size()==0) {
+			log.info("no table renames detected");
+		}
+		else {
+			log.info(renames.size()+" table renames detected");
 		
-		//do renames
-		doRenames(tableDiffs, renames);
+			//validate renames
+			validateConflictingRenames(renames);
+			
+			//do renames
+			doRenames(tableDiffs, renames);
+		}
 		
 		return renames.size();
 	}
@@ -132,11 +139,18 @@ public class RenameDetector {
 		//get renames
 		List<RenameTuple> renames = detectColumnRenames(columnDiffs, minSimilarity);
 		
-		//validate renames
-		validateConflictingRenames(renames);
-		
-		//do renames
-		doRenames(columnDiffs, renames);
+		if(renames.size()==0) {
+			log.info("no column renames detected");
+		}
+		else {
+			log.info(renames.size()+" column renames detected");
+
+			//validate renames
+			validateConflictingRenames(renames);
+			
+			//do renames
+			doRenames(columnDiffs, renames);
+		}
 
 		return renames.size();
 	}
