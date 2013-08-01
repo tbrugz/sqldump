@@ -11,7 +11,6 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
-import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.DBMSUpdateListener;

@@ -119,37 +119,30 @@ public class RenameDetector {
 		//get renames
 		List<RenameTuple> renames = detectTableRenames(tableDiffs, minSimilarity);
 		
-		if(renames.size()==0) {
-			log.info("no table renames detected");
-		}
-		else {
-			log.info(renames.size()+" table renames detected");
-		
-			//validate renames
-			validateConflictingRenames(renames);
-			
-			//do renames
-			doRenames(tableDiffs, renames);
-		}
-		
-		return renames.size();
+		//validate & do renames
+		return validateAndDoRenames(tableDiffs, renames, "table");
 	}
 
 	public static int detectAndDoColumnRenames(Collection<ColumnDiff> columnDiffs, double minSimilarity) {
 		//get renames
 		List<RenameTuple> renames = detectColumnRenames(columnDiffs, minSimilarity);
-		
+
+		//validate & do renames
+		return validateAndDoRenames(columnDiffs, renames, "column");
+	}
+	
+	static int validateAndDoRenames(Collection<? extends Diff> diffs, List<RenameTuple> renames, String diffType) {
 		if(renames.size()==0) {
-			log.info("no column renames detected");
+			log.info("no "+diffType+" renames detected");
 		}
 		else {
-			log.info(renames.size()+" column renames detected");
+			log.info(renames.size()+" "+diffType+" renames detected");
 
 			//validate renames
 			validateConflictingRenames(renames);
 			
 			//do renames
-			doRenames(columnDiffs, renames);
+			doRenames(diffs, renames);
 		}
 
 		return renames.size();

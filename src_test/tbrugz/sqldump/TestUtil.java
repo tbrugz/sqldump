@@ -15,7 +15,7 @@ import tbrugz.sqldump.util.IOUtil;
 
 public class TestUtil {
 
-	public static final String[] NULL_PARAMS = {};		
+	public static final String[] NULL_PARAMS = {};
 
 	public static Connection getConn(Properties prop, String prefix) throws ClassNotFoundException, SQLException, NamingException {
 		Connection conn = ConnectionUtil.initDBConnection(prefix, prop);
