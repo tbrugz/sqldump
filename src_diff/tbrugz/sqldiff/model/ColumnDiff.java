@@ -133,13 +133,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(! column.type.equals(previousColumn.type)) break;
 			//if(! column.type.equals(previousColumn.type)) break;
 		case NEVER:
-			String colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
-			if(addComments) {
-				colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
-			}
-			
-			String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
-			ret.add(alterSql);
+			ret.add(getAlterColumnSQL());
 			return ret;
 		}
 		
@@ -148,12 +142,26 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		//XXX what if column is not null & table has data?
 		Column tmpColumn = previousColumn.clone();
 		tmpColumn.setName(tmpColumn.getName()+"_TMP");
+		
+		boolean columnNotNull = column.nullable!=null && !column.nullable;
 		ret.add( getDiff(ChangeType.RENAME, previousColumn, tmpColumn).get(0) );
+		if(columnNotNull) { column.nullable = true; }
 		ret.add( getDiff(ChangeType.ADD, null, column).get(0) );
 		ret.add( "update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName() );
+		if(columnNotNull) { column.nullable = false; ret.add(getAlterColumnSQL()); }
 		ret.add( getDiff(ChangeType.DROP, tmpColumn, null).get(0)+
 				(addComments?" /* from: "+Column.getColumnDesc(previousColumn)+" */":"") );
 		return ret;
+	}
+	
+	String getAlterColumnSQL() {
+		String colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
+		if(addComments) {
+			colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
+		}
+		
+		String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
+		return alterSql;
 	}
 
 	@Override
