@@ -163,31 +163,56 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
 		return alterSql;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((column == null) ? 0 : column.hashCode());
+		result = prime * result
+				+ ((previousColumn == null) ? 0 : previousColumn.hashCode());
+		result = prime * result
+				+ ((schemaName == null) ? 0 : schemaName.hashCode());
+		result = prime * result
+				+ ((tableName == null) ? 0 : tableName.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if(super.equals(obj)) {
-			if(obj instanceof ColumnDiff) {
-				ColumnDiff tcd = (ColumnDiff) obj;
-				if(type.equals(tcd.type)) {
-					if((column!=null && tcd.column==null) || (column==null && tcd.column!=null)) {
-						return false;
-					}
-					
-					boolean equals = true;
-					if(column!=null && tcd.column!=null) {
-						equals |= column.equals(tcd.column);
-					}
-					if(previousColumn!=null && tcd.previousColumn!=null) {
-						equals |= previousColumn.equals(tcd.previousColumn);
-					}
-					return equals;
-				}
-			}
-		}
-		return false;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ColumnDiff other = (ColumnDiff) obj;
+		if (column == null) {
+			if (other.column != null)
+				return false;
+		} else if (!column.equals(other.column))
+			return false;
+		if (previousColumn == null) {
+			if (other.previousColumn != null)
+				return false;
+		} else if (!previousColumn.equals(other.previousColumn))
+			return false;
+		if (schemaName == null) {
+			if (other.schemaName != null)
+				return false;
+		} else if (!schemaName.equals(other.schemaName))
+			return false;
+		if (tableName == null) {
+			if (other.tableName != null)
+				return false;
+		} else if (!tableName.equals(other.tableName))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
 	}
-	
+
 	@Override
 	public int compareTo(ColumnDiff o) {
 		int comp = type.compareTo(o.type);

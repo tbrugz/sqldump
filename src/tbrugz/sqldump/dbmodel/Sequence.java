@@ -29,7 +29,18 @@ public class Sequence extends DBObject {
 		return "[Sequence:"+getSchemaName()+"."+getName()+";min:"+minValue+",max:"+maxValue+"]";
 	}
 
-	//XXX: do not use lastNumber
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (int) (incrementBy ^ (incrementBy >>> 32));
+		result = prime * result
+				+ ((maxValue == null) ? 0 : maxValue.hashCode());
+		result = prime * result
+				+ ((minValue == null) ? 0 : minValue.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -41,9 +52,15 @@ public class Sequence extends DBObject {
 		Sequence other = (Sequence) obj;
 		if (incrementBy != other.incrementBy)
 			return false;
-		if (maxValue != other.maxValue)
+		if (maxValue == null) {
+			if (other.maxValue != null)
+				return false;
+		} else if (!maxValue.equals(other.maxValue))
 			return false;
-		if (minValue != other.minValue)
+		if (minValue == null) {
+			if (other.minValue != null)
+				return false;
+		} else if (!minValue.equals(other.minValue))
 			return false;
 		return true;
 	}

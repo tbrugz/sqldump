@@ -66,18 +66,48 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		ret.add(getDiff());
 		return ret;
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((changeType == null) ? 0 : changeType.hashCode());
+		result = prime * result + ((ident == null) ? 0 : ident.hashCode());
+		result = prime * result
+				+ ((ownerTableName == null) ? 0 : ownerTableName.hashCode());
+		result = prime * result
+				+ ((previousIdent == null) ? 0 : previousIdent.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof DBIdentifiableDiff) {
-			DBIdentifiableDiff dbid = (DBIdentifiableDiff) obj;
-			if(changeType.equals(dbid.changeType)) {
-				if(ident!=null) { return ident.equals(dbid.ident); }
-				else { return previousIdent.equals(dbid.previousIdent); }
-			}
+		if (this == obj)
+			return true;
+		if (obj == null)
 			return false;
-		}
-		return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DBIdentifiableDiff other = (DBIdentifiableDiff) obj;
+		if (changeType != other.changeType)
+			return false;
+		if (ident == null) {
+			if (other.ident != null)
+				return false;
+		} else if (!ident.equals(other.ident))
+			return false;
+		if (ownerTableName == null) {
+			if (other.ownerTableName != null)
+				return false;
+		} else if (!ownerTableName.equals(other.ownerTableName))
+			return false;
+		if (previousIdent == null) {
+			if (other.previousIdent != null)
+				return false;
+		} else if (!previousIdent.equals(other.previousIdent))
+			return false;
+		return true;
 	}
 
 	@Override
