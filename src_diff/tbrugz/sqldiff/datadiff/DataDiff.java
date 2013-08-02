@@ -116,9 +116,9 @@ public class DataDiff extends AbstractFailable {
 			return;
 		}
 		
-		Set<Table> tablesToDiff = sourceSchemaModel.getTables();
-		Set<Table> targetTables = targetSchemaModel.getTables();
-		tablesToDiff.retainAll(targetTables);
+		Set<Table> tablesToDiff = targetSchemaModel.getTables();
+		Set<Table> sourceTables = sourceSchemaModel.getTables();
+		tablesToDiff.retainAll(sourceTables); //only diff tables contained in source & target models... 
 		
 		boolean
 			sourceConnCreated = false,
@@ -188,7 +188,8 @@ public class DataDiff extends AbstractFailable {
 				continue;
 			}
 			
-			String sql = DataDump.getQuery(table, "*", null, null, true);
+			//XXX select '*' or all column names? option to select by property?
+			String sql = DataDump.getQuery(table, getColumnsForSelect(table), null, null, true); //replaced '*' for column names - same column order for both resultsets
 			
 			if(sourceMustImportData) {
 				importData(table, sourceConn, sourceId);
@@ -234,6 +235,10 @@ public class DataDiff extends AbstractFailable {
 		if(targetConnCreated) {
 			ConnectionUtil.closeConnection(targetConn);
 		}
+	}
+	
+	String getColumnsForSelect(Table t) {
+		return Utils.join(t.getColumnNames(), ", ");
 	}
 	
 	static List<DiffSyntax> getSyntaxes(Properties prop, boolean applyDataDiff) throws SQLException {

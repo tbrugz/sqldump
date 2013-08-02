@@ -118,6 +118,10 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 				}
 				continue;
 			}
+			if(val2str==null) {
+				changedColNames.add(lsColNames.get(i));
+				continue;
+			}
 			comp = val1str.compareTo(val2str);
 			if(comp!=0) {
 				changedColNames.add(lsColNames.get(i));
