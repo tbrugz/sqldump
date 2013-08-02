@@ -94,7 +94,9 @@ public class SQLDiff implements Executor {
 	String jsoninfile = null;
 	String jsonoutfile = null;
 	
-	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	transient int lastDiffCount = 0;
+	
+	int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -309,6 +311,8 @@ public class SQLDiff implements Executor {
 		//XXX close connections if open?
 		
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+		
+		return diff.getDiffList().size();
 	}
 	
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {
@@ -427,7 +431,7 @@ public class SQLDiff implements Executor {
 			return;
 		}
 		
-		doIt();
+		lastDiffCount = doIt();
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
@@ -438,5 +442,9 @@ public class SQLDiff implements Executor {
 	@Override
 	public void setFailOnError(boolean failonerror) {
 		this.failonerror = failonerror;
+	}
+	
+	public int getLastDiffCount() {
+		return lastDiffCount;
 	}
 }
