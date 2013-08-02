@@ -311,7 +311,7 @@
 
 	<!-- ========= code analysis tasks ========== -->
 
-	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura">
+	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura, findbugs">
 	</target>
 	
 	<target name="codeanalysis-pmd">
@@ -366,6 +366,7 @@
 	</target>
 	
 	<target name="codeanalysis-cobertura">
+		<taskdef classpathref="classpath.cobertura" resource="tasks.properties" />
 		<cobertura-report format="xml" destdir="${dist.dir}" >
 			<fileset dir="${src.dir}">
 				<include name="**/*.java"/>
@@ -406,6 +407,8 @@
 			<!--instrumentationClasspath>
 				<pathelement location="${bin.dir}" />
 			</instrumentationClasspath-->
+			<!-- needs cobertura 2.0.3+ -->
+			<auxClasspath refid="classpath.compile" />
 		</cobertura-instrument>
 	</target>
 	

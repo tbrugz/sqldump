@@ -65,6 +65,7 @@ Usage examples can be found at [doc/examples](https://bitbucket.org/tbrugz/sqldu
 
 Dependencies
 ------------
+- java 6 or newer
 - [apache-commons-logging](http://commons.apache.org/logging/)
 - [log4j](http://logging.apache.org/log4j/1.2/) - optional but recommended
 - database-dependent JDBC jars ( e.g.
