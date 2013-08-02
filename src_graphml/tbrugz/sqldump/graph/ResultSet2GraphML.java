@@ -27,6 +27,7 @@ import tbrugz.graphml.model.Stereotyped;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.xml.AbstractDump;
 
@@ -346,12 +347,20 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	boolean dumpSchema(String qid, ResultSet rsEdges, ResultSet rsNodes) throws SQLException, FileNotFoundException {
 		log.info("dumping graphML: translating model [edgeonly="+isEdgeOnlyStrategy(rsEdges, rsNodes)+"]");
 		if(rsEdges==null) {
-			log.warn("resultSet is null!");
+			String message = "resultSet is null!";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return false;
 		}
 		Root r = getGraphMlModel(qid, rsEdges, rsNodes);
 		if(r==null) {
-			log.warn("null model: nothing to dump");
+			String message = "null model: nothing to dump";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return false;
 		}
 		log.info("dumping model... [graph size = "+r.getChildren().size()+"]");
@@ -398,7 +407,11 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	void processIntern() throws SQLException, IOException {
 		String queriesStr = prop.getProperty(PROP_GRAPHMLQUERIES);
 		if(queriesStr==null) {
-			log.warn("prop '"+PROP_GRAPHMLQUERIES+"' not defined");
+			String message = "prop '"+PROP_GRAPHMLQUERIES+"' not defined";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 			return;
 		}
 		String[] queriesArr = queriesStr.split(",");
@@ -413,6 +426,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				String sqlfile = prop.getProperty("sqldump.graphmlquery."+qid+".sqlfile");
 				if(sqlfile!=null) {
 					sqlEdges = IOUtil.readFromFilename(sqlfile);
+					sqlEdges = ParametrizedProperties.replaceProps(sqlEdges, prop);
 				}
 			}
 
@@ -423,6 +437,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				String sqlfile = prop.getProperty("sqldump.graphmlquery."+qid+".nodesqlfile");
 				if(sqlfile!=null) {
 					sqlNodes = IOUtil.readFromFilename(sqlfile);
+					sqlNodes = ParametrizedProperties.replaceProps(sqlNodes, prop);
 				}
 			}
 			
@@ -433,14 +448,12 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				return;
 			}
 			
-			//XXX replace vars in sqlEdges
 			logsql.info("edges sql: "+sqlEdges);
 			Statement st = conn.createStatement();
 			ResultSet rsEdges = st.executeQuery(sqlEdges);
 			ResultSet rsNodes = null;
 
 			if(sqlNodes!=null) {
-				//XXX replace vars in sqlNodes
 				logsql.info("nodes sql: "+sqlNodes);
 				st = conn.createStatement();
 				rsNodes = st.executeQuery(sqlNodes);
