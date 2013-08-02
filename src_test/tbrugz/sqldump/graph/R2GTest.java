@@ -49,4 +49,27 @@ public class R2GTest {
 		NodeList le = XMLUtil.getList(doc, "edge");
 		Assert.assertEquals(3, le.getLength());
 	}
+
+	@Test
+	public void testR2Gsql() throws SAXException, ParserConfigurationException, IOException, ClassNotFoundException, SQLException, NamingException {
+		Properties prop = new Properties();
+		prop.load(R2GTest.class.getResourceAsStream("r2g.properties"));
+		prop.setProperty("sqldump.graphmlqueries", "q2");
+		Connection conn = ConnectionUtil.initDBConnection("sqldump", prop);
+		
+		Processor proc = new ResultSet2GraphML();
+		proc.setProperties(prop);
+		proc.setConnection(conn);
+		proc.process();
+		
+		Document doc = XMLUtil.getDoc(new File("work/output/graph/r2g-sql.graphml"));
+		
+		//List ln = e.selectNodes("//node");//graphml/graph/node
+		NodeList ln = XMLUtil.getList(doc, "node");
+		Assert.assertEquals(3, ln.getLength());
+		
+		//List le = dom.selectNodes("//edge");
+		NodeList le = XMLUtil.getList(doc, "edge");
+		Assert.assertEquals(4, le.getLength());
+	}
 }
