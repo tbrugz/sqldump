@@ -703,6 +703,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
 		if(pkTable==null) {
 			log.warn("table not found: "+schemaName+"."+fk.getPkTable());
+			return;
 		}
 		
 		HierarchyLevelData getHierLevelData = getHierLevelData(pkTable, fk);

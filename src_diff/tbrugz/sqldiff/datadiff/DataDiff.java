@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -194,14 +195,14 @@ public class DataDiff extends AbstractFailable {
 			if(sourceMustImportData) {
 				importData(table, sourceConn, sourceId);
 			}
-			Statement stmtSource = sourceConn.createStatement();
-			ResultSet rsSource = stmtSource.executeQuery(sql);
+			PreparedStatement stmtSource = sourceConn.prepareStatement(sql);
+			ResultSet rsSource = stmtSource.executeQuery();
 			
 			if(targetMustImportData) {
 				importData(table, targetConn, targetId);
 			}
-			Statement stmtTarget = targetConn.createStatement();
-			ResultSet rsTarget = stmtTarget.executeQuery(sql);
+			PreparedStatement stmtTarget = targetConn.prepareStatement(sql);
+			ResultSet rsTarget = stmtTarget.executeQuery();
 			
 			//TODOne: check if rsmetadata is equal between RSs...
 			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
