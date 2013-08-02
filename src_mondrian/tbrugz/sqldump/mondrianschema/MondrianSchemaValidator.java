@@ -32,8 +32,6 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 	
 	public static final String PROP_MONDRIAN_VALIDATOR_SCHEMAFILE = "sqldump.mondrianvalidator.schemafile";
 
-	Properties prop = null;
-
 	String dataSource = null;
 	String driverClass = null;
 	String url = null;
@@ -44,8 +42,6 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 	
 	@Override
 	public void setProperties(Properties prop) {
-		this.prop = prop;
-		
 		String connPrefix = prop.getProperty(SQLDump.PROP_CONNPROPPREFIX);
 		if(connPrefix==null) {
 			connPrefix = SQLDump.CONN_PROPS_PREFIX;

@@ -7,12 +7,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.util.SQLUtils;
 
 public class SQLTests extends AbstractSQLProc {
 
-	static Log log = LogFactory.getLog(SQLTests.class);
-	
-	Connection conn;
+	static final Log log = LogFactory.getLog(SQLTests.class);
 	
 	public static void tests(Connection conn) {
 		try {
@@ -53,11 +52,6 @@ public class SQLTests extends AbstractSQLProc {
 		//Statement st = conn.createStatement();
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
-	}
-	
-	@Override
-	public void setConnection(Connection conn) {
-		this.conn = conn;
 	}
 
 	@Override
