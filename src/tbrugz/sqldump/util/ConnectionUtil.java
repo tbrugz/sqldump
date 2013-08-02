@@ -15,6 +15,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.def.ProcessingException;
+
 public class ConnectionUtil {
 	
 	static final Log log = LogFactory.getLog(ConnectionUtil.class);
@@ -108,12 +110,14 @@ public class ConnectionUtil {
 	
 	static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 		if(driverClass==null) {
-			log.error("driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed");
-			return null;
+			String message = "driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed";
+			log.error(message);
+			throw new ProcessingException(message);
 		}
 		if(dbUrl==null) {
-			log.error("db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed");
-			return null;
+			String message = "db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed"; 
+			log.error(message);
+			throw new ProcessingException(message);
 		}
 
 		Class.forName(driverClass);
