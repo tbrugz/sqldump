@@ -11,7 +11,7 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	//dumping parameters
 	//XXX: add dumpWithSchemaName to DBObject ?
 	public static transient boolean dumpCreateOrReplace = false;
-	public static transient SQLIdentifierDecorator sqlIddecorator = new SQLIdentifierDecorator();
+	public static transient final SQLIdentifierDecorator sqlIddecorator = new SQLIdentifierDecorator();
 	//public static transient boolean dumpQuoteAll = true;
 	//public static transient String dumpIdentifierQuoteString = "\"";
 

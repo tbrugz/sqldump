@@ -38,9 +38,9 @@ public class DataDumpUtils {
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
 	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
-	public static NumberFormat floatFormatterSQL = null;
+	public static final NumberFormat floatFormatterSQL;
 	//public static NumberFormat floatFormatterBR = null;
-	public static NumberFormat longFormatter = null;
+	public static final NumberFormat longFormatter;
 	public static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
 	
 	static {
