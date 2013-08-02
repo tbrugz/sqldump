@@ -27,6 +27,7 @@ import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.sqlrun.SQLTokenizersTest;
 import tbrugz.sqldump.sqlrun.StmtExecTest;
+import tbrugz.sqldump.sqlrun.StmtProcTest;
 import tbrugz.sqldump.util.CLIProcessorTest;
 import tbrugz.sqldump.util.CategorizedOutTest;
 import tbrugz.sqldump.util.IOUtilTest;
@@ -43,6 +44,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	CategorizedOutTest.class,
 	CLIProcessorTest.class,
 	DBMSResourcesTest.class,
+	StmtProcTest.class,
 
 	//diff "unit" tests
 	ColumnDiffTest.class,

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -323,6 +324,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 	}
 
+	static final String questionMarkPattern = Pattern.quote("?");
+	
 	String replaceParameters(String stmt) throws SQLException {
 		int i=1;
 		String retStmt = stmt;
@@ -331,7 +334,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 			String param = papp.getProperty(key);
 			if(param!=null) {
 				log.debug("param #"+i+"/"+key+": "+param);
-				retStmt = retStmt.replaceFirst("?", param);
+				retStmt = retStmt.replaceFirst(questionMarkPattern, param);
 			}
 			else { return retStmt; }
 			i++;
