@@ -5,6 +5,7 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 import tbrugz.sqldiff.SQLDiffMainTest;
+import tbrugz.sqldiff.apply.DiffApplyTest;
 import tbrugz.sqldiff.datadiff.ResultSetDiffTest;
 import tbrugz.sqldiff.io.DiffIOTest;
 import tbrugz.sqldiff.model.ColumnDiffTest;
@@ -67,6 +68,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	SQLDiffTest.class,
 	//DerbyDiffTest.class, //taking too long...
 	HSQLDBDiffTest.class,
+	DiffApplyTest.class,
 	
 	//datadump
 	DataDumpTest.class,
