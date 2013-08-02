@@ -69,11 +69,13 @@ public class SQLRun implements Executor {
 	static final String SUFFIX_LOGINVALIDSTATEMENTS = ".loginvalidstatments";
 	static final String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
 	static final String SUFFIX_PARAM = ".param";
+
 	//properties
-	static final String PROP_COMMIT_STATEGY = "sqlrun.commit.strategy";
+	static final String PROP_COMMIT_STATEGY = Constants.SQLRUN_PROPS_PREFIX+".commit.strategy";
 	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
-	static final String PROP_FILTERBYIDS = "sqlrun.filterbyids";
+	static final String PROP_FILTERBYIDS = Constants.SQLRUN_PROPS_PREFIX+".filterbyids";
 	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
+	static final String PROP_CONNPROPPREFIX = Constants.SQLRUN_PROPS_PREFIX+".connpropprefix";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -346,11 +348,14 @@ public class SQLRun implements Executor {
 			conn = c;
 		}
 		else {
-			conn = ConnectionUtil.initDBConnection(CONN_PROPS_PREFIX, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
-		}
-		
-		if(conn==null) {
-			throw new ProcessingException("null connection [prop prefix: '"+CONN_PROPS_PREFIX+"']");
+			String connPrefix = papp.getProperty(PROP_CONNPROPPREFIX);
+			if(connPrefix==null) {
+				connPrefix = CONN_PROPS_PREFIX;
+			}
+			conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
+			if(conn==null) {
+				throw new ProcessingException("null connection [prop prefix: '"+connPrefix+"']");
+			}
 		}
 
 		ConnectionUtil.showDBInfo(conn.getMetaData());
