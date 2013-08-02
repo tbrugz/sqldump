@@ -38,25 +38,48 @@ public class DiffApplyTest {
 	@Test
 	public void testDiffAddColumn() throws Exception {
 		//exec DDL
-		Properties p = new ParametrizedProperties();
-		p.load(DiffApplyTest.class.getResourceAsStream("db2.properties"));
-		p.setProperty("sqlrun.exec.50.statement", "alter table emp add column abc varchar(10)");
-		p.setProperty("sqlrun.connpropprefix","sqlrun.db2");
-		Executor sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p);
+		execDDLId2("alter table emp add column abc varchar(10)");
 		
 		//run diff
 		SQLDiff sqldiff = new SQLDiff();
+		runDiff(sqldiff);
+		Assert.assertEquals(1, sqldiff.getLastDiffCount());
+
+		//run diff 2nd time - should have no difference
+		runDiff(sqldiff);
+		Assert.assertEquals(0, sqldiff.getLastDiffCount());
+	}
+
+	@Test
+	public void testDiffDropColumn() throws Exception {
+		//exec DDL
+		execDDLId2("alter table emp drop column salary");
+		
+		//run diff
+		SQLDiff sqldiff = new SQLDiff();
+		runDiff(sqldiff);
+		Assert.assertEquals(1, sqldiff.getLastDiffCount());
+
+		//run diff 2nd time - should have no difference
+		runDiff(sqldiff);
+		Assert.assertEquals(0, sqldiff.getLastDiffCount());
+	}
+	
+	void execDDLId2(String ddl) throws Exception {
+		Properties p = new ParametrizedProperties();
+		p.load(DiffApplyTest.class.getResourceAsStream("db2.properties"));
+		p.setProperty("sqlrun.exec.50.statement", ddl);
+		p.setProperty("sqlrun.connpropprefix","sqlrun.db2");
+		Executor sqlr = new SQLRun();
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
+	}
+	
+	void runDiff(SQLDiff sqldiff) throws Exception {
 		Properties pd = new ParametrizedProperties();
 		pd.load(DiffApplyTest.class.getResourceAsStream("diff1.properties"));
 		pd.load(DiffApplyTest.class.getResourceAsStream("db1.properties"));
 		pd.load(DiffApplyTest.class.getResourceAsStream("db2.properties"));
 		sqldiff.doMain(TestUtil.NULL_PARAMS, pd);
-		Assert.assertEquals(1, sqldiff.getLastDiffCount());
-
-		//run diff 2nd time - should have no difference
-		sqldiff.doMain(TestUtil.NULL_PARAMS, pd);
-		Assert.assertEquals(0, sqldiff.getLastDiffCount());
 	}
 	
 }
