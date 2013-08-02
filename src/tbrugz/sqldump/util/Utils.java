@@ -354,7 +354,7 @@ public class Utils {
 		return ret;
 	}
 
-	public static String PASSECHO_WARN_MESSAGE = "WARN: password will be echoed";
+	static final String PASSECHO_WARN_MESSAGE = "WARN: password will be echoed";
 	
 	public static String readPassword(String message) {
 		Console cons = System.console();

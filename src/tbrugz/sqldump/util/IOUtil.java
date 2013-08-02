@@ -13,9 +13,9 @@ import org.apache.commons.logging.LogFactory;
 
 public class IOUtil {
 	
-	public static int BUFFER_SIZE = 1024*8;
+	static final int BUFFER_SIZE = 1024*8;
 	
-	static Log log = LogFactory.getLog(IOUtil.class);
+	static final Log log = LogFactory.getLog(IOUtil.class);
 	
 	static void writeFile(String contents, Writer writer) throws IOException {
 		writer.write(contents);

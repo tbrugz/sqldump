@@ -83,7 +83,7 @@ public class BlobDataDump extends DumpSyntax {
 	}
 	
 	//XX: prop for setting ROWID_JOINER
-	public static String ROWID_JOINER = "_";
+	static String ROWID_JOINER = "_";
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer writer) throws IOException, SQLException {

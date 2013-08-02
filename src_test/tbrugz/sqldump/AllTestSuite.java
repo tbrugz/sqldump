@@ -17,7 +17,6 @@ import tbrugz.sqldiff.util.SimilarityCalculatorTest;
 import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
-import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
@@ -85,7 +84,4 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//RoundTripTest.class,
 })
 public class AllTestSuite {
-	static {
-		AbstractFailable.DEFAULT_FAILONERROR = true;
-	}
 }
