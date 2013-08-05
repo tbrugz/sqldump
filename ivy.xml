@@ -42,5 +42,6 @@
 		<dependency org="net.sourceforge.pmd" name="pmd" rev="5.0.4" conf="test->default"/>
 		<dependency org="net.sourceforge.cobertura" name="cobertura" rev="2.0.2" conf="test->default"/>
 		<dependency org="com.google.code.findbugs" name="findbugs" rev="2.0.1" conf="findbugs->default"/>
+		<dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.6" conf="test->default"/>
 	</dependencies>
 </ivy-module>

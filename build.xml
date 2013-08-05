@@ -431,6 +431,21 @@
 			<class location="${bin.dir}" />
 		</findbugs>
 	</target>
+	
+	<target name="checkstyle">
+		<taskdef resource="checkstyletask.properties" classpathref="classpath.test"/>
+		<!-- config from: https://raw.github.com/lhanson/checkstyle/master/sun_checks.xml -->
+		<checkstyle config="resources-build/checkstyle_sun_checks.xml" classpathref="classpath.test" failOnViolation="false">
+			<fileset dir="${src.diff.dir}" includes="**/*.java"/>
+			<fileset dir="${src.dir}" includes="**/*.java"/>
+			<fileset dir="${src.graphml.dir}" includes="**/*.java"/>
+			<fileset dir="${src.mondrian.dir}" includes="**/*.java"/>
+			<fileset dir="${src.run.dir}" includes="**/*.java"/>
+			<fileset dir="${src.xtra.dir}" includes="**/*.java"/>
+			<!--formatter type="plain"/-->
+			<formatter type="xml" toFile="${dist.dir}/checkstyle_errors.xml"/>
+		</checkstyle>
+	</target>
 
 	<!-- ========= /code analysis tasks ========== -->
 
