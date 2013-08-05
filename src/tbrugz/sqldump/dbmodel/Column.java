@@ -155,19 +155,30 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	}
 
 	public String getDefinition() {
-		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition();
+		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition()+getColumnConstraints();
 	}
 	
 	public String getTypeDefinition() {
 		String colType = type.trim();
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 		return colType
-			+(usePrecision?"("+columSize+(decimalDigits!=null?","+decimalDigits:"")+")":"")
-			+(defaultValue!=null?" default "+defaultValue:"")
-			+(!nullable?" not null":"")
+			+(usePrecision?"("+columSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");
+	}
+	
+	public String getColumnConstraints() {
+		return getDefaultSnippet()
+			+getNullableSnippet()
 			+(useAutoIncrement?
 				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
 			 :"");
+	}
+	
+	public String getDefaultSnippet() {
+		return (defaultValue!=null?" default "+defaultValue:"");
+	}
+	
+	public String getNullableSnippet() {
+		return (!nullable?" not null":"");
 	}
 	
 	@Override
