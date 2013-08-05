@@ -255,8 +255,13 @@ public class Utils {
 		File parent = f.getParentFile();
 		if(parent!=null) {
 			if(!parent.exists()) {
-				parent.mkdirs();
+				if(!parent.mkdirs()) {
+					log.warn("error creating dirs: "+parent.getAbsolutePath());
+				}
 			}
+		}
+		else {
+			log.warn("null parent dir? file: "+f.getAbsolutePath());
 		}
 	}
 	

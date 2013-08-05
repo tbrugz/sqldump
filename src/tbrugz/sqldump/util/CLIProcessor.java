@@ -67,6 +67,7 @@ public class CLIProcessor {
 		else {
 			try {
 				p.load(propIS);
+				propIS.close();
 			}
 			catch(IOException e) {
 				log.warn("error loading resource '"+propResource+"': "+e);
@@ -84,6 +85,7 @@ public class CLIProcessor {
 			log.info("loading properties file: "+propFile);
 			InputStream propIS = new FileInputStream(propFile);
 			p.load(propIS);
+			propIS.close();
 		}
 		catch(IOException e) {
 			if(logExceptionAsWarn) {

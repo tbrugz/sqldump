@@ -133,10 +133,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public boolean equals(Object obj) {
 		if(obj instanceof Column) {
 			Column c = (Column) obj;
-			return name.equals(c.name) && type.equals(c.type) && (columSize==c.columSize) 
-					&& (decimalDigits!=null?decimalDigits.equals(c.decimalDigits):c.decimalDigits==null) 
-					&& (defaultValue!=null?defaultValue.equals(c.defaultValue):c.defaultValue==null) 
-					&& (pk==c.pk) && (nullable==c.nullable);
+			return name.equals(c.name) && type.equals(c.type)
+					&& (columSize!=null?columSize.equals(c.columSize):c.columSize==null)
+					&& (decimalDigits!=null?decimalDigits.equals(c.decimalDigits):c.decimalDigits==null)
+					&& (defaultValue!=null?defaultValue.equals(c.defaultValue):c.defaultValue==null)
+					&& (nullable!=null?nullable.equals(c.nullable):c.nullable==null)
+					&& (pk==c.pk);
 		}
 		return false;
 	}

@@ -69,6 +69,8 @@ public class Index extends DBObject {
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
 		if (this == obj)
 			return true;
 		// Index equality will not depend on Index name

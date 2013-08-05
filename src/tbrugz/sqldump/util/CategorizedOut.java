@@ -127,7 +127,9 @@ public class CategorizedOut {
 			//String dirStr = f.getParent();
 			File dir = new File(f.getParent());
 			if(!dir.exists()) {
-				dir.mkdirs();
+				if(!dir.mkdirs()) {
+					log.warn("error creating dirs: "+dir.getAbsolutePath());
+				}
 			}
 			else {
 				if(!dir.isDirectory()) {
@@ -180,7 +182,9 @@ public class CategorizedOut {
 			//String dirStr = f.getParent();
 			File dir = new File(f.getParent());
 			if(!dir.exists()) {
-				dir.mkdirs();
+				if(!dir.mkdirs()) {
+					log.warn("error creating dirs: "+dir.getAbsolutePath());
+				}
 			}
 			else {
 				if(!dir.isDirectory()) {
