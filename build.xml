@@ -5,8 +5,9 @@
 	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="src.mondrian.dir" value="src_mondrian"/>
 	<property name="src.run.dir" value="src_run"/>
-	<property name="src.test.dir" value="src_test"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
+	<property name="src.anttaks.dir" value="src_anttasks"/>
+	<property name="src.test.dir" value="src_test"/>
 
 	<property name="bin.dir" value="bin/main"/>
 	<property name="bin.test.dir" value="bin/test"/>
