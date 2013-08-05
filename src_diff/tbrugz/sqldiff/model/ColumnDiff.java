@@ -143,7 +143,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		Column tmpColumn = previousColumn.clone();
 		tmpColumn.setName(tmpColumn.getName()+"_TMP");
 		
-		boolean columnNotNull = column.nullable!=null && !column.nullable;
+		boolean columnNotNull = !column.nullable;
 		ret.add( getDiff(ChangeType.RENAME, previousColumn, tmpColumn).get(0) );
 		if(columnNotNull) { column.nullable = true; }
 		ret.add( getDiff(ChangeType.ADD, null, column).get(0) );

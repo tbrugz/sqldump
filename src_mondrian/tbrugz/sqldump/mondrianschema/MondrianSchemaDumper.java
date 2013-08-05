@@ -351,7 +351,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					List<Column> cols = t.getColumns();
 					Column notNullCol = null;
 					for(Column col: cols) {
-						if(col.nullable!=null && !col.nullable) { notNullCol = col; }
+						if(!col.nullable) { notNullCol = col; }
 					}
 					if(notNullCol!=null) {
 						measures.add(newMeasure(notNullCol.getName(), descFactCountMeasure, "count"));

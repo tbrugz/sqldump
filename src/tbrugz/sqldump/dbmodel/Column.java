@@ -100,7 +100,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public Integer columSize;
 	public Integer decimalDigits;
 	transient boolean pk;
-	public Boolean nullable;
+	public boolean nullable = true;
 	String defaultValue;
 	String remarks;
 	public Boolean autoIncrement;
@@ -121,7 +121,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 					&& (columSize!=null?columSize.equals(c.columSize):c.columSize==null)
 					&& (decimalDigits!=null?decimalDigits.equals(c.decimalDigits):c.decimalDigits==null)
 					&& (defaultValue!=null?defaultValue.equals(c.defaultValue):c.defaultValue==null)
-					&& (nullable!=null?nullable.equals(c.nullable):c.nullable==null)
+					&& (nullable == c.nullable)
 					&& (pk==c.pk);
 		}
 		return false;
@@ -164,7 +164,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		return colType
 			+(usePrecision?"("+columSize+(decimalDigits!=null?","+decimalDigits:"")+")":"")
 			+(defaultValue!=null?" default "+defaultValue:"")
-			+(nullable!=null && !nullable?" not null":"")
+			+(!nullable?" not null":"")
 			+(useAutoIncrement?
 				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
 			 :"");
