@@ -109,22 +109,8 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 
 	public static transient boolean useAutoIncrement = false;
 	
-	static String getColumnDesc(Column c) {
-		String colType = c.type!=null ? c.type.trim() : null;
-		
-		boolean usePrecision = ColTypeUtil.usePrecision(colType);
-
-		return DBObject.getFinalIdentifier(c.name)+" "+colType
-			+(usePrecision?"("+c.columSize+(c.decimalDigits!=null?","+c.decimalDigits:"")+")":"")
-			+(c.defaultValue!=null?" default "+c.defaultValue:"")
-			+(c.nullable!=null && !c.nullable?" not null":"")
-			+(useAutoIncrement?
-				((c.autoIncrement!=null && c.autoIncrement)?" auto_increment":"")
-			 :"");
-	}
-	
 	public static String getColumnDescFull(Column c) {
-		return getColumnDesc(c)+(c.pk?" primary key":"");
+		return c.getDefinition()+(c.pk?" primary key":"");
 	}
 	
 	@Override
@@ -159,17 +145,29 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 
 	@Override
 	public String toString() {
-		return "[column:"+getColumnDesc(this)+"]";
+		return "[column:"+this.getDefinition()+"]";
 		//return "[column: "+name+" "+type+"]";
 	}
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return getColumnDesc(this);
+		return getDefinition();
 	}
 
 	public String getDefinition() {
-		return getColumnDesc(this);
+		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition();
+	}
+	
+	public String getTypeDefinition() {
+		String colType = type.trim();
+		boolean usePrecision = ColTypeUtil.usePrecision(colType);
+		return colType
+			+(usePrecision?"("+columSize+(decimalDigits!=null?","+decimalDigits:"")+")":"")
+			+(defaultValue!=null?" default "+defaultValue:"")
+			+(nullable!=null && !nullable?" not null":"")
+			+(useAutoIncrement?
+				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
+			 :"");
 	}
 	
 	@Override

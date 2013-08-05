@@ -73,7 +73,7 @@ public class Table extends DBObject implements Relation {
 		
 		//Columns
 		for(Column c: columns) {
-			String colDesc = Column.getColumnDesc(c);
+			String colDesc = c.getDefinition();
 			//if(c.pk) { pkCols.add(c.name); }
 			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);
 			countTabElements++;
