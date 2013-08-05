@@ -271,7 +271,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		StringBuffer sbCols = new StringBuffer();
 		int colCount = 0;
 		for(Column c: t.getColumns()) {
-			sbCols.append(Column.getColumnDesc(c)+"\n");
+			sbCols.append(c.getDefinition()+"\n");
 			colCount++;
 		}
 		n.setColumnsDesc(sbCols.toString());

@@ -105,7 +105,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		String colChange = null;
 		switch(changeType) {
 			case ADD:
-				colChange = features.sqlAddColumnClause()+" "+Column.getColumnDesc(column); break; //COLUMN "+column.name+" "+column.type;
+				colChange = features.sqlAddColumnClause()+" "+column.getDefinition(); break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
@@ -150,14 +150,14 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		ret.add( "update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName() );
 		if(columnNotNull) { column.nullable = false; ret.add(getAlterColumnSQL()); }
 		ret.add( getDiff(ChangeType.DROP, tmpColumn, null).get(0)+
-				(addComments?" /* from: "+Column.getColumnDesc(previousColumn)+" */":"") );
+				(addComments?" /* from: "+previousColumn.getDefinition()+" */":"") );
 		return ret;
 	}
 	
 	String getAlterColumnSQL() {
-		String colChange = features.sqlAlterColumnClause()+" "+Column.getColumnDesc(column);
+		String colChange = features.sqlAlterColumnClause()+" "+column.getDefinition();
 		if(addComments) {
-			colChange += " /* from: "+Column.getColumnDesc(previousColumn)+" */";
+			colChange += " /* from: "+previousColumn.getDefinition()+" */";
 		}
 		
 		String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...

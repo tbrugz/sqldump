@@ -109,8 +109,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 
 	public static transient boolean useAutoIncrement = false;
 	
-	//XXX: should be 'default'?
-	public static String getColumnDesc(Column c) {
+	static String getColumnDesc(Column c) {
 		String colType = c.type!=null ? c.type.trim() : null;
 		
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
@@ -127,7 +126,6 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public static String getColumnDescFull(Column c) {
 		return getColumnDesc(c)+(c.pk?" primary key":"");
 	}
-
 	
 	@Override
 	public boolean equals(Object obj) {
@@ -167,6 +165,10 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
+		return getColumnDesc(this);
+	}
+
+	public String getDefinition() {
 		return getColumnDesc(this);
 	}
 	

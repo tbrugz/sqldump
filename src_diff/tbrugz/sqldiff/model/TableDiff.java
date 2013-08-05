@@ -79,7 +79,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			if(cNew!=null) {
 				newColumnsThatExistsInOrigModel.add(cNew);
 				//boolean equal = cNew.equals(cOrig);
-				boolean equal = Column.getColumnDesc(cOrig).equals(Column.getColumnDesc(cNew));
+				boolean equal = cOrig.getDefinition().equals(cNew.getDefinition());
 				if(!equal) {
 					//alter column
 					log.debug("alter column: orig: "+cOrig+" new: "+cNew);
