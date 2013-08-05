@@ -419,7 +419,8 @@
 		<taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="classpath.findbugs"/>
 		<findbugs classpathref="classpath.findbugs"
 				output="xml"
-				outputFile="${dist.dir}/findbugs.xml" >
+				outputFile="${dist.dir}/findbugs.xml"
+				excludefilter="resources-build/findbugs-filter.xml">
 			<auxClasspath path="${ivy.test.classpath}" />
 			<sourcePath path="${src.diff.dir}" />
 			<sourcePath path="${src.dir}" />

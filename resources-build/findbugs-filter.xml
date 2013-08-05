@@ -1,0 +1,6 @@
+<FindBugsFilter>
+	<Match>
+		<!-- Bug code="SQL_NONCONSTANT_STRING_PASSED_TO_EXECUTE,SQL_PREPARED_STATEMENT_GENERATED_FROM_NONCONSTANT_STRING,DM_DEFAULT_ENCODING" /-->
+		<Bug code="SQL,Dm" />
+	</Match>
+</FindBugsFilter>
