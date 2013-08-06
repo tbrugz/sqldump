@@ -54,6 +54,7 @@ class HierarchyLevelData {
 	String levelNameColumn;
 	String levelType;
 	String levelTable;
+	String levelTableSchema;
 	String levelColumnDataType; //Levels contain a type attribute, which can have values "String", "Integer", "Numeric", "Boolean", "Date", "Time", and "Timestamp". The default value is "Numeric" because key columns generally have a numeric type
 
 	//String joinPKTable;
@@ -716,6 +717,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		level.joinRightKey = pkColStr;
 		//level.joinPKTable = fk.pkTable;
 		level.levelTable = fk.getPkTable();
+		level.levelTableSchema = fk.getPkTableSchemaName();
 		Column pkCol = pkTable.getColumn(pkColStr);
 		if(setLevelType) { setLevelType(level, pkCol); }
 
@@ -818,7 +820,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					HierarchyLevelData l = thisLevels.get(i);
 
 					mondrian.olap.MondrianDef.Table table = new mondrian.olap.MondrianDef.Table();
-					table.schema = schemaName;
+					table.schema = sqlIdDecorator.get( l.levelTableSchema );
 					table.name = sqlIdDecorator.get( l.levelName );
 
 					Join join = new Join();
@@ -918,6 +920,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		//XXX: lret.setNameExpression(value)
 		if(l.recursiveHierarchy!=null) {
 			lret.parentColumn = l.recursiveHierarchy.levelParentColumn;
+			lret.uniqueMembers = true; //XXX: always true for parent-child hierarchy?
 			if(l.recursiveHierarchy.levelNullParentValue!=null) {
 				lret.nullParentValue = l.recursiveHierarchy.levelNullParentValue;
 			}
