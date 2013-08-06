@@ -147,12 +147,41 @@ public class ColumnDiffTest {
 		out(diff);
 		Assert.assertEquals("alter table a modify cx varchar(20)", diff);
 	}
+
+	@Test
+	public void testAlterPgsqlDataType() {
+		DBMSResources.instance().updateDbId("pgsql");
+		
+		Column c1 = newColumn("cx","varchar",10);
+		Column c2 = newColumn("cx","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		String diff = cd.getDiff();
+		out(diff);
+		Assert.assertEquals("alter table a alter column cx set data type varchar(20)", diff);
+	}
+
+	@Test
+	public void testAlterPgsqlNullable() {
+		DBMSResources.instance().updateDbId("pgsql");
+		
+		Column c1 = newColumn("cx","varchar",10);
+		Column c2 = newColumn("cx","varchar",10, false);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		String diff = cd.getDiff();
+		out(diff);
+		Assert.assertEquals("alter table a alter column cx set not null", diff);
+	}
 	
 	public static Column newColumn(String name, String type, int precision) {
+		return newColumn(name, type, precision, true);
+	}
+	
+	public static Column newColumn(String name, String type, int precision, boolean nullable) {
 		Column c = new Column();
 		c.setName(name);
 		c.type = type;
 		c.columSize = precision;
+		c.nullable = nullable;
 		return c;
 	}
 	
