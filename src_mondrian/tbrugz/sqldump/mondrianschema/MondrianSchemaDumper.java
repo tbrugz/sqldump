@@ -202,6 +202,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	boolean addAllDegenerateDimCandidates = false;
 	boolean detectParentChildHierarchies = true;
 	boolean setLevelType = true; //XXX: add prop?
+	boolean ignoreMeasureColumnsBelongingToPK = true;
 	
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
@@ -392,7 +393,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			//columnloop:
 			//measures
 			for(Column c: t.getColumns()) {
-				procMeasures(cube, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
+				procMeasures(cube, t, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
 			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
@@ -538,7 +539,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	Set<String> noMeasureTypeWarned = new TreeSet<String>();
 	
-	void procMeasures(Cube cube, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) throws XOMException {
+	void procMeasures(Cube cube, Table t, Column c, List<FK> fks, List<String> measureCols, List<String> measureColsRegexes, List<String> degenerateDimCandidates) throws XOMException {
 		//XXXxx: if column is FK, do not add to measures
 		boolean ok = true;
 		
@@ -547,6 +548,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				log.debug("column '"+c.getName()+"' belongs to FK. ignoring (as measure)");
 				ok = false; break;
 			}
+		}
+		
+		Constraint pk = t.getPKConstraint();
+		if(ignoreMeasureColumnsBelongingToPK && pk!=null && pk.uniqueColumns.contains(c.getName())) {
+			log.info("column '"+c.getName()+"' belongs to PK. ignoring (as measure)");
+			ok = false;
 		}
 
 		if(!numericTypes.contains(c.type.toUpperCase())) {
