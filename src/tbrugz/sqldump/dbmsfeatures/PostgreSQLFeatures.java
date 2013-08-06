@@ -16,7 +16,7 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.Utils;
 
-public class PostgreSQLFeatures extends InformationSchemaFeatures {
+public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 
 	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
 	
