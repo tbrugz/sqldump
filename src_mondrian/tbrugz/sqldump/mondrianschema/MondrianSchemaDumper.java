@@ -61,6 +61,59 @@ class HierarchyLevelData {
 	String joinRightKey;
 	
 	RecursiveHierData recursiveHierarchy;
+	
+	@Override
+	public String toString() {
+		return levelName;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((levelColumn == null) ? 0 : levelColumn.hashCode());
+		result = prime * result
+				+ ((levelName == null) ? 0 : levelName.hashCode());
+		result = prime * result
+				+ ((levelNameColumn == null) ? 0 : levelNameColumn.hashCode());
+		result = prime * result
+				+ ((levelTable == null) ? 0 : levelTable.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HierarchyLevelData other = (HierarchyLevelData) obj;
+		if (levelColumn == null) {
+			if (other.levelColumn != null)
+				return false;
+		} else if (!levelColumn.equals(other.levelColumn))
+			return false;
+		if (levelName == null) {
+			if (other.levelName != null)
+				return false;
+		} else if (!levelName.equals(other.levelName))
+			return false;
+		if (levelNameColumn == null) {
+			if (other.levelNameColumn != null)
+				return false;
+		} else if (!levelNameColumn.equals(other.levelNameColumn))
+			return false;
+		if (levelTable == null) {
+			if (other.levelTable != null)
+				return false;
+		} else if (!levelTable.equals(other.levelTable))
+			return false;
+		return true;
+	}
+	
 }
 
 class RecursiveHierData {
@@ -608,7 +661,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		dim.type = "StandardDimension";
 		
 		List<HierarchyLevelData> levels = new ArrayList<HierarchyLevelData>();
-		procHierRecursive(schemaModel, cube, dim, fk, fk.getSchemaName(), fk.getPkTable(), levels);
+		procHierRecursive(schemaModel, cube, dim, fk, levels);
 		
 		//TODO: re-enable oneHierarchyPerDim
 		/*if(oneHierarchyPerDim && dim.getHierarchy().size() > 1) {
@@ -694,11 +747,13 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 	}
 	
-	void procHierRecursive(SchemaModel schemaModel, Cube cube, Dimension dim, FK fk, String schemaName, 
-			String pkTableName, List<HierarchyLevelData> levelsData) throws XOMException {
+	void procHierRecursive(SchemaModel schemaModel, Cube cube, Dimension dim, FK fk, 
+			List<HierarchyLevelData> levelsData) throws XOMException {
 		List<HierarchyLevelData> thisLevels = new ArrayList<HierarchyLevelData>();
 		thisLevels.addAll(levelsData);
 		boolean isLevelLeaf = true;
+		String pkTableName = fk.getPkTable();
+		String schemaName = fk.getPkTableSchemaName();
 
 		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
 		if(pkTable==null) {
@@ -710,9 +765,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		thisLevels.add(getHierLevelData);
 
 		for(FK fkInt: schemaModel.getForeignKeys()) {
-			if(fkInt.getFkTable().equals(pkTableName) && fkInt.getPkTable().equals(pkTableName)) {
+			if(!fkInt.getFkTable().equals(pkTableName)) { continue; }
+			if(fkInt.getFkColumns().size()!=1) { continue; }
+			if(fkInt.getPkTable().equals(pkTableName)) {
 				//XXX auto (parent-child?) relationship
-				if(detectParentChildHierarchies && fkInt.getFkColumns().size()==1) {
+				if(detectParentChildHierarchies) {
 					if(getHierLevelData.recursiveHierarchy==null) {
 						getHierLevelData.recursiveHierarchy = new RecursiveHierData();
 					}
@@ -723,15 +780,22 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 				
 			}
-			else if(fkInt.getFkTable().equals(pkTableName) && (fkInt.getFkColumns().size()==1)) {
-				isLevelLeaf = false;
-				procHierRecursive(schemaModel, cube, dim, fkInt, schemaName, fkInt.getPkTable(), thisLevels);
+			else {
+				if(!isCycle(thisLevels)) {
+					isLevelLeaf = false;
+					procHierRecursive(schemaModel, cube, dim, fkInt, thisLevels);
+				}
+				else {
+					log.debug("cycle detected: "+thisLevels);
+					return;
+				}
 				//isLeaf = false;
 				//fks.add(fkInt);
 			}
 		}
 		
-		if(isLevelLeaf) {
+		if(!isLevelLeaf) { return; }
+		{
 			Hierarchy hier = new Hierarchy();
 			String hierName = "";
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
@@ -831,6 +895,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				dim.hierarchies = (Hierarchy[]) concatenate(dim.hierarchies, new Hierarchy[]{hier});
 			}
 		}
+	}
+	
+	boolean isCycle(List<HierarchyLevelData> hierdata) {
+		HierarchyLevelData top = hierdata.get(hierdata.size()-1);
+		for(int i=hierdata.size()-2;i>=0;i--) {
+			if(top.equals(hierdata.get(i))) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	Level cloneAsLevel(HierarchyLevelData l) throws XOMException {
