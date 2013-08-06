@@ -57,14 +57,11 @@
           <y:Geometry height="50.0" width="120.0"/>
           <y:Fill color="#CCFFCC"/>
           <y:NodeLabel>
-            <xsl:value-of select="@name"/>
+            <xsl:value-of select="@name"/><xsl:apply-templates select="child::Hierarchy" />
           </y:NodeLabel>
         </y:ShapeNode>
       </g:data>
     </xsl:element>
-    <xsl:apply-templates select="child::Hierarchy">
-      <xsl:with-param name="source" select="concat('dim.',@name)"/>
-    </xsl:apply-templates>
   </xsl:template>
 
   <xsl:template match="Cube/Dimension">
@@ -77,14 +74,11 @@
           <y:Geometry height="50.0" width="120.0"/>
           <y:Fill color="#FFFFCC"/>
           <y:NodeLabel>
-            <xsl:value-of select="@name"/>
+            <xsl:value-of select="@name"/><xsl:apply-templates select="child::Hierarchy" />
           </y:NodeLabel>
         </y:ShapeNode>
       </g:data>
     </xsl:element>
-    <xsl:apply-templates select="child::Hierarchy">
-      <xsl:with-param name="source" select="concat(../@name,'.',@name)"/>
-    </xsl:apply-templates>
 
     <xsl:element name="g:edge">
       <xsl:attribute name="id">
@@ -148,48 +142,13 @@
   </xsl:template-->
 
   <xsl:template match="Hierarchy">
-    <xsl:param name="source"/>
-    <xsl:variable name="hierid" select="generate-id()"/>
-    <!-- xsl:variable name="hierid" select="concat('hier.',../@name,'.',@name)"/ -->
-    
-    <xsl:element name="g:node">
-      <xsl:attribute name="id">
-        <xsl:value-of select="$hierid"/>
-      </xsl:attribute>
-      <g:data key="d0">
-        <y:ShapeNode>
-          <y:Geometry height="50.0" width="120.0"/>
-          <y:Fill color="#CCFFCC"/>
-          <y:NodeLabel>
-            <xsl:value-of select="@name"/>
-			::<xsl:apply-templates select="child::Level" />            
-          </y:NodeLabel>
-        </y:ShapeNode>
-      </g:data>
-    </xsl:element>  
-    <xsl:element name="g:edge">
-      <xsl:attribute name="id">
-        <xsl:value-of select="generate-id()"/>
-      </xsl:attribute>
-      <xsl:attribute name="source">
-        <xsl:value-of select="$source"/>
-      </xsl:attribute>
-      <xsl:attribute name="target">
-        <xsl:value-of select="$hierid"/>
-      </xsl:attribute>
-      <g:data key="d1">
-        <y:PolyLineEdge>
-          <y:Arrows source="none" target="standard"/>
-        </y:PolyLineEdge>
-      </g:data>
-    </xsl:element>
-  </xsl:template>
+::<xsl:apply-templates select="child::Level" /></xsl:template>
 
   <xsl:template match="Level">
-l: <xsl:value-of select="@name"/></xsl:template>
+-> <xsl:value-of select="@name"/></xsl:template>
 
   <xsl:template match="Measure">
-m: <xsl:value-of select="@name"/></xsl:template>
+>> <xsl:value-of select="@name"/></xsl:template>
   
   <xsl:template match="VirtualCube">
     <xsl:element name="g:node">
@@ -253,10 +212,10 @@ m: <xsl:value-of select="@name"/></xsl:template>
   </xsl:template>
   
   <xsl:template match="VirtualCubeMeasure">
-m: <xsl:value-of select="@name"/></xsl:template>
+>> <xsl:value-of select="@name"/></xsl:template>
   
   <xsl:template match="CalculatedMember">
-cm: <xsl:value-of select="@name"/></xsl:template>
+>+> <xsl:value-of select="@name"/></xsl:template>
 
   <xsl:template match="Role">
   </xsl:template>
