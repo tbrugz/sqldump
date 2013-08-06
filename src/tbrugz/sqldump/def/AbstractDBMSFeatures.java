@@ -62,6 +62,13 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 	
 	@Override
+	public String sqlAlterColumnDefinition(NamedDBObject table,
+			Column column) {
+		//oracle syntax?
+		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getDefinition();
+	}
+	
+	@Override
 	public String sqlAddColumnClause() {
 		return "add column";
 	}
@@ -70,6 +77,17 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
 		//oracle & postgresql syntax
 		return "alter table "+DBObject.getFinalName(table, true)+" rename column "+column.getName()+" to "+newName;
+	}
+	
+	@Override
+	public boolean supportsDiffingColumn() {
+		return false;
+	}
+	
+	@Override
+	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn,
+			Column column) {
+		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");
 	}
 	
 }

@@ -46,5 +46,10 @@ public interface DBMSFeatures {
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
+	String sqlAlterColumnDefinition(NamedDBObject table, Column column);
+	//String sqlAlterColumnNullableDefinition(NamedDBObject table, Column column);
 	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);
+	
+	boolean supportsDiffingColumn();
+	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
 }
