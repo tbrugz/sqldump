@@ -155,12 +155,17 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	}
 	
 	String getAlterColumnSQL() {
-		String colChange = features.sqlAlterColumnClause()+" "+column.getDefinition();
-		if(addComments) {
-			colChange += " /* from: "+previousColumn.getDefinition()+" */";
+		String alterSql = null;
+		if(features.supportsDiffingColumn()) {
+			alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
+		}
+		else {
+			alterSql = features.sqlAlterColumnDefinition(table, column);
 		}
 		
-		String alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+colChange; //refactor...
+		if(addComments) {
+			alterSql += " /* from: "+previousColumn.getDefinition()+" */";
+		}
 		return alterSql;
 	}
 	
