@@ -444,7 +444,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				log.warn("cube '"+cube.name+"' has no measure...");
 			}
 			else {
-				cube.measures = (Measure[]) concatenate(cube.measures, measures.toArray(new Measure[0]));
+				cube.measures = concatenate(cube.measures, measures.toArray(new Measure[0]));
 			}
 			
 			//dimensions
@@ -474,7 +474,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 					degenerateDimCandidates.remove(col);
 					if(nameColumn!=null) { degenerateDimCandidates.remove(nameColumn); }
-					cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(col, nameColumn, col)});
+					cube.dimensions = concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(col, nameColumn, col)});
 				}
 			}
 			
@@ -493,7 +493,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					log.info("adding degenerated dim candidates for cube '"+cube.name+"': "+degenerateDimCandidates);
 					for(String c: degenerateDimCandidates) {
 						//log.debug("adding degeneraded dim '"+c+" for cube '"+cube.getName()+"'");
-						cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(c, null, "degenerate_dim_"+c)});
+						cube.dimensions = concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(c, null, "degenerate_dim_"+c)});
 					}
 				}
 				else {
@@ -501,7 +501,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 			}
 			
-			schema.cubes = (Cube[]) concatenate(schema.cubes, new Cube[]{cube});
+			schema.cubes = concatenate(schema.cubes, new Cube[]{cube});
 		}
 		
 		if(factTables!=null && factTables.size()>0) {
@@ -602,7 +602,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				newMeasures.add(newMeasure(c.getName(), c.getName()+"_"+agg, agg));
 			}
 		}
-		cube.measures = (Measure[]) concatenate(cube.measures, newMeasures.toArray(new Measure[0]));
+		cube.measures = concatenate(cube.measures, newMeasures.toArray(new Measure[0]));
 	}
 	
 	Measure newMeasure(String column, String name, String aggregator) throws XOMException {
@@ -649,12 +649,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		Hierarchy hier = new Hierarchy();
 		hier.name = column;
 		hier.hasAll = hierarchyHasAll;
-		hier.levels = (Level[]) concatenate(hier.levels, new Level[]{level});
+		hier.levels = concatenate(hier.levels, new Level[]{level});
 		
 		Dimension dim = new Dimension();
 		dim.name = dimName;
 		//dim.setType("StandardDimension");
-		dim.hierarchies = (Hierarchy[]) concatenate(dim.hierarchies, new Hierarchy[]{hier});
+		dim.hierarchies = concatenate(dim.hierarchies, new Hierarchy[]{hier});
 		
 		return dim;
 	}
@@ -684,7 +684,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		//dim.getHierarchy().add(hier);
 		
 		if(!addDimForEachHierarchy) {
-			cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{dim});
+			cube.dimensions = concatenate(cube.dimensions, new Dimension[]{dim});
 		}
 	}
 	
@@ -787,7 +787,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					}
 					getParentChildHierInfo(getHierLevelData);
 				}
-				
+				else {
+					isLevelLeaf = false;
+				}
 			}
 			else {
 				if(!isCycle(thisLevels)) {
@@ -896,12 +898,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				//dim.setName(dimName);
 				newDim.foreignKey = sqlIdDecorator.get( dim.foreignKey );
 				newDim.type = dim.type;
-				newDim.hierarchies = (Hierarchy[]) concatenate(newDim.hierarchies, new Hierarchy[]{hier});
+				newDim.hierarchies = concatenate(newDim.hierarchies, new Hierarchy[]{hier});
 				newDim.name = hier.name;
-				cube.dimensions = (Dimension[]) concatenate(cube.dimensions, new Dimension[]{newDim});
+				cube.dimensions = concatenate(cube.dimensions, new Dimension[]{newDim});
 			}
 			else {
-				dim.hierarchies = (Hierarchy[]) concatenate(dim.hierarchies, new Hierarchy[]{hier});
+				dim.hierarchies = concatenate(dim.hierarchies, new Hierarchy[]{hier});
 			}
 		}
 	}
@@ -981,7 +983,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			if(setLevelType) { setLevelType(level, col); }
 			//level.setUniqueMembers(true);
-			hier.levels = (Level[]) concatenate(hier.levels, new Level[]{level});
+			hier.levels = concatenate(hier.levels, new Level[]{level});
 		}
 		return count;
 	}
@@ -1092,9 +1094,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				|| (isNumeric(c) && (c.decimalDigits==null || c.decimalDigits<=0));
 	}
 	
-	static Object[] concatenate(Object[] a, Object[] b) {
+	static <T extends Object> T[] concatenate(T[] a, T[] b) {
 		if(a==null) return b;
-		return XOMUtil.concatenate(a, b);
+		return (T[]) XOMUtil.concatenate(a, b);
 	}
 
 }
