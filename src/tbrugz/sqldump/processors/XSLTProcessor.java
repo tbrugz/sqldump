@@ -37,6 +37,9 @@ public abstract class XSLTProcessor extends AbstractProcessor {
 	}
 	
 	protected void processInternal() throws TransformerException {
+		if(xsl==null) {
+			throw new ProcessingException("xsl can't be null");
+		}
 		TransformerFactory factory = TransformerFactory.newInstance();
 		Source xslt = new StreamSource(xsl);
 		Transformer transformer = factory.newTransformer(xslt);

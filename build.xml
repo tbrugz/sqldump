@@ -139,6 +139,7 @@
 			</fileset>
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.properties"/>
+				<include name="**/*.xsl"/>
 			</fileset>
 			<fileset dir="${src.diff.dir}">
 				<include name="**/*.properties"/>
@@ -175,7 +176,7 @@
 	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
-			includes="**/*.class, **/*.properties, **/jaxb.index, **/*.xml">
+			includes="**/*.class, **/*.properties, **/jaxb.index, **/*.xml, **/*.xsl">
 			<exclude name="log4j.properties"/>
 			<exclude name="**/jaxb.properties"/>
 			<manifest>
