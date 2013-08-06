@@ -175,6 +175,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_SQLID_DECORATOR = "sqldump.mondrianschema.sqliddecorator";
 	public static final String PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE = "sqldump.mondrianschema.factcountmeasure";
 	public static final String PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER = "sqldump.mondrianschema.detectparentchild";
+	public static final String PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK = "sqldump.mondrianschema.ignoremeasurecolumnsbelongingtopk";
 
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
@@ -267,6 +268,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		hierarchyHasAll = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_HIERHASALL, hierarchyHasAll);
 		addAllDegenerateDimCandidates = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDALLDEGENERATEDIMCANDIDATES, addAllDegenerateDimCandidates);
 		detectParentChildHierarchies = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER, detectParentChildHierarchies);
+		ignoreMeasureColumnsBelongingToPK = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK, ignoreMeasureColumnsBelongingToPK);
 
 		List<String> defaultAggTmp = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_DEFAULT_MEASURE_AGGREGATORS, ",");
 		if(defaultAggTmp==null) {
