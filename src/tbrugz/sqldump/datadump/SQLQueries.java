@@ -1,5 +1,7 @@
 package tbrugz.sqldump.datadump;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,7 @@ public class SQLQueries extends AbstractSQLProc {
 	static final String PROP_QUERIES_RUN = PROP_QUERIES+".runqueries";
 	static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
 	static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
+	static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
 
 	static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
 	
@@ -100,6 +103,15 @@ public class SQLQueries extends AbstractSQLProc {
 				log.warn("no SQL defined for query [id="+qid+"]");
 				continue;
 			}
+			
+			PreparedStatement stmt = null;
+			try {
+				stmt = conn.prepareStatement(sql);
+			} catch (SQLException e) {
+				log.warn("error creating prepared statement [id="+qid+";sql="+sql+"]");
+				//continue; //?
+			}
+			
 			if(queryName==null) {
 				log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
 				queryName = qid;
@@ -137,74 +149,14 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 
 			// adding query to model
-			ADD_QUERY_TO_MODEL:
 			if(addQueriesToModel) {
-				if(model==null) {
-					log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
-					break ADD_QUERY_TO_MODEL;
-				}
-				
-				Query query = new Query();
-				query.id = qid;
-				query.setName(queryName);
-				//add schemaName
-				query.setSchemaName(prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName));
-				
-				query.query = sql;
-				query.parameterValues = params;
-				//XXX: add columns? query.setColumns(columns)...
-				if(keyCols!=null) {
-					Constraint cpk = new Constraint();
-					cpk.type = ConstraintType.PK;
-					cpk.uniqueColumns = keyCols;
-					cpk.setName(SQLUtils.newNameFromTableName(queryName, SQLUtils.pkNamePattern));
-					List<Constraint> lc = query.getConstraints(); 
-					if(lc==null) {
-						lc = new ArrayList<Constraint>();
-						query.setConstraints(lc);
-					}	
-					lc.add(cpk);
-				}
-				
-				List<String> allCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".cols", ",");
-				if(allCols!=null) {
-					List<Column> cols = new ArrayList<Column>();
-					for(String colspec: allCols) {
-						String[] colparts = colspec.split(":");
-						Column c = new Column();
-						c.setName(colparts[0]);
-						if(colparts.length>1) {
-							c.type = colparts[1];
-						}
-						cols.add(c);
-					}
-					
-					if(cols.size()>0) {
-						query.setColumns(cols);
-					}
-					else {
-						log.warn("error setting cols for query [id="+qid+"; name="+queryName+"]");
-					}
-				}
-				
-				if(rsDecoratorFactory!=null) {
-					query.rsDecoratorFactoryClass = rsDecoratorFactory;
-					query.rsDecoratorArguments = new TreeMap<String, String>();
-					for(String arg: rsFactoryArgs) {
-						query.rsDecoratorArguments.put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
-					}
-				}
-
-				//queries.add(query);
-				queriesGrabbed++;
-				model.getViews().add(query);
+				addQueryToModel(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
-			// added query to model, or not
 			
 			if(runQueries) {
 				try {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
-					dd.runQuery(conn, sql, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
+					dd.runQuery(conn, stmt, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
 							keyCols, null, null, rsdf);
 				} catch (Exception e) {
@@ -257,6 +209,84 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 		return syntaxList;
+	}
+	
+	int addQueryToModel(String qid, String queryName, String defaultSchemaName,
+			PreparedStatement stmt, String sql, List<String> keyCols,
+			List<String> params,
+			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
+		int queriesGrabbed=0;
+		if(model==null) {
+			log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
+			return 0;
+		}
+		
+		Query query = new Query();
+		query.id = qid;
+		query.setName(queryName);
+		//add schemaName
+		query.setSchemaName(prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName));
+		
+		query.query = sql;
+		query.parameterValues = params;
+		//XXX: add columns? query.setColumns(columns)...
+		if(keyCols!=null) {
+			Constraint cpk = new Constraint();
+			cpk.type = ConstraintType.PK;
+			cpk.uniqueColumns = keyCols;
+			cpk.setName(SQLUtils.newNameFromTableName(queryName, SQLUtils.pkNamePattern));
+			List<Constraint> lc = query.getConstraints(); 
+			if(lc==null) {
+				lc = new ArrayList<Constraint>();
+				query.setConstraints(lc);
+			}	
+			lc.add(cpk);
+		}
+		
+		List<String> allCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".cols", ",");
+		if(allCols!=null) {
+			List<Column> cols = new ArrayList<Column>();
+			for(String colspec: allCols) {
+				String[] colparts = colspec.split(":");
+				Column c = new Column();
+				c.setName(colparts[0]);
+				if(colparts.length>1) {
+					c.type = colparts[1];
+				}
+				cols.add(c);
+			}
+			
+			if(cols.size()>0) {
+				query.setColumns(cols);
+			}
+			else {
+				log.warn("error setting cols for query [id="+qid+"; name="+queryName+"]");
+			}
+		}
+		else {
+			//getting columns from prepared statement metadata
+			if(Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false)) {
+				log.debug("grabbing colums name & type from prepared statement's metadata");
+				try {
+					ResultSetMetaData rsmd = stmt.getMetaData();
+					query.setColumns(DataDumpUtils.getColumns(rsmd));
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		if(rsDecoratorFactory!=null) {
+			query.rsDecoratorFactoryClass = rsDecoratorFactory;
+			query.rsDecoratorArguments = new TreeMap<String, String>();
+			for(String arg: rsFactoryArgs) {
+				query.rsDecoratorArguments.put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+			}
+		}
+
+		queriesGrabbed++;
+		model.getViews().add(query);
+		return queriesGrabbed;
 	}
 	
 }

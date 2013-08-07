@@ -19,6 +19,7 @@ import java.util.Locale;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.SQLUtils;
 
 public class DataDumpUtils {
@@ -267,6 +268,40 @@ public class DataDumpUtils {
 			sb.append("\n\t"+lsColNames.get(i)+" ["+lsColTypes.get(i).getSimpleName()+"/t:"+md.getColumnType(i+1)+"/p:"+md.getPrecision(i+1)+"/s:"+md.getScale(i+1)+"]; ");
 		}
 		log.debug("dump columns ["+tableName+"]: "+sb);
+	}
+	
+	public static List<String> getColumnNames(ResultSetMetaData md) throws SQLException {
+		int numCol = md.getColumnCount();
+		List<String> names = new ArrayList<String>();
+		for(int i=0;i<numCol;i++) {
+			names.add(md.getColumnName(i+1));
+		}
+		return names;
+	}
+
+	public static List<Class<?>> getColumnTypes(ResultSetMetaData md) throws SQLException {
+		int numCol = md.getColumnCount();
+		List<Class<?>> types = new ArrayList<Class<?>>();
+		for(int i=0;i<numCol;i++) {
+			types.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
+		}
+		return types;
+	}
+
+	public static List<Column> getColumns(ResultSetMetaData md) throws SQLException {
+		int numCol = md.getColumnCount();
+		List<Column> columns = new ArrayList<Column>();
+		for(int i=0;i<numCol;i++) {
+			Column c = new Column();
+			c.setName(md.getColumnName(i+1));
+			c.type = md.getColumnTypeName(i+1);
+			c.columSize = md.getPrecision(i+1);
+			c.decimalDigits = md.getScale(i+1);
+			if(c.columSize==0) { c.columSize = null; }
+			if(c.decimalDigits==0) { c.decimalDigits = null; }
+			columns.add(c);
+		}
+		return columns;
 	}
 	
 }

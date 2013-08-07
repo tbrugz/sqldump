@@ -278,6 +278,7 @@ public class DataDump extends AbstractSQLProc {
 		}
 	}
 	
+	//XXX: move to DataDumpUtils?
 	public static String getQuery(Table table, String selectColumns, String whereClause, String orderClause, boolean orderByPK) {
 		String tableName = table.getName();
 		
@@ -347,9 +348,31 @@ public class DataDump extends AbstractSQLProc {
 			List<Constraint> uniqueKeys,
 			ResultSetDecoratorFactory rsDecoratorFactory
 			) throws SQLException, IOException {
-		
 		PreparedStatement st = conn.prepareStatement(sql);
 		try {
+			runQuery(conn, st, params, prop, tableOrQueryId,
+					tableOrQueryName, charset, rowlimit, syntaxList, partitionByPatterns,
+					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory);
+		}
+		catch(SQLException e) {
+			log.warn("error in sql: "+sql);
+			throw e;
+		}
+		finally {
+			if(log.isDebugEnabled()) { SQLUtils.logWarnings(st.getWarnings(), log); }
+		}
+	}
+		
+	void runQuery(Connection conn, PreparedStatement st, List<String> params, Properties prop, 
+			String tableOrQueryId, String tableOrQueryName, String charset, 
+			long rowlimit,
+			List<DumpSyntax> syntaxList,
+			String[] partitionByPatterns,
+			List<String> keyColumns,
+			List<FK> importedFKs,
+			List<Constraint> uniqueKeys,
+			ResultSetDecoratorFactory rsDecoratorFactory
+			) throws SQLException, IOException {
 			//st.setFetchSize(20);
 			if(params!=null) {
 				for(int i=0;i<params.size();i++) {
@@ -369,14 +392,6 @@ public class DataDump extends AbstractSQLProc {
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
 					initTime);
-		}
-		catch(SQLException e) {
-			log.warn("error in sql: "+sql);
-			throw e;
-		}
-		finally {
-			if(log.isDebugEnabled()) { SQLUtils.logWarnings(st.getWarnings(), log); }
-		}
 	}
 
 	void dumpResultSet(ResultSet rs, Properties prop, 
