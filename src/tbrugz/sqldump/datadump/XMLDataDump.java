@@ -15,6 +15,9 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
+enum HeaderFooterDump {
+	ALWAYS, IFHASDATA, NEVER;
+}
 //XXX: option to define per-column 'row' xml-element? cursors already have "table-name"...
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
@@ -31,30 +34,37 @@ public class XMLDataDump extends DumpSyntax {
 	
 	static final String PREFIX_ROWELEMENT4TABLE = "sqldump.datadump.xml.rowelement4table@";
 	static final String PREFIX_DUMPROWELEMENT4TABLE = "sqldump.datadump.xml.dumprowelement4table@";
+	static final String PROP_DUMPHEADER4INNERTABLES = "sqldump.datadump.xml.dumpheader4innertables";
+	static final String PROP_DUMPTABLENAMEASROWTAG = "sqldump.datadump.xml.dumptablenameasrowtag";
+	
 	//static final String PREFIX_ROWELEMENT4COLUMN = "sqldump.datadump.xml.rowelement4column@";
 	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
 
 	public XMLDataDump() {
-		this("", true);
+		this("", HeaderFooterDump.ALWAYS);
 	}
 
-	public XMLDataDump(String padding, boolean alwaysDumpHeaderAndFooter) {
+	public XMLDataDump(String padding, HeaderFooterDump dumpHeaderFooter) {
 		this.padding = padding;
-		this.alwaysDumpHeaderAndFooter = alwaysDumpHeaderAndFooter;
+		this.dumpHeaderFooter = dumpHeaderFooter;
 	}
 	
 	final String padding;
-	final boolean alwaysDumpHeaderAndFooter;
+	final HeaderFooterDump dumpHeaderFooter;
 	
+	//definitions from properties
+	Properties prop = null;
 	String defaultRowElement = DEFAULT_ROW_ELEMENT;
 	boolean defaultDumpRowElement = true;
-	
+	boolean dumpNullValues = true;
+	HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
+	boolean dumpTableNameAsRowTag = false;
+
+	//dumper properties
 	String tableName;
 	int numCol;
 	String rowElement = defaultRowElement;
 	boolean dumpRowElement = defaultDumpRowElement;
-	boolean dumpNullValues = true;
-	Properties prop = null;
 	
 	final List<String> lsColNames = new ArrayList<String>();
 	final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
@@ -65,6 +75,8 @@ public class XMLDataDump extends DumpSyntax {
 		defaultRowElement = prop.getProperty(PROP_ROWELEMENT, defaultRowElement);
 		defaultDumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, defaultDumpRowElement);
 		dumpNullValues = Utils.getPropBool(prop, PROP_DUMPNULLVALUES, dumpNullValues);
+		dumpHeader4InnerTables = HeaderFooterDump.valueOf(prop.getProperty(PROP_DUMPHEADER4INNERTABLES, dumpHeader4InnerTables.name()));
+		dumpTableNameAsRowTag = Utils.getPropBool(prop, PROP_DUMPTABLENAMEASROWTAG, dumpTableNameAsRowTag);
 		this.prop = prop;
 	}
 
@@ -81,7 +93,7 @@ public class XMLDataDump extends DumpSyntax {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 		
-		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, defaultRowElement);
+		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
 	}
 	
@@ -90,14 +102,14 @@ public class XMLDataDump extends DumpSyntax {
 		//XXX: add xml declaration? optional? e.g.: <?xml version="1.0" encoding="UTF-8" ?>
 		//see http://www.w3.org/TR/REC-xml/#NT-XMLDecl
 		//    http://www.ibm.com/developerworks/xml/library/x-tipdecl/index.html
-		if(alwaysDumpHeaderAndFooter) {
+		if(dumpHeaderFooter.equals(HeaderFooterDump.ALWAYS)) {
 			out("<"+tableName+">\n", fos);
 		}
 	}
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		if(count==0 && !alwaysDumpHeaderAndFooter) {
+		if(count==0 && dumpHeaderFooter.equals(HeaderFooterDump.IFHASDATA)) {
 			out("<"+tableName+">\n", fos);
 		}
 		if(dumpRowElement) {
@@ -117,7 +129,7 @@ public class XMLDataDump extends DumpSyntax {
 				dumpAndClearBuffer(sb, fos);
 				
 				//XXX: one dumper for each column (not each column/row)?
-				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t", false);
+				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t", dumpHeader4InnerTables);
 				xmldd.procProperties(prop);
 				/*String rowElement4column = prop.getProperty(PREFIX_ROWELEMENT4COLUMN+lsColNames.get(i));
 				if(rowElement4column!=null) {
@@ -161,7 +173,8 @@ public class XMLDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
-		if(alwaysDumpHeaderAndFooter || count>0) {
+		if(dumpHeaderFooter.equals(HeaderFooterDump.ALWAYS)
+				|| (dumpHeaderFooter.equals(HeaderFooterDump.IFHASDATA) && count>0)) {
 			out("</"+tableName+">\n", fos);
 		}
 	}
