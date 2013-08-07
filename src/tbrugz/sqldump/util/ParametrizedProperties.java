@@ -22,6 +22,8 @@ public class ParametrizedProperties extends Properties {
 	//List<File> loadedPropFiles = new ArrayList<File>();
 	Map<File, Boolean> loadedPropFiles = new HashMap<File, Boolean>(); //boolean is: hasWarned
 	
+	//TODO: process @includes at 'end'
+	
 	@Override
 	public synchronized void load(final InputStream inStream) throws IOException {
 		//TODOne: load in temp Properties; load from @include directive; load from temp Properties

@@ -83,7 +83,7 @@ public class XMLDataDump extends DumpSyntax {
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
-		numCol = md.getColumnCount();		
+		numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
