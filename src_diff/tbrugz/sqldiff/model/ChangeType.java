@@ -1,17 +1,18 @@
 package tbrugz.sqldiff.model;
 
 public enum ChangeType {
-	ADD, ALTER, RENAME, DROP;
+	ADD, ALTER, DROP, RENAME, REPLACE;
 	
 	public ChangeType inverse() {
 		switch (this) {
 		case ADD:
 			return DROP;
-		case ALTER:
-		case RENAME:
-			return null;
 		case DROP:
 			return ADD;
+		case ALTER:
+		case RENAME:
+		case REPLACE:
+			return this;
 		}
 		throw new IllegalStateException("Unknown ChangeType: "+this);
 	}

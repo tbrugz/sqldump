@@ -48,6 +48,8 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				return "alter table "+(renameFromSchema!=null?renameFromSchema+".":"")+renameFromName+" rename to "+table.getFinalQualifiedName();
 			case DROP:
 				return "drop table "+table.getFinalQualifiedName();
+			case REPLACE:
+				throw new IllegalStateException("cannot REPLACE a table");
 		}
 		return null;
 	}

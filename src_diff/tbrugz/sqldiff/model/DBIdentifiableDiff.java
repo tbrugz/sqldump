@@ -41,23 +41,31 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	@Override
 	public String getDiff() {
 		switch(changeType) {
-			case ADD: return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")
-					+ ident.getDefinition(true).trim()
-					+ (addComments?getComment(previousIdent, "old: "):"");
-			//case ALTER:  return "ALTER "+ident.getDefinition(true);
-			//case RENAME:  return "RENAME "+ident.getDefinition(true);
-			case DROP:
-				if(ownerTableName!=null) {
-					return "alter table "+ownerTableName+" drop "
-							+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
-							+ (addComments?getComment(ident, "new: "):"");
-				}
-				return "drop "
-					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
-					+ (addComments?getComment(ident, "new: "):"");
-			default:
-				throw new RuntimeException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
+			case ADD: return getAddDiffSQL();
+			case DROP: return getDropDiffSQL();
+			case REPLACE:
+			case ALTER:
+			case RENAME:
+				throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
 		}
+		throw new IllegalStateException("unknown changetype "+changeType+" on DBIdentifiableDiff.getDiff()");
+	}
+	
+	String getAddDiffSQL() {
+		return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")
+					+ ident.getDefinition(true).trim()
+					+ (addComments?getComment(previousIdent, "old: "):"");		
+	}
+
+	String getDropDiffSQL() {
+		if(ownerTableName!=null) {
+			return "alter table "+ownerTableName+" drop "
+					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
+					+ (addComments?getComment(ident, "new: "):"");
+		}
+		return "drop "
+			+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
+			+ (addComments?getComment(ident, "new: "):"");
 	}
 	
 	@Override

@@ -117,6 +117,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			case DROP:
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
+			case REPLACE:
+				throw new IllegalArgumentException("illegal ChangeType for ColumnDiff: "+changeType);
 		}
 		return DiffUtil.singleElemList( "alter table "+DBObject.getFinalName(table, true)+" "+colChange );
 	}
