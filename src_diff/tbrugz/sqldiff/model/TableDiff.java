@@ -25,7 +25,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final String renameFromName;
 	final Table table;
 	
-	static final boolean mayReplaceDbId = true; //TODO: add prop for using replace for dbIdDiffs
+	public static boolean mayReplaceDbId = false;
 
 	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName) {
 		this.diffType = changeType;

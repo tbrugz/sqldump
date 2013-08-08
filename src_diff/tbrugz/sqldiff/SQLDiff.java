@@ -65,8 +65,11 @@ public class SQLDiff implements Executor {
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
-	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
 	public static final String PROP_ADD_COMMENTS = PROP_PREFIX+".addcomments";
+	
+	//type-dependent props
+	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
+	public static final String PROP_DBIDDIFF_USEREPLACE = PROP_PREFIX+".dbiddiff.usereplace";
 
 	//rename detection
 	public static final String PROP_DO_RENAMEDETECTION = PROP_PREFIX+".dorenamedetection";
@@ -378,6 +381,7 @@ public class SQLDiff implements Executor {
 		boolean addComments = Utils.getPropBool(prop, PROP_ADD_COMMENTS, true);
 		ColumnDiff.addComments = addComments;
 		DBIdentifiableDiff.addComments = addComments;
+		TableDiff.mayReplaceDbId = Utils.getPropBool(prop, PROP_DBIDDIFF_USEREPLACE, TableDiff.mayReplaceDbId);
 	}
 	
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {
