@@ -198,8 +198,13 @@ public class DBMSResources {
 	synchronized void updateSpecificFeaturesClass() {
 		String dbSpecificFeaturesClass = null;
 		
-		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS,
-				dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass"));
+		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
+		if(dbSpecificFeaturesClass!=null) {
+			log.info("using specific grab class: "+dbSpecificFeaturesClass);
+		}
+		else {
+			dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+DBMSResources.instance().dbid()+".specificgrabclass");
+		}
 		
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()

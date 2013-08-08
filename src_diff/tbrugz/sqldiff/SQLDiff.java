@@ -417,12 +417,13 @@ public class SQLDiff implements Executor {
 	}
 
 	@Override
-	public void doMain(String[] args, Properties prop) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
-		if(prop!=null) {
-			this.prop.putAll(prop);
+	public void doMain(String[] args, Properties properties) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+		if(properties!=null) {
+			prop.putAll(properties);
 		}
-		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, this.prop);
+		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, prop);
 		procProterties();
+		DBMSResources.instance().setup(prop);
 
 		if(outfilePattern==null && xmloutfile==null) {
 			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"'] defined. can't dump diff script";
