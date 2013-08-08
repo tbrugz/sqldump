@@ -490,7 +490,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 		
 		//objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
-		if(schemaName==null) { schemaName = ""; };
+		if(schemaName==null) { schemaName = ""; }
 		schemaName = Matcher.quoteReplacement(schemaName);
 		objectName = Matcher.quoteReplacement(objectName);
 		

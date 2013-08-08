@@ -1,15 +1,28 @@
 package tbrugz.sqldump;
 
-import java.util.*;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
-import java.sql.*;
-import java.io.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -24,7 +37,6 @@ import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
-import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSFeatures;
@@ -679,7 +691,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
 		for(Table t: tables) {
-			if(t.getName().equals(tableName) && t.getSchemaName().equals(schemaName)) return true;
+			if(t.getName().equals(tableName) && t.getSchemaName().equals(schemaName)) { return true; }
 		}
 		return false;
 	}
@@ -932,7 +944,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			pkCols.put(pks.getInt("KEY_SEQ"), pks.getString("COLUMN_NAME"));
 			count++;
 		}
-		if(count==0) return null; //no PK
+		if(count==0) { return null; }//no PK
 
 		Constraint cPK = new Constraint();
 		cPK.type = ConstraintType.PK;

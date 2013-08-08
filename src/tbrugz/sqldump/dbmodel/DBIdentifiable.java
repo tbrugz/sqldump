@@ -40,7 +40,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 			if(type.equals(getType4Diff(d)) 
 					&& (d.getSchemaName()!=null?d.getSchemaName().equals(schemaName):true) 
 					//XXX: better? //&& (schemaName!=null?d.getSchemaName().equals(schemaName):true) 
-					&& d.getName().equals(name)) return (T) d;
+					&& d.getName().equals(name)) { return (T) d; }
 		}
 		return null;
 	}
@@ -49,7 +49,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType4Diff(d)) 
-					&& d.getName().equals(name)) return (T) d;
+					&& d.getName().equals(name)) { return (T) d; }
 		}
 		return null;
 	}
@@ -58,7 +58,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType4Diff(d)) 
-					&& d.getName().equalsIgnoreCase(name)) return (T) d;
+					&& d.getName().equalsIgnoreCase(name)) { return (T) d; }
 		}
 		return null;
 	}
@@ -67,7 +67,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndName(Collection<? extends DBIdentifiable> dbids, String schemaName, String name) {
 		for(DBIdentifiable obj: dbids) {
 			if(( (schemaName==null && obj.schemaName==null) || schemaName.equals(obj.schemaName)) 
-					&& name.equals(obj.name)) return (T) obj;
+					&& name.equals(obj.name)) { return (T) obj; }
 		}
 		return null;		
 	}
@@ -75,7 +75,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByName(Collection<? extends DBIdentifiable> dbids, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(d.getName().equals(name)) return (T) d;
+			if(d.getName().equals(name)) { return (T) d; }
 		}
 		return null;
 	}
@@ -84,7 +84,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static <T extends DBIdentifiable> T getDBIdentifiableByNamedObject(Collection<? extends DBIdentifiable> dbids, NamedDBObject object) {
 		for(DBIdentifiable obj: dbids) {
 			if(( (object.getSchemaName()==null && obj.schemaName==null) || object.getSchemaName().equals(obj.schemaName)) 
-					&& object.getName().equals(obj.name)) return (T) obj;
+					&& object.getName().equals(obj.name)) { return (T) obj; }
 		}
 		return null;		
 	}
