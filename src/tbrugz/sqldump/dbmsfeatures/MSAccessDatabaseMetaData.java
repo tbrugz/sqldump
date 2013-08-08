@@ -19,7 +19,7 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 	static Log log = LogFactory.getLog(MSAccessDatabaseMetaData.class);
 
 	public MSAccessDatabaseMetaData(DatabaseMetaData metadata) {
-		this.metadata = metadata;
+		super(metadata);
 	}
 	
 	@Override

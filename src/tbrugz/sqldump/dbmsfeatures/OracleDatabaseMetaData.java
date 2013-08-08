@@ -18,7 +18,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	static Log log = LogFactory.getLog(OracleDatabaseMetaData.class);
 	
 	public OracleDatabaseMetaData(DatabaseMetaData metadata) {
-		this.metadata = metadata;
+		super(metadata);
 	}
 
 	@Override

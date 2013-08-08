@@ -14,7 +14,7 @@ import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
 public class MySQLDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 
 	public MySQLDatabaseMetaData(DatabaseMetaData metadata) {
-		this.metadata = metadata;
+		super(metadata);
 	}
 	
 	@Override

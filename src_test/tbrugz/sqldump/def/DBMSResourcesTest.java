@@ -13,6 +13,7 @@ public class DBMSResourcesTest {
 		final int minor;
 		
 		public TestDBMD(String dbProduct, int major, int minor) {
+			super(null);
 			this.dbProduct = dbProduct;
 			this.major = major;
 			this.minor = minor;

@@ -8,13 +8,11 @@ import java.sql.SQLException;
 
 public abstract class AbstractDatabaseMetaDataDecorator implements DatabaseMetaData {
 
-	/*public static DatabaseMetaData getAbstractDatabaseMetadataDecorator(DatabaseMetaData metadata) {
-		AbstractDatabaseMetaDataDecorator adbmd = new AbstractDatabaseMetaDataDecorator();
-		adbmd.metadata = metadata;
-		return adbmd;
-	}*/
+	public AbstractDatabaseMetaDataDecorator(DatabaseMetaData metadata) {
+		this.metadata = metadata;
+	}
 	
-	protected DatabaseMetaData metadata;
+	protected final DatabaseMetaData metadata;
 
 	public <T> T unwrap(Class<T> iface) throws SQLException {
 		return metadata.unwrap(iface);
