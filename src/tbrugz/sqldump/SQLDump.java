@@ -174,7 +174,7 @@ public class SQLDump implements Executor {
 		
 		//dumping model
 		if(dumpSchemaClasses!=null) {
-			String dumpClasses[] = dumpSchemaClasses.split(",");
+			String[] dumpClasses = dumpSchemaClasses.split(",");
 			for(String dumpClass: dumpClasses) {
 				dumpClass = dumpClass.trim();
 				SchemaModelDumper schemaDumper = (SchemaModelDumper) Utils.getClassInstance(dumpClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
@@ -327,7 +327,7 @@ public class SQLDump implements Executor {
 	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
 		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
 		
-		String processingClasses[] = processingClassesStr.split(",");
+		String[] processingClasses = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
 			procClass = procClass.trim();
 			ProcessComponent sqlproc = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);

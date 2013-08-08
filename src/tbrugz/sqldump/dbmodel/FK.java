@@ -27,6 +27,8 @@ public class FK extends AbstractConstraint implements Serializable {
 				return "set null";
 			case SET_DEFAULT:
 				return "set default";
+			default:
+				break;
 			}
 			return "unknown";
 		};

@@ -97,9 +97,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
-	static Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
+	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
-	static String[] DEFAULT_SCHEMA_NAMES = {
+	static final String[] DEFAULT_SCHEMA_NAMES = {
 		"public", //postgresql, h2, hsqldb
 		"APP",    //derby
 		"",       //'schema-less' databases

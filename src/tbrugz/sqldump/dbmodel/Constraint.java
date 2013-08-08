@@ -42,6 +42,8 @@ public class Constraint extends AbstractConstraint implements Serializable {
 			case UNIQUE:
 			case PK:
 				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
+			default:
+				break;
 		}
 		throw new RuntimeException("unknown constraint type: "+type);
 	}
@@ -72,9 +74,10 @@ public class Constraint extends AbstractConstraint implements Serializable {
 				case PK:
 					//return uniqueColumns.equals(cc.uniqueColumns);
 					return Utils.stringListEqualIgnoreCase(uniqueColumns, cc.uniqueColumns);
+				default:
+					break;
 				}
 			}
-			else return false;
 		}
 		return false;
 	}

@@ -23,9 +23,9 @@ public class Table extends DBObject implements Relation {
 	static Log log = LogFactory.getLog(Table.class);
 	
 	public Column getColumn(String name) {
-		if(name==null) return null;
+		if(name==null) { return null; }
 		for(Column c: columns) {
-			if(name.equals(c.name)) return c;
+			if(name.equals(c.name)) { return c; }
 		}
 		return null;
 	}
@@ -94,10 +94,12 @@ public class Table extends DBObject implements Relation {
 		for(Constraint cons: constraints) {
 			switch(cons.type) {
 				case PK: 
-					if(!dumpPKs) break;
+					if(!dumpPKs) { break; }
 				case CHECK:
 				case UNIQUE:
 					sb.append((countTabElements==0?"":",")+"\n\t"+cons.getDefinition(false));
+				default:
+					break;
 			}
 			countTabElements++;
 		}
