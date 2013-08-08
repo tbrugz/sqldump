@@ -3,10 +3,12 @@ package tbrugz.sqldiff.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX option to change 'new:' & 'old:' xtra comments?
@@ -39,11 +41,17 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	}
 
 	@Override
-	public String getDiff() {
+	public List<String> getDiffList() {
 		switch(changeType) {
-			case ADD: return getAddDiffSQL();
-			case DROP: return getDropDiffSQL();
+			case ADD: return DiffUtil.singleElemList( getAddDiffSQL(addComments) );
+			case DROP: return DiffUtil.singleElemList( getDropDiffSQL(addComments) );
 			case REPLACE:
+				//XXX: add DBMSFeatrures.sqlAlterDbIdByDiffing ? create or replace ...
+				//XXX: option to do a line-by-line diff/patch as comment ...
+				List<String> ret = new ArrayList<String>();
+				ret.add( getDropDiffSQL(false) );
+				ret.add( getAddDiffSQL(false) + (addComments?getComment(previousIdent, "replacing: "):"") );
+				return ret;
 			case ALTER:
 			case RENAME:
 				throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
@@ -51,28 +59,26 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		throw new IllegalStateException("unknown changetype "+changeType+" on DBIdentifiableDiff.getDiff()");
 	}
 	
-	String getAddDiffSQL() {
+	String getAddDiffSQL(boolean dumpComments) {
 		return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")
 					+ ident.getDefinition(true).trim()
-					+ (addComments?getComment(previousIdent, "old: "):"");		
+					+ (dumpComments?getComment(previousIdent, "old: "):"");		
 	}
 
-	String getDropDiffSQL() {
+	String getDropDiffSQL(boolean dumpComments) {
 		if(ownerTableName!=null) {
 			return "alter table "+ownerTableName+" drop "
 					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
-					+ (addComments?getComment(ident, "new: "):"");
+					+ (dumpComments?getComment(ident, "new: "):"");
 		}
 		return "drop "
 			+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
-			+ (addComments?getComment(ident, "new: "):"");
+			+ (dumpComments?getComment(ident, "new: "):"");
 	}
 	
 	@Override
-	public List<String> getDiffList() {
-		List<String> ret = new ArrayList<String>();
-		ret.add(getDiff());
-		return ret;
+	public String getDiff() {
+		return Utils.join(getDiffList(), ";\n");
 	}
 
 	@Override

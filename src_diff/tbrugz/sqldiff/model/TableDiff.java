@@ -24,6 +24,8 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final String renameFromSchema;
 	final String renameFromName;
 	final Table table;
+	
+	static final boolean mayReplaceDbId = true; //TODO: add prop for using replace for dbIdDiffs
 
 	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName) {
 		this.diffType = changeType;
@@ -42,16 +44,17 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			case ADD:
 				return table.getDefinition(true); //XXX: is it useful?
 				//return getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable, colTypeConversionProp, foreignKeys);
-			case ALTER:
-				throw new IllegalStateException("cannot ALTER a table");
 			case RENAME:
 				return "alter table "+(renameFromSchema!=null?renameFromSchema+".":"")+renameFromName+" rename to "+table.getFinalQualifiedName();
 			case DROP:
 				return "drop table "+table.getFinalQualifiedName();
+			case ALTER:
 			case REPLACE:
-				throw new IllegalStateException("cannot REPLACE a table");
+				throw new IllegalStateException("cannot "+diffType.name()+" a table");
+			default:
+				break;
 		}
-		return null;
+		throw new IllegalStateException("unknown changetype: "+diffType);
 	}
 	
 	@Override
@@ -134,9 +137,16 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 						log.debug("original/new object not dumpeable: "+cOrig);
 						continue;
 					}
-					log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
-					diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
-					diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
+					
+					if(mayReplaceDbId && (origOwnerTableName==null && newOwnerTableName==null || (origOwnerTableName.equals(newOwnerTableName)))) {
+						log.debug("replace "+objType+": orig: "+cOrig+" new: "+cNew);
+						diffs.add(new DBIdentifiableDiff(ChangeType.REPLACE, cOrig, cNew, origOwnerTableName));
+					}
+					else {
+						log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
+						diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
+						diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
+					}
 				}
 			}
 			else {
