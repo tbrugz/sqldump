@@ -15,9 +15,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.datadiff.DataDiff;
+import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldiff.util.RenameDetector;
 import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
@@ -64,6 +66,7 @@ public class SQLDiff implements Executor {
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
 	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
+	public static final String PROP_ADD_COMMENTS = PROP_PREFIX+".addcomments";
 
 	//rename detection
 	public static final String PROP_DO_RENAMEDETECTION = PROP_PREFIX+".dorenamedetection";
@@ -372,6 +375,9 @@ public class SQLDiff implements Executor {
 				}
 			}
 		}
+		boolean addComments = Utils.getPropBool(prop, PROP_ADD_COMMENTS, true);
+		ColumnDiff.addComments = addComments;
+		DBIdentifiableDiff.addComments = addComments;
 	}
 	
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {

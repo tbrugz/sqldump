@@ -20,7 +20,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	final String ownerTableName;
 	
 	static boolean dumpSchemaName = true;
-	static boolean addComments = true;
+	public static boolean addComments = true;
 
 	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable previousIdent, DBIdentifiable ident, String ownerTableName) {
 		this.changeType = changeType;
