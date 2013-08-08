@@ -7,7 +7,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
-import tbrugz.sqldump.util.SQLUtils;
 
 public class SQLTests extends AbstractSQLProc {
 

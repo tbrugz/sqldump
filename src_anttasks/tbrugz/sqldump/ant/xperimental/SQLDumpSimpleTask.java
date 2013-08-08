@@ -31,6 +31,7 @@ public class SQLDumpSimpleTask extends Task {
 		//getCommandLine().addSyspropertyset(sysp);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void execute() throws BuildException {
 		Executor sqldump = new SQLDump();
 		try {

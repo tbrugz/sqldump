@@ -1096,6 +1096,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				|| (isNumeric(c) && (c.decimalDigits==null || c.decimalDigits<=0));
 	}
 	
+	@SuppressWarnings("unchecked")
 	static <T extends Object> T[] concatenate(T[] a, T[] b) {
 		if(a==null) return b;
 		return (T[]) XOMUtil.concatenate(a, b);
