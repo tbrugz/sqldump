@@ -37,7 +37,7 @@ public class DiffValidator {
 			validateColumnDiff((ColumnDiff) diff);
 		}
 		else if(diff instanceof DBIdentifiableDiff) {
-			//other dbobjects?
+			//TODO validate other dbobjects (dbidentifiables)?
 			log.debug("no validation applied to dbIdDiff '"+diff+"'");
 		}
 		else {
@@ -64,6 +64,7 @@ public class DiffValidator {
 			if(tPrev==null) throw new IncompatibleChangeException("can't RENAME a table that does not exists ["+td.getTable()+"]");
 			break;
 		case ALTER:
+		case REPLACE:
 			throw new IllegalStateException(td.getChangeType()+" change for TableDiff not supported");
 		}
 	}
@@ -96,6 +97,8 @@ public class DiffValidator {
 			Column cNew = table.getColumn(cd.getColumn().getName());
 			if(cNew!=null) throw new IncompatibleChangeException("can't RENAME a column to a name that already exists ["+cd.getColumn()+"]");
 			break; }
+		case REPLACE:
+			throw new IllegalStateException(cd.getChangeType()+" change for ColumnDiff not supported");
 		}
 	}
 

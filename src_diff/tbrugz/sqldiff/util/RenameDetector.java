@@ -81,6 +81,7 @@ public class RenameDetector {
 		return renames;
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static void doRenames(Collection/*<? extends Diff>*/ diffs, List<RenameTuple> renames) {
 		for(RenameTuple rt: renames) {
 			boolean added = false;
