@@ -173,10 +173,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			 :"");
 	}
 	
+	//XXX: complete syntax parameter? may return 'default null'
 	public String getDefaultSnippet() {
 		return (defaultValue!=null?" default "+defaultValue:"");
 	}
 	
+	//XXX: complete syntax parameter? may return 'null'
 	public String getNullableSnippet() {
 		return (!nullable?" not null":"");
 	}

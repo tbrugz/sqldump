@@ -49,7 +49,37 @@ public class DiffApplyTest {
 		runDiff(sqldiff);
 		Assert.assertEquals(0, sqldiff.getLastDiffCount());
 	}
+	
+	@Test
+	public void testDiffAlterColumnType() throws Exception {
+		//exec DDL
+		execDDLId2("alter table emp alter column name varchar(200)"); //was 100
+		
+		//run diff
+		SQLDiff sqldiff = new SQLDiff();
+		runDiff(sqldiff);
+		Assert.assertEquals(1, sqldiff.getLastDiffCount());
 
+		//run diff 2nd time - should have no difference
+		runDiff(sqldiff);
+		Assert.assertEquals(0, sqldiff.getLastDiffCount());
+	}
+
+	@Test
+	public void testDiffAlterColumnNullable() throws Exception {
+		//exec DDL
+		execDDLId2("alter table emp alter column department_id set not null"); //was 100
+		
+		//run diff
+		SQLDiff sqldiff = new SQLDiff();
+		runDiff(sqldiff);
+		Assert.assertEquals(1, sqldiff.getLastDiffCount());
+
+		//run diff 2nd time - should have no difference
+		runDiff(sqldiff);
+		Assert.assertEquals(0, sqldiff.getLastDiffCount());
+	}
+	
 	@Test
 	public void testDiffDropColumn() throws Exception {
 		//exec DDL
