@@ -1,7 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import tbrugz.sqldump.dbmodel.Column;
-import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 
 public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatures {
@@ -9,11 +8,6 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 	@Override
 	public boolean supportsDiffingColumn() {
 		return true;
-	}
-	
-	String createAlterColumn(NamedDBObject table, Column column, String xtraSql) {
-		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getName()
-				+(xtraSql!=null?xtraSql:"");
 	}
 
 	@Override

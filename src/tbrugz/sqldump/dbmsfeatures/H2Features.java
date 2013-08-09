@@ -102,4 +102,30 @@ public class H2Features extends InformationSchemaFeatures {
 		return "alter table "+DBObject.getFinalName(table, true)+" alter column "+DBObject.getFinalIdentifier(column.getName())
 				+" rename to "+DBObject.getFinalIdentifier(newName);
 	}
+	
+	@Override
+	public boolean supportsDiffingColumn() {
+		return true;
+	}
+
+	@Override
+	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn,
+			Column column) {
+		//see: http://www.h2database.com/html/grammar.html#alter_table_alter_column
+		if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {
+			return createAlterColumn(table, column,
+					" "+column.getTypeDefinition());
+			//XXX add default & not null besides type?
+		}
+		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
+			return createAlterColumn(table, column,
+					" set default "+(column.getDefaultSnippet().trim().equals("")?"null":column.getDefaultValue()));
+		}
+		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
+			return createAlterColumn(table, column,
+					" set "+(column.nullable?"null":"not null"));
+		}
+		else throw new UnsupportedOperationException("no differences between H2 columns found");
+	}
+	
 }

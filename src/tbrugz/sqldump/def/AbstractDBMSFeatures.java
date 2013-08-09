@@ -83,4 +83,9 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");
 	}
 	
+	protected String createAlterColumn(NamedDBObject table, Column column, String xtraSql) {
+		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getName()
+				+(xtraSql!=null?xtraSql:"");
+	}
+	
 }
