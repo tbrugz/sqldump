@@ -36,10 +36,4 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 		else throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
 	}
 	
-	@Override
-	public String sqlAlterColumnDefinition(NamedDBObject table,
-			Column column) {
-		throw new UnsupportedOperationException();
-	}
-	
 }

@@ -62,13 +62,6 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 	
 	@Override
-	public String sqlAlterColumnDefinition(NamedDBObject table,
-			Column column) {
-		//oracle syntax?
-		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getDefinition();
-	}
-	
-	@Override
 	public String sqlAddColumnClause() {
 		return "add column";
 	}
