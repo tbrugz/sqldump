@@ -138,7 +138,9 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 						continue;
 					}
 					
-					if(mayReplaceDbId && (origOwnerTableName==null && newOwnerTableName==null || (origOwnerTableName.equals(newOwnerTableName)))) {
+					if(mayReplaceDbId 
+							&& ( (origOwnerTableName==null && newOwnerTableName==null)
+							|| (origOwnerTableName!=null && origOwnerTableName.equals(newOwnerTableName)) ) ) {
 						log.debug("replace "+objType+": orig: "+cOrig+" new: "+cNew);
 						diffs.add(new DBIdentifiableDiff(ChangeType.REPLACE, cOrig, cNew, origOwnerTableName));
 					}

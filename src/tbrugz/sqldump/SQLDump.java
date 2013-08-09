@@ -1,8 +1,12 @@
 package tbrugz.sqldump;
 
-import java.util.*;
-import java.sql.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 import javax.naming.NamingException;
 
