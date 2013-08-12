@@ -235,6 +235,7 @@
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
 		<delete dir="${bin.test.dir}"/>
+		<delete dir="${bin.cobertura.dir}"/>
 		<delete dir="${dist.dir}"/>
 		<delete dir="output"/>
 		<delete dir="work"/>
