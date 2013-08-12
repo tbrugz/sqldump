@@ -385,13 +385,17 @@ public class SQLDiff implements Executor {
 	}
 	
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {
+		//do not apply DDLs with comments
+		boolean savedAddComments = ColumnDiff.addComments;
+		ColumnDiff.addComments = false;
+		
 		List<Diff> diffs = diff.getChildren();
 
 		int diffCount = 0;
 		int execCount = 0;
 		int errorCount = 0;
 		int updateCount = 0;
-		SQLException lastEx = null; 
+		SQLException lastEx = null;
 		for(Diff d: diffs) {
 			try {
 				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
@@ -420,6 +424,8 @@ public class SQLDiff implements Executor {
 		else {
 			log.info("no diff statements executed");
 		}
+
+		ColumnDiff.addComments = savedAddComments;
 		
 		if(failonerror && errorCount>0) {
 			throw new ProcessingException(errorCount+" sqlExceptions occured", lastEx);

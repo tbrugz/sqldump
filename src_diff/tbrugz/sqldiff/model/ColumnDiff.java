@@ -162,16 +162,17 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
 		}
 		else {
+			//XXX: return all diffs in one query? return List<String>?
 			//oracle-like syntax?
 			alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+features.sqlAlterColumnClause()+" "+column.getName();
 			if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {
 				alterSql += " "+column.getTypeDefinition();
 			}
 			else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
-				alterSql += " "+(column.getDefaultSnippet().trim().equals("")?" default null":" "+column.getDefaultSnippet());
+				alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
 			}
 			else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
-				alterSql += " "+(column.nullable?" null":" "+column.getNullableSnippet());
+				alterSql += (column.nullable?" null":column.getNullableSnippet());
 			}
 		}
 		
