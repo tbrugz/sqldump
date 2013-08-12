@@ -85,8 +85,7 @@
 	</path>
 
 	<path id="classpath.cobertura">
-		<pathelement location="lib/cobertura-2.0.3-SNAPSHOT.jar"/>
-		<pathelement location="lib/cobertura-2.0.2.jar"/>
+		<pathelement location="lib/cobertura-2.0.3.jar"/>
 		<pathelement location="lib/log4j-1.2.16.jar"/>
 		<pathelement location="lib/asm-4.1.jar"/>
 		<pathelement location="lib/asm-util-4.1.jar"/>
