@@ -136,7 +136,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		boolean edgeOnlyStrategy = isEdgeOnlyStrategy(rsEdges, rsNodes);
 		
 		Set<String> nodeSet = new HashSet<String>();
-		Set<String> edgeEndSet = new HashSet<String>();
+		Set<String> edgeSourceSet = new HashSet<String>();
+		Set<String> edgeTargetSet = new HashSet<String>();
 		
 		double maxWidth = Double.MIN_VALUE, minWidth = Double.MAX_VALUE;
 		
@@ -274,12 +275,15 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			edge.setTarget(target);
 			edge.setStereotype(edgeType);
 			edges.add(edge);
-			edgeEndSet.add(source);
-			edgeEndSet.add(target);
+			edgeSourceSet.add(source);
+			edgeTargetSet.add(target);
 		}
 		
 		for(Node n: nodes) {
-			if(doNotDumpNonConnectedNodes && !edgeEndSet.contains(n.getId())) { continue; }
+			if(doNotDumpNonConnectedNodes && !edgeSourceSet.contains(n.getId()) && !edgeTargetSet.contains(n.getId())) { continue; }
+			//XXX: add source-only or target-only stereotypes?
+			//if(!edgeSourceSet.contains(n.getId())) { n.setFinalNode(true); }
+			//if(!edgeTargetSet.contains(n.getId())) { n.setInitialNode(true); }
 			graphModel.getChildren().add(n);
 		}
 		for(WeightedEdge e: edges) {
@@ -418,12 +422,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		int i=0;
 		for(String qid: queriesArr) {
 			qid = qid.trim();
+			String queryPrefix = PREFIX_RS2GRAPH+"."+qid;
 			
 			//edges query
-			String sqlEdges = prop.getProperty("sqldump.graphmlquery."+qid+".sql");
+			String sqlEdges = prop.getProperty(queryPrefix+".sql");
 			if(sqlEdges==null) {
 				//load from file
-				String sqlfile = prop.getProperty("sqldump.graphmlquery."+qid+".sqlfile");
+				String sqlfile = prop.getProperty(queryPrefix+".sqlfile");
 				if(sqlfile!=null) {
 					sqlEdges = IOUtil.readFromFilename(sqlfile);
 					sqlEdges = ParametrizedProperties.replaceProps(sqlEdges, prop);
@@ -431,17 +436,17 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 
 			//nodes optional query
-			String sqlNodes = prop.getProperty("sqldump.graphmlquery."+qid+".nodesql");
+			String sqlNodes = prop.getProperty(queryPrefix+".nodesql");
 			if(sqlNodes==null) {
 				//load from file
-				String sqlfile = prop.getProperty("sqldump.graphmlquery."+qid+".nodesqlfile");
+				String sqlfile = prop.getProperty(queryPrefix+".nodesqlfile");
 				if(sqlfile!=null) {
 					sqlNodes = IOUtil.readFromFilename(sqlfile);
 					sqlNodes = ParametrizedProperties.replaceProps(sqlNodes, prop);
 				}
 			}
 			
-			String propOutFile = "sqldump.graphmlquery."+qid+".outputfile";
+			String propOutFile = queryPrefix+".outputfile";
 			String outputfile = prop.getProperty(propOutFile);
 			if(outputfile==null) {
 				log.error("output file not defined (prop '"+propOutFile+"')");
@@ -460,9 +465,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			
 			output = new File(outputfile);
-			snippets = prop.getProperty("sqldump.graphmlquery."+qid+".snippetsfile");
+			snippets = prop.getProperty(queryPrefix+".snippetsfile");
 			dumpFormatClass = Schema2GraphML.getDumpFormatClass(prop,
-					PREFIX_RS2GRAPH+"."+qid+Schema2GraphML.SUFFIX_DUMPFORMATCLASS);
+					queryPrefix+Schema2GraphML.SUFFIX_DUMPFORMATCLASS);
 			if(dumpFormatClass!=null) {
 				log.info("dump format class: "+dumpFormatClass.getName()+" [qid = "+qid+"]");
 			}
