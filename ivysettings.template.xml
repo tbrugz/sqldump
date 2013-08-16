@@ -14,7 +14,7 @@
                 <ibiblio name="eclipselink" root="http://download.eclipse.org/rt/eclipselink/maven.repo/" m2compatible="true" />
                 <ibiblio name="pentaho-rep" root="http://repo.pentaho.org/artifactory/repo/" m2compatible="true" />
                 <chain name="shared" returnFirst="true">
-                        <!-- resolver ref="local-mvn-publish"/ -->
+                        <resolver ref="local-mvn-publish"/>
                         <ibiblio name="ibiblio" m2compatible="true" />
                         <resolver ref="eclipselink"/>
                         <resolver ref="pentaho-rep"/>
