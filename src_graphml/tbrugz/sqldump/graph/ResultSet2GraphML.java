@@ -47,13 +47,19 @@ class RSNode extends NodeXYWH {
 		switch (i) {
 			case 5:
 				return description;
+			case 6:
+				if(isInitialNode()) { return ResultSet2GraphML.initialNodeLabel; }
+			case 7:
+				if(isFinalNode()) { return ResultSet2GraphML.finalNodeLabel; }
+			case 8:
+				if(isInitialNode() || isFinalNode()) { return ResultSet2GraphML.initialOrFinalNodeLabel; }
 		}
 		return super.getStereotypeParam(i);
 	}
 	
 	@Override
 	public int getStereotypeParamCount() {
-		return 6;
+		return 9;
 	}
 }
 
@@ -127,6 +133,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	Class<?> dumpFormatClass = null;
 	File output;
 	String snippets;
+	
+	static String initialNodeLabel = "";
+	static String finalNodeLabel = "";
+	static String initialOrFinalNodeLabel = "";
 	
 	Root getGraphMlModel(String qid, ResultSet rsEdges, ResultSet rsNodes) throws SQLException {
 		Root graphModel = new Root();
@@ -279,12 +289,15 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			edgeTargetSet.add(target);
 		}
 		
+		int nodeCount = 0, edgeCount = 0;
+		
 		for(Node n: nodes) {
 			if(doNotDumpNonConnectedNodes && !edgeSourceSet.contains(n.getId()) && !edgeTargetSet.contains(n.getId())) { continue; }
 			//XXX: add source-only or target-only stereotypes?
-			//if(!edgeSourceSet.contains(n.getId())) { n.setFinalNode(true); }
-			//if(!edgeTargetSet.contains(n.getId())) { n.setInitialNode(true); }
+			if(!edgeSourceSet.contains(n.getId())) { n.setFinalNode(true); }
+			if(!edgeTargetSet.contains(n.getId())) { n.setInitialNode(true); }
 			graphModel.getChildren().add(n);
+			nodeCount++;
 		}
 		for(WeightedEdge e: edges) {
 			if(!nodeSet.contains(e.getSource())) { log.warn("node source '"+e.getSource()+"' not found"); continue; }
@@ -293,7 +306,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			log.debug("edge '"+e+"' ["+e.getName()+"] has stereotype: "+e.getStereotype()+"; oldW: "+e.getWidth()+", newW: "+getNewWidth(e.getWidth(), minWidth, maxWidth));
 			e.setWidth(getNewWidth(e.getWidth(), minWidth, maxWidth));
 			graphModel.getChildren().add(e);
+			edgeCount++;
 		}
+		log.info("graph '"+qid+"': #nodes="+nodeCount+" ; #edges="+edgeCount);
 		
 		return graphModel;
 	}
@@ -423,6 +438,11 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		for(String qid: queriesArr) {
 			qid = qid.trim();
 			String queryPrefix = PREFIX_RS2GRAPH+"."+qid;
+			
+			//aux props
+			initialNodeLabel = prop.getProperty(queryPrefix+".initialnodelabel");
+			finalNodeLabel = prop.getProperty(queryPrefix+".finalnodelabel");
+			initialOrFinalNodeLabel = prop.getProperty(queryPrefix+".initialorfinalnodelabel");
 			
 			//edges query
 			String sqlEdges = prop.getProperty(queryPrefix+".sql");
