@@ -137,7 +137,7 @@ class RecursiveHierData {
  * XXXdone: addDimForEachHierarchy
  * XXX: level properties
  * XXXdone: add props: 'sqldump.mondrianschema.cube@<cube>.measurecolsregex=measure_.* | amount_.*'
- * XXX: add props: 'sqldump.mondrianschema.measurecolsregex=measure_.* | amount_.*'
+ * XXXdone: add props: 'sqldump.mondrianschema.measurecolsregex=measure_.* | amount_.*'
  * 
  * XXX: new dumper: suggestions for aggregate tables. for each fact table with X dimensions:
  * - for Y := X-1 to 0
@@ -176,6 +176,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE = "sqldump.mondrianschema.factcountmeasure";
 	public static final String PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER = "sqldump.mondrianschema.detectparentchild";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK = "sqldump.mondrianschema.ignoremeasurecolumnsbelongingtopk";
+	
+	public static final String SUFFIX_MEASURECOLSREGEX = ".measurecolsregex";
 
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
@@ -389,7 +391,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					log.debug("cube "+cube.name+": add measure: "+c.trim());
 				}
 			}
-			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+".measurecolsregex", "\\|");
+			List<String> measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(t.getName())+SUFFIX_MEASURECOLSREGEX, "\\|");
+			if(measureColsRegexes==null) {
+				measureColsRegexes = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+SUFFIX_MEASURECOLSREGEX, "\\|");
+			}
 			
 			List<String> degenerateDimCandidates = new ArrayList<String>();
 			//columnloop:
