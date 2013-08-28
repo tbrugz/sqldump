@@ -184,6 +184,11 @@ public class Table extends DBObject implements Relation {
 	
 	//---------
 	
+	@Override
+	public String getRelationType() {
+		return type.getName();
+	}
+	
 	public TableType getType() {
 		return type;
 	}
@@ -268,7 +273,7 @@ public class Table extends DBObject implements Relation {
 		String tableComment = rel.getRemarks();
 		if(tableComment!=null && !tableComment.trim().equals("")) {
 			tableComment = tableComment.replaceAll("'", "''");
-			sb.append("comment on table "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
+			sb.append("comment on "+rel.getRelationType()+" "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
 		}
 		return sb.toString();
 	}

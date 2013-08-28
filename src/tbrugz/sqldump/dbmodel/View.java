@@ -42,6 +42,10 @@ public class View extends DBObject implements Relation {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
+		return getDefinition(dumpSchemaName, null);
+	}
+
+	protected String getDefinition(boolean dumpSchemaName, String viewType) {
 		StringBuffer sbConstraints = new StringBuffer();
 		if(constraints!=null) {
 			for(int i=0;i<constraints.size();i++) {
@@ -55,10 +59,11 @@ public class View extends DBObject implements Relation {
 		String stmp1 = Table.getRelationRemarks(this, dumpSchemaName);
 		String stmp2 = Table.getColumnRemarks(columns, this, dumpSchemaName);
 		
-		if(stmp1!=null && stmp1.length()>0 && stmp2!=null && stmp2.length()>0) { sbRemarks.append("\n\n"); }
+		if((stmp1!=null && stmp1.length()>0) || (stmp2!=null && stmp2.length()>0)) { sbRemarks.append("\n\n"); }
+		
 		if(stmp1!=null && stmp1.length()>0) { sbRemarks.append(stmp1+";\n"); }
-
 		if(stmp2!=null && stmp2.length()>0) { sbRemarks.append(stmp2+";\n"); }
+		
 		int len = sbRemarks.length();
 		if(len>0) {
 			sbRemarks.delete(len-2, len);
@@ -69,7 +74,7 @@ public class View extends DBObject implements Relation {
 				//+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
 		}
 		
-		return (dumpCreateOrReplace?"create or replace ":"create ") + "view "
+		return (dumpCreateOrReplace?"create or replace ":"create ") + (viewType!=null?viewType+" ":"") + "view "
 				+ getFinalName(dumpSchemaName)
 				+ (sbConstraints.length()>0?" (\n\t"
 						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
@@ -110,6 +115,11 @@ public class View extends DBObject implements Relation {
 	@Override
 	public String getRemarks() {
 		return remarks;
+	}
+	
+	@Override
+	public String getRelationType() {
+		return "view";
 	}
 
 	public void setRemarks(String remarks) {

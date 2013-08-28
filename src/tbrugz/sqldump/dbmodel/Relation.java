@@ -17,5 +17,7 @@ public interface Relation extends NamedDBObject {
 	public List<Constraint> getConstraints();
 	
 	public String getRemarks();
+	
+	public String getRelationType();
 
 }

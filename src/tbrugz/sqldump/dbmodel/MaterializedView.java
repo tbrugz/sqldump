@@ -8,13 +8,19 @@ public class MaterializedView extends View {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return (dumpCreateOrReplace?"create or replace ":"create ") + "materialized view "
-				+ getFinalName(dumpSchemaName) + " as \n" + query;
+		return getDefinition(dumpSchemaName, "materialized");
+		//return (dumpCreateOrReplace?"create or replace ":"create ") + "materialized view "
+		//		+ getFinalName(dumpSchemaName) + " as\n" + query;
 	}
 	
 	@Override
 	public String toString() {
 		return "MaterializedView["+getName()+"]";
+	}
+	
+	@Override
+	public String getRelationType() {
+		return "materialized view";
 	}
 	
 	/*@Override

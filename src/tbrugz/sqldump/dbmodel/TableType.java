@@ -18,7 +18,11 @@ public enum TableType {
 	// Typical types are "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", 
 	// "LOCAL TEMPORARY", "ALIAS", "SYNONYM".
 	
-	static Log log = LogFactory.getLog(TableType.class);
+	static final Log log = LogFactory.getLog(TableType.class);
+	
+	public String getName() {
+		return toString().toLowerCase().replace('_', ' ');
+	}
 	
 	public static TableType getTableType(String tableType, String tableName) {
 		if(tableType.equals("TABLE")) {
