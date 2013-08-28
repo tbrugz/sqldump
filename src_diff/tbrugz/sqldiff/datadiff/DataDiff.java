@@ -162,6 +162,8 @@ public class DataDiff extends AbstractFailable {
 		}
 		else {
 		
+		int tablesDiffedCount = 0;
+		int tablesToDiffCount = 0;
 		for(Table table: tablesToDiff) {
 			if(tablesToDiffFilter!=null) {
 				if(tablesToDiffFilter.contains(table.getName())) {
@@ -178,6 +180,8 @@ public class DataDiff extends AbstractFailable {
 					continue;
 				}
 			}
+			
+			tablesToDiffCount++;
 
 			List<String> keyCols = null;
 			Constraint ctt = table.getPKConstraint();
@@ -192,17 +196,31 @@ public class DataDiff extends AbstractFailable {
 			//XXX select '*' or all column names? option to select by property?
 			String sql = DataDump.getQuery(table, getColumnsForSelect(table), null, null, true); //replaced '*' for column names - same column order for both resultsets
 			
+			ResultSet rsSource = null, rsTarget=null;
+			
 			if(sourceMustImportData) {
 				importData(table, sourceConn, sourceId);
 			}
-			PreparedStatement stmtSource = sourceConn.prepareStatement(sql);
-			ResultSet rsSource = stmtSource.executeQuery();
+			try {
+				PreparedStatement stmtSource = sourceConn.prepareStatement(sql);
+				rsSource = stmtSource.executeQuery();
+			}
+			catch(SQLException e) {
+				log.warn("error in sql exec [source ; '"+table+"']: "+sql);
+				continue;
+			}
 			
 			if(targetMustImportData) {
 				importData(table, targetConn, targetId);
 			}
-			PreparedStatement stmtTarget = targetConn.prepareStatement(sql);
-			ResultSet rsTarget = stmtTarget.executeQuery();
+			try {
+				PreparedStatement stmtTarget = targetConn.prepareStatement(sql);
+				rsTarget = stmtTarget.executeQuery();
+			}
+			catch(SQLException e) {
+				log.warn("error in sql exec [target]: "+sql);
+				continue;
+			}
 			
 			//TODOne: check if rsmetadata is equal between RSs...
 			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
@@ -219,6 +237,7 @@ public class DataDiff extends AbstractFailable {
 			
 			rsSource.close(); rsTarget.close();
 			
+			tablesDiffedCount++;
 			//XXX: drop table if imported?
 		}
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
@@ -227,6 +246,7 @@ public class DataDiff extends AbstractFailable {
 		if(tablesToIgnore!=null && tablesToIgnore.size()>0) {
 			log.warn("tables to ignore that were not found: "+Utils.join(tablesToIgnore, ", "));
 		}
+		log.info(tablesDiffedCount+" [of "+tablesToDiffCount+"] tables diffed");
 		
 		}
 
