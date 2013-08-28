@@ -24,40 +24,48 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 		//REMARKS String => comment describing column (may be null)
+		
+		// only tables & materialized views may have comments/remarks
+		// http://docs.oracle.com/cd/B19306_01/server.102/b14200/statements_4009.htm
+		
 		Connection conn = metadata.getConnection();
 		List<String> params = new ArrayList<String>();
 		
-		String sql = "select tables.*, comm.comments as REMARKS from (\n";
+		String sql = "select tables.* from (\n";
 		//tables
-		sql += "select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, null as REMARKSz, " 
+		sql += "select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, comm.comments as REMARKS, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, PARTITIONED, PARTITIONING_TYPE, "
 				+"at.owner as TABLE_SCHEM_FILTER "
-				+"from all_tables at, all_part_tables apt "
-				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) "
+				+"from all_tables at, all_part_tables apt, all_tab_comments comm "
+				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) and at.owner = comm.owner (+) and at.table_name = comm.TABLE_NAME (+) "
 				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n";
 		//synonyms
-		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKSz, " 
+		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
 				+"alls.owner as TABLE_SCHEM_FILTER "
 				+"from all_synonyms alls, all_tables allt "
 				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n";
 		//views
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKSz, " 
+		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
 				+"from all_views \n";
 		//materialized views
-		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, null as REMARKSz, "
+		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, allmv.MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, mvcomm.comments as REMARKS, "
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"allmv.owner as TABLE_SCHEM_FILTER "
-				+"from all_tables allt, all_mviews allmv where allt.owner = allmv.owner and allt.table_name = allmv.mview_name \n";
+				+"from all_tables allt, all_mviews allmv, all_mview_comments mvcomm where allt.owner = allmv.owner and allt.table_name = allmv.mview_name and allt.owner = mvcomm.owner and allt.table_name = mvcomm.mview_name ";
 		//external tables
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKSz, "
+		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKS, "
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
 				+"from all_external_tables \n";
-		sql += ") tables, all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";
+		sql += ") tables "
+			+ "where 1=1 ";
+			//+ ", all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";
+			//+ "\n left outer join all_tab_comments comm on tables.TABLE_SCHEM = comm.owner and tables.TABLE_NAME = comm.TABLE_NAME "
+			//+ "\n left outer join all_mview_comments mvcomm on tables.TABLE_SCHEM = mvcomm.owner and tables.TABLE_NAME = mvcomm.mview_name ";
 		if(schemaPattern!=null) {
 			sql += "and TABLE_SCHEM_FILTER = ? ";
 			params.add(schemaPattern);
