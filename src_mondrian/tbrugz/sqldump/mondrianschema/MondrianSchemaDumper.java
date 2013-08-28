@@ -153,6 +153,7 @@ class RecursiveHierData {
  * -- If you know that the values of a given level column in the dimension table are unique across all the other values in that column across the parent levels, then set uniqueMembers="true", otherwise, set to "false". / At the top level, this will always be uniqueMembers="true", as there is no parent level.
  * XXX: uniqueMembers="true": maybe on 1st level of 1st dim table also... 
  * XXX: show parentLevel candidates
+ * TODO: option to use/add shared dimensions - to simplify, declare all as shared? or delclare all shared, and if dim is referenced by only one cube, add only to it?
  */
 public class MondrianSchemaDumper extends AbstractFailable implements SchemaModelDumper {
 	
@@ -403,30 +404,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				procMeasures(cube, t, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
 			
-			String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
-					prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
 			List<Measure> measures = new ArrayList<Measure>();
-			
-			if(descFactCountMeasure!=null) {
-				Constraint c = t.getPKConstraint();
-				if(c==null) {
-					List<Column> cols = t.getColumns();
-					Column notNullCol = null;
-					for(Column col: cols) {
-						if(!col.nullable) { notNullCol = col; }
-					}
-					if(notNullCol!=null) {
-						measures.add(newMeasure(notNullCol.getName(), descFactCountMeasure, "count"));
-					}
-					else {
-						log.warn("table '"+t.getName()+"' has no PK nor not-null-column for fact count measure");
-					}
-				}
-				else {
-					String pk1stCol = c.uniqueColumns.get(0);
-					measures.add(newMeasure(pk1stCol, descFactCountMeasure, "count"));
-				}
-			}
 			
 			List<String> addMeasures = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
 			if(addMeasures!=null) {
@@ -448,6 +426,13 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					log.info("cube '"+cube.name+"' has no measure: ignoring");
 					continue;
 				}
+				
+				String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
+						prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
+				if(descFactCountMeasure!=null) {
+					addFactCountMeasure(t, measures, descFactCountMeasure);
+				}
+				
 				log.warn("cube '"+cube.name+"' has no measure...");
 			}
 			else {
@@ -541,6 +526,27 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			log.warn("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
+		}
+	}
+	
+	void addFactCountMeasure(Table t, List<Measure> measures, String descFactCountMeasure) throws XOMException {
+		Constraint c = t.getPKConstraint();
+		if(c==null) {
+			List<Column> cols = t.getColumns();
+			Column notNullCol = null;
+			for(Column col: cols) {
+				if(!col.nullable) { notNullCol = col; }
+			}
+			if(notNullCol!=null) {
+				measures.add(newMeasure(notNullCol.getName(), descFactCountMeasure, "count"));
+			}
+			else {
+				log.warn("table '"+t.getName()+"' has no PK nor not-null-column for fact count measure");
+			}
+		}
+		else {
+			String pk1stCol = c.uniqueColumns.get(0);
+			measures.add(newMeasure(pk1stCol, descFactCountMeasure, "count"));
 		}
 	}
 	
