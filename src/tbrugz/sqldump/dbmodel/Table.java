@@ -30,6 +30,14 @@ public class Table extends DBObject implements Relation {
 		return null;
 	}
 	
+	public Column getColumnIgnoreCase(String name) {
+		if(name==null) { return null; }
+		for(Column c: columns) {
+			if(name.toUpperCase().equals(c.name.toUpperCase())) { return c; }
+		}
+		return null;
+	}
+	
 	@Override
 	public String toString() {
 		return type+":"+name;

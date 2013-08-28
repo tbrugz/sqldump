@@ -702,8 +702,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnamecol");
 		if(levelNameColumn!=null) {
-			if(pkTable.getColumn(levelNameColumn)!=null) {
-				level.levelNameColumn = levelNameColumn;
+			Column c = pkTable.getColumnIgnoreCase(levelNameColumn);
+			if(c!=null) {
+				level.levelNameColumn = c.getName();
 			}
 			else {
 				log.warn("levelName column not found: "+levelNameColumn+" [table = "+schemaName+"."+fk.getPkTable()+"]");
@@ -713,9 +714,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			if(pkTable!=null) {
 				//checking if column exists
 				for(String colName: preferredLevelNameColumns) {
-					if(pkTable.getColumn(colName)!=null) {
-						log.debug("level column name: "+colName);
-						level.levelNameColumn = colName;
+					Column c = pkTable.getColumnIgnoreCase(colName);
+					if(c!=null) {
+						log.debug("level column name: "+c.getName());
+						level.levelNameColumn = c.getName();
 						break;
 					}
 				}
@@ -965,7 +967,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			count++;
 			String[] tuple = pair.split(":");
 			String column = tuple[0].trim();
-			Column col = table.getColumn(column);
+			Column col = table.getColumnIgnoreCase(column);
 			//log.info("level:: '"+column+"' / '"+col+"'");
 			if(col==null) {
 				log.warn("level column '"+column+"' for table '"+table.getName()+"' does not exist");
@@ -973,16 +975,17 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 
 			Level level = new Level();
-			level.name = column;
-			level.column = sqlIdDecorator.get( column );
+			level.name = col.getName();
+			level.column = sqlIdDecorator.get( col.getName() );
 			level.table = sqlIdDecorator.get( levelTable );
 			if(tuple.length>1) {
 				String nameColumn = tuple[1].trim();
-				if(table.getColumn(nameColumn)==null) {
+				Column levelNameCol = table.getColumnIgnoreCase(nameColumn);
+				if(levelNameCol==null) {
 					log.warn("level nameColumn '"+nameColumn+"' for table '"+table.getName()+"' does not exist");
 				}
 				else {
-					level.nameColumn = nameColumn;
+					level.nameColumn = levelNameCol.getName();
 				}
 			}
 			if(count==1) {
