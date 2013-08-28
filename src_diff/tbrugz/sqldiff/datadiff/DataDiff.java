@@ -9,9 +9,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -44,6 +48,7 @@ public class DataDiff extends AbstractFailable {
 	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
 	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
 	public static final String PROP_DATADIFF_IMPORTCHARSET = SQLDiff.PROP_PREFIX+".datadiff.importcharset";
+	public static final String PROP_DATADIFF_USECOMMONCOLUMNS = SQLDiff.PROP_PREFIX+".datadiff.usecommoncolumns";
 	
 	StringDecorator quoteAllDecorator;
 	
@@ -53,6 +58,7 @@ public class DataDiff extends AbstractFailable {
 	String outFilePattern = null;
 	long loopLimit = 0;
 	boolean applyDataDiff = false;
+	boolean useCommonColumns = false;
 	
 	SchemaModel sourceSchemaModel = null;
 	SchemaModel targetSchemaModel = null;
@@ -75,6 +81,7 @@ public class DataDiff extends AbstractFailable {
 		targetId = prop.getProperty(SQLDiff.PROP_TARGET);
 		log.debug("source: "+sourceId+" ; target: "+targetId);
 		importCharset = prop.getProperty(PROP_DATADIFF_IMPORTCHARSET, DataDumpUtils.CHARSET_UTF8);
+		useCommonColumns = Utils.getPropBool(prop, PROP_DATADIFF_USECOMMONCOLUMNS, useCommonColumns);
 		
 		this.prop = prop;
 	}
@@ -117,9 +124,17 @@ public class DataDiff extends AbstractFailable {
 			return;
 		}
 		
-		Set<Table> tablesToDiff = targetSchemaModel.getTables();
+		Set<Table> targetTables = targetSchemaModel.getTables();
 		Set<Table> sourceTables = sourceSchemaModel.getTables();
-		tablesToDiff.retainAll(sourceTables); //only diff tables contained in source & target models... 
+		
+		Set<Table> tablesToDiff = new TreeSet<Table>();
+		tablesToDiff.addAll(targetTables);
+		tablesToDiff.retainAll(sourceTables); //only diff tables contained in source & target models...
+		
+		Map<String, Table> sourceTablesMap = new HashMap<String, Table>();
+		for(Table t: sourceTables) {
+			sourceTablesMap.put(t.getName(), t);
+		}
 		
 		boolean
 			sourceConnCreated = false,
@@ -193,8 +208,24 @@ public class DataDiff extends AbstractFailable {
 				continue;
 			}
 			
+			String sql = null;
+			
 			//XXX select '*' or all column names? option to select by property?
-			String sql = DataDump.getQuery(table, getColumnsForSelect(table), null, null, true); //replaced '*' for column names - same column order for both resultsets
+			if(useCommonColumns) {
+				List<Column> cols = getCommonColumns(table, sourceTablesMap.get(table.getName()));
+				if(cols.size()==0) {
+					log.warn("no common columns ["+table+"] for datadiff");
+					continue;
+				}
+				if(table.getColumns().size()>cols.size()) {
+					log.info("tablediff ["+table+"] using "+cols.size()+" column [of "+table.getColumns().size()+"]");
+				}
+				sql = DataDump.getQuery(table, getColumnsForSelect(cols), null, null, true); //replaced '*' for column names - same column order for both resultsets
+			}
+			else {
+				//replaced '*' for column names - same column order for both resultsets
+				sql = DataDump.getQuery(table, getColumnsForSelect(table), null, null, true);
+			}
 			
 			ResultSet rsSource = null, rsTarget=null;
 			
@@ -260,6 +291,26 @@ public class DataDiff extends AbstractFailable {
 	
 	String getColumnsForSelect(Table t) {
 		return Utils.join(t.getColumnNames(), ", ");
+	}
+
+	String getColumnsForSelect(List<Column> cols) {
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<cols.size();i++) {
+			if(i>0) { sb.append(", "); }
+			Column c = cols.get(i);
+			sb.append(c.getName());
+		}
+		return sb.toString();
+	}
+	
+	List<Column> getCommonColumns(Table t1, Table t2) {
+		List<Column> cols = new ArrayList<Column>();
+		for(Column c: t1.getColumns()) {
+			if(t2.getColumn(c.getName())!=null) {
+				cols.add(c);
+			}
+		}
+		return cols;
 	}
 	
 	static List<DiffSyntax> getSyntaxes(Properties prop, boolean applyDataDiff) throws SQLException {
