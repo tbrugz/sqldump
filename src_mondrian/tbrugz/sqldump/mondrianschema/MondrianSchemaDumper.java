@@ -320,7 +320,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		//TODO: remove & use SchemaModelTransformer
 		List<FK> addFKs = new ArrayList<FK>();
 		for(Table t: schemaModel.getTables()) {
-			List<String> xtraFKs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.table@"+propIdDecorator.get(t.getName())+".xtrafk", ",");
+			List<String> xtraFKs = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".table@"+propIdDecorator.get(t.getName())+".xtrafk", ",");
 			if(xtraFKs==null) { continue; }
 			
 			for(String newfkstr: xtraFKs) {
@@ -406,7 +406,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			
 			List<Measure> measures = new ArrayList<Measure>();
 			
-			List<String> addMeasures = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
+			List<String> addMeasures = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(cube.name)+".addmeasures", ";"); //<column>:<aggregator>[:<label>]
 			if(addMeasures!=null) {
 				for(String addM: addMeasures) {
 					String[] parts = addM.split(":");
@@ -427,7 +427,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					continue;
 				}
 				
-				String descFactCountMeasure = prop.getProperty("sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
+				String descFactCountMeasure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
 						prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
 				if(descFactCountMeasure!=null) {
 					addFactCountMeasure(t, measures, descFactCountMeasure);
@@ -598,7 +598,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			return;
 		}
 		
-		List<String> aggs = Utils.getStringListFromProp(prop, "sqldump.mondrianschema.cube@"+propIdDecorator.get(cube.name)+".aggregators", ",");
+		List<String> aggs = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(cube.name)+".aggregators", ",");
 		if(aggs==null || aggs.size()==0) { aggs = defaultAggregators; }
 
 		if(aggs==null || aggs.size()==0) {
@@ -1070,7 +1070,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					
 					if(hier.levels==null) { continue; }
 					for(Level l: hier.levels) {
-						String internalType = prop.getProperty("sqldump.mondrianschema.table@"+l.table+".column@"+l.column+".internalType");
+						String internalType = prop.getProperty(PROP_MONDRIAN_SCHEMA+".table@"+l.table+".column@"+l.column+".internalType");
 						if(internalType!=null) {
 							log.debug("level.internalType ["+l.table+":"+l.column+"]: "+internalType);
 							l.internalType = internalType;
