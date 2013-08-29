@@ -44,6 +44,13 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(comp!=0) return comp;
 			return tableName.compareTo(o.getName());
 		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(obj==null) { return false; }
+			if(! (obj instanceof NamedDBObject)) { return false; }
+			return compareTo((NamedDBObject) obj)==0;
+		}
 	}
 	
 	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
@@ -245,7 +252,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public String toString() {
-		return "[ColDiff:"+DBObject.getFinalName(table, true)+","+type+","+column+"]";
+		return "[ColDiff:"+DBObject.getFinalName(table, true)+","+type+","
+				+(type==ChangeType.RENAME?previousColumn+"->"+column:
+					type==ChangeType.DROP?previousColumn:
+						column)
+				+"]";
 	}
 
 	@Override

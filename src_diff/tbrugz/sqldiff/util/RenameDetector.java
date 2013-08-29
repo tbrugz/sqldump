@@ -65,14 +65,30 @@ public class RenameDetector {
 			return new ArrayList<RenameTuple>();
 		}
 		
+		Set<String> colsAdded = new HashSet<String>();
+		Set<String> colsDropped = new HashSet<String>();
 		List<RenameTuple> renames = new ArrayList<RenameTuple>();
+		
 		for(int i=0;i<lcadd.size();i++) {
 			ColumnDiff cadd = lcadd.get(i);
 			for(int j=0;j<lcdrop.size();j++) {
 				ColumnDiff cdrop = lcdrop.get(j);
-				double similarity = SimilarityCalculator.instance().similarity(cadd.getColumn(), i, cdrop.getPreviousColumn(), j);
-				log.debug("c-add: '"+cadd.getNamedObject()+"' ; c-drop: '"+cdrop.getNamedObject()+"' ; sim: "+similarity);
+				if(!cadd.getNamedObject().equals(cdrop.getNamedObject())) {
+					//log.debug("different tables... c-add: '"+cadd+"' ; c-drop: '"+cdrop+"'");
+					continue;
+				}
+				double similarity = SimilarityCalculator.instance().similarity(cadd.getColumn(), cdrop.getPreviousColumn());
+				log.debug("same tables... c-add: '"+cadd+"' ["+cadd.getColumn().ordinalPosition+"] ; c-drop: '"+cdrop+"' ["+cdrop.getPreviousColumn().ordinalPosition+"]; sim: "+similarity);
 				if(similarity>=minSimilarity) {
+					log.debug("renamed; c-add: '"+cadd+"' ; c-drop: '"+cdrop+"' ; sim: "+similarity);
+					String cAddId = cadd.getNamedObject().getSchemaName()+"."+cadd.getNamedObject().getName()+"."+cadd.getColumn().getName();
+					String cDropId = cdrop.getNamedObject().getSchemaName()+"."+cdrop.getNamedObject().getName()+"."+cdrop.getPreviousColumn().getName();
+					if(!colsDropped.add(cDropId)) {
+						log.warn("column '"+cDropId+"' \"renamed-from\" multiple times");
+					}
+					if(!colsAdded.add(cAddId)) {
+						log.warn("column '"+cAddId+"' \"renamed-to\" multiple times");
+					}
 					renames.add(new RenameTuple(cadd, cdrop, similarity));
 				}
 			}

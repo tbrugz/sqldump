@@ -60,11 +60,11 @@ public class SimilarityCalculator {
 	}
 
 	//XXX: similarity for rename (do not consider equal names)?
-	public double similarity(Column c1, int posCol1, Column c2, int posCol2) {
+	public double similarity(Column c1, Column c2) {
 		double ret = 0;
 		
 		//XXX name similarity (not equals)? type similarity?
-		if(posCol1==posCol2) { ret += 0.4; }
+		if(c1.ordinalPosition!=0 && (c1.ordinalPosition==c2.ordinalPosition)) { ret += 0.4; }
 		if(c1.getName().equals(c2.getName())) { ret += 0.3; }
 		if(c1.type.equals(c2.type)) { ret += 0.2; }
 		if((c1.columSize==null && c2.columSize==null)
