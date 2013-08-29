@@ -40,6 +40,25 @@ public class InformationSchemaTrigger extends Trigger {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime
+				* result
+				+ ((actionOrientation == null) ? 0 : actionOrientation
+						.hashCode());
+		result = prime * result
+				+ ((actionStatement == null) ? 0 : actionStatement.hashCode());
+		result = prime * result
+				+ ((conditionTiming == null) ? 0 : conditionTiming.hashCode());
+		result = prime
+				* result
+				+ ((eventsManipulation == null) ? 0 : eventsManipulation
+						.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -70,4 +89,5 @@ public class InformationSchemaTrigger extends Trigger {
 			return false;
 		return true;
 	}
+
 }

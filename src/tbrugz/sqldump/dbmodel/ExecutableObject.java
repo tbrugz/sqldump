@@ -76,6 +76,20 @@ public class ExecutableObject extends DBObject {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((body == null) ? 0 : body.hashCode());
+		result = prime * result
+				+ ((packageName == null) ? 0 : packageName.hashCode());
+		result = prime * result + ((params == null) ? 0 : params.hashCode());
+		result = prime * result
+				+ ((returnParam == null) ? 0 : returnParam.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -89,6 +103,21 @@ public class ExecutableObject extends DBObject {
 				return false;
 		} else if (!body.equals(other.body))
 			return false;
+		if (packageName == null) {
+			if (other.packageName != null)
+				return false;
+		} else if (!packageName.equals(other.packageName))
+			return false;
+		if (params == null) {
+			if (other.params != null)
+				return false;
+		} else if (!params.equals(other.params))
+			return false;
+		if (returnParam == null) {
+			if (other.returnParam != null)
+				return false;
+		} else if (!returnParam.equals(other.returnParam))
+			return false;
 		if (type != other.type)
 			return false;
 		return true;
@@ -97,7 +126,7 @@ public class ExecutableObject extends DBObject {
 	public DBObjectType getType() {
 		return type;
 	}
-
+	
 	public void setType(DBObjectType type) {
 		this.type = type;
 	}

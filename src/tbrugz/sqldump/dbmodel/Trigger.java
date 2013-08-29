@@ -21,12 +21,26 @@ public class Trigger extends DBObject {
 	public String toString() {
 		return "[Trigger:"+description+"]";
 	}
-	
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((body == null) ? 0 : body.hashCode());
+		result = prime * result
+				+ ((description == null) ? 0 : description.hashCode());
+		result = prime * result
+				+ ((tableName == null) ? 0 : tableName.hashCode());
+		result = prime * result
+				+ ((whenClause == null) ? 0 : whenClause.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -45,6 +59,11 @@ public class Trigger extends DBObject {
 			if (other.tableName != null)
 				return false;
 		} else if (!tableName.equals(other.tableName))
+			return false;
+		if (whenClause == null) {
+			if (other.whenClause != null)
+				return false;
+		} else if (!whenClause.equals(other.whenClause))
 			return false;
 		return true;
 	}

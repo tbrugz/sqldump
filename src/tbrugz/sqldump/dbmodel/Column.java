@@ -127,6 +127,20 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		return false;
 	}
 	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((columSize == null) ? 0 : columSize.hashCode());
+		result = prime * result + ((decimalDigits == null) ? 0 : decimalDigits.hashCode());
+		result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
+		result = prime * result + ((nullable) ? 0 : 1);
+		result = prime * result + ((pk) ? 0 : 2);
+		return result;
+	}
+	
 	public String getDefaultValue() {
 		return defaultValue;
 	}

@@ -24,10 +24,24 @@ public class Synonym extends DBObject {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((dbLink == null) ? 0 : dbLink.hashCode());
+		result = prime * result
+				+ ((objectOwner == null) ? 0 : objectOwner.hashCode());
+		result = prime * result + (publik ? 1231 : 1237);
+		result = prime
+				* result
+				+ ((referencedObject == null) ? 0 : referencedObject.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
@@ -51,5 +65,5 @@ public class Synonym extends DBObject {
 			return false;
 		return true;
 	}
-	
+
 }
