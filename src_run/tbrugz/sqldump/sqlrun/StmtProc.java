@@ -120,7 +120,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				stmtTokenizer = new StringSpliter(fileStr, split);
 				break;
 			default:
-				break;
+				throw new IllegalStateException("unknown TokenizerStrategy: "+tokenizerStrategy);
 			}
 			reader.close();
 		}

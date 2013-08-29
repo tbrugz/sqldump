@@ -27,11 +27,11 @@ public class Util {
 	}
 
 	public static List<String> getFiles(String dir, String fileRegex) {
-		List<String> ret = new ArrayList<String>();
 		if(dir==null) {
-			log.warn("dir '"+dir+"' not found...");
+			log.warn("dir cannot be null");
 			return null;
 		}
+		List<String> ret = new ArrayList<String>();
 		File fdir = new File(dir);
 		String[] files = fdir.list();
 		if(files==null) {

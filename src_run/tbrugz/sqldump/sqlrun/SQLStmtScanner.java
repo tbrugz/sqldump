@@ -55,7 +55,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 		int countApos = countApos(token);
 		StringBuilder sb = new StringBuilder();
 		sb.append(token);
-		while (countApos>0 && countApos%2==1) {
+		while (countApos>0 && countApos%2!=0) {
 			if(!scan.hasNext()) {
 				//XXX maybe an error in the imput file? log.debug() ?
 				break;

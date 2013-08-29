@@ -51,6 +51,15 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(! (obj instanceof NamedDBObject)) { return false; }
 			return compareTo((NamedDBObject) obj)==0;
 		}
+		
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((tableName == null) ? 0 : tableName.hashCode());
+			result = prime * result + ((schemaName == null) ? 0 : schemaName.hashCode());
+			return result;
+		}
 	}
 	
 	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
