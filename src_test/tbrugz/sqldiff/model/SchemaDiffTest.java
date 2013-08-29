@@ -44,6 +44,19 @@ public class SchemaDiffTest {
 
 	@Test
 	public void testColumnTwoAddDrop() {
+		SchemaDiff sd = twoColumnsAddDrop();
+		Assert.assertEquals(4, sd.getChildren().size());
+	}
+
+	@Test
+	public void testColumnRenameTwoAddDrop() {
+		SchemaDiff sd = twoColumnsAddDrop();
+		RenameDetector.detectAndDoColumnRenames(sd.getColumnDiffs(), 0.5);
+		SchemaDiff.logInfo(sd);
+		Assert.assertEquals(2, sd.getChildren().size());
+	}
+	
+	SchemaDiff twoColumnsAddDrop() {
 		sm1.getTables().iterator().next().getColumns().add(newColumn("c1b", "int", 1, 2));
 		
 		Table t = new Table();
@@ -55,7 +68,7 @@ public class SchemaDiffTest {
 		sm2.getTables().add(t);
 		
 		SchemaDiff sd = SchemaDiff.diff(sm1, sm2);
-		Assert.assertEquals(4, sd.getChildren().size());
+		return sd;
 	}
 
 	@Test
@@ -69,6 +82,7 @@ public class SchemaDiffTest {
 		
 		SchemaDiff sd = SchemaDiff.diff(sm1, sm2);
 		int renameCount = RenameDetector.detectAndDoColumnRenames(sd.getColumnDiffs(), 0.5);
+		SchemaDiff.logInfo(sd);
 		
 		Assert.assertEquals(1, sd.getChildren().size());
 	}
