@@ -105,7 +105,7 @@ public class Index extends DBObject {
 	}
 	
 	@Override
-	public int compareTo(DBObject o) {
+	public int compareTo(DBIdentifiable o) {
 		int comp = super.compareTo(o);
 		if(comp==0) {
 			if(o instanceof Index) {

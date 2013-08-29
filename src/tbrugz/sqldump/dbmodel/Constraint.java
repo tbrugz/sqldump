@@ -48,7 +48,13 @@ public class Constraint extends AbstractConstraint implements Serializable {
 		throw new RuntimeException("unknown constraint type: "+type);
 	}
 	
-	public int compareTo(Constraint c) {
+	@Override
+	public int compareTo(DBIdentifiable o) {
+		if(!(o instanceof Constraint)) {
+			return super.compareTo(o);
+		}
+		
+		Constraint c = (Constraint) o;
 		if(type.equals(c.type)) {
 			return name.compareTo(c.name);
 		}

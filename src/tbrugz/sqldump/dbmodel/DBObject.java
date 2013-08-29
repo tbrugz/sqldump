@@ -18,7 +18,13 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	//XXX: getDefinition() should have 'sql dialect' param?
 	public abstract String getDefinition(boolean dumpSchemaName);
 	
-	public int compareTo(DBObject o) {
+	@Override
+	public int compareTo(DBIdentifiable di) {
+		if(!(di instanceof DBObject)) {
+			return super.compareTo(di);
+		}
+		
+		DBObject o = (DBObject) di;
 		int comp = schemaName!=null?schemaName.compareTo(o.schemaName):o.schemaName!=null?1:0; //XXX: return -1? 1?
 		if(comp!=0) return comp;
 		return name.compareTo(o.name);

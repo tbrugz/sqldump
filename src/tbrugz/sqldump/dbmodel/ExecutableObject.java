@@ -62,7 +62,7 @@ public class ExecutableObject extends DBObject {
 	}
 	
 	@Override
-	public int compareTo(DBObject o) {
+	public int compareTo(DBIdentifiable o) {
 		if(o instanceof ExecutableObject) {
 			ExecutableObject eo = (ExecutableObject) o;
 			//System.out.println("EO.compareTo: "+this+"/"+eo);

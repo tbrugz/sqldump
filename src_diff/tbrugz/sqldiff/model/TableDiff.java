@@ -210,4 +210,48 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		return renameFromName;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((diffType == null) ? 0 : diffType.hashCode());
+		result = prime * result
+				+ ((renameFromName == null) ? 0 : renameFromName.hashCode());
+		result = prime
+				* result
+				+ ((renameFromSchema == null) ? 0 : renameFromSchema.hashCode());
+		result = prime * result + ((table == null) ? 0 : table.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TableDiff other = (TableDiff) obj;
+		if (diffType != other.diffType)
+			return false;
+		if (renameFromName == null) {
+			if (other.renameFromName != null)
+				return false;
+		} else if (!renameFromName.equals(other.renameFromName))
+			return false;
+		if (renameFromSchema == null) {
+			if (other.renameFromSchema != null)
+				return false;
+		} else if (!renameFromSchema.equals(other.renameFromSchema))
+			return false;
+		if (table == null) {
+			if (other.table != null)
+				return false;
+		} else if (!table.equals(other.table))
+			return false;
+		return true;
+	}
+
 }
