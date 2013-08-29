@@ -883,6 +883,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		c.type = cols.getString("TYPE_NAME");
 		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
 		c.columSize = cols.getInt("COLUMN_SIZE");
+		c.ordinalPosition = cols.getInt("ORDINAL_POSITION");
 		c.setRemarks(cols.getString("REMARKS"));
 		boolean autoInc = false;
 		if(grabColumnIsAutoincrement) {

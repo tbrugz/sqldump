@@ -97,7 +97,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	static Log log = LogFactory.getLog(Column.class);
 	
 	public String type;
-	public Integer columSize;
+	public Integer columSize; //TODO: rename to columnSize?
 	public Integer decimalDigits;
 	transient boolean pk;
 	public boolean nullable = true;
@@ -105,7 +105,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	String remarks;
 	public Boolean autoIncrement;
 	//XXX add transient String tableName; //??
-	//XXX add column position in table? nice for column compare...
+	public int ordinalPosition; //XXXdone add column position in table? nice for column compare...
 
 	public static transient boolean useAutoIncrement = false;
 	
