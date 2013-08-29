@@ -290,8 +290,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(dumpIndexesWithReferencingTable) {
 				for(Index idx: schemaModel.getIndexes()) {
 					//option for index output inside table
-					if(table==null || idx==null) {
-						log.warn("index null? table: "+table+" / idx: "+idx);
+					if(idx==null) {
+						log.warn("index null? table: "+table);
 						continue;
 					}
 					if(table.getName().equals(idx.tableName)) {

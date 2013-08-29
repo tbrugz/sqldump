@@ -59,7 +59,7 @@ public class View extends DBObject implements Relation {
 		String stmp1 = Table.getRelationRemarks(this, dumpSchemaName);
 		String stmp2 = Table.getColumnRemarks(columns, this, dumpSchemaName);
 		
-		if((stmp1!=null && stmp1.length()>0) || (stmp2!=null && stmp2.length()>0)) { sbRemarks.append("\n\n"); }
+		if( (stmp1!=null && stmp1.length()>0) || (stmp2!=null && stmp2.length()>0) ) { sbRemarks.append("\n\n"); }
 		
 		if(stmp1!=null && stmp1.length()>0) { sbRemarks.append(stmp1+";\n"); }
 		if(stmp2!=null && stmp2.length()>0) { sbRemarks.append(stmp2+";\n"); }

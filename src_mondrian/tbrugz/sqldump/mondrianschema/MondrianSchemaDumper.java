@@ -717,20 +717,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 		}
 		else if(preferredLevelNameColumns!=null) {
-			if(pkTable!=null) {
-				//checking if column exists
-				for(String colName: preferredLevelNameColumns) {
-					Column c = pkTable.getColumnIgnoreCase(colName);
-					if(c!=null) {
-						log.debug("level column name: "+c.getName());
-						level.levelNameColumn = c.getName();
-						break;
-					}
+			//checking if column exists
+			for(String colName: preferredLevelNameColumns) {
+				Column c = pkTable.getColumnIgnoreCase(colName);
+				if(c!=null) {
+					log.debug("level column name: "+c.getName());
+					level.levelNameColumn = c.getName();
+					break;
 				}
 			}
-			/*else {
-				log.warn("table not found [2]: "+schemaName+"."+fk.getPkTable());
-			}*/
 		}
 		String pkColStr = fk.getPkColumns().iterator().next();
 		level.levelColumn = pkColStr;
@@ -823,7 +818,6 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		if(!isLevelLeaf) { return; }
 		{
 			Hierarchy hier = new Hierarchy();
-			String hierName = "";
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			hier.primaryKey = sqlIdDecorator.get( thisLevels.get(0).levelColumn );
 			hier.hasAll = hierarchyHasAll;
@@ -881,6 +875,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			
 			//Levels
+			StringBuilder sbHierName = new StringBuilder();
 			int levelCounter = 0;
 			for(int i = thisLevels.size()-1; i>=0; i--) {
 				levelCounter++;
@@ -900,12 +895,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					l.uniqueMembers = true;
 				}
 				hier.levels = (Level[]) concatenate(hier.levels, new Level[]{l});
-				if(hierName.length() > 0) {
-					hierName += "+";
+				if(levelCounter > 1) {
+					sbHierName.append("+");
 				}
-				hierName += l.name;
+				sbHierName.append(l.name);
 			}
-			hier.name = hierName;
+			hier.name = sbHierName.toString();
 			log.debug("add hier: "+hier.name);
 			
 			if(addDimForEachHierarchy) {

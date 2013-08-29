@@ -1,6 +1,5 @@
 package tbrugz.sqldump;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -456,7 +455,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return schemaModel;
 
 		}
-		catch(Exception e) {
+		catch(SQLException e) {
 			log.error("error grabbing schema: "+e);
 			log.debug("error grabbing schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
@@ -491,7 +490,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	}
 	
 	//XXX shoud it be "grabTables"?
-	void grabRelations(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws Exception { //, String padding
+	void grabRelations(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws SQLException { //, String padding
 		log.debug("grabRelations()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
 		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_DOMAINTABLES, ",");
 		
@@ -617,7 +616,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//return schemaModel;
 	}
 
-	List<FK> grabRelationFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, Relation relation) throws SQLException, IOException {
+	List<FK> grabRelationFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, Relation relation) throws SQLException {
 		String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<FK> ret = new ArrayList<FK>();
 		
@@ -640,7 +639,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return ret;
 	}
 
-	List<Constraint> grabRelationPKs(DatabaseMetaData dbmd, Relation relation) throws SQLException, IOException {
+	List<Constraint> grabRelationPKs(DatabaseMetaData dbmd, Relation relation) throws SQLException {
 		//String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<Constraint> ret = new ArrayList<Constraint>();
 		
@@ -658,7 +657,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return ret;
 	}
 	
-	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern, boolean grabExportedFKsAlso) throws Exception { //, String padding
+	void grabTablesRecursivebasedOnFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, SchemaModel schemaModel, String schemaPattern, boolean grabExportedFKsAlso) throws SQLException { //, String padding
 		log.debug("recursivegrab: "+schemaPattern);
 		Set<DBObjectId> ids = new HashSet<DBObjectId>();
 		for(FK fk: schemaModel.getForeignKeys()) {
@@ -954,7 +953,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return cPK;
 	}
 
-	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException, IOException {
+	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;

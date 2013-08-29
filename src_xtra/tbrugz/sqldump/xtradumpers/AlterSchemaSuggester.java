@@ -365,7 +365,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	int writeIndexes(Set<Index> indexes, CategorizedOut fos) throws IOException {
 		int dumpCounter = 0;
 		for(Index idx: indexes) {
-			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(idx.getSchemaName()))) {
+			if(schemasToAlter==null || schemasToAlter.contains(idx.getSchemaName()) ) {
 				fos.categorizedOut( idx.getDefinition(true)+";\n", idx.getSchemaName(), DBObjectType.INDEX.toString());
 				dumpCounter++;
 			}
@@ -376,7 +376,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	int writeFKs(Set<FK> fks, CategorizedOut fos) throws IOException {
 		int dumpCounter = 0;
 		for(FK fk: fks) {
-			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(fk.getFkTableSchemaName()))) {
+			if(schemasToAlter==null || schemasToAlter.contains(fk.getFkTableSchemaName()) ) {
 				fos.categorizedOut(fk.fkScriptWithAlterTable(false, true), fk.getSchemaName(), DBObjectType.FK.toString() );
 				//fos.write( fk.getDefinition(true)+";\n\n" );
 				dumpCounter++;
@@ -388,7 +388,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	int writeWarnings(Set<Warning> warnings, CategorizedOut fos) throws IOException {
 		int dumpCounter = 0;
 		for(Warning w: warnings) {
-			if(schemasToAlter==null || (schemasToAlter!=null && schemasToAlter.contains(w.schemaName))) {
+			if(schemasToAlter==null || schemasToAlter.contains(w.schemaName) ) {
 				fos.categorizedOut( w.warning, w.schemaName, DBObjectType.CONSTRAINT.toString());
 				dumpCounter++;
 			}

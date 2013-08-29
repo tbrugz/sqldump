@@ -13,13 +13,13 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	int numCol;
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	ResultSetMetaData md;
+	//ResultSetMetaData md;
 	List<String> pkCols;
 	
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
-		this.md = md;
+		//this.md = md;
 		this.pkCols = pkCols;
 		this.numCol = md.getColumnCount();
 		

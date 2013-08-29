@@ -824,7 +824,7 @@ public class DataDump extends AbstractSQLProc {
 				log.warn("getPartitionByStr(): column '"+c+"' not found in result set");
 				throw e;
 			}
-			if(replacement==null) { replacement = ""; }
+			//if(replacement==null) { replacement = ""; }
 			replacement = Matcher.quoteReplacement(replacement);
 			partitionByStr = partitionByStr.replaceAll("\\$\\{col:"+c+"\\}", replacement); //XXX: remove deprecated pattern style
 			partitionByStr = partitionByStr.replaceAll("\\[col:"+c+"\\]", replacement);
