@@ -183,6 +183,18 @@ public class FK extends AbstractConstraint implements Serializable {
 	}
 	
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((pkTable == null) ? 0 : pkTable.hashCode());
+		result = prime * result + ((fkTable == null) ? 0 : fkTable.hashCode());
+		result = prime * result + ((pkColumns == null) ? 0 : pkColumns.hashCode());
+		result = prime * result + ((fkColumns == null) ? 0 : fkColumns.hashCode());
+		return result;
+	}
+	
+	@Override
 	public String getSchemaName() {
 		return fkTableSchemaName;
 	}

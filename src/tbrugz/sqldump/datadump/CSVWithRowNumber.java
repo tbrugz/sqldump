@@ -35,7 +35,7 @@ public class CSVWithRowNumber extends CSVDataDump {
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes4ResultSet, numCol4RS);
-		vals.add(0, new Long(count));
+		vals.add(0, Long.valueOf(count));
 		dumpValues(vals, count, fos);
 	}
 	

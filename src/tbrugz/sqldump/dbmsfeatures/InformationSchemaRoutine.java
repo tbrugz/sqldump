@@ -37,4 +37,32 @@ public class InformationSchemaRoutine extends ExecutableObject {
 				+getBody()+"$BODY$"
 				+"\n  language "+externalLanguage+";";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime
+				* result
+				+ ((externalLanguage == null) ? 0 : externalLanguage.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InformationSchemaRoutine other = (InformationSchemaRoutine) obj;
+		if (externalLanguage == null) {
+			if (other.externalLanguage != null)
+				return false;
+		} else if (!externalLanguage.equals(other.externalLanguage))
+			return false;
+		return true;
+	}
+	
 }

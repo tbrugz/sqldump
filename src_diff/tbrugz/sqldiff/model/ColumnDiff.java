@@ -242,13 +242,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	public int compareTo(ColumnDiff o) {
 		int comp = type.compareTo(o.type);
 		if(comp==0) { comp = table.compareTo(o.table); }
-		if(comp==0) {
-			if(column!=null && o.column!=null) {
-				comp = column.getName().compareTo(o.column.getName());
-			}
-			if(comp==0 && previousColumn!=null && o.previousColumn!=null) {
-				comp = previousColumn.getName().compareTo(o.previousColumn.getName());
-			}
+		if(comp==0 && column!=null && o.column!=null) {
+			comp = column.getName().compareTo(o.column.getName());
+		}
+		if(comp==0 && previousColumn!=null && o.previousColumn!=null) {
+			comp = previousColumn.getName().compareTo(o.previousColumn.getName());
 		}
 		return comp;
 	}
