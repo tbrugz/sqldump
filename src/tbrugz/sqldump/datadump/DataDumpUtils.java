@@ -292,11 +292,13 @@ public class DataDumpUtils {
 		int numCol = md.getColumnCount();
 		List<Column> columns = new ArrayList<Column>();
 		for(int i=0;i<numCol;i++) {
+			int colpos = i+1;
 			Column c = new Column();
-			c.setName(md.getColumnName(i+1));
-			c.type = md.getColumnTypeName(i+1);
-			c.columSize = md.getPrecision(i+1);
-			c.decimalDigits = md.getScale(i+1);
+			c.setName(md.getColumnName(colpos));
+			c.type = md.getColumnTypeName(colpos);
+			c.columSize = md.getPrecision(colpos);
+			c.decimalDigits = md.getScale(colpos);
+			c.ordinalPosition = colpos;
 			if(c.columSize==0) { c.columSize = null; }
 			if(c.decimalDigits==0) { c.decimalDigits = null; }
 			columns.add(c);
