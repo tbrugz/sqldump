@@ -13,7 +13,7 @@ import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 public class Table extends DBObject implements Relation {
 	private static final long serialVersionUID = 1L;
 
-	TableType type;
+	TableType type = TableType.TABLE;
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
 	List<Constraint> constraints = new ArrayList<Constraint>();

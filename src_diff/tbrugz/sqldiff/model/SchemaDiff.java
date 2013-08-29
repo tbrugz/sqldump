@@ -47,7 +47,8 @@ public class SchemaDiff implements Diff {
 
 	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
 		for(DBObject obj: col) {
-			if(schemaName.equalsIgnoreCase(obj.getSchemaName()) && name.equalsIgnoreCase(obj.getName())) return obj;
+			if((schemaName==null && obj.getSchemaName()==null || schemaName.equalsIgnoreCase(obj.getSchemaName()))
+					&& name.equalsIgnoreCase(obj.getName())) return obj;
 		}
 		return null;
 	}
