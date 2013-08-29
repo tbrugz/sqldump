@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -592,12 +593,12 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		StringBuffer sb = new StringBuffer();
 		
-		for(String grantee: mapWithGrant.keySet()) {
-			Set<PrivilegeType> privs = mapWithGrant.get(grantee);
+		for(Entry<String, Set<PrivilegeType>> entry: mapWithGrant.entrySet()) {
+			Set<PrivilegeType> privs = entry.getValue();
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
 					+" on "+finalTableName
-					+" to "+grantee
+					+" to "+entry.getKey()
 					+" WITH GRANT OPTION"+";\n\n");
 			/*for(PrivilegeType priv: privs) {
 				sb.append("grant "+priv
@@ -607,12 +608,12 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			}*/
 		}
 
-		for(String grantee: mapWOGrant.keySet()) {
-			Set<PrivilegeType> privs = mapWOGrant.get(grantee);
+		for(Entry<String, Set<PrivilegeType>> entry: mapWOGrant.entrySet()) {
+			Set<PrivilegeType> privs = entry.getValue();
 			String privsStr = Utils.join(privs, ", ");
 			sb.append("grant "+privsStr
 					+" on "+finalTableName
-					+" to "+grantee
+					+" to "+entry.getKey()
 					+";\n\n");
 			/*for(PrivilegeType priv: privs) {
 				sb.append("grant "+priv

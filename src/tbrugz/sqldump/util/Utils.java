@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -522,8 +523,8 @@ public class Utils {
 			//System.out.println("Util: show sys prop");
 			Map<Object, Object> m = new TreeMap<Object, Object>(System.getProperties());
 			log.debug("system properties:");
-			for(Object key: m.keySet()) {
-				log.debug("\t"+key+": "+m.get(key));
+			for(Entry<Object, Object> entry: m.entrySet()) {
+				log.debug("\t"+entry.getKey()+": "+entry.getValue());
 			}
 			log.debug("end system properties");
 		}
@@ -633,8 +634,8 @@ public class Utils {
 	
 	public static String countByKeyString(Map<?,?> map) {
 		StringBuilder sb = new StringBuilder();
-		for(Object key: map.keySet()) {
-			sb.append((sb.length()>0?";":"")+"#"+key+"="+map.get(key));
+		for(Entry<?,?> entry: map.entrySet()) {
+			sb.append((sb.length()>0?";":"")+"#"+entry.getKey()+"="+entry.getValue());
 		}
 		return sb.toString();
 	}

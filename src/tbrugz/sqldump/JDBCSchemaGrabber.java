@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
@@ -1013,8 +1014,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			log.debug("fk: "+fkName+" - "+fk+" / fkcol:"+fkcol+" / pkcol:"+pkcol);
 		}
 		List<FK> ret = new ArrayList<FK>();
-		for(String key: fks.keySet()) {
-			ret.add(fks.get(key));
+		for(Entry<String, FK> entry: fks.entrySet()) {
+			ret.add(entry.getValue());
 		}
 		return ret;
 	}

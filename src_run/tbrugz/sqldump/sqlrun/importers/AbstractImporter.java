@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -286,8 +287,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	}
 	
 	void addMapCount(Map<Integer, IOCounter> agg, Map<Integer, IOCounter> cc) {
-		for(Integer i: cc.keySet()) {
-			agg.get(i).add(cc.get(i));
+		for(Entry<Integer, IOCounter> entry: cc.entrySet()) {
+			agg.get(entry.getKey()).add(entry.getValue());
 		}
 	}
 
@@ -410,10 +411,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) { // remove alwaysShowId?
 		long countAllIn = 0, countAllOut = 0;
 		int loopCount = 1, mapSize = ccMap.size();
-		for(Integer id: ccMap.keySet()) {
-			IOCounter cc = ccMap.get(id);
+		for(Entry<Integer, IOCounter> entry: ccMap.entrySet()) {
+			IOCounter cc = entry.getValue();
 			if(cc.input>0 || cc.output>0 || loopCount < mapSize) {
-				log.info( ((mapSize > 1)?"[failover="+id+"] ":"") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
+				log.info( ((mapSize > 1)?"[failover="+entry.getKey()+"] ":"") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
 				countAllIn += cc.input;
 				countAllOut += cc.output;
 			}
@@ -677,8 +678,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static String getCookieString(final Map<String,String> cookiesHeader) {
 		StringBuilder sb = new StringBuilder();
 		boolean is1st = true;
-		for(String key: cookiesHeader.keySet()) {
-			sb.append((is1st?"":"; ")+key+"="+cookiesHeader.get(key));
+		for(Entry<String,String> entry: cookiesHeader.entrySet()) {
+			sb.append((is1st?"":"; ")+entry.getKey()+"="+entry.getValue());
 			is1st = false;
 		}
 		return sb.toString();

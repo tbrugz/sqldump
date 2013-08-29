@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +22,7 @@ import tbrugz.sqldump.util.MapEntryValueComparator;
  */
 public class StatsProc extends AbstractSQLProc {
 
-	static Log log = LogFactory.getLog(StatsProc.class);
+	static final Log log = LogFactory.getLog(StatsProc.class);
 	
 	@Override
 	public void process() {
@@ -49,8 +50,8 @@ public class StatsProc extends AbstractSQLProc {
 
 		Map<String,Integer> sorted_map = MapEntryValueComparator.sortByValue(map, true);
 		
-		for (String key: sorted_map.keySet()) {
-			System.out.println("count["+key+"]: "+sorted_map.get(key));
+		for(Entry<String,Integer> entry: sorted_map.entrySet()) {
+			System.out.println("count["+entry.getKey()+"]: "+entry.getValue());
 		}
 	}
 
