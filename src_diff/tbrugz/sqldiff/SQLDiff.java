@@ -182,8 +182,6 @@ public class SQLDiff implements Executor {
 			CategorizedOut co = new CategorizedOut(finalPattern);
 			log.debug("final pattern: "+finalPattern);
 			
-			co.setFilePathPattern(finalPattern);
-	
 			//co.categorizedOut(diff.getDiff());
 			//log.info("dumping diff...");
 			diff.outDiffs(co);

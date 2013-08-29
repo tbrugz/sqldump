@@ -25,15 +25,15 @@ public class CategorizedOut {
 	
 	public static class NullWriter extends Writer {
 		@Override
-		public void write(char[] cbuf, int off, int len) throws IOException {
+		public void write(char[] cbuf, int off, int len) {
 		}
 
 		@Override
-		public void flush() throws IOException {
+		public void flush() {
 		}
 
 		@Override
-		public void close() throws IOException {
+		public void close() {
 		}
 	}
 	
@@ -51,16 +51,11 @@ public class CategorizedOut {
 		this.filePathPattern = filePathPattern;
 	}
 
-	@Deprecated
-	public CategorizedOut() {
-		this(null);
-	}
-	
 	Set<String> filesOpened = new TreeSet<String>();
 	
 	//String[] categories = null;
-	//XXX: final filePathPattern ?
-	String filePathPattern; // XXX: file: /abc/def/${1}file${2}.sql
+	//XXXdone: final filePathPattern ?
+	final String filePathPattern; // XXX: file: /abc/def/${1}file${2}.sql
 	
 	/*public String[] getCategories() {
 		return categories;
@@ -74,23 +69,42 @@ public class CategorizedOut {
 		return filePathPattern;
 	}
 
-	//XXX @Deprecated ?
-	public void setFilePathPattern(String filePathPattern) {
-		this.filePathPattern = filePathPattern;
-	}
-
 	public void categorizedNewOut(String message, String... categories) throws IOException {
 		Writer w = getCategorizedWriter(categories);
 		w.write(message+"\n");
 		w.flush();
 	}
 	
-	//XXX: use getCategorizedWriter() (as categorizedNewOut()) ?
+	//XXXdone: use getCategorizedWriter() (as categorizedNewOut()) ?
 	public void categorizedOut(String message, String... categories) throws IOException {
+		Writer w = getCategorizedWriter(categories);
+		w.write(message+"\n");
+		closeWriter(w);
+	}
+
+	public Writer getCategorizedWriter(String... categories) throws IOException {
 		if(filePathPattern==null) {
 			throw new RuntimeException("filePathPattern not defined, aborting");
 		}
 
+		String thisFP = getFilePath(categories);
+		
+		if(STDOUT.equals(thisFP)) {
+			return pwSTDOUT;
+		}
+		else if(STDERR.equals(thisFP)) {
+			return pwSTDERR;
+		}
+		else if(NULL_WRITER.equals(thisFP)) {
+			return nullWriter;
+		}
+		else {
+			FileWriter fos = getFileWriter(thisFP);
+			return fos;
+		}
+	}
+	
+	String getFilePath(String... categories) {
 		String thisFP = new String(filePathPattern);
 		
 		boolean hasnull = false;
@@ -105,95 +119,32 @@ public class CategorizedOut {
 			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
 			//log.debug("fp: "+tmpThisFP+" / "+thisFP);
 		}
-		
-		if(hasnull) {
-			log.debug("cats w/ null: "+Arrays.asList(categories)+" ; message = "+message);
-		}
-		
-		if(STDOUT.equals(thisFP)) {
-			System.out.println(message);
-		}
-		else if(STDERR.equals(thisFP)) {
-			System.err.println(message);
-		}
-		else if(NULL_WRITER.equals(thisFP)) {
-			nullWriter.write(message); //not realy needed...
-		}
-		else {
-			boolean alreadyOpened = filesOpened.contains(thisFP);
-			if(!alreadyOpened) { filesOpened.add(thisFP); }
-			
-			File f = new File(thisFP);
-			//String dirStr = f.getParent();
-			File dir = new File(f.getParent());
-			if(!dir.exists()) {
-				if(!dir.mkdirs()) {
-					log.warn("error creating dirs: "+dir.getAbsolutePath());
-				}
-			}
-			else {
-				if(!dir.isDirectory()) {
-					throw new IOException(dir+" already exists and is not a directory");
-				}
-			}
-			FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
-			//XXX: remove '\n'?
-			fos.write(message+"\n");
-			fos.close();
-		}
-	}
 
-	public Writer getCategorizedWriter(String... categories) throws IOException {
-		if(filePathPattern==null) {
-			throw new RuntimeException("filePathPattern not defined, aborting");
-		}
-
-		String thisFP = new String(filePathPattern);
-		
-		boolean hasnull = false;
-		for(int i=0;i<categories.length;i++) {
-			String c = categories[i];
-			if(c==null) {
-				hasnull = true;
-				continue;
-			}
-			c = Matcher.quoteReplacement(c);
-			thisFP = thisFP.replaceAll("\\["+(i+1)+"\\]", c);
-		}
-		
 		if(hasnull) {
 			log.debug("cats w/ null: "+Arrays.asList(categories));
 		}
 		
-		if(STDOUT.equals(thisFP)) {
-			return pwSTDOUT;
-		}
-		else if(STDERR.equals(thisFP)) {
-			return pwSTDERR;
-		}
-		else if(NULL_WRITER.equals(thisFP)) {
-			return nullWriter;
+		return thisFP;
+	}
+	
+	FileWriter getFileWriter(String thisFP) throws IOException {
+		boolean alreadyOpened = filesOpened.contains(thisFP);
+		if(!alreadyOpened) { filesOpened.add(thisFP); }
+		
+		File f = new File(thisFP);
+		//String dirStr = f.getParent();
+		File dir = new File(f.getParent());
+		if(!dir.exists()) {
+			if(!dir.mkdirs()) {
+				log.warn("error creating dirs: "+dir.getAbsolutePath());
+			}
 		}
 		else {
-			boolean alreadyOpened = filesOpened.contains(thisFP);
-			if(!alreadyOpened) { filesOpened.add(thisFP); }
-			
-			File f = new File(thisFP);
-			//String dirStr = f.getParent();
-			File dir = new File(f.getParent());
-			if(!dir.exists()) {
-				if(!dir.mkdirs()) {
-					log.warn("error creating dirs: "+dir.getAbsolutePath());
-				}
+			if(!dir.isDirectory()) {
+				throw new IOException(dir+" already exists and is not a directory");
 			}
-			else {
-				if(!dir.isDirectory()) {
-					throw new IOException(dir+" already exists and is not a directory");
-				}
-			}
-			FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
-			return fos;
 		}
+		return new FileWriter(f, alreadyOpened);
 	}
 	
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
