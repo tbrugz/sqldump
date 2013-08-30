@@ -92,6 +92,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 
 		try {
 			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(is));
+			is.close();
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
 			log.info("xml schema model grabbed from '"+inputDescription+"'");

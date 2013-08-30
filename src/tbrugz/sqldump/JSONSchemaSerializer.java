@@ -49,6 +49,7 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 
 		try {
 			SchemaModel sm = (SchemaModel) jsonser.unmarshal(new InputStreamReader(is));
+			is.close();
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
 			log.info("json schema model grabbed from '"+inputDescription+"'");
