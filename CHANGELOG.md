@@ -1,4 +1,14 @@
 
+sqldump 0.9.9
+-------------
+- r2g: initial & final node types
+- mondrian: added prop '.measurecolsregex'
+- mondrian2graph: added xsl.simple
+- datadiff: added prop '.usecommoncolumns'
+- model: added Column.ordinalPosition
+- fixed: some findbugs/pmd warnings ; ColumnDiff.compareTo()
+
+
 sqldump 0.9.8
 -------------
 - LGPLv3 (.md) - https://github.com/tallus/forecast.io.py/blob/master/LICENSE-LGPL.md
