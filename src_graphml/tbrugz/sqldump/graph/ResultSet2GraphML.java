@@ -125,6 +125,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static boolean useAbsolute = true;
 	//TODO: add property for 'doNotDumpNonConnectedNodes'
 	static boolean doNotDumpNonConnectedNodes = true;
+	//XXX: add property for 'ignoreSelfReference4InitialAndFinalNodes'
+	static boolean ignoreSelfReference4InitialAndFinalNodes = true;
 	
 	//TODO: add property for 'edgeMinWidth' & 'edgeMaxWidth'
 	static double edgeMinWidth = 0.1; //XXX: maybe 0?
@@ -285,8 +287,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			edge.setTarget(target);
 			edge.setStereotype(edgeType);
 			edges.add(edge);
-			edgeSourceSet.add(source);
-			edgeTargetSet.add(target);
+			if( (!ignoreSelfReference4InitialAndFinalNodes) || (!source.equals(target)) ) {
+				edgeSourceSet.add(source);
+				edgeTargetSet.add(target);
+			}
 		}
 		
 		int nodeCount = 0, edgeCount = 0;
