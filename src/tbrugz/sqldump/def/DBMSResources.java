@@ -211,20 +211,20 @@ public class DBMSResources {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				features = (DBMSFeatures) c.newInstance();
-				initDBMSFeatures(features, papp);
 				log.debug("specific DBMS features class: "+c.getName());
-				return;
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			} catch (InstantiationException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
-		
-		log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
-		features = new DefaultDBMSFeatures();
+		else {
+			//if(features==null) ?
+			log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
+			features = new DefaultDBMSFeatures();
+		}
 		initDBMSFeatures(features, papp);
 	}
 	
