@@ -12,3 +12,5 @@ glob:*~
 glob:*.orig
 glob:derby.log
 glob:sqldump.properties
+syntax: glob
+ivy.classpath.properties
