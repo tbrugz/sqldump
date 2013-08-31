@@ -17,17 +17,20 @@ public class RegexImporter extends AbstractImporter {
 	
 	static final String SUFFIX_PATTERN = ".pattern";
 	static final String SUFFIX_PATTERNFLAGS = ".patternflags";
+	static final String SUFFIX_SUBPATTERNS2IGNORE = ".subpatterns2ignore";
 	
 	static final String[] NULL_STR_ARRAY = {};
 	
 	static final String[] REGEX_AUX_SUFFIXES = {
 		SUFFIX_PATTERN,
-		SUFFIX_PATTERNFLAGS
+		SUFFIX_PATTERNFLAGS,
+		SUFFIX_SUBPATTERNS2IGNORE
 	};
 
 	String patternStr = null;
 	Pattern pattern = null;
 	int patternFlags = 0;
+	List<Pattern> patterns2ignore = new ArrayList<Pattern>();
 	
 	List<Integer> loggedPatternFailoverIds = new ArrayList<Integer>();
 
@@ -37,6 +40,13 @@ public class RegexImporter extends AbstractImporter {
 		patternStr = prop.getProperty(importerPrefix+SUFFIX_PATTERN, patternStr);
 		patternFlags = Utils.getPropInt(prop, importerPrefix+SUFFIX_PATTERNFLAGS, patternFlags);
 		pattern = Pattern.compile(patternStr, patternFlags);
+		List<String> patterns2ignoreStr = Utils.getStringListFromProp(prop, importerPrefix+SUFFIX_SUBPATTERNS2IGNORE, "\\|");
+		if(patterns2ignoreStr!=null) {
+			//log.info("pats2ign: "+patterns2ignoreStr);
+			for(String s: patterns2ignoreStr) {
+				patterns2ignore.add(Pattern.compile(s));
+			}
+		}
 		
 		if(!loggedPatternFailoverIds.contains(failoverId)) {
 			log.info("pattern"+(failoverId>0?"[failover="+failoverId+"]":"")+": "+patternStr);
@@ -53,6 +63,9 @@ public class RegexImporter extends AbstractImporter {
 	
 	@Override
 	String[] procLine(String line, long processedLines) throws java.sql.SQLException {
+		for(Pattern ignp: patterns2ignore) {
+			line = ignp.matcher(line).replaceAll("");
+		}
 		Matcher matcher = pattern.matcher(line);
 
 		String[] parts = null;

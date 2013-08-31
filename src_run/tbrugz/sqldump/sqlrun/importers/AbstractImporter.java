@@ -520,9 +520,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	String strTruncated(String s, int max) {
 		if(s.length()>max) {
-			return s.substring(0, max)+"...";
+			s = s.substring(0, max)+"...";
 		}
-		return s;
+		return s.replaceAll("\\n", " ");
 	}
 	
 	void stmtSetValue(int index, String value) throws SQLException {
