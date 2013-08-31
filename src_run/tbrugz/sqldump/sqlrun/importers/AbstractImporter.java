@@ -434,12 +434,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		IOCounter counter = countsByFailoverId.get(failoverId);
 		String[] parts = procLine(line, counter.input);
 		if(parts==null) {
-			log.debug("line could not be understood: "+line);
-			throw new RuntimeException("line could not be processed: "+line);
+			String lineTrunc = strTruncated(line, 40);
+			log.debug("line could not be understood: "+lineTrunc);
+			throw new RuntimeException("line could not be processed: "+lineTrunc);
 		}
 		
 		if(log.isDebugEnabled()) {
-			log.debug("parts["+counter.input+"; l="+parts.length+"]: "+Arrays.asList(parts));
+			log.debug("parts[count="+counter.input+"; parts="+parts.length+"]: "+Arrays.asList(parts));
 		}
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
@@ -453,11 +454,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		
 		//List<String> values = new ArrayList<String>();
 		
+		List<Integer> partsNotFound = new ArrayList<Integer>();
 		for(int i=0;i<parts.length;i++) {
 			int index = i;
 			try {
 				
-			if(filecol2tabcolMap!=null) {
+			if(filecol2tabcolMap!=null && filecol2tabcolMap.size()>0) {
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
 					index = filecol2tabcolMap.indexOf(i);
@@ -467,6 +469,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				}
 				else {
 					//do nothing!
+					partsNotFound.add(i);
 				}
 			}
 			else {
@@ -482,6 +485,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				throw e;
 			}
 			//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
+		}
+		if(partsNotFound.size()>0) {
+			log.debug("filecol2tabcolMap does not contain parts "+partsNotFound);
 		}
 		
 		//log.info("insert-values: "+values);
@@ -512,6 +518,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		}
 	}
 	
+	String strTruncated(String s, int max) {
+		if(s.length()>max) {
+			return s.substring(0, max)+"...";
+		}
+		return s;
+	}
+	
 	void stmtSetValue(int index, String value) throws SQLException {
 		if(columnTypes!=null) {
 			if(columnTypes.size()>index) {
@@ -526,6 +539,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			}
 		}
 		//default: set as string
+		//log.debug("stmtSetValue: index [="+(index+1)+"]: "+value);
 		stmt.setString(index+1, value);
 	}
 	
