@@ -12,6 +12,9 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -479,7 +482,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			
 			}
 			catch(NumberFormatException nfe) {
-				stmtSetValue(index, null);
+				stmtSetNull(index);
+			}
+			catch(ParseException nfe) {
+				stmtSetNull(index);
 			}
 			catch(RuntimeException e) {
 				log.debug("error procLineInternal: i="+i+"; index="+index+" ; value='"+parts[i]+"'"
@@ -528,7 +534,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		return s.replaceAll("\\n", " ");
 	}
 
-	void stmtSetValue(int index, String value) throws SQLException {
+	void stmtSetValue(int index, String value) throws SQLException, ParseException {
 		if(value==null) {
 			stmt.setString(index+1, null);
 			return;
@@ -548,11 +554,18 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				else if(colType.equals("string")) {
 					stmt.setString(index+1, value);
 				}
+				else if(colType.startsWith("date[")) {
+					//XXX use java.sql.Timestamp?
+					//XXX setup DateFormat only once for each column?
+					String strFormat = colType.substring(5, colType.indexOf(']'));
+					DateFormat df = new SimpleDateFormat(strFormat);
+					stmt.setDate(index+1, new java.sql.Date( df.parse(value).getTime() ));
+				}
 				else {
 					log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
 					stmt.setString(index+1, value);
 				}
-				//XXX: more column types (date, boolean, byte, long, object?, null?, ...)
+				//XXX: more column types (boolean, byte, long, object?, null?, ...)
 				return;
 			}
 			else {
@@ -562,6 +575,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		//default: set as string
 		//log.debug("stmtSetValue: index [="+(index+1)+"]: "+value);
 		stmt.setString(index+1, value);
+	}
+
+	void stmtSetNull(int index) throws SQLException {
+		stmt.setString(index+1, null);
+		return;
 	}
 	
 	List<Integer> loggedStatementFailoverIds = new ArrayList<Integer>();
