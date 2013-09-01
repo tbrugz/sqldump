@@ -478,6 +478,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			}
 			
 			}
+			catch(NumberFormatException nfe) {
+				stmtSetValue(index, null);
+			}
 			catch(RuntimeException e) {
 				log.debug("error procLineInternal: i="+i+"; index="+index+" ; value='"+parts[i]+"'"
 						+(columnTypes!=null?" ; type="+columnTypes.get(index):"")
@@ -524,15 +527,33 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		}
 		return s.replaceAll("\\n", " ");
 	}
-	
+
 	void stmtSetValue(int index, String value) throws SQLException {
+		if(value==null) {
+			stmt.setString(index+1, null);
+			return;
+		}
 		if(columnTypes!=null) {
 			if(columnTypes.size()>index) {
-				if(columnTypes.get(index).equals("int")) {
+				String colType = columnTypes.get(index);
+				if(colType.equals("int")) {
 					stmt.setInt(index+1, Integer.parseInt(value.trim()));
-					return;
 				}
-				//XXX: more column types (double, date, boolean, byte, long, object?, null?, ...)
+				else if(colType.equals("double")) {
+					stmt.setDouble(index+1, Double.parseDouble(value.replaceAll(",", "").trim()));
+				}
+				else if(colType.equals("doublec")) {
+					stmt.setDouble(index+1, Double.parseDouble(value.replaceAll("\\.", "").replaceAll(",", ".").trim()));
+				}
+				else if(colType.equals("string")) {
+					stmt.setString(index+1, value);
+				}
+				else {
+					log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
+					stmt.setString(index+1, value);
+				}
+				//XXX: more column types (date, boolean, byte, long, object?, null?, ...)
+				return;
 			}
 			else {
 				log.warn("stmtSetValue: columnTypes.size() <= index [="+index+"] (will use 'string' type)");
