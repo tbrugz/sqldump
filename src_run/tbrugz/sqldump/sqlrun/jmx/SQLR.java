@@ -10,15 +10,15 @@ public class SQLR implements SQLRMBean {
 	public SQLR(int maxPosition, DatabaseMetaData dbmd) {
 		this.maxPosition = maxPosition;
 		this.dbmd = dbmd;
-		this.startTimeMilis = System.currentTimeMillis();
+		this.startTimeMillis = System.currentTimeMillis();
 	}
 	
 	final int maxPosition;
-	final long startTimeMilis;
+	final long startTimeMillis;
 	protected DatabaseMetaData dbmd;
 	
 	int currentPosition;
-	long currentTaskStartMilis;
+	long currentTaskStartMillis;
 	String currentId;
 	String currentTaskType;
 	String currentTaskDefinition;
@@ -60,12 +60,12 @@ public class SQLR implements SQLRMBean {
 
 	@Override
 	public long getTotalElapsedSeconds() {
-		return (System.currentTimeMillis()-startTimeMilis)/1000;
+		return (System.currentTimeMillis()-startTimeMillis)/1000;
 	}
 
 	@Override
 	public long getCurrentTaskElapsedSeconds() {
-		return (System.currentTimeMillis()-currentTaskStartMilis)/1000;
+		return (System.currentTimeMillis()-currentTaskStartMillis)/1000;
 	}
 
 	public void newTaskUpdate(int currentPosition, String currentId, String currentTaskType, String currentTaskDefinition) {
@@ -73,7 +73,7 @@ public class SQLR implements SQLRMBean {
 		this.currentId = currentId;
 		this.currentTaskType = currentTaskType;
 		this.currentTaskDefinition = currentTaskDefinition;
-		this.currentTaskStartMilis = System.currentTimeMillis();
+		this.currentTaskStartMillis = System.currentTimeMillis();
 	}
 
 	@Override

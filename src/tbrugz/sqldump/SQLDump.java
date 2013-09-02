@@ -116,6 +116,7 @@ public class SQLDump implements Executor {
 		if(c!=null) { conn = c; }
 		
 		long initTime = System.currentTimeMillis();
+		papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
 		
 		try {
 

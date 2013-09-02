@@ -21,6 +21,7 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
@@ -112,6 +113,7 @@ public class SQLRun implements Executor {
 		//Utils.showSysProperties();
 		Utils.logEnvironment();
 		long initTime = System.currentTimeMillis();
+		papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
 
 		Set<String> procIds = new TreeSet<String>();
 		if(filterByIds!=null) {
