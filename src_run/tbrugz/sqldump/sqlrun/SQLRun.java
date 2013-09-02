@@ -29,6 +29,7 @@ import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
+import tbrugz.sqldump.sqlrun.importers.FFCImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.util.CLIProcessor;
@@ -224,6 +225,10 @@ public class SQLRun implements Executor {
 				else if("REGEX".equalsIgnoreCase(importType)) {
 					importer = new RegexImporter();
 				}
+				//ffc
+				else if("FFC".equalsIgnoreCase(importType)) {
+					importer = new FFCImporter();
+				}
 				else {
 					log.warn("unknown import type: "+importType);
 					continue;
@@ -342,6 +347,7 @@ public class SQLRun implements Executor {
 		allAuxSuffixes.addAll(new StmtProc().getAuxSuffixes());
 		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
+		allAuxSuffixes.addAll(new FFCImporter().getAuxSuffixes());
 		allAuxSuffixes.addAll(new QueryDumper().getAuxSuffixes());
 		filterByIds = Utils.getStringListFromProp(papp, PROP_FILTERBYIDS, ",");
 		
