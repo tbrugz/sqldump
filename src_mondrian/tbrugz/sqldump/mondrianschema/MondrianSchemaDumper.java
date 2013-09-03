@@ -183,6 +183,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
 	
+	//possible aggregate functions: "sum", "count", "min", "max", "avg" and "distinct-count ; mode, median, first, last, concat?
 	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
 	
 	static Log log = LogFactory.getLog(MondrianSchemaDumper.class);
@@ -403,6 +404,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			for(Column c: t.getColumns()) {
 				procMeasures(cube, t, c, fks, measureCols, measureColsRegexes, degenerateDimCandidates);
 			}
+			if(cube.measures==null && measureCols.size()>0) {
+				log.warn("no measures from '.measurecols' found: "+measureCols);
+			}
+			else if(cube.measures!=null && measureCols.size()>cube.measures.length) {
+				log.warn("only "+cube.measures.length+" measures from '.measurecols' ("+measureCols+") found");
+			}
 			
 			List<Measure> measures = new ArrayList<Measure>();
 			
@@ -419,6 +426,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 			}
 			
+			if(measures.size()>0) {
+				cube.measures = concatenate(cube.measures, measures.toArray(new Measure[0]));
+			}
+			
 			int cubeMeasuresCount = cube.measures==null?0:cube.measures.length;
 			
 			if(cubeMeasuresCount==0) {
@@ -427,16 +438,17 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					continue;
 				}
 				
-				String descFactCountMeasure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
-						prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
-				if(descFactCountMeasure!=null) {
-					addFactCountMeasure(t, measures, descFactCountMeasure);
-				}
-				
 				log.warn("cube '"+cube.name+"' has no measure...");
 			}
-			else {
-				cube.measures = concatenate(cube.measures, measures.toArray(new Measure[0]));
+
+			//fact-count measure
+			String descFactCountMeasure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+propIdDecorator.get(cube.name)+".factcountmeasure",
+					prop.getProperty(PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE));
+			if(descFactCountMeasure!=null) {
+				Measure factCountMeasure = getFactCountMeasure(t, descFactCountMeasure);
+				if(factCountMeasure!=null) {
+					cube.measures = concatenate(cube.measures, new Measure[]{factCountMeasure});
+				}
 			}
 			
 			//dimensions
@@ -456,17 +468,23 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 						col = colAndColName[0];
 						nameColumn = colAndColName[1];
 					}
-					boolean containsCol = false;
+					String finalCol = null;
+					String finalNameCol = null;
 					for(Column cc: t.getColumns()) {
-						if(stringEquals(cc.getName(), col)) { containsCol = true; break; }
+						if(cc.getName().equalsIgnoreCase(col)) { finalCol = cc.getName(); }
+						if(nameColumn!=null && cc.getName().equalsIgnoreCase(nameColumn)) { finalNameCol = cc.getName(); }
 					}
-					if(!containsCol) {
+					if(finalCol==null) {
 						log.warn("column for degenerate dimension '"+col+"' not present in table "+t.getName());
+						break;
+					}
+					if(nameColumn!=null && finalNameCol==null) {
+						log.warn("name column '"+nameColumn+"' for degenerate dimension '"+col+"' not present in table "+t.getName());
 					}
 
 					degenerateDimCandidates.remove(col);
 					if(nameColumn!=null) { degenerateDimCandidates.remove(nameColumn); }
-					cube.dimensions = concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(col, nameColumn, col)});
+					cube.dimensions = concatenate(cube.dimensions, new Dimension[]{genDegeneratedDim(finalCol, finalNameCol, col)});
 				}
 			}
 			
@@ -529,7 +547,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 	}
 	
-	void addFactCountMeasure(Table t, List<Measure> measures, String descFactCountMeasure) throws XOMException {
+	Measure getFactCountMeasure(Table t, String descFactCountMeasure) throws XOMException {
 		Constraint c = t.getPKConstraint();
 		if(c==null) {
 			List<Column> cols = t.getColumns();
@@ -538,7 +556,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				if(!col.nullable) { notNullCol = col; }
 			}
 			if(notNullCol!=null) {
-				measures.add(newMeasure(notNullCol.getName(), descFactCountMeasure, "count"));
+				return newMeasure(notNullCol.getName(), descFactCountMeasure, "count");
 			}
 			else {
 				log.warn("table '"+t.getName()+"' has no PK nor not-null-column for fact count measure");
@@ -546,8 +564,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		else {
 			String pk1stCol = c.uniqueColumns.get(0);
-			measures.add(newMeasure(pk1stCol, descFactCountMeasure, "count"));
+			return newMeasure(pk1stCol, descFactCountMeasure, "count");
 		}
+		return null;
 	}
 	
 	Set<String> noMeasureTypeWarned = new TreeSet<String>();
@@ -582,7 +601,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			if(listContains(measureCols, c.getName())) { ok = true; }
 			else { ok = false; }
 		}
-
+		
 		if(measureColsRegexes!=null) {
 			ok = false;
 			for(String regex: measureColsRegexes) {
@@ -1062,6 +1081,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				Dimension dim = (Dimension) cdim;
 				if(dim.hierarchies==null) { continue; }
 				for(Hierarchy hier: dim.hierarchies) {
+					
+					//XXX: warn for tables/columns not found...
 					
 					if(hier.levels==null) { continue; }
 					for(Level l: hier.levels) {
