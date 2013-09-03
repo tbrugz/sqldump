@@ -86,6 +86,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
 	List<String> columnTypes;
+	Integer onErrorIntValue;
 	
 	boolean logMalformedLine = true;
 	
@@ -124,6 +125,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
 	static final String SUFFIX_COLUMN_TYPES = ".columntypes";
+	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
+	//XXX: add '.onerror.type-(double|date)-value' ?
 	
 	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
@@ -142,7 +145,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		SUFFIX_SKIP_N,
 		SUFFIX_LOG_MALFORMED_LINE,
 		SUFFIX_X_COMMIT_EACH_X_ROWS,
-		SUFFIX_COLUMN_TYPES
+		SUFFIX_COLUMN_TYPES,
+		SUFFIX_ONERROR_TYPE_INT_SET_VALUE
 	};
 	
 	@Override
@@ -165,6 +169,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
+		onErrorIntValue = Utils.getPropInt(prop, Constants.PREFIX_EXEC+execId+SUFFIX_ONERROR_TYPE_INT_SET_VALUE);
 		
 		long defaultCommitEachXrows = commitStrategy==CommitStrategy.FILE?defaultCommitEachXrowsForFileStrategy:commitEachXrows;
 		commitEachXrows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
@@ -438,7 +443,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		String[] parts = procLine(line, counter.input);
 		if(parts==null) {
 			String lineTrunc = strTruncated(line, 40);
-			log.debug("line could not be understood: "+lineTrunc);
+			log.debug("line could not be processed: "+lineTrunc);
 			throw new RuntimeException("line could not be processed: "+lineTrunc);
 		}
 		
@@ -458,6 +463,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		//List<String> values = new ArrayList<String>();
 		
 		List<Integer> partsNotFound = new ArrayList<Integer>();
+		//TODO: what if parts.length for some lines is shorter than others? stmt will keep old value from longer line...
 		for(int i=0;i<parts.length;i++) {
 			int index = i;
 			try {
@@ -468,7 +474,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 					index = filecol2tabcolMap.indexOf(i);
 					stmtSetValue(index, parts[i]);
 					//values.add(parts[i]);
-					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);						
+					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);
 				}
 				else {
 					//do nothing!
@@ -543,7 +549,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			if(columnTypes.size()>index) {
 				String colType = columnTypes.get(index);
 				if(colType.equals("int")) {
-					stmt.setInt(index+1, Integer.parseInt(value.trim()));
+					try {
+						stmt.setInt(index+1, Integer.parseInt(value.trim()));
+					}
+					catch(NumberFormatException e) {
+						if(onErrorIntValue!=null) {
+							stmt.setInt(index+1, onErrorIntValue);
+						}
+						else {
+							throw e;
+						}
+					}
 				}
 				else if(colType.equals("double")) {
 					stmt.setDouble(index+1, Double.parseDouble(value.replaceAll(",", "").trim()));
