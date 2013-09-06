@@ -212,9 +212,9 @@ public class SQLDump implements Executor {
 	
 	void doMainProcess(SchemaModelGrabber grabber, List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
 
-		int numOfComponents = processors.size();
+		int numOfProcessors = processors.size();
 		StringBuilder sb = new StringBuilder();
-		for(int i=0;i<numOfComponents;i++) {
+		for(int i=0;i<numOfProcessors;i++) {
 			ProcessComponent pc = processors.get(i);
 			sb.append((i>0?", ":"")+pc.getClass().getSimpleName());
 		}
@@ -222,7 +222,8 @@ public class SQLDump implements Executor {
 			log.info("sqldump grabber: "+grabber.getClass().getSimpleName());
 			processors.add(0, grabber);
 		}
-		log.info("sqldump processors [#"+numOfComponents+"]: "+sb.toString());
+		log.info("sqldump processors [#"+numOfProcessors+"]: "+sb.toString());
+		int numOfComponents = processors.size();
 
 		//jmx
 		SQLD sqldmbean = new SQLD(numOfComponents, (conn!=null)?conn.getMetaData():null );
