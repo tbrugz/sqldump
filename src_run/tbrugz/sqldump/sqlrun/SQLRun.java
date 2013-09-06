@@ -18,8 +18,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
-import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;

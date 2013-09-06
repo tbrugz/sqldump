@@ -7,11 +7,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.util.DiffUtil;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
-import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.DBMSUpdateListener;
 import tbrugz.sqldump.util.Utils;

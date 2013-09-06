@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
+
 public class DBMSResourcesTest {
 	
 	class TestDBMD extends AbstractDatabaseMetaDataDecorator {

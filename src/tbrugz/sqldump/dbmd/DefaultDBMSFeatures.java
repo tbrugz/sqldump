@@ -1,4 +1,4 @@
-package tbrugz.sqldump.def;
+package tbrugz.sqldump.dbmd;
 
 import java.sql.Connection;
 import java.sql.SQLException;

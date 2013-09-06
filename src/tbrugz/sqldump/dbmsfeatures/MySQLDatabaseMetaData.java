@@ -4,7 +4,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
+import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 
 /*
  * XXX: change [catalog -> schema] in getColumns(), .getTablePrivileges(), .getPrimaryKeys(), getIndexInfo(), getImportedKeys(), getExportedKeys(),

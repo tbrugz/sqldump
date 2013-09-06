@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -21,7 +22,6 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.DefaultDBMSFeatures;
 import tbrugz.sqldump.util.Utils;
 
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {

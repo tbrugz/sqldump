@@ -1,4 +1,4 @@
-package tbrugz.sqldump.def;
+package tbrugz.sqldump.dbmd;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -14,20 +14,6 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 public interface DBMSFeatures {
-	static String PROP_GRAB_INDEXES = "sqldump.dbspecificfeatures.grabindexes";
-	static String PROP_GRAB_EXECUTABLES = "sqldump.dbspecificfeatures.grabexecutables";
-	static String PROP_GRAB_VIEWS = "sqldump.dbspecificfeatures.grabviews";
-	static String PROP_GRAB_TRIGGERS = "sqldump.dbspecificfeatures.grabtriggers";
-	static String PROP_GRAB_SYNONYMS = "sqldump.dbspecificfeatures.grabsynonyms";
-	static String PROP_GRAB_SEQUENCES = "sqldump.dbspecificfeatures.grabsequences";
-	static String PROP_GRAB_CONSTRAINTS_XTRA = "sqldump.dbspecificfeatures.grabextraconstraints";
-	
-	static String PROP_GRAB_FKFROMUK = "sqldump.dbspecificfeatures.grabfkfromuk";
-	static String PROP_DUMP_SEQUENCE_STARTWITH = "sqldump.dbspecificfeatures.sequencestartwithdump";
-	static String PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES = "sqldump.dbspecificfeatures.dumpphysicalattributes";
-	static String PROP_DUMP_TABLE_LOGGING = "sqldump.dbspecificfeatures.dumplogging";
-	static String PROP_DUMP_TABLE_PARTITION = "sqldump.dbspecificfeatures.dumppartition";
-	
 	void procProperties(Properties prop);
 	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);

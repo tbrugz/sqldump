@@ -11,7 +11,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
+import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 
 public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	

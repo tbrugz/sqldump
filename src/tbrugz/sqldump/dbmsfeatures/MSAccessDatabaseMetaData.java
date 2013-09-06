@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.def.AbstractDatabaseMetaDataDecorator;
+import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 import tbrugz.sqldump.resultset.EmptyResultSet;
 
 //TODO: getCrossReference()?

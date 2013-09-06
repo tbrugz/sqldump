@@ -9,10 +9,10 @@ import java.sql.Statement;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.DefaultDBMSFeatures;
 
 public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Log log = LogFactory.getLog(DerbyFeatures.class);

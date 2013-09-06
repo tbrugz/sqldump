@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import tbrugz.sqldump.def.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 
 public class MSAccessFeatures extends DefaultDBMSFeatures {
 	

@@ -1,4 +1,4 @@
-package tbrugz.sqldump.def;
+package tbrugz.sqldump.dbmd;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -14,6 +14,20 @@ import tbrugz.sqldump.util.Utils;
 
 public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 
+	public static final String PROP_GRAB_INDEXES = "sqldump.dbspecificfeatures.grabindexes";
+	public static final String PROP_GRAB_EXECUTABLES = "sqldump.dbspecificfeatures.grabexecutables";
+	public static final String PROP_GRAB_VIEWS = "sqldump.dbspecificfeatures.grabviews";
+	public static final String PROP_GRAB_TRIGGERS = "sqldump.dbspecificfeatures.grabtriggers";
+	public static final String PROP_GRAB_SYNONYMS = "sqldump.dbspecificfeatures.grabsynonyms";
+	public static final String PROP_GRAB_SEQUENCES = "sqldump.dbspecificfeatures.grabsequences";
+	public static final String PROP_GRAB_CONSTRAINTS_XTRA = "sqldump.dbspecificfeatures.grabextraconstraints";
+	
+	public static final String PROP_GRAB_FKFROMUK = "sqldump.dbspecificfeatures.grabfkfromuk";
+	public static final String PROP_DUMP_SEQUENCE_STARTWITH = "sqldump.dbspecificfeatures.sequencestartwithdump";
+	public static final String PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES = "sqldump.dbspecificfeatures.dumpphysicalattributes";
+	public static final String PROP_DUMP_TABLE_LOGGING = "sqldump.dbspecificfeatures.dumplogging";
+	public static final String PROP_DUMP_TABLE_PARTITION = "sqldump.dbspecificfeatures.dumppartition";
+	
 	protected boolean grabExecutables = true;
 	protected boolean grabIndexes = true;
 	protected boolean grabSequences = true;

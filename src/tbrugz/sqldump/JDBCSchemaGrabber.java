@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -39,7 +40,6 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractFailable;
-import tbrugz.sqldump.def.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
