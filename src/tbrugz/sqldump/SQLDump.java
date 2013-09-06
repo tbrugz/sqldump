@@ -203,6 +203,7 @@ public class SQLDump implements Executor {
 		doMainProcess(schemaGrabber, processors);
 		
 		}
+		//XXX: error-processors (like SendMail)?
 		finally {
 			end(c==null);
 			log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");

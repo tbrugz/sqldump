@@ -38,7 +38,7 @@ public interface DBMSFeatures {
 	
 	Table getTableObject();
 	FK getForeignKeyObject();
-	Map<Class<?>, Class<?>> getColumnTypeMapper();
+	Map<Class<?>, Class<?>> getColumnTypeMapper(); //XXX: remove getColumnTypeMapper()?
 	//XXX: add Map<Integer, String> getSQLTypeClassMapper() (mainly for unknown types)?
 	//XXX: add String getDefaultSchemaName()?
 	

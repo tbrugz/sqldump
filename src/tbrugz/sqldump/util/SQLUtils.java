@@ -29,6 +29,7 @@ public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
 	
+	//XXX: move updateListener to another class/package (cyclic dependency: util <-> def)? 
 	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
 		public void dbmsUpdated() {

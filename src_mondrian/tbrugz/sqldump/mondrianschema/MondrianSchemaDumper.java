@@ -183,7 +183,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	//public static final String PROP_MONDRIAN_SCHEMA_ALLPOSSIBLEDEGENERATED = "sqldump.mondrianschema.allpossibledegenerated";
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
 	
-	//possible aggregate functions: "sum", "count", "min", "max", "avg" and "distinct-count ; mode, median, first, last, concat?
+	//possible aggregate functions: "sum", "count", "min", "max", "avg" and "distinct-count" ; mode, median, first, last, concat?
 	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
 	
 	static Log log = LogFactory.getLog(MondrianSchemaDumper.class);
@@ -1087,6 +1087,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					if(hier.levels==null) { continue; }
 					for(Level l: hier.levels) {
 						String internalType = prop.getProperty(PROP_MONDRIAN_SCHEMA+".table@"+l.table+".column@"+l.column+".internalType");
+						/*if(internalType==null) {
+							internalType = prop.getProperty(PROP_MONDRIAN_SCHEMA+".table@"+hier.relation+".column@"+l.column+".internalType");
+						}*/
 						if(internalType!=null) {
 							log.debug("level.internalType ["+l.table+":"+l.column+"]: "+internalType);
 							l.internalType = internalType;

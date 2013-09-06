@@ -208,6 +208,8 @@ public class SQLDiff implements Executor {
 				log.debug("error writing json: "+e.getMessage(),e);
 			}
 		}
+		
+		//out patch - show changed lines, ... ; dbiddiff: replace changetype
 
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
 		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);

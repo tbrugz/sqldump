@@ -98,7 +98,7 @@ public class ResultSetDiff {
 				boolean updated = false;
 				for(DiffSyntax ds: dss) {
 					//last 'updated' that counts...
-					//TODO: compare (equals) should not be dumpSyntax responsability... or should it?
+					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called 
 					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
