@@ -44,4 +44,11 @@ public class ParametrizedPropertiesTest {
 		Assert.assertEquals("system", pp.getProperty("id1"));
 		Assert.assertEquals("id2.value", pp.getProperty("id2"));
 	}
+
+	@Test
+	public void testP4IncludeWithBaseDir() throws IOException {
+		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
+		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		Assert.assertEquals("value1", pp.getProperty("id1"));
+	}
 }

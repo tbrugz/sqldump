@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,6 +26,8 @@ public class ParametrizedProperties extends Properties {
 	
 	//TODO: process @includes at 'end'
 	
+	static final String PROPFILEBASEDIR_PATTERN = Pattern.quote("${"+CLIProcessor.PROP_PROPFILEBASEDIR+"}");
+	
 	@Override
 	public synchronized void load(final InputStream inStream) throws IOException {
 		//TODOne: load in temp Properties; load from @include directive; load from temp Properties
@@ -35,6 +39,10 @@ public class ParametrizedProperties extends Properties {
 		
 		String includes = ptmp.getProperty(DIRECTIVE_INCLUDE);
 		if(includes!=null) {
+			String baseDir = getProperty(CLIProcessor.PROP_PROPFILEBASEDIR);
+			if(baseDir!=null) {
+				includes = includes.replaceAll(PROPFILEBASEDIR_PATTERN, Matcher.quoteReplacement(baseDir));
+			}
 			String[] files = includes.split(",");
 			for(String f: files) {
 				f = f.trim();
@@ -59,7 +67,7 @@ public class ParametrizedProperties extends Properties {
 						log.info("loaded @include: "+ff.getCanonicalPath());
 					}
 					catch(IOException e2) {
-						log.warn("error loading @include '"+f+"': "+e.getMessage());
+						log.warn("error loading @include '"+f+"': "+e.getMessage()+" [user.dir='"+System.getProperty("user.dir")+"']");
 						log.debug("error loading @include: "+f, e);
 					}
 				}
