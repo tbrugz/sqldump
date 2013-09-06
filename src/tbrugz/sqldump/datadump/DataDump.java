@@ -145,9 +145,9 @@ public class DataDump extends AbstractSQLProc {
 		
 		List<DumpSyntax> syntaxList = getSyntaxList(prop);
 		if(syntaxList==null) {
-			log.error("no datadump syntax defined");
+			log.error("no datadump syntax(es) defined [prop '"+PROP_DATADUMP_SYNTAXES+"']");
 			if(failonerror) {
-				throw new ProcessingException("DataDump: no datadump syntax defined");
+				throw new ProcessingException("DataDump: no datadump syntax(es) defined");
 			}
 		}
 		
