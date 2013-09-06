@@ -13,12 +13,13 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
 //TODOne: add addUpdateListener() ? so DBMSResources may notify others that need its info
-public class DBMSResources {
+public final class DBMSResources {
 
 	static final Log log = LogFactory.getLog(DBMSResources.class);
 
@@ -45,6 +46,8 @@ public class DBMSResources {
 			log.warn("error loading resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 		}
 		dbIds = Utils.getStringListFromProp(dbmsSpecificResource, "dbids", ",");
+
+		Column.ColTypeUtil.init(dbmsSpecificResource);
 	}
 	
 	public void setup(Properties prop) {
@@ -101,6 +104,7 @@ public class DBMSResources {
 			updateIdentifierQuoteString();
 			updateSpecificFeaturesClass();
 			fireUpdateToListeners();
+			Column.ColTypeUtil.setDbId(newid);
 		}
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");

@@ -27,6 +27,7 @@ public class HSQLDBDiffTest extends SQLDiffTest {
 			Statement st = conn.createStatement();
 			st.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
 			st.executeUpdate("CREATE SCHEMA PUBLIC");
+			//DBMSResources.instance().updateMetaData(conn.getMetaData());
 		} catch (SQLException e) {
 			System.err.println("error dropping db: "+e);
 		}
