@@ -18,30 +18,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.DBMSUpdateListener;
 
 public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
 	
-	//XXX: move updateListener to another class/package (cyclic dependency: util <-> def)? 
-	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
-		@Override
-		public void dbmsUpdated() {
-			Map<Class<?>, Class<?>> mapper = DBMSResources.instance().databaseSpecificFeaturesClass().getColumnTypeMapper();
-			setupColumnTypeMapper(mapper);
-		}
-	};
-	
-	static {
-		DBMSResources.instance().addUpdateListener(updateListener);
-	}
-
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
 		return getRowFromRS(rs, numCol, table, ";");
 	}

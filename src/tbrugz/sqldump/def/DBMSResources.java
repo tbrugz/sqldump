@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //TODOne: add addUpdateListener() ? so DBMSResources may notify others that need its info
@@ -104,7 +106,6 @@ public final class DBMSResources {
 			updateIdentifierQuoteString();
 			updateSpecificFeaturesClass();
 			fireUpdateToListeners();
-			Column.ColTypeUtil.setDbId(newid);
 		}
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");
@@ -279,6 +280,11 @@ public final class DBMSResources {
 		for(DBMSUpdateListener listener: updateListeners) {
 			listener.dbmsUpdated();
 		}
+		
+		//instead of firing update to listeners...
+		Column.ColTypeUtil.setDbId(DBMSResources.instance().dbid());
+		Map<Class<?>, Class<?>> mapper = DBMSResources.instance().databaseSpecificFeaturesClass().getColumnTypeMapper();
+		SQLUtils.setupColumnTypeMapper(mapper);
 	}
 	
 }
