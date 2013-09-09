@@ -4,7 +4,6 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 import tbrugz.sqldiff.model.adapted.DBIdDiff;
 
-
 public class DBIdentifiableDiffAdapter extends XmlAdapter<DBIdDiff, DBIdentifiableDiff> {
 	
 	@Override

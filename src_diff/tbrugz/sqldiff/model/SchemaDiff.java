@@ -19,7 +19,6 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.compare.ExecOrderDiffComparator;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
-import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
@@ -45,16 +44,6 @@ public class SchemaDiff implements Diff {
 	
 	//XXX add String sqlDialect; ?
 
-	public static DBObject findDBObjectBySchemaAndName(Collection<? extends DBObject> col, String schemaName, String name) {
-		for(DBObject obj: col) {
-			if(( (schemaName==null && obj.getSchemaName()==null) || (schemaName!=null && schemaName.equalsIgnoreCase(obj.getSchemaName()) ))
-					&& name.equalsIgnoreCase(obj.getName())) return obj;
-		}
-		return null;
-	}
-
-	//-----------------------
-	
 	void diffTable(SchemaModel modelOrig, SchemaModel modelNew) {
 		SchemaDiff diff = this;
 		//tables
@@ -64,7 +53,7 @@ public class SchemaDiff implements Diff {
 		for(Table tOrig: modelOrig.getTables()) {
 			if(! tOrig.getType().equals(TableType.TABLE)) continue;
 			
-			Table tNew = (Table) findDBObjectBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
+			Table tNew = DBIdentifiable.getDBIdentifiableBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
 				//if new table doesn't exist, drop old
 				TableDiff td = new TableDiff(ChangeType.DROP, tOrig);
