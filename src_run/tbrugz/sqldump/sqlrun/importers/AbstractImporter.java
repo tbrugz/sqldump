@@ -67,6 +67,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	};
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
+	
+	static final int ERRORLINE_MAXSIZE = 40;
 
 	Properties prop;
 	Connection conn;
@@ -132,6 +134,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static final String[] AUX_SUFFIXES = {
+		SUFFIX_COLUMN_TYPES,
 		SUFFIX_ENCLOSING,
 		Constants.SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
@@ -141,12 +144,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		SUFFIX_IMPORTURL,
 		SUFFIX_INSERTTABLE,
 		SUFFIX_INSERTSQL,
+		SUFFIX_LOG_MALFORMED_LINE,
+		SUFFIX_ONERROR_TYPE_INT_SET_VALUE,
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
-		SUFFIX_LOG_MALFORMED_LINE,
-		SUFFIX_X_COMMIT_EACH_X_ROWS,
-		SUFFIX_COLUMN_TYPES,
-		SUFFIX_ONERROR_TYPE_INT_SET_VALUE
+		SUFFIX_URLMESSAGEBODY,
+		SUFFIX_URLMETHOD,
+		SUFFIX_X_COMMIT_EACH_X_ROWS
 	};
 	
 	@Override
@@ -442,7 +446,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		IOCounter counter = countsByFailoverId.get(failoverId);
 		String[] parts = procLine(line, counter.input);
 		if(parts==null) {
-			String lineTrunc = strTruncated(line, 40);
+			String lineTrunc = strTruncated(line, ERRORLINE_MAXSIZE);
 			log.debug("line could not be processed: "+lineTrunc);
 			throw new RuntimeException("line could not be processed: "+lineTrunc);
 		}
@@ -712,6 +716,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		if(cookiesHeader!=null) {
 			urlconn.setRequestProperty("Cookie", getCookieString(cookiesHeader));
 		}
+		//urlconn.setRequestProperty("SOAPAction", "\"\"");
 		if(urlData!=null) {
 			log.info("urldata["+urlMethod+"]: "+urlData);
 			urlconn.setDoOutput(true);
@@ -721,8 +726,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			w.flush();
 		}
 		urlconn.connect();
-		//int responseCode = urlconn.getResponseCode();
+		int responseCode = urlconn.getResponseCode();
 		//log.debug("response-code: "+responseCode);
+		
+		//responde-code >= 500 - error
+		if(responseCode>=500) {
+			return urlconn.getErrorStream();
+		}
+		
+		//XXX response-code >= 400: getErrorStream?
+		
+		//responde-code >= 300 - redirect ?
 		String location = urlconn.getHeaderField("Location");
 		if(location!=null) {
 			log.info("location: "+location);
@@ -741,6 +755,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			}
 			return getURLInputStream(location, urlMethod, urlData, cookiesHeader, level+1);
 		}
+		
+		//responde-code >= 200 - ok
 		return urlconn.getInputStream();
 	}
 	
