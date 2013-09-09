@@ -31,38 +31,6 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.xml.AbstractDump;
 
-class RSNode extends NodeXYWH {
-	String description;
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	@Override
-	public String getStereotypeParam(int i) {
-		switch (i) {
-			case 5:
-				return description;
-			case 6:
-				if(isInitialNode()) { return ResultSet2GraphML.initialNodeLabel; }
-			case 7:
-				if(isFinalNode()) { return ResultSet2GraphML.finalNodeLabel; }
-			case 8:
-				if(isInitialNode() || isFinalNode()) { return ResultSet2GraphML.initialOrFinalNodeLabel; }
-		}
-		return super.getStereotypeParam(i);
-	}
-	
-	@Override
-	public int getStereotypeParamCount() {
-		return 9;
-	}
-}
-
 class WeightedEdge extends Edge {
 	Double width;
 
@@ -84,6 +52,39 @@ class WeightedEdge extends Edge {
  * XXXdone: add optional OBJECT_WIDTH, OBJECT_HEIGHT
  */
 public class ResultSet2GraphML extends AbstractSQLProc {
+
+	static class RSNode extends NodeXYWH {
+		String description;
+	
+		public String getDescription() {
+			return description;
+		}
+	
+		public void setDescription(String description) {
+			this.description = description;
+		}
+		
+		@Override
+		public String getStereotypeParam(int i) {
+			switch (i) {
+				case 5:
+					return description;
+				case 6:
+					if(isInitialNode()) { return ResultSet2GraphML.initialNodeLabel; }
+				case 7:
+					if(isFinalNode()) { return ResultSet2GraphML.finalNodeLabel; }
+				case 8:
+					//XXX will never happen...
+					if(isInitialNode() || isFinalNode()) { return ResultSet2GraphML.initialOrFinalNodeLabel; }
+			}
+			return super.getStereotypeParam(i);
+		}
+		
+		@Override
+		public int getStereotypeParamCount() {
+			return 9;
+		}
+	}
 	
 	static Log log = LogFactory.getLog(ResultSet2GraphML.class);
 	static Log logsql = LogFactory.getLog(ResultSet2GraphML.class.getName()+".sql");
