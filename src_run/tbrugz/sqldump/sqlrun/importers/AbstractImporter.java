@@ -718,7 +718,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		}
 		//urlconn.setRequestProperty("SOAPAction", "\"\"");
 		if(urlData!=null) {
-			log.info("urldata["+urlMethod+"]: "+urlData);
+			log.info("urldata[method="+urlMethod+"]: "+urlData);
 			urlconn.setDoOutput(true);
 			urlconn.setFixedLengthStreamingMode(urlData.length());
 			Writer w = new OutputStreamWriter( urlconn.getOutputStream() );

@@ -94,6 +94,10 @@ public class SQLRun implements Executor {
 	CommitStrategy commitStrategy = CommitStrategy.FILE;
 	List<String> filterByIds = null;
 	boolean failonerror = true;
+	String defaultEncoding;
+	
+	SQLR sqlrmbean;
+	StmtProc srproc;
 	
 	void end(boolean closeConnection) throws SQLException {
 		if(closeConnection && conn!=null) {
@@ -136,12 +140,10 @@ public class SQLRun implements Executor {
 			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
 		}
 		
-		SQLR sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
+		sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
 		JMXUtil.registerMBeanSimple(SQLR.MBEAN_NAME, sqlrmbean);
 		
-		String defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
-		
-		StmtProc srproc = new StmtProc();
+		srproc = new StmtProc();
 		srproc.setConnection(conn);
 		srproc.setDefaultFileEncoding(defaultEncoding);
 		srproc.setCommitStrategy(commitStrategy);
@@ -152,10 +154,22 @@ public class SQLRun implements Executor {
 		
 		//TODO: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
+			boolean exec = doExec(key, sqlrunCounter);
+			if(exec) {
+				sqlrunCounter++;
+			}
+		}
+		long totalTime = System.currentTimeMillis() - initTime;
+		log.info("...end processing ["+sqlrunCounter+" ids runned], total time = "+totalTime+"ms");
+		
+		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
+	}
+	
+	boolean doExec(String key, int sqlrunCounter) throws IOException, SQLException {
 			boolean isExecId = false;
 			String procId = getExecId(key, Constants.PREFIX_EXEC);
 			String action = key.substring((Constants.PREFIX_EXEC+procId).length());
-			if(filterByIds!=null && !filterByIds.contains(procId)) { continue; }
+			if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
 			
 			String execValue = papp.getProperty(key);
 			
@@ -164,6 +178,9 @@ public class SQLRun implements Executor {
 				isExecId = true;
 				sqlrunCounter++;
 				sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
+			}
+			else {
+				return false;
 			}
 			papp.setProperty(PROP_PROCID, procId);
 			
@@ -233,7 +250,7 @@ public class SQLRun implements Executor {
 				}
 				else {
 					log.warn("unknown import type: "+importType);
-					continue;
+					return false;
 				}
 				
 				importer.setExecId(procId);
@@ -275,13 +292,11 @@ public class SQLRun implements Executor {
 					doCommit();
 				}
 				Utils.logMemoryUsage();
+				return true;
 			}
-		}
-		long totalTime = System.currentTimeMillis() - initTime;
-		log.info("...end processing, total time = "+totalTime+"ms");
-		
-		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
+			return false;
 	}
+	
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
@@ -380,6 +395,7 @@ public class SQLRun implements Executor {
 		log.debug("DBMSFeatures: "+feats);
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
+		defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		
 		if(Utils.getPropBool(papp, PROP_TRUST_ALL_CERTS, false)) {
 			SSLUtil.trustAll();
