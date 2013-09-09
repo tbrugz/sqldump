@@ -32,6 +32,7 @@ import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.FFCImporter;
 import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
+import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.JMXUtil;
@@ -78,6 +79,7 @@ public class SQLRun implements Executor {
 	static final String PROP_FILTERBYIDS = Constants.SQLRUN_PROPS_PREFIX+".filterbyids";
 	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
 	static final String PROP_CONNPROPPREFIX = Constants.SQLRUN_PROPS_PREFIX+".connpropprefix";
+	static final String PROP_TRUST_ALL_CERTS = Constants.SQLRUN_PROPS_PREFIX+".trust-all-certs";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -378,6 +380,10 @@ public class SQLRun implements Executor {
 		log.debug("DBMSFeatures: "+feats);
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
+		
+		if(Utils.getPropBool(papp, PROP_TRUST_ALL_CERTS, false)) {
+			SSLUtil.trustAll();
+		}
 	}
 	
 	/**
