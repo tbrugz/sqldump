@@ -1,4 +1,4 @@
-package tbrugz.sqldiff.util;
+package tbrugz.sqldiff;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,11 +9,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldiff.ConflictingChangesException;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
+import tbrugz.sqldiff.util.SimilarityCalculator;
 import tbrugz.sqldump.dbmodel.Table;
 
 class RenameTuple {

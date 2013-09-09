@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import tbrugz.sqldiff.util.RenameDetector;
+import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;

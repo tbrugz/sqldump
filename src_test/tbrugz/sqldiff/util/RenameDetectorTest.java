@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldiff.ConflictingChangesException;
+import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.ColumnDiffTest;

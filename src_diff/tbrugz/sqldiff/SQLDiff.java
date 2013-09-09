@@ -20,7 +20,6 @@ import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.TableDiff;
-import tbrugz.sqldiff.util.RenameDetector;
 import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
