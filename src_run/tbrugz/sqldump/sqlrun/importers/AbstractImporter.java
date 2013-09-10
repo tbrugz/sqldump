@@ -79,8 +79,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	String importDir = null;
 	String importFiles = null;
 	String importURL = null;
+	
 	String urlData = null;
 	String urlMethod = null;
+	Map<String,String> urlHeaders;
+	
 	boolean follow = false;
 	String recordDelimiter = "\r?\n";
 	String insertTable = null;
@@ -117,8 +120,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_IMPORTDIR = ".importdir";
 	static final String SUFFIX_IMPORTFILES = ".importfiles";
 	static final String SUFFIX_IMPORTURL = ".importurl";
+	
 	static final String SUFFIX_URLMESSAGEBODY = ".urlmessagebody";
 	static final String SUFFIX_URLMETHOD = ".urlmethod";
+	static final String SUFFIX_URLHEADER = ".urlheader@";
 	
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
@@ -174,6 +179,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
 		onErrorIntValue = Utils.getPropInt(prop, Constants.PREFIX_EXEC+execId+SUFFIX_ONERROR_TYPE_INT_SET_VALUE);
+		String urlHeaderPrefix = Constants.PREFIX_EXEC+execId+SUFFIX_URLHEADER;
+		List<String> headerKeys = Utils.getKeysStartingWith(prop, urlHeaderPrefix);
+		if(headerKeys!=null) {
+			urlHeaders = new HashMap<String, String>();
+			for(String key: headerKeys) {
+				urlHeaders.put(key.substring(urlHeaderPrefix.length()), prop.getProperty(key));
+			}
+		}
+		else {
+			urlHeaders = null;
+		}
 		
 		long defaultCommitEachXrows = commitStrategy==CommitStrategy.FILE?defaultCommitEachXrowsForFileStrategy:commitEachXrows;
 		commitEachXrows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
@@ -682,11 +698,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	abstract String[] procLine(String line, long processedLines) throws SQLException;
 	
 	static Map<String,String> cookiesHeader = new HashMap<String, String>();
-	
+
 	Scanner createScanner() throws MalformedURLException, IOException {
 		Scanner scan = null;
 		if(importURL!=null) {
-			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, 0), inputEncoding);
+			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, urlHeaders, 0), inputEncoding);
 		}
 		else if(Constants.STDIN.equals(importFile)) {
 			scan = new Scanner(System.in, inputEncoding);
@@ -703,7 +719,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	static final int MAX_LEVEL = 5;
 	
-	static InputStream getURLInputStream(final String importURL, final String urlMethod, final String urlData, final Map<String,String> cookiesHeader, final int level)
+	static InputStream getURLInputStream(final String importURL, final String urlMethod, final String urlData, final Map<String,String> cookiesHeader, final Map<String,String> urlHeaders, final int level)
 			throws MalformedURLException, IOException {
 		if(level>MAX_LEVEL) {
 			throw new RuntimeException("max level redirection reached ("+MAX_LEVEL+")");
@@ -716,7 +732,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		if(cookiesHeader!=null) {
 			urlconn.setRequestProperty("Cookie", getCookieString(cookiesHeader));
 		}
-		//urlconn.setRequestProperty("SOAPAction", "\"\"");
+		if(urlHeaders!=null && urlHeaders.size()>0) {
+			for(Entry<String, String> headerEntry: urlHeaders.entrySet()) {
+				//log.debug("header:: "+headerEntry.getKey()+": "+headerEntry.getValue());
+				urlconn.setRequestProperty(headerEntry.getKey(), headerEntry.getValue());
+			}
+			log.info("headers added: "+Utils.join(urlHeaders.keySet(), ", "));
+		}
 		if(urlData!=null) {
 			log.info("urldata[method="+urlMethod+"]: "+urlData);
 			urlconn.setDoOutput(true);
@@ -753,7 +775,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				location = importURL.substring(0, importURL.lastIndexOf("/")+1) + location;
 				log.debug("redir-location: "+location);
 			}
-			return getURLInputStream(location, urlMethod, urlData, cookiesHeader, level+1);
+			return getURLInputStream(location, urlMethod, urlData, cookiesHeader, urlHeaders, level+1);
 		}
 		
 		//responde-code >= 200 - ok
