@@ -32,7 +32,7 @@ import tbrugz.sqldump.util.Utils;
 import tbrugz.xml.AbstractDump;
 
 enum EdgeLabelType {
-	FK, FKANDCOLUMNS, COLUMNS, NONE;
+	FK, FKANDCOLUMNS, COLUMNS, FKCOLUMNS, PKCOLUMNS, NONE;
 }
 
 /*
@@ -321,6 +321,10 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			case FKANDCOLUMNS:
 				//fk label: fk name + columns involved
 				l.setName(fk.getName()+" ("+fk.getFkColumns()+" -> "+fk.getPkColumns()+")"); break;
+			case FKCOLUMNS:
+				l.setName(Utils.join(fk.getFkColumns(),", ")); break;
+			case PKCOLUMNS:
+				l.setName(Utils.join(fk.getPkColumns(),", ")); break;
 			case NONE:
 			default:
 				l.setName(""); break;
@@ -348,7 +352,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			return;
 		}
 		Root r = getGraphMlModel(schemaModel);
-		log.info("dumping model...");
+		log.info("dumping model... [size = "+r.getChildren().size()+"]");
 
 		AbstractDump dg = (AbstractDump) Utils.getClassInstance(dumpFormatClass);
 		Utils.prepareDir(output);
