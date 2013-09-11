@@ -12,8 +12,10 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
@@ -132,7 +134,7 @@ public class SQLQueries extends AbstractSQLProc {
 			
 			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
 			if(partitionsBy!=null) {
-				log.info("partitionby-patterns: "+partitionsBy); //XXX: move log into DataDump?
+				log.info("partitionby-patterns[id="+qid+"]: "+partitionsBy); //XXX: move log into DataDump?
 			}
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
@@ -150,7 +152,7 @@ public class SQLQueries extends AbstractSQLProc {
 
 			// adding query to model
 			if(addQueriesToModel) {
-				addQueryToModel(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+				queriesGrabbed += addQueryToModel(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
 			if(runQueries) {
@@ -215,7 +217,6 @@ public class SQLQueries extends AbstractSQLProc {
 			PreparedStatement stmt, String sql, List<String> keyCols,
 			List<String> params,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
-		int queriesGrabbed=0;
 		if(model==null) {
 			log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
 			return 0;
@@ -266,12 +267,14 @@ public class SQLQueries extends AbstractSQLProc {
 		else {
 			//getting columns from prepared statement metadata
 			if(Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false)) {
-				log.debug("grabbing colums name & type from prepared statement's metadata");
+				log.debug("grabbing colums name & type from prepared statement's metadata [id="+qid+"; name="+queryName+"]");
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
 					query.setColumns(DataDumpUtils.getColumns(rsmd));
 				} catch (SQLException e) {
-					e.printStackTrace();
+					query.setColumns(new ArrayList<Column>());
+					log.warn("sqlexception: "+e.toString().trim());
+					log.debug("sqlexception: "+e.getMessage(), e);
 				}
 			}
 		}
@@ -283,10 +286,18 @@ public class SQLQueries extends AbstractSQLProc {
 				query.rsDecoratorArguments.put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
 			}
 		}
-
-		queriesGrabbed++;
+		
 		model.getViews().add(query);
-		return queriesGrabbed;
+
+		//adding view to table's list
+		Table t = new Table();
+		t.setSchemaName(query.getSchemaName());
+		t.setName(query.getName());
+		t.setType(TableType.VIEW);
+		t.setColumns(query.getColumns());
+		model.getTables().add(t);
+		
+		return 1;
 	}
 	
 }

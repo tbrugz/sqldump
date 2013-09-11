@@ -144,6 +144,7 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		//sqldump.schematransform.columntype@DATE=TIMESTAMP
 		int count = 0;
 		for(Table t: model.getTables()) {
+			if(t.getColumns()==null) { continue; }
 			for(Column c: t.getColumns()) {
 				String newColType = prop.getProperty(prefix+".columntype@"+c.type);
 				if(newColType!=null) {
