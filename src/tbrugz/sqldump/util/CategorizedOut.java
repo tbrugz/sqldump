@@ -129,11 +129,15 @@ public class CategorizedOut {
 	
 	FileWriter getFileWriter(String thisFP) throws IOException {
 		boolean alreadyOpened = filesOpened.contains(thisFP);
-		if(!alreadyOpened) { filesOpened.add(thisFP); }
+		if(!alreadyOpened) {
+			filesOpened.add(thisFP);
+			log.debug("opening '"+thisFP+"' for writing...");
+		}
 		
 		File f = new File(thisFP);
-		//String dirStr = f.getParent();
-		File dir = new File(f.getParent());
+		File dir = f.getParentFile();
+		if(dir!=null) {
+			
 		if(!dir.exists()) {
 			if(!dir.mkdirs()) {
 				log.warn("error creating dirs: "+dir.getAbsolutePath());
@@ -143,6 +147,8 @@ public class CategorizedOut {
 			if(!dir.isDirectory()) {
 				throw new IOException(dir+" already exists and is not a directory");
 			}
+		}
+		
 		}
 		return new FileWriter(f, alreadyOpened);
 	}
