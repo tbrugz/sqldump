@@ -60,6 +60,7 @@ public class ResultSetDiff {
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;
 		long count = 0;
+		boolean loggedLastLine = false;
 
 		//header fos writer-independent syntaxes
 		//XXX: what about stateful syntaxes?
@@ -149,15 +150,23 @@ public class ResultSetDiff {
 			
 			count++;
 			
-			if( (logEachXLoops>0) && (count>0) &&(count%logEachXLoops==0) ) { 
+			if( (logEachXLoops>0) && (count>0) && (count%logEachXLoops==0) ) { 
 				log.info("[table="+tableName+"] "+count+" rows compared ; stats: "+getCompactStats());
+				loggedLastLine = true;
+			}
+			else {
+				loggedLastLine = false;
 			}
 			
-			if(limit>0 && count>limit) {
+			if(limit>0 && count>=limit) {
 				log.info("limit reached: "+limit+" [table="+tableName+"]");
 				break;
 			}
 		}
+		if(!loggedLastLine) {
+			log.info("[table="+tableName+"] "+count+" rows compared ; stats: "+getCompactStats());
+		}
+		
 		//footer for writer-independent syntaxes
 		//XXX: what about stateful syntaxes?
 		for(DiffSyntax ds: dss) {
