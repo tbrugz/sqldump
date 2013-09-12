@@ -1,6 +1,7 @@
 package tbrugz.sqldiff;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,9 +19,9 @@ import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Executor;
-import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
@@ -33,6 +34,10 @@ public class DiffTwoQueries implements Executor {
 	public static final String PROPERTIES_FILENAME = DIFF2Q+".properties";
 
 	static final String PREFIX = "diff2q";
+	
+	static final String PROP_CONNPROPPREFIX = PREFIX+".connpropprefix";
+	static final String PROP_SOURCE_CONNPROPPREFIX = PREFIX+".source.connpropprefix";
+	static final String PROP_TARGET_CONNPROPPREFIX = PREFIX+".target.connpropprefix";
 	
 	static final String PROP_SOURCEQUERY = PREFIX+".sourcesql";
 	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
@@ -59,20 +64,36 @@ public class DiffTwoQueries implements Executor {
 	}
 	
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
-		SchemaModelGrabber fromSchemaGrabber = null;
-		SchemaModelGrabber toSchemaGrabber = null;
-		String sourceId = null;
-		String targetId = null;
-		
 		long initTime = System.currentTimeMillis();
 		
-		//from
-		sourceId = prop.getProperty(SQLDiff.PROP_SOURCE);
-		fromSchemaGrabber = SQLDiff.initGrabber("source", sourceId, prop);
+		Connection sourceConn = null;
+		Connection targetConn = null;
 		
-		//to
-		targetId = prop.getProperty(SQLDiff.PROP_TARGET);
-		toSchemaGrabber = SQLDiff.initGrabber("target", targetId, prop);
+		//source
+		String sourceConnPropPrefix = prop.getProperty(PROP_SOURCE_CONNPROPPREFIX);
+		if(sourceConnPropPrefix!=null) {
+			sourceConn = ConnectionUtil.initDBConnection(sourceConnPropPrefix, prop);
+		}
+		
+		//target
+		String targetConnPropPrefix = prop.getProperty(PROP_TARGET_CONNPROPPREFIX);
+		if(targetConnPropPrefix!=null) {
+			targetConn = ConnectionUtil.initDBConnection(targetConnPropPrefix, prop);
+		}
+		
+		//"common"
+		if(sourceConn==null || targetConn==null) {
+			String commonConnPropPrefix = prop.getProperty(PROP_CONNPROPPREFIX);
+			if(commonConnPropPrefix==null) {
+				commonConnPropPrefix = PREFIX;
+			}
+			log.info("using common connection prop prefix '"+commonConnPropPrefix+"' for ["
+					+(sourceConn==null?"source"+(targetConn==null?", target":""):(targetConn==null?"target":""))
+					+"]");
+			Connection commonConn = ConnectionUtil.initDBConnection(commonConnPropPrefix, prop);
+			if(sourceConn==null) { sourceConn = commonConn; }
+			if(targetConn==null) { targetConn = commonConn; }
+		}
 		
 		List<DiffSyntax> dss = getSyntaxes();
 		
@@ -97,10 +118,10 @@ public class DiffTwoQueries implements Executor {
 		
 		CategorizedOut cout = new CategorizedOut(outPattern);
 
-		PreparedStatement stmtSource = fromSchemaGrabber.getConnection().prepareStatement(sourceSQL);
+		PreparedStatement stmtSource = sourceConn.prepareStatement(sourceSQL);
 		ResultSet rsSource = stmtSource.executeQuery();
 		
-		PreparedStatement stmtTarget = toSchemaGrabber.getConnection().prepareStatement(targetSQL);
+		PreparedStatement stmtTarget = targetConn.prepareStatement(targetSQL);
 		ResultSet rsTarget = stmtTarget.executeQuery();
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
