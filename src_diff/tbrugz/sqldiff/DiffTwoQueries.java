@@ -32,7 +32,7 @@ public class DiffTwoQueries implements Executor {
 	
 	public static final String PROPERTIES_FILENAME = DIFF2Q+".properties";
 
-	static final String PREFIX = DIFF2Q;
+	static final String PREFIX = "diff2q";
 	
 	static final String PROP_SOURCEQUERY = PREFIX+".sourcesql";
 	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
@@ -61,8 +61,6 @@ public class DiffTwoQueries implements Executor {
 	void doIt() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
-		//SchemaModel fromSM = null;
-		//SchemaModel toSM = null;
 		String sourceId = null;
 		String targetId = null;
 		
@@ -75,17 +73,6 @@ public class DiffTwoQueries implements Executor {
 		//to
 		targetId = prop.getProperty(SQLDiff.PROP_TARGET);
 		toSchemaGrabber = SQLDiff.initGrabber("target", targetId, prop);
-		
-		//grab schemas
-		//log.info("grabbing 'source' model ["+sourceId+"]");
-		//fromSM = fromSchemaGrabber.grabSchema();
-		//log.info("grabbing 'target' model ["+targetId+"]");
-		//toSM = toSchemaGrabber.grabSchema();
-		
-		//XXX: option to set dialect from properties?
-		//String dialect = toSM.getSqlDialect();
-		//log.debug("diff dialect set to: "+dialect);
-		//DBMSResources.instance().updateDbId(dialect);
 		
 		List<DiffSyntax> dss = getSyntaxes();
 		
