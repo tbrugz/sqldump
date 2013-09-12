@@ -43,9 +43,10 @@ public class DiffTwoQueries implements Executor {
 	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
 	static final String PROP_QUERYNAME = PREFIX+".queryname";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
+	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
 	static final String PROP_OUTPATTERN = PREFIX+".outpattern";
 
-	static final long LOOP_LIMIT = 1000L;
+	static final long DEFAULT_LOOP_LIMIT = 1000L;
 	static final String DEFAULT_TABLE_NAME = "<table>";
 	
 	final Properties prop = new ParametrizedProperties();
@@ -116,6 +117,8 @@ public class DiffTwoQueries implements Executor {
 			outPattern = CategorizedOut.STDOUT;
 		}
 		
+		long loopLimit = Utils.getPropLong(prop, PROP_LOOPLIMIT, DEFAULT_LOOP_LIMIT);
+		
 		CategorizedOut cout = new CategorizedOut(outPattern);
 
 		PreparedStatement stmtSource = sourceConn.prepareStatement(sourceSQL);
@@ -125,7 +128,7 @@ public class DiffTwoQueries implements Executor {
 		ResultSet rsTarget = stmtTarget.executeQuery();
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
-		rsdiff.setLimit(LOOP_LIMIT);
+		rsdiff.setLimit(loopLimit);
 		rsdiff.diff(rsSource, rsTarget, queryName, keyCols, dss, cout);
 
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
