@@ -18,6 +18,7 @@ import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -41,13 +42,13 @@ public class DiffTwoQueries implements Executor {
 	
 	static final String PROP_SOURCEQUERY = PREFIX+".sourcesql";
 	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
-	static final String PROP_QUERYNAME = PREFIX+".queryname";
+	static final String PROP_QUERYNAME = PREFIX+".tablename";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
 	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
 	static final String PROP_OUTPATTERN = PREFIX+".outpattern";
 
 	static final long DEFAULT_LOOP_LIMIT = 1000L;
-	static final String DEFAULT_TABLE_NAME = "<table>";
+	static final String DEFAULT_TABLE_NAME = "_table_";
 	
 	final Properties prop = new ParametrizedProperties();
 
@@ -109,18 +110,28 @@ public class DiffTwoQueries implements Executor {
 		if(keyCols==null || keyCols.size()==0 || keyCols.get(0).trim().equals("")) {
 			String message = "prop '"+PROP_KEYCOLS+"' must not be null or empty";
 			log.warn(message);
+			//XXX: option to show prepared statement metadata (columns)
 			throw new RuntimeException(message);
 		}
+
+		//cout
+		String finalPattern = null;
 		String outPattern = prop.getProperty(PROP_OUTPATTERN);
 		if(outPattern==null) {
 			log.info("null '"+PROP_OUTPATTERN+"', using stdout");
-			outPattern = CategorizedOut.STDOUT;
+			finalPattern = CategorizedOut.STDOUT;
 		}
+		else {
+			//finalPattern = outPattern;
+			finalPattern = CategorizedOut.generateFinalOutPattern(outPattern,
+				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
+				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
+				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
+		}
+		CategorizedOut cout = new CategorizedOut(finalPattern);
 		
 		long loopLimit = Utils.getPropLong(prop, PROP_LOOPLIMIT, DEFAULT_LOOP_LIMIT);
 		
-		CategorizedOut cout = new CategorizedOut(outPattern);
-
 		PreparedStatement stmtSource = sourceConn.prepareStatement(sourceSQL);
 		ResultSet rsSource = stmtSource.executeQuery();
 		
@@ -129,7 +140,14 @@ public class DiffTwoQueries implements Executor {
 		
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
-		rsdiff.diff(rsSource, rsTarget, queryName, keyCols, dss, cout);
+		try {
+			log.info("starting diff...");
+			rsdiff.diff(rsSource, rsTarget, queryName, keyCols, dss, cout);
+		}
+		catch(IllegalArgumentException e) {
+			//XXX: option to show prepared statement metadata (columns)
+			throw e;
+		}
 
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 	}
