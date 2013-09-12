@@ -42,7 +42,7 @@ public class DiffTwoQueries implements Executor {
 	
 	static final String PROP_SOURCEQUERY = PREFIX+".sourcesql";
 	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
-	static final String PROP_QUERYNAME = PREFIX+".tablename";
+	static final String PROP_TABLENAME = PREFIX+".tablename";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
 	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
 	static final String PROP_OUTPATTERN = PREFIX+".outpattern";
@@ -101,10 +101,10 @@ public class DiffTwoQueries implements Executor {
 		
 		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCEQUERY);
 		String targetSQL = getPropertyFailIfNull(prop, PROP_TARGETQUERY);
-		String queryName = prop.getProperty(PROP_QUERYNAME);
-		if(queryName==null) {
-			log.info("null '"+PROP_QUERYNAME+"', using '"+DEFAULT_TABLE_NAME+"'");
-			queryName = DEFAULT_TABLE_NAME;
+		String tableName = prop.getProperty(PROP_TABLENAME);
+		if(tableName==null) {
+			log.info("null '"+PROP_TABLENAME+"', using '"+DEFAULT_TABLE_NAME+"'");
+			tableName = DEFAULT_TABLE_NAME;
 		}
 		List<String> keyCols = Utils.getStringListFromProp(prop, PROP_KEYCOLS, ",");
 		if(keyCols==null || keyCols.size()==0 || keyCols.get(0).trim().equals("")) {
@@ -122,7 +122,6 @@ public class DiffTwoQueries implements Executor {
 			finalPattern = CategorizedOut.STDOUT;
 		}
 		else {
-			//finalPattern = outPattern;
 			finalPattern = CategorizedOut.generateFinalOutPattern(outPattern,
 				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
 				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
@@ -142,7 +141,7 @@ public class DiffTwoQueries implements Executor {
 		rsdiff.setLimit(loopLimit);
 		try {
 			log.info("starting diff...");
-			rsdiff.diff(rsSource, rsTarget, queryName, keyCols, dss, cout);
+			rsdiff.diff(rsSource, rsTarget, tableName, keyCols, dss, cout);
 		}
 		catch(IllegalArgumentException e) {
 			//XXX: option to show prepared statement metadata (columns)
