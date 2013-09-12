@@ -49,6 +49,9 @@ public class ResultSetDiff {
 		for(int i=0;i<keyCols.size();i++) {
 			String key = keyCols.get(i);
 			keyIndexes[i] = lsColNames.indexOf(key);
+			if(keyIndexes[i]<0) {
+				throw new IllegalArgumentException("key column not found: "+key);
+			}
 		}
 		
 		for(DiffSyntax ds: dss) {
