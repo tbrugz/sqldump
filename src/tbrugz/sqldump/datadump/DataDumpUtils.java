@@ -306,4 +306,7 @@ public class DataDumpUtils {
 		return columns;
 	}
 	
+	//see: Table.getColumnNames
+	//public static List<String> getColumnNames(List<Column> columns) //?
+	
 }

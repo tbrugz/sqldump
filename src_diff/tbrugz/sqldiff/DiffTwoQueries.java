@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;
@@ -144,7 +145,9 @@ public class DiffTwoQueries implements Executor {
 			rsdiff.diff(rsSource, rsTarget, tableName, keyCols, dss, cout);
 		}
 		catch(IllegalArgumentException e) {
-			//XXX: option to show prepared statement metadata (columns)
+			log.warn("error diffing: "+e);
+			log.info("source-sql columns: "+DataDumpUtils.getColumnNames(rsSource.getMetaData()));
+			log.info("target-sql columns: "+DataDumpUtils.getColumnNames(rsSource.getMetaData()));
 			throw e;
 		}
 
