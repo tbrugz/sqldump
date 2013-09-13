@@ -20,6 +20,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
 	
 	boolean shouldFlush = true;
+	boolean addComments = false; //XXX: add property for addComments
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
@@ -39,7 +40,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 		List<String> changedCols = getChangedCols(lsColNames, valsS, valsT);
 		if(changedCols.size()>0) {
 			//dumpUpdateRowInternal(rsTarget, null, count, w); //updates all cols
-			dumpUpdateRowInternal(rsTarget, changedCols, count, w); //updates changed cols
+			dumpUpdateRowInternal(valsS, valsT, changedCols, count, w); //updates changed cols
 			return true;
 		}
 		else {
@@ -50,7 +51,11 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	@Override
 	public void dumpUpdateRow(ResultSet rsSource, ResultSet rsTarget,
 			long count, Writer w) throws IOException, SQLException {
-		dumpUpdateRowInternal(rsTarget, null, count, w);
+		//dumpUpdateRowInternal(rsTarget, null, count, w);
+		//XXX: valsS: not needed?
+		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
+		List<String> valsT = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol), dateFormatter );
+		dumpUpdateRowInternal(valsS, valsT, null, count, w);
 	}
 
 	@Override
@@ -74,6 +79,8 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 		if(shouldFlush) { w.flush(); }
 	}
 
+	//XXX: option to show old values in comment
+	/*
 	void dumpUpdateRowInternal(ResultSet rs, List<String> colsToUpdate, long count, Writer w) throws IOException, SQLException {
 		List<String> vals = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );
 		
@@ -97,6 +104,37 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 				" where "+
 				Utils.join(wheres, " and ")+
 				";", w);
+		if(shouldFlush) { w.flush(); }
+	}
+	*/
+
+	void dumpUpdateRowInternal(List<String> valsS, List<String> valsT, List<String> colsToUpdate, long count, Writer w) throws IOException, SQLException {
+		List<String> sets = new ArrayList<String>();
+		List<String> wheres = new ArrayList<String>();
+		List<String> comments = new ArrayList<String>();
+		
+		for(int i = 0;i<lsColNames.size();i++) {
+			String colname = lsColNames.get(i);
+			if(!pkCols.contains(colname)) {
+				if(colsToUpdate==null || colsToUpdate.contains(colname)) {
+					sets.add(colname+" = "+valsT.get(i));
+					if(colsToUpdate!=null && addComments) {
+						comments.add(colname+" = "+valsS.get(i));
+					}
+				}
+			}
+			else {
+				wheres.add(colname+" = "+valsT.get(i));
+			}
+		}
+		
+		out("update "+tableName+" set "+
+				Utils.join(sets, ", ")+
+				" where "+
+				Utils.join(wheres, " and ")+
+				(addComments?(" /* was: "+Utils.join(comments, ", ")+" */"):"")+
+				";"
+				, w);
 		if(shouldFlush) { w.flush(); }
 	}
 	
