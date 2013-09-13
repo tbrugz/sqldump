@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
+import tbrugz.sqldiff.DiffTwoQueriesTest;
 import tbrugz.sqldiff.SQLDiffMainTest;
 import tbrugz.sqldiff.apply.DiffApplyTest;
 import tbrugz.sqldiff.datadiff.ResultSetDiffTest;
@@ -66,6 +67,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//diff
 	DiffFromJAXB.class,
 	ResultSetDiffTest.class,
+	DiffTwoQueriesTest.class,
 
 	//diff + database
 	SQLDiffTest.class,
