@@ -17,6 +17,8 @@ SQLDump also has two subprojects:
 	See [sqlrun.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqlrun.template.properties) for more info 
 - **SQLDiff**: generates a diff from 2 schema models.
 	See [sqldiff.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldiff.template.properties) for more info 
+- **Diff2Queries**: generates data diff from 2 SQL queries.
+	See [diff2q.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/diff2q.template.properties) for more info 
 
 Author: Telmo Brugnara <[tbrugz@gmail.com](mailto:tbrugz@gmail.com)>
 
@@ -111,9 +113,8 @@ Running (with sources)
 
 Not building? Setup env (without sources)
 -----------------------------------------
-- Download `sqldump.jar` jar from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads) (may be outdated).
-  Better than that, download from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
-  (e.g.: [sqldump 0.9.2](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.2/sqldump-0.9.2.jar))
+- Download `sqldump.jar` jar from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
+  (e.g.: [sqldump 0.9.9](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.9/sqldump-0.9.9.jar))
 - Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat`
   or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
