@@ -20,11 +20,16 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
 	
 	boolean shouldFlush = true;
-	boolean addComments = false; //XXX: add property for addComments
+	boolean addComments = true; //XXX: add property for addComments
+	//XXX: add property for dumpInserts, dumpUpdates & dumpDeletes
+	boolean dumpInserts = true,
+		dumpUpdates = true,
+		dumpDeletes = true;
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
+		if(!dumpInserts) { return; }
 		super.dumpRow(rs, count, fos);
 		if(shouldFlush) { fos.flush(); }
 	}
@@ -40,7 +45,9 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 		List<String> changedCols = getChangedCols(lsColNames, valsS, valsT);
 		if(changedCols.size()>0) {
 			//dumpUpdateRowInternal(rsTarget, null, count, w); //updates all cols
-			dumpUpdateRowInternal(valsS, valsT, changedCols, count, w); //updates changed cols
+			if(dumpUpdates) {
+				dumpUpdateRowInternal(valsS, valsT, changedCols, count, w); //updates changed cols
+			}
 			return true;
 		}
 		else {
@@ -51,6 +58,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	@Override
 	public void dumpUpdateRow(ResultSet rsSource, ResultSet rsTarget,
 			long count, Writer w) throws IOException, SQLException {
+		if(!dumpUpdates) { return; }
 		//dumpUpdateRowInternal(rsTarget, null, count, w);
 		//XXX: valsS: not needed?
 		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
@@ -61,6 +69,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	@Override
 	public void dumpDeleteRow(ResultSet rs, long count, Writer w)
 			throws IOException, SQLException {
+		if(!dumpDeletes) { return; }
 		List<String> vals = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol), dateFormatter );
 		
 		List<String> wheres = new ArrayList<String>();
