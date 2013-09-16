@@ -108,25 +108,35 @@ public class ConnectionUtil {
 	
 	static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 		if(driverClass==null) {
-			String message = "driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined. can't proceed";
-			log.error(message);
-			throw new RuntimeException(message);
+			String message = "driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined (using JDBC 4+ ?)";
+			log.debug(message);
 		}
+		else {
+			Class.forName(driverClass);
+		}
+
 		if(dbUrl==null) {
 			String message = "db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed"; 
 			log.error(message);
 			throw new RuntimeException(message);
 		}
-
-		Class.forName(driverClass);
 		
-		Driver driver = DriverManager.getDriver(dbUrl);
-		if(driver!=null) {
-			log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
+		Driver driver = null;
+		try {
+			driver = DriverManager.getDriver(dbUrl);
+			if(driver!=null) {
+				log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
+			}
+			else {
+				log.warn("jdbc driver not found [url: "+dbUrl+"]?");
+			}
 		}
-		else {
-			log.warn("jdbc driver not found [url: "+dbUrl+"]");
-		} 
+		catch(SQLException e) {
+			log.warn("jdbc driver not found [url: '"+dbUrl+"'"
+				+(driverClass==null?" ; property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined":"")
+				+"]");
+			throw e;
+		}
 		
 		Properties p = new Properties();
 		String user = papp.getProperty(propsPrefix+SUFFIX_USER);
