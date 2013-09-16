@@ -23,6 +23,11 @@ public class ResultSetDiff {
 	long limit = 0;
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
+	//XXX: add property for dumpInserts, dumpUpdates & dumpDeletes
+	boolean dumpInserts = true,
+		dumpUpdates = true,
+		dumpDeletes = true;
+	
 	//XXX: add schemaName ?
 	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
@@ -100,29 +105,35 @@ public class ResultSetDiff {
 				//same key
 				readSource = readTarget = true;
 				boolean updated = false;
+				if(dumpUpdates) {
 				for(DiffSyntax ds: dss) {
 					//last 'updated' that counts...
 					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called 
 					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
+				}
 				if(updated) { updateCount++; }
 				else { identicalRowsCount++; }
 			}
 			else if(compare<0) {
 				readSource = true; readTarget = false;
 				if(hasNextSource) {
+					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
 						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					}
 					}
 					deleteCount++;
 				}
 				else {
 					readSource = false; readTarget = true;
+					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
 						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					}
 					}
 					dumpCount++;
 				}
@@ -130,17 +141,21 @@ public class ResultSetDiff {
 			else {
 				readSource = false; readTarget = true;
 				if(hasNextTarget) {
+					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
 						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+					}
 					}
 					dumpCount++;
 				}
 				else {
 					readSource = true; readTarget = false;
+					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
 						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+					}
 					}
 					deleteCount++;
 				}
