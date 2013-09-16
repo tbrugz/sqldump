@@ -11,7 +11,7 @@ Utility to dump schema and data from a RDBMS. Features:
 - Flexible schema output patterns (based on schema name, object type and object name)
 - Translation of metadata (column types) between different RDBMS dialects/implementations (partial)
 
-SQLDump also has two subprojects:
+SQLDump also has tree subprojects:
 
 - **SQLRun**: runs SQL scripts from files - may be used for regenerating database from dumped SQL-scripts. 
 	See [sqlrun.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqlrun.template.properties) for more info 
