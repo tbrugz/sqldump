@@ -174,7 +174,7 @@ public class SQLDump implements Executor {
 		
 		//processing classes
 		if(processingClassesStr!=null) {
-			processors.addAll(getProcessComponentClasses(processingClassesStr, sm));
+			processors.addAll(getProcessComponentClasses(processingClassesStr));
 		}
 		
 		//dumping model
@@ -197,7 +197,7 @@ public class SQLDump implements Executor {
 
 		//processing classes after dumpers
 		if(processingClassesAfterDumpersStr!=null) {
-			processors.addAll(getProcessComponentClasses(processingClassesAfterDumpersStr, sm));
+			processors.addAll(getProcessComponentClasses(processingClassesAfterDumpersStr));
 		}
 		
 		doMainProcess(schemaGrabber, processors);
@@ -331,7 +331,7 @@ public class SQLDump implements Executor {
 		}
 	}
 	
-	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
+	List<ProcessComponent> getProcessComponentClasses(String processingClassesStr) throws ClassNotFoundException, SQLException, NamingException {
 		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
 		
 		String[] processingClasses = processingClassesStr.split(",");
@@ -342,7 +342,9 @@ public class SQLDump implements Executor {
 				processors.add(sqlproc);
 			}
 			else {
-				log.error("Error initializing processing class: '"+procClass+"'");
+				String message = "Error initializing processing class: '"+procClass+"'";
+				log.error(message);
+				if(failonerror) { throw new ProcessingException(message); }
 			}
 		}
 		return processors;
