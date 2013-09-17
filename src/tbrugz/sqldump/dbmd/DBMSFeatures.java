@@ -14,9 +14,21 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 public interface DBMSFeatures {
-	void procProperties(Properties prop);
-	void grabDBObjects(SchemaModel model, String schemaPattern,	Connection conn) throws SQLException;
+	void procProperties(Properties prop); //XXX: really needed?
+	void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException; //XXX: remove this too?
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
+	
+	/*
+	//TODO: add standart methods for grabbing DB Objects
+	//XXX: add factory for specific DBMSFeatures?
+	List<View> grabDBViews(String schemaPattern, String viewPattern) throws SQLException;
+	List<Trigger> grabDBTriggers(String schemaPattern, String triggerPattern) throws SQLException;
+	List<ExecutableObject> grabDBExecutables(String schemaPattern, String executablePattern) throws SQLException;
+	////List<Sequence> grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	List<Sequence> grabDBSequences(String schemaPattern, String sequencePattern) throws SQLException;
+	List<Constraint> grabDBCheckConstraints(String schemaPattern, String constraintPattern) throws SQLException;
+	List<Constraint> grabDBUniqueConstraints(String schemaPattern, String constraintPattern) throws SQLException;
+	*/
 	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
 	void addColumnSpecificFeatures(Column c, ResultSet rs);
