@@ -5,7 +5,7 @@
 		<pathelement location="lib/commons-logging-1.1.1.jar"/>
 	</path>
 	
-	<target name="dump-ok">
+	<target name="dump-fail">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		<property name="sqldump.processingclasses" value="ABC" />
 		
@@ -21,10 +21,11 @@
 	<target name="dump-fail-java-ok">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		
+		<!-- inherit failonerror value from Java task - which is false -->
 		<sqldump/>
 	</target>
 
-	<target name="dump-fail">
+	<target name="dump-fail-2">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		
 		<sqldump failonerror="true"/>
@@ -53,24 +54,34 @@
 		</sqldumpij>
 	</target>
 	
-	<target name="run">
+	<target name="run-fail">
 		<taskdef name="sqlrun" classname="tbrugz.sqldump.ant.SQLRunTask" classpathref="sqldump.exec"/>
 		
 		<sqlrun failonerror="true"/>
 	</target>
 
-	<target name="run-lib">
-		<sqld:run/>
+	<target name="run-lib-fail">
+		<sqld:run failonerror="true"/>
 	</target>
 	
-	<target name="diff">
+	<target name="diff-fail">
 		<taskdef name="sqldiff" classname="tbrugz.sqldump.ant.SQLDiffTask" classpathref="sqldump.exec"/>
 		
 		<sqldiff failonerror="true"/>
 	</target>
 
-	<target name="diff-lib">
-		<sqld:diff/>
+	<target name="diff-lib-fail">
+		<sqld:diff failonerror="true"/>
+	</target>
+
+	<target name="diff2q-lib">
+		<sqld:diff2q failonerror="true">
+			<arg value="-propfile=src_test/tbrugz/sqldiff/diff2qtest.properties"/>
+		</sqld:diff2q>
+	</target>
+
+	<target name="diff2q-lib-fail">
+		<sqld:diff2q failonerror="true"/>
 	</target>
 	
 </project>

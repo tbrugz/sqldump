@@ -17,6 +17,7 @@ import tbrugz.sqldiff.test.SQLDiffTest;
 import tbrugz.sqldiff.util.RenameDetectorTest;
 import tbrugz.sqldiff.util.SimilarityCalculatorTest;
 import tbrugz.sqldiff.validate.DiffValidatorTest;
+import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
@@ -84,6 +85,9 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	
 	//mondrian
 	MondrianTests.class,
+	
+	//ant tasks
+	AntTasksTest.class,
 	
 	//roundtrip
 	SQLRunAndDumpTest.class,
