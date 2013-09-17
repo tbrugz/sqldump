@@ -35,7 +35,7 @@ public class DiffTwoQueries implements Executor {
 	
 	public static final String PROPERTIES_FILENAME = DIFF2Q+".properties";
 
-	static final String PREFIX = "diff2q";
+	public static final String PREFIX = "diff2q";
 	
 	static final String PROP_CONNPROPPREFIX = PREFIX+".connpropprefix";
 	static final String PROP_SOURCE_CONNPROPPREFIX = PREFIX+".source.connpropprefix";

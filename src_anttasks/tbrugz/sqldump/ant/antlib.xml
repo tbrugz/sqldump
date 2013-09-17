@@ -3,4 +3,5 @@
 	<taskdef name="dump" classname="tbrugz.sqldump.ant.SQLDumpTask"/>
 	<taskdef name="run" classname="tbrugz.sqldump.ant.SQLRunTask"/>
 	<taskdef name="diff" classname="tbrugz.sqldump.ant.SQLDiffTask"/>
+	<taskdef name="diff2q" classname="tbrugz.sqldump.ant.DiffTwoQueriesTask"/>
 </antlib>
