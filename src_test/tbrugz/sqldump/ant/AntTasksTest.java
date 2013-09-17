@@ -90,5 +90,10 @@ public class AntTasksTest {
 	public void testDiff2QFail() {
 		RunAnt.runAnt(file, "diff2q-fail");
 	}
+
+	@Test(expected=BuildException.class)
+	public void testDiff2Q2TargetsFail() {
+		RunAnt.runAnt(file, "diff2q-2targets-fail");
+	}
 	
 }

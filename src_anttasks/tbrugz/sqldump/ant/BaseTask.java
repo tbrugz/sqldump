@@ -54,6 +54,7 @@ public abstract class BaseTask extends Task {
 			java.setFailonerror(failonerror);
 		}
 		java.execute();
+		//XXX: add teardown() (remove sysproperties, ...)? 
 	}
 	
 	void addSysproperty(String key, String value) {

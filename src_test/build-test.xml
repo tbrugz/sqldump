@@ -95,5 +95,7 @@
 		<taskdef name="diff2q" classname="tbrugz.sqldump.ant.DiffTwoQueriesTask" classpathref="sqldump.exec"/>
 		<diff2q failonerror="true"/>
 	</target>
+
+	<target name="diff2q-2targets-fail" depends="diff2q, diff-fail"/>
 	
 </project>
