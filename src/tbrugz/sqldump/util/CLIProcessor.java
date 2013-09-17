@@ -28,6 +28,7 @@ public class CLIProcessor {
 				"init... [version "+Version.getVersion()+"]");
 		boolean useSysPropSetted = false;
 		int loadedCount = 0;
+		if(args!=null) {
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				String propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
@@ -47,6 +48,7 @@ public class CLIProcessor {
 			else {
 				log.warn("unrecognized param '"+arg+"'. ignoring...");
 			}
+		}
 		}
 		if(loadedCount==0) {
 			loadFile(papp, defaultPropFile, false);

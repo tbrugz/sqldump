@@ -128,7 +128,6 @@ public class SQLDump implements Executor {
 		
 		//Utils.showSysProperties();
 		
-		SchemaModel sm = null;
 		SchemaModelGrabber schemaGrabber = null;
 		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
 		//DBMSResources.instance().updateMetaData(null);
