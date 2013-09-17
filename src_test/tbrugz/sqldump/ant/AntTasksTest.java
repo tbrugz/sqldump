@@ -4,10 +4,13 @@ import java.io.File;
 
 import org.apache.tools.ant.BuildException;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import tbrugz.sqldump.def.ProcessingException;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AntTasksTest {
 	
 	File file = new File("src_test/build-test.xml");
@@ -24,13 +27,13 @@ public class AntTasksTest {
 	}
 
 	@Test
-	public void testDumpNofail() {
+	public void testDump() {
 		RunAnt.runAnt(file, "dump-nofail");
 	}
 
 	@Test
-	public void testDumpFailJavaOk() {
-		RunAnt.runAnt(file, "dump-fail-java-ok");
+	public void testDumpErrorJavaOk() {
+		RunAnt.runAnt(file, "dump-error-java-ok");
 	}
 	
 	@Test(expected=RuntimeException.class)
@@ -43,28 +46,28 @@ public class AntTasksTest {
 		RunAnt.runAnt(file, "dump-ok-lib");
 	}
 
-	@Test
-	public void testDump2() {
-		RunAnt.runAnt(file, "dump-2");
+	@Test(expected=BuildException.class)
+	public void testDump2Fail() {
+		RunAnt.runAnt(file, "dump-2-fail");
 	}
 
 	@Test(expected=BuildException.class)
-	public void testRun() {
+	public void testRunFail() {
 		RunAnt.runAnt(file, "run-fail");
 	}
 
 	@Test(expected=BuildException.class)
-	public void testRunLib() {
+	public void testRunLibFail() {
 		RunAnt.runAnt(file, "run-lib-fail");
 	}
 
 	@Test(expected=BuildException.class)
-	public void testDiff() {
+	public void testDiffFail() {
 		RunAnt.runAnt(file, "diff-fail");
 	}
 
 	@Test(expected=BuildException.class)
-	public void testDiffLib() {
+	public void testDiffLibFail() {
 		RunAnt.runAnt(file, "diff-lib-fail");
 	}
 
@@ -75,7 +78,17 @@ public class AntTasksTest {
 
 	@Test(expected=BuildException.class)
 	public void testDiff2QLibFail() {
-		RunAnt.runAnt(file, "diff2q-lib");
+		RunAnt.runAnt(file, "diff2q-lib-fail");
+	}
+	
+	@Test
+	public void testDiff2Q() {
+		RunAnt.runAnt(file, "diff2q");
+	}
+
+	@Test(expected=BuildException.class)
+	public void testDiff2QFail() {
+		RunAnt.runAnt(file, "diff2q-fail");
 	}
 	
 }

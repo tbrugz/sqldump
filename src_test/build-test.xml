@@ -18,7 +18,7 @@
 		<sqldump failonerror="false"/>
 	</target>
 	
-	<target name="dump-fail-java-ok">
+	<target name="dump-error-java-ok">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		
 		<!-- inherit failonerror value from Java task - which is false -->
@@ -42,7 +42,7 @@
 		</sqldumpj>
 	</target-->
 
-	<target name="dump-2">
+	<target name="dump-2-fail">
 		<taskdef name="sqldumpij" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		<property name="sqldump.processingclasses" value="ABC" />
 		
@@ -82,6 +82,18 @@
 
 	<target name="diff2q-lib-fail">
 		<sqld:diff2q failonerror="true"/>
+	</target>
+
+	<target name="diff2q">
+		<taskdef name="diff2q" classname="tbrugz.sqldump.ant.DiffTwoQueriesTask" classpathref="sqldump.exec"/>
+		<diff2q failonerror="true">
+			<arg value="-propfile=src_test/tbrugz/sqldiff/diff2qtest.properties"/>
+		</diff2q>
+	</target>
+
+	<target name="diff2q-fail">
+		<taskdef name="diff2q" classname="tbrugz.sqldump.ant.DiffTwoQueriesTask" classpathref="sqldump.exec"/>
+		<diff2q failonerror="true"/>
 	</target>
 	
 </project>
