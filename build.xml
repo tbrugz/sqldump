@@ -124,6 +124,7 @@
 			<src path="${src.run.dir}"/>
 			<src path="${src.mondrian.dir}"/>
 			<src path="${src.xtra.dir}"/>
+			<src path="${src.anttaks.dir}"/>			
 		</javac>
 		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
 			<src path="${src.test.dir}"/>
@@ -143,6 +144,9 @@
 			<fileset dir="${src.diff.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
+			</fileset>
+			<fileset dir="${src.anttaks.dir}">
+				<include name="**/antlib.xml"/>
 			</fileset>
 		</copy>
 		<copy todir="${bin.test.dir}" >
