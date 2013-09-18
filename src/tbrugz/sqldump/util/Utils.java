@@ -11,6 +11,7 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -638,6 +640,16 @@ public class Utils {
 			sb.append((sb.length()>0?";":"")+"#"+entry.getKey()+"="+entry.getValue());
 		}
 		return sb.toString();
+	}
+
+	//see: http://stackoverflow.com/questions/469695/decode-base64-data-in-java/2054226#2054226
+	public static String parseBase64(String str) throws UnsupportedEncodingException {
+		byte[] arr = DatatypeConverter.parseBase64Binary(str);
+		return new String(arr, "UTF-8");
+	}
+
+	public static String printBase64(String str) {
+		return DatatypeConverter.printBase64Binary(str.getBytes());
 	}
 	
 }

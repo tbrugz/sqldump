@@ -1,5 +1,6 @@
 package tbrugz.sqldump.util;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
@@ -29,6 +30,7 @@ public class ConnectionUtil {
 	public static final String SUFFIX_URL = ".dburl";
 	public static final String SUFFIX_USER = ".user";
 	public static final String SUFFIX_PASSWD = ".password";
+	public static final String SUFFIX_PASSWD_BASE64 = ".password.base64";
 	public static final String SUFFIX_ASKFORUSERNAME = ".askforusername";
 	public static final String SUFFIX_ASKFORPASSWD = ".askforpassword";
 	public static final String SUFFIX_ASKFORUSERNAME_GUI = ".askforusernamegui";
@@ -151,6 +153,16 @@ public class ConnectionUtil {
 		}
 		}
 
+		if(password==null) {
+			String passBase64 = papp.getProperty(propsPrefix+SUFFIX_PASSWD_BASE64);
+			if(passBase64!=null) {
+				try {
+					password = Utils.parseBase64(passBase64);
+				} catch (UnsupportedEncodingException e) {
+					log.warn("error loading base64 password [prop '"+propsPrefix+SUFFIX_PASSWD_BASE64+"']"); //show exception?
+				}
+			}
+		}
 		if(password==null) {
 		if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
 			password = Utils.readPassword("password [user="+user+"]: ");
