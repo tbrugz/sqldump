@@ -1,12 +1,13 @@
 package tbrugz.sqldump.dbmodel;
 
 /*
- * TODO: mviews: refresh on commit|demand ; tablespace
+ * TODO: mviews: tablespace/physical attributes
  */
 public class MaterializedView extends View {
 	private static final long serialVersionUID = 1L;
 
-	//rewrite_enabled, rewrite_capability, refresh_mode, refresh_method,,, build_mode, fast_refreshable?
+	//rewrite_enabled, rewrite_capability, refresh_mode, refresh_method
+	//XXX: add build_mode, fast_refreshable?
 	public boolean rewriteEnabled;
 	public String rewriteCapability;
 	public String refreshMode;
@@ -18,6 +19,28 @@ public class MaterializedView extends View {
 		//return (dumpCreateOrReplace?"create or replace ":"create ") + "materialized view "
 		//		+ getFinalName(dumpSchemaName) + " as\n" + query;
 	}
+	
+	@Override
+	protected String getExtraConstraintsSnippet() {
+		StringBuilder sb = new StringBuilder();
+		//refresh
+		if(refreshMethod!=null) {
+			if(refreshMethod.equalsIgnoreCase("never")) {
+				sb.append("\nnever refresh");
+			}
+			else {
+				sb.append("\nrefresh "+refreshMethod.toLowerCase()
+					+(refreshMode!=null?" on "+refreshMode.toLowerCase():""));
+			}
+		}
+		//rewrite
+		if(rewriteEnabled) {
+			sb.append("\nenable query rewrite");
+		}
+		return sb.toString();
+	}
+	
+	//default parameters on create MV: BUILD IMMEDIATE, REFRESH FORCE ON DEMAND, WITH PRIMARY KEY ?
 	
 	@Override
 	public String toString() {

@@ -46,6 +46,21 @@ public class View extends DBObject implements Relation {
 	}
 
 	protected String getDefinition(boolean dumpSchemaName, String viewType) {
+		if(PATTERN_CREATE_VIEW.matcher(query).find()) {
+			return query;
+				//+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
+		}
+		
+		return (dumpCreateOrReplace?"create or replace ":"create ") + (viewType!=null?viewType+" ":"") + "view "
+				+ getFinalName(dumpSchemaName)
+				+ getConstraintsSnippet()
+				+ getExtraConstraintsSnippet()
+				+ " as\n" + query
+				+ getCheckOptionAndReadOnlySnippet()
+				+ getRemarksSnippet(dumpSchemaName);
+	}
+	
+	protected String getConstraintsSnippet() {
 		StringBuffer sbConstraints = new StringBuffer();
 		if(constraints!=null) {
 			for(int i=0;i<constraints.size();i++) {
@@ -53,7 +68,29 @@ public class View extends DBObject implements Relation {
 				sbConstraints.append((i==0?"":",\n\t")+cons.getDefinition(false));
 			}
 		}
-
+		
+		if(sbConstraints.length()>0) {
+			return " (\n\t"
+						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
+						+ sbConstraints.toString()+"\n)";			
+		}
+		
+		return "";
+	}
+	
+	protected String getExtraConstraintsSnippet() {
+		return "";
+	}
+	
+	protected String getCheckOptionAndReadOnlySnippet() {
+		return (withReadOnly?"\nwith read only":
+					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
+						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""
+					)
+				);		
+	}
+	
+	protected String getRemarksSnippet(boolean dumpSchemaName) {
 		StringBuffer sbRemarks = new StringBuffer();
 
 		String stmp1 = Table.getRelationRemarks(this, dumpSchemaName);
@@ -69,23 +106,7 @@ public class View extends DBObject implements Relation {
 			sbRemarks.delete(len-2, len);
 		}
 		
-		if(PATTERN_CREATE_VIEW.matcher(query).find()) {
-			return query;
-				//+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
-		}
-		
-		return (dumpCreateOrReplace?"create or replace ":"create ") + (viewType!=null?viewType+" ":"") + "view "
-				+ getFinalName(dumpSchemaName)
-				+ (sbConstraints.length()>0?" (\n\t"
-						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
-						+ sbConstraints.toString()+"\n)":"")
-				+ " as\n" + query
-				+ (withReadOnly?"\nwith read only":
-					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
-						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""
-					)
-				)
-				+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
+		return sbRemarks.length()>0?";"+sbRemarks.toString():"";
 	}
 	
 	@Override
