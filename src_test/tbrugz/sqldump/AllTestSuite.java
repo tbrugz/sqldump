@@ -33,6 +33,7 @@ import tbrugz.sqldump.sqlrun.StmtExecTest;
 import tbrugz.sqldump.sqlrun.StmtProcTest;
 import tbrugz.sqldump.util.CLIProcessorTest;
 import tbrugz.sqldump.util.CategorizedOutTest;
+import tbrugz.sqldump.util.ConnectionUtilTest;
 import tbrugz.sqldump.util.IOUtilTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 
@@ -88,6 +89,9 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	
 	//ant tasks
 	AntTasksTest.class,
+	
+	//database/connection
+	ConnectionUtilTest.class,
 	
 	//roundtrip
 	SQLRunAndDumpTest.class,

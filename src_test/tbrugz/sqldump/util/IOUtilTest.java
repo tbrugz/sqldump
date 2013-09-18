@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
 import org.junit.Assert;
@@ -47,6 +48,19 @@ public class IOUtilTest {
 		String s = IOUtil.readFromFilename(DIR+file);
 		//log.info("f: "+file+"; s: "+s);
 		return s;
+	}
+	
+	@Test
+	public void testParseBase64() throws UnsupportedEncodingException {
+		String s = Utils.parseBase64("YWJjZA==");
+		Assert.assertEquals("abcd", s);
+	}
+
+	@Test
+	public void testPrintBase64() {
+		String s = Utils.printBase64("abcd");
+		System.err.println("s: "+s);
+		Assert.assertEquals("YWJjZA==", s);
 	}
 	
 }
