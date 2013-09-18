@@ -31,9 +31,9 @@ public class AntTasksTest {
 		RunAnt.runAnt(file, "dump-nofail");
 	}
 
-	@Test
-	public void testDumpErrorJavaOk() {
-		RunAnt.runAnt(file, "dump-error-java-ok");
+	@Test(expected=BuildException.class)
+	public void testDumpDefaultFailOnErrorFail() {
+		RunAnt.runAnt(file, "dump-defaultfailonerror-fail");
 	}
 	
 	@Test(expected=RuntimeException.class)

@@ -18,10 +18,10 @@
 		<sqldump failonerror="false"/>
 	</target>
 	
-	<target name="dump-error-java-ok">
+	<target name="dump-defaultfailonerror-fail">
 		<taskdef name="sqldump" classname="tbrugz.sqldump.ant.SQLDumpTask" classpathref="sqldump.exec"/>
 		
-		<!-- inherit failonerror value from Java task - which is false -->
+		<!-- default failonerror value is true -->
 		<sqldump/>
 	</target>
 

@@ -16,7 +16,7 @@ public abstract class BaseTask extends Task {
 	Java java;
 	Path classpath;
 	Reference classpathref;
-	Boolean failonerror = null;
+	boolean failonerror = true;
 
 	Java getJava() {
 		if (java == null) {
@@ -28,9 +28,7 @@ public abstract class BaseTask extends Task {
 
 	void setup() throws BuildException {
 		// failonerror
-		if(failonerror!=null) {
-			addSysproperty(getPropPrefix()+".failonerror", failonerror?"true":"false");
-		}
+		addSysproperty(getPropPrefix()+".failonerror", failonerror?"true":"false");
 		// set all properties as system properties
 		for(Object key : getProject().getProperties().keySet()) {
 			addSysproperty(String.valueOf(key), String.valueOf(getProject().getProperties().get(key)));
@@ -50,9 +48,7 @@ public abstract class BaseTask extends Task {
 			java.setClasspathRef(classpathref);
 		}
 		// java.setFork(true);
-		if(failonerror != null) {
-			java.setFailonerror(failonerror);
-		}
+		java.setFailonerror(failonerror);
 		java.execute();
 		//XXX: add teardown() (remove sysproperties, ...)? 
 	}
