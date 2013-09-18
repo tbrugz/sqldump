@@ -64,7 +64,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	static final String PREFIX = "sqldump.schemagrab";
 	
-	//sqldump.properties
+	// grabber properties
 	static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
 	static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
 	static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
@@ -86,19 +86,25 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS = PREFIX+".ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
 	
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks"; //deprecated?
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep"; //deprecated?
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel"; //deprecated?
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks"; //deprecated?
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivedumpbasedonfks";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivedumpbasedonfks.deep";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL = PREFIX+".recursivedumpbasedonfks.maxlevel";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS = PREFIX+".recursivedumpbasedonfks.exportedfks";
+	
+	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
+	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
+	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel";
+	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 
-	static final String PROP_SCHEMAINFO_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	static final String PROP_SCHEMAGRAB_TABLEFILTER = PREFIX+".tablefilter";
 	static final String PROP_SCHEMAGRAB_EXCLUDETABLES = PREFIX+".tablename.excludes";
 	@Deprecated
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
 	static final String PROP_SCHEMAGRAB_EXCLUDEOBJECTS = PREFIX+".objectname.excludes";
 	static final String PROP_SCHEMAGRAB_TABLETYPES = PREFIX+".tabletypes";
-	
+
+	// xtra/generic grabber properties
+	static final String PROP_SCHEMAINFO_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
@@ -131,7 +137,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabDbSpecific = false,
 			doSetConnectionReadOnly = false;
 
-	boolean ignoretableswithzerocolumns = true;
+	boolean ignoretableswithzerocolumns = true,
+		recursivedump = false,
+		deeprecursivedump = false,
+		grabExportedFKsAlso = false;
 	
 	List<TableType> tableTypesToGrab = null;
 	
@@ -161,7 +170,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		ignoretableswithzerocolumns = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, ignoretableswithzerocolumns);
 		
-		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
+		recursivedump = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, recursivedump);
+		deeprecursivedump = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, deeprecursivedump);
+		grabExportedFKsAlso = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, grabExportedFKsAlso);
+		maxLevel = getPropLongWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL, maxLevel);
+		
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
 		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
 		if(tableTypesToGrabStr!=null) {
@@ -322,9 +335,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		if(doSchemaGrabTables) {
 		
-		boolean recursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, false);
 		if(recursivedump) {
-			boolean grabExportedFKsAlso = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, false);
 			int lastTableCount = schemaModel.getTables().size();
 			int level = 0;
 			log.info("grabbing tables recursively["+level+"]: #ini:"+lastTableCount
@@ -488,8 +499,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 
-		boolean deeprecursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, false);
-		
 		while(rs.next()) {
 			TableType ttype = null;
 			String tableName = rs.getString("TABLE_NAME");
@@ -1115,7 +1124,17 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
 			ret = Utils.getPropBool(p, deprecatedKey, defaultValue);
 		}
-		ret = Utils.getPropBool(p, key, defaultValue);
+		ret = Utils.getPropBool(p, key, ret);
+		return ret;
+	}
+
+	static Long getPropLongWithDeprecated(Properties p, String key, String deprecatedKey, Long defaultValue) {
+		Long ret = defaultValue;
+		if(Utils.propertyExists(p, deprecatedKey)) {
+			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			ret = Utils.getPropLong(p, deprecatedKey, defaultValue);
+		}
+		ret = Utils.getPropLong(p, key, ret);
 		return ret;
 	}
 	
