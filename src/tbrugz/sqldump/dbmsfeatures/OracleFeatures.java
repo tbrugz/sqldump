@@ -110,7 +110,9 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 
 	void grabDBMaterializedViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
-		String query = "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query from all_mviews "
+		String query = "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query, "
+				+" rewrite_enabled, rewrite_capability, refresh_mode, refresh_method, build_mode, fast_refreshable "
+				+" from all_mviews "
 				+" where owner = '"+schemaPattern+"' ORDER BY MVIEW_NAME";
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
@@ -122,7 +124,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			v.setName( rs.getString(2) );
 			v.query = rs.getString(4);
 			v.setSchemaName(schemaPattern);
-			//v.materialized = true;
+			v.rewriteEnabled = "Y".equals(rs.getString(5));
+			v.rewriteCapability = rs.getString(6);
+			v.refreshMode = rs.getString(7);
+			v.refreshMethod = rs.getString(8);
 			model.getViews().add(v);
 			count++;
 		}
