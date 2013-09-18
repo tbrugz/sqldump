@@ -62,11 +62,13 @@ class DBObjectId extends DBIdentifiable {
  */
 public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGrabber {
 	
+	static final String PREFIX = "sqldump.schemagrab";
+	
 	//sqldump.properties
-	static final String PROP_SCHEMAGRAB_TABLES = "sqldump.schemagrab.tables";
-	static final String PROP_SCHEMAGRAB_PKS = "sqldump.schemagrab.pks";
-	static final String PROP_SCHEMAGRAB_FKS = "sqldump.schemagrab.fks";
-	static final String PROP_SCHEMAGRAB_EXPORTEDFKS = "sqldump.schemagrab.exportedfks";
+	static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
+	static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
+	static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
+	static final String PROP_SCHEMAGRAB_EXPORTEDFKS = PREFIX+".exportedfks";
 	@Deprecated
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	@Deprecated
@@ -75,25 +77,27 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
 	@Deprecated
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
-	static final String PROP_SCHEMAGRAB_GRANTS = "sqldump.schemagrab.grants";
-	static final String PROP_SCHEMAGRAB_ALLGRANTS = "sqldump.schemagrab.allgrants"; //XXX: xperimental
-	static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
-	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = "sqldump.schemagrab.proceduresandfunctions";
-	static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
-	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = "sqldump.schemagrab.setconnectionreadonly";
+	static final String PROP_SCHEMAGRAB_GRANTS = PREFIX+".grants";
+	static final String PROP_SCHEMAGRAB_ALLGRANTS = PREFIX+".allgrants"; //XXX: xperimental
+	static final String PROP_SCHEMAGRAB_INDEXES = PREFIX+".indexes";
+	@Deprecated static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
+	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = PREFIX+".proceduresandfunctions";
+	@Deprecated static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
+	static final String PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS = PREFIX+".ignoretableswithzerocolumns";
+	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
 	
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel";
-	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks"; //deprecated?
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep"; //deprecated?
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel"; //deprecated?
+	static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks"; //deprecated?
 
-	static final String PROP_SCHEMADUMP_DOMAINTABLES = "sqldump.schemainfo.domaintables";
-	static final String PROP_SCHEMADUMP_TABLEFILTER = "sqldump.schemagrab.tablefilter";
-	static final String PROP_SCHEMAGRAB_EXCLUDETABLES = "sqldump.schemagrab.tablename.excludes";
+	static final String PROP_SCHEMAINFO_DOMAINTABLES = "sqldump.schemainfo.domaintables";
+	static final String PROP_SCHEMAGRAB_TABLEFILTER = PREFIX+".tablefilter";
+	static final String PROP_SCHEMAGRAB_EXCLUDETABLES = PREFIX+".tablename.excludes";
 	@Deprecated
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
-	static final String PROP_SCHEMAGRAB_EXCLUDEOBJECTS = "sqldump.schemagrab.objectname.excludes";
-	static final String PROP_SCHEMAGRAB_TABLETYPES = "sqldump.schemagrab.tabletypes";
+	static final String PROP_SCHEMAGRAB_EXCLUDEOBJECTS = PREFIX+".objectname.excludes";
+	static final String PROP_SCHEMAGRAB_TABLETYPES = PREFIX+".tabletypes";
 	
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
@@ -126,6 +130,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabProceduresAndFunctions = true,
 			doSchemaGrabDbSpecific = false,
 			doSetConnectionReadOnly = false;
+
+	boolean ignoretableswithzerocolumns = true;
 	
 	List<TableType> tableTypesToGrab = null;
 	
@@ -139,37 +145,22 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//papp = prop;
 		papp.putAll(prop);
 		
-		//inicializa variaveis controle
+		//init control vars
 		doSchemaGrabTables = Utils.getPropBool(papp, PROP_SCHEMAGRAB_TABLES, doSchemaGrabTables);
 		
-		if(Utils.propertyExists(prop, PROP_DO_SCHEMADUMP_PKS)) {
-			log.warn("using deprecated prop '"+PROP_DO_SCHEMADUMP_PKS+"' - use '"+PROP_SCHEMAGRAB_PKS+"' instead");
-			doSchemaGrabPKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
-		}
-		doSchemaGrabPKs = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PKS, doSchemaGrabPKs);
-		
-		if(Utils.propertyExists(prop, PROP_DO_SCHEMADUMP_FKS)) {
-			log.warn("using deprecated prop '"+PROP_DO_SCHEMADUMP_FKS+"' - use '"+PROP_SCHEMAGRAB_FKS+"' instead");
-			doSchemaGrabFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
-		}
-		doSchemaGrabFKs = Utils.getPropBool(papp, PROP_SCHEMAGRAB_FKS, doSchemaGrabFKs);
-		
-		if(Utils.propertyExists(prop, PROP_DO_SCHEMADUMP_EXPORTEDFKS)) {
-			log.warn("using deprecated prop '"+PROP_DO_SCHEMADUMP_EXPORTEDFKS+"' - use '"+PROP_SCHEMAGRAB_EXPORTEDFKS+"' instead");
-			doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
-		}
-		doSchemaGrabExportedFKs = Utils.getPropBool(papp, PROP_SCHEMAGRAB_EXPORTEDFKS, doSchemaGrabExportedFKs);
-		
-		if(Utils.propertyExists(prop, PROP_DO_SCHEMADUMP_GRANTS)) {
-			log.warn("using deprecated prop '"+PROP_DO_SCHEMADUMP_GRANTS+"' - use '"+PROP_SCHEMAGRAB_GRANTS+"' instead");
-			doSchemaGrabTableGrants = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabTableGrants);
-		}
-		doSchemaGrabTableGrants = Utils.getPropBool(papp, PROP_SCHEMAGRAB_GRANTS, doSchemaGrabTableGrants);
+		doSchemaGrabPKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_PKS, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
+		doSchemaGrabFKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_FKS, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
+		doSchemaGrabExportedFKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_EXPORTEDFKS, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
+		doSchemaGrabTableGrants = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_GRANTS, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabTableGrants);
 		
 		doGrabAllSchemaGrants = Utils.getPropBool(papp, PROP_SCHEMAGRAB_ALLGRANTS, doGrabAllSchemaGrants);
-		doSchemaGrabIndexes = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
+		
+		doSchemaGrabIndexes = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_INDEXES, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
+		
+		ignoretableswithzerocolumns = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, ignoretableswithzerocolumns);
+		
 		maxLevel = Utils.getPropLong(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL);
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
 		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
@@ -313,7 +304,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 		if(doSchemaGrabTables) {
 			
-		List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_TABLEFILTER, ","); 
+		List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMAGRAB_TABLEFILTER, ","); 
 		for(String schemaName: schemasList) {
 			if(tablePatterns==null) {
 				grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
@@ -493,12 +484,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	//XXX shoud it be "grabTables"?
 	void grabRelations(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws SQLException { //, String padding
 		log.debug("grabRelations()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
-		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMADUMP_DOMAINTABLES, ",");
+		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMAINFO_DOMAINTABLES, ",");
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
 
 		boolean deeprecursivedump = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, false);
-		boolean ignoretableswithzerocolumns = Utils.getPropBool(papp, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, true);
 		
 		while(rs.next()) {
 			TableType ttype = null;
@@ -1117,6 +1107,16 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 			}
 		}
+	}
+	
+	static boolean getPropBoolWithDeprecated(Properties p, String key, String deprecatedKey, boolean defaultValue) {
+		boolean ret = defaultValue;
+		if(Utils.propertyExists(p, deprecatedKey)) {
+			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			ret = Utils.getPropBool(p, deprecatedKey, defaultValue);
+		}
+		ret = Utils.getPropBool(p, key, defaultValue);
+		return ret;
 	}
 	
 }
