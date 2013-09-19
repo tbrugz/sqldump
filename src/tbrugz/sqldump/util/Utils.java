@@ -652,4 +652,24 @@ public class Utils {
 		return DatatypeConverter.printBase64Binary(str.getBytes());
 	}
 	
+	public static boolean getPropBoolWithDeprecated(Properties p, String key, String deprecatedKey, boolean defaultValue) {
+		boolean ret = defaultValue;
+		if(Utils.propertyExists(p, deprecatedKey)) {
+			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			ret = Utils.getPropBool(p, deprecatedKey, defaultValue);
+		}
+		ret = Utils.getPropBool(p, key, ret);
+		return ret;
+	}
+
+	public static Long getPropLongWithDeprecated(Properties p, String key, String deprecatedKey, Long defaultValue) {
+		Long ret = defaultValue;
+		if(Utils.propertyExists(p, deprecatedKey)) {
+			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			ret = Utils.getPropLong(p, deprecatedKey, defaultValue);
+		}
+		ret = Utils.getPropLong(p, key, ret);
+		return ret;
+	}
+	
 }

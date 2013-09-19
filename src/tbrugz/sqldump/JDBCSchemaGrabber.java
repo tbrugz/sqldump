@@ -157,23 +157,23 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//init control vars
 		doSchemaGrabTables = Utils.getPropBool(papp, PROP_SCHEMAGRAB_TABLES, doSchemaGrabTables);
 		
-		doSchemaGrabPKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_PKS, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
-		doSchemaGrabFKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_FKS, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
-		doSchemaGrabExportedFKs = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_EXPORTEDFKS, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
-		doSchemaGrabTableGrants = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_GRANTS, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabTableGrants);
+		doSchemaGrabPKs = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_PKS, PROP_DO_SCHEMADUMP_PKS, doSchemaGrabPKs);
+		doSchemaGrabFKs = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_FKS, PROP_DO_SCHEMADUMP_FKS, doSchemaGrabFKs);
+		doSchemaGrabExportedFKs = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_EXPORTEDFKS, PROP_DO_SCHEMADUMP_EXPORTEDFKS, doSchemaGrabExportedFKs);
+		doSchemaGrabTableGrants = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_GRANTS, PROP_DO_SCHEMADUMP_GRANTS, doSchemaGrabTableGrants);
 		
 		doGrabAllSchemaGrants = Utils.getPropBool(papp, PROP_SCHEMAGRAB_ALLGRANTS, doGrabAllSchemaGrants);
 		
-		doSchemaGrabIndexes = getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_INDEXES, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
+		doSchemaGrabIndexes = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_INDEXES, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
 		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 		
-		ignoretableswithzerocolumns = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, ignoretableswithzerocolumns);
+		ignoretableswithzerocolumns = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, ignoretableswithzerocolumns);
 		
-		recursivedump = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, recursivedump);
-		deeprecursivedump = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, deeprecursivedump);
-		grabExportedFKsAlso = getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, grabExportedFKsAlso);
-		maxLevel = getPropLongWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL, maxLevel);
+		recursivedump = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP, recursivedump);
+		deeprecursivedump = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP, deeprecursivedump);
+		grabExportedFKsAlso = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS, grabExportedFKsAlso);
+		maxLevel = Utils.getPropLongWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL, maxLevel);
 		
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
 		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
@@ -1116,26 +1116,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 			}
 		}
-	}
-	
-	static boolean getPropBoolWithDeprecated(Properties p, String key, String deprecatedKey, boolean defaultValue) {
-		boolean ret = defaultValue;
-		if(Utils.propertyExists(p, deprecatedKey)) {
-			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
-			ret = Utils.getPropBool(p, deprecatedKey, defaultValue);
-		}
-		ret = Utils.getPropBool(p, key, ret);
-		return ret;
-	}
-
-	static Long getPropLongWithDeprecated(Properties p, String key, String deprecatedKey, Long defaultValue) {
-		Long ret = defaultValue;
-		if(Utils.propertyExists(p, deprecatedKey)) {
-			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
-			ret = Utils.getPropLong(p, deprecatedKey, defaultValue);
-		}
-		ret = Utils.getPropLong(p, key, ret);
-		return ret;
 	}
 	
 }
