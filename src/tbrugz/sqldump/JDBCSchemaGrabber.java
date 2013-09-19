@@ -86,10 +86,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS = PREFIX+".ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
 	
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivedumpbasedonfks";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivedumpbasedonfks.deep";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL = PREFIX+".recursivedumpbasedonfks.maxlevel";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS = PREFIX+".recursivedumpbasedonfks.exportedfks";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivegrabbasedonfks";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivegrabbasedonfks.deep";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL = PREFIX+".recursivegrabbasedonfks.maxlevel";
+	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS = PREFIX+".recursivegrabbasedonfks.exportedfks";
 	
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
@@ -285,7 +285,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			return null;
 		}
 		
-		log.info("schema dump... schema(s): '"+schemaPattern+"'");
+		log.info("schema grab... schema(s): '"+schemaPattern+"'");
 
 		//init stat objects
 		tablesCountByTableType = new HashMap<TableType, Integer>();
