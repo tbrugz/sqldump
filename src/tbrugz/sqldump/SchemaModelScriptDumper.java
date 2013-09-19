@@ -153,7 +153,6 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	public void setProperties(Properties prop) {
 		//init control vars
 		doSchemaDumpPKs = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_PKS, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
-		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
 		boolean doSchemaDumpFKsAtEnd = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_FKS_ATEND, PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		dumpWithSchemaName = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_DUMP_WITH_SCHEMA_NAME, PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
@@ -172,7 +171,6 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 
-		//dumpPKs = doSchemaDumpPKs;
 		fromDbId = DBMSResources.instance().dbid();
 		toDbId = prop.getProperty(Defs.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
@@ -204,16 +202,6 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			}
 		}
 		
-		/*dbmsSpecificsProperties = new ParametrizedProperties();
-		try {
-			InputStream is = SchemaModelScriptDumper.class.getClassLoader().getResourceAsStream(SQLDump.DBMS_SPECIFIC_RESOURCE);
-			if(is==null) throw new IOException("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
-			dbmsSpecificsProperties.load(is);
-		}
-		catch(IOException ioe) {
-			log.warn("resource "+SQLDump.DBMS_SPECIFIC_RESOURCE+" not found");
-		}*/
-		
 		for(DBObjectType dbtype: DBObjectType.values()) {
 			DBObjectType typeMappedTo = null;
 			
@@ -227,14 +215,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				log.warn("unknown object type on property file: '"+typeMappedToStr+"'");
 			}
 		}
-		//sqldump.outputfilepattern.maptype.PROCEDURE=EXECUTABLE
 		
 		this.prop = prop;
 	}
 
-	/* (non-Javadoc)
-	 * @see tbrugz.sqldump.SchemaModelDumper#dumpSchema(tbrugz.sqldump.SchemaModel)
-	 */
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {
@@ -276,9 +260,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				case SYNONYM: if(dumpSynonymAsTable) { break; } else { continue; } 
 				case VIEW: if(dumpViewAsTable) { break; } else { continue; }
 				case MATERIALIZED_VIEW: if(dumpMaterializedViewAsTable) { break; } else { continue; }
-				//XXX: other tables: EXTERNAL_TABLE(?), SYSTEM_TABLE
-				//XXX: other views: SYSTEM_VIEW
-				//XXX: other things - 'TYPE' table ... ?
+				//XXX: other table types: EXTERNAL_TABLE(?), SYSTEM_TABLE, SYSTEM_VIEW, TYPE
 				default: break;
 			}
 			
@@ -433,36 +415,12 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	
 	void dumpFKsOutsideTable(Collection<FK> foreignKeys) throws IOException {
-		//StringBuffer sb = new StringBuffer();
 		for(FK fk: foreignKeys) {
 			String fkscript = fk.fkScriptWithAlterTable(dumpDropStatements, dumpWithSchemaName);
-			//sb.append(fkscript+"\n");
-			//if(dumpFKsWithReferencingTable) {
-			//	categorizedOut(fk.fkTableSchemaName, fk.fkTable, DBObjectType.TABLE, fkscript);
-			//}
-			//else {
 			categorizedOut(fk.getSchemaName(), fk.getName(), DBObjectType.FK, fkscript);
-			//}
 		}
-		//out(sb.toString());
 	}
 	
-	/*
-	String dumpFKsInsideTable(Collection<FK> foreignKeys, String schemaName, String tableName) throws IOException {
-		StringBuffer sb = new StringBuffer();
-		for(FK fk: foreignKeys) {
-			if(schemaName.equals(fk.fkTableSchemaName) && tableName.equals(fk.fkTable)) {
-				//sb.append("\tconstraint "+fk.getName()+" foreign key ("+Utils.join(fk.fkColumns, ", ")
-				//	+") references "+(dumpWithSchemaName?fk.pkTableSchemaName+".":"")+fk.pkTable+" ("+Utils.join(fk.pkColumns, ", ")+"),\n");
-				sb.append("\t"+FK.fkSimpleScript(fk, " ", dumpWithSchemaName)+",\n");
-			}
-		}
-		return sb.toString();
-	}
-	*/
-	
-	//XXXcc Map<String, FileWriter> ? not if "sqldump.outputfilepattern" contains ${objectname}
-	//Map<DBObjectType, String> outFilePatterns = new HashMap<DBObjectType, String>();
 	Set<String> filesOpened = new TreeSet<String>();
 	
 	Set<String> warnedOldPatternFiles = new TreeSet<String>();
@@ -482,8 +440,6 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			return;
 		}
 		
-		//String outFilePattern = outFilePatterns.get(objectType);
-		//if(outFilePatterns.containsKey(objectType)) {}
 		DBObjectType mappedObjectType = mappingBetweenDBObjectTypes.get(objectType);
 		if(mappedObjectType!=null) { objectType = mappedObjectType; }
 		
@@ -549,6 +505,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		fos.close();
 	}
 
+	/*
 	@Deprecated
 	String simpleGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
 		StringBuffer sb = new StringBuffer();
@@ -565,6 +522,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 		return "";
 	}
+	*/
 	
 	String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
 		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
