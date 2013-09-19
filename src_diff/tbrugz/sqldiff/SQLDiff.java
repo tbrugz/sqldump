@@ -83,6 +83,10 @@ public class SQLDiff implements Executor {
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 	
+	//props from SchemaModelScriptDumper
+	@Deprecated	static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
+	@Deprecated	static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";	
+	
 	static final String XML_IO_CLASS = "tbrugz.sqldiff.io.XMLDiffIO";
 	static final String JSON_IO_CLASS = "tbrugz.sqldiff.io.JSONDiffIO";
 
@@ -173,8 +177,8 @@ public class SQLDiff implements Executor {
 		//dump diff
 		if(outfilePattern!=null) {
 			String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
-					new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
-					new String[]{SchemaModelScriptDumper.FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
+					new String[]{FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
+					new String[]{FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
 					new String[]{Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME)},
 					new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
 					);
