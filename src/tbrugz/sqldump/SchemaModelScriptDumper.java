@@ -86,6 +86,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	String outputConnPropPrefix;
 	Connection outputConn = null;
 	
+	static final String PREFIX = "sqldump.schemadump";
+	
 	static final String PATTERN_SCHEMANAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME);
 	static final String PATTERN_SCHEMANAME_QUOTED = Pattern.quote(PATTERN_SCHEMANAME_FINAL);
 	static final String PATTERN_OBJECTTYPE_FINAL = Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE);
@@ -93,12 +95,12 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	static final String PATTERN_OBJECTNAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME);
 	static final String PATTERN_OBJECTNAME_QUOTED = Pattern.quote(PATTERN_OBJECTNAME_FINAL);
 	
-	@Deprecated
-	public static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
+	@Deprecated //also used by SQLDiff
+	static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
 	@Deprecated
 	static final String FILENAME_PATTERN_SCHEMA_QUOTED = Pattern.quote(FILENAME_PATTERN_SCHEMA);
 	@Deprecated
-	public static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";
+	static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";
 	@Deprecated
 	static final String FILENAME_PATTERN_OBJECTTYPE_QUOTED = Pattern.quote(FILENAME_PATTERN_OBJECTTYPE);
 	@Deprecated
@@ -106,41 +108,48 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	@Deprecated
 	static final String FILENAME_PATTERN_OBJECTNAME_QUOTED = Pattern.quote(FILENAME_PATTERN_OBJECTNAME);
 
-	public static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
+	static final String PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = "sqldump.outputobjectwithreferencingtable";
 
 	static final String PROP_MAIN_OUTPUT_FILE_PATTERN = "sqldump.mainoutputfilepattern";
-	static final String PROP_OUTPUTFILE = "sqldump.outputfile";
-	static final String PROP_OUTPUT_CONN_PROP_PREFIX = "sqldump.schemadump.output.connpropprefix";
+	@Deprecated static final String PROP_OUTPUTFILE = "sqldump.outputfile";
+	static final String PROP_OUTPUT_CONN_PROP_PREFIX = PREFIX+".output.connpropprefix";
 
-	public static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 	static final String PROP_DO_SCHEMADUMP_FKS_ATEND = "sqldump.doschemadump.fks.atend";
 
-	static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
-	static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
-	static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
+	static final String PROP_SCHEMADUMP_SYNONYM_AS_TABLE = PREFIX+".dumpsynonymastable";
+	static final String PROP_SCHEMADUMP_VIEW_AS_TABLE = PREFIX+".dumpviewastable";
+	static final String PROP_SCHEMADUMP_MATERIALIZEDVIEW_AS_TABLE = PREFIX+".dumpmaterializedviewastable";
 
-	public static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = "sqldump.schemadump.dumpdropstatements";
-	public static final String PROP_SCHEMADUMP_USECREATEORREPLACE = "sqldump.schemadump.usecreateorreplace";
-	public static final String PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS = "sqldump.schemadump.dumpscriptcomments";
-	public static final String PROP_SCHEMADUMP_DUMPREMARKS = "sqldump.schemadump.dumpremarks";
-	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = "sqldump.schemadump.quoteallsqlidentifiers";
-	public static final String PROP_SCHEMADUMP_INDEXORDERBY = "sqldump.schemadump.index.orderby";
-	public static final String PROP_SCHEMADUMP_FKs = "sqldump.schemadump.fks";
-	//static final String PROP_SCHEMADUMP_WRITEAPPEND = "sqldump.schemadump.writeappend";
+	@Deprecated static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
+	@Deprecated static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
+	@Deprecated static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
+
+	//also used by SQLDiff
+	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname"; //SQLDiff?
+	public static final String PROP_SCHEMADUMP_USECREATEORREPLACE = PREFIX+".usecreateorreplace";
+	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = PREFIX+".quoteallsqlidentifiers";
+
+	static final String PROP_SCHEMADUMP_DUMPDROPSTATEMENTS = PREFIX+".dumpdropstatements";
+	static final String PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS = PREFIX+".dumpscriptcomments";
+	static final String PROP_SCHEMADUMP_DUMPREMARKS = PREFIX+".dumpremarks";
+	static final String PROP_SCHEMADUMP_INDEXORDERBY = PREFIX+".index.orderby";
+	static final String PROP_SCHEMADUMP_PKS = PREFIX+".pks";
+	static final String PROP_SCHEMADUMP_FKs = PREFIX+".fks";
+	//static final String PROP_SCHEMADUMP_WRITEAPPEND = PREFIX+".writeappend";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
 	@Override
 	public void setProperties(Properties prop) {
 		//init control vars
-		doSchemaDumpPKs = Utils.getPropBool(prop, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
+		doSchemaDumpPKs = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_PKS, JDBCSchemaGrabber.PROP_DO_SCHEMADUMP_PKS, doSchemaDumpPKs);
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
 		boolean doSchemaDumpFKsAtEnd = Utils.getPropBool(prop, PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
 		dumpWithSchemaName = Utils.getPropBool(prop, PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
-		dumpSynonymAsTable = Utils.getPropBool(prop, PROP_DUMP_SYNONYM_AS_TABLE, dumpSynonymAsTable);
-		dumpViewAsTable = Utils.getPropBool(prop, PROP_DUMP_VIEW_AS_TABLE, dumpViewAsTable);
-		dumpMaterializedViewAsTable = Utils.getPropBool(prop, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable); //default should be 'true'?
+		dumpSynonymAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_SYNONYM_AS_TABLE, PROP_DUMP_SYNONYM_AS_TABLE, dumpSynonymAsTable);
+		dumpViewAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_VIEW_AS_TABLE, PROP_DUMP_VIEW_AS_TABLE, dumpViewAsTable);
+		dumpMaterializedViewAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_MATERIALIZEDVIEW_AS_TABLE, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable);
 		dumpDropStatements = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPDROPSTATEMENTS, dumpDropStatements);
 		dumpWithCreateOrReplace = Utils.getPropBool(prop, PROP_SCHEMADUMP_USECREATEORREPLACE, dumpWithCreateOrReplace);
 		dumpScriptComments = Utils.getPropBool(prop, PROP_SCHEMADUMP_DUMPSCRIPTCOMMENTS, dumpScriptComments);
