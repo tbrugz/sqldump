@@ -16,12 +16,14 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 
 import java.io.FileFilter;
@@ -652,10 +654,15 @@ public class Utils {
 		return DatatypeConverter.printBase64Binary(str.getBytes());
 	}
 	
+	static Set<String> deprecatedKeysWarned = new HashSet<String>();
+	
 	public static String getPropWithDeprecated(Properties p, String key, String deprecatedKey, String defaultValue) {
 		String ret = defaultValue;
 		if(Utils.propertyExists(p, deprecatedKey)) {
-			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			if(!deprecatedKeysWarned.contains(deprecatedKey)) { 
+				log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+				deprecatedKeysWarned.add(deprecatedKey);
+			}
 			ret = p.getProperty(deprecatedKey, defaultValue);
 		}
 		ret = p.getProperty(key, ret);
@@ -665,7 +672,10 @@ public class Utils {
 	public static boolean getPropBoolWithDeprecated(Properties p, String key, String deprecatedKey, boolean defaultValue) {
 		boolean ret = defaultValue;
 		if(Utils.propertyExists(p, deprecatedKey)) {
-			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			if(!deprecatedKeysWarned.contains(deprecatedKey)) { 
+				log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+				deprecatedKeysWarned.add(deprecatedKey);
+			}
 			ret = Utils.getPropBool(p, deprecatedKey, defaultValue);
 		}
 		ret = Utils.getPropBool(p, key, ret);
@@ -675,7 +685,10 @@ public class Utils {
 	public static Long getPropLongWithDeprecated(Properties p, String key, String deprecatedKey, Long defaultValue) {
 		Long ret = defaultValue;
 		if(Utils.propertyExists(p, deprecatedKey)) {
-			log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+			if(!deprecatedKeysWarned.contains(deprecatedKey)) { 
+				log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
+				deprecatedKeysWarned.add(deprecatedKey);
+			}
 			ret = Utils.getPropLong(p, deprecatedKey, defaultValue);
 		}
 		ret = Utils.getPropLong(p, key, ret);

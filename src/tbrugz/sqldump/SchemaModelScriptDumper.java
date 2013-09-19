@@ -141,8 +141,11 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	static final String PROP_SCHEMADUMP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = PREFIX+".outputobjectwithreferencingtable";
 	static final String PROP_SCHEMADUMP_FKS_ATEND =  PREFIX+".fks.atend";
 	
-	static final String PREFIX_OUTPATTERN_BYTYPE = "sqldump.outputfilepattern.bytype."; //XXX
-	static final String PREFIX_OUTPATTERN_MAPTYPE = "sqldump.outputfilepattern.maptype."; //XXX
+	@Deprecated static final String PREFIX_OUTPATTERN_BYTYPE = "sqldump.outputfilepattern.bytype.";
+	@Deprecated static final String PREFIX_OUTPATTERN_MAPTYPE = "sqldump.outputfilepattern.maptype.";
+
+	static final String PREFIX_SCHEMADUMP_OUTPATTERN_BYTYPE = PREFIX+".outputfilepattern.bytype.";
+	static final String PREFIX_SCHEMADUMP_OUTPATTERN_MAPTYPE = PREFIX+".outputfilepattern.maptype.";
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
@@ -213,7 +216,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		for(DBObjectType dbtype: DBObjectType.values()) {
 			DBObjectType typeMappedTo = null;
-			String typeMappedToStr = prop.getProperty(PREFIX_OUTPATTERN_MAPTYPE+dbtype.name());
+			
+			String typeMappedToStr = Utils.getPropWithDeprecated(prop, PREFIX_SCHEMADUMP_OUTPATTERN_MAPTYPE+dbtype.name(), PREFIX_OUTPATTERN_MAPTYPE+dbtype.name(), null);
 			if(typeMappedToStr==null) { continue; }
 			try {
 				typeMappedTo = DBObjectType.valueOf(typeMappedToStr);
@@ -483,7 +487,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		DBObjectType mappedObjectType = mappingBetweenDBObjectTypes.get(objectType);
 		if(mappedObjectType!=null) { objectType = mappedObjectType; }
 		
-		String outFilePattern = prop.getProperty(PREFIX_OUTPATTERN_BYTYPE+objectType.name());
+		String outFilePattern = Utils.getPropWithDeprecated(prop, PREFIX_SCHEMADUMP_OUTPATTERN_BYTYPE+objectType.name(), PREFIX_OUTPATTERN_BYTYPE+objectType.name(), null);
 		if(outFilePattern==null) {
 			outFilePattern = mainOutputFilePattern;
 		}
