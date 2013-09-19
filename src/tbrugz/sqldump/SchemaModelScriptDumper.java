@@ -122,9 +122,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	@Deprecated static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
 	@Deprecated static final String PROP_DUMP_VIEW_AS_TABLE = "sqldump.dumpviewastable";
 	@Deprecated static final String PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE = "sqldump.dumpmaterializedviewastable";
+	@Deprecated static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname";
 
 	//also used by SQLDiff
-	static final String PROP_DUMP_WITH_SCHEMA_NAME = "sqldump.dumpwithschemaname"; //XXX SQLDiff should use this?
+	static final String PROP_SCHEMADUMP_DUMP_WITH_SCHEMA_NAME = PREFIX+".dumpwithschemaname"; //XXX SQLDiff should use this?
 	public static final String PROP_SCHEMADUMP_USECREATEORREPLACE = PREFIX+".usecreateorreplace";
 	public static final String PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS = PREFIX+".quoteallsqlidentifiers";
 
@@ -140,7 +141,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	static final String PROP_SCHEMADUMP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = PREFIX+".outputobjectwithreferencingtable";
 	static final String PROP_SCHEMADUMP_FKS_ATEND =  PREFIX+".fks.atend";
 	
-	static final String PREFIX_OUTPATTERN_BYTYPE = "sqldump.outputfilepattern.bytype";
+	static final String PREFIX_OUTPATTERN_BYTYPE = "sqldump.outputfilepattern.bytype."; //XXX
+	static final String PREFIX_OUTPATTERN_MAPTYPE = "sqldump.outputfilepattern.maptype."; //XXX
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
@@ -151,7 +153,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		//XXX doSchemaDumpFKs = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_FKS, "").equals("true");
 		boolean doSchemaDumpFKsAtEnd = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_FKS_ATEND, PROP_DO_SCHEMADUMP_FKS_ATEND, !dumpFKsInsideTable);
 		//XXX doSchemaDumpGrants = prop.getProperty(SQLDataDump.PROP_DO_SCHEMADUMP_GRANTS, "").equals("true");
-		dumpWithSchemaName = Utils.getPropBool(prop, PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
+		dumpWithSchemaName = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_DUMP_WITH_SCHEMA_NAME, PROP_DUMP_WITH_SCHEMA_NAME, dumpWithSchemaName);
 		dumpSynonymAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_SYNONYM_AS_TABLE, PROP_DUMP_SYNONYM_AS_TABLE, dumpSynonymAsTable);
 		dumpViewAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_VIEW_AS_TABLE, PROP_DUMP_VIEW_AS_TABLE, dumpViewAsTable);
 		dumpMaterializedViewAsTable = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMADUMP_MATERIALIZEDVIEW_AS_TABLE, PROP_DUMP_MATERIALIZEDVIEW_AS_TABLE, dumpMaterializedViewAsTable);
@@ -211,7 +213,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		for(DBObjectType dbtype: DBObjectType.values()) {
 			DBObjectType typeMappedTo = null;
-			String typeMappedToStr = prop.getProperty("sqldump.outputfilepattern.maptype."+dbtype.name());
+			String typeMappedToStr = prop.getProperty(PREFIX_OUTPATTERN_MAPTYPE+dbtype.name());
 			if(typeMappedToStr==null) { continue; }
 			try {
 				typeMappedTo = DBObjectType.valueOf(typeMappedToStr);
@@ -481,7 +483,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		DBObjectType mappedObjectType = mappingBetweenDBObjectTypes.get(objectType);
 		if(mappedObjectType!=null) { objectType = mappedObjectType; }
 		
-		String outFilePattern = prop.getProperty(PREFIX_OUTPATTERN_BYTYPE+"."+objectType.name());
+		String outFilePattern = prop.getProperty(PREFIX_OUTPATTERN_BYTYPE+objectType.name());
 		if(outFilePattern==null) {
 			outFilePattern = mainOutputFilePattern;
 		}
