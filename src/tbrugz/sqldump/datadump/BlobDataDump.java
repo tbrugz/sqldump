@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,27 +32,32 @@ public class BlobDataDump extends DumpSyntax {
 	static final String BLOB_SYNTAX_ID = "blob";
 	static final String PROP_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern";
 	static final String PREFIX_BLOB_COLUMNS = "sqldump.datadump.blob.columns2dump@";
+	static final String PREFIX_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern@";
 	
 	static final String REGEX_COLUMNNAME = "\\[columnname\\]";
 	static final String REGEX_ROWID = "\\[rowid\\]";
+	static final String REGEX_COLUMNVALUE = "\\[col:(\\w+)\\]";
+	
+	static final Pattern PATTERN_COLUMNVALUE = Pattern.compile(REGEX_COLUMNVALUE);
 
 	// variables from properties
 	Properties prop;
-	String outFilePattern;
+	String propOutFilePattern;
 	
 	// variables from query/table
 	String tableName;
 	List<String> pkCols;
 	List<String> columnsToDump;
+	String outFilePattern;
 	
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	@Override
 	public void procProperties(Properties prop) {
-		outFilePattern = prop.getProperty(PROP_BLOB_OUTFILEPATTERN);
-		if(outFilePattern==null) {
-			log.warn("prop '"+PROP_BLOB_OUTFILEPATTERN+"' must be set");
+		propOutFilePattern = prop.getProperty(PROP_BLOB_OUTFILEPATTERN);
+		if(propOutFilePattern==null) {
+			log.warn("prop '"+PROP_BLOB_OUTFILEPATTERN+"' should be set");
 			//XXX: if not found, use DataDump.PROP_DATADUMP_OUTFILEPATTERN
 		}
 		this.prop = prop;
@@ -85,6 +91,7 @@ public class BlobDataDump extends DumpSyntax {
 		}
 		
 		columnsToDump = Utils.getStringListFromProp(prop, PREFIX_BLOB_COLUMNS+tableName, ",");
+		outFilePattern = prop.getProperty(PREFIX_BLOB_OUTFILEPATTERN+tableName, propOutFilePattern);
 	}
 
 	@Override
@@ -117,6 +124,18 @@ public class BlobDataDump extends DumpSyntax {
 					.replaceAll(REGEX_COLUMNNAME, Matcher.quoteReplacement(colName) ) //table may have more than 1 blob per row
 					.replaceAll(REGEX_ROWID, Matcher.quoteReplacement(rowid) ) //pkid? rowid?
 					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, BLOB_SYNTAX_ID);
+			if(PATTERN_COLUMNVALUE.matcher(filename).find()) {
+				//log.debug("blob filename: "+filename);
+				for(String col: lsColNames) {
+					//String pattStr = "\\[col:"+col+"\\]";
+					String pattStr = REGEX_COLUMNVALUE.replace("\\w+", col);
+					Matcher matcher = Pattern.compile(pattStr).matcher(filename);
+					//log.debug("partial blob filename: "+filename+"; next-col: "+col+" ; next-pattern: "+pattStr);
+					if(matcher.find()) {
+						filename = matcher.replaceAll(rs.getString(col));
+					}
+				}
+			}
 			log.debug("blob filename: "+filename+"; col: "+colName);
 			
 			//open file, open blob, write content, close both
