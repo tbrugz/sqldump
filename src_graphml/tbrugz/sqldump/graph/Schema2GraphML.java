@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.graphml.model.Edge;
 import tbrugz.graphml.model.Root;
 import tbrugz.graphml.model.Stereotyped;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
@@ -26,6 +25,7 @@ import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.Utils;
@@ -388,7 +388,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			dumpFormatClass = DEFAULT_DUMPFORMAT_CLASS;
 		}
 		
-		String schemaPattern = prop.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
+		String schemaPattern = Utils.getPropWithDeprecated(prop, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
 		schemaNamesList = new ArrayList<String>();
 		

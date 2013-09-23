@@ -5,8 +5,12 @@ public class Defs {
 
 	public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
+
+	// grabber properties
+	@Deprecated public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
+	public static final String PROP_SCHEMAGRAB_SCHEMANAMES = "sqldump.schemagrab.schemas";
 	
-	//program-defined 'special' properties
+	// program-defined 'special' properties
 	public static final String PROP_START_TIME_MILLIS = "sqlx.startTimeMillis";
 	
 	static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";

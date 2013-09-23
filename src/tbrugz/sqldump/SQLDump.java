@@ -57,13 +57,12 @@ public class SQLDump implements Executor {
 	public static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
-	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass";
-	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses";
+	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass"; // sqldump.grabclass?
+	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses"; // sqldump.dumpclasses?
 	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";  //.(pre)processors?
 	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
 
 	public static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
-	public static final String PROP_DUMPSCHEMAPATTERN = "sqldump.dumpschemapattern";
 	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
 	static final String PROP_DATADUMP_XTRASYNTAXES = "sqldump.datadump.xtrasyntaxes";

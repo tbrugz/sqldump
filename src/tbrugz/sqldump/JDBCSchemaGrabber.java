@@ -41,6 +41,7 @@ import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -255,7 +256,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		
 		SchemaModel schemaModel = new SchemaModel();
-		String schemaPattern = papp.getProperty(SQLDump.PROP_DUMPSCHEMAPATTERN);
+		String schemaPattern = Utils.getPropWithDeprecated(papp, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
@@ -274,8 +275,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(schemaPattern!=null) {
 				log.info("setting suggested schema: '"+schemaPattern+"'"
 						+(equalsUsername?" (same as username)":"") );
-				papp.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
-				propOriginal.setProperty(SQLDump.PROP_DUMPSCHEMAPATTERN, schemaPattern);
+				papp.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
+				propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 			}
 		}
 
