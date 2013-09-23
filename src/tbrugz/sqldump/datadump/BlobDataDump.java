@@ -30,13 +30,19 @@ public class BlobDataDump extends DumpSyntax {
 	
 	static final String BLOB_SYNTAX_ID = "blob";
 	static final String PROP_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern";
+	static final String PREFIX_BLOB_COLUMNS = "sqldump.datadump.blob.columns2dump@";
 	
 	static final String REGEX_COLUMNNAME = "\\[columnname\\]";
 	static final String REGEX_ROWID = "\\[rowid\\]";
 
+	// variables from properties
+	Properties prop;
+	String outFilePattern;
+	
+	// variables from query/table
 	String tableName;
 	List<String> pkCols;
-	String outFilePattern;
+	List<String> columnsToDump;
 	
 	List<String> lsColNames = new ArrayList<String>();
 	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
@@ -48,6 +54,7 @@ public class BlobDataDump extends DumpSyntax {
 			log.warn("prop '"+PROP_BLOB_OUTFILEPATTERN+"' must be set");
 			//XXX: if not found, use DataDump.PROP_DATADUMP_OUTFILEPATTERN
 		}
+		this.prop = prop;
 	}
 
 	@Override
@@ -76,6 +83,8 @@ public class BlobDataDump extends DumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
+		
+		columnsToDump = Utils.getStringListFromProp(prop, PREFIX_BLOB_COLUMNS+tableName, ",");
 	}
 
 	@Override
@@ -95,20 +104,24 @@ public class BlobDataDump extends DumpSyntax {
 		}
 		String rowid = Utils.join(pkVals, ROWID_JOINER);
 		for(int i=0;i<lsColNames.size();i++) {
+			String colName = lsColNames.get(i);
 			Class<?> c = lsColTypes.get(i);
-			if(! c.equals(Blob.class)) { continue; }
+			if(columnsToDump!=null) {
+				if(!columnsToDump.contains(colName)) { continue; } 
+			}
+			else if(! c.equals(Blob.class)) { continue; } //Clob also?
 			
 			String filename = outFilePattern
 					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
 					//.replaceAll("${pkcolumnnames}", "")
-					.replaceAll(REGEX_COLUMNNAME, Matcher.quoteReplacement(lsColNames.get(i)) ) //table may have more than 1 blob per row
+					.replaceAll(REGEX_COLUMNNAME, Matcher.quoteReplacement(colName) ) //table may have more than 1 blob per row
 					.replaceAll(REGEX_ROWID, Matcher.quoteReplacement(rowid) ) //pkid? rowid?
 					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, BLOB_SYNTAX_ID);
-			log.debug("blob filename: "+filename+"; col: "+lsColNames.get(i));
+			log.debug("blob filename: "+filename+"; col: "+colName);
 			
 			//open file, open blob, write content, close both
 			try {
-				InputStream is = rs.getBinaryStream(lsColNames.get(i));
+				InputStream is = rs.getBinaryStream(colName);
 				File dir = new File(filename).getParentFile();
 				dir.mkdirs();
 				FileOutputStream fos = new FileOutputStream(filename);
@@ -117,7 +130,8 @@ public class BlobDataDump extends DumpSyntax {
 				fos.close();
 			}
 			catch(SQLException e) {
-				log.warn("sql error: "+e.getMessage()+"; errcode="+e.getErrorCode()+"; mixin BlobDataDump with other dumpers may cause problems");
+				log.warn("sql error: "+e.getMessage()+"; errcode="+e.getErrorCode()+"; mixing BlobDataDump with other dumpers may cause problems");
+				log.debug("sql error: "+e.getMessage(), e);
 				pkCols = null; //warn only once per table/query
 			}
 		}
