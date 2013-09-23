@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -453,6 +455,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			
 			//dimensions
 			for(FK fk: fks) {
+				//XXX: what if multiple FKs point to same table?
 				procDimension(cube, fk, degenerateDimCandidates, schemaModel);
 			}
 			
@@ -527,6 +530,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		schemaModel.getForeignKeys().removeAll(addFKs);
 		
 		setPropertiesBeforeSerialization(schema);
+		
+		cleanUpBeforeSerialization(schema);
 		
 		try {
 			File fout = new File(fileOutput);
@@ -722,10 +727,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	HierarchyLevelData getHierLevelData(Table pkTable, FK fk) {
 		HierarchyLevelData level = new HierarchyLevelData();
-		level.levelName = pkTable.getName();
+		String tableName = pkTable.getName();
 		String schemaName = pkTable.getSchemaName();
 		
-		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnamecol");
+		String levelNameColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(tableName)+".levelnamecol");
 		if(levelNameColumn!=null) {
 			Column c = pkTable.getColumnIgnoreCase(levelNameColumn);
 			if(c!=null) {
@@ -747,9 +752,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 		}
 		String pkColStr = fk.getPkColumns().iterator().next();
+		String fkColStr = fk.getFkColumns().iterator().next();
 		level.levelColumn = pkColStr;
 		level.levelType = "Regular";
-		level.joinLeftKey = fk.getFkColumns().iterator().next();
+		level.joinLeftKey = fkColStr;
 		level.joinRightKey = pkColStr;
 		//level.joinPKTable = fk.pkTable;
 		level.levelTable = fk.getPkTable();
@@ -758,7 +764,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		if(setLevelType) { setLevelType(level, pkCol); }
 
 		// parent-child hierarchies properties
-		String levelParentColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelparentcol");
+		String levelParentColumn = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(tableName)+".levelparentcol");
 		if(levelParentColumn!=null) {
 			level.recursiveHierarchy = new RecursiveHierData();
 			level.recursiveHierarchy.levelParentColumn = levelParentColumn;
@@ -766,17 +772,19 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			getParentChildHierInfo(level);
 		}
 		
+		level.levelName = tableName;
+		
 		log.debug("fk: "+fk.toStringFull());
 		
 		return level;
 	}
 	
 	void getParentChildHierInfo(HierarchyLevelData level) {
-		String levelNullParentVal = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".levelnullparentvalue");
+		String levelNullParentVal = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelTable)+".levelnullparentvalue");
 		if(levelNullParentVal!=null) {
 			level.recursiveHierarchy.levelNullParentValue = levelNullParentVal;
 		}
-		String levelClosure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelName)+".closure");
+		String levelClosure = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(level.levelTable)+".closure");
 		if(levelClosure!=null) {
 			String[] parts = levelClosure.split(":"); //table:parent-column:child-column
 			level.recursiveHierarchy.closureTable = parts[0];
@@ -800,6 +808,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		
 		HierarchyLevelData getHierLevelData = getHierLevelData(pkTable, fk);
+		//XXX if hierLevel with same name already exists, rename?
 		thisLevels.add(getHierLevelData);
 
 		for(FK fkInt: schemaModel.getForeignKeys()) {
@@ -858,7 +867,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 					mondrian.olap.MondrianDef.Table table = new mondrian.olap.MondrianDef.Table();
 					table.schema = sqlIdDecorator.get( l.levelTableSchema );
-					table.name = sqlIdDecorator.get( l.levelName );
+					table.name = sqlIdDecorator.get( l.levelTable );
 
 					Join join = new Join();
 					join.left = table; //XXX: left or right?
@@ -1095,6 +1104,45 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 							l.internalType = internalType;
 						}
 					}
+				}
+			}
+		}
+	}
+	
+	void cleanUpBeforeSerialization(Schema schema) {
+		if(schema.cubes==null) { return; }
+		for(Cube cube: schema.cubes) {
+			
+			Map<String, Dimension> cubeDims = new HashMap<String, Dimension>();
+		
+			if(cube.dimensions==null) { continue; }
+			for(CubeDimension cdim: cube.dimensions) {
+				
+				if(!(cdim instanceof Dimension)) { continue; }
+				Dimension dim = (Dimension) cdim;
+				
+				//test for duplicated Dims
+				Dimension prevDim = cubeDims.put(dim.name, dim);
+				if(prevDim!=null) {
+					log.info("duplicated dim-name found: renaming dim '"+dim.name+"' to '"+dim.foreignKey+"' (other was '"+prevDim.foreignKey+"')");
+					dim.name = dim.foreignKey;
+					prevDim.name = prevDim.foreignKey;
+				}
+				
+				Map<String, Hierarchy> dimHiers = new HashMap<String, Hierarchy>();
+				
+				if(dim.hierarchies==null) { continue; }
+				for(Hierarchy hier: dim.hierarchies) {
+					
+					//test for duplicated Hierarchies
+					Hierarchy prevHier = dimHiers.put(hier.name, hier);
+					if(prevHier!=null) {
+						log.info("duplicated hier-name found: '"+hier.name+"' [cube: '"+cube.name+"']");
+					}
+					
+					/*if(hier.levels==null) { continue; }
+					for(Level l: hier.levels) {
+					}*/
 				}
 			}
 		}
