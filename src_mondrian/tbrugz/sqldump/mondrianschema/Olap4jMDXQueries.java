@@ -69,7 +69,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 			return;
 		}
 		if(fileOutputPattern==null) {
-			String message = "no outfilepattern defined (suffix '"+SUFFIX_MDXQUERIES_OUTFILEPATTERN+"')";
+			String message = "no '"+SUFFIX_MDXQUERIES_OUTFILEPATTERN+"' prop defined (prefix is '"+PREFIX_MDXQUERIES+"')";
 			log.warn(message);
 			if(failonerror) {
 				throw new ProcessingException(message);

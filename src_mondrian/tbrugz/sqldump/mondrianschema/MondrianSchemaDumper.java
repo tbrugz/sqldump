@@ -903,7 +903,6 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			
 			//Levels
-			StringBuilder sbHierName = new StringBuilder();
 			int levelCounter = 0;
 			for(int i = thisLevels.size()-1; i>=0; i--) {
 				levelCounter++;
@@ -923,12 +922,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					l.uniqueMembers = true;
 				}
 				hier.levels = (Level[]) concatenate(hier.levels, new Level[]{l});
-				if(levelCounter > 1) {
-					sbHierName.append("+");
-				}
-				sbHierName.append(l.name);
 			}
-			hier.name = sbHierName.toString();
+			setupHierarchyName(hier);
 			log.debug("add hier: "+hier.name);
 			
 			if(addDimForEachHierarchy) {
@@ -1079,6 +1074,14 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public void setPropertiesPrefix(String propertiesPrefix) {
 	}
 	
+	void setupHierarchyName(Hierarchy hier) {
+		List<String> levels = new ArrayList<String>();
+		for(Level l: hier.levels) {
+			levels.add(l.name);
+		}
+		hier.name = Utils.join(levels, "+");
+	}
+	
 	void setPropertiesBeforeSerialization(Schema schema) {
 		if(schema.cubes==null) { return; }
 		for(Cube cube: schema.cubes) {
@@ -1124,9 +1127,22 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				//test for duplicated Dims
 				Dimension prevDim = cubeDims.put(dim.name, dim);
 				if(prevDim!=null) {
-					log.info("duplicated dim-name found: renaming dim '"+dim.name+"' to '"+dim.foreignKey+"' (other was '"+prevDim.foreignKey+"')");
+					log.info("duplicated dim-name found: renaming dim '"+dim.name+"' to FK column '"+dim.foreignKey+"' (other FK column is '"+prevDim.foreignKey+"')");
 					dim.name = dim.foreignKey;
 					prevDim.name = prevDim.foreignKey;
+					// renaming bottom level names & hierarchy names...
+					for(Hierarchy h: dim.hierarchies) {
+						int idx = h.levels.length-1;
+						log.info("duplicated dim-name found: renaming dim level '"+h.levels[idx].name+"' to '"+dim.foreignKey+"'");
+						h.levels[idx].name = dim.foreignKey; 
+						setupHierarchyName(h);
+					}
+					for(Hierarchy h: prevDim.hierarchies) {
+						int idx = h.levels.length-1;
+						log.info("duplicated dim-name found: renaming dim level '"+h.levels[idx].name+"' to '"+dim.foreignKey+"'");
+						h.levels[idx].name = prevDim.foreignKey; 
+						setupHierarchyName(h);
+					}
 				}
 				
 				Map<String, Hierarchy> dimHiers = new HashMap<String, Hierarchy>();
