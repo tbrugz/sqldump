@@ -179,6 +179,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_FACTCOUNTMEASURE = "sqldump.mondrianschema.factcountmeasure";
 	public static final String PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER = "sqldump.mondrianschema.detectparentchild";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK = "sqldump.mondrianschema.ignoremeasurecolumnsbelongingtopk";
+	public static final String PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN = "sqldump.mondrianschema.levelname.pattern";
 	
 	public static final String SUFFIX_MEASURECOLSREGEX = ".measurecolsregex";
 
@@ -187,6 +188,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	//possible aggregate functions: "sum", "count", "min", "max", "avg" and "distinct-count" ; mode, median, first, last, concat?
 	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
+	
+	static String PATTERN_STR_TABLENAME = "\\[tablename\\]";
+	static String PATTERN_STR_PKCOLUMN = "\\[pkcolumn\\]";
+	static String PATTERN_STR_FKCOLUMN = "\\[fkcolumn\\]";
+	
+	static String DEFAULT_LEVELNAME_PATTERN = "[tablename]";
 	
 	static Log log = LogFactory.getLog(MondrianSchemaDumper.class);
 	
@@ -214,6 +221,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
 	StringDecorator sqlIdDecorator = null;
+	String levelNamePattern = DEFAULT_LEVELNAME_PATTERN;
 	
 	List<String> preferredLevelNameColumns = new ArrayList<String>();
 	List<String> defaultAggregators = new ArrayList<String>();
@@ -293,6 +301,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		
 		validateSchema = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_VALIDATE, validateSchema);
+		levelNamePattern = prop.getProperty(PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN, levelNamePattern);
 	}
 
 	@Override
@@ -772,7 +781,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			getParentChildHierInfo(level);
 		}
 		
-		level.levelName = tableName;
+		//levelnamepattern may use [tablename];[pkcolumn];[fkcolumn]
+		level.levelName = getLevelName(tableName, pkColStr, fkColStr);
 		
 		log.debug("fk: "+fk.toStringFull());
 		
@@ -1080,6 +1090,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			levels.add(l.name);
 		}
 		hier.name = Utils.join(levels, "+");
+	}
+	
+	String getLevelName(String tableName, String pkColumnName, String fkColumnName) {
+		return levelNamePattern.replaceAll(PATTERN_STR_TABLENAME, tableName)
+			.replaceAll(PATTERN_STR_PKCOLUMN, pkColumnName)
+			.replaceAll(PATTERN_STR_FKCOLUMN, fkColumnName);
 	}
 	
 	void setPropertiesBeforeSerialization(Schema schema) {

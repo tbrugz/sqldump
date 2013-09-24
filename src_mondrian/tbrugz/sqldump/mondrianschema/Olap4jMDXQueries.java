@@ -48,6 +48,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	boolean validate = true;
 	String fileOutputPattern = null;
 	boolean compactMode = false;
+	boolean mayCreateOlapConnection = true; // add prop for mayCreateOlapConnection?
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -60,6 +61,15 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	
 	@Override
 	public void process() {
+		if(!Olap4jUtil.isOlapConnection(conn) && mayCreateOlapConnection) {
+			Olap4jConnector connector = new Olap4jConnector();
+			connector.setFailOnError(failonerror);
+			connector.setProperties(prop);
+			//connector.setSchemaModel(model);
+			connector.setConnection(conn);
+			connector.process();
+			conn = connector.getConnection();
+		}
 		if(!Olap4jUtil.isOlapConnection(conn)) {
 			String message = "connection is not instance of OlapConnection";
 			log.warn(message);
@@ -68,6 +78,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 			}
 			return;
 		}
+		
 		if(fileOutputPattern==null) {
 			String message = "no '"+SUFFIX_MDXQUERIES_OUTFILEPATTERN+"' prop defined (prefix is '"+PREFIX_MDXQUERIES+"')";
 			log.warn(message);
