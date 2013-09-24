@@ -33,6 +33,7 @@ public class MaterializedView extends View {
 					+(refreshMode!=null?" on "+refreshMode.toLowerCase():""));
 			}
 		}
+		//with primary key?
 		//rewrite
 		if(rewriteEnabled) {
 			sb.append("\nenable query rewrite");

@@ -59,7 +59,7 @@ public class IOUtilTest {
 	@Test
 	public void testPrintBase64() {
 		String s = Utils.printBase64("abcd");
-		System.err.println("s: "+s);
+		System.out.println("s: "+s);
 		Assert.assertEquals("YWJjZA==", s);
 	}
 	
