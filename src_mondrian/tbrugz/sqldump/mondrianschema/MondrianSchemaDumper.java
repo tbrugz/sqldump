@@ -862,7 +862,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		
 		if(!isLevelLeaf) { return; }
-		{
+		makeLeafLevel(pkTable, cube, dim, thisLevels);
+	}
+	
+	void makeLeafLevel(Table pkTable, Cube cube, Dimension dim, List<HierarchyLevelData> thisLevels) throws XOMException {
 			Hierarchy hier = new Hierarchy();
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			hier.primaryKey = sqlIdDecorator.get( thisLevels.get(0).levelColumn );
@@ -871,8 +874,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			//Table / Join
 			if(thisLevels.size()==1) {
 				mondrian.olap.MondrianDef.Table table = new mondrian.olap.MondrianDef.Table();
-				table.schema = schemaName;
-				table.name = sqlIdDecorator.get( pkTableName );
+				table.schema = pkTable.getSchemaName();
+				table.name = sqlIdDecorator.get( pkTable.getName() );
 				
 				hier.relation = table;
 			}
@@ -956,7 +959,6 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			else {
 				dim.hierarchies = concatenate(dim.hierarchies, new Hierarchy[]{hier});
 			}
-		}
 	}
 	
 	boolean isCycle(List<HierarchyLevelData> hierdata) {
