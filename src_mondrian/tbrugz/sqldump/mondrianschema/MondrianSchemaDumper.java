@@ -180,6 +180,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_DETECTPARENTCHILDHIER = "sqldump.mondrianschema.detectparentchild";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK = "sqldump.mondrianschema.ignoremeasurecolumnsbelongingtopk";
 	public static final String PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN = "sqldump.mondrianschema.levelname.pattern";
+	public static final String PROP_MONDRIAN_SCHEMA_SNOWFLAKE_MAXLEVEL = "sqldump.mondrianschema.snowflake.maxlevel";
 	
 	public static final String SUFFIX_MEASURECOLSREGEX = ".measurecolsregex";
 
@@ -217,6 +218,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	boolean detectParentChildHierarchies = true;
 	boolean setLevelType = true; //XXX: add prop?
 	boolean ignoreMeasureColumnsBelongingToPK = true;
+	int maxSnowflakeLevel = -1;
 	
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
@@ -302,6 +304,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		validateSchema = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_VALIDATE, validateSchema);
 		levelNamePattern = prop.getProperty(PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN, levelNamePattern);
+		maxSnowflakeLevel = Utils.getPropInt(prop, PROP_MONDRIAN_SCHEMA_SNOWFLAKE_MAXLEVEL, maxSnowflakeLevel);
 	}
 
 	@Override
@@ -840,6 +843,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				}
 			}
 			else {
+				if(maxSnowflakeLevel>=0 && thisLevels.size()>=maxSnowflakeLevel) {
+					log.debug("max snowflake level reached ["+maxSnowflakeLevel+"], levels: "+thisLevels); //info or debug?
+				}
+				else {
 				if(!isCycle(thisLevels)) {
 					isLevelLeaf = false;
 					procHierRecursive(schemaModel, cube, dim, fkInt, thisLevels);
@@ -847,6 +854,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				else {
 					log.debug("cycle detected: "+thisLevels);
 					return;
+				}
 				}
 				//isLeaf = false;
 				//fks.add(fkInt);
