@@ -839,7 +839,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					getParentChildHierInfo(getHierLevelData);
 				}
 				else {
-					isLevelLeaf = false;
+					//isLevelLeaf = false;
+					log.debug("leaf-level auto-relation ignored [cube:"+cube.name+"]: levels="+thisLevels+" ; fkcol="+fkInt.getFkColumns().get(0));
 				}
 			}
 			else {
