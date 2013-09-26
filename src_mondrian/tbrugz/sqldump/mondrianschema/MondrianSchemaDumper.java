@@ -846,15 +846,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				if(maxSnowflakeLevel>=0 && thisLevels.size()>=maxSnowflakeLevel) {
 					log.debug("max snowflake level reached ["+maxSnowflakeLevel+"], levels: "+thisLevels); //info or debug?
 				}
+				else if(isCycle(thisLevels)) {
+					log.debug("cycle detected: "+thisLevels);
+				}
 				else {
-				if(!isCycle(thisLevels)) {
 					isLevelLeaf = false;
 					procHierRecursive(schemaModel, cube, dim, fkInt, thisLevels);
-				}
-				else {
-					log.debug("cycle detected: "+thisLevels);
-					return;
-				}
 				}
 				//isLeaf = false;
 				//fks.add(fkInt);
