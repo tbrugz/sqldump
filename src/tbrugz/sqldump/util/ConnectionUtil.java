@@ -50,6 +50,7 @@ public class ConnectionUtil {
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 		String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
 		String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
+
 		Connection conn = null;
 		if(connectionDataSource!=null) {
 			conn = getConnectionFromDataSource(connectionDataSource);
@@ -57,6 +58,7 @@ public class ConnectionUtil {
 		else {
 			conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
 		}
+		if(conn==null) { throw new IllegalStateException("connection is null!"); }
 		
 		if(log.isDebugEnabled()) {
 			try {
@@ -77,8 +79,6 @@ public class ConnectionUtil {
 				log.warn("error on Connection.getClientInfo: "+e);
 			}
 		}
-		
-		if(conn==null) { return null; }
 		
 		conn.setAutoCommit(autoCommit);
 		

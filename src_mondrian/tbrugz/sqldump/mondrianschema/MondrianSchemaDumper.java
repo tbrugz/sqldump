@@ -1059,12 +1059,14 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 	}
 	
+	@Deprecated
 	void jaxbOutput(Object o, File fileOutput) throws JAXBException {
 		//JAXBContext jc = JAXBContext.newInstance( "tbrugz.mondrian.xsdmodel" );
 		JAXBContext jc = JAXBContext.newInstance( "mondrian.olap" );
 		
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);		
+		log.info("dumping mondrian schema model...");
 		m.marshal(o, fileOutput);
 		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
 	}
@@ -1072,6 +1074,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	void xomOutput(ElementDef e, File fileOutput) throws FileNotFoundException {
 		PrintWriter pw = new PrintWriter(fileOutput);
 		XMLOutput out = new XMLOutput(pw);
+		//log.info("dumping mondrian schema model to '"+fileOutput.getAbsolutePath()+"'");
+		log.info("dumping mondrian schema model...");
 		e.displayXML(out, 4);
 		pw.close();
 		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
@@ -1163,7 +1167,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					}
 					for(Hierarchy h: prevDim.hierarchies) {
 						int idx = h.levels.length-1;
-						log.info("duplicated dim-name found: renaming dim level '"+h.levels[idx].name+"' to '"+dim.foreignKey+"'");
+						log.info("duplicated dim-name found: renaming prev dim level '"+h.levels[idx].name+"' to '"+prevDim.foreignKey+"'");
 						h.levels[idx].name = prevDim.foreignKey; 
 						setupHierarchyName(h);
 					}
