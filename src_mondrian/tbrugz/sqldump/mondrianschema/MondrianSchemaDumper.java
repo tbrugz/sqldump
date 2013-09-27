@@ -466,9 +466,14 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			
 			//dimensions
+			if(maxSnowflakeLevel!=0) {
 			for(FK fk: fks) {
 				//XXX: what if multiple FKs point to same table?
 				procDimension(cube, fk, degenerateDimCandidates, schemaModel);
+			}
+			}
+			else if(fks.size()>0) {
+				log.info("max snowflake level is 0: only degenerated dimensions will be created [cube:"+cube.name+"]");
 			}
 			
 			//degenerate dimensions - see: http://mondrian.pentaho.com/documentation/schema.php#Degenerate_dimensions
