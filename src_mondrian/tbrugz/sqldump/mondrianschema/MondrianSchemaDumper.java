@@ -328,6 +328,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		Schema schema = new Schema();
 		schema.name = mondrianSchemaName;
+		//XXX schema.metamodelVersion ? "3.6"?
 		
 		//XXX~: snowflake
 		//XXX: virtual cubes / shared dimensions
@@ -820,9 +821,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		String pkTableName = fk.getPkTable();
 		String schemaName = fk.getPkTableSchemaName();
 
-		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, fk.getPkTable());
+		Table pkTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, pkTableName);
 		if(pkTable==null) {
-			log.warn("table not found: "+schemaName+"."+fk.getPkTable());
+			log.warn("table not found: "+schemaName+"."+pkTableName);
 			return;
 		}
 		
@@ -865,8 +866,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 		}
 		
-		if(!isLevelLeaf) { return; }
-		makeLeafLevel(pkTable, cube, dim, thisLevels);
+		//boolean lowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(pkTableName)+".addLowerLevelsAsDistinctDims");
+		if(isLevelLeaf) {// || lowerLevelsAsDistinctDim) {
+			makeLeafLevel(pkTable, cube, dim, thisLevels);
+		}
 	}
 	
 	void makeLeafLevel(Table pkTable, Cube cube, Dimension dim, List<HierarchyLevelData> thisLevels) throws XOMException {
