@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -868,12 +869,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		//boolean lowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(pkTableName)+".addLowerLevelsAsDistinctDims");
 		if(isLevelLeaf) {// || lowerLevelsAsDistinctDim) {
-			Hierarchy hier = makeLeafLevel(pkTable, thisLevels);
-			addHierToDim(cube, dim, hier);			
+			List<Hierarchy> hiers = makeHierarchies(pkTable, thisLevels);
+			addHiersToDim(cube, dim, hiers.toArray(new Hierarchy[0]));			
 		}
 	}
 	
-	Hierarchy makeLeafLevel(Table pkTable, List<HierarchyLevelData> thisLevels) throws XOMException {
+	List<Hierarchy> makeHierarchies(Table pkTable, List<HierarchyLevelData> thisLevels) throws XOMException {
 			Hierarchy hier = new Hierarchy();
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			hier.primaryKey = sqlIdDecorator.get( thisLevels.get(0).levelColumn );
@@ -932,6 +933,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 			
 			//Levels
+			List<Hierarchy> hiers = new ArrayList<Hierarchy>();
 			int levelCounter = 0;
 			for(int i = thisLevels.size()-1; i>=0; i--) {
 				levelCounter++;
@@ -949,8 +951,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					else {
 						parentLevelPairs = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels", ",");
 					}
+					
+					Hierarchy hierLower = cloneHierarchy(hier);
+					hiers.add(hierLower);
+					
 					if(parentLevelPairs!=null) {
-						numOfParentLevels = createParentLevels(hier, pkTable, parentLevelPairs);
+						numOfParentLevels = createParentLevels(hierLower, pkTable, parentLevelPairs);
 					}
 				}
 				
@@ -962,28 +968,47 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					if(lowerLevelsAreUnique || ((numOfParentLevels==0) && (levelCounter == 1))) {
 						l.uniqueMembers = true;
 					}
-					hier.levels = concatenate(hier.levels, new Level[]{l});
+					for(Hierarchy h: hiers) {
+						h.levels = concatenate(h.levels, new Level[]{l});
+					}
 				}
 			}
-			setupHierarchyName(hier);
-			log.debug("add hier: "+hier.name);
 			
-			return hier;
+			for(Hierarchy h: hiers) {
+				setupHierarchyName(h);
+				log.debug("add hier: "+h.name);
+			}
+			
+			return hiers;
 	}
 	
-	void addHierToDim(Cube cube, Dimension dim, Hierarchy hier) {
+	void addHiersToDim(Cube cube, Dimension dim, Hierarchy[] hiers) {
 			if(addDimForEachHierarchy) {
 				Dimension newDim = new Dimension();
 				//dim.setName(dimName);
 				newDim.foreignKey = sqlIdDecorator.get( dim.foreignKey );
 				newDim.type = dim.type;
-				newDim.hierarchies = concatenate(newDim.hierarchies, new Hierarchy[]{hier});
-				newDim.name = hier.name;
+				newDim.hierarchies = concatenate(newDim.hierarchies, hiers);
+				newDim.name = hiers[0].name; //longest name...
 				cube.dimensions = concatenate(cube.dimensions, new Dimension[]{newDim});
 			}
 			else {
-				dim.hierarchies = concatenate(dim.hierarchies, new Hierarchy[]{hier});
+				dim.hierarchies = concatenate(dim.hierarchies, hiers);
 			}
+	}
+	
+	Hierarchy cloneHierarchy(Hierarchy hier) {
+		Hierarchy newhier = new Hierarchy();
+		newhier.primaryKey = hier.primaryKey;
+		newhier.hasAll = hier.hasAll;
+		newhier.relation = hier.relation;
+		newhier.primaryKeyTable = hier.primaryKeyTable;
+		newhier.name = hier.name;
+		//newhier.levels = hier.levels; //cloned it
+		if(hier.levels!=null) {
+			newhier.levels = Arrays.copyOf(hier.levels, hier.levels.length);
+		}
+		return newhier;
 	}
 	
 	boolean isCycle(List<HierarchyLevelData> hierdata) {
