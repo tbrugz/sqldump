@@ -868,11 +868,12 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		//boolean lowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(pkTableName)+".addLowerLevelsAsDistinctDims");
 		if(isLevelLeaf) {// || lowerLevelsAsDistinctDim) {
-			makeLeafLevel(pkTable, cube, dim, thisLevels);
+			Hierarchy hier = makeLeafLevel(pkTable, thisLevels);
+			addHierToDim(cube, dim, hier);			
 		}
 	}
 	
-	void makeLeafLevel(Table pkTable, Cube cube, Dimension dim, List<HierarchyLevelData> thisLevels) throws XOMException {
+	Hierarchy makeLeafLevel(Table pkTable, List<HierarchyLevelData> thisLevels) throws XOMException {
 			Hierarchy hier = new Hierarchy();
 			//hier.setPrimaryKey(fk.pkColumns.iterator().next());
 			hier.primaryKey = sqlIdDecorator.get( thisLevels.get(0).levelColumn );
@@ -967,6 +968,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			setupHierarchyName(hier);
 			log.debug("add hier: "+hier.name);
 			
+			return hier;
+	}
+	
+	void addHierToDim(Cube cube, Dimension dim, Hierarchy hier) {
 			if(addDimForEachHierarchy) {
 				Dimension newDim = new Dimension();
 				//dim.setName(dimName);
