@@ -941,15 +941,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				boolean addLowestLevel = true;
 				if(levelCounter == 1) {
 					String levelTable = thisLevels.get(i).levelTable;
-					String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".levels");
-					if(parentLevels!=null) {
+					List<String> parentLevelPairs = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".levels", ",");
+					if(parentLevelPairs!=null) {
 						addLowestLevel = false;
 					}
 					else {
-						parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
+						parentLevelPairs = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels", ",");
 					}
-					if(parentLevels!=null) {
-						numOfParentLevels = createParentLevels(hier, pkTable, parentLevels);
+					if(parentLevelPairs!=null) {
+						numOfParentLevels = createParentLevels(hier, pkTable, parentLevelPairs);
 					}
 				}
 				
@@ -1020,11 +1020,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		return lret;
 	}
 	
-	int createParentLevels(Hierarchy hier, Table table, String parentLevels) throws XOMException {
+	int createParentLevels(Hierarchy hier, Table table, List<String> levelPairs) throws XOMException {
 		/*if(parentLevels==null) {
 			return 0;
 		}*/
-		String[] levelPairs = parentLevels.split(",");
+		//String[] levelPairs = parentLevels.split(",");
 		int count = 0;
 		for(String pair: levelPairs) {
 			count++;
