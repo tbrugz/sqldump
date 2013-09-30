@@ -935,18 +935,31 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				Level l = cloneAsLevel(thisLevels.get(i));
 				log.debug("add level: "+l.name);
 				int numOfParentLevels = 0;
+				boolean addLowestLevel = true;
 				if(levelCounter == 1) {
-					numOfParentLevels = createParentLevels(hier, pkTable, thisLevels.get(i).levelTable);
+					String levelTable = thisLevels.get(i).levelTable;
+					String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".levels");
+					if(parentLevels!=null) {
+						addLowestLevel = false;
+					}
+					else {
+						parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
+					}
+					if(parentLevels!=null) {
+						numOfParentLevels = createParentLevels(hier, pkTable, levelTable, parentLevels);
+					}
 				}
 				
 				//XXX: add parentLevels to other levels? "showflake" it?
 				//Table parentTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, thisLevels.get(i).levelTable);
 				//numOfParentLevels = createParentLevels(hier, parentTable, thisLevels.get(i).levelTable);
 				
-				if(lowerLevelsAreUnique || ((numOfParentLevels==0) && (levelCounter == 1))) {
-					l.uniqueMembers = true;
+				if(addLowestLevel) {
+					if(lowerLevelsAreUnique || ((numOfParentLevels==0) && (levelCounter == 1))) {
+						l.uniqueMembers = true;
+					}
+					hier.levels = concatenate(hier.levels, new Level[]{l});
 				}
-				hier.levels = concatenate(hier.levels, new Level[]{l});
 			}
 			setupHierarchyName(hier);
 			log.debug("add hier: "+hier.name);
@@ -1004,8 +1017,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		return lret;
 	}
 	
-	int createParentLevels(Hierarchy hier, Table table, String levelTable) throws XOMException {
-		String parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
+	int createParentLevels(Hierarchy hier, Table table, String levelTable, String parentLevels) throws XOMException {
 		if(parentLevels==null) {
 			return 0;
 		}
