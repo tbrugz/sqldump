@@ -166,7 +166,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_FACTTABLES = "sqldump.mondrianschema.facttables";
 	public static final String PROP_MONDRIAN_SCHEMA_XTRAFACTTABLES = "sqldump.mondrianschema.xtrafacttables";
 	public static final String PROP_MONDRIAN_SCHEMA_NAME = "sqldump.mondrianschema.schemaname";
-	public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
+	//public static final String PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM = "sqldump.mondrianschema.onehierarchyperdim";
 	public static final String PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY = "sqldump.mondrianschema.adddimforeachhierarchy";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREDIMS = "sqldump.mondrianschema.ignoredims";
 	public static final String PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE = "sqldump.mondrianschema.ignorecubewithnomeasure";
@@ -219,6 +219,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	boolean setLevelType = true; //XXX: add prop?
 	boolean ignoreMeasureColumnsBelongingToPK = true;
 	int maxSnowflakeLevel = -1;
+	boolean lowerLevelsAreUnique = true; // if all non-parent (ie: lowest level for each table) levels should have Level.uniqueMembers=true
 	
 	boolean equalsShouldIgnoreCase = false;
 	StringDecorator propIdDecorator = new StringDecorator(); //does nothing (for now?)
@@ -274,9 +275,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		preferredLevelNameColumns = Utils.getStringListFromProp(prop, PROP_MONDRIAN_SCHEMA_PREFERREDLEVELNAMECOLUMNS, ",");
 		
 		//oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
-		if(prop.getProperty(PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM)!=null) {
-			log.warn("prop '"+PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM+"' not avaiable");
-		}
+		//if(prop.getProperty(PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM)!=null) {
+		//	log.warn("prop '"+PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM+"' not avaiable");
+		//}
 		
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);
 		ignoreCubesWithNoMeasure = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_IGNORECUBEWITHNOMEASURE, ignoreCubesWithNoMeasure);
@@ -942,10 +943,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				//Table parentTable = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, schemaName, thisLevels.get(i).levelTable);
 				//numOfParentLevels = createParentLevels(hier, parentTable, thisLevels.get(i).levelTable);
 				
-				if((numOfParentLevels==0) && (levelCounter == 1)) {
+				if(lowerLevelsAreUnique || ((numOfParentLevels==0) && (levelCounter == 1))) {
 					l.uniqueMembers = true;
 				}
-				hier.levels = (Level[]) concatenate(hier.levels, new Level[]{l});
+				hier.levels = concatenate(hier.levels, new Level[]{l});
 			}
 			setupHierarchyName(hier);
 			log.debug("add hier: "+hier.name);
