@@ -957,6 +957,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					
 					if(parentLevelPairs!=null) {
 						numOfParentLevels = createParentLevels(hierLower, pkTable, parentLevelPairs);
+						boolean addLowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".addLowerLevelsAsDistinctDims");
+						if(addLowerLevelsAsDistinctDim && parentLevelPairs.size()>1) { //makeLowerLevelsAsDistinctDims
+							for(int j=0;j<parentLevelPairs.size();j++) {
+								Hierarchy hxtra = cloneHierarchy(hier);
+								parentLevelPairs.remove(0); //removing top level
+								createParentLevels(hxtra, pkTable, parentLevelPairs);
+								hiers.add(hxtra);
+							}
+						}
 					}
 				}
 				
