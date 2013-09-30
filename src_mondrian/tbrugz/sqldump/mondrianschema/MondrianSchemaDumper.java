@@ -946,7 +946,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 						parentLevels = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".parentLevels");
 					}
 					if(parentLevels!=null) {
-						numOfParentLevels = createParentLevels(hier, pkTable, levelTable, parentLevels);
+						numOfParentLevels = createParentLevels(hier, pkTable, parentLevels);
 					}
 				}
 				
@@ -1017,10 +1017,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		return lret;
 	}
 	
-	int createParentLevels(Hierarchy hier, Table table, String levelTable, String parentLevels) throws XOMException {
-		if(parentLevels==null) {
+	int createParentLevels(Hierarchy hier, Table table, String parentLevels) throws XOMException {
+		/*if(parentLevels==null) {
 			return 0;
-		}
+		}*/
 		String[] levelPairs = parentLevels.split(",");
 		int count = 0;
 		for(String pair: levelPairs) {
@@ -1037,7 +1037,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			Level level = new Level();
 			level.name = col.getName();
 			level.column = sqlIdDecorator.get( col.getName() );
-			level.table = sqlIdDecorator.get( levelTable );
+			level.table = sqlIdDecorator.get( table.getName() );
 			if(tuple.length>1) {
 				String nameColumn = tuple[1].trim();
 				Column levelNameCol = table.getColumnIgnoreCase(nameColumn);
