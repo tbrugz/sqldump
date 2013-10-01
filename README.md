@@ -30,9 +30,9 @@ SQLDump - Basic Process
 
 SQLDump processing consists of:
 
-1. 1 Grabber (implementation of `SchemaModelGrabber`, grabs a `SchemaModel`)
-2. 'n' Processors (implementation of `AbstractSQLProc`, usually uses a `Connection`)
-3. 'n' Dumpers (implementation of `SchemaModelDumper`, dumps a `SchemaModel`)
+1. 1 **Grabber** (implementation of `SchemaModelGrabber`, grabs a `SchemaModel`)
+2. 'n' **Processors** (implementation of `Processor`, usually uses a `Connection` or `SchemaModel`)
+  & **Dumpers** (implementation of `SchemaModelDumper`, dumps a `SchemaModel`)
 
 *Grabber* can be:
 
