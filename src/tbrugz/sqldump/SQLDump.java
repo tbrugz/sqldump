@@ -57,10 +57,11 @@ public class SQLDump implements Executor {
 	public static final String CONN_PROPS_PREFIX = "sqldump";
 	
 	//sqldump.properties
-	public static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass"; // sqldump.grabclass?
-	public static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses"; // sqldump.dumpclasses?
-	public static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";  //.(pre)processors?
-	public static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
+	static final String PROP_GRABCLASS = "sqldump.grabclass";
+	@Deprecated static final String PROP_SCHEMAGRAB_GRABCLASS = "sqldump.schemagrab.grabclass"; // sqldump.grabclass?
+	@Deprecated static final String PROP_SCHEMADUMP_DUMPCLASSES = "sqldump.schemadump.dumpclasses"; // sqldump.dumpclasses?
+	static final String PROP_PROCESSINGCLASSES = "sqldump.processingclasses";  //.(pre)processors?
+	@Deprecated static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
 
 	public static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
@@ -132,10 +133,17 @@ public class SQLDump implements Executor {
 		//DBMSResources.instance().updateMetaData(null);
 		
 		//class names
-		String grabClassName = papp.getProperty(PROP_SCHEMAGRAB_GRABCLASS);
+		String grabClassName = Utils.getPropWithDeprecated(papp, PROP_GRABCLASS, PROP_SCHEMAGRAB_GRABCLASS, null);
 		String processingClassesStr = papp.getProperty(PROP_PROCESSINGCLASSES);
 		String dumpSchemaClasses = papp.getProperty(PROP_SCHEMADUMP_DUMPCLASSES);
 		String processingClassesAfterDumpersStr = papp.getProperty(PROP_PROCESSINGCLASSES_AFTERDUMPERS);
+		
+		if(dumpSchemaClasses!=null) {
+			log.warn("property '"+PROP_SCHEMADUMP_DUMPCLASSES+"' is deprecated. You should probably add the dumpclasses to '"+PROP_PROCESSINGCLASSES+"' property");
+		}
+		if(processingClassesAfterDumpersStr!=null) {
+			log.warn("property '"+PROP_PROCESSINGCLASSES_AFTERDUMPERS+"' is deprecated. You should probably add the after-dump processingclasses to '"+PROP_PROCESSINGCLASSES+"' property");
+		}
 		
 		if(grabClassName!=null && dumpSchemaClasses==null && processingClassesStr==null) {
 			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
