@@ -19,15 +19,22 @@ public interface DBMSFeatures {
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
 	
 	/*
-	//TODO: add standart methods for grabbing DB Objects
+	//TODO: add standart methods for grabbing DB Objects - use 'get' instead of 'grab'?
 	//XXX: add factory for specific DBMSFeatures?
-	List<View> grabDBViews(String schemaPattern, String viewPattern) throws SQLException;
-	List<Trigger> grabDBTriggers(String schemaPattern, String triggerPattern) throws SQLException;
-	List<ExecutableObject> grabDBExecutables(String schemaPattern, String executablePattern) throws SQLException;
+	List<View> grabViews(String schemaPattern, String viewPattern) throws SQLException;
+	List<Trigger> grabTriggers(String schemaPattern, String triggerPattern) throws SQLException;
+	List<ExecutableObject> grabExecutables(String schemaPattern, String executablePattern) throws SQLException;
 	////List<Sequence> grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
-	List<Sequence> grabDBSequences(String schemaPattern, String sequencePattern) throws SQLException;
-	List<Constraint> grabDBCheckConstraints(String schemaPattern, String constraintPattern) throws SQLException;
-	List<Constraint> grabDBUniqueConstraints(String schemaPattern, String constraintPattern) throws SQLException;
+	List<Sequence> grabSequences(String schemaPattern, String sequencePattern) throws SQLException;
+	List<Constraint> grabCheckConstraints(String schemaPattern, String constraintPattern) throws SQLException;
+	List<Constraint> grabUniqueConstraints(String schemaPattern, String constraintPattern) throws SQLException;
+	//XXX: add Connection to parameters?
+	boolean supportsGrabViews();
+	boolean supportsGrabTriggers();
+	boolean supportsGrabExecutables();
+	boolean supportsGrabSequences();
+	boolean supportsGrabCheckConstraints();
+	boolean supportsGrabUniqueConstraints();
 	*/
 	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
