@@ -956,14 +956,17 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					hiers.add(hierLower);
 					
 					if(parentLevelPairs!=null) {
+						//log.info("addParentLevels: pairs="+parentLevelPairs);
 						numOfParentLevels = createParentLevels(hierLower, pkTable, parentLevelPairs);
 						boolean addLowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".addLowerLevelsAsDistinctDims");
-						if(addLowerLevelsAsDistinctDim && parentLevelPairs.size()>1) { //makeLowerLevelsAsDistinctDims
-							for(int j=0;j<parentLevelPairs.size();j++) {
+						if(addLowerLevelsAsDistinctDim && parentLevelPairs.size()>0) { //makeLowerLevelsAsDistinctDims
+							//log.info("addLowerLevelsAsDistinctDim: pairs="+parentLevelPairs);
+							parentLevelPairs.remove(0); //removing top level
+							while(parentLevelPairs.size()>0) {
 								Hierarchy hxtra = cloneHierarchy(hier);
-								parentLevelPairs.remove(0); //removing top level
 								createParentLevels(hxtra, pkTable, parentLevelPairs);
 								hiers.add(hxtra);
+								parentLevelPairs.remove(0); //removing top level
 							}
 						}
 					}
@@ -993,13 +996,17 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	
 	void addHiersToDim(Cube cube, Dimension dim, Hierarchy[] hiers) {
 			if(addDimForEachHierarchy) {
+				for(int i=0;i<hiers.length;i++) {
+				Hierarchy hier = hiers[i];
 				Dimension newDim = new Dimension();
 				//dim.setName(dimName);
 				newDim.foreignKey = sqlIdDecorator.get( dim.foreignKey );
 				newDim.type = dim.type;
-				newDim.hierarchies = concatenate(newDim.hierarchies, hiers);
-				newDim.name = hiers[0].name; //longest name...
+				//newDim.hierarchies = concatenate(newDim.hierarchies, new Hierarchy[]{hier});
+				newDim.hierarchies = new Hierarchy[]{hier};
+				newDim.name = hier.name;
 				cube.dimensions = concatenate(cube.dimensions, new Dimension[]{newDim});
+				}
 			}
 			else {
 				dim.hierarchies = concatenate(dim.hierarchies, hiers);
@@ -1064,6 +1071,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			return 0;
 		}*/
 		//String[] levelPairs = parentLevels.split(",");
+		//log.info("createParentLevels ["+table+"]: "+levelPairs);
 		int count = 0;
 		for(String pair: levelPairs) {
 			count++;
