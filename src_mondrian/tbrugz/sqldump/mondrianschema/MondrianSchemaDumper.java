@@ -549,9 +549,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		//so that schema isn't modified
 		schemaModel.getForeignKeys().removeAll(addFKs);
 		
-		setPropertiesBeforeSerialization(schema);
-		
 		cleanUpBeforeSerialization(schema);
+		
+		setPropertiesBeforeSerialization(schema);
 		
 		try {
 			File fout = new File(fileOutput);
@@ -1181,10 +1181,24 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	void setPropertiesBeforeSerialization(Schema schema) {
 		if(schema.cubes==null) { return; }
 		for(Cube cube: schema.cubes) {
+
+			// cube caption
+			String cubeCaption = prop.getProperty(PROP_MONDRIAN_SCHEMA+".cube@"+cube.name+".caption");
+			if(cubeCaption!=null) {
+				log.debug("cubeCaption ["+cube.name+"]: "+cubeCaption);
+				cube.caption = cubeCaption;
+			}
 			
 			if(cube.dimensions==null) { continue; }
 			for(CubeDimension cdim: cube.dimensions) {
 				
+				// dim caption
+				String dimCaption = prop.getProperty(PROP_MONDRIAN_SCHEMA+".dim@"+cdim.name+".caption");
+				if(dimCaption!=null) {
+					log.debug("dimCaption ["+cdim.name+"]: "+dimCaption);
+					cdim.caption = dimCaption;
+				}
+			
 				if(!(cdim instanceof Dimension)) { continue; }
 				Dimension dim = (Dimension) cdim;
 				if(dim.hierarchies==null) { continue; }
@@ -1194,13 +1208,18 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					
 					if(hier.levels==null) { continue; }
 					for(Level l: hier.levels) {
+						// level internalType
 						String internalType = prop.getProperty(PROP_MONDRIAN_SCHEMA+".table@"+l.table+".column@"+l.column+".internalType");
-						/*if(internalType==null) {
-							internalType = prop.getProperty(PROP_MONDRIAN_SCHEMA+".table@"+hier.relation+".column@"+l.column+".internalType");
-						}*/
 						if(internalType!=null) {
 							log.debug("level.internalType ["+l.table+":"+l.column+"]: "+internalType);
 							l.internalType = internalType;
+						}
+						
+						// level caption
+						String levelCaption = prop.getProperty(PROP_MONDRIAN_SCHEMA+".level@"+l.name+".caption");
+						if(levelCaption!=null) {
+							log.debug("levelCaption ["+l.name+"]: "+levelCaption);
+							l.caption = levelCaption;
 						}
 					}
 				}
