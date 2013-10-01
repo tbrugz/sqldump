@@ -867,7 +867,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 		}
 		
-		//boolean lowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(pkTableName)+".addLowerLevelsAsDistinctDims");
+		//boolean lowerLevelsAsDistinctHiers = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(pkTableName)+".addLowerLevelsAsDistinctHiers");
 		if(isLevelLeaf) {// || lowerLevelsAsDistinctDim) {
 			List<Hierarchy> hiers = makeHierarchies(pkTable, thisLevels);
 			addHiersToDim(cube, dim, hiers.toArray(new Hierarchy[0]));			
@@ -958,8 +958,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					if(parentLevelPairs!=null) {
 						//log.info("addParentLevels: pairs="+parentLevelPairs);
 						numOfParentLevels = createParentLevels(hierLower, pkTable, parentLevelPairs);
-						boolean addLowerLevelsAsDistinctDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".addLowerLevelsAsDistinctDims");
-						if(addLowerLevelsAsDistinctDim && parentLevelPairs.size()>0) { //makeLowerLevelsAsDistinctDims
+						boolean addLowerLevelsAsDistinctHiers = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA+".level@"+propIdDecorator.get(levelTable)+".addLowerLevelsAsDistinctHiers");
+						if(addLowerLevelsAsDistinctHiers && parentLevelPairs.size()>0) { //makeLowerLevelsAsDistinctHiers
 							//log.info("addLowerLevelsAsDistinctDim: pairs="+parentLevelPairs);
 							parentLevelPairs.remove(0); //removing top level
 							while(parentLevelPairs.size()>0) {
