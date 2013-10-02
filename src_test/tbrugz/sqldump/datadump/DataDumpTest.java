@@ -77,10 +77,8 @@ public class DataDumpTest {
 	@Test
 	public void dump1() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
-				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
-				//"-Dsqldump.schemadump.dumpclasses=SchemaModelScriptDumper",
-				//"-Dsqldump.mainoutputfilepattern=work/output/dbobjects.sql",
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
 				"-Dsqldump.datadump.writebom=false",
@@ -106,7 +104,7 @@ public class DataDumpTest {
 	@Test
 	public void dumpPartitioned() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
-				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=SQLQueries",
 				"-Dsqldump.queries=q1",
 				"-Dsqldump.query.q1.sql=select * from emp",
@@ -136,7 +134,7 @@ public class DataDumpTest {
 	@Test
 	public void dumpPartitioned2Patterns() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
-				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=SQLQueries",
 				"-Dsqldump.queries=q1",
 				"-Dsqldump.query.q1.sql=select * from emp",
@@ -170,7 +168,7 @@ public class DataDumpTest {
 	@Test
 	public void dumpWithRowNumber() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
-				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=SQLQueries",
 				"-Dsqldump.queries=q1",
 				"-Dsqldump.query.q1.sql=select * from emp",
@@ -194,7 +192,7 @@ public class DataDumpTest {
 	@Test
 	public void dumpPartitionedWithRowNumber() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
-				"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=SQLQueries",
 				"-Dsqldump.queries=q1",
 				"-Dsqldump.query.q1.sql=select * from emp",

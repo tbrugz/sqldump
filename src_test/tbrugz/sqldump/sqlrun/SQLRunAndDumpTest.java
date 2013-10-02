@@ -57,8 +57,8 @@ public class SQLRunAndDumpTest {
 		System.out.println("conn.isClosed(): "+conn.isClosed());
 		
 		String[] vmparamsDump = {
-					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
-					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer, JSONSchemaSerializer",
+					"-Dsqldump.grabclass=JDBCSchemaGrabber",
+					"-Dsqldump.processingclasses=JAXBSchemaXMLSerializer, JSONSchemaSerializer",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
 					"-Dsqldump.jsonserialization.outfile=work/output/empdept.json",
 					/*"-Dsqldump.driverclass=org.h2.Driver",
@@ -120,10 +120,9 @@ public class SQLRunAndDumpTest {
 		sqlr.doMain(params, p, null);
 		
 		String[] vmparamsDump = {
-					"-Dsqldump.schemagrab.grabclass=JDBCSchemaGrabber",
-					"-Dsqldump.schemadump.dumpclasses=JAXBSchemaXMLSerializer, SchemaModelScriptDumper",
-					"-Dsqldump.processingclasses=DataDump",
-					"-Dsqldump.mainoutputfilepattern=work/output/dbobjects.sql",
+					"-Dsqldump.grabclass=JDBCSchemaGrabber",
+					"-Dsqldump.processingclasses=DataDump, JAXBSchemaXMLSerializer, SchemaModelScriptDumper",
+					"-Dsqldump.schemadump.outputfilepattern=work/output/dbobjects.sql",
 					"-Dsqldump.schemadump.dumpdropstatements=true",
 					"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",

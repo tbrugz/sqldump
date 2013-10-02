@@ -33,6 +33,7 @@ public class CategorizedOutTest {
 		Assert.assertEquals("work/output/test/cout-[1]-[2].txt", outpattern);
 	}
 
+	//XXX: remove deprecated patterns
 	@Test
 	public void testDeprecatedPattern() throws IOException {
 		String outpattern = CategorizedOut.generateFinalOutPattern("work/output/test/cout-${ab}.txt",
