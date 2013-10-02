@@ -146,14 +146,14 @@ public class SQLDump implements Executor {
 		}
 		
 		if(grabClassName!=null && dumpSchemaClasses==null && processingClassesStr==null) {
-			log.warn("grabber class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined but no dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
+			log.warn("grabber class [prop '"+PROP_GRABCLASS+"'] defined but no dumper [deprecated prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined");
 			//XXX: throw ProcessingException ?
 		}
 		if(grabClassName==null && dumpSchemaClasses!=null) {
-			log.warn("dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined but no grab class [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'] defined");
+			log.warn("dumper classes [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] defined but no grab class [prop '"+PROP_GRABCLASS+"'] defined");
 		}
 		if(grabClassName==null && dumpSchemaClasses==null && processingClassesStr==null) {
-			String message = "no grabber [prop '"+PROP_SCHEMAGRAB_GRABCLASS+"'], dumper [prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined";
+			String message = "no grabber [prop '"+PROP_GRABCLASS+"'], dumper [deprecated prop '"+PROP_SCHEMADUMP_DUMPCLASSES+"'] or processing [prop '"+PROP_PROCESSINGCLASSES+"'] classes defined";
 			log.error(message);
 			if(failonerror) { throw new ProcessingException(message); }
 		}
