@@ -36,6 +36,10 @@ public interface DBMSFeatures {
 	boolean supportsGrabCheckConstraints();
 	boolean supportsGrabUniqueConstraints();
 	*/
+	/*
+	ResultSet getExplainPlanForQuery(String sql, Connection conn);
+	boolean supportsExplainPlan();
+	*/
 	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
 	void addColumnSpecificFeatures(Column c, ResultSet rs);
