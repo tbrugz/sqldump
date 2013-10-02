@@ -8,4 +8,6 @@ public interface ProcessComponent {
 
 	public void setPropertiesPrefix(String propertiesPrefix);
 	
+	public void setFailOnError(boolean failonerror);
+
 }
