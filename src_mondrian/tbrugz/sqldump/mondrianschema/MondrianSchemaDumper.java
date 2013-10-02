@@ -160,6 +160,8 @@ class RecursiveHierData {
  */
 public class MondrianSchemaDumper extends AbstractFailable implements SchemaModelDumper {
 	
+	public static final String PREFIX_MONDRIANSCHEMA = "sqldump.mondrianschema";
+	
 	public static final String PROP_MONDRIAN_SCHEMA = "sqldump.mondrianschema";
 	public static final String PROP_MONDRIAN_SCHEMA_OUTFILE = "sqldump.mondrianschema.outfile";
 	public static final String PROP_MONDRIAN_SCHEMA_VALIDATE = "sqldump.mondrianschema.validateschema";
@@ -182,6 +184,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_IGNOREMEASURECOLUMNSFROMPK = "sqldump.mondrianschema.ignoremeasurecolumnsbelongingtopk";
 	public static final String PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN = "sqldump.mondrianschema.levelname.pattern";
 	public static final String PROP_MONDRIAN_SCHEMA_SNOWFLAKE_MAXLEVEL = "sqldump.mondrianschema.snowflake.maxlevel";
+	public static final String PROP_MONDRIANSCHEMA_MEASURESCAPTION = PREFIX_MONDRIANSCHEMA+".measuresCaption";
 	
 	public static final String SUFFIX_MEASURECOLSREGEX = ".measurecolsregex";
 
@@ -330,6 +333,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		Schema schema = new Schema();
 		schema.name = mondrianSchemaName;
 		//XXX schema.metamodelVersion ? "3.6"?
+		String measuresCaption = prop.getProperty(PROP_MONDRIANSCHEMA_MEASURESCAPTION);
+		if(measuresCaption!=null) {
+			log.info("schema.measuresCaption: '"+measuresCaption+"'");
+			schema.measuresCaption = measuresCaption;
+		}
 		
 		//XXX~: snowflake
 		//XXX: virtual cubes / shared dimensions
