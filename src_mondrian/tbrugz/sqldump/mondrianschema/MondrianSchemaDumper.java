@@ -185,6 +185,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	public static final String PROP_MONDRIAN_SCHEMA_LEVELNAME_PATTERN = "sqldump.mondrianschema.levelname.pattern";
 	public static final String PROP_MONDRIAN_SCHEMA_SNOWFLAKE_MAXLEVEL = "sqldump.mondrianschema.snowflake.maxlevel";
 	public static final String PROP_MONDRIANSCHEMA_MEASURESCAPTION = PREFIX_MONDRIANSCHEMA+".measuresCaption";
+	public static final String PROP_MONDRIANSCHEMA_HIER_ALLMEMBERCAPTIONPATTERN = PREFIX_MONDRIANSCHEMA+".hier.allMemberCaptionPattern";
 	
 	public static final String SUFFIX_MEASURECOLSREGEX = ".measurecolsregex";
 
@@ -197,6 +198,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	static String PATTERN_STR_TABLENAME = "\\[tablename\\]";
 	static String PATTERN_STR_PKCOLUMN = "\\[pkcolumn\\]";
 	static String PATTERN_STR_FKCOLUMN = "\\[fkcolumn\\]";
+
+	static String PATTERN_STR_DIMNAME = "\\[dimname\\]";
+	static String PATTERN_STR_DIMCAPTION = "\\[dimcaption\\]";
 	
 	static String DEFAULT_LEVELNAME_PATTERN = "[tablename]";
 	
@@ -1186,6 +1190,21 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			.replaceAll(PATTERN_STR_FKCOLUMN, fkColumnName);
 	}
 	
+	void setHierarchyAllMemberCaption(Hierarchy hier, String dimName, String dimCaption) {
+		String hierAllMemberCaption = prop.getProperty(PROP_MONDRIAN_SCHEMA+".hier@"+hier.name+".allMemberCaption");
+		if(hierAllMemberCaption!=null) {
+			hier.allMemberCaption = hierAllMemberCaption;
+			return;
+		}
+		String hierAllMemberCaptionPattern = prop.getProperty(PROP_MONDRIANSCHEMA_HIER_ALLMEMBERCAPTIONPATTERN);
+		if(hierAllMemberCaptionPattern!=null) {
+			if(dimName==null) { dimName = ""; }
+			if(dimCaption==null) { dimCaption = ""; }
+			hier.allMemberCaption = hierAllMemberCaptionPattern.replaceAll(PATTERN_STR_DIMNAME, dimName)
+					.replaceAll(PATTERN_STR_DIMCAPTION, dimCaption);
+		}
+	}
+
 	void setPropertiesBeforeSerialization(Schema schema) {
 		if(schema.cubes==null) { return; }
 		for(Cube cube: schema.cubes) {
@@ -1211,6 +1230,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 				Dimension dim = (Dimension) cdim;
 				if(dim.hierarchies==null) { continue; }
 				for(Hierarchy hier: dim.hierarchies) {
+					
+					// hierarchy all-member caption
+					setHierarchyAllMemberCaption(hier, dim.name, dim.caption);
 					
 					//XXX: warn for tables/columns not found...
 					
