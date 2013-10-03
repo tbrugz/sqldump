@@ -23,13 +23,19 @@ public class H2Features extends InformationSchemaFeatures {
 	static Log log = LogFactory.getLog(H2Features.class);
 
 	@Override
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.warn("grab triggers: not implemented");
+	String grabDBTriggersQuery(String schemaPattern) {
+		// other columns: REMARKS, SQL, QUEUE_SIZE, NO_WAIT, ID
+		return "select trigger_catalog, trigger_schema, trigger_name, trigger_type as event_manipulation, null as event_object_schema, table_name as event_object_table "
+				+"  , 'CALL \"'||java_class||'\"' as action_statement "
+				+"  , 'ROW' as action_orientation, casewhen(before, 'BEFORE', 'AFTER') as action_timing, null as action_condition "
+				+"from information_schema.triggers "
+				+"where trigger_schema = '"+schemaPattern+"' "
+				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
 	}
 	
 	@Override
 	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
-		log.warn("grab routines: not implemented");
+		log.debug("grab routines: not supported"); //warn level?
 	}
 	
 	@Override
