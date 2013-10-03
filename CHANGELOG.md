@@ -1,4 +1,22 @@
 
+sqldump 0.9.10
+--------------
+- sqlrun: importer: more column types
+- processors: added SendMail
+- sqlrun: importer: added FFCImporter
+- removed package deps/cycle:
+    - util -> dbmd
+    - util -> def (SQLUtils)
+- added DiffTwoQueries (diff2q)
+- util: removed requirement Class.forName(driverClass) (JDBC 4.0+)
+- anttasks fixes
+- util: ConnectionUtil: added '.password.base64'
+- mondrian: added prop 'snowflake.maxlevel', refactoring & other changes
+- properties refactoring: grabber, dumper, ...
+- mondrian: option to add hier's lower levels as distinct hierarchy
+- mondrian: added caption (cube, dimension, level, hierarchy's 'all-member')
+
+
 sqldump 0.9.9
 -------------
 - r2g: initial & final node types
