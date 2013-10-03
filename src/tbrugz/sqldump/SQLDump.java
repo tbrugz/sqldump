@@ -54,7 +54,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SQLDump implements Executor {
 	
-	public static final String CONN_PROPS_PREFIX = "sqldump";
+	public static final String CONN_PROPS_PREFIX = "sqldump"; //XXX: change to non-public
 	
 	//sqldump.properties
 	static final String PROP_GRABCLASS = "sqldump.grabclass";
@@ -64,7 +64,7 @@ public class SQLDump implements Executor {
 	@Deprecated static final String PROP_PROCESSINGCLASSES_AFTERDUMPERS = "sqldump.processingclasses.afterdumpers";  //.postprocessors?
 
 	public static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
-	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix";
+	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix"; //XXX: change to non-public
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
 	static final String PROP_DATADUMP_XTRASYNTAXES = "sqldump.datadump.xtrasyntaxes";
 	
