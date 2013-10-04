@@ -25,9 +25,9 @@ public class H2Features extends InformationSchemaFeatures {
 	@Override
 	String grabDBTriggersQuery(String schemaPattern) {
 		// other columns: REMARKS, SQL, QUEUE_SIZE, NO_WAIT, ID
-		return "select trigger_catalog, trigger_schema, trigger_name, trigger_type as event_manipulation, null as event_object_schema, table_name as event_object_table "
-				+"  , 'CALL \"'||java_class||'\"' as action_statement "
-				+"  , 'ROW' as action_orientation, casewhen(before, 'BEFORE', 'AFTER') as action_timing, null as action_condition "
+		return "select trigger_catalog, trigger_schema, trigger_name, lower(trigger_type) as event_manipulation, null as event_object_schema, table_name as event_object_table "
+				+"  , 'call \"'||java_class||'\"' as action_statement "
+				+"  , 'row' as action_orientation, casewhen(before, 'before', 'after') as action_timing, null as action_condition "
 				+"from information_schema.triggers "
 				+"where trigger_schema = '"+schemaPattern+"' "
 				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
