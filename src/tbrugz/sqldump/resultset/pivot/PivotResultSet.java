@@ -80,13 +80,31 @@ public class PivotResultSet extends AbstractResultSet {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		rsColsCount = rsmd.getColumnCount();
 		measureCols = new ArrayList<String>();
+		List<String> colsToPivotNotFound = new ArrayList<String>();
+		List<String> colsNotToPivotNotFound = new ArrayList<String>();
+		colsToPivotNotFound.addAll(colsToPivotNames);
+		colsNotToPivotNotFound.addAll(colsNotToPivot);
 		for(int i=1;i<=rsColsCount;i++) {
 			String colName = rsmd.getColumnName(i);
-			if(!colsNotToPivot.contains(colName) && !colsToPivotNames.contains(colName)) {
+			if(colsToPivotNotFound.contains(colName)) {
+				colsToPivotNotFound.remove(colName);
+			}
+			else if(colsNotToPivotNotFound.contains(colName)) {
+				colsNotToPivotNotFound.remove(colName);
+			}
+			else {
+			//if(!colsNotToPivot.contains(colName) && !colsToPivotNames.contains(colName)) {
 				measureCols.add(colName);
 				valuesForEachMeasure.add(new HashMap<String, String>());
 			}
 			log.debug("colName "+i+" [colCount="+rsColsCount+"]: "+colName);
+		}
+		
+		if(colsToPivotNotFound.size()>0) {
+			throw new RuntimeException("cols to pivot not found: "+colsToPivotNotFound);
+		}
+		if(colsNotToPivotNotFound.size()>0) {
+			throw new RuntimeException("cols not to pivot not found: "+colsNotToPivotNotFound);
 		}
 		
 		metadata = new RSMetaDataAdapter(null, null, newColNames);
@@ -312,7 +330,7 @@ public class PivotResultSet extends AbstractResultSet {
 			
 			//TODO: multi-measure!
 		}
-		throw new SQLException("unknown column: "+columnLabel);
+		throw new SQLException("unknown column: '"+columnLabel+"'");
 	}
 
 	@Override
