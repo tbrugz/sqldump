@@ -6,9 +6,9 @@ import java.util.List;
 
 public class RSMetaDataAdapter extends AbstractResultSetMetaData {
 	
-	String schema;
-	String table;
-	List<String> colNames;
+	final String schema;
+	final String table;
+	final List<String> colNames;
 	
 	public RSMetaDataAdapter(String schema, String table, List<String> colNames) {
 		this.schema = schema;
