@@ -29,6 +29,13 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
 public class PivotResultSet extends AbstractResultSet {
 	
 	final static Log log = LogFactory.getLog(PivotResultSet.class);
+	
+	public enum Aggregator {
+		FIRST,
+		LAST
+		//COUNT?
+		//numeric: AVG, MAX, MIN, SUM, ...
+	}
 
 	final static String COLS_SEP = "|";
 	final static String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
@@ -61,6 +68,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public boolean showMeasuresInColumns = true; //TODO: show measures in columns
 	public boolean showMeasuresFirst = true;
 	public boolean alwaysShowMeasures = false;
+	public static Aggregator aggregator = Aggregator.LAST;
 
 	//colsNotToPivot - key cols
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess) throws SQLException {
@@ -131,14 +139,24 @@ public class PivotResultSet extends AbstractResultSet {
 				Map<String, String> values = valuesForEachMeasure.get(i);
 				String value = rs.getString(measureCol);
 				
-				//TODO: if value already existed, throw exception? aggregate?
 				String prevValue = values.get(key);
-				if(prevValue!=null) {
+				if(prevValue==null) {
+					values.put(key, value);
+				}
+				else {
 					log.warn("prevValue not null[measurecol="+measureCol+";key="+key+"]: "+prevValue);
+					switch (aggregator) {
+					case FIRST:
+						//do nothing
+						break;
+					case LAST:
+						values.put(key, value);
+					default:
+						break;
+					} 
 				}
 				
-				values.put(key, value);
-				log.debug("put: key="+key+" ; val="+value);
+				log.debug("put: key="+key+" ; val="+value+"; aggr="+aggregator);
 			}
 			
 			String colsNotToPivotKey = key.substring(0, key.indexOf("%"));
