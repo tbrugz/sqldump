@@ -39,13 +39,16 @@ public class PivotQueryParser {
 		String pivotColsStr = m.group(1);
 		String[] pivotCols = pivotColsStr.split(",");
 		for(String s: pivotCols) {
-			colsToPivot.put(s.trim(), null);
+			colsToPivot.put(s.trim(), null); //XXX: add comparator? asc, desc?
 		}
 		
 		String nonPivotColsStr = m.group(2); 
 		String[] nonPivotCols = nonPivotColsStr.split(",");
 		for(String s: nonPivotCols) {
-			colsNotToPivot.add(s.trim());
+			s = s.trim();
+			if(!"".equals(s)) {
+				colsNotToPivot.add(s);
+			}
 		}
 	}
 	

@@ -24,6 +24,7 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
  * TODO: multiple column type (beside String): Integer, Double, Date
  * TODO: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
  * XXX: option to remove cols/rows/both where all measures are null
+ * XXX: aggregate if duplicated key found? first(), last()?
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
@@ -58,7 +59,9 @@ public class PivotResultSet extends AbstractResultSet {
 	final List<String> nonPivotKeyValues = new ArrayList<String>();
 	//final List<List<String>> nonPivotValues = new ArrayList<List<String>>();
 	String currentNonPivotKey = null;
-	boolean showMeasuresInColumns = true;
+	public boolean showMeasuresInColumns = true;
+	public boolean showMeasuresFirst = true;
+	public boolean alwaysShowMeasures = false;
 
 	//colsNotToPivot - key cols
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess) throws SQLException {
@@ -162,6 +165,15 @@ public class PivotResultSet extends AbstractResultSet {
 				log.debug("processed row count: "+count);
 			}
 		}
+
+		originalRSRowCount = count;
+		processed = true;
+		
+		processMetadata();
+	}
+	
+	public void processMetadata() {
+		newColNames.clear();
 		
 		//-- create rs-metadata --
 		//create non pivoted col names
@@ -173,8 +185,23 @@ public class PivotResultSet extends AbstractResultSet {
 		//foreach pivoted column
 		genNewCols(0, "");
 		
-		originalRSRowCount = count;
-		processed = true;
+		//single-measure
+		if(measureCols.size()==1 && alwaysShowMeasures) {
+			if(showMeasuresFirst) {
+				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+					newColNames.set(i, measureCols.get(0)+"|"+newColNames.get(i));
+				}
+			}
+			else {
+				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+					newColNames.set(i, newColNames.get(i)+"|"+measureCols.get(0));
+				}
+			}
+		}
+		//multi-measure
+		else {
+			//TODO: multi-measure
+		}
 	}
 	
 	void genNewCols(int colNumber, String partialColName) {
@@ -313,22 +340,33 @@ public class PivotResultSet extends AbstractResultSet {
 		index = newColNames.indexOf(columnLabel);
 		if(index>=0) {
 			//is pivotcol
+			
+			int measureIndex = -1; 
 
 			StringBuilder sb = new StringBuilder();
 			String[] parts = columnLabel.split(COLS_SEP_PATTERN);
 			for(int i=0;i<parts.length;i++) {
 				String p = parts[i];
-				sb.append( (i==0?"":"|") + p.split(COLVAL_SEP_PATTERN)[1]);
+				int measureColsIndex = measureCols.indexOf(p);
+				if(measureColsIndex>=0) {
+					if(measureIndex>=0) {
+						log.warn("more than 1 measure name in column name? label: "+columnLabel);
+					}
+					measureIndex = measureColsIndex;
+				}
+				else {
+					String[] colAndVal = p.split(COLVAL_SEP_PATTERN);
+					sb.append( (sb.length()==0?"":"|") + colAndVal[1]);
+				}
 			}
 			String key = currentNonPivotKey+"%"+sb.toString();
 			log.debug("pivotCol: key:: "+key);
 			
 			//single measure
-			if(valuesForEachMeasure.size()==1) {
-				return valuesForEachMeasure.get(0).get(key);
-			}
+			if(measureIndex==-1) { measureIndex = 0; }
+			return valuesForEachMeasure.get(measureIndex).get(key);
 			
-			//TODO: multi-measure!
+			//XXX multi-measure ?
 		}
 		throw new SQLException("unknown column: '"+columnLabel+"'");
 	}
