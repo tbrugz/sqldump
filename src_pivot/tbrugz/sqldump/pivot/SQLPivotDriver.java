@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 public class SQLPivotDriver implements java.sql.Driver {
 	
@@ -55,6 +57,10 @@ public class SQLPivotDriver implements java.sql.Driver {
 	@Override
 	public boolean jdbcCompliant() {
 		return false;
+	}
+
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		return null;
 	}
 
 }
