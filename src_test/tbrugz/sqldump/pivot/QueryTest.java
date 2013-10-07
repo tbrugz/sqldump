@@ -3,10 +3,8 @@ package tbrugz.sqldump.pivot;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Properties;
 
 import org.junit.After;
@@ -14,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.sqlrun.QueryDumper;
 
 public class QueryTest {
@@ -60,12 +59,22 @@ public class QueryTest {
 		String sql = prop.getProperty("q2");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
+
+		((PivotResultSet)rs).alwaysShowMeasures = false;
+		((PivotResultSet)rs).processMetadata();
 		rs.absolute(0);
-		//QueryDumper.simplerRSDump(rs);
 		rs.next();
+		
 		Assert.assertEquals("FALSE", rs.getString("A"));
 		Assert.assertEquals("FALSE", rs.getString("B:FALSE"));
 		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
+	}
+
+	@Test
+	public void testQ3Pivot2Cols() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q3");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
 	}
 	
 }
