@@ -26,7 +26,6 @@ import tbrugz.sqldump.resultset.RSMetaDataAdapter;
  * XXX: option to remove cols/rows/both where all measures are null
  * XXX: aggregate if duplicated key found? first(), last()?
  */
-@SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
 	
 	final static Log log = LogFactory.getLog(PivotResultSet.class);
@@ -59,7 +58,7 @@ public class PivotResultSet extends AbstractResultSet {
 	final List<String> nonPivotKeyValues = new ArrayList<String>();
 	//final List<List<String>> nonPivotValues = new ArrayList<List<String>>();
 	String currentNonPivotKey = null;
-	public boolean showMeasuresInColumns = true;
+	public boolean showMeasuresInColumns = true; //TODO: show measures in columns
 	public boolean showMeasuresFirst = true;
 	public boolean alwaysShowMeasures = false;
 
@@ -173,20 +172,25 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 	
 	public void processMetadata() {
+		//-- create rs-metadata --
 		newColNames.clear();
 		
-		//-- create rs-metadata --
+		log.debug("processMetadata: measures="+measureCols);
+		
 		//create non pivoted col names
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
 			newColNames.add(col);
 		}
 		
+		List<String> dataColumns = new ArrayList<String>();
 		//foreach pivoted column
-		genNewCols(0, "");
+		genNewCols(0, "", dataColumns);
 		
 		//single-measure
-		if(measureCols.size()==1 && alwaysShowMeasures) {
+		if(measureCols.size()==1) {
+			newColNames.addAll(dataColumns);
+			if(alwaysShowMeasures) {
 			if(showMeasuresFirst) {
 				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
 					newColNames.set(i, measureCols.get(0)+"|"+newColNames.get(i));
@@ -197,14 +201,34 @@ public class PivotResultSet extends AbstractResultSet {
 					newColNames.set(i, newColNames.get(i)+"|"+measureCols.get(0));
 				}
 			}
+			}
 		}
 		//multi-measure
 		else {
-			//TODO: multi-measure
+			//TODOne: multi-measure
+			List<String> colNames = new ArrayList<String>();
+			colNames.addAll(newColNames);
+			
+			if(showMeasuresFirst) {
+				for(String measure: measureCols) {
+					for(int i=0;i<dataColumns.size();i++) {
+						newColNames.add(measure+"|"+dataColumns.get(i));
+					}
+				}
+			}
+			else {
+				for(int i=0;i<dataColumns.size();i++) {
+					for(String measure: measureCols) {
+						newColNames.add(dataColumns.get(i)+"|"+measure);
+					}
+				}
+			}
 		}
+
+		log.debug("processMetadata: columns="+newColNames);
 	}
 	
-	void genNewCols(int colNumber, String partialColName) {
+	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
 		String colName = colsToPivotNames.get(colNumber);
 		Set<String> colVals = keyColValues.get(colName);
 		for(String v: colVals) {
@@ -212,11 +236,11 @@ public class PivotResultSet extends AbstractResultSet {
 			if(colNumber+1==colsToPivotNames.size()) {
 				//add col name
 				log.debug("col-full-name: "+colFullName);
-				newColNames.add(colFullName);
+				newColumns.add(colFullName);
 			}
 			else {
 				log.debug("col-partial-name: "+colFullName);
-				genNewCols(colNumber+1, colFullName);
+				genNewCols(colNumber+1, colFullName, newColumns);
 			}
 		}
 	}
@@ -366,7 +390,7 @@ public class PivotResultSet extends AbstractResultSet {
 			if(measureIndex==-1) { measureIndex = 0; }
 			return valuesForEachMeasure.get(measureIndex).get(key);
 			
-			//XXX multi-measure ?
+			//XXXxx multi-measure ? done ?
 		}
 		throw new SQLException("unknown column: '"+columnLabel+"'");
 	}
