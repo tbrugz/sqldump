@@ -64,8 +64,8 @@ public class QueryTest {
 		rs.absolute(0);
 		rs.next();
 		Assert.assertEquals("FALSE", rs.getString("A"));
-		Assert.assertEquals("FALSE", rs.getString("B:FALSE"));
-		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
+		Assert.assertEquals("false", rs.getString("B:FALSE"));
+		Assert.assertEquals("true", rs.getString("B:TRUE"));
 	}
 
 	@Test
@@ -76,8 +76,8 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals("FALSE", rs.getString("A"));
-		Assert.assertEquals("FALSE", rs.getString("B:FALSE|C:FALSE"));
-		Assert.assertEquals("TRUE", rs.getString("B:FALSE|C:TRUE"));
+		Assert.assertEquals("false", rs.getString("B:FALSE|C:FALSE"));
+		Assert.assertEquals("true", rs.getString("B:FALSE|C:TRUE"));
 	}
 	
 	@Test
@@ -88,8 +88,8 @@ public class QueryTest {
 		
 		rs.absolute(1);
 		Assert.assertEquals("FALSE", rs.getString("A"));
-		Assert.assertEquals("FALSE", rs.getString("BOOL_AND|B:FALSE"));
-		Assert.assertEquals("TRUE", rs.getString("BOOL_OR|B:TRUE"));
+		Assert.assertEquals("false", rs.getString("BOOL_AND|B:FALSE"));
+		Assert.assertEquals("true", rs.getString("BOOL_OR|B:TRUE"));
 		
 		((PivotResultSet)rs).showMeasuresFirst = false;
 		((PivotResultSet)rs).processMetadata();
@@ -98,8 +98,8 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals("FALSE", rs.getString("A"));
-		Assert.assertEquals("FALSE", rs.getString("B:FALSE|BOOL_AND"));
-		Assert.assertEquals("TRUE", rs.getString("B:TRUE|BOOL_OR"));
+		Assert.assertEquals("false", rs.getString("B:FALSE|BOOL_AND"));
+		Assert.assertEquals("true", rs.getString("B:TRUE|BOOL_OR"));
 	}
 
 	@Test
@@ -109,13 +109,28 @@ public class QueryTest {
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
 		rs.absolute(1);
-		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
+		Assert.assertEquals("true", rs.getString("B:TRUE"));
 
 		PivotResultSet.aggregator = Aggregator.FIRST;
 		rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
 		rs.absolute(1);
-		Assert.assertEquals("FALSE", rs.getString("B:TRUE"));
+		Assert.assertEquals("false", rs.getString("B:TRUE"));
+	}
+
+	@Test
+	public void testQ6Integers() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q6");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals("2", rs.getString("B"));
+		Assert.assertEquals(2+1, rs.getInt("A:1"));
+		
+		rs.next();
+		Assert.assertEquals("4", rs.getString("B"));
+		Assert.assertEquals(4+2, rs.getInt("A:2"));
 	}
 	
 }
