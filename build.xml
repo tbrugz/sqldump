@@ -5,6 +5,7 @@
 	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="src.mondrian.dir" value="src_mondrian"/>
 	<property name="src.run.dir" value="src_run"/>
+	<property name="src.pivot.dir" value="src_pivot"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
 	<property name="src.anttaks.dir" value="src_anttasks"/>
 	<property name="src.test.dir" value="src_test"/>
@@ -123,6 +124,7 @@
 			<src path="${src.diff.dir}"/>
 			<src path="${src.run.dir}"/>
 			<src path="${src.mondrian.dir}"/>
+			<src path="${src.pivot.dir}"/>
 			<src path="${src.xtra.dir}"/>
 			<src path="${src.anttaks.dir}"/>
 			<exclude name="tbrugz/sqldump/ant/xperimental/**"/>
@@ -226,6 +228,7 @@
 			<sourcepath location="${src.run.dir}"/>
 			<sourcepath location="${src.graphml.dir}"/>
 			<sourcepath location="${src.mondrian.dir}"/>
+			<sourcepath location="${src.pivot.dir}"/>
 		</javadoc>
 		<jar destfile="${dist.dir}/javadocs/sqldump.jar"
 			basedir="${javadoc.dir}" includes="**">
