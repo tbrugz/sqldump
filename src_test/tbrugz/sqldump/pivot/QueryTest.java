@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
+import tbrugz.sqldump.resultset.pivot.PivotResultSet.Aggregator;
 import tbrugz.sqldump.sqlrun.QueryDumper;
 
 public class QueryTest {
@@ -99,6 +100,22 @@ public class QueryTest {
 		Assert.assertEquals("FALSE", rs.getString("A"));
 		Assert.assertEquals("FALSE", rs.getString("B:FALSE|BOOL_AND"));
 		Assert.assertEquals("TRUE", rs.getString("B:TRUE|BOOL_OR"));
+	}
+
+	@Test
+	public void testQ5Aggregator() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q5");
+		
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+		rs.absolute(1);
+		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
+
+		PivotResultSet.aggregator = Aggregator.FIRST;
+		rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+		rs.absolute(1);
+		Assert.assertEquals("FALSE", rs.getString("B:TRUE"));
 	}
 	
 }
