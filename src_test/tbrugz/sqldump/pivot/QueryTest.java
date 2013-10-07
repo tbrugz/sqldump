@@ -47,15 +47,25 @@ public class QueryTest {
 	public void testQ1NonPivot() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q1");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
-		QueryDumper.simplerRSDump(rs);
+		//QueryDumper.simplerRSDump(rs);
+		//rs.absolute(0);
+		rs.next();
+		Assert.assertEquals("FALSE", rs.getString("A"));
+		Assert.assertEquals("FALSE", rs.getString("B"));
+		Assert.assertEquals("FALSE", rs.getString("BOOL_OR"));
 	}
 
 	@Test
-	//TODO test for values
 	public void testQ2Pivot() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q2");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
+		rs.absolute(0);
+		//QueryDumper.simplerRSDump(rs);
+		rs.next();
+		Assert.assertEquals("FALSE", rs.getString("A"));
+		Assert.assertEquals("FALSE", rs.getString("B:FALSE"));
+		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
 	}
 	
 }
