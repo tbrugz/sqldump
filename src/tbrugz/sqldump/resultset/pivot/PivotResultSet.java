@@ -3,6 +3,7 @@ package tbrugz.sqldump.resultset.pivot;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.resultset.AbstractResultSet;
-import tbrugz.sqldump.resultset.RSMetaDataAdapter;
+import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 
 /*
  * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting)
@@ -48,14 +49,17 @@ public class PivotResultSet extends AbstractResultSet {
 	final int rsColsCount;
 	
 	final List<String> colsNotToPivot;
+	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); //XXX add type for non-pivot columns 
 	final Map<String, Comparable> colsToPivot;
-	final List<String> measureCols;
+	final List<String> measureCols = new ArrayList<String>();
+	final List<Integer> measureColsType = new ArrayList<Integer>();
 
 	final List<String> colsToPivotNames;
 	
 	final Map<String, Set<String>> keyColValues = new HashMap<String, Set<String>>();
-	final List<Map<String, String>> valuesForEachMeasure = new ArrayList<Map<String,String>>(); //new HashMap<String, String>();
+	final List<Map<String, Object>> valuesForEachMeasure = new ArrayList<Map<String, Object>>(); //new HashMap<String, String>();
 	final List<String> newColNames = new ArrayList<String>();
+	final List<Integer> newColTypes = new ArrayList<Integer>();
 	final ResultSetMetaData metadata;
 	
 	boolean processed = false;
@@ -89,7 +93,6 @@ public class PivotResultSet extends AbstractResultSet {
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		rsColsCount = rsmd.getColumnCount();
-		measureCols = new ArrayList<String>();
 		List<String> colsToPivotNotFound = new ArrayList<String>();
 		List<String> colsNotToPivotNotFound = new ArrayList<String>();
 		colsToPivotNotFound.addAll(colsToPivotNames);
@@ -105,7 +108,8 @@ public class PivotResultSet extends AbstractResultSet {
 			else {
 			//if(!colsNotToPivot.contains(colName) && !colsToPivotNames.contains(colName)) {
 				measureCols.add(colName);
-				valuesForEachMeasure.add(new HashMap<String, String>());
+				measureColsType.add(rsmd.getColumnType(i));
+				valuesForEachMeasure.add(new HashMap<String, Object>());
 			}
 			log.debug("colName "+i+" [colCount="+rsColsCount+"]: "+colName);
 		}
@@ -117,7 +121,7 @@ public class PivotResultSet extends AbstractResultSet {
 			throw new RuntimeException("cols not to pivot not found: "+colsNotToPivotNotFound);
 		}
 		
-		metadata = new RSMetaDataAdapter(null, null, newColNames);
+		metadata = new RSMetaDataTypedAdapter(null, null, newColNames, newColTypes);
 		
 		if(doProcess) { process(); }
 	}
@@ -136,10 +140,10 @@ public class PivotResultSet extends AbstractResultSet {
 			String key = getKey();
 			for(int i=0;i<measureCols.size();i++) {
 				String measureCol = measureCols.get(i);
-				Map<String, String> values = valuesForEachMeasure.get(i);
-				String value = rs.getString(measureCol);
+				Map<String, Object> values = valuesForEachMeasure.get(i);
+				Object value = rs.getObject(measureCol);
 				
-				String prevValue = values.get(key);
+				Object prevValue = values.get(key);
 				if(prevValue==null) {
 					values.put(key, value);
 				}
@@ -192,6 +196,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public void processMetadata() {
 		//-- create rs-metadata --
 		newColNames.clear();
+		newColTypes.clear();
 		
 		log.debug("processMetadata: measures="+measureCols);
 		
@@ -199,6 +204,7 @@ public class PivotResultSet extends AbstractResultSet {
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
 			newColNames.add(col);
+			newColTypes.add(Types.VARCHAR); //XXX set non-pivot column type
 		}
 		
 		List<String> dataColumns = new ArrayList<String>();
@@ -208,6 +214,9 @@ public class PivotResultSet extends AbstractResultSet {
 		//single-measure
 		if(measureCols.size()==1) {
 			newColNames.addAll(dataColumns);
+			for(int i=0;i<dataColumns.size();i++) {
+				newColTypes.add(measureColsType.get(0));
+			}
 			if(alwaysShowMeasures) {
 			if(showMeasuresFirst) {
 				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
@@ -228,22 +237,27 @@ public class PivotResultSet extends AbstractResultSet {
 			colNames.addAll(newColNames);
 			
 			if(showMeasuresFirst) {
-				for(String measure: measureCols) {
+				for(int j=0;j<measureCols.size();j++) {
+					String measure = measureCols.get(j);
+					Integer measureColType = measureColsType.get(j);
 					for(int i=0;i<dataColumns.size();i++) {
 						newColNames.add(measure+"|"+dataColumns.get(i));
+						newColTypes.add(measureColType);
 					}
 				}
 			}
 			else {
 				for(int i=0;i<dataColumns.size();i++) {
-					for(String measure: measureCols) {
+					for(int j=0;j<measureCols.size();j++) {
+						String measure = measureCols.get(j);
 						newColNames.add(dataColumns.get(i)+"|"+measure);
+						newColTypes.add(measureColsType.get(j));
 					}
 				}
 			}
 		}
 
-		log.debug("processMetadata: columns="+newColNames);
+		log.debug("processMetadata: columns="+newColNames+" types="+newColTypes);
 	}
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
@@ -371,9 +385,9 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 	
 	@Override
-	public String getString(String columnLabel) throws SQLException {
+	public Object getObject(String columnLabel) throws SQLException {
 		int index = colsNotToPivot.indexOf(columnLabel);
-		log.debug("getString:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
+		log.debug("getObject:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
 		if(index>=0) {
 			//is nonpivotcol
 			return currentNonPivotKey.split("\\|")[index];
@@ -414,24 +428,89 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 
 	@Override
-	public String getString(int columnIndex) throws SQLException {
+	public Object getObject(int columnIndex) throws SQLException {
 		log.debug("index: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
 		if(columnIndex <= colsNotToPivot.size()) {
-			return getString(colsNotToPivot.get(columnIndex-1));
+			return getObject(colsNotToPivot.get(columnIndex-1));
 		}
 		if(columnIndex - colsNotToPivot.size() <= newColNames.size()) {
-			return getString(newColNames.get(columnIndex-1));
+			return getObject(newColNames.get(columnIndex-1));
 		}
 		throw new SQLException("unknown column index: "+columnIndex);
 	}
 	
 	@Override
-	public Object getObject(String columnLabel) throws SQLException {
-		return getString(columnLabel);
+	public String getString(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		if(o==null) { return null; }
+		return String.valueOf(o);
 	}
 
 	@Override
-	public Object getObject(int columnIndex) throws SQLException {
-		return getString(columnIndex);
+	public String getString(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		if(o==null) { return null; }
+		return String.valueOf(o);
 	}
+	
+	static double getDoubleValue(Object o) {
+		if(o==null) { return 0d; }
+		if(o instanceof Number) {
+			return ((Number)o).doubleValue();
+		}
+		return 0d;
+	}
+
+	static long getLongValue(Object o) {
+		if(o==null) { return 0l; }
+		if(o instanceof Number) {
+			return ((Number)o).longValue();
+		}
+		return 0l;
+	}
+	
+	static int getIntValue(Object o) {
+		if(o==null) { return 0; }
+		if(o instanceof Number) {
+			return ((Number)o).intValue();
+		}
+		return 0;
+	}
+	
+	@Override
+	public double getDouble(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		return getDoubleValue(o);
+	}
+	
+	@Override
+	public double getDouble(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		return getDoubleValue(o);
+	}
+	
+	@Override
+	public long getLong(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		return getLongValue(o);
+	}
+	
+	@Override
+	public long getLong(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		return getLongValue(o);
+	}
+	
+	@Override
+	public int getInt(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		return getIntValue(o);
+	}
+	
+	@Override
+	public int getInt(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		return getIntValue(o);
+	}
+	
 }
