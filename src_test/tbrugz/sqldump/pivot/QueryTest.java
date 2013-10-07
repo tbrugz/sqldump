@@ -60,11 +60,8 @@ public class QueryTest {
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
 
-		((PivotResultSet)rs).alwaysShowMeasures = false;
-		((PivotResultSet)rs).processMetadata();
 		rs.absolute(0);
 		rs.next();
-		
 		Assert.assertEquals("FALSE", rs.getString("A"));
 		Assert.assertEquals("FALSE", rs.getString("B:FALSE"));
 		Assert.assertEquals("TRUE", rs.getString("B:TRUE"));
@@ -75,6 +72,33 @@ public class QueryTest {
 		String sql = prop.getProperty("q3");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals("FALSE", rs.getString("A"));
+		Assert.assertEquals("FALSE", rs.getString("B:FALSE|C:FALSE"));
+		Assert.assertEquals("TRUE", rs.getString("B:FALSE|C:TRUE"));
+	}
+	
+	@Test
+	public void testQ4Pivot2Measures() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q4");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+		
+		rs.absolute(1);
+		Assert.assertEquals("FALSE", rs.getString("A"));
+		Assert.assertEquals("FALSE", rs.getString("BOOL_AND|B:FALSE"));
+		Assert.assertEquals("TRUE", rs.getString("BOOL_OR|B:TRUE"));
+		
+		((PivotResultSet)rs).showMeasuresFirst = false;
+		((PivotResultSet)rs).processMetadata();
+		rs.absolute(0);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals("FALSE", rs.getString("A"));
+		Assert.assertEquals("FALSE", rs.getString("B:FALSE|BOOL_AND"));
+		Assert.assertEquals("TRUE", rs.getString("B:TRUE|BOOL_OR"));
 	}
 	
 }
