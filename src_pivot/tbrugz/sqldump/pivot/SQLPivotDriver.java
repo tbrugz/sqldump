@@ -25,7 +25,8 @@ public class SQLPivotDriver implements java.sql.Driver {
 	@Override
 	public Connection connect(String url, Properties info) throws SQLException {
 		if(!acceptsURL(url)) {
-			throw new RuntimeException("url '"+url+"' does not match required prefix: "+SQLPIVOT_DRIVER_PREFIX);
+			//throw new RuntimeException("url '"+url+"' does not match required prefix: "+SQLPIVOT_DRIVER_PREFIX);
+			return null;
 		}
 		String innerUrl = "jdbc:"+url.substring(SQLPIVOT_DRIVER_PREFIX.length());
 		Connection conn = DriverManager.getConnection(innerUrl, info);
