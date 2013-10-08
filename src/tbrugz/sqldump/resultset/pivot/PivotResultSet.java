@@ -48,15 +48,16 @@ public class PivotResultSet extends AbstractResultSet {
 	final int rsColsCount;
 	
 	final List<String> colsNotToPivot;
-	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); 
 	final Map<String, Comparable> colsToPivot;
 	final List<String> measureCols = new ArrayList<String>();
+	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); 
 	final List<Integer> measureColsType = new ArrayList<Integer>();
 
 	transient final List<String> colsToPivotNames;
 	
 	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();
 	final List<Map<String, Object>> valuesForEachMeasure = new ArrayList<Map<String, Object>>(); //new HashMap<String, String>();
+	
 	final List<String> newColNames = new ArrayList<String>();
 	final List<Integer> newColTypes = new ArrayList<Integer>();
 	final ResultSetMetaData metadata;
@@ -74,6 +75,10 @@ public class PivotResultSet extends AbstractResultSet {
 	public static Aggregator aggregator = Aggregator.LAST;
 
 	//colsNotToPivot - key cols
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot) throws SQLException {
+		this(rs, colsNotToPivot, colsToPivot, true);
+	}
+
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess) throws SQLException {
 		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess);
 	}
@@ -86,14 +91,14 @@ public class PivotResultSet extends AbstractResultSet {
 		this.colsNotToPivotType.clear();
 		for(int i=0;i<colsNotToPivot.size();i++) { this.colsNotToPivotType.add(null); }
 		
-		List<String> colsTP = new ArrayList<String>();
+		colsToPivotNames = new ArrayList<String>();
 		for(String key: colsToPivot.keySet()) {
-			colsTP.add(key);
+			colsToPivotNames.add(key);
 		}
-		colsToPivotNames = colsTP;
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		rsColsCount = rsmd.getColumnCount();
+		
 		List<String> colsToPivotNotFound = new ArrayList<String>();
 		List<String> colsNotToPivotNotFound = new ArrayList<String>();
 		colsToPivotNotFound.addAll(colsToPivotNames);
@@ -146,7 +151,7 @@ public class PivotResultSet extends AbstractResultSet {
 		String lastColsNotToPivotKey = "";
 		
 		while(rs.next()) {
-			String key = getKey();
+			String key = getKey(rs);
 			for(int i=0;i<measureCols.size();i++) {
 				String measureCol = measureCols.get(i);
 				Map<String, Object> values = valuesForEachMeasure.get(i);
@@ -271,11 +276,12 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
+		int colsToPivotCount = colsToPivotNames.size();
 		String colName = colsToPivotNames.get(colNumber);
 		Set<Object> colVals = keyColValues.get(colName);
 		for(Object v: colVals) {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
-			if(colNumber+1==colsToPivotNames.size()) {
+			if(colNumber+1==colsToPivotCount) {
 				//add col name
 				log.debug("genNewCols: col-full-name: "+colFullName);
 				newColumns.add(colFullName);
@@ -287,7 +293,7 @@ public class PivotResultSet extends AbstractResultSet {
 		}
 	}
 	
-	String getKey() throws SQLException {
+	String getKey(ResultSet rs) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
