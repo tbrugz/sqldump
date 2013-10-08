@@ -3,7 +3,6 @@ package tbrugz.sqldump.resultset.pivot;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -534,5 +533,11 @@ public class PivotResultSet extends AbstractResultSet {
 		Object o = getObject(columnIndex);
 		return getIntValue(o);
 	}
+	
+	//public short getShort(int columnIndex) throws SQLException;
+	
+	//public byte getByte(int columnIndex) throws SQLException;
+	
+	//public float getFloat(int columnIndex) throws SQLException;
 	
 }

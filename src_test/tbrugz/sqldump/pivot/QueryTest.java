@@ -125,11 +125,11 @@ public class QueryTest {
 		QueryDumper.simplerRSDump(rs);
 
 		rs.absolute(1);
-		Assert.assertEquals("2", rs.getString("B"));
-		Assert.assertEquals(2+1, rs.getInt("A:1"));
+		Assert.assertEquals("2", rs.getObject("B"));
+		Assert.assertEquals(2+1, rs.getObject("A:1"));
 		
 		rs.next();
-		Assert.assertEquals("4", rs.getString("B"));
+		Assert.assertEquals("4", rs.getObject("B"));
 		Assert.assertEquals(4+2, rs.getInt("A:2"));
 	}
 	
