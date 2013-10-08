@@ -19,12 +19,13 @@ import tbrugz.sqldump.resultset.AbstractResultSet;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 
 /*
- * ~TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting) - processMetadata()!
+ * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting) - processMetadata()!
  * ~TODO: multiple column type (beside String): Integer, Double, Date
- * TODO: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
+ * XXX: Date column type?
+ * XXX: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
  * XXX: option to remove cols/rows/both where all measures are null
  * ~XXX: aggregate if duplicated key found? first(), last()?
- * TODO: option to show measures in columns
+ * ->TODO: option to show measures in columns
  */
 public class PivotResultSet extends AbstractResultSet {
 	
@@ -43,38 +44,46 @@ public class PivotResultSet extends AbstractResultSet {
 	final static String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
 
 	final static int logEachXRows = 1000;
+
+	final static Aggregator DEFAULT_AGGREGATOR = Aggregator.LAST;
 	
+	// original ResultSet properties
 	final ResultSet rs;
 	final int rsColsCount;
+	boolean processed = false;
+	int originalRSRowCount;
+	public static Aggregator aggregator = DEFAULT_AGGREGATOR; //used in process(), refactor?
 	
+	// pivot "Constructor" properties
 	final List<String> colsNotToPivot;
 	final Map<String, Comparable> colsToPivot;
 	final List<String> measureCols = new ArrayList<String>();
-	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); 
+	final List<Integer> colsNotToPivotType = new ArrayList<Integer>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
-
-	transient final List<String> colsToPivotNames;
+	transient final List<String> colsToPivotNames; // derived from colsToPivot
 	
+	// data properties - set in processMetadata()?
 	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();
+
+	// data properties - set in process()
+	final List<String> nonPivotKeyValues = new ArrayList<String>();
 	final List<Map<String, Object>> valuesForEachMeasure = new ArrayList<Map<String, Object>>(); //new HashMap<String, String>();
 	
+	// pivot metadata properties
 	final List<String> newColNames = new ArrayList<String>();
 	final List<Integer> newColTypes = new ArrayList<Integer>();
 	final ResultSetMetaData metadata;
 	
-	boolean processed = false;
+	// pivot ResultSet properties
 	int position = -1;
-	int originalRSRowCount = 0;
 	int rowCount = 0;
-	final List<String> nonPivotKeyValues = new ArrayList<String>();
-	//final List<List<String>> nonPivotValues = new ArrayList<List<String>>();
 	String currentNonPivotKey = null;
 	public boolean showMeasuresInColumns = true; //XXX: show measures in columns
 	public boolean showMeasuresFirst = true;
 	public boolean alwaysShowMeasures = false;
-	public static Aggregator aggregator = Aggregator.LAST;
 
-	//colsNotToPivot - key cols
+	// colsNotToPivot+colsToPivot - key cols ?
+	
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot) throws SQLException {
 		this(rs, colsNotToPivot, colsToPivot, true);
 	}
@@ -403,9 +412,10 @@ public class PivotResultSet extends AbstractResultSet {
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
 		int index = colsNotToPivot.indexOf(columnLabel);
-		//log.debug("getObject:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
 		if(index>=0) {
 			//is nonpivotcol
+			
+			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+java.util.Arrays.asList(currentNonPivotKey.split("\\|")));
 			//XXX: return non-string values for non-pivot columns?
 			return currentNonPivotKey.split("\\|")[index];
 		}
@@ -415,7 +425,6 @@ public class PivotResultSet extends AbstractResultSet {
 			//is pivotcol
 			
 			int measureIndex = -1; 
-
 			StringBuilder sb = new StringBuilder();
 			String[] parts = columnLabel.split(COLS_SEP_PATTERN);
 			for(int i=0;i<parts.length;i++) {
@@ -437,7 +446,7 @@ public class PivotResultSet extends AbstractResultSet {
 			
 			//single measure
 			if(measureIndex==-1) { measureIndex = 0; }
-			//log.info("value [key="+key+",measureIndex="+measureIndex+"]:"+valuesForEachMeasure.get(measureIndex).get(key));
+			//log.debug("getObject[pivot] value [key="+key+",measureIndex="+measureIndex+"]:"+valuesForEachMeasure.get(measureIndex).get(key));
 			return valuesForEachMeasure.get(measureIndex).get(key);
 			
 			//XXXxx multi-measure ? done ?
