@@ -88,7 +88,7 @@ public class RSMetaDataTypedAdapter extends RSMetaDataAdapter {
 			return String.class.getName();
 			
 		default:
-			return String.class.getName();
+			return Object.class.getName();
 		}
 	}
 	

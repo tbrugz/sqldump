@@ -5,7 +5,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,11 +20,12 @@ import tbrugz.sqldump.resultset.AbstractResultSet;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 
 /*
- * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting)
- * TODO: multiple column type (beside String): Integer, Double, Date
+ * ~TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting) - processMetadata()!
+ * ~TODO: multiple column type (beside String): Integer, Double, Date
  * TODO: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
  * XXX: option to remove cols/rows/both where all measures are null
- * XXX: aggregate if duplicated key found? first(), last()?
+ * ~XXX: aggregate if duplicated key found? first(), last()?
+ * TODO: option to show measures in columns
  */
 public class PivotResultSet extends AbstractResultSet {
 	
@@ -69,7 +69,7 @@ public class PivotResultSet extends AbstractResultSet {
 	final List<String> nonPivotKeyValues = new ArrayList<String>();
 	//final List<List<String>> nonPivotValues = new ArrayList<List<String>>();
 	String currentNonPivotKey = null;
-	public boolean showMeasuresInColumns = true; //TODO: show measures in columns
+	public boolean showMeasuresInColumns = true; //XXX: show measures in columns
 	public boolean showMeasuresFirst = true;
 	public boolean alwaysShowMeasures = false;
 	public static Aggregator aggregator = Aggregator.LAST;
@@ -84,6 +84,8 @@ public class PivotResultSet extends AbstractResultSet {
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
 		this.colsToPivot = colsToPivot;
+		this.colsNotToPivotType.clear();
+		for(int i=0;i<colsNotToPivot.size();i++) { this.colsNotToPivotType.add(null); }
 		
 		List<String> colsTP = new ArrayList<String>();
 		for(String key: colsToPivot.keySet()) {
@@ -99,6 +101,14 @@ public class PivotResultSet extends AbstractResultSet {
 		colsNotToPivotNotFound.addAll(colsNotToPivot);
 		for(int i=1;i<=rsColsCount;i++) {
 			String colName = rsmd.getColumnName(i);
+
+			int index = colsNotToPivot.indexOf(colName);
+			if(index>=0) {
+				//colsNotToPivotType.set(index, Types.VARCHAR); //XXXxx set non-pivot column type
+				int type = rsmd.getColumnType(index+1);
+				colsNotToPivotType.set(index, type);
+			}
+			
 			if(colsToPivotNotFound.contains(colName)) {
 				colsToPivotNotFound.remove(colName);
 			}
@@ -111,7 +121,7 @@ public class PivotResultSet extends AbstractResultSet {
 				measureColsType.add(rsmd.getColumnType(i));
 				valuesForEachMeasure.add(new HashMap<String, Object>());
 			}
-			log.debug("colName "+i+" [colCount="+rsColsCount+"]: "+colName);
+			log.debug("orig colName ["+i+"/"+rsColsCount+"]: "+colName);
 		}
 		
 		if(colsToPivotNotFound.size()>0) {
@@ -160,7 +170,7 @@ public class PivotResultSet extends AbstractResultSet {
 					} 
 				}
 				
-				log.debug("put: key="+key+" ; val="+value+"; aggr="+aggregator);
+				//log.debug("put: key="+key+" ; val="+value+"; aggr="+aggregator);
 			}
 			
 			String colsNotToPivotKey = key.substring(0, key.indexOf("%"));
@@ -176,7 +186,7 @@ public class PivotResultSet extends AbstractResultSet {
 				lastColsNotToPivotKey = colsNotToPivotKey;
 			}
 			
-			log.debug("key: "+key);
+			//log.debug("key: "+key);
 			
 			count++;
 			
@@ -204,7 +214,8 @@ public class PivotResultSet extends AbstractResultSet {
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
 			newColNames.add(col);
-			newColTypes.add(Types.VARCHAR); //XXX set non-pivot column type
+			//newColTypes.add(Types.VARCHAR); //XXX set non-pivot column type
+			newColTypes.add(colsNotToPivotType.get(i));
 		}
 		
 		List<String> dataColumns = new ArrayList<String>();
@@ -267,11 +278,11 @@ public class PivotResultSet extends AbstractResultSet {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotNames.size()) {
 				//add col name
-				log.debug("col-full-name: "+colFullName);
+				log.debug("genNewCols: col-full-name: "+colFullName);
 				newColumns.add(colFullName);
 			}
 			else {
-				log.debug("col-partial-name: "+colFullName);
+				//log.debug("col-partial-name: "+colFullName);
 				genNewCols(colNumber+1, colFullName, newColumns);
 			}
 		}
@@ -387,9 +398,10 @@ public class PivotResultSet extends AbstractResultSet {
 	@Override
 	public Object getObject(String columnLabel) throws SQLException {
 		int index = colsNotToPivot.indexOf(columnLabel);
-		log.debug("getObject:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
+		//log.debug("getObject:: "+columnLabel+"/"+index+" :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+Arrays.asList(currentNonPivotKey.split("\\|")));
 		if(index>=0) {
 			//is nonpivotcol
+			//XXX: return non-string values for non-pivot columns?
 			return currentNonPivotKey.split("\\|")[index];
 		}
 		
@@ -416,10 +428,11 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 			}
 			String key = currentNonPivotKey+"%"+sb.toString();
-			log.debug("pivotCol: key:: "+key);
+			//log.debug("pivotCol: key:: "+key);
 			
 			//single measure
 			if(measureIndex==-1) { measureIndex = 0; }
+			//log.info("value [key="+key+",measureIndex="+measureIndex+"]:"+valuesForEachMeasure.get(measureIndex).get(key));
 			return valuesForEachMeasure.get(measureIndex).get(key);
 			
 			//XXXxx multi-measure ? done ?
@@ -429,7 +442,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		log.debug("index: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
+		//log.debug("index: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
 		if(columnIndex <= colsNotToPivot.size()) {
 			return getObject(colsNotToPivot.get(columnIndex-1));
 		}
@@ -458,7 +471,7 @@ public class PivotResultSet extends AbstractResultSet {
 		if(o instanceof Number) {
 			return ((Number)o).doubleValue();
 		}
-		return 0d;
+		return getDoubleValue(o.toString());
 	}
 
 	static long getLongValue(Object o) {
@@ -466,7 +479,7 @@ public class PivotResultSet extends AbstractResultSet {
 		if(o instanceof Number) {
 			return ((Number)o).longValue();
 		}
-		return 0l;
+		return (long) getDoubleValue(o.toString());
 	}
 	
 	static int getIntValue(Object o) {
@@ -474,7 +487,16 @@ public class PivotResultSet extends AbstractResultSet {
 		if(o instanceof Number) {
 			return ((Number)o).intValue();
 		}
-		return 0;
+		return (int) getDoubleValue(o.toString());
+	}
+
+	static double getDoubleValue(String s) {
+		try {
+			return Double.parseDouble(s);
+		}
+		catch(NumberFormatException e) {
+			return 0d;
+		}
 	}
 	
 	@Override
