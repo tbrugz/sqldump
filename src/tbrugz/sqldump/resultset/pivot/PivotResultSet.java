@@ -48,14 +48,14 @@ public class PivotResultSet extends AbstractResultSet {
 	final int rsColsCount;
 	
 	final List<String> colsNotToPivot;
-	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); //XXX add type for non-pivot columns 
+	final List<Integer> colsNotToPivotType = new ArrayList<Integer>(); 
 	final Map<String, Comparable> colsToPivot;
 	final List<String> measureCols = new ArrayList<String>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
 
-	final List<String> colsToPivotNames;
+	transient final List<String> colsToPivotNames;
 	
-	final Map<String, Set<String>> keyColValues = new HashMap<String, Set<String>>();
+	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();
 	final List<Map<String, Object>> valuesForEachMeasure = new ArrayList<Map<String, Object>>(); //new HashMap<String, String>();
 	final List<String> newColNames = new ArrayList<String>();
 	final List<Integer> newColTypes = new ArrayList<Integer>();
@@ -272,8 +272,8 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
 		String colName = colsToPivotNames.get(colNumber);
-		Set<String> colVals = keyColValues.get(colName);
-		for(String v: colVals) {
+		Set<Object> colVals = keyColValues.get(colName);
+		for(Object v: colVals) {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotNames.size()) {
 				//add col name
@@ -291,7 +291,7 @@ public class PivotResultSet extends AbstractResultSet {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
-			String val = rs.getString(col);
+			Object val = rs.getObject(col);
 			if(val==null) { log.warn("value for key col is null [col = "+col+"]"); }
 			addValueToSet(col, val);
 			sb.append( (i==0?"":"|") + val);
@@ -299,7 +299,7 @@ public class PivotResultSet extends AbstractResultSet {
 		sb.append("%");
 		for(int i=0;i<colsToPivotNames.size();i++) {
 			String col = colsToPivotNames.get(i);
-			String val = rs.getString(col);
+			Object val = rs.getObject(col);
 			if(val==null) { log.warn("value for pivotted key col is null [col = "+col+"]"); }
 			addValueToSet(col, val);
 			sb.append( (i==0?"":"|") + val);
@@ -311,12 +311,12 @@ public class PivotResultSet extends AbstractResultSet {
 		return sb.toString();
 	}
 	
-	void addValueToSet(String col, String val) {
+	void addValueToSet(String col, Object val) {
 		//adds value to set
-		Set<String> vals = keyColValues.get(col);
+		Set<Object> vals = keyColValues.get(col);
 		if(vals==null) {
 			//XXX: order of elements inside set: use Comparator/Comparable
-			vals = new TreeSet<String>();
+			vals = new TreeSet<Object>();
 			keyColValues.put(col, vals);
 		}
 		vals.add(val);
