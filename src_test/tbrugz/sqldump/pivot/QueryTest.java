@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Properties;
 
 import org.junit.After;
@@ -42,6 +44,10 @@ public class QueryTest {
 	public void after() throws SQLException, ClassNotFoundException {
 		conn.close();
 	}
+	
+	Date makeSqlDate(int year, int month, int dayOfMonth) {
+		return new java.sql.Date(new GregorianCalendar(year, month-1, dayOfMonth).getTime().getTime());
+	}
 
 	@Test
 	public void testQ1NonPivot() throws SQLException, ClassNotFoundException, IOException {
@@ -66,6 +72,11 @@ public class QueryTest {
 		Assert.assertEquals("false", rs.getString("A"));
 		Assert.assertEquals("false", rs.getString("B:false"));
 		Assert.assertEquals("true", rs.getString("B:true"));
+
+		rs.next();
+		Assert.assertEquals("true", rs.getString("A"));
+		Assert.assertEquals("true", rs.getString("B:false"));
+		Assert.assertEquals(true, rs.getObject("B:true"));
 	}
 
 	@Test
@@ -131,6 +142,18 @@ public class QueryTest {
 		rs.next();
 		Assert.assertEquals(4, rs.getObject("B"));
 		Assert.assertEquals(4+2, rs.getInt("A:2"));
+	}
+
+	@Test
+	public void testQ7Date() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q7");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals(makeSqlDate(2013, 10, 8), rs.getObject("A"));
+		Assert.assertEquals(1, rs.getObject("B:one"));
+		Assert.assertEquals(2, rs.getObject("B:two"));
 	}
 	
 }

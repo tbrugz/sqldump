@@ -3,8 +3,10 @@ package tbrugz.sqldump.resultset.pivot;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -535,6 +537,15 @@ public class PivotResultSet extends AbstractResultSet {
 		}
 	}
 	
+	static Date getDate(Object o) {
+		if(o==null) { return null; }
+		//log.debug("getDate: "+o+" ; "+o.getClass());
+		if(o instanceof Date) {
+			return (Date) o;
+		}
+		return null;
+	}
+	
 	@Override
 	public double getDouble(String columnLabel) throws SQLException {
 		Object o = getObject(columnLabel);
@@ -576,5 +587,21 @@ public class PivotResultSet extends AbstractResultSet {
 	//public byte getByte(int columnIndex) throws SQLException;
 	
 	//public float getFloat(int columnIndex) throws SQLException;
+	
+	@Override
+	public java.sql.Date getDate(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		Date d = getDate(o);
+		if(d==null) { return null; }
+		return new java.sql.Date( d.getTime() );
+	}
+
+	@Override
+	public Timestamp getTimestamp(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		Date d = getDate(o);
+		if(d==null) { return null; }
+		return new Timestamp( d.getTime() );
+	}
 	
 }
