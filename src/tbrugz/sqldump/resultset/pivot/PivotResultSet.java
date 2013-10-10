@@ -125,7 +125,7 @@ public class PivotResultSet extends AbstractResultSet {
 			int index = colsNotToPivot.indexOf(colName);
 			if(index>=0) {
 				//colsNotToPivotType.set(index, Types.VARCHAR); //XXXxx set non-pivot column type
-				int type = rsmd.getColumnType(index+1);
+				int type = rsmd.getColumnType(i);
 				colsNotToPivotType.set(index, type);
 			}
 			
