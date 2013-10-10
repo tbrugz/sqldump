@@ -28,7 +28,8 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
  * XXX: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
  * XXX: option to remove cols/rows/both where all measures are null
  * XXXxx: aggregate if duplicated key found? first(), last()?
- * ->TODO: option to show measures in columns
+ * TODOne: option to show measures in columns
+ * - MeasureNames is a dimension (key)
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
@@ -234,7 +235,7 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 		}
 		
-		//log.info("before: "+nonPivotKeyValues);
+		//log.info("before[mic="+showMeasuresInColumns+";smf="+showMeasuresFirst+"]: "+nonPivotKeyValues);
 
 		if(!showMeasuresInColumns) {
 			//populate measures in column
@@ -251,7 +252,7 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 			}
 			else {
-				//FIXME populate nonPivotKeyValues when showMeasuresFirst is false
+				//XXX populate nonPivotKeyValues when showMeasuresFirst is false. really?
 			}
 		}
 
@@ -539,7 +540,13 @@ public class PivotResultSet extends AbstractResultSet {
 					keyArr = Arrays.copyOfRange(keyArr, 1, keyArr.length);
 				}
 				else {
-					keyArr = Arrays.copyOfRange(keyArr, 0, keyArr.length-1);
+					int npkc = currentNonPivotKey.values.length-1;
+					Object[] newKeyArr = new Object[keyArr.length-1];
+					System.arraycopy(keyArr, 0, newKeyArr, 0, npkc);
+					//log.debug("[int;"+npkc+"] before: "+Arrays.asList(keyArr)+" ; after: "+Arrays.asList(newKeyArr));
+					System.arraycopy(keyArr, npkc+1, newKeyArr, npkc, keyArr.length-npkc-1);
+					//log.debug("getObject: measureKey: before: "+Arrays.asList(keyArr)+" ; after: "+Arrays.asList(newKeyArr));
+					keyArr = newKeyArr;
 				}
 			}
 			Key key = new Key(keyArr);
@@ -561,17 +568,15 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 			}
 			Map<Key, Object> measureMap = valuesForEachMeasure.get(measureIndex);
-			//log.debug("getObject[pivot] value [key="+key+",measureIndex="+measureIndex+"]:"+measureMap.get(key));
+			//log.debug("getObject[pivot] value [key="+key+",measureIndex="+measureIndex+"]: "+measureMap.get(key));
 			return measureMap.get(key);
-			
-			//XXXxx multi-measure ? done ?
 		}
 		throw new SQLException("unknown column: '"+columnLabel+"'");
 	}
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		//log.debug("index: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
+		//log.debug("getObject[by-index]: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
 		if((!showMeasuresInColumns)) {
 			if(showMeasuresFirst && columnIndex==1) {
 				return getObject(MEASURES_COLNAME);

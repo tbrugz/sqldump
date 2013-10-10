@@ -35,6 +35,8 @@ public class QueryTest {
 	@Before
 	public void before() throws SQLException, ClassNotFoundException {
 		PivotResultSet.showMeasuresInColumns = true;
+		PivotResultSet.showMeasuresFirst = true;
+		
 		Class.forName(pivotDriverClass); //"tbrugz.sqldump.pivot.SQLPivotDriver");
 		
 		String url = "jdbc:sqlpivot:h2:mem:abc";
@@ -159,7 +161,7 @@ public class QueryTest {
 	}
 	
 	@Test
-	public void testQ4MeasuresInColumns() throws SQLException, ClassNotFoundException, IOException {
+	public void testQ4MeasuresInColumnsFirst() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q4");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
@@ -187,6 +189,35 @@ public class QueryTest {
 		Assert.assertEquals("BOOL_OR", rs.getString("Measure"));
 		Assert.assertEquals("false", rs.getString("A"));
 		Assert.assertEquals("false", rs.getString("B:false"));
+		Assert.assertEquals(true, rs.getObject("B:true"));
+	}
+
+	@Test
+	public void testQ4MeasuresInColumnsLast() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q4");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+		
+		rs.absolute(1);
+		Assert.assertEquals("false", rs.getString("A"));
+		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
+		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
+		
+		PivotResultSet.showMeasuresInColumns = false;
+		PivotResultSet.showMeasuresFirst = false;
+		rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals("false", rs.getString("A"));
+		Assert.assertEquals("BOOL_AND", rs.getObject("Measure"));
+		Assert.assertEquals("false", rs.getString("B:false"));
+		Assert.assertEquals(false, rs.getObject("B:true"));
+
+		rs.absolute(4);
+		Assert.assertEquals("true", rs.getString("A"));
+		Assert.assertEquals("BOOL_OR", rs.getString("Measure"));
+		Assert.assertEquals("true", rs.getString("B:false"));
 		Assert.assertEquals(true, rs.getObject("B:true"));
 	}
 	
