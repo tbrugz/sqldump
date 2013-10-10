@@ -159,6 +159,25 @@ public class QueryTest {
 		Assert.assertEquals(1, rs.getObject("B:one"));
 		Assert.assertEquals(2, rs.getObject("B:two"));
 	}
+
+	@Test
+	public void testQ7DatePivotted() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q7p");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals("one", rs.getObject("B"));
+		Assert.assertEquals(1, rs.getObject("A:2013-10-08"));
+		Assert.assertEquals(3, rs.getObject("A:2013-10-09"));
+
+		rs.next();
+		Assert.assertEquals("two", rs.getObject("B"));
+		Assert.assertEquals(2, rs.getObject("A:2013-10-08"));
+		Assert.assertEquals(4, rs.getObject("A:2013-10-09"));
+
+		Assert.assertEquals(false, rs.next());
+	}
 	
 	@Test
 	public void testQ4MeasuresInColumnsFirst() throws SQLException, ClassNotFoundException, IOException {
