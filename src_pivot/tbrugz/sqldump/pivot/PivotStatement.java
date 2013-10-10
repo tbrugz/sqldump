@@ -28,7 +28,7 @@ public class PivotStatement<S extends Statement> implements Statement {
 		}
 		PivotQueryParser parser = new PivotQueryParser(sql);
 		if(parser.colsToPivot!=null) {
-			return new PivotResultSet(statement.executeQuery(sql), parser.colsNotToPivot, parser.colsToPivot, true);
+			return new PivotResultSet(statement.executeQuery(sql), parser.colsNotToPivot, parser.colsToPivot, true, parser.flags);
 		}
 		return statement.executeQuery(sql);
 	}

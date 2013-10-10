@@ -37,7 +37,7 @@ public class PivotPreparedStatement extends PivotStatement<PreparedStatement> im
 	//XXX
 	public ResultSet executeQuery() throws SQLException {
 		PivotQueryParser parser = new PivotQueryParser(sql);
-		return new PivotResultSet(statement.executeQuery(), parser.colsNotToPivot, parser.colsToPivot, true);
+		return new PivotResultSet(statement.executeQuery(), parser.colsNotToPivot, parser.colsToPivot, true, parser.flags);
 		//return statement.executeQuery();
 	}
 

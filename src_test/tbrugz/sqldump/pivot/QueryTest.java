@@ -34,9 +34,6 @@ public class QueryTest {
 	
 	@Before
 	public void before() throws SQLException, ClassNotFoundException {
-		PivotResultSet.showMeasuresInColumns = true;
-		PivotResultSet.showMeasuresFirst = true;
-		
 		Class.forName(pivotDriverClass); //"tbrugz.sqldump.pivot.SQLPivotDriver");
 		
 		String url = "jdbc:sqlpivot:h2:mem:abc";
@@ -97,7 +94,8 @@ public class QueryTest {
 	@Test
 	public void testQ4Pivot2Measures() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q4");
-		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String sql1 = sql + " /* pivot B nonpivot A */";
+		ResultSet rs = conn.createStatement().executeQuery(sql1);
 		QueryDumper.simplerRSDump(rs);
 		
 		rs.absolute(1);
@@ -105,10 +103,9 @@ public class QueryTest {
 		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
 		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
 		
-		PivotResultSet.showMeasuresFirst = false;
-		//((PivotResultSet)rs).showMeasuresFirst = false;
+		String sql2 = sql + " /* pivot B nonpivot A +measures-show-last */";
+		rs = conn.createStatement().executeQuery(sql2);
 		((PivotResultSet)rs).processMetadata();
-		//rs.absolute(0);
 		QueryDumper.simplerRSDump(rs);
 
 		rs.absolute(1);
@@ -182,7 +179,8 @@ public class QueryTest {
 	@Test
 	public void testQ4MeasuresInColumnsFirst() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q4");
-		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String sql1 = sql + " /* pivot B nonpivot A */";
+		ResultSet rs = conn.createStatement().executeQuery(sql1);
 		QueryDumper.simplerRSDump(rs);
 		
 		rs.absolute(1);
@@ -190,12 +188,8 @@ public class QueryTest {
 		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
 		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
 		
-		//((PivotResultSet)rs).showMeasuresInColumns = false;
-		PivotResultSet.showMeasuresInColumns = false;
-		PivotResultSet.showMeasuresFirst = true; //both ways must be tested
-		rs = conn.createStatement().executeQuery(sql);
-		//((PivotResultSet)rs).showMeasuresFirst = true; //both ways must be tested
-		//((PivotResultSet)rs).processMetadata();
+		String sql2 = sql + " /* pivot B nonpivot A +measures-show-inrows */";
+		rs = conn.createStatement().executeQuery(sql2);
 		QueryDumper.simplerRSDump(rs);
 
 		rs.absolute(1);
@@ -214,7 +208,8 @@ public class QueryTest {
 	@Test
 	public void testQ4MeasuresInColumnsLast() throws SQLException, ClassNotFoundException, IOException {
 		String sql = prop.getProperty("q4");
-		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String sql1 = sql + " /* pivot B nonpivot A */";
+		ResultSet rs = conn.createStatement().executeQuery(sql1);
 		QueryDumper.simplerRSDump(rs);
 		
 		rs.absolute(1);
@@ -222,9 +217,8 @@ public class QueryTest {
 		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
 		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
 		
-		PivotResultSet.showMeasuresInColumns = false;
-		PivotResultSet.showMeasuresFirst = false;
-		rs = conn.createStatement().executeQuery(sql);
+		String sql2 = sql + " /* pivot B nonpivot A +measures-show-inrows */";
+		rs = conn.createStatement().executeQuery(sql2);
 		QueryDumper.simplerRSDump(rs);
 
 		rs.absolute(1);

@@ -55,6 +55,10 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	final static String MEASURES_COLNAME = "Measure"; 
 	
+	public static final int SHOW_MEASURES_IN_ROWS = 0x01;
+	public static final int SHOW_MEASURES_LAST = 0x02;
+	public static final int SHOW_MEASURES_ALLWAYS = 0x04;
+	
 	// original ResultSet properties
 	final ResultSet rs;
 	final int rsColsCount;
@@ -87,9 +91,9 @@ public class PivotResultSet extends AbstractResultSet {
 	int position = -1;
 	int rowCount = 0;
 	Key currentNonPivotKey = null;
-	public static boolean showMeasuresInColumns = true;
-	public static boolean showMeasuresFirst = true;
-	public boolean alwaysShowMeasures = false;
+	boolean showMeasuresInColumns = true;
+	boolean showMeasuresFirst = true;
+	boolean alwaysShowMeasures = false;
 
 	// colsNotToPivot+colsToPivot - key cols ?
 	
@@ -98,14 +102,21 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess) throws SQLException {
-		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess);
+		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess, 0);
 	}
 	
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
 			boolean doProcess) throws SQLException {
+		this(rs, colsNotToPivot, colsToPivot, doProcess, 0);
+	}
+	
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
+			boolean doProcess, int flags) throws SQLException {
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
 		this.colsToPivot = colsToPivot;
+		setFlags(flags);
+		
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			this.colsNotToPivotType.add(null);
 			//this.colsNotToPivotIndex.add(null);
@@ -165,6 +176,13 @@ public class PivotResultSet extends AbstractResultSet {
 		log.debug("colsNotToPivot: names="+this.colsNotToPivot+" ; types="+colsNotToPivotType);
 		
 		if(doProcess) { process(); }
+	}
+	
+	void setFlags(int flags) {
+		//log.debug("flags: "+flags);
+		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
+		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
+		showMeasuresInColumns = (flags & SHOW_MEASURES_IN_ROWS) == 0;
 	}
 	
 	//XXX: addObservers, ...
