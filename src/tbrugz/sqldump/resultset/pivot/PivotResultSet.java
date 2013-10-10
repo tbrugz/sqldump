@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,7 @@ public class PivotResultSet extends AbstractResultSet {
 	final Map<String, Comparable> colsToPivot;
 	final List<String> measureCols = new ArrayList<String>();
 	final List<Integer> colsNotToPivotType = new ArrayList<Integer>();
+	//final List<Integer> colsNotToPivotIndex = new ArrayList<Integer>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
 	transient final List<String> colsToPivotNames; // derived from colsToPivot
 	
@@ -104,8 +106,10 @@ public class PivotResultSet extends AbstractResultSet {
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
 		this.colsToPivot = colsToPivot;
-		this.colsNotToPivotType.clear();
-		for(int i=0;i<colsNotToPivot.size();i++) { this.colsNotToPivotType.add(null); }
+		for(int i=0;i<colsNotToPivot.size();i++) {
+			this.colsNotToPivotType.add(null);
+			//this.colsNotToPivotIndex.add(null);
+		}
 		
 		colsToPivotNames = new ArrayList<String>();
 		for(String key: colsToPivot.keySet()) {
@@ -115,18 +119,22 @@ public class PivotResultSet extends AbstractResultSet {
 		ResultSetMetaData rsmd = rs.getMetaData();
 		rsColsCount = rsmd.getColumnCount();
 		
+		List<String> rsColNames = new ArrayList<String>();
+		
 		List<String> colsToPivotNotFound = new ArrayList<String>();
 		List<String> colsNotToPivotNotFound = new ArrayList<String>();
 		colsToPivotNotFound.addAll(colsToPivotNames);
 		colsNotToPivotNotFound.addAll(colsNotToPivot);
 		for(int i=1;i<=rsColsCount;i++) {
 			String colName = rsmd.getColumnName(i);
+			rsColNames.add(colName);
 
 			int index = colsNotToPivot.indexOf(colName);
 			if(index>=0) {
 				//colsNotToPivotType.set(index, Types.VARCHAR); //XXXxx set non-pivot column type
 				int type = rsmd.getColumnType(i);
 				colsNotToPivotType.set(index, type);
+				//colsNotToPivotIndex.set(index, i);
 			}
 			
 			if(colsToPivotNotFound.contains(colName)) {
@@ -153,6 +161,9 @@ public class PivotResultSet extends AbstractResultSet {
 		
 		metadata = new RSMetaDataTypedAdapter(null, null, newColNames, newColTypes);
 		
+		log.debug("rsColNames="+rsColNames);
+		log.debug("colsNotToPivot: names="+this.colsNotToPivot+" ; types="+colsNotToPivotType);
+		
 		if(doProcess) { process(); }
 	}
 	
@@ -164,7 +175,7 @@ public class PivotResultSet extends AbstractResultSet {
 	 */
 	public void process() throws SQLException {
 		int count = 0;
-		Key lastColsNotToPivotKey = null;
+		Set<Key> colsNotToPivotKeySet = new HashSet<Key>();
 		
 		while(rs.next()) {
 			Object[] keyArr = getKeyArray(rs);
@@ -196,13 +207,13 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 			
 			if(showMeasuresInColumns) {
-				Key keyNotToPicotArr = new Key(Arrays.copyOf(keyArr, colsNotToPivot.size()));
-				//log.info(keyNotToPicotArr);
-				if(!keyNotToPicotArr.equals(lastColsNotToPivotKey)) {
+				Key keyNotToPivotArr = new Key(Arrays.copyOf(keyArr, colsNotToPivot.size())); 
+				//log.info("new row? "+keyNotToPivotArr);
+				if(!colsNotToPivotKeySet.contains(keyNotToPivotArr)) {
 					//new row!
 					rowCount++;
-					nonPivotKeyValues.add(keyNotToPicotArr);
-					lastColsNotToPivotKey = keyNotToPicotArr;
+					nonPivotKeyValues.add(keyNotToPivotArr);
+					colsNotToPivotKeySet.add(keyNotToPivotArr);
 				}
 			}
 			else {
@@ -215,12 +226,11 @@ public class PivotResultSet extends AbstractResultSet {
 					keyVals[keyVals.length-1] = measureCols.get((rowCount+1)%measureCols.size()); 
 				}
 				Key keyNotToPicotArr = new Key(keyVals);
-				//log.info(keyNotToPicotArr);
-				if(!keyNotToPicotArr.equals(lastColsNotToPivotKey)) {
+				if(!colsNotToPivotKeySet.contains(keyNotToPicotArr)) {
 					//new row!
 					rowCount++;
 					nonPivotKeyValues.add(keyNotToPicotArr);
-					lastColsNotToPivotKey = keyNotToPicotArr;
+					colsNotToPivotKeySet.add(keyNotToPicotArr);
 				}
 			}
 			
