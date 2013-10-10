@@ -186,8 +186,9 @@ public class PivotResultSet extends AbstractResultSet {
 						break;
 					case LAST:
 						values.put(key, value);
-					default:
 						break;
+					default:
+						throw new IllegalStateException("unknown aggregator: "+aggregator);
 					} 
 				}
 				
@@ -218,7 +219,6 @@ public class PivotResultSet extends AbstractResultSet {
 				if(!keyNotToPicotArr.equals(lastColsNotToPivotKey)) {
 					//new row!
 					rowCount++;
-					//
 					nonPivotKeyValues.add(keyNotToPicotArr);
 					lastColsNotToPivotKey = keyNotToPicotArr;
 				}
@@ -261,7 +261,7 @@ public class PivotResultSet extends AbstractResultSet {
 		originalRSRowCount = count;
 		processed = true;
 		
-		//log.info(valuesForEachMeasure);
+		//log.info("valuesForEachMeasure: "+valuesForEachMeasure);
 		
 		processMetadata();
 	}
@@ -304,16 +304,16 @@ public class PivotResultSet extends AbstractResultSet {
 				newColTypes.add(measureColsType.get(0));
 			}
 			if(alwaysShowMeasures) {
-			if(showMeasuresFirst) {
-				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
-					newColNames.set(i, measureCols.get(0)+"|"+newColNames.get(i));
+				if(showMeasuresFirst) {
+					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+						newColNames.set(i, measureCols.get(0)+"|"+newColNames.get(i));
+					}
 				}
-			}
-			else {
-				for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
-					newColNames.set(i, newColNames.get(i)+"|"+measureCols.get(0));
+				else {
+					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+						newColNames.set(i, newColNames.get(i)+"|"+measureCols.get(0));
+					}
 				}
-			}
 			}
 		}
 		//multi-measure
@@ -375,7 +375,6 @@ public class PivotResultSet extends AbstractResultSet {
 			addValueToSet(col, val);
 			ret[i] = val;
 		}
-		//sb.append("%");
 		for(int i=0;i<colsToPivotNames.size();i++) {
 			String col = colsToPivotNames.get(i);
 			Object val = rs.getObject(col);
@@ -486,7 +485,7 @@ public class PivotResultSet extends AbstractResultSet {
 			//is nonpivotcol
 			
 			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+java.util.Arrays.asList(currentNonPivotKey.split("\\|")));
-			//log.warn("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] : "+currentNonPivotKey.values[index]);
+			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] : "+currentNonPivotKey.values[index]);
 			//XXXdone: return non-string values for non-pivot columns?
 			if(!showMeasuresInColumns && showMeasuresFirst) {
 				return currentNonPivotKey.values[index+1];

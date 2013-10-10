@@ -23,6 +23,9 @@ public class PivotStatement<S extends Statement> implements Statement {
 
 	//XXX
 	public ResultSet executeQuery(String sql) throws SQLException {
+		if(sql==null) {
+			throw new IllegalArgumentException("query must not be null");
+		}
 		PivotQueryParser parser = new PivotQueryParser(sql);
 		if(parser.colsToPivot!=null) {
 			return new PivotResultSet(statement.executeQuery(sql), parser.colsNotToPivot, parser.colsToPivot, true);
