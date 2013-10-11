@@ -16,6 +16,7 @@ import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 public class PivotStatement<S extends Statement> implements Statement {
 	
 	final S statement;
+	ResultSet rs;
 	
 	public PivotStatement(S statement) {
 		this.statement = statement;
@@ -93,12 +94,26 @@ public class PivotStatement<S extends Statement> implements Statement {
 		statement.setCursorName(name);
 	}
 
+	//TODO ??
 	public boolean execute(String sql) throws SQLException {
+		if(sql==null) {
+			throw new IllegalArgumentException("query must not be null");
+		}
+		PivotQueryParser parser = new PivotQueryParser(sql);
+		if(parser.colsToPivot!=null) {
+			rs = new PivotResultSet(statement.executeQuery(sql), parser.colsNotToPivot, parser.colsToPivot, true, parser.flags);
+			return true;
+		}
 		return statement.execute(sql);
 	}
 
 	//TODO ??
 	public ResultSet getResultSet() throws SQLException {
+		if(rs!=null) {
+			ResultSet rstmp = rs;
+			rs = null;
+			return rstmp;
+		}
 		return statement.getResultSet();
 	}
 
