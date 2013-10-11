@@ -160,7 +160,7 @@ public class PivotResultSet extends AbstractResultSet {
 				measureColsType.add(rsmd.getColumnType(i));
 				valuesForEachMeasure.add(new HashMap<Key, Object>());
 			}
-			log.debug("orig colName ["+i+"/"+rsColsCount+"]: "+colName);
+			//log.debug("orig colName ["+i+"/"+rsColsCount+"]: "+colName);
 		}
 		
 		if(colsToPivotNotFound.size()>0) {
@@ -384,7 +384,7 @@ public class PivotResultSet extends AbstractResultSet {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotCount) {
 				//add col name
-				log.debug("genNewCols: col-full-name: "+colFullName);
+				//log.debug("genNewCols: col-full-name: "+colFullName);
 				newColumns.add(colFullName);
 			}
 			else {

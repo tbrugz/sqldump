@@ -71,4 +71,9 @@ public class PivotQueryParser {
 		//System.out.println("flags: "+flags);
 	}
 	
+	@Override
+	public String toString() {
+		return "PivotQueryParser[colsToPivot="+colsToPivot+";colsNotToPivot="+colsNotToPivot+";flags="+flags+"]";
+	}
+	
 }
