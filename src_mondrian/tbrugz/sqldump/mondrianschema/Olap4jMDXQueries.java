@@ -10,23 +10,28 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.olap4j.CellSet;
+import org.olap4j.CellSetAxis;
 import org.olap4j.OlapConnection;
+import org.olap4j.Position;
 import org.olap4j.layout.CellSetFormatter;
 import org.olap4j.layout.RectangularCellSetFormatter;
 import org.olap4j.mdx.SelectNode;
 import org.olap4j.mdx.parser.MdxParser;
 import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
+import org.olap4j.metadata.Hierarchy;
 
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.sqlrun.QueryDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.Utils;
 
 /*
- * TODO: add ResultSetCellSetAdapter
+ * TODOne: add ResultSetCellSetAdapter
  * XXX: add csv exporter?
+ * TODO: add option to use different dump syntaxes
  */
 public class Olap4jMDXQueries extends AbstractSQLProc {
 
@@ -38,6 +43,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	static final String SUFFIX_MDXQUERIES_NAME = ".name";
 	static final String SUFFIX_MDXQUERIES_OUTFILEPATTERN = ".outfilepattern";
 	static final String SUFFIX_MDXQUERIES_VALIDATE = ".validate";
+	static final String SUFFIX_MDXQUERIES_USE_CELLSET_FORMATTER = ".use-cellset-formatter";
 	static final String SUFFIX_MDXQUERIES_X_COMPACT = ".x-compactmode";
 
 	OlapConnection olapConnection = null;
@@ -47,6 +53,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	//XXX: prop to parse & validate query
 	boolean validate = true;
 	String fileOutputPattern = null;
+	boolean useCellSetFormatter = false;
 	boolean compactMode = false;
 	boolean mayCreateOlapConnection = true; // add prop for mayCreateOlapConnection?
 	
@@ -56,6 +63,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		
 		fileOutputPattern = prop.getProperty(PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_OUTFILEPATTERN);
 		validate = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_VALIDATE, validate);
+		useCellSetFormatter = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_USE_CELLSET_FORMATTER, useCellSetFormatter);
 		compactMode = Utils.getPropBool(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_X_COMPACT, compactMode);
 	}
 	
@@ -122,9 +130,22 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 					continue;
 				}
 				
-				Writer w = co.getCategorizedWriter(queryName!=null?queryName:id);
-				dumpQuery(id, query, w);
-				CategorizedOut.closeWriter(w);
+				String qid = queryName!=null?queryName:id;
+				CellSet cellset = executeQuery(qid, query);
+				
+				if(useCellSetFormatter) {
+					Writer w = co.getCategorizedWriter(qid);
+					dumpQueryCellSetFormatter(qid, cellset, w);
+					CategorizedOut.closeWriter(w);
+				}
+				else {
+					// using cellset->resultset adapter 
+					//dumpQueryResultSetAdapter(qid, cellset);
+					Writer w = co.getCategorizedWriter(qid);
+					dumpQueryResultSetAdapter(qid, cellset, w);
+					CategorizedOut.closeWriter(w);
+				}
+				
 				count++;
 			}
 			catch (Exception e) {
@@ -137,7 +158,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		log.info(count+" queries [of "+queryIds.size()+"] dumped");
 	}
 
-	void dumpQuery(String id, String query, Writer w) throws SQLException, IOException {
+	CellSet executeQuery(String id, String query) throws SQLException, IOException {
 		if(validate) {
 			log.info("validating query '"+id+"'");
 			SelectNode parsedObject = parser.parseSelect(query);
@@ -148,11 +169,47 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		log.info("mdx query ["+id+"]: "+query);
 		CellSet cellSet = olapConnection.prepareOlapStatement(query).executeQuery();
 		//log.info("cellSet: "+cellSet.getClass()+" / "+cellSet.getMetaData().getClass());
+		//logCellSetInfo(cellSet);
+		log.info("query '"+id+"' returned [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+		return cellSet;
+	}
+	
+	void dumpQueryCellSetFormatter(String id, CellSet cellSet, Writer w) throws SQLException, IOException {
+		long initTime = System.currentTimeMillis();
 		
 		CellSetFormatter formatter = new RectangularCellSetFormatter(compactMode);
 		//CellSetFormatter formatter = new TraditionalCellSetFormatter();
 		formatter.format(cellSet, new PrintWriter(w));
-		log.info("query ["+id+"] dumped [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+		
+		log.info("query '"+id+"' dumped [CellSetFormatter;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		//formatter.format(cellSet, new PrintWriter(System.out, true));
+	}
+	
+	void dumpQueryResultSetAdapter(String id, CellSet cellSet) throws SQLException, IOException {
+		long initTime = System.currentTimeMillis();
+		CellSetResultSetAdapter csrsad = new CellSetResultSetAdapter(cellSet);
+		QueryDumper.simplerRSDump(csrsad);
+		log.info("query '"+id+"' dumped [ResultSetAdapter.simplerRSDump;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+	}
+
+	void dumpQueryResultSetAdapter(String id, CellSet cellSet, Writer w) throws SQLException, IOException {
+		long initTime = System.currentTimeMillis();
+		CellSetResultSetAdapter csrsad = new CellSetResultSetAdapter(cellSet);
+		QueryDumper.simpleRSDump(csrsad, "FFCDataDump", prop, w);
+		log.info("query '"+id+"' dumped [ResultSetAdapter;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+	}
+	
+	void logCellSetInfo(CellSet cellSet) {
+		List<CellSetAxis> axis = cellSet.getAxes();
+		log.info("axis: "+axis);
+		for(CellSetAxis ax: axis) {
+			log.info(ax.getAxisOrdinal()+" ; "+ax.getPositionCount());
+			for(Hierarchy h: ax.getAxisMetaData().getHierarchies()) {
+				log.info("h: name="+h.getName()+" ; unique="+h.getUniqueName()+" ; caption="+h.getCaption());
+			}
+			for(Position p: ax.getPositions()) {
+				log.info("  "+p.getOrdinal()+" : "+p.getMembers());
+			}
+		}
 	}
 }
