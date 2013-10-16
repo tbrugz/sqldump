@@ -187,29 +187,11 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	void dumpBuffer(Writer fos) throws IOException {
 		if(valuesBuffer.size()<=0) { return; } //should it be here? XXX: dump header only when rowCount = 0? 
 		
+		dumpColumnNames(fos);
+		
 		//print buffer
 		StringBuffer sb = new StringBuffer();
 
-		if(showColNames) {
-			if(showColNamesLines) {
-				//upper line
-				appendLine(sb, mergeBlocksSeparatorLines);
-			}
-	
-			//col names
-			if(show1stColSeparator) { sb.append(separator); }
-			for(int j=0;j<lsColNames.size();j++) {
-				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
-			}
-			sb.append(recordDemimiter);
-	
-			if(showColNamesLines) {
-				//lower line
-				appendLine(sb, false);
-			}
-		}
-		
 		for(int i=0;i<valuesBuffer.size();i++) {
 			if(show1stColSeparator) { sb.append(separator); }
 			List<String> vals = valuesBuffer.get(i);
@@ -233,6 +215,30 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		
 		lastBlockLineSize = thisBlockSize;
 		//clearBuffer();
+	}
+	
+	void dumpColumnNames(Writer fos) throws IOException {
+		StringBuffer sb = new StringBuffer();
+		if(showColNames) {
+			if(showColNamesLines) {
+				//upper line
+				appendLine(sb, mergeBlocksSeparatorLines);
+			}
+	
+			//col names
+			if(show1stColSeparator) { sb.append(separator); }
+			for(int j=0;j<lsColNames.size();j++) {
+				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
+				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
+			}
+			sb.append(recordDemimiter);
+	
+			if(showColNamesLines) {
+				//lower line
+				appendLine(sb, false);
+			}
+		}
+		out(sb.toString(), fos); //+"\n"
 	}
 	
 	void appendLine(StringBuffer sb, boolean isBlock1stLine) {
@@ -281,7 +287,10 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	public void dumpFooter(long count, Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
-		if(showTrailerLine && !showTrailerLineAllBlocks) {
+		if(count==0) {
+			dumpColumnNames(fos);
+		}
+		else if(showTrailerLine && !showTrailerLineAllBlocks) {
 			StringBuffer sb = new StringBuffer();
 			appendLine(sb, false);
 			out(sb.toString(), fos);
