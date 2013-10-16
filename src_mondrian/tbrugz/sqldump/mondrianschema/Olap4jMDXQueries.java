@@ -21,6 +21,8 @@ import org.olap4j.mdx.parser.MdxParserFactory;
 import org.olap4j.mdx.parser.MdxValidator;
 import org.olap4j.metadata.Hierarchy;
 
+import tbrugz.sqldump.datadump.DataDump;
+import tbrugz.sqldump.datadump.DumpSyntax;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
@@ -43,8 +45,11 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 	static final String SUFFIX_MDXQUERIES_NAME = ".name";
 	static final String SUFFIX_MDXQUERIES_OUTFILEPATTERN = ".outfilepattern";
 	static final String SUFFIX_MDXQUERIES_VALIDATE = ".validate";
+	static final String SUFFIX_MDXQUERIES_SYNTAXES = ".dumpsyntaxes";
 	static final String SUFFIX_MDXQUERIES_USE_CELLSET_FORMATTER = ".use-cellset-formatter";
 	static final String SUFFIX_MDXQUERIES_X_COMPACT = ".x-compactmode";
+	
+	static final int ROW_LIMIT = 10000;
 
 	OlapConnection olapConnection = null;
 	MdxParser parser = null;
@@ -138,12 +143,17 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 					dumpQueryCellSetFormatter(qid, cellset, w);
 					CategorizedOut.closeWriter(w);
 				}
+				/*
 				else {
 					// using cellset->resultset adapter 
 					//dumpQueryResultSetAdapter(qid, cellset);
 					Writer w = co.getCategorizedWriter(qid);
 					dumpQueryResultSetAdapter(qid, cellset, w);
 					CategorizedOut.closeWriter(w);
+				}
+				*/
+				else {
+					dumpQueryResultSetAdapterDD(id, qid, cellset);
 				}
 				
 				count++;
@@ -197,6 +207,22 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		CellSetResultSetAdapter csrsad = new CellSetResultSetAdapter(cellSet);
 		QueryDumper.simpleRSDump(csrsad, "FFCDataDump", prop, w);
 		log.info("query '"+id+"' dumped [ResultSetAdapter;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+	}
+	
+	void dumpQueryResultSetAdapterDD(String id, String qname, CellSet cellSet) throws SQLException, IOException {
+		long initTime = System.currentTimeMillis();
+		CellSetResultSetAdapter csrsad = new CellSetResultSetAdapter(cellSet);
+		List<String> syntaxes = Utils.getStringListFromProp(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_SYNTAXES, ",");
+		if(syntaxes==null) {
+			csrsad.close();
+			throw new ProcessingException("datadump syntax list must be defined [prop '"+PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_SYNTAXES+"']");
+		}
+		DataDump dd = new DataDump();
+		List<DumpSyntax> ds = DataDump.getSyntaxList(prop, syntaxes.toArray(new String[]{}));
+		dd.dumpResultSet(csrsad, prop, id, /*tableOrQueryName*/ qname, /*charset*/ null,
+				/*rowlimit*/ ROW_LIMIT, /*syntaxList*/ ds, /*partitionByPatterns*/ null, /*keyColumns*/ null, /*importedFKs*/ null,
+				/*uniqueKeys*/ null, /*rsDecoratorFactory*/ null, initTime);
+		log.info("query '"+id+"' dumped [ResultSetAdapter/DataDump;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
 	void logCellSetInfo(CellSet cellSet) {
