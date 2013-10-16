@@ -143,7 +143,7 @@ public class DataDump extends AbstractSQLProc {
 
 		List<String> tables4dump = getTables4dump(prop);
 		
-		List<DumpSyntax> syntaxList = getSyntaxList(prop);
+		List<DumpSyntax> syntaxList = getSyntaxList(prop, PROP_DATADUMP_SYNTAXES);
 		if(syntaxList==null) {
 			log.error("no datadump syntax(es) defined [prop '"+PROP_DATADUMP_SYNTAXES+"']");
 			if(failonerror) {
@@ -312,7 +312,7 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
-		List<DumpSyntax> syntaxList = getSyntaxList(prop);
+		List<DumpSyntax> syntaxList = getSyntaxList(prop, PROP_DATADUMP_SYNTAXES);
 		if(syntaxList==null) {
 			log.error("no datadump syntax defined");
 			if(failonerror) {
@@ -394,7 +394,7 @@ public class DataDump extends AbstractSQLProc {
 					initTime);
 	}
 
-	void dumpResultSet(ResultSet rs, Properties prop, 
+	public void dumpResultSet(ResultSet rs, Properties prop, 
 			String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
@@ -451,6 +451,8 @@ public class DataDump extends AbstractSQLProc {
 			long logEachXRows = Utils.getPropLong(prop, PROP_DATADUMP_LOG_EACH_X_ROWS, LOG_EACH_X_ROWS_DEFAULT);
 			
 			long count = 0;
+			
+			if(charset==null) { charset = CHARSET_DEFAULT; }
 			
 			try {
 
@@ -852,16 +854,20 @@ public class DataDump extends AbstractSQLProc {
 		}
 		return null;
 	}
-	
-	static List<DumpSyntax> getSyntaxList(Properties prop) {
-		String syntaxes = prop.getProperty(PROP_DATADUMP_SYNTAXES);
+		
+	static List<DumpSyntax> getSyntaxList(Properties prop, String dumpSyntaxesProperty) {
+		String syntaxes = prop.getProperty(dumpSyntaxesProperty);
 		if(syntaxes==null) {
 			return null;
 		}
 		
-		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		String[] syntaxArr = syntaxes.split(",");
-		for(String syntax: syntaxArr) {
+		return getSyntaxList(prop, syntaxArr);
+	}
+	
+	public static List<DumpSyntax> getSyntaxList(Properties prop, String[] dumpSyntaxes) {
+		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
+		for(String syntax: dumpSyntaxes) {
 			boolean syntaxAdded = false;
 			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
