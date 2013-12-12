@@ -106,6 +106,7 @@ public class DataDump extends AbstractSQLProc {
 	
 	static Log log = LogFactory.getLog(DataDump.class);
 	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
+	static Log logNewFile = LogFactory.getLog(DataDump.class.getName()+".datadump-file");
 	static Log log1stRow = LogFactory.getLog(DataDump.class.getName()+".datadump-1st");
 	static Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
 	
@@ -748,12 +749,13 @@ public class DataDump extends AbstractSQLProc {
 				parent.mkdirs();
 			}
 
-			//see: http://stackoverflow.com/questions/9852978/write-a-file-in-utf-8-using-filewriter-java
-			// http://stackoverflow.com/questions/1001540/how-to-write-a-utf-8-file-with-java
+			// see: http://stackoverflow.com/questions/9852978/write-a-file-in-utf-8-using-filewriter-java
+			//      http://stackoverflow.com/questions/1001540/how-to-write-a-utf-8-file-with-java
 			CharsetEncoder encoder = Charset.forName(charset).newEncoder();
 			encoder.onMalformedInput(CodingErrorAction.REPLACE);
 			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			
+			logNewFile.debug("creating file"+(append?" [append]":"")+": "+fname);
 			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, append), encoder);
 			writeBOMifNeeded(w, charset, writeBOM);
 			writersOpened.put(key, w);
