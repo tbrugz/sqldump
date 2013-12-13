@@ -20,6 +20,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import tbrugz.sqldump.SQLDump;
@@ -87,7 +90,7 @@ public class DataDumpTest {
 		String[] vmparamsDump = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
-				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml",
+				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
 				"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.driverclass=org.h2.Driver",
@@ -117,14 +120,30 @@ public class DataDumpTest {
 		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
 	}
 
-	
 	@Test
 	public void testXML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dump1();
 		File f = new File(DIR_OUT+"/data_ETC.xml");
-		parseXML(f);
+		//String xmlStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(xmlStr);
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(6, countElements(n.getChildNodes()));
 	}
 
+	@Test
+	public void testHTML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dump1();
+		File f = new File(DIR_OUT+"/data_ETC.html");
+		//String xmlStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(xmlStr);
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(7, countElements(n.getChildNodes()));
+	}
+	
 	@Test
 	public void dumpPartitioned() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
@@ -247,6 +266,17 @@ public class DataDumpTest {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		return dBuilder.parse(f);
+	}
+	
+	static int countElements(NodeList nl) {
+		int count = 0;
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType()==Node.ELEMENT_NODE) {
+				count++;
+			}
+		}
+		return count;
 	}
 	
 }
