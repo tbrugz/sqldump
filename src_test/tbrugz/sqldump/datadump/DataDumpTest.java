@@ -15,12 +15,14 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -90,7 +92,7 @@ public class DataDumpTest {
 		String[] vmparamsDump = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
-				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html",
+				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html, json",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
 				"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.driverclass=org.h2.Driver",
@@ -142,6 +144,23 @@ public class DataDumpTest {
 		
 		Node n = doc.getChildNodes().item(0);
 		Assert.assertEquals(7, countElements(n.getChildNodes()));
+	}
+	
+	@Test
+	public void testJSON() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
+		dump1();
+		File f = new File(DIR_OUT+"/data_ETC.json");
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		obj = jobj.get("ETC");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals(6, jarr.size());
 	}
 	
 	@Test
