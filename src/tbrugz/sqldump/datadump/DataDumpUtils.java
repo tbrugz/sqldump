@@ -189,7 +189,7 @@ public class DataDumpUtils {
 		return value;
 	} 
 
-	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df) {
+	static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df) {
 		if(elem == null) {
 			return null;
 		}
@@ -203,8 +203,42 @@ public class DataDumpUtils {
 			return null;
 		}
 
-		return String.valueOf(elem);
-	} 
+		return xmlEscapeText(String.valueOf(elem));
+	}
+	
+	/*
+	 * see: http://stackoverflow.com/a/10035382/616413
+	 */
+	static String xmlEscapeText(String t) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < t.length(); i++) {
+			char c = t.charAt(i);
+			switch (c) {
+			case '<':
+				sb.append("&lt;");
+				break;
+			case '>':
+				sb.append("&gt;");
+				break;
+			case '\"':
+				sb.append("&quot;");
+				break;
+			case '&':
+				sb.append("&amp;");
+				break;
+			case '\'':
+				sb.append("&apos;");
+				break;
+			default:
+				/*if (c > 0x7e) {
+					sb.append("&#" + ((int) c) + ";");
+				} else {*/
+					sb.append(c);
+				/*}*/
+			}
+		}
+		return sb.toString();
+	}
 	
 	public static Collection<String> values4sql(Collection<?> s, DateFormat df) {
 		Iterator<?> iter = s.iterator();
