@@ -20,3 +20,9 @@ create table dept (
 );
 
 alter table emp add constraint emp_dept_fk foreign key (department_id) references dept (id);
+
+create table etc (
+	id integer not null,
+	description varchar(1000),
+	constraint etc_pk primary key (id)
+);

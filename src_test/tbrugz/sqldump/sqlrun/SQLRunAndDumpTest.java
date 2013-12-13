@@ -51,7 +51,7 @@ public class SQLRunAndDumpTest {
 		Connection conn = TestUtil.getConn(p, "sqlrun");
 		setupModel(conn);
 		
-		testForTwoTables(conn);
+		testForTables(conn);
 		
 		System.out.println("conn: "+conn);
 		System.out.println("conn.isClosed(): "+conn.isClosed());
@@ -72,7 +72,7 @@ public class SQLRunAndDumpTest {
 		sqld.doMain(NULL_PARAMS, p, conn);
 	}
 	
-	void testForTwoTables(Connection conn) throws ClassNotFoundException, SQLException, NamingException {
+	void testForTables(Connection conn) throws ClassNotFoundException, SQLException, NamingException {
 		SchemaModelGrabber schemaGrabber = new JDBCSchemaGrabber();
 		/*Properties jdbcPropOrig = new Properties();
 		String[] vmparams = {
@@ -89,7 +89,7 @@ public class SQLRunAndDumpTest {
 		SchemaModel smOrig = schemaGrabber.grabSchema();
 		System.out.println("smOrig: "+smOrig);
 		System.out.println("smOrig.getTables(): "+smOrig.getTables());
-		Assert.assertEquals("should have grabbed 2 tables", 2, smOrig.getTables().size());
+		Assert.assertEquals("should have grabbed 3 tables", 3, smOrig.getTables().size());
 	}
 
 	@Test

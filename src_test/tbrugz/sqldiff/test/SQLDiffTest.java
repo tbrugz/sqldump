@@ -76,7 +76,7 @@ public class SQLDiffTest {
 		schemaJdbcGrabber.setConnection(conn);
 		
 		smOriginal = schemaJdbcGrabber.grabSchema();
-		Assert.assertEquals("should have grabbed 2 tables", 2, smOriginal.getTables().size());
+		Assert.assertEquals("should have grabbed 3 tables", 3, smOriginal.getTables().size());
 	}
 	
 	@Test
