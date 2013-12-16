@@ -67,6 +67,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	};
 
 	static final Log log = LogFactory.getLog(AbstractImporter.class);
+	static final Log logRow = LogFactory.getLog(AbstractImporter.class.getName()+"-row");
 	
 	static final int ERRORLINE_MAXSIZE = 40;
 
@@ -398,7 +399,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 						//is last failover-id?
 						if(failoverId == loopStartedWithFailoverId) {
 							if(logMalformedLine) {
-								log.warn("error processing line "+linecounter
+								logRow.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
 										+e);
 								//log.debug("error processing line "+linecounter, e);
