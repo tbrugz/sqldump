@@ -22,10 +22,10 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
-import tbrugz.sqldump.def.Executor;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
+import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
@@ -55,7 +55,7 @@ import tbrugz.sqldump.util.Utils;
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
 */
-public class SQLRun implements Executor {
+public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	static final Log log = LogFactory.getLog(SQLRun.class);
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
@@ -172,9 +172,10 @@ public class SQLRun implements Executor {
 			if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
 			
 			String execValue = papp.getProperty(key);
+			boolean execFailOnError = Utils.getPropBool(papp, Constants.PREFIX_EXEC+procId+Constants.SUFFIX_FAILONERROR, failonerror);
 			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
-				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"'");
+				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; failonerror = "+execFailOnError);
 				isExecId = true;
 				sqlrunCounter++;
 				sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
@@ -189,6 +190,7 @@ public class SQLRun implements Executor {
 			// .file
 			if(key.endsWith(SUFFIX_FILE)) {
 				try {
+					setExecProperties(srproc, papp, execFailOnError);
 					srproc.execFile(execValue, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 				}
 				catch(FileNotFoundException e) {
@@ -202,6 +204,7 @@ public class SQLRun implements Executor {
 			// .files
 			else if(key.endsWith(SUFFIX_FILES)) {
 				try {
+					setExecProperties(srproc, papp, execFailOnError);
 					String dir = getDir(procId);
 					List<String> files = Util.getFiles(dir, execValue);
 					int fileCount = 0;
@@ -230,6 +233,7 @@ public class SQLRun implements Executor {
 			}
 			// .statement
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
+				setExecProperties(srproc, papp, execFailOnError);
 				int urows = srproc.execStatement(execValue);
 			}
 			// .import
@@ -257,8 +261,7 @@ public class SQLRun implements Executor {
 				importer.setConnection(conn);
 				importer.setDefaultFileEncoding(defaultEncoding);
 				importer.setCommitStrategy(commitStrategy);
-				importer.setFailOnError(failonerror);
-				importer.setProperties(papp);
+				setExecProperties(importer, papp, execFailOnError);
 				long imported = 0;
 				try {
 					imported = importer.importData();
@@ -272,8 +275,7 @@ public class SQLRun implements Executor {
 				sqd.setExecId(procId);
 				sqd.setConnection(conn);
 				sqd.setDefaultFileEncoding(defaultEncoding);
-				sqd.setFailOnError(failonerror);
-				sqd.setProperties(papp);
+				setExecProperties(sqd, papp, execFailOnError);
 				sqd.execQuery(execValue);
 			}
 			// ...else
@@ -300,6 +302,11 @@ public class SQLRun implements Executor {
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
+	
+	void setExecProperties(Executor exec, Properties prop, boolean failonerror) {
+		exec.setFailOnError(failonerror);
+		exec.setProperties(prop);
+	}
 
 	String getDir(String procId) {
 		String dir = papp.getProperty(Constants.PREFIX_EXEC+procId+SUFFIX_DIR);

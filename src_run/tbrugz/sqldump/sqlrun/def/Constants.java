@@ -14,5 +14,6 @@ public class Constants {
 	public static final String SUFFIX_BATCH_SIZE = ".batchsize";
 	public static final String SUFFIX_ENCODING = ".encoding";
 	public static final String SUFFIX_DEFAULT_ENCODING = ".defaultencoding";
+	public static final String SUFFIX_FAILONERROR = ".failonerror";
 
 }
