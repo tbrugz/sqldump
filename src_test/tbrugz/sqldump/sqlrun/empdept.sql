@@ -23,6 +23,7 @@ alter table emp add constraint emp_dept_fk foreign key (department_id) reference
 
 create table etc (
 	id integer not null,
+	dt_x date,
 	description varchar(1000),
 	constraint etc_pk primary key (id)
 );

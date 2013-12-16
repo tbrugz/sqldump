@@ -123,6 +123,14 @@ public class DataDumpTest {
 	}
 
 	@Test
+	public void testSQLDate() throws Exception {
+		dump1();
+		String sqlEtc = IOUtil.readFromFilename(DIR_OUT+"/data_ETC.sql");
+		String expected = "insert into ETC (ID, DT_X, DESCRIPTION) values (1, '2013-01-01', 'lala &');";
+		Assert.assertEquals(expected, sqlEtc.substring(0, expected.length()));
+	}
+
+	@Test
 	public void testXML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dump1();
 		File f = new File(DIR_OUT+"/data_ETC.xml");
