@@ -179,7 +179,7 @@ public class DataDumpUtils {
 	} 
 
 	//dumpers: XML, HTML
-	//XXX: XML format: translate '<', '>', '&'?
+	//XXXdone: XML format: translate '<', '>', '&'?
 	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String nullValue) {
 		String value = getFormattedXMLValue(elem, type, floatFormatter, df);
 		if(value == null) {
@@ -220,15 +220,15 @@ public class DataDumpUtils {
 			case '>':
 				sb.append("&gt;");
 				break;
-			case '\"':
+			/*case '\"':
 				sb.append("&quot;");
-				break;
+				break;*/
 			case '&':
 				sb.append("&amp;");
 				break;
-			case '\'':
+			/*case '\'':
 				sb.append("&apos;");
-				break;
+				break;*/
 			default:
 				/*if (c > 0x7e) {
 					sb.append("&#" + ((int) c) + ";");
