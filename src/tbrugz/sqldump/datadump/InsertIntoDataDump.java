@@ -5,6 +5,8 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -30,6 +32,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
 	static final String COMPACTMODE_IDENT = "  ";
+	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
 
 	protected String tableName;
 	protected int numCol;
@@ -48,6 +51,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
+		dateFormatter = sqlDefaultDateFormatter;
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);

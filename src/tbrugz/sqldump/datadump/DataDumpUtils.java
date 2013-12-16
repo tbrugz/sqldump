@@ -38,7 +38,7 @@ public class DataDumpUtils {
 	static boolean resultSetWarnedForSQLValue = false;
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
-	public static DateFormat dateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
+	public static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	public static final NumberFormat floatFormatterSQL;
 	//public static NumberFormat floatFormatterBR = null;
 	public static final NumberFormat longFormatter;
