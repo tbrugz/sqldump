@@ -67,12 +67,15 @@ public class DataDumpUtils {
 	}
 	
 	//dumpers: CSV, FFC
-	public static String getFormattedCSVValue(Object elem, Class<?> type, NumberFormat floatFormatter, String separator, String lineSeparator, String enclosing, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String separator, String lineSeparator, String enclosing, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
 		else if(Double.class.isAssignableFrom(type)) {
 			return floatFormatter.format(elem);
+		}
+		else if(Date.class.isAssignableFrom(type)) {
+			return df.format((Date)elem);
 		}
 		else if(ResultSet.class.isAssignableFrom(type)) {
 			return nullValue;

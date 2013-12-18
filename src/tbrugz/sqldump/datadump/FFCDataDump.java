@@ -280,7 +280,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	
 	String getFormattedValue(Object o, Class<?> c) {
 		//if(o==null) return nullValue;
-		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, null, recordDemimiter, null, nullValueStr);
+		return DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, dateFormatter, null, recordDemimiter, null, nullValueStr);
 	}
 
 	@Override
