@@ -115,6 +115,14 @@ public class DataDumpTest {
 	}
 	
 	@Test
+	public void testCSVDate() throws Exception {
+		dump1();
+		String csvEtc = IOUtil.readFromFilename(DIR_OUT+"/data_ETC.csv");
+		String expected = "ID,DT_X,DESCRIPTION\n1,2013-01-01,lala &\n";
+		Assert.assertEquals(expected, csvEtc.substring(0, expected.length()));
+	}
+	
+	@Test
 	public void testSQL() throws Exception {
 		dump1();
 		String sqlEmp = IOUtil.readFromFilename(DIR_OUT+"/data_EMP.sql");
