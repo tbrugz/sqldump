@@ -34,11 +34,11 @@ public class SimilarityCalculator {
 		}
 		//columns similarity
 		int t1cols = t1.getColumns().size();
-		int t2cols = t1.getColumns().size();
+		int t2cols = t2.getColumns().size();
 		int sumSize = t1cols+t2cols;
 		for(int i=0;i<t1cols;i++) {
 			Column c1 = t1.getColumns().get(i);
-			for(int j=0;j<t1cols;j++) {
+			for(int j=0;j<t2cols;j++) {
 				Column c2 = t2.getColumns().get(j);
 				double ORDER_WEIGTH = 0.7;
 				if(i==j) {
