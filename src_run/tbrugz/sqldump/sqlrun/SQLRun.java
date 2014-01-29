@@ -208,10 +208,15 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 					String dir = getDir(procId);
 					List<String> files = Util.getFiles(dir, execValue);
 					int fileCount = 0;
+					if(files!=null && files.size()>0) {
 					for(String file: files) {
 						if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
 						srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 						fileCount++;
+					}
+					}
+					else {
+						log.warn("no files selected in dir '"+dir+"'");
 					}
 					/*if(dir==null) {
 						log.warn("no '.dir' property...");
