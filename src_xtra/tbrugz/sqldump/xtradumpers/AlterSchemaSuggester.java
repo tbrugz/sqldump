@@ -310,7 +310,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 						fk.setFkTableSchemaName( otherT.getSchemaName() );
 						fk.getFkColumns().addAll(cons.uniqueColumns);
 						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
-						fk.setName(suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getFkTable()) + "_FK");
+						fk.setName(suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getPkTable()) + "_FK");
 
 						//Test if FK already exists
 						boolean fkAlreadyExists = false;
