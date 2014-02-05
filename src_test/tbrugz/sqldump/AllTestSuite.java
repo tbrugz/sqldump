@@ -20,6 +20,7 @@ import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
+import tbrugz.sqldump.dbmsfeatures.TriggerTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
@@ -63,6 +64,9 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 
 	//import
 	CSVImportTest.class,
+	
+	//dbms features
+	TriggerTest.class,
 	
 	//run
 	FailoverTest.class,
