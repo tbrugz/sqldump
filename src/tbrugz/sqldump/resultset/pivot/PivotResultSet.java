@@ -31,6 +31,7 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
  * XXXxx: aggregate if duplicated key found? first(), last()?
  * TODOne: option to show measures in columns
  * - MeasureNames is a dimension (key)
+ * XXX: implement olap4j's CellSet? maybe subclass should...
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {

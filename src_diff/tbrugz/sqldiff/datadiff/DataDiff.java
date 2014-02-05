@@ -273,6 +273,7 @@ public class DataDiff extends AbstractFailable {
 		}
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
 			log.warn("tables not found for diff: "+Utils.join(tablesToDiffFilter, ", "));
+			//XXX: log which tables do not exist in source or target models
 		}
 		if(tablesToIgnore!=null && tablesToIgnore.size()>0) {
 			log.warn("tables to ignore that were not found: "+Utils.join(tablesToIgnore, ", "));
