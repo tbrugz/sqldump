@@ -36,6 +36,12 @@ public class TestUtil {
 		}
 	}
 	
+	public static Properties createProperties(String[] vmparams) {
+		Properties p = new Properties();
+		setProperties(p, vmparams);
+		return p;
+	}
+	
 	public static int countLines(String path) throws IOException {
 		String s = IOUtil.readFromFilename(path);
 		BufferedReader sr = new BufferedReader( new StringReader(s) );
