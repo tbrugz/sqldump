@@ -321,7 +321,7 @@
 
 	<!-- ========= code analysis tasks ========== -->
 
-	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura, findbugs">
+	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura, findbugs, checkstyle">
 	</target>
 
 	<target name="codeanalysis-pmd">
