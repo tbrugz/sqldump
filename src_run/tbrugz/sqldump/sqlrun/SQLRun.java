@@ -80,6 +80,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
 	static final String PROP_CONNPROPPREFIX = Constants.SQLRUN_PROPS_PREFIX+".connpropprefix";
 	static final String PROP_TRUST_ALL_CERTS = Constants.SQLRUN_PROPS_PREFIX+".trust-all-certs";
+	static final String PROP_JMX_CREATE_MBEAN = Constants.SQLRUN_PROPS_PREFIX+".jmx.create-mbean";
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
@@ -95,6 +96,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	List<String> filterByIds = null;
 	boolean failonerror = true;
 	String defaultEncoding;
+	boolean jmxCreateMBean = false;
 	
 	SQLR sqlrmbean;
 	StmtProc srproc;
@@ -140,8 +142,10 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
 		}
 		
-		sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
-		JMXUtil.registerMBeanSimple(SQLR.MBEAN_NAME, sqlrmbean);
+		if(jmxCreateMBean) {
+			sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
+			JMXUtil.registerMBeanSimple(SQLR.MBEAN_NAME, sqlrmbean);
+		}
 		
 		srproc = new StmtProc();
 		srproc.setConnection(conn);
@@ -178,7 +182,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; failonerror = "+execFailOnError);
 				isExecId = true;
 				sqlrunCounter++;
-				sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
+				if(sqlrmbean!=null) {
+					sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
+				}
 			}
 			else {
 				return false;
@@ -408,6 +414,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 		defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
+		jmxCreateMBean = Utils.getPropBool(papp, PROP_JMX_CREATE_MBEAN, jmxCreateMBean);
 		
 		if(Utils.getPropBool(papp, PROP_TRUST_ALL_CERTS, false)) {
 			SSLUtil.trustAll();
