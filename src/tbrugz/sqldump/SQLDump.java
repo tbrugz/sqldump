@@ -66,6 +66,7 @@ public class SQLDump implements Executor {
 	public static final String PROP_DO_DELETEREGULARFILESDIR = "sqldump.deleteregularfilesfromdir";
 	public static final String PROP_CONNPROPPREFIX = "sqldump.connpropprefix"; //XXX: change to non-public
 	static final String PROP_FAILONERROR = "sqldump.failonerror";
+	static final String PROP_JMX_CREATE_MBEAN = "sqldump.jmx.create-mbean";
 	static final String PROP_DATADUMP_XTRASYNTAXES = "sqldump.datadump.xtrasyntaxes";
 	
 	//properties files filenames
@@ -75,6 +76,7 @@ public class SQLDump implements Executor {
 	
 	Connection conn;
 	boolean failonerror = true;
+	boolean jmxCreateMBean = false;
 
 	final Properties papp = new ParametrizedProperties();
 	
@@ -83,6 +85,9 @@ public class SQLDump implements Executor {
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 		log.info("failonerror: "+failonerror);
+
+		jmxCreateMBean = Utils.getPropBool(papp, PROP_JMX_CREATE_MBEAN, jmxCreateMBean);
+		log.debug("jmx.create-mbean: "+jmxCreateMBean);
 		
 		ColTypeUtil.setProperties(papp);
 		DBMSResources.instance().setup(papp);
@@ -232,8 +237,11 @@ public class SQLDump implements Executor {
 		int numOfComponents = processors.size();
 
 		//jmx
-		SQLD sqldmbean = new SQLD(numOfComponents, (conn!=null)?conn.getMetaData():null );
-		JMXUtil.registerMBeanSimple(SQLD.MBEAN_NAME, sqldmbean);
+		SQLD sqldmbean = null;
+		if(jmxCreateMBean) {
+			sqldmbean = new SQLD(numOfComponents, (conn!=null)?conn.getMetaData():null );
+			JMXUtil.registerMBeanSimple(SQLD.MBEAN_NAME, sqldmbean);
+		}
 		
 		int count = 0;
 		SchemaModel sm = null;
@@ -244,7 +252,9 @@ public class SQLDump implements Executor {
 		
 		for(ProcessComponent pc: processors) {
 			count++;
-			sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
+			if(sqldmbean!=null) {
+				sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
+			}
 			
 			if((count==1) && (pc instanceof SchemaModelGrabber)) {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
@@ -265,7 +275,7 @@ public class SQLDump implements Executor {
 				}
 			}
 			
-			if(conn!=null) {
+			if(sqldmbean!=null && conn!=null) {
 				sqldmbean.dbmdUpdate(conn.getMetaData());
 			}
 			
