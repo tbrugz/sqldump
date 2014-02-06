@@ -19,4 +19,5 @@ steps
 2. run [jenkins-cli](https://wiki.jenkins-ci.org/display/JENKINS/Jenkins+CLI):
   `java -jar jenkins-cli.jar -s http://[your-server] create-job sqldump < [sqldump-repo]/doc/jenkins-config.xml`
 
-3. [optional] change your Mercurial Repository URL to your `[sqldump-repo]`
+3. [optional] at **jenkins > sqldump > configure**: change your Mercurial Repository URL to your `[sqldump-repo]`
+
