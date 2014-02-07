@@ -1,4 +1,16 @@
 
+sqldump 0.9.11
+--------------
+- dbms: H2: added grabDBTriggers()
+- added sqlpivot driver
+- pivot: multiple measures, measures in rows or cols
+- mdxqueries: add cellset->resultset adapter
+- datadump tests & bugfixing
+- sqlrun: failonerror by executor
+- test: 'grabTrigger" unit test with H2
+- jmx: added sqldump & sqlrun props for creating mbean
+
+
 sqldump 0.9.10
 --------------
 - sqlrun: importer: more column types
