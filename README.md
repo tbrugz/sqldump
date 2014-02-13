@@ -134,3 +134,8 @@ Command-line options
 - `-propfile=<path-to-prop-file>`: loads a different config properties file
 - `-propresource=<path-to-resource>`: loads a different config properties resource
 - `-usesysprop=<true|false>`: loads system properties besides the config file properties (default is true)
+
+
+Misc/End notes
+--------------
+To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/jenkins-config.md)
