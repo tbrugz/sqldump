@@ -80,7 +80,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	static final String PROP_PREFIX = "sqldump.alterschemasuggester";
 	
 	static final String FILENAME_PATTERN_SCHEMA = "[schemaname]";
-	static final String FILENAME_PATTERN_OBJECTTYPE	= "[objecttype]";
+	static final String FILENAME_PATTERN_OBJECTTYPE = "[objecttype]";
 	
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
 	public static final String PROP_ALTER_SCHEMA_SUGGESTER_ALTEROBJECTSFROMSCHEMAS = PROP_PREFIX+".alterobjectsfromschemas";
