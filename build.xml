@@ -303,7 +303,7 @@
 		<echo message="revision = ${revision}"/>
 		<property name="ivy.pom.version" value="${revision}"/>
 		<ivy:deliver conf="*(public)" deliverpattern="${dist.dir}/[type]s/sqldump.ivy.xml" status="release" validate="true" pubrevision="${revision}"/>
-		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/poms/${ivy.module}.pom">
+		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/poms/${ivy.module}.pom" templatefile="pom-template.xml">
 			<mapping conf="default" scope="compile"/>
 			<mapping conf="test" scope="test"/>
 		</ivy:makepom>
