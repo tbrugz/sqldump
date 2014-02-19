@@ -320,6 +320,19 @@
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
 
+	<target name="publish-sonatype-snapshot">
+		<!-- version must be of SNAPSHOT type -->
+		<condition property="version-ok">
+			<matches pattern="SNAPSHOT" string="${version}"/>
+		</condition>
+		<fail message="Must be SNAPSHOT version" unless="version-ok"/>
+		<ant antfile="build-sonatype.xml" target="deploy"/> <!-- deploy snapshots -->
+	</target>
+	
+	<target name="publish-sonatype-release">
+		<!--ant antfile="build-sonatype.xml" target="stage"/--> <!-- deploy (signed) releases -->
+	</target>
+	
 	<!-- ========= /dependencies tasks ========== -->
 
 	<!-- ========= code analysis tasks ========== -->
