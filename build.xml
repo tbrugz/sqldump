@@ -235,7 +235,7 @@
 		</jar>
 	</target>
 
-	<target name="dist" depends="jar,jar-source" description="builds jars"/>
+	<target name="dist" depends="jar,jar-source,make-ivy-pom" description="builds jars, ivy &amp; pom files"/>
 
 	<target name="all" depends="clean,javadoc,test,publish" description="clean, build, test and publish project"/>
 
@@ -295,18 +295,21 @@
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
-
-	<target name="publish" depends="dist,config-ivy" description="publish this project in the ivy repository">
-		<property name="revision" value="${version}"/>
-		<property name="resolver.publish" value="local"/>
+	
+	<target name="make-ivy-pom" depends="config-ivy">
 		<ivy:info/>
-		<echo message="revision = ${revision}"/>
+		<property name="revision" value="${version}"/>
 		<property name="ivy.pom.version" value="${revision}"/>
 		<ivy:deliver conf="*(public)" deliverpattern="${dist.dir}/[type]s/sqldump.ivy.xml" status="release" validate="true" pubrevision="${revision}"/>
 		<ivy:makepom ivyfile="ivy.xml" pomfile="dist/poms/${ivy.module}.pom" templatefile="pom-template.xml">
 			<mapping conf="default" scope="compile"/>
 			<mapping conf="test" scope="test"/>
 		</ivy:makepom>
+	</target>
+
+	<target name="publish" depends="dist" description="publish this project in the ivy repository">
+		<property name="resolver.publish" value="local"/>
+		<echo message="revision = ${revision}"/>
 		<ivy:publish resolver="${resolver.publish}" pubrevision="${revision}" status="release" update="true" overwrite="true"
 			artifactsPattern="${dist.dir}/[type]s/[artifact].[ext]">
 			<artifact name="${ivy.module}" ext="pom" type="pom" />

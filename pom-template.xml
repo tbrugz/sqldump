@@ -5,8 +5,8 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>${ivy.pom.groupId}</groupId>
   <artifactId>${ivy.pom.artifactId}</artifactId>
-  <packaging>${ivy.pom.packaging}</packaging>
   <version>${ivy.pom.version}</version>
+  <packaging>${ivy.pom.packaging}</packaging>
   <name>sqldump</name>
   <description>Utility to dump schema and data from a RDBMS</description>
   <url>https://bitbucket.org/tbrugz/sqldump</url>
