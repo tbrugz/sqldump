@@ -220,7 +220,7 @@
 		</jar>
 	</target>
 
-	<target name="javadoc" depends="prepare">
+	<target name="javadoc" depends="prepare" description="builds javadoc">
 		<!--echo message="java.home: ${java.home}" /-->
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" classpathref="classpath.compile">
 			<sourcepath location="${src.dir}"/>
@@ -235,9 +235,9 @@
 		</jar>
 	</target>
 
-	<target name="dist" depends="jar,jar-source,make-ivy-pom" description="builds jars, ivy &amp; pom files"/>
+	<target name="dist" depends="jar,jar-source,javadoc,make-ivy-pom" description="builds jars, javadoc, ivy &amp; pom files"/>
 
-	<target name="all" depends="clean,javadoc,test,publish" description="clean, build, test and publish project"/>
+	<target name="all" depends="clean,test,publish" description="clean, build, test and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
@@ -319,25 +319,29 @@
 		</ivy:publish>
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
-
-	<target name="publish-sonatype-snapshot">
-		<!-- version must be of SNAPSHOT type -->
-		<condition property="version-ok">
+	
+	<target name="prepare-publish-sonatype">
+		<condition property="version-snapshot">
 			<matches pattern="SNAPSHOT" string="${version}"/>
 		</condition>
-		<fail message="Must be SNAPSHOT version" unless="version-ok"/>
+	</target>
+
+	<target name="publish-sonatype-snapshot" depends="dist,prepare-publish-sonatype">
+		<!-- version must be of SNAPSHOT type -->
+		<fail message="Must be SNAPSHOT version" unless="version-snapshot"/>
 		<ant antfile="build-sonatype.xml" target="deploy"/> <!-- deploy snapshots -->
 	</target>
 	
-	<target name="publish-sonatype-release">
-		<!--ant antfile="build-sonatype.xml" target="stage"/--> <!-- deploy (signed) releases -->
+	<target name="publish-sonatype-release" depends="dist,prepare-publish-sonatype">
+		<fail message="Must NOT be SNAPSHOT version" if="version-snapshot"/>
+		<ant antfile="build-sonatype.xml" target="stage"/> <!-- deploy (signed) releases -->
 	</target>
 	
 	<!-- ========= /dependencies tasks ========== -->
 
 	<!-- ========= code analysis tasks ========== -->
 
-	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura, findbugs, checkstyle">
+	<target name="codeanalysis" depends="codeanalysis-pmd, codeanalysis-cpd, codeanalysis-cobertura, findbugs, checkstyle" description="run codeanalisys targets">
 	</target>
 
 	<target name="codeanalysis-pmd">
