@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.io.JSONDiffIO;
 import tbrugz.sqldiff.io.XMLDiffIO;
 import tbrugz.sqldiff.model.ChangeType;
@@ -43,6 +44,7 @@ public class SQLDiffTest {
 	SchemaModelGrabber schemaJdbcGrabber;
 	Connection conn;
 	SchemaModel smOriginal;
+	SchemaDiffer differ = new SchemaDiffer();
 
 	@Before
 	public void setupConnProperties() throws SQLException {
@@ -93,7 +95,7 @@ public class SQLDiffTest {
 		//test diff size
 		{
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 1", 1, diffs.size());
@@ -117,7 +119,7 @@ public class SQLDiffTest {
 		//rolling back db changes
 		st.executeUpdate(dinv.getDiff());
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 0", 0, diffs.size());
@@ -135,7 +137,7 @@ public class SQLDiffTest {
 		st.executeUpdate("alter table emp add column email varchar(100)");
 		
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		SchemaDiff schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		SchemaDiff schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		
 		//test xml & json output
 		XMLDiffIO xmlio = new XMLDiffIO();
@@ -158,7 +160,7 @@ public class SQLDiffTest {
 		//get diff 
 		{
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 1", 1, diffs.size());
@@ -176,7 +178,7 @@ public class SQLDiffTest {
 		//rolling back db changes
 		st.executeUpdate(dinv.getDiff());
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 0", 0, diffs.size());
@@ -202,7 +204,7 @@ public class SQLDiffTest {
 		{
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
 		Assert.assertEquals("model should have 1 view", 1, sm2.getViews().size());
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 1", 1, diffs.size());
@@ -220,7 +222,7 @@ public class SQLDiffTest {
 		//rolling back db changes
 		st.executeUpdate(dinv.getDiff());
 		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
-		schemaDiff = SchemaDiff.diff(smOriginal, sm2);
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
 		System.out.println("diff:\n"+schemaDiff.getDiff());
 		diffs = schemaDiff.getChildren();
 		Assert.assertEquals("diff size should be 0", 0, diffs.size());

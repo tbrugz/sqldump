@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldiff.RenameDetector;
+import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
@@ -12,6 +13,7 @@ import tbrugz.sqldump.dbmodel.Table;
 public class SchemaDiffTest {
 	
 	SchemaModel sm1;
+	SchemaDiffer differ = new SchemaDiffer();
 	
 	@Before
 	public void before() {
@@ -25,7 +27,7 @@ public class SchemaDiffTest {
 
 	@Test
 	public void testNoDiff() {
-		SchemaDiff sd = SchemaDiff.diff(sm1, sm1);
+		SchemaDiff sd = differ.diffSchemas(sm1, sm1);
 		Assert.assertEquals(0, sd.getChildren().size());
 	}
 
@@ -38,7 +40,7 @@ public class SchemaDiffTest {
 		SchemaModel sm2 = new SchemaModel();
 		sm2.getTables().add(t);
 		
-		SchemaDiff sd = SchemaDiff.diff(sm1, sm2);
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
 		Assert.assertEquals(2, sd.getChildren().size());
 	}
 
@@ -67,7 +69,7 @@ public class SchemaDiffTest {
 		SchemaModel sm2 = new SchemaModel();
 		sm2.getTables().add(t);
 		
-		SchemaDiff sd = SchemaDiff.diff(sm1, sm2);
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
 		return sd;
 	}
 
@@ -80,7 +82,7 @@ public class SchemaDiffTest {
 		SchemaModel sm2 = new SchemaModel();
 		sm2.getTables().add(t);
 		
-		SchemaDiff sd = SchemaDiff.diff(sm1, sm2);
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
 		int renameCount = RenameDetector.detectAndDoColumnRenames(sd.getColumnDiffs(), 0.5);
 		SchemaDiff.logInfo(sd);
 		

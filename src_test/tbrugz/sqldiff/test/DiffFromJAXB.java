@@ -6,6 +6,7 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
@@ -33,7 +34,8 @@ public class DiffFromJAXB {
 		Assert.assertEquals("should have grabbed 2 tables", 2, smNew.getTables().size());
 		
 		//do diff
-		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
+		SchemaDiffer sd = new SchemaDiffer();
+		SchemaDiff diff = sd.diffSchemas(smOrig, smNew);
 		System.out.println("diff:\n"+diff.getDiff());
 		
 		List<Diff> diffs = diff.getChildren();
@@ -65,7 +67,8 @@ public class DiffFromJAXB {
 		}
 		
 		//do diff
-		SchemaDiff diff = SchemaDiff.diff(smOrig, smNew);
+		SchemaDiffer sd = new SchemaDiffer();
+		SchemaDiff diff = sd.diffSchemas(smOrig, smNew);
 		System.out.println("diff:\n"+diff.getDiff());
 		
 		List<Diff> diffs = diff.getChildren();

@@ -151,7 +151,8 @@ public class SQLDiff implements Executor {
 
 		//do diff
 		log.info("diffing...");
-		diff = SchemaDiff.diff(fromSM, toSM);
+		SchemaDiffer differ = new SchemaDiffer();
+		diff = differ.diffSchemas(fromSM, toSM);
 		
 		//detect renames
 		//XXX: add DiffProcessor?

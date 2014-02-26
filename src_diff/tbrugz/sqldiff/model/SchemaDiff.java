@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -20,11 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.compare.ExecOrderDiffComparator;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
-import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.CategorizedOut;
 
 //XXX: should SchemaDiff implement Diff?
@@ -46,126 +41,6 @@ public class SchemaDiff implements Diff {
 	
 	//XXX add String sqlDialect; ?
 
-	void diffTable(SchemaModel modelOrig, SchemaModel modelNew) {
-		SchemaDiff diff = this;
-		//tables
-		Set<Table> newTablesThatExistsInOrigModel = new HashSet<Table>();
-		if(modelOrig.getTables().size()>0) {
-			
-		for(Table tOrig: modelOrig.getTables()) {
-			if(! tOrig.getType().equals(TableType.TABLE)) continue;
-			
-			Table tNew = DBIdentifiable.getDBIdentifiableBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
-			if(tNew==null) {
-				//if new table doesn't exist, drop old
-				TableDiff td = new TableDiff(ChangeType.DROP, tOrig);
-				//td.table = tOrig;
-				//td.diffType = ChangeType.DROP;
-				diff.tableDiffs.add(td);
-			}
-			else {
-				//new and old tables exists
-				newTablesThatExistsInOrigModel.add(tNew);
-				//rename XXX: what about rename? external info needed?
-				List<Diff> diffs = TableDiff.tableDiffs(tOrig, tNew);
-				
-				//FKs
-				TableDiff.diffs(DBObjectType.FK, diff.dbidDiffs, 
-						getFKsFromTable(modelOrig.getForeignKeys(), tOrig.getName()), 
-						getFKsFromTable(modelNew.getForeignKeys(), tNew.getName()), 
-						tOrig.getFinalQualifiedName(),
-						tNew.getFinalQualifiedName());
-				
-				for(Diff dt: diffs) {
-					boolean added = false;
-					if(dt instanceof TableDiff) {
-						added = diff.tableDiffs.add((TableDiff)dt);
-					}
-					else if(dt instanceof ColumnDiff) {
-						added = diff.columnDiffs.add((ColumnDiff)dt);
-					}
-					else if(dt instanceof GrantDiff) {
-						added = diff.grantDiffs.add((GrantDiff)dt);
-					}
-					else if(dt instanceof DBIdentifiableDiff) {
-						added = diff.dbidDiffs.add((DBIdentifiableDiff)dt);
-					}
-					else {
-						added = true;
-						log.warn("unknown diff: "+dt);
-					}
-					
-					if(!added) {
-						log.warn("diff already present in set: "+dt);
-					}
-				}
-				//diff.tableDiffs.addAll(diffs);
-				//column changes
-			}
-		}
-		
-		}
-		
-		/*Set<Table> newTables = new HashSet<Table>();
-		newTables.addAll(modelNew.getTables());
-		newTables.removeAll(newTablesThatExistsInOrigModel);
-		diff.getTables().addAll(newTables);*/
-		/*for(Table tNew: newTables) {
-			diff.getTables().add(tNew);
-		}*/
-		
-		Set<Table> addTables = new TreeSet<Table>();
-		
-		//add tables
-		addTables.addAll(modelNew.getTables());
-		addTables.removeAll(newTablesThatExistsInOrigModel);
-		for(Table t: addTables) {
-			if(! t.getType().equals(TableType.TABLE)) continue;
-
-			TableDiff td = new TableDiff(ChangeType.ADD, t);
-			diff.tableDiffs.add(td);
-		}
-	}	
-		
-	public static SchemaDiff diff(SchemaModel modelOrig, SchemaModel modelNew) {
-		if(modelOrig == null || modelNew == null) {
-			log.warn("source, target, or both models are null");
-			return null;
-		}
-		
-		SchemaDiff diff = new SchemaDiff();
-		
-		//Tables
-		diff.diffTable(modelOrig, modelNew);
-		
-		//TODOne: Table: grants? see TableDiff.diffGrants()
-		
-		//Views
-		TableDiff.diffs(DBObjectType.VIEW, diff.dbidDiffs, modelOrig.getViews(), modelNew.getViews());
-		
-		//Triggers
-		TableDiff.diffs(DBObjectType.TRIGGER, diff.dbidDiffs, modelOrig.getTriggers(), modelNew.getTriggers());
-
-		//FIXedME: package and package body: findByName must also use object type! (and schemaName!)
-		//Executables
-		TableDiff.diffs(DBObjectType.EXECUTABLE, diff.dbidDiffs, modelOrig.getExecutables(), modelNew.getExecutables());
-
-		//Synonyms
-		//FIXedME: doesn't detect schemaName changes
-		TableDiff.diffs(DBObjectType.SYNONYM, diff.dbidDiffs, modelOrig.getSynonyms(), modelNew.getSynonyms());
-		
-		//Indexes
-		TableDiff.diffs(DBObjectType.INDEX, diff.dbidDiffs, modelOrig.getIndexes(), modelNew.getIndexes());
-
-		//Sequences
-		TableDiff.diffs(DBObjectType.SEQUENCE, diff.dbidDiffs, modelOrig.getSequences(), modelNew.getSequences());
-		
-		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
-		logInfo(diff);
-		
-		return diff;
-	}
-	
 	@SuppressWarnings("unchecked")
 	public static void logInfo(SchemaDiff diff) {
 		int maxNameSize = getMaxDBObjectNameSize(diff.tableDiffs, diff.columnDiffs, diff.dbidDiffs);
@@ -234,14 +109,6 @@ public class SchemaDiff implements Diff {
 			}
 		}
 		return retdiff;
-	}
-	
-	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
-		Set<FK> retfks = new HashSet<FK>();
-		for(FK fk: fks) {
-			if(fk.getFkTable().equals(table)) { retfks.add(fk); }
-		}
-		return retfks;
 	}
 	
 	//@Override
@@ -379,6 +246,10 @@ public class SchemaDiff implements Diff {
 
 	public Set<DBIdentifiableDiff> getDbIdDiffs() {
 		return dbidDiffs;
+	}
+	
+	public Set<GrantDiff> getGrantDiffs() {
+		return grantDiffs;
 	}
 
 }
