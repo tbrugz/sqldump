@@ -59,6 +59,7 @@ public class DataDiff extends AbstractFailable {
 	long loopLimit = 0;
 	boolean applyDataDiff = false;
 	boolean useCommonColumns = false;
+	boolean orderWithAllColumnsIfNoUK = true; //XXX add property for 'orderWithAllColumnsIfNoUK'
 	
 	SchemaModel sourceSchemaModel = null;
 	SchemaModel targetSchemaModel = null;
@@ -198,18 +199,7 @@ public class DataDiff extends AbstractFailable {
 			
 			tablesToDiffCount++;
 
-			List<String> keyCols = null;
-			Constraint ctt = table.getPKConstraint();
-			if(ctt!=null) {
-				keyCols = ctt.uniqueColumns;
-			}
-			if(keyCols==null) {
-				log.warn("table '"+table+"' has no PK. diff disabled");
-				continue;
-			}
-			
-			String sql = null;
-			
+			String columnsForSelect = null;
 			//XXX select '*' or all column names? option to select by property?
 			if(useCommonColumns) {
 				List<Column> cols = getCommonColumns(table, sourceTablesMap.get(table.getName()));
@@ -220,13 +210,31 @@ public class DataDiff extends AbstractFailable {
 				if(table.getColumns().size()>cols.size()) {
 					log.info("tablediff ["+table+"] using "+cols.size()+" column [of "+table.getColumns().size()+"]");
 				}
-				sql = DataDump.getQuery(table, getColumnsForSelect(cols), null, null, true); //replaced '*' for column names - same column order for both resultsets
+				columnsForSelect = getColumnsForSelect(cols);
 			}
 			else {
 				//replaced '*' for column names - same column order for both resultsets
-				sql = DataDump.getQuery(table, getColumnsForSelect(table), null, null, true);
+				columnsForSelect = getColumnsForSelect(table);
+			}
+
+			List<String> keyCols = null;
+			Constraint ctt = table.getPKConstraint();
+			if(ctt!=null) {
+				keyCols = ctt.uniqueColumns;
+			}
+			if(keyCols==null) {
+				if(orderWithAllColumnsIfNoUK) {
+					log.info("table '"+table+"' has no PK. using all columns in 'order by'");
+					keyCols = Utils.splitStringWithTrim(columnsForSelect, ",");
+				}
+				else {
+					log.warn("table '"+table+"' has no PK. diff disabled");
+					continue;
+				}
 			}
 			
+			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
+
 			ResultSet rsSource = null, rsTarget=null;
 			
 			if(sourceMustImportData) {
