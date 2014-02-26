@@ -6,31 +6,57 @@ import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 
 public class GrantDiff implements Diff, Comparable<GrantDiff> {
+
+	// grant properties
+	final String schemaName;
+	final String tableName;
+	final PrivilegeType privilege;
+	final String grantee;
+	final boolean withGrantOption;
+
+	// grant "diff" properties
+	final boolean revoke;
+	//final transient Grant grant;
+	final transient ColumnDiff.NamedTable namedTable;
 	
-	final Grant grant;
-	final ColumnDiff.NamedTable namedTable;
-	final boolean isRevoke;
+	public GrantDiff(String schemaName, String tableName, PrivilegeType privilege, String grantee, boolean withGrantOption, boolean isRevoke) {
+		this.schemaName = schemaName;
+		this.tableName = tableName;
+		this.privilege = privilege;
+		this.grantee = grantee;
+		this.withGrantOption = withGrantOption;
+		//this.grant = grant;
+		this.revoke = isRevoke;
+		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);
+	}
 	
 	public GrantDiff(Grant grant, String schemaName, boolean isRevoke) {
-		this.grant = grant;
+		this(schemaName, grant.table, grant.privilege, grant.grantee, grant.withGrantOption, isRevoke);
+		/*this.schemaName = schemaName;
+		this.tableName = grant.table;
+		this.privilege = grant.privilege;
+		this.grantee = grant.grantee;
+		this.withGrantOption = grant.withGrantOption;
+		//this.grant = grant;
 		this.isRevoke = isRevoke;
-		this.namedTable = new ColumnDiff.NamedTable(schemaName, grant.table);
+		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);*/
 	}
 
 	@Override
 	public ChangeType getChangeType() {
-		return isRevoke?ChangeType.DROP:ChangeType.ADD;
+		return revoke?ChangeType.DROP:ChangeType.ADD;
 	}
 
 	@Override
 	public String getDiff() {
 		return 
-			(isRevoke?"revoke ":"grant ")
-			+grant.privilege
+			(revoke?"revoke ":"grant ")
+			+privilege
 			+" on "+namedTable.getName()
-			+" to "+grant.grantee;
+			+" to "+grantee;
 			//+";\n\n";
 	}
 
@@ -51,7 +77,7 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 
 	@Override
 	public Diff inverse() {
-		return new GrantDiff(grant, namedTable.schemaName, !isRevoke);
+		return new GrantDiff(schemaName, tableName, privilege, grantee, withGrantOption, !revoke);
 	}
 	
 	@Override
@@ -59,19 +85,19 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 		//int compare = grant.compareTo(o.grant);
 		//if(compare!=0) return compare;
 		
-		int compare = grant.table.compareTo(o.grant.table);
+		int compare = tableName.compareTo(o.tableName);
 		if(compare!=0) return compare;
 		
-		compare = grant.privilege.compareTo(o.grant.privilege);
+		compare = privilege.compareTo(o.privilege);
 		if(compare!=0) return compare;
 		
-		compare = grant.grantee.compareTo(o.grant.grantee);
+		compare = grantee.compareTo(o.grantee);
 		if(compare!=0) return compare;
 		
-		compare = grant.withGrantOption==o.grant.withGrantOption?0:1;
+		compare = withGrantOption==o.withGrantOption?0:1;
 		if(compare!=0) return compare;
 		
-		return isRevoke==o.isRevoke?0:1;
+		return revoke==o.revoke?0:1;
 	}
 
 }
