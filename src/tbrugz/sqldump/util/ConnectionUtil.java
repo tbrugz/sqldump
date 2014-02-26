@@ -108,6 +108,10 @@ public class ConnectionUtil {
 		return false;
 	}
 	
+	public static String getBasePropertiesSuffixStr() {
+		return "('"+SUFFIX_DRIVERCLASS+"' and '"+SUFFIX_URL+"') or '"+SUFFIX_CONNECTION_DATASOURCE+"'";
+	}
+	
 	static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
 		if(driverClass==null) {
 			String message = "driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined (using JDBC 4+ ?)";

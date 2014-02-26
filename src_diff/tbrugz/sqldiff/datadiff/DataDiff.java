@@ -368,11 +368,11 @@ public class DataDiff extends AbstractFailable {
 					log.info("database connection created [grabberId="+grabberId+"]");
 					return conn;
 				}
+				log.error("base connection properties not defined, can't proceed [grabberId="+grabberId+"]");
+				log.info("base properties are: "+ConnectionUtil.getBasePropertiesSuffixStr());
+				if(failonerror) { throw new ProcessingException("base connection properties not defined, can't proceed [grabberId="+grabberId+"]"); }
+				return null;
 			}
-			
-			log.error("base connection properties not defined, can't proceed [grabberId="+grabberId+"]");
-			if(failonerror) { throw new ProcessingException("base connection properties not defined, can't proceed [grabberId="+grabberId+"]"); }
-			return null;
 		} catch (Exception e) {
 			log.error("error creating connection [grabberId="+grabberId+"]: "+e);
 			log.debug("error creating connection",e);
