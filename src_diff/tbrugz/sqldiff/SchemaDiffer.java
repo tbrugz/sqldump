@@ -24,6 +24,8 @@ import tbrugz.sqldump.dbmodel.TableType;
 
 public class SchemaDiffer {
 	static final Log log = LogFactory.getLog(SchemaDiffer.class);
+	
+	Set<DBObjectType> doDiffTypes = null;
 
 	void diffTables(SchemaModel modelOrig, SchemaModel modelNew, SchemaDiff diff) {
 		//tables
@@ -113,28 +115,47 @@ public class SchemaDiffer {
 		
 		SchemaDiff diff = new SchemaDiff();
 		
+		if(doDiffTypes!=null) {
+			log.info("diffing types: "+doDiffTypes);
+		}
+		
 		//Tables
-		diffTables(modelOrig, modelNew, diff);
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.TABLE)) {
+			//TODO: diff or not COLUMN, GRANT & CONSTRAINT types
+			diffTables(modelOrig, modelNew, diff);
+		}
 		
 		//Views
-		TableDiff.diffs(DBObjectType.VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.VIEW)) {
+			TableDiff.diffs(DBObjectType.VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews());
+		}
 		
 		//Triggers
-		TableDiff.diffs(DBObjectType.TRIGGER, diff.getDbIdDiffs(), modelOrig.getTriggers(), modelNew.getTriggers());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.TRIGGER)) {
+			TableDiff.diffs(DBObjectType.TRIGGER, diff.getDbIdDiffs(), modelOrig.getTriggers(), modelNew.getTriggers());
+		}
 
 		//FIXedME: package and package body: findByName must also use object type! (and schemaName!)
 		//Executables
-		TableDiff.diffs(DBObjectType.EXECUTABLE, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.EXECUTABLE)) {
+			TableDiff.diffs(DBObjectType.EXECUTABLE, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables());
+		}
 
 		//Synonyms
 		//FIXedME: doesn't detect schemaName changes
-		TableDiff.diffs(DBObjectType.SYNONYM, diff.getDbIdDiffs(), modelOrig.getSynonyms(), modelNew.getSynonyms());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.SYNONYM)) {
+			TableDiff.diffs(DBObjectType.SYNONYM, diff.getDbIdDiffs(), modelOrig.getSynonyms(), modelNew.getSynonyms());
+		}
 		
 		//Indexes
-		TableDiff.diffs(DBObjectType.INDEX, diff.getDbIdDiffs(), modelOrig.getIndexes(), modelNew.getIndexes());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.INDEX)) {
+			TableDiff.diffs(DBObjectType.INDEX, diff.getDbIdDiffs(), modelOrig.getIndexes(), modelNew.getIndexes());
+		}
 
 		//Sequences
-		TableDiff.diffs(DBObjectType.SEQUENCE, diff.getDbIdDiffs(), modelOrig.getSequences(), modelNew.getSequences());
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.SEQUENCE)) {
+			TableDiff.diffs(DBObjectType.SEQUENCE, diff.getDbIdDiffs(), modelOrig.getSequences(), modelNew.getSequences());
+		}
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		SchemaDiff.logInfo(diff);
@@ -148,6 +169,23 @@ public class SchemaDiffer {
 			if(fk.getFkTable().equals(table)) { retfks.add(fk); }
 		}
 		return retfks;
+	}
+	
+	public void setTypesForDiff(String types) {
+		if(types==null) { return; }
+		doDiffTypes = new TreeSet<DBObjectType>();
+		String[] typesArr = types.split(",");
+		for(String s: typesArr) {
+			if(s==null) { continue; }
+			s = s.trim();
+			try {
+				DBObjectType t = DBObjectType.valueOf(s);
+				doDiffTypes.add(t);
+			}
+			catch(IllegalArgumentException e) {
+				log.warn("unknown object type: "+s);
+			}
+		}
 	}
 
 }

@@ -50,6 +50,7 @@ public class SQLDiff implements Executor {
 	public static final String PROP_PREFIX = "sqldiff";
 	public static final String PROP_SOURCE = PROP_PREFIX+".source";
 	public static final String PROP_TARGET = PROP_PREFIX+".target";
+	public static final String PROP_TYPES_TO_DIFF = PROP_PREFIX+".typestodiff";
 	
 	//schema input/output props
 	static final String PREFIX_INPUT = PROP_PREFIX+".input";
@@ -152,6 +153,7 @@ public class SQLDiff implements Executor {
 		//do diff
 		log.info("diffing...");
 		SchemaDiffer differ = new SchemaDiffer();
+		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
 		diff = differ.diffSchemas(fromSM, toSM);
 		
 		//detect renames
