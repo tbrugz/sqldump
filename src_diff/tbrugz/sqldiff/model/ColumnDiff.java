@@ -28,7 +28,14 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		ALWAYS;
 	}
 	
-	class NamedTable implements NamedDBObject {
+	public static class NamedTable implements NamedDBObject {
+		final String schemaName, tableName;
+		
+		public NamedTable(String schemaName, String tableName) {
+			this.schemaName = schemaName;
+			this.tableName = tableName;
+		}
+		
 		@Override
 		public String getName() {
 			return tableName;
@@ -95,7 +102,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this.tableName = tableName;
 		this.column = newColumn;
 		this.previousColumn = oldColumn;
-		this.table = new NamedTable();
+		this.table = new NamedTable(schemaName, tableName);
 		
 		if(features==null) {
 			updateFeatures();

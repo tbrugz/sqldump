@@ -13,6 +13,7 @@ import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -117,9 +118,31 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		}
 		diffs.addAll(dbiddiffs);
 		
+		//grants
+		diffGrants(diffs, origTable, newTable);
+		
 		return diffs;
 	}
 	
+	static void diffGrants(List<Diff> diffs, Table origTable, Table newTable) {
+		List<Grant> origGrants = origTable.getGrants();
+		List<Grant> newGrants = newTable.getGrants();
+		
+		for(Grant og: origGrants) {
+			if(!Grant.containsGrant(newGrants, og)) {
+				//log.debug("revoke: "+og);
+				diffs.add(new GrantDiff(og, origTable.getSchemaName(), true));
+			}
+		}
+
+		for(Grant ng: newGrants) {
+			if(!Grant.containsGrant(origGrants, ng)) {
+				//log.debug("grant: "+ng);
+				diffs.add(new GrantDiff(ng, newTable.getSchemaName(), false));
+			}
+		}
+	}
+
 	//XXX: move to another class
 	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
 		diffs(objType, diffs, listOrig, listNew, null, null);

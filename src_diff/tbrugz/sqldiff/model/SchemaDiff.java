@@ -39,6 +39,8 @@ public class SchemaDiff implements Diff {
 	final Set<TableDiff> tableDiffs = new TreeSet<TableDiff>();
 	@XmlElement(name="columnDiff")
 	final Set<ColumnDiff> columnDiffs = new TreeSet<ColumnDiff>();
+	@XmlElement(name="grantDiff")
+	final Set<GrantDiff> grantDiffs = new TreeSet<GrantDiff>();
 	@XmlElement(name="dbidDiff")
 	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 	
@@ -81,6 +83,9 @@ public class SchemaDiff implements Diff {
 					}
 					else if(dt instanceof ColumnDiff) {
 						added = diff.columnDiffs.add((ColumnDiff)dt);
+					}
+					else if(dt instanceof GrantDiff) {
+						added = diff.grantDiffs.add((GrantDiff)dt);
 					}
 					else if(dt instanceof DBIdentifiableDiff) {
 						added = diff.dbidDiffs.add((DBIdentifiableDiff)dt);
@@ -133,7 +138,7 @@ public class SchemaDiff implements Diff {
 		//Tables
 		diff.diffTable(modelOrig, modelNew);
 		
-		//TODO: Table: grants, table.type?
+		//TODOne: Table: grants? see TableDiff.diffGrants()
 		
 		//Views
 		TableDiff.diffs(DBObjectType.VIEW, diff.dbidDiffs, modelOrig.getViews(), modelNew.getViews());
@@ -166,6 +171,7 @@ public class SchemaDiff implements Diff {
 		int maxNameSize = getMaxDBObjectNameSize(diff.tableDiffs, diff.columnDiffs, diff.dbidDiffs);
 		logInfoByObjectAndChangeType(diff.tableDiffs, maxNameSize);
 		logInfoByObjectAndChangeType(diff.columnDiffs, maxNameSize);
+		logInfoByObjectAndChangeType(diff.grantDiffs, maxNameSize);
 		logInfoByObjectAndChangeType(diff.dbidDiffs, maxNameSize);
 	}
 
@@ -243,6 +249,7 @@ public class SchemaDiff implements Diff {
 		List<Diff> diffs = new ArrayList<Diff>();
 		diffs.addAll(tableDiffs);
 		diffs.addAll(columnDiffs);
+		diffs.addAll(grantDiffs);
 		diffs.addAll(dbidDiffs);
 		
 		//XXX: option to select diff comparator?
@@ -311,7 +318,12 @@ public class SchemaDiff implements Diff {
 		List<String> diffStrs = new ArrayList<String>();
 
 		for(Diff d: diffs) {
-			for(String s: d.getDiffList()) {
+			List<String> ls = d.getDiffList();
+			if(ls==null) {
+				//log.warn("null diff...");
+				continue;
+			}
+			for(String s: ls) {
 				diffStrs.add(s);
 			}
 		}
