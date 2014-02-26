@@ -84,8 +84,10 @@ public class SQLDiff implements Executor {
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 	
 	//props from SchemaModelScriptDumper
-	@Deprecated	static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
-	@Deprecated	static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";	
+	@Deprecated static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
+	@Deprecated static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";
+	
+	static final double RENAMEDETECT_MINSIMILARITY_DEFAULT = 0.5;
 	
 	static final String XML_IO_CLASS = "tbrugz.sqldiff.io.XMLDiffIO";
 	static final String JSON_IO_CLASS = "tbrugz.sqldiff.io.JSONDiffIO";
@@ -155,7 +157,7 @@ public class SQLDiff implements Executor {
 		//XXX: add DiffProcessor?
 		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
 		if(doRenameDetection) {
-			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, 0.5);
+			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
 			int renames = 0;
 			renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
 			renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
