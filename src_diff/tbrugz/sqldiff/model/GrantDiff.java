@@ -18,42 +18,34 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 	final boolean withGrantOption;
 
 	// grant "diff" properties
-	final boolean revoke;
+	final ChangeType changeType;
 	//final transient Grant grant;
 	final transient ColumnDiff.NamedTable namedTable;
 	
-	public GrantDiff(String schemaName, String tableName, PrivilegeType privilege, String grantee, boolean withGrantOption, boolean isRevoke) {
+	public GrantDiff(String schemaName, String tableName, PrivilegeType privilege, String grantee, boolean withGrantOption, boolean revoke) {
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.privilege = privilege;
 		this.grantee = grantee;
 		this.withGrantOption = withGrantOption;
 		//this.grant = grant;
-		this.revoke = isRevoke;
+		this.changeType = revoke?ChangeType.DROP:ChangeType.ADD;
 		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);
 	}
 	
 	public GrantDiff(Grant grant, String schemaName, boolean isRevoke) {
 		this(schemaName, grant.table, grant.privilege, grant.grantee, grant.withGrantOption, isRevoke);
-		/*this.schemaName = schemaName;
-		this.tableName = grant.table;
-		this.privilege = grant.privilege;
-		this.grantee = grant.grantee;
-		this.withGrantOption = grant.withGrantOption;
-		//this.grant = grant;
-		this.isRevoke = isRevoke;
-		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);*/
 	}
 
 	@Override
 	public ChangeType getChangeType() {
-		return revoke?ChangeType.DROP:ChangeType.ADD;
+		return changeType;
 	}
 
 	@Override
 	public String getDiff() {
 		return 
-			(revoke?"revoke ":"grant ")
+			(changeType.equals(ChangeType.DROP)?"revoke ":"grant ")
 			+privilege
 			+" on "+namedTable.getName()
 			+" to "+grantee;
@@ -77,7 +69,7 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 
 	@Override
 	public Diff inverse() {
-		return new GrantDiff(schemaName, tableName, privilege, grantee, withGrantOption, !revoke);
+		return new GrantDiff(schemaName, tableName, privilege, grantee, withGrantOption, changeType.equals(ChangeType.ADD)?true:false);
 	}
 	
 	@Override
@@ -97,7 +89,7 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 		compare = withGrantOption==o.withGrantOption?0:1;
 		if(compare!=0) return compare;
 		
-		return revoke==o.revoke?0:1;
+		return changeType.compareTo(o.changeType);
 	}
 
 }

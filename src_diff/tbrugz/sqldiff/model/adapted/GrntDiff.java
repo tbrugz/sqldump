@@ -14,5 +14,4 @@ public class GrntDiff {
 	public PrivilegeType privilege;
 	public String grantee;
 	public boolean withGrantOption;
-	public boolean revoke;
 }

@@ -8,7 +8,7 @@ public class GrantDiffAdapter extends XmlAdapter<GrntDiff, GrantDiff> {
 	
 	@Override
 	public GrantDiff unmarshal(GrntDiff v) throws Exception {
-		return new GrantDiff(v.schemaName, v.tableName, v.privilege, v.grantee, v.withGrantOption, v.revoke);
+		return new GrantDiff(v.schemaName, v.tableName, v.privilege, v.grantee, v.withGrantOption, v.changeType.equals(ChangeType.DROP));
 	}
 
 	@Override
@@ -20,7 +20,6 @@ public class GrantDiffAdapter extends XmlAdapter<GrntDiff, GrantDiff> {
 		adapted.privilege = v.privilege;
 		adapted.grantee = v.grantee;
 		adapted.withGrantOption = v.withGrantOption;
-		adapted.revoke = v.revoke;
 		return adapted;
 	}
 
