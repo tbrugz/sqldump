@@ -416,6 +416,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			for(String schemaName: schemasList) {
 				log.info("getting grants from schema "+schemaName);
 				//XXX filter by GRANTEE, not GRANTOR/SCHEMA ? schema != user (in some databases?)
+				//XXX no grants for 'role's? (tested on oracle)
 				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaName, null);
 				//List<Grant> grants = grabSchemaGrants(grantrs); //table.setGrants(  );
 				closeResultSetAndStatement(grantrs);

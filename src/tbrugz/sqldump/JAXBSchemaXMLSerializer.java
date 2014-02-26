@@ -107,7 +107,6 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		
 	}
 	
-	@SuppressWarnings("resource")
 	InputStream getInputStream() {
 		InputStream is = null;
 		if(filenameIn!=null) {
