@@ -58,6 +58,7 @@ public class ResultSetDiff {
 				throw new IllegalArgumentException("key column not found: "+key);
 			}
 		}
+		log.debug("[table="+tableName+"] key cols: "+keyCols);
 		
 		for(DiffSyntax ds: dss) {
 			ds.initDump(tableName, keyCols, md);

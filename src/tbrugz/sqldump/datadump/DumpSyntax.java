@@ -8,12 +8,17 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax implements DumpSyntaxInt {
 	
+	static final Log log = LogFactory.getLog(DumpSyntax.class);
+
 	public static final String DEFAULT_NULL_VALUE = "";
 	
 	public DateFormat dateFormatter;
@@ -25,11 +30,14 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	//public abstract void procProperties(Properties prop);
 
 	public void procStandardProperties(Properties prop) {
-		String dateFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".dateformat");
+		String dateProp = "sqldump.datadump."+getSyntaxId()+".dateformat";
+		//log.debug("date prop: '"+dateProp+"'");
+		String dateFormat = prop.getProperty(dateProp);
 		if(dateFormat!=null) {
+			log.debug("date format: "+dateFormat);
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
-		else if(dateFormatter==null){
+		if(dateFormatter==null){
 			dateFormatter = DataDumpUtils.dateFormatter;
 		}
 		
