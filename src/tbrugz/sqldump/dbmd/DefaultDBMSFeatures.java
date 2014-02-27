@@ -29,4 +29,9 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	public FK getForeignKeyObject() {
 		return new FK();
 	}
+	
+	@Override
+	public String sqlDefaultDateFormatPattern() {
+		return null;
+	}
 }

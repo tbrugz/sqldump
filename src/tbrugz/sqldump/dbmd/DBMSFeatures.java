@@ -58,6 +58,7 @@ public interface DBMSFeatures {
 	//String sqlAlterColumnDefinition(NamedDBObject table, Column column); //removed...
 	//String sqlAlterColumnNullableDefinition(NamedDBObject table, Column column);
 	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);
+	String sqlDefaultDateFormatPattern();
 	
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
