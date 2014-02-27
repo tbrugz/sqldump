@@ -785,4 +785,9 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	public String sqlAlterColumnClause() {
 		return "modify";
 	}
+	
+	@Override
+	public String sqlDefaultDateFormatPattern() {
+		return "'TO_DATE('''yyyy-MM-dd''',''YYYY-MM-DD'')'";
+	}
 }
