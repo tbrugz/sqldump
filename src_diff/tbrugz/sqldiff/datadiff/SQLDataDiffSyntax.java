@@ -20,6 +20,8 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 
 	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
 	
+	static final String SYNTAX_ID = "sqldatadiff";
+	
 	static final String DATADIFF_PREFIX = "sqldiff.datadiff"; 
 	static final String PROP_DATADIFF_ADDCOMMENTS = DATADIFF_PREFIX+".addcomments";
 	
@@ -30,6 +32,11 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		addComments = Utils.getPropBool(prop, PROP_DATADIFF_ADDCOMMENTS, addComments);
+	}
+	
+	@Override
+	public String getSyntaxId() {
+		return SYNTAX_ID;
 	}
 	
 	@Override
