@@ -17,7 +17,7 @@ import tbrugz.sqldump.util.Utils;
 
 public abstract class DumpSyntax implements DumpSyntaxInt {
 	
-	static final Log log = LogFactory.getLog(DumpSyntax.class);
+	private static final Log log = LogFactory.getLog(DumpSyntax.class);
 
 	public static final String DEFAULT_NULL_VALUE = "";
 	

@@ -13,12 +13,18 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class InsertIntoDataDump extends DumpSyntax {
 
+	private static final Log log = LogFactory.getLog(InsertIntoDataDump.class);
+	
 	static final String INSERTINTO_SYNTAX_ID = "insertinto";
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.insertinto.withcolumnnames";
 	static final String PROP_INSERTINTO_DUMPCURSORS = "sqldump.datadump.insertinto.dumpcursors";
@@ -51,7 +57,14 @@ public class InsertIntoDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		dateFormatter = sqlDefaultDateFormatter;
+		String dbmsDatePattern = DBMSResources.instance().databaseSpecificFeaturesClass().sqlDefaultDateFormatPattern();
+		if(dbmsDatePattern!=null) {
+			log.debug("dbms default date format: "+dbmsDatePattern);
+			dateFormatter = new SimpleDateFormat(dbmsDatePattern);
+		}
+		else {
+			dateFormatter = sqlDefaultDateFormatter;
+		}
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);

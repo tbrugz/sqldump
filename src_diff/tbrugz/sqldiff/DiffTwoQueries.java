@@ -98,6 +98,8 @@ public class DiffTwoQueries implements Executor {
 			if(targetConn==null) { targetConn = commonConn; }
 		}
 		
+		DBMSResources.instance().updateMetaData(sourceConn.getMetaData(), true);
+		
 		List<DiffSyntax> dss = getSyntaxes();
 		
 		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCEQUERY);
