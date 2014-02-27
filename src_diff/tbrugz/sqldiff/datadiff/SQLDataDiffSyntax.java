@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,8 +20,17 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 
 	static final Log log = LogFactory.getLog(SQLDataDiffSyntax.class);
 	
+	static final String DATADIFF_PREFIX = "sqldiff.datadiff"; 
+	static final String PROP_DATADIFF_ADDCOMMENTS = DATADIFF_PREFIX+".addcomments";
+	
 	boolean shouldFlush = true;
-	boolean addComments = true; //XXX: add property for addComments
+	boolean addComments = true; //XXXdone: add property for addComments
+	
+	@Override
+	public void procProperties(Properties prop) {
+		super.procProperties(prop);
+		addComments = Utils.getPropBool(prop, PROP_DATADIFF_ADDCOMMENTS, addComments);
+	}
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos)
