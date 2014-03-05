@@ -20,6 +20,7 @@ import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
+import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
@@ -52,6 +53,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	CLIProcessorTest.class,
 	DBMSResourcesTest.class,
 	StmtProcTest.class,
+	DBObjectUtilsTest.class,
 
 	//diff "unit" tests
 	ColumnDiffTest.class,
