@@ -185,6 +185,10 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return true;
 	}
 	
+	public boolean equals4Diff(Object obj) {
+		return equals(obj);
+	}
+	
 	//XXX: use schemaName in compareTo()? see old DBObject.compareTo()...
 	@Override
 	public int compareTo(DBIdentifiable o) {

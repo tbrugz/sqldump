@@ -177,7 +177,7 @@ public class SchemaDiffer {
 			DBIdentifiable cNew = DiffUtil.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType4Diff(cOrig), cOrig.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
-				if(!cOrig.equals(cNew)) {
+				if(!cOrig.equals4Diff(cNew)) {
 					if(!cOrig.isDumpable()) {
 						log.debug("original/new object not dumpable: "+cOrig);
 						continue;
