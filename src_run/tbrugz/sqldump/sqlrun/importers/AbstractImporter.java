@@ -101,12 +101,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	boolean useBatchUpdate = false;
 	long batchUpdateSize = 1000;
 
-	long commitEachXrows = 0l;
-	static long defaultCommitEachXrowsForFileStrategy = 1000l;
+	long commitEachXrows = 0L;
+	static long defaultCommitEachXrowsForFileStrategy = 1000L;
 	
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
-	long logEachXrows = 10000l; //XXX: prop for logEachXrows
+	long logEachXrows = 10000L; //XXX: prop for logEachXrows
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;

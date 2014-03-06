@@ -645,7 +645,7 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 
 	static long getLongValue(Object o) {
-		if(o==null) { return 0l; }
+		if(o==null) { return 0L; }
 		if(o instanceof Number) {
 			return ((Number)o).longValue();
 		}
