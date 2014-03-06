@@ -620,7 +620,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			c.checkDescription = rs.getString(5);
 			
 			//ignore NOT NULL constraints
-			if(c.checkDescription.contains(" IS NOT NULL")) continue;
+			if(c.checkDescription.contains(" IS NOT NULL")) { continue; }
 			
 			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 			if(t!=null) {

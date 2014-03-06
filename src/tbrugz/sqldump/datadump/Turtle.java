@@ -147,7 +147,7 @@ public class Turtle extends RDFAbstractSyntax {
 	}
 	
 	String getKey(ResultSet rs, List<String> fkCols, List<String> pkCols) throws SQLException, UnsupportedEncodingException {
-		if(fkCols==null) return null;
+		if(fkCols==null) { return null; }
 		
 		StringBuilder sb = new StringBuilder();
 		boolean isFirst = true;

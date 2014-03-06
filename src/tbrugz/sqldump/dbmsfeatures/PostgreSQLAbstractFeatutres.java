@@ -27,7 +27,8 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 			return createAlterColumn(table, column,
 					(column.nullable?" drop":" set")+" not null");
 		}
-		else throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
+		
+		throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
 	}
 	
 }

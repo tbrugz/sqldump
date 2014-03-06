@@ -326,28 +326,28 @@ public class SQLUtils {
 	 * http://docs.oracle.com/javase/tutorial/jdbc/basics/sqlexception.html
 	 * http://docs.oracle.com/javase/6/docs/api/java/sql/SQLSyntaxErrorException.html
 	 */
-	public static void logWarnings(SQLWarning warning, Log log)
+	public static void logWarnings(SQLWarning warning, Log logger)
 			throws SQLException {
 		while (warning != null) {
-			log.debug("SQLWarning: message: " + warning.getMessage()
+			logger.debug("SQLWarning: message: " + warning.getMessage()
 					+"; state: " + warning.getSQLState()
 					+"; error code: "+warning.getErrorCode());
 			warning = warning.getNextWarning();
 		}
 	}
 	
-	public static void xtraLogSQLException(SQLException se, Log log) {
-		log.info("SQLException: state: "+se.getSQLState()+" ; errorCode: "+se.getErrorCode());
+	public static void xtraLogSQLException(SQLException se, Log logger) {
+		logger.info("SQLException: state: "+se.getSQLState()+" ; errorCode: "+se.getErrorCode());
 		if(se.iterator()!=null) {
 			Iterator<Throwable> it = se.iterator();
 			while(it.hasNext()) {
 				Throwable t = it.next();
-				log.info("inner SQLException: "+t);
+				logger.info("inner SQLException: "+t);
 			}
 		}
 		se = se.getNextException();
 		while(se!=null) {
-			log.info("next SQLException: "+se);
+			logger.info("next SQLException: "+se);
 			se = se.getNextException();
 		} 
 	}

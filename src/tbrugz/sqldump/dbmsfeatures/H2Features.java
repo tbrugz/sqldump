@@ -131,7 +131,8 @@ public class H2Features extends InformationSchemaFeatures {
 			return createAlterColumn(table, column,
 					" set "+(column.nullable?"null":"not null"));
 		}
-		else throw new UnsupportedOperationException("no differences between H2 columns found");
+		
+		throw new UnsupportedOperationException("no differences between H2 columns found");
 	}
 	
 }

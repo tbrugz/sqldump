@@ -420,7 +420,7 @@ public class Utils {
 		try {
 			int read = 0;
 			while((read = is.read()) != -1) {
-				if(read==13) break;
+				if(read==13) { break; }
 				char c = (char) (read & 0xff);
 				sb.append(c);
 				System.out.print(replacer);
