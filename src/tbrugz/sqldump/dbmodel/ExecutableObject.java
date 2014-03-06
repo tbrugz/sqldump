@@ -123,6 +123,42 @@ public class ExecutableObject extends DBObject {
 		return true;
 	}
 
+	/* ignoring whitespaces */
+	@Override
+	public boolean equals4Diff(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExecutableObject other = (ExecutableObject) obj;
+		if (body == null) {
+			if (other.body != null)
+				return false;
+		} else if (!DBObjectUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		//} else if (!body.equals(other.body))
+			return false;
+		if (packageName == null) {
+			if (other.packageName != null)
+				return false;
+		} else if (!packageName.equals(other.packageName))
+			return false;
+		if (params == null) {
+			if (other.params != null)
+				return false;
+		} else if (!params.equals(other.params))
+			return false;
+		if (returnParam == null) {
+			if (other.returnParam != null)
+				return false;
+		} else if (!returnParam.equals(other.returnParam))
+			return false;
+		if (type != other.type)
+			return false;
+		return true;
+	}
+	
 	public DBObjectType getType() {
 		return type;
 	}

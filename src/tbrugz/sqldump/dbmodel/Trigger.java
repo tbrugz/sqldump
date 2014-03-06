@@ -68,4 +68,38 @@ public class Trigger extends DBObject {
 		return true;
 	}
 	
+	/* ignoring whitespaces */
+	@Override
+	public boolean equals4Diff(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Trigger other = (Trigger) obj;
+		if (body == null) {
+			if (other.body != null)
+				return false;
+		} else if (!DBObjectUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		//} else if (!body.equals(other.body))
+			return false;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
+			return false;
+		if (tableName == null) {
+			if (other.tableName != null)
+				return false;
+		} else if (!tableName.equals(other.tableName))
+			return false;
+		if (whenClause == null) {
+			if (other.whenClause != null)
+				return false;
+		} else if (!whenClause.equals(other.whenClause))
+			return false;
+		return true;
+	}
+
 }

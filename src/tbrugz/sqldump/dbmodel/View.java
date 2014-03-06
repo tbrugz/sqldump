@@ -122,6 +122,17 @@ public class View extends DBObject implements Relation {
 		}
 		return false;
 	}
+
+	/* ignoring whitespaces */
+	@Override
+	public boolean equals4Diff(Object obj) {
+		if(obj instanceof View) {
+			View v = (View) obj;
+			//return name.equals(v.name) && query.equals(v.query);
+			return name.equals(v.name) && DBObjectUtils.equalsIgnoreWhitespacesEachLine(query, v.query);
+		}
+		return false;
+	}
 	
 	@Override
 	public int hashCode() {
