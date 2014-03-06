@@ -69,7 +69,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 	}
 	
-	final static DBMSUpdateListener updateListener = new DBMSUpdateListener() {
+	static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
 		public void dbmsUpdated() {
 			updateFeatures();

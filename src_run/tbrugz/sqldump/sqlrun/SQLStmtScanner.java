@@ -13,7 +13,7 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	//final static String DEFAULT_CHARSET = DataDumpUtils.CHARSET_UTF8;
 	//TODOne: option to define inputEncoding
 	//XXX: option to define recordDelimiter?
-	final static String recordDelimiter = ";";
+	static final String recordDelimiter = ";";
 	final boolean escapeBackslashApos; //mysql uses this escape - default is false
 	final String inputEncoding;
 	final Scanner scan;

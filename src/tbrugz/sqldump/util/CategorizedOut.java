@@ -43,9 +43,9 @@ public class CategorizedOut {
 	public static final String STDERR = "<stderr>";
 	public static final String NULL_WRITER = "<null>"; // constant for "/dev/null"
 	
-	final static Writer pwSTDOUT = new PrintWriter(System.out);
-	final static Writer pwSTDERR = new PrintWriter(System.err);
-	final static Writer nullWriter = new NullWriter();
+	static final Writer pwSTDOUT = new PrintWriter(System.out);
+	static final Writer pwSTDERR = new PrintWriter(System.err);
+	static final Writer nullWriter = new NullWriter();
 	
 	public CategorizedOut(String filePathPattern) {
 		this.filePathPattern = filePathPattern;

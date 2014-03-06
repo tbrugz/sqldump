@@ -8,8 +8,8 @@ public class StringDecorator {
 	
 	static final Log log = LogFactory.getLog(StringDecorator.class);
 
-	public final static String tolower = "tolower";
-	public final static String toupper = "toupper";
+	public static final String tolower = "tolower";
+	public static final String toupper = "toupper";
 
 	public static class StringToLowerDecorator extends StringDecorator {
 		@Override
@@ -37,7 +37,6 @@ public class StringDecorator {
 			return str==null?null:quote+str+quote;
 		}
 	}
-	
 	
 	public String get(String str) { return str; }
 	

@@ -16,8 +16,8 @@ import tbrugz.sqldump.util.SQLUtils;
 public class DocbookTable extends XMLDataDump {
 	
 	//TODO: set propertuy for ROWSEP_DIVISOR_NUMLINES
-	final static int ROWSEP_DIVISOR_NUMLINES = 5; //to ignore, set to, e.g., Integer.MAX_VALUE 
-	final static int ROWSEP_DIVISOR_INITGAP = 1;
+	static final int ROWSEP_DIVISOR_NUMLINES = 5; //to ignore, set to, e.g., Integer.MAX_VALUE 
+	static final int ROWSEP_DIVISOR_INITGAP = 1;
 
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {

@@ -5,9 +5,9 @@ import java.util.Properties;
 
 public class Version {
 
-	final static String PROP_VERSION = "version";
+	static final String PROP_VERSION = "version";
 	
-	final static Properties prop = new Properties();
+	static final Properties prop = new Properties();
 	
 	static {
 		try {

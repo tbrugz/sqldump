@@ -175,15 +175,15 @@ public class View extends DBObject implements Relation {
 		this.columns = columns;
 	}
 	
-	public void setSimpleColumns(List<Column> columns) {
-		if(columns==null) {
+	public void setSimpleColumns(List<Column> cols) {
+		if(cols==null) {
 			this.columns = null;
 			return;
 		}
 		
 		this.columns = new ArrayList<Column>();
-		for(int i=0;i<columns.size();i++) {
-			Column tcol = columns.get(i);
+		for(int i=0;i<cols.size();i++) {
+			Column tcol = cols.get(i);
 			Column c = new Column();
 			c.setName(tcol.getName());
 			c.setRemarks(tcol.getRemarks());

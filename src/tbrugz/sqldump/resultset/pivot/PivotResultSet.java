@@ -36,7 +36,7 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
 	
-	final static Log log = LogFactory.getLog(PivotResultSet.class);
+	static final Log log = LogFactory.getLog(PivotResultSet.class);
 	
 	public enum Aggregator {
 		FIRST,
@@ -45,16 +45,16 @@ public class PivotResultSet extends AbstractResultSet {
 		//numeric: AVG, MAX, MIN, SUM, ...
 	}
 
-	final static String COLS_SEP = "|";
-	final static String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
-	final static String COLVAL_SEP = ":";
-	final static String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
+	static final String COLS_SEP = "|";
+	static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
+	static final String COLVAL_SEP = ":";
+	static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
 
-	final static int logEachXRows = 1000;
+	static final int logEachXRows = 1000;
 
-	final static Aggregator DEFAULT_AGGREGATOR = Aggregator.LAST;
+	static final Aggregator DEFAULT_AGGREGATOR = Aggregator.LAST;
 	
-	final static String MEASURES_COLNAME = "Measure"; 
+	static final String MEASURES_COLNAME = "Measure"; 
 	
 	public static final int SHOW_MEASURES_IN_ROWS = 0x01;
 	public static final int SHOW_MEASURES_LAST = 0x02;
@@ -74,7 +74,7 @@ public class PivotResultSet extends AbstractResultSet {
 	final List<Integer> colsNotToPivotType = new ArrayList<Integer>();
 	//final List<Integer> colsNotToPivotIndex = new ArrayList<Integer>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
-	transient final List<String> colsToPivotNames; // derived from colsToPivot
+	final transient List<String> colsToPivotNames; // derived from colsToPivot
 	
 	// data properties - set in processMetadata()?
 	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();

@@ -12,7 +12,7 @@ import tbrugz.sqldump.util.Utils;
 
 public class PivotRSFactory implements ResultSetDecoratorFactory {
 
-	final static Log log = LogFactory.getLog(PivotRSFactory.class);
+	static final Log log = LogFactory.getLog(PivotRSFactory.class);
 
 	static final String PARAM_COLS_TO_PIVOT = "colstopivot";
 	static final String PARAM_COLS_NOT_TO_PIVOT = "colsnottopivot";
