@@ -14,8 +14,7 @@ public class OracleFK extends FK {
 		return super.fkSimpleScript(whitespace, dumpWithSchemaName)
 			+ (enabled!=null && !enabled?" disable":"")
 			+ (validated!=null && !validated?" novalidate":"")
-			+ (rely!=null && !rely?" norely":"")
-			;
+			+ (rely!=null && !rely?" norely":"");
 		//return super.getDefinition(dumpSchemaName)
 	};
 	

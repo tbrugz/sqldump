@@ -43,7 +43,7 @@ public class FK extends AbstractConstraint implements Serializable {
 		}*/
 
 		public static UpdateRule getUpdateRule(Integer i) {
-			if(i==null) return null;
+			if(i==null) { return null; }
 			switch (i) {
 			case DatabaseMetaData.importedKeyNoAction:
 			case DatabaseMetaData.importedKeyRestrict:

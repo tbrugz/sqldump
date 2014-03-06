@@ -111,8 +111,7 @@ public class MSAccessDatabaseMetaData extends AbstractDatabaseMetaDataDecorator 
 		String sql = "select null as PKTABLE_SCHEM, null as FKTABLE_SCHEM, null as PKTABLE_CAT, null as FKTABLE_CAT, null as FK_NAME, "
 				+"szObject as FKTABLE_NAME, szColumn as FKCOLUMN_NAME, szReferencedObject as PKTABLE_NAME, szReferencedColumn as PKCOLUMN_NAME, "
 				+"null as UPDATE_RULE, null as DELETE_RULE \n"
-				+"from MSysRelationships"
-				;
+				+"from MSysRelationships";
 		if(table!=null) {
 			if(imported) {
 				sql += "\nwhere szObject = '"+table+"' ";
