@@ -135,7 +135,9 @@
             <property name="tokens" value="BNOT, DEC, DOT, INC, UNARY_MINUS, UNARY_PLUS"/>
         </module>
         <module name="NoWhitespaceBefore"/>
-        <module name="OperatorWrap"/>
+        <module name="OperatorWrap">
+            <property name="severity" value="warning"/>
+        </module>
         <!-- module name="ParenPad"/ -->
         <module name="TypecastParenPad"/>
         <!-- module name="WhitespaceAfter"/>
@@ -145,8 +147,9 @@
         <!-- Modifier Checks                                    -->
         <!-- See http://checkstyle.sf.net/config_modifiers.html -->
         <module name="ModifierOrder"/>
-        <!-- XXX module name="RedundantModifier"/ -->
-
+        <module name="RedundantModifier">
+            <property name="severity" value="warning"/>
+        </module>
 
         <!-- Checks for blocks. You know, those {}'s         -->
         <!-- See http://checkstyle.sf.net/config_blocks.html -->
