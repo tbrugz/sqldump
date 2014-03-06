@@ -1,5 +1,10 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+/**
+ * Uses (mostly) <code>DBMS_METADATA.GET_DDL()</code> function to grab schema data.
+ * <code>SELECT_CATALOG_ROLE</code> privilege needed.
+ * see also: http://stackoverflow.com/questions/116522/what-oracle-privileges-do-i-need-to-use-dbms-metadata-get-ddl
+ */
 public class OracleDbmsMetadataFeatures extends OracleFeatures {
 	
 	@Override
