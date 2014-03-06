@@ -73,15 +73,15 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 		
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenSize = tk.getScreenSize();
-		final int WIDTH = screenSize.width;
-		final int HEIGHT = screenSize.height;
+		final int screenWidth = screenSize.width;
+		final int screenHeight = screenSize.height;
 		int actualWidth = getWidth();
 		int actualHeight = getHeight();
 
 		// Setup the frame accordingly
 		// This is assuming you are extending the JFrame //class
 		//this.setSize(WIDTH / 2, HEIGHT / 2);
-		this.setLocation((WIDTH - actualWidth)/ 2, (HEIGHT - actualHeight) / 2);
+		this.setLocation((screenWidth - actualWidth)/ 2, (screenHeight - actualHeight) / 2);
 		
 		setVisible(true);
 	}
@@ -474,7 +474,7 @@ public class Utils {
 	}
 	
 	static int deleteDirRegularContents(File f, int level) {
-		File files[] = f.listFiles(new RegularFileFilter());
+		File[] files = f.listFiles(new RegularFileFilter());
 		if(files==null) {
 			return 0;
 		}

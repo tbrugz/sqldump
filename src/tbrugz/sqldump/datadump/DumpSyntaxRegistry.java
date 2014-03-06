@@ -56,7 +56,7 @@ public class DumpSyntaxRegistry {
 				e.printStackTrace();
 			}
 		}
-		String ss[] = classes.split(",");
+		String[] ss = classes.split(",");
 		for(String s: ss) {
 			s = s.trim();
 			loadClass(s);

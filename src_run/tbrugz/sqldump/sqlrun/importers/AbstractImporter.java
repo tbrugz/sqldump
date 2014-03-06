@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -700,7 +699,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	static Map<String,String> cookiesHeader = new HashMap<String, String>();
 
-	Scanner createScanner() throws MalformedURLException, IOException {
+	Scanner createScanner() throws IOException {
 		Scanner scan = null;
 		if(importURL!=null) {
 			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, urlHeaders, 0), inputEncoding);
@@ -721,7 +720,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final int MAX_LEVEL = 5;
 	
 	static InputStream getURLInputStream(final String importURL, final String urlMethod, final String urlData, final Map<String,String> cookiesHeader, final Map<String,String> urlHeaders, final int level)
-			throws MalformedURLException, IOException {
+			throws IOException {
 		if(level>MAX_LEVEL) {
 			throw new RuntimeException("max level redirection reached ("+MAX_LEVEL+")");
 		}

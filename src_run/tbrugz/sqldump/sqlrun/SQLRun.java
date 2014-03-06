@@ -374,7 +374,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		return cs;
 	}
 	
-	void init(String args[], Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
+	void init(String[] args, Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		CLIProcessor.init("sqlrun", args, PROPERTIES_FILENAME, papp);
 		ColTypeUtil.setProperties(papp);
 		

@@ -2,7 +2,6 @@ package tbrugz.sqldump;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -17,7 +16,6 @@ import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.SQLUtils;
 
 public class SQLTests extends AbstractSQLProc {
 
@@ -79,7 +77,7 @@ public class SQLTests extends AbstractSQLProc {
 		st.doMain(args[0], args[1]);
 	}
 	
-	void doMain(String fileName, String connPrefix) throws ClassNotFoundException, SQLException, NamingException, FileNotFoundException, IOException {
+	void doMain(String fileName, String connPrefix) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		log.info("loading props: "+fileName);
 		File f = new File(fileName);
 
