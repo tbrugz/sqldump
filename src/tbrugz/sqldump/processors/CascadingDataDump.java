@@ -401,7 +401,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	}
 	
 	static String getSQLAlias(final Table t, final List<FK> fks, final Table filterTable, final String filter) {
-		if(fks==null) return null;
+		if(fks==null) { return null; }
 		
 		StringBuilder sb = new StringBuilder();
 		String lastTable = t.getName();
@@ -441,7 +441,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 
 	@Deprecated
 	static String getSQLNoAlias(final Table t, final List<FK> fks, final Table filterTable, String filter) {
-		if(fks==null) return null;
+		if(fks==null) { return null; }
 		
 		StringBuilder sb = new StringBuilder();
 		String lastTable = t.getName();

@@ -512,7 +512,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			//rows
 			do {
-				for(int partIndex = 0; partIndex<partitionByPatterns.length ; partIndex++) {
+				for(int partIndex = 0; partIndex<partitionByPatterns.length; partIndex++) {
 					String partitionByPattern = partitionByPatterns[partIndex];
 					//log.info("row:: partitionby:: "+partitionByPattern);
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
@@ -598,8 +598,8 @@ public class DataDump extends AbstractSQLProc {
 				if(count==1) {
 					dump1stRowTime = System.currentTimeMillis();
 					if(dolog1stRow) {
-						log1stRow.debug("[qid="+tableOrQueryId+"] 1st row dumped" + 
-							" ["+(dump1stRowTime-initTime)+"ms elapsed]");
+						log1stRow.debug("[qid="+tableOrQueryId+"] 1st row dumped"
+							+ " ["+(dump1stRowTime-initTime)+"ms elapsed]");
 					}
 				}
 				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) { 
@@ -612,10 +612,10 @@ public class DataDump extends AbstractSQLProc {
 			
 			long elapsedMilis = System.currentTimeMillis()-initTime;
 			
-			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName + 
-				(rs.next()?" (more rows exists)":"") + 
-				" ["+elapsedMilis+"ms elapsed]" +
-				(elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
+			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName
+				+ (rs.next()?" (more rows exists)":"")
+				+ " ["+elapsedMilis+"ms elapsed]"
+				+ (elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
 				);
 
 			//footers
