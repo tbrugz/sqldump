@@ -179,7 +179,7 @@ public class SchemaDiffer {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
 				if(!cOrig.equals(cNew)) {
 					if(!cOrig.isDumpable()) {
-						log.debug("original/new object not dumpeable: "+cOrig);
+						log.debug("original/new object not dumpable: "+cOrig);
 						continue;
 					}
 					
@@ -198,7 +198,7 @@ public class SchemaDiffer {
 			}
 			else {
 				if(!cOrig.isDumpable()) {
-					log.debug("original object not dumpeable: "+cOrig);
+					log.debug("original object not dumpable: "+cOrig);
 					continue;
 				}
 				log.debug("drop "+objType+": orig: "+cOrig);
@@ -208,7 +208,7 @@ public class SchemaDiffer {
 		for(DBIdentifiable cNew: listNew) {
 			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
 			if(!cNew.isDumpable()) {
-				log.debug("new object not dumpeable: "+cNew);
+				log.debug("new object not dumpable: "+cNew);
 				continue;
 			}
 			log.debug("add "+objType+": new: "+cNew);

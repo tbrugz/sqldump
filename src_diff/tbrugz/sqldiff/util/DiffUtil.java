@@ -9,7 +9,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 
 public class DiffUtil {
 	
-	//XXX rename to getDumpeableByXXX?
+	//XXX rename to getDumpableByXXX?
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
 		for(DBIdentifiable d: dbids) {
