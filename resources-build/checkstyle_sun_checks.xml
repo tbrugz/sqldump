@@ -149,7 +149,9 @@
         <!-- Checks for blocks. You know, those {}'s         -->
         <!-- See http://checkstyle.sf.net/config_blocks.html -->
         <module name="AvoidNestedBlocks"/>
-        <module name="EmptyBlock"/>
+        <module name="EmptyBlock">
+            <property name="severity" value="warning"/>
+        </module>
         <module name="LeftCurly"/>
         <module name="NeedBraces"/>
         <!-- module name="RightCurly"/ -->
@@ -162,7 +164,8 @@
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
         <module name="HiddenField">
-        	<property name="ignoreSetter" value="true"/>
+            <property name="ignoreSetter" value="true"/>
+            <property name="severity" value="warning"/>
         </module>
         <module name="IllegalInstantiation"/>
         <module name="InnerAssignment"/>
