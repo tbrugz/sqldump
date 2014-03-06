@@ -584,7 +584,7 @@ public class Utils {
 	}
 
 	public static boolean stringListEqualIgnoreCase(List<String> l1, List<String> l2) {
-		if(l1.size()!=l2.size()) return false;
+		if(l1.size()!=l2.size()) { return false; }
 		for(int i=0;i<l1.size();i++) {
 			if(! l1.get(i).equalsIgnoreCase(l2.get(i))) { return false; }
 		}
@@ -601,8 +601,7 @@ public class Utils {
 	
 	static boolean equalsConsiderNull(String s1, String s2) {
 		if(s1==null) {
-			if(s2==null) { return true; }
-			else { return false; }
+			return (s2==null);
 		}
 		else if(s2==null) { return false; }
 		return s1.equals(s2);

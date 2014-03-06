@@ -773,7 +773,7 @@ public class DataDump extends AbstractSQLProc {
 	static void writeBOMifNeeded(Writer w, String charset, Boolean doWrite) {
 		try {
 			if(DataDumpUtils.CHARSET_UTF8.equalsIgnoreCase(charset)) {
-				if(doWrite!=null && doWrite==true) {
+				if(doWrite!=null && doWrite) {
 					w.write('\ufeff');
 				}
 			}
@@ -781,7 +781,7 @@ public class DataDump extends AbstractSQLProc {
 				//do nothing
 			}*/
 			else {
-				if(doWrite!=null && doWrite==true) {
+				if(doWrite!=null && doWrite) {
 					log.warn("unknown BOM for charset '"+charset+"'");
 				}
 			}
