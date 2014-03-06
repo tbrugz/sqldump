@@ -19,7 +19,6 @@ import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
-import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -389,7 +388,7 @@ public class SQLDiff implements Executor {
 		boolean addComments = Utils.getPropBool(prop, PROP_ADD_COMMENTS, true);
 		ColumnDiff.addComments = addComments;
 		DBIdentifiableDiff.addComments = addComments;
-		TableDiff.mayReplaceDbId = Utils.getPropBool(prop, PROP_DBIDDIFF_USEREPLACE, TableDiff.mayReplaceDbId);
+		SchemaDiffer.mayReplaceDbId = Utils.getPropBool(prop, PROP_DBIDDIFF_USEREPLACE, SchemaDiffer.mayReplaceDbId);
 	}
 	
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {

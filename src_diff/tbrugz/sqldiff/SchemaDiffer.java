@@ -1,5 +1,6 @@
 package tbrugz.sqldiff;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.GrantDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.TableDiff;
+import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
@@ -24,6 +26,8 @@ import tbrugz.sqldump.dbmodel.TableType;
 
 public class SchemaDiffer {
 	static final Log log = LogFactory.getLog(SchemaDiffer.class);
+
+	public static boolean mayReplaceDbId = false;
 	
 	Set<DBObjectType> doDiffTypes = null;
 
@@ -50,7 +54,7 @@ public class SchemaDiffer {
 				List<Diff> diffs = TableDiff.tableDiffs(tOrig, tNew);
 				
 				//FKs
-				TableDiff.diffs(DBObjectType.FK, diff.getDbIdDiffs(), 
+				diffs(DBObjectType.FK, diff.getDbIdDiffs(), 
 						getFKsFromTable(modelOrig.getForeignKeys(), tOrig.getName()), 
 						getFKsFromTable(modelNew.getForeignKeys(), tNew.getName()), 
 						tOrig.getFinalQualifiedName(),
@@ -127,40 +131,89 @@ public class SchemaDiffer {
 		
 		//Views
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.VIEW)) {
-			TableDiff.diffs(DBObjectType.VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews());
+			diffs(DBObjectType.VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews());
 		}
 		
 		//Triggers
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.TRIGGER)) {
-			TableDiff.diffs(DBObjectType.TRIGGER, diff.getDbIdDiffs(), modelOrig.getTriggers(), modelNew.getTriggers());
+			diffs(DBObjectType.TRIGGER, diff.getDbIdDiffs(), modelOrig.getTriggers(), modelNew.getTriggers());
 		}
 
 		//FIXedME: package and package body: findByName must also use object type! (and schemaName!)
 		//Executables
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.EXECUTABLE)) {
-			TableDiff.diffs(DBObjectType.EXECUTABLE, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables());
+			diffs(DBObjectType.EXECUTABLE, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables());
 		}
 
 		//Synonyms
 		//FIXedME: doesn't detect schemaName changes
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.SYNONYM)) {
-			TableDiff.diffs(DBObjectType.SYNONYM, diff.getDbIdDiffs(), modelOrig.getSynonyms(), modelNew.getSynonyms());
+			diffs(DBObjectType.SYNONYM, diff.getDbIdDiffs(), modelOrig.getSynonyms(), modelNew.getSynonyms());
 		}
 		
 		//Indexes
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.INDEX)) {
-			TableDiff.diffs(DBObjectType.INDEX, diff.getDbIdDiffs(), modelOrig.getIndexes(), modelNew.getIndexes());
+			diffs(DBObjectType.INDEX, diff.getDbIdDiffs(), modelOrig.getIndexes(), modelNew.getIndexes());
 		}
 
 		//Sequences
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.SEQUENCE)) {
-			TableDiff.diffs(DBObjectType.SEQUENCE, diff.getDbIdDiffs(), modelOrig.getSequences(), modelNew.getSequences());
+			diffs(DBObjectType.SEQUENCE, diff.getDbIdDiffs(), modelOrig.getSequences(), modelNew.getSequences());
 		}
 		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		SchemaDiff.logInfo(diff);
 		
 		return diff;
+	}
+	
+	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
+		diffs(objType, diffs, listOrig, listNew, null, null);
+	}
+
+	public static void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName) {
+		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
+		for(DBIdentifiable cOrig: listOrig) {
+			DBIdentifiable cNew = DiffUtil.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType4Diff(cOrig), cOrig.getSchemaName(), cOrig.getName());
+			if(cNew!=null) {
+				newDBObjectsThatExistsInOrigModel.add(cNew);
+				if(!cOrig.equals(cNew)) {
+					if(!cOrig.isDumpable()) {
+						log.debug("original/new object not dumpeable: "+cOrig);
+						continue;
+					}
+					
+					if(mayReplaceDbId 
+							&& ( (origOwnerTableName==null && newOwnerTableName==null)
+							|| (origOwnerTableName!=null && origOwnerTableName.equals(newOwnerTableName)) ) ) {
+						log.debug("replace "+objType+": orig: "+cOrig+" new: "+cNew);
+						diffs.add(new DBIdentifiableDiff(ChangeType.REPLACE, cOrig, cNew, origOwnerTableName));
+					}
+					else {
+						log.debug("drop/add "+objType+": orig: "+cOrig+" new: "+cNew);
+						diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
+						diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
+					}
+				}
+			}
+			else {
+				if(!cOrig.isDumpable()) {
+					log.debug("original object not dumpeable: "+cOrig);
+					continue;
+				}
+				log.debug("drop "+objType+": orig: "+cOrig);
+				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, null, origOwnerTableName));
+			}
+		}
+		for(DBIdentifiable cNew: listNew) {
+			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
+			if(!cNew.isDumpable()) {
+				log.debug("new object not dumpeable: "+cNew);
+				continue;
+			}
+			log.debug("add "+objType+": new: "+cNew);
+			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, null, cNew, newOwnerTableName));
+		}
 	}
 	
 	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
