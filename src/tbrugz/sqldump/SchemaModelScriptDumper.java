@@ -524,7 +524,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	*/
 	
-	String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
+	static String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
 		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
 		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
 		
@@ -610,7 +610,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	//XXX: move to DBMSResources?
 	static final String DBPROP_COLUMN_USEAUTOINCREMENT = "column.useautoincrement";
 	
-	void setupScriptDumpSpecificFeatures(String toDbId) {
+	static void setupScriptDumpSpecificFeatures(String toDbId) {
 		Properties p = DBMSResources.instance().getProperties();
 		if(Utils.getStringListFromProp(p, DBPROP_COLUMN_USEAUTOINCREMENT, ",").contains(toDbId)) {
 			Column.useAutoIncrement = true;
