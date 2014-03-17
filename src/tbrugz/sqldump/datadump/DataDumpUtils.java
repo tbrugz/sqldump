@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,14 +83,14 @@ public class DataDumpUtils {
 		}
 
 		// String output:
+		String val = getString(elem);
 		
 		if(enclosing!=null) {
 			if(csvWriteEnclosingAllFields) {
-				return enclosing+String.valueOf(elem).replaceAll(enclosing, enclosing+enclosing)+enclosing;
+				return enclosing+val.replaceAll(enclosing, enclosing+enclosing)+enclosing;
 			}
 			else {
 				//return String.valueOf(elem).replaceAll(enclosing, EMPTY_STRING); //XXX: replace by "'"?
-				String val = String.valueOf(elem);
 				if(val.contains(enclosing)) {
 					return enclosing+val.replaceAll(enclosing, enclosing+enclosing)+enclosing;
 				}
@@ -104,18 +105,18 @@ public class DataDumpUtils {
 		if(separator==null) {
 			//return String.valueOf(elem);
 			if(lineSeparator==null) {
-				return String.valueOf(elem);
+				return val;
 			}
 			else {
-				return String.valueOf(elem).replaceAll(lineSeparator, EMPTY_STRING);
+				return val.replaceAll(lineSeparator, EMPTY_STRING);
 			}
 		}
 		else {
 			if(lineSeparator==null) {
-				return String.valueOf(elem).replaceAll(separator, EMPTY_STRING);
+				return val.replaceAll(separator, EMPTY_STRING);
 			}
 			else {
-				return String.valueOf(elem).replaceAll(separator, EMPTY_STRING).replaceAll(lineSeparator, EMPTY_STRING);
+				return val.replaceAll(separator, EMPTY_STRING).replaceAll(lineSeparator, EMPTY_STRING);
 			}
 		}
 	} 
@@ -126,12 +127,13 @@ public class DataDumpUtils {
 			return null;
 		}
 		else if(String.class.isAssignableFrom(type)) {
-			elem = ((String) elem).replaceAll(DOUBLEQUOTE, "&quot;");
-			elem = ((String) elem).replaceAll("\\\\", "\\\\\\\\");
-			elem = ((String) elem).replaceAll("\r\n", "\n");
-			elem = ((String) elem).replaceAll("\r", " ");
-			elem = ((String) elem).replaceAll("\n", "\\\\n");
-			return DOUBLEQUOTE+elem+DOUBLEQUOTE;
+			String val = getString(elem);
+			val = val.replaceAll(DOUBLEQUOTE, "&quot;");
+			val = val.replaceAll("\\\\", "\\\\\\\\");
+			val = val.replaceAll("\r\n", "\n");
+			val = val.replaceAll("\r", " ");
+			val = val.replaceAll("\n", "\\\\n");
+			return DOUBLEQUOTE+val+DOUBLEQUOTE;
 		}
 		else if(Date.class.isAssignableFrom(type)) {
 			//XXXdone: JSON dateFormatter?
@@ -142,7 +144,7 @@ public class DataDumpUtils {
 			return longFormatter.format((Long)elem);
 		}
 
-		return String.valueOf(elem);
+		return getString(elem);
 	}
 
 	//dumpers: insertinto, updatebypk
@@ -154,7 +156,7 @@ public class DataDumpUtils {
 			/* XXX?: String escaping? "\n, \r, ', ..."
 			 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
 			 */
-			elem = ((String) elem).replaceAll("'", "''");
+			elem = getString(elem).replaceAll("'", "''");
 			return DEFAULT_SQL_STRING_ENCLOSING+elem+DEFAULT_SQL_STRING_ENCLOSING;
 		}
 		else if(elem instanceof Date) {
@@ -178,7 +180,7 @@ public class DataDumpUtils {
 			return String.valueOf(elem);
 		}*/
 
-		return String.valueOf(elem);
+		return getString(elem);
 	} 
 
 	//dumpers: XML, HTML
@@ -206,7 +208,7 @@ public class DataDumpUtils {
 			return null;
 		}
 
-		return xmlEscapeText(String.valueOf(elem));
+		return xmlEscapeText(getString(elem));
 	}
 	
 	/*
@@ -341,6 +343,20 @@ public class DataDumpUtils {
 			columns.add(c);
 		}
 		return columns;
+	}
+	
+	//see: http://tools.ietf.org/html/rfc2822 (NO-WS-CTL)
+	//XXX: [\\x0b-\\x0c] needed? - vertical tab, form feed
+	static final String REGEX_CONTROL_CHARS = "[\\x01-\\x08]|[\\x0b-\\x0c]|[\\x0e-\\x1f]|\\x7f";
+	static final Pattern patternCointrolChars = Pattern.compile(REGEX_CONTROL_CHARS);
+	static final String STR_CONTROL_CHARS_REPLACEMENT = "?";
+	
+	/*
+	 * should be getPrintableString()?
+	 * XXX: option to change replacement char? option to NOT replace ontrol chars?
+	 */
+	static String getString(Object s) {
+		return (s==null)?"null":patternCointrolChars.matcher(s.toString()).replaceAll(STR_CONTROL_CHARS_REPLACEMENT);
 	}
 	
 	//see: Table.getColumnNames
