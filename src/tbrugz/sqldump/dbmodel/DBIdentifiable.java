@@ -145,9 +145,12 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	//XXX: refactoring: move to another class/package?
 	public static List<Constraint> getUKs(Relation rel) {
 		List<Constraint> uks = new ArrayList<Constraint>();
-		for(Constraint c: rel.getConstraints()) {
-			if(c.type==ConstraintType.UNIQUE) {
-				uks.add(c);
+		List<Constraint> constraints = rel.getConstraints();
+		if(constraints!=null) {
+			for(Constraint c: constraints) {
+				if(c.type==ConstraintType.UNIQUE) {
+					uks.add(c);
+				}
 			}
 		}
 		return uks;

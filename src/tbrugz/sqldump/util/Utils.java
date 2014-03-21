@@ -342,8 +342,13 @@ public class Utils {
 		return prop.getProperty(key)!=null;
 	}
 
+		
 	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter) {
 		String strings = prop.getProperty(key);
+		return getStringList(strings, delimiter);
+	}
+	
+	public static List<String> getStringList(String strings, String delimiter) {
 		if(strings!=null) {
 			List<String> ret = new ArrayList<String>();
 			String[] retArr = strings.split(delimiter);
