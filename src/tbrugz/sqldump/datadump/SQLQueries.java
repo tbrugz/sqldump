@@ -151,7 +151,7 @@ public class SQLQueries extends AbstractSQLProc {
 
 			// adding query to model
 			if(addQueriesToModel) {
-				queriesGrabbed += addQueryToModel(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
 			if(runQueries) {
@@ -213,10 +213,24 @@ public class SQLQueries extends AbstractSQLProc {
 		return syntaxList;
 	}
 	
-	int addQueryToModel(String qid, String queryName, String defaultSchemaName,
+	int addQueryToModelInternal(String qid, String queryName, String defaultSchemaName,
 			PreparedStatement stmt, String sql, List<String> keyCols,
 			List<String> params,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
+		
+		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName);
+		String colNames = prop.getProperty("sqldump.query."+qid+".cols");
+		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
+		
+		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, true, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+	}
+	
+	public int addQueryToModel(String qid, String queryName, String schemaName,
+			String colNames, boolean grabInfoFromMetadata, boolean addAlsoAsTable,
+			PreparedStatement stmt, String sql, List<String> keyCols,
+			List<String> params,
+			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
+		
 		if(model==null) {
 			log.warn("can't add query [id="+qid+"; name="+queryName+"]: model is null");
 			return 0;
@@ -226,7 +240,7 @@ public class SQLQueries extends AbstractSQLProc {
 		query.id = qid;
 		query.setName(queryName);
 		//add schemaName
-		query.setSchemaName(prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName));
+		query.setSchemaName(schemaName);
 		
 		query.query = sql;
 		query.parameterValues = params;
@@ -244,7 +258,7 @@ public class SQLQueries extends AbstractSQLProc {
 			lc.add(cpk);
 		}
 		
-		List<String> allCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".cols", ",");
+		List<String> allCols = Utils.getStringList(colNames, ",");
 		if(allCols!=null) {
 			List<Column> cols = new ArrayList<Column>();
 			for(String colspec: allCols) {
@@ -266,7 +280,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		else {
 			//getting columns from prepared statement metadata
-			if(Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false)) {
+			if(grabInfoFromMetadata) {
 				log.debug("grabbing colums name & type from prepared statement's metadata [id="+qid+"; name="+queryName+"]");
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
@@ -287,17 +301,23 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 		
-		model.getViews().add(query);
+		if(model.getViews().contains(query)) {
+			System.out.println("removing query: "+query);
+			model.getViews().remove(query);
+		}
+		boolean added = model.getViews().add(query);
 
-		//adding view to table's list
-		Table t = new Table();
-		t.setSchemaName(query.getSchemaName());
-		t.setName(query.getName());
-		t.setType(TableType.VIEW);
-		t.setColumns(query.getColumns());
-		model.getTables().add(t);
+		if(addAlsoAsTable) {
+			//adding view to table's list
+			Table t = new Table();
+			t.setSchemaName(query.getSchemaName());
+			t.setName(query.getName());
+			t.setType(TableType.VIEW);
+			t.setColumns(query.getColumns());
+			model.getTables().add(t);
+		}
 		
-		return 1;
+		return added?1:0;
 	}
 	
 }
