@@ -18,24 +18,24 @@ import tbrugz.sqldump.util.SQLUtils;
 //XXX: should extend XMLDataDump?
 public class HTMLDataDump extends DumpSyntax {
 
-	static Log log = LogFactory.getLog(HTMLDataDump.class);
+	static final Log log = LogFactory.getLog(HTMLDataDump.class);
 
 	static final String HTML_SYNTAX_ID = "html";
 	
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
 	
-	String tableName;
-	int numCol;
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected String tableName;
+	protected int numCol;
+	protected List<String> lsColNames = new ArrayList<String>();
+	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 
-	String padding = "";
+	protected String padding = "";
 	
-	String prepend = null;
-	String append = null;
+	protected String prepend = null;
+	protected String append = null;
 	//TODO: prop for 'dumpColElement'
-	boolean dumpColElement = false;
+	protected boolean dumpColElement = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -47,13 +47,11 @@ public class HTMLDataDump extends DumpSyntax {
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
-		numCol = md.getColumnCount();		
+		numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 	}
@@ -115,7 +113,7 @@ public class HTMLDataDump extends DumpSyntax {
 		if(append!=null) { out(append, fos); }
 	}
 
-	void out(String s, Writer pw) throws IOException {
+	protected void out(String s, Writer pw) throws IOException {
 		pw.write(padding+s);
 	}
 	
