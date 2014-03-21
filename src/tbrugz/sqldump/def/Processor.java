@@ -4,7 +4,7 @@ import java.sql.Connection;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
-public interface Processor extends ProcessComponent {
+public interface Processor extends ProcessOutputComponent {
 
 	public boolean needsConnection();
 

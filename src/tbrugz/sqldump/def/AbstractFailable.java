@@ -1,5 +1,8 @@
 package tbrugz.sqldump.def;
 
+import java.io.OutputStream;
+import java.io.Writer;
+
 public abstract class AbstractFailable {
 
 	public static final boolean DEFAULT_FAILONERROR = true;
@@ -10,4 +13,12 @@ public abstract class AbstractFailable {
 		this.failonerror = failonerror;
 	}
 
+	public boolean acceptsOutputWriter() { return false; }
+	
+	public void setOutputWriter(Writer writer) {}
+
+	public boolean acceptsOutputStream() { return false; }
+	
+	public void setOutputStream(OutputStream out) {}
+	
 }
