@@ -65,9 +65,9 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
-		if(fileOutput==null) {
-			log.error("json serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
-			if(failonerror) { throw new ProcessingException("JAXB: json serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined"); }
+		if(outputWriter==null) {
+			log.error("json serialization output ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			if(failonerror) { throw new ProcessingException("JAXB: json serialization output ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined"); }
 			return;
 		}
 		if(schemaModel==null) {
@@ -77,9 +77,15 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 		}
 
 		try {
-			File fout = new File(fileOutput);
-			jsonser.marshal(schemaModel, fout);
-			log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
+			jsonser.marshal(schemaModel, outputWriter);
+			outputWriter.flush();
+			if(fileOutput!=null) {
+				File fout = new File(fileOutput);
+				log.info("json schema model dumped to '"+fout.getAbsolutePath()+"'");
+			}
+			else {
+				log.info("json schema model dumped to output-stream");
+			}
 		}
 		catch(Exception e) {
 			log.error("error dumping schema: "+e);

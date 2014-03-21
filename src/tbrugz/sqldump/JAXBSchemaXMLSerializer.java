@@ -3,8 +3,11 @@ package tbrugz.sqldump;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -38,6 +41,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	String resourceIn;
 	String inputDescription;
 	String fileOutput;
+	Writer outputWriter;
 	XMLSerializer xmlser;
 	
 	public JAXBSchemaXMLSerializer() {
@@ -52,16 +56,26 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	
 	@Override
 	public void setProperties(Properties prop) {
-		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
+		String fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
+		try {
+			if(fileOutput!=null) {
+				outputWriter = new FileWriter(fileOutput);
+			}
+			else {
+				log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			}
+		} catch (IOException e) {
+			log.warn(e);
+		}
 		filenameIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
 		resourceIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
 	}
 	
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
-		if(fileOutput==null) {
-			log.error("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
-			if(failonerror) { throw new ProcessingException("JAXB: xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined"); }
+		if(outputWriter==null) {
+			log.error("xml serialization output ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
+			if(failonerror) { throw new ProcessingException("JAXB: xml serialization output ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined"); }
 			return;
 		}
 		if(schemaModel==null) {
@@ -71,9 +85,15 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		}
 
 		try {
-			File fout = new File(fileOutput);
-			xmlser.marshal(schemaModel, fout);
-			log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
+			xmlser.marshal(schemaModel, outputWriter);
+			outputWriter.flush();
+			if(fileOutput!=null) {
+				File fout = new File(fileOutput);
+				log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
+			}
+			else {
+				log.info("xml schema model dumped to output-stream");
+			}
 		}
 		catch(Exception e) {
 			log.error("error dumping schema: "+e);
@@ -165,6 +185,16 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
 		this.propertiesPrefix = propertiesPrefix;
+	}
+	
+	@Override
+	public boolean acceptsOutputWriter() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputWriter(Writer writer) {
+		outputWriter = writer;
 	}
 
 }
