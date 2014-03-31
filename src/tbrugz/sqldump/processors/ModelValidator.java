@@ -19,6 +19,13 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
+/**
+ * Processor that validates a Schema Model.
+ */
+/*
+ * XXX: option to remove invalid objects
+ * XXX: option to fail if invalid objects found
+ */
 public class ModelValidator extends AbstractSQLProc {
 	
 	static final Log log = LogFactory.getLog(ModelValidator.class);
@@ -32,7 +39,8 @@ public class ModelValidator extends AbstractSQLProc {
 		try {
 			doIt();
 		} catch (IOException e) {
-			log.warn("exception: "+e);
+			log.warn("IO Exception: "+e);
+			log.debug("IO Exception: "+e.getMessage(), e);
 			//XXX fail on error?
 		}
 	}
@@ -78,7 +86,7 @@ public class ModelValidator extends AbstractSQLProc {
 		out(message);
 		
 		if(relationsValidated < relationsCount) {
-			//XXX throw exception if fail on error?
+			// throw exception if fail on error?
 		}
 	}
 	

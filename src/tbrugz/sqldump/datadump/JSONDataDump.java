@@ -24,6 +24,8 @@ import tbrugz.sqldump.util.SQLUtils;
  *      
  * TODO: option to output as hash (using pkcols)
  * TODO: add prepend/append (JSONP option) / ?callback=xxx
+ * 
+ * see: http://dataprotocols.org/json-table-schema/
  */
 public class JSONDataDump extends DumpSyntax {
 
