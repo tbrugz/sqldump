@@ -101,7 +101,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			View v = new View();
 			v.setName( rs.getString(2) );
-			v.query = rs.getString(4);
+			v.setQuery( rs.getString(4) );
 			v.setSchemaName(schemaPattern);
 			model.getViews().add(v);
 			count++;
@@ -130,7 +130,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			MaterializedView v = new MaterializedView();
 			v.setName( rs.getString(2) );
-			v.query = rs.getString(4);
+			v.setQuery( rs.getString(4) );
 			v.setSchemaName(schemaPattern);
 			v.rewriteEnabled = "Y".equals(rs.getString(5));
 			v.rewriteCapability = rs.getString(6);

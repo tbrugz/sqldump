@@ -66,7 +66,7 @@ public class ModelValidator extends AbstractSQLProc {
 			try {
 				if(v instanceof Query) {
 					Query q = (Query) v;
-					validateSQL(q.query);
+					validateSQL(q.getQuery());
 				}
 				else {
 					validateRelation(v);

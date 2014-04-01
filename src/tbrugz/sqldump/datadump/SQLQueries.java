@@ -237,13 +237,13 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		
 		Query query = new Query();
-		query.id = qid;
+		query.setId(qid);
 		query.setName(queryName);
 		//add schemaName
 		query.setSchemaName(schemaName);
 		
-		query.query = sql;
-		query.parameterValues = params;
+		query.setQuery(sql);
+		query.setParameterValues(params);
 		//XXX: add columns? query.setColumns(columns)...
 		if(keyCols!=null) {
 			Constraint cpk = new Constraint();

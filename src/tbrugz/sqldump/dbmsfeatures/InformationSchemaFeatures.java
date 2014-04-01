@@ -77,10 +77,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			View v = new View();
 			v.setName( rs.getString(3) );
-			v.query = rs.getString(4);
-			Matcher m = patternLastSemicolon.matcher(v.query);
+			v.setQuery( rs.getString(4) );
+			Matcher m = patternLastSemicolon.matcher(v.getQuery());
 			if(m.find()) {
-				v.query = m.replaceAll("");
+				v.setQuery( m.replaceAll("") );
 			}
 			/*if(v.query!=null && v.query.endsWith(";")) {
 				v.query = v.query.substring(0, v.query.length()-1);
@@ -89,13 +89,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			String checkOption = rs.getString(5);
 			if(checkOption!=null) {
 				try {
-					v.checkOption = View.CheckOptionType.valueOf(checkOption); //"YES".equalsIgnoreCase(rs.getString(5));
+					v.setCheckOption( View.CheckOptionType.valueOf(checkOption) ); //"YES".equalsIgnoreCase(rs.getString(5));
 				}
 				catch (Exception e) {
 					log.warn("unknown check option: "+checkOption+" [view '"+v.getName()+"']");
 				}
 			}
-			v.withReadOnly = !"YES".equalsIgnoreCase(rs.getString(6));
+			v.setWithReadOnly( !"YES".equalsIgnoreCase(rs.getString(6)) );
 			model.getViews().add(v);
 			count++;
 		}

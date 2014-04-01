@@ -241,6 +241,7 @@ public class Table extends DBObject implements Relation {
 		this.constraints = constraints;
 	}
 
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}

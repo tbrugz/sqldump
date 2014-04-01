@@ -55,7 +55,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			View v = new View();
 			v.setName( rs.getString(1) );
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
-			v.query = rs.getString(3);
+			v.setQuery( rs.getString(3) );
 			v.setSchemaName( schemaPattern );
 			model.getViews().add(v);
 			count++;

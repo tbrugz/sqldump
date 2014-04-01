@@ -27,10 +27,10 @@ public class View extends DBObject implements Relation {
 		TRUE; //true: set for databases that doesn't have local and cascaded options 
 	}
 	
-	public String query;
+	String query;
 	
-	public CheckOptionType checkOption;
-	public boolean withReadOnly;
+	CheckOptionType checkOption;
+	boolean withReadOnly;
 	List<Column> columns = null;
 	List<Constraint> constraints = null;
 	String remarks;
@@ -161,6 +161,30 @@ public class View extends DBObject implements Relation {
 	@Override
 	public String getRelationType() {
 		return "view";
+	}
+	
+	public String getQuery() {
+		return query;
+	}
+
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
+	public CheckOptionType getCheckOption() {
+		return checkOption;
+	}
+
+	public void setCheckOption(CheckOptionType checkOption) {
+		this.checkOption = checkOption;
+	}
+
+	public boolean isWithReadOnly() {
+		return withReadOnly;
+	}
+
+	public void setWithReadOnly(boolean withReadOnly) {
+		this.withReadOnly = withReadOnly;
 	}
 
 	public void setRemarks(String remarks) {
