@@ -62,6 +62,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	}
 	
 	void addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
+		int matched = 0;
 		for (PropertyDescriptor prop : propertyDescriptors) {
 			if(matchCol==null || matchCol.equals(prop.getName())) {
 				String pname = prop.getName();
@@ -76,10 +77,13 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				columnNames.add(pname);
 				methods.add(m);
-				return;
+				if(matchCol!=null) { return; }
+				matched++;
 			}
 		}
-		log.warn("column '"+matchCol+"' not matched: missing a getter?");
+		if(matched==0) {
+			log.warn("column '"+matchCol+"' not matched: missing a getter?");
+		}
 	}
 
 	@Override
