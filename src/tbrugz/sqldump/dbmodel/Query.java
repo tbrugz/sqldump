@@ -8,7 +8,6 @@ public class Query extends View {
 
 	String id;
 	List<String> parameterValues;
-	Integer parameterCount; //XXX add parameterCount to View?
 	
 	public String rsDecoratorFactoryClass;
 	public Map<String,String> rsDecoratorArguments;
@@ -27,14 +26,6 @@ public class Query extends View {
 
 	public void setParameterValues(List<String> parameterValues) {
 		this.parameterValues = parameterValues;
-	}
-
-	public Integer getParameterCount() {
-		return parameterCount;
-	}
-
-	public void setParameterCount(Integer parameterCount) {
-		this.parameterCount = parameterCount;
 	}
 	
 }

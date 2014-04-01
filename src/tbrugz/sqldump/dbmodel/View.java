@@ -34,6 +34,11 @@ public class View extends DBObject implements Relation {
 	List<Column> columns = null;
 	List<Constraint> constraints = null;
 	String remarks;
+	// useful for Queries & parameterized views  
+	// see: http://asktom.oracle.com/pls/asktom/f?p=100:11:0::::P11_QUESTION_ID:1448404423206 ,
+	//  http://stackoverflow.com/questions/4498364/create-parameterized-view-in-sql-server-2008 ,
+	//  http://hordine.com/2012/08/workaround-for-parameterized-views-in-mysql/
+	Integer parameterCount; //XXXdone add parameterCount to View?
 	
 	//public String checkOptionConstraintName;
 	
@@ -219,6 +224,14 @@ public class View extends DBObject implements Relation {
 		this.constraints = constraints;
 	}
 
+	public Integer getParameterCount() {
+		return parameterCount;
+	}
+
+	public void setParameterCount(Integer parameterCount) {
+		this.parameterCount = parameterCount;
+	}
+	
 	/*@Override
 	public String getAfterCreateScript() {
 		return null;
