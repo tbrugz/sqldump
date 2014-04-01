@@ -151,7 +151,8 @@ public class SQLQueries extends AbstractSQLProc {
 
 			// adding query to model
 			if(addQueriesToModel) {
-				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+				String remarks = prop.getProperty("sqldump.query."+qid+".remarks");
+				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
 			if(runQueries) {
@@ -215,20 +216,20 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	int addQueryToModelInternal(String qid, String queryName, String defaultSchemaName,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params,
+			List<String> params, String remarks,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName);
 		String colNames = prop.getProperty("sqldump.query."+qid+".cols");
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
-		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, true, stmt, sql, keyCols, params, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, true, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 	}
 	
 	public int addQueryToModel(String qid, String queryName, String schemaName,
 			String colNames, boolean grabInfoFromMetadata, boolean addAlsoAsTable,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params,
+			List<String> params, String remarks,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		if(model==null) {
@@ -244,6 +245,7 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		query.setQuery(sql);
 		query.setParameterValues(params);
+		query.setRemarks(remarks);
 		//XXX: add columns? query.setColumns(columns)...
 		if(keyCols!=null) {
 			Constraint cpk = new Constraint();
