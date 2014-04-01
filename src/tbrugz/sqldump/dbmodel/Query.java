@@ -28,4 +28,9 @@ public class Query extends View {
 		this.parameterValues = parameterValues;
 	}
 	
+	@Override
+	public String getRelationType() {
+		return "query";
+	}
+	
 }

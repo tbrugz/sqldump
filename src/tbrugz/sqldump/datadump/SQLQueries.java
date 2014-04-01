@@ -1,5 +1,6 @@
 package tbrugz.sqldump.datadump;
 
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -75,7 +76,7 @@ public class SQLQueries extends AbstractSQLProc {
 			
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
 			List<DumpSyntax> syntaxList = getQuerySyntexes(qid);
-			if(syntaxList==null) {
+			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
 			}
@@ -287,6 +288,9 @@ public class SQLQueries extends AbstractSQLProc {
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
 					query.setColumns(DataDumpUtils.getColumns(rsmd));
+					//XXX option to set parameter count by properties?
+					ParameterMetaData pmd = stmt.getParameterMetaData();
+					query.setParameterCount(pmd.getParameterCount());
 				} catch (SQLException e) {
 					query.setColumns(new ArrayList<Column>());
 					log.warn("sqlexception: "+e.toString().trim());
