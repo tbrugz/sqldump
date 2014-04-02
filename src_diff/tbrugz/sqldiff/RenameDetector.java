@@ -78,7 +78,7 @@ public class RenameDetector {
 					continue;
 				}
 				double similarity = SimilarityCalculator.instance().similarity(cadd.getColumn(), cdrop.getPreviousColumn());
-				log.debug("same tables... c-add: '"+cadd+"' ["+cadd.getColumn().ordinalPosition+"] ; c-drop: '"+cdrop+"' ["+cdrop.getPreviousColumn().ordinalPosition+"]; sim: "+similarity);
+				log.debug("same tables... c-add: '"+cadd+"' ["+cadd.getColumn().getOrdinalPosition()+"] ; c-drop: '"+cdrop+"' ["+cdrop.getPreviousColumn().getOrdinalPosition()+"]; sim: "+similarity);
 				if(similarity>=minSimilarity) {
 					log.debug("renamed; c-add: '"+cadd+"' ; c-drop: '"+cdrop+"' ; sim: "+similarity);
 					String cAddId = cadd.getNamedObject().getSchemaName()+"."+cadd.getNamedObject().getName()+"."+cadd.getColumn().getName();

@@ -25,7 +25,7 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 		}
 		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
 			return createAlterColumn(table, column,
-					(column.nullable?" drop":" set")+" not null");
+					(column.isNullable()?" drop":" set")+" not null");
 		}
 		
 		throw new UnsupportedOperationException("no differences between PostgreSQL columns found");

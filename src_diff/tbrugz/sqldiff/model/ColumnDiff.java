@@ -152,10 +152,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		switch(useTempColumnStrategy) {
 		case ALWAYS: break;
 		case NEWPRECISIONSMALLER:
-			if(column.columSize!=null && previousColumn.columSize!=null
-				&& previousColumn.columSize>column.columSize) break;
+			if(column.getColumSize()!=null && previousColumn.getColumSize()!=null
+				&& previousColumn.getColumSize()>column.getColumSize()) break;
 		case TYPESDIFFER:
-			if(! column.type.equals(previousColumn.type)) break;
+			if(! column.getType().equals(previousColumn.getType())) break;
 			//if(! column.type.equals(previousColumn.type)) break;
 		case NEVER:
 			ret.add(getAlterColumnSQL());
@@ -168,12 +168,12 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		Column tmpColumn = previousColumn.clone();
 		tmpColumn.setName(tmpColumn.getName()+"_TMP");
 		
-		boolean columnNotNull = !column.nullable;
+		boolean columnNotNull = !column.isNullable();
 		ret.add( getDiff(ChangeType.RENAME, previousColumn, tmpColumn).get(0) );
-		if(columnNotNull) { column.nullable = true; }
+		if(columnNotNull) { column.setNullable(true); }
 		ret.add( getDiff(ChangeType.ADD, null, column).get(0) );
 		ret.add( "update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName() );
-		if(columnNotNull) { column.nullable = false; ret.add(getAlterColumnSQL()); }
+		if(columnNotNull) { column.setNullable(false); ret.add(getAlterColumnSQL()); }
 		ret.add( getDiff(ChangeType.DROP, tmpColumn, null).get(0)+
 				(addComments?" /* from: "+previousColumn.getDefinition()+" */":"") );
 		return ret;
@@ -195,7 +195,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 				alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
 			}
 			else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
-				alterSql += (column.nullable?" null":column.getNullableSnippet());
+				alterSql += (column.isNullable()?" null":column.getNullableSnippet());
 			}
 		}
 		

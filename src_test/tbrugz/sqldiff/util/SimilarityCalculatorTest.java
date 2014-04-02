@@ -27,7 +27,7 @@ public class SimilarityCalculatorTest {
 		t2.getColumns().add(ColumnDiffTest.newColumn("c1", "varchar", 10));
 		t2.getColumns().add(ColumnDiffTest.newColumn("c2", "varchar", 10));
 		
-		c1.ordinalPosition = 1; c2.ordinalPosition = 1; 
+		c1.setOrdinalPosition(1); c2.setOrdinalPosition(1); 
 	}
 	
 	@Test
@@ -79,7 +79,7 @@ public class SimilarityCalculatorTest {
 	@Test
 	public void testColumnSimOtherPosition() {
 		double sim1 = SimilarityCalculator.instance().similarity(c1, c1);
-		c2.ordinalPosition = 2;
+		c2.setOrdinalPosition(2);
 		double sim2 = SimilarityCalculator.instance().similarity(c1, c2);
 		
 		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);
@@ -89,7 +89,7 @@ public class SimilarityCalculatorTest {
 	@Test
 	public void testColumnSimOtherType() {
 		double sim1 = SimilarityCalculator.instance().similarity(c1, c1);
-		c1.type = "char";
+		c1.setType("char");
 		double sim2 = SimilarityCalculator.instance().similarity(c1, c2);
 		
 		System.out.println("sim1 = "+sim1+" ; sim2 = "+sim2);

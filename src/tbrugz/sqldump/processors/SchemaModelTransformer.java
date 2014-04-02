@@ -146,11 +146,11 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		for(Table t: model.getTables()) {
 			if(t.getColumns()==null) { continue; }
 			for(Column c: t.getColumns()) {
-				String newColType = prop.getProperty(prefix+".columntype@"+c.type);
+				String newColType = prop.getProperty(prefix+".columntype@"+c.getType());
 				if(newColType!=null) {
-					colTypeTransforms.put(c.type, colTypeTransforms.get(c.type)+1);
+					colTypeTransforms.put(c.getType(), colTypeTransforms.get(c.getType())+1);
 					//log.info("prop: "+prefix+".columntype@"+c.type+" newValue="+newColType);
-					c.type = newColType;
+					c.setType(newColType);
 					count++;
 				}
 			}

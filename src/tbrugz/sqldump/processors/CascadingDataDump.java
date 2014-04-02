@@ -529,7 +529,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		int countDistinctableCols = 0;
 		int countNonDistinctable = 0;
 		for(Column c: t.getColumns()) {
-			if(nonDistinctableColumnTypes.contains(c.type.toUpperCase())) {
+			if(nonDistinctableColumnTypes.contains(c.getType().toUpperCase())) {
 				countNonDistinctable++;
 			}
 			else {

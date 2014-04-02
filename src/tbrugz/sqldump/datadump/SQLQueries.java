@@ -270,7 +270,7 @@ public class SQLQueries extends AbstractSQLProc {
 				Column c = new Column();
 				c.setName(colparts[0]);
 				if(colparts.length>1) {
-					c.type = colparts[1];
+					c.setType(colparts[1]);
 				}
 				cols.add(c);
 			}

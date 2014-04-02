@@ -40,7 +40,7 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 		
 		for(Table table: model.getTables()) {
 			for(Column col: table.getColumns()) {
-				String colType = col.type;
+				String colType = col.getType();
 				
 				colType = colType.toUpperCase();
 				//String ansiColType = ColTypeUtil.dbmsSpecificProps.getProperty("from."+fromDialectId+"."+colType);
@@ -54,11 +54,11 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 				}
 				
 				if(newColType!=null) {
-					col.type = newColType;
+					col.setType(newColType);
 					 
 				}
 				else if(ansiColType!=null) {
-					col.type = ansiColType;
+					col.setType(ansiColType);
 				}
 				/*else {
 					//log.debug("old col type: "+colType);

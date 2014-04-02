@@ -179,9 +179,9 @@ public class ColumnDiffTest {
 	public static Column newColumn(String name, String type, int precision, boolean nullable) {
 		Column c = new Column();
 		c.setName(name);
-		c.type = type;
-		c.columSize = precision;
-		c.nullable = nullable;
+		c.setType(type);
+		c.setColumSize(precision);
+		c.setNullable(nullable);
 		return c;
 	}
 	

@@ -86,16 +86,16 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
 	static Log log = LogFactory.getLog(Column.class);
 	
-	public String type;
-	public Integer columSize; //TODO: rename to columnSize?
-	public Integer decimalDigits;
+	String type;
+	Integer columSize;
+	Integer decimalDigits;
 	transient boolean pk;
-	public boolean nullable = true;
+	boolean nullable = true;
 	String defaultValue;
 	String remarks;
-	public Boolean autoIncrement;
+	Boolean autoIncrement;
 	//XXX add transient String tableName; //??
-	public int ordinalPosition; //XXXdone add column position in table? nice for column compare...
+	int ordinalPosition; //XXXdone add column position in table? nice for column compare...
 
 	public static transient boolean useAutoIncrement = false;
 	
@@ -194,6 +194,62 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Integer getColumSize() {
+		return columSize;
+	}
+
+	public void setColumSize(Integer columSize) {
+		this.columSize = columSize;
+	}
+
+	public Integer getDecimalDigits() {
+		return decimalDigits;
+	}
+
+	public void setDecimalDigits(Integer decimalDigits) {
+		this.decimalDigits = decimalDigits;
+	}
+
+	public boolean isPk() {
+		return pk;
+	}
+
+	public void setPk(boolean pk) {
+		this.pk = pk;
+	}
+
+	public boolean isNullable() {
+		return nullable;
+	}
+
+	public void setNullable(boolean nullable) {
+		this.nullable = nullable;
+	}
+
+	public Boolean getAutoIncrement() {
+		return autoIncrement;
+	}
+
+	public void setAutoIncrement(Boolean autoIncrement) {
+		this.autoIncrement = autoIncrement;
+	}
+
+	public int getOrdinalPosition() {
+		return ordinalPosition;
+	}
+
+	public void setOrdinalPosition(int ordinalPosition) {
+		this.ordinalPosition = ordinalPosition;
 	}
 	
 }

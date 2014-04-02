@@ -334,12 +334,16 @@ public class DataDumpUtils {
 			int colpos = i+1;
 			Column c = new Column();
 			c.setName(md.getColumnName(colpos));
-			c.type = md.getColumnTypeName(colpos);
-			c.columSize = md.getPrecision(colpos);
-			c.decimalDigits = md.getScale(colpos);
-			c.ordinalPosition = colpos;
-			if(c.columSize==0) { c.columSize = null; }
-			if(c.decimalDigits==0) { c.decimalDigits = null; }
+			c.setType(md.getColumnTypeName(colpos));
+			int precision = md.getPrecision(colpos);
+			int scale = md.getScale(colpos);
+			if(precision!=0) {
+				c.setColumSize(precision);
+			}
+			if(scale!=0) {
+				c.setDecimalDigits(scale);
+			}
+			c.setOrdinalPosition(colpos);
 			columns.add(c);
 		}
 		return columns;

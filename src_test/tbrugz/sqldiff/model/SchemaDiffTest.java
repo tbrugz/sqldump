@@ -91,7 +91,7 @@ public class SchemaDiffTest {
 	
 	public static Column newColumn(String name, String type, int precision, int position) {
 		Column c = ColumnDiffTest.newColumn(name, type, precision, true);
-		c.ordinalPosition = position;
+		c.setOrdinalPosition(position);
 		return c;
 	}
 	

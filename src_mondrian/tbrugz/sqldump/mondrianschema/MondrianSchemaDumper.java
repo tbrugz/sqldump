@@ -590,7 +590,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			List<Column> cols = t.getColumns();
 			Column notNullCol = null;
 			for(Column col: cols) {
-				if(!col.nullable) { notNullCol = col; }
+				if(!col.isNullable()) { notNullCol = col; }
 			}
 			if(notNullCol!=null) {
 				return newMeasure(notNullCol.getName(), descFactCountMeasure, "count");
@@ -625,11 +625,11 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			ok = false;
 		}
 
-		if(!numericTypes.contains(c.type.toUpperCase())) {
-			if(noMeasureTypeWarned.contains(c.type.toUpperCase())) {}
+		if(!numericTypes.contains(c.getType().toUpperCase())) {
+			if(noMeasureTypeWarned.contains(c.getType().toUpperCase())) {}
 			else {
-				log.debug("not a measure column type: "+c.type);
-				noMeasureTypeWarned.add(c.type.toUpperCase());
+				log.debug("not a measure column type: "+c.getType());
+				noMeasureTypeWarned.add(c.getType().toUpperCase());
 			}
 			ok = false;
 		}
@@ -1328,14 +1328,14 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 	
 	static boolean isNumeric(Column c) {
-		if(c==null || c.type==null) { return false; }
-		return Utils.getEqualIgnoreCaseFromList(numericTypes, c.type)!=null;
+		if(c==null || c.getType()==null) { return false; }
+		return Utils.getEqualIgnoreCaseFromList(numericTypes, c.getType())!=null;
 	}
 	
 	static boolean isInteger(Column c) {
-		if(c==null || c.type==null) { return false; }
-		return Utils.getEqualIgnoreCaseFromList(integerTypes, c.type)!=null
-				|| (isNumeric(c) && (c.decimalDigits==null || c.decimalDigits<=0));
+		if(c==null || c.getType()==null) { return false; }
+		return Utils.getEqualIgnoreCaseFromList(integerTypes, c.getType())!=null
+				|| (isNumeric(c) && (c.getDecimalDigits()==null || c.getDecimalDigits()<=0));
 	}
 	
 	@SuppressWarnings("unchecked")

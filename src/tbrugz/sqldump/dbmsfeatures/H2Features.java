@@ -129,7 +129,7 @@ public class H2Features extends InformationSchemaFeatures {
 		}
 		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
 			return createAlterColumn(table, column,
-					" set "+(column.nullable?"null":"not null"));
+					" set "+(column.isNullable()?"null":"not null"));
 		}
 		
 		throw new UnsupportedOperationException("no differences between H2 columns found");

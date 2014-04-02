@@ -881,10 +881,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
-		c.type = cols.getString("TYPE_NAME");
-		c.nullable = "YES".equals(cols.getString("IS_NULLABLE"));
-		c.columSize = cols.getInt("COLUMN_SIZE");
-		c.ordinalPosition = cols.getInt("ORDINAL_POSITION");
+		c.setType(cols.getString("TYPE_NAME"));
+		c.setNullable("YES".equals(cols.getString("IS_NULLABLE")));
+		c.setColumSize(cols.getInt("COLUMN_SIZE"));
+		c.setOrdinalPosition(cols.getInt("ORDINAL_POSITION"));
 		c.setRemarks(cols.getString("REMARKS"));
 		boolean autoInc = false;
 		if(grabColumnIsAutoincrement) {
@@ -896,12 +896,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not avaiable");
 			}
 		}
-		if(autoInc) { c.autoIncrement = true; }
+		if(autoInc) { c.setAutoIncrement(true); }
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
 			int iDecimalDigits = ((Number) decimalDigits).intValue();
 			if(iDecimalDigits!=0) {
-				c.decimalDigits = iDecimalDigits;
+				c.setDecimalDigits(iDecimalDigits);
 			} 
 		}
 		return c;
