@@ -988,8 +988,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					updateRule = fkrs.getInt("UPDATE_RULE");
 				}
 				int deleteRule = fkrs.getInt("DELETE_RULE");
-				fk.updateRule = UpdateRule.getUpdateRule(updateRule);
-				fk.deleteRule = UpdateRule.getUpdateRule(deleteRule);
+				fk.setUpdateRule(UpdateRule.getUpdateRule(updateRule));
+				fk.setDeleteRule(UpdateRule.getUpdateRule(deleteRule));
 				//log.info("fk: "+fkName+" :: rules: "+updateRule+"|"+fk.updateRule+" / "+deleteRule+"|"+fk.deleteRule+"");
 				
 				//for MySQL
@@ -998,7 +998,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				
 				if(askForUkType) {
 					try {
-						fk.fkReferencesPK = "P".equals(fkrs.getString("UK_CONSTRAINT_TYPE"));
+						fk.setFkReferencesPK("P".equals(fkrs.getString("UK_CONSTRAINT_TYPE")));
 					}
 					catch(SQLException e) {
 						askForUkType = false;

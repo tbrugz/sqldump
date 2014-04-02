@@ -329,7 +329,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			default:
 				l.setName(""); break;
 		}
-		l.referencesPK = fk.fkReferencesPK;
+		l.referencesPK = fk.getFkReferencesPK();
 		l.composite = fk.getFkColumns().size()>1;
 		l.setSource(getSourceId(fk));
 		l.setTarget(getTargetId(fk));

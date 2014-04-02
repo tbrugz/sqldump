@@ -71,9 +71,9 @@ public class FK extends AbstractConstraint implements Serializable {
 	String fkTable;
 	String pkTableSchemaName;
 	String fkTableSchemaName;
-	public Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
-	public UpdateRule updateRule;
-	public UpdateRule deleteRule;
+	Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
+	UpdateRule updateRule;
+	UpdateRule deleteRule;
 
 	List<String> pkColumns = new ArrayList<String>();
 	List<String> fkColumns = new ArrayList<String>();
@@ -115,8 +115,7 @@ public class FK extends AbstractConstraint implements Serializable {
 			+DBObject.getFinalName(pkTableSchemaName, pkTable, dumpWithSchemaName)
 			+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+(updateRule!=null && updateRule!=UpdateRule.NO_ACTION?" on update "+updateRule:"")
-			+(deleteRule!=null && deleteRule!=UpdateRule.NO_ACTION?" on delete "+deleteRule:"")
-			;
+			+(deleteRule!=null && deleteRule!=UpdateRule.NO_ACTION?" on delete "+deleteRule:"");
 	}
 
 	@Override
@@ -170,6 +169,30 @@ public class FK extends AbstractConstraint implements Serializable {
 
 	public void setFkColumns(List<String> fkColumns) {
 		this.fkColumns = fkColumns;
+	}
+
+	public Boolean getFkReferencesPK() {
+		return fkReferencesPK;
+	}
+
+	public void setFkReferencesPK(Boolean fkReferencesPK) {
+		this.fkReferencesPK = fkReferencesPK;
+	}
+
+	public UpdateRule getUpdateRule() {
+		return updateRule;
+	}
+
+	public void setUpdateRule(UpdateRule updateRule) {
+		this.updateRule = updateRule;
+	}
+
+	public UpdateRule getDeleteRule() {
+		return deleteRule;
+	}
+
+	public void setDeleteRule(UpdateRule deleteRule) {
+		this.deleteRule = deleteRule;
 	}
 
 	@Override
