@@ -204,16 +204,16 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 				
 				//Index
 				for(Index idx: schemaModel.getIndexes()) {
-					if(! (idx.tableName.equals(fk.getPkTable()) || idx.tableName.equals(fk.getFkTable()))) { continue; }
+					if(! (idx.getTableName().equals(fk.getPkTable()) || idx.getTableName().equals(fk.getFkTable()))) { continue; }
 
 					Set<String> cols = new HashSet<String>();
-					cols.addAll(idx.columns);
-					if(idx.tableName.equals(fk.getPkTable())) {
+					cols.addAll(idx.getColumns());
+					if(idx.getTableName().equals(fk.getPkTable())) {
 						if(stringCollectionEquals(cols,fk.getPkColumns())) { pkTableHasIndex = true; }
 						//if(cols.equals(fk.pkColumns)) { pkTableHasIndex = true; }
 						//log.info("cols["+idx.tableName+"/pkt]: "+cols+" fk.pkCols: "+fk.pkColumns+"; hasI: "+pkTableHasIndex+"/"+stringCollectionEquals(cols, fk.pkColumns));
 					}
-					if(idx.tableName.equals(fk.getFkTable())) { 
+					if(idx.getTableName().equals(fk.getFkTable())) { 
 						if(stringCollectionEquals(cols,fk.getFkColumns())) { fkTableHasIndex = true; }
 						//if(cols.equals(fk.fkColumns)) { fkTableHasIndex = true; }
 						//log.info("cols["+idx.tableName+"/fkt]: "+cols+" fk.fkCols: "+fk.fkColumns+"; hasI: "+fkTableHasIndex+"/"+stringCollectionEquals(cols, fk.fkColumns));
@@ -225,21 +225,21 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 			
 			if(!pkTableHasIndex && !dumpFKIndexesOnly) {
 				Index idx = new Index();
-				idx.tableName = fk.getPkTable();
+				idx.setTableName(fk.getPkTable());
 				idx.setSchemaName(fk.getPkTableSchemaName());
-				idx.unique = false;
-				idx.columns.addAll(fk.getPkColumns());
-				idx.setName(fk.getPkTable() + "_" + suggestAcronym(idx.columns) + "_UKI"); //_" + (indexes.size()+1);
+				idx.setUnique(false);
+				idx.getColumns().addAll(fk.getPkColumns());
+				idx.setName(fk.getPkTable() + "_" + suggestAcronym(idx.getColumns()) + "_UKI"); //_" + (indexes.size()+1);
 				addIndex(indexes, idx);
 			}
 
 			if(!fkTableHasIndex) {
 				Index idx = new Index();
-				idx.tableName = fk.getFkTable();
+				idx.setTableName(fk.getFkTable());
 				idx.setSchemaName(fk.getFkTableSchemaName());
-				idx.unique = false;
-				idx.columns.addAll(fk.getFkColumns());
-				idx.setName(fk.getFkTable() + "_" + suggestAcronym(idx.columns) + "_FKI");
+				idx.setUnique(false);
+				idx.getColumns().addAll(fk.getFkColumns());
+				idx.setName(fk.getFkTable() + "_" + suggestAcronym(idx.getColumns()) + "_FKI");
 				//idx.name = fk.fkTable + "_FKI";
 				//idx.name = fk.fkTable + "_FKI_" + idx.hashCode();
 				//idx.name = fk.fkTable + "_FKI_" + (++fkIndexCounter);

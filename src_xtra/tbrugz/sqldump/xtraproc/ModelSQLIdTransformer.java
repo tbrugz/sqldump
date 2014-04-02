@@ -59,8 +59,8 @@ public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 		}
 		for(Index i: model.getIndexes()) {
 			i.setName( identifierDecorator.get(i.getName()) );
-			i.tableName = identifierDecorator.get( i.tableName );
-			procList(i.columns, identifierDecorator);
+			i.setTableName(identifierDecorator.get( i.getTableName() ));
+			procList(i.getColumns(), identifierDecorator);
 		}
 		log.info("model transformer end: ok");
 	}

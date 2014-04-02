@@ -466,15 +466,15 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				//new object
 				idx = new Index();
 				idx.setName( idxName );
-				idx.unique = rs.getString(3).equals("UNIQUE");
+				idx.setUnique(rs.getString(3).equals("UNIQUE"));
 				idx.setSchemaName(rs.getString(1));
 				setIndexType(idx, rs.getString(4));
-				idx.tableName = rs.getString(5);
+				idx.setTableName(rs.getString(5));
 				if("LOCAL".equals(rs.getString("LOCALITY"))) {
-					idx.local = true;
+					idx.setLocal(true);
 				}
 			}
-			idx.columns.add(rs.getString(6));
+			idx.getColumns().add(rs.getString(6));
 			colCount++;
 		}
 		if(idx!=null) {
@@ -490,9 +490,9 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	boolean grabIndexesFromUnkownTables = false;
 	boolean addIndexToModel(SchemaModel model, Index idx) {
 		if(!grabIndexesFromUnkownTables) {
-			Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, idx.getSchemaName(), idx.tableName);
+			Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, idx.getSchemaName(), idx.getTableName());
 			if(t==null) {
-				log.debug("table '"+idx.getSchemaName()+"."+idx.tableName+"' not found in model, index "+idx.getName()+" won't be grabbed");
+				log.debug("table '"+idx.getSchemaName()+"."+idx.getTableName()+"' not found in model, index "+idx.getName()+" won't be grabbed");
 				return false;
 			}
 		}
@@ -502,10 +502,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	static void setIndexType(Index idx, String typeStr) {
 		if(typeStr==null) { return; }
 		if(typeStr.equals("NORMAL")) { return; }
-		if(typeStr.equals("BITMAP")) { idx.type = typeStr; return; }
-		if(typeStr.equals("NORMAL/REV")) { idx.reverse = true; return; }
+		if(typeStr.equals("BITMAP")) { idx.setType(typeStr); return; }
+		if(typeStr.equals("NORMAL/REV")) { idx.setReverse(true); return; }
 		//XXX: 'unknown' index types: DOMAIN, FUNCTION-BASED NORMAL, FUNCTION-BASED DOMAIN, IOT - TOP
-		idx.comment = "unknown index type: '"+typeStr+"'";
+		idx.setComment("unknown index type: '"+typeStr+"'");
 	}
 
 	String grabDBSequencesQuery(String schemaPattern) {

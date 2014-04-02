@@ -301,7 +301,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			StringBuffer sbIndexes = new StringBuffer();
 			for(Index idx: schemaModel.getIndexes()) {
 				//log.debug("idx: "+idx+" / t: "+t.name);
-				if(idx.tableName.equals(t.getName())) {
+				if(idx.getTableName().equals(t.getName())) {
 					sbIndexes.append(idx.getDefinition(false)+"\n");
 					indexCount++;
 				}

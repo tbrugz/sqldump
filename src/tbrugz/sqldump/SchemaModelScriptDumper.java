@@ -291,8 +291,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 						log.warn("index null? table: "+table);
 						continue;
 					}
-					if(table.getName().equals(idx.tableName)) {
-						categorizedOut(idx.getSchemaName(), idx.tableName, DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+";\n");
+					if(table.getName().equals(idx.getTableName())) {
+						categorizedOut(idx.getSchemaName(), idx.getTableName(), DBObjectType.TABLE, idx.getDefinition(dumpWithSchemaName)+";\n");
 					}
 				}
 			}

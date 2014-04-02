@@ -1041,20 +1041,20 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				idx = new Index();
 				idx.setName(idxName);
 				boolean bNonUnique = indexesrs.getBoolean("NON_UNIQUE");
-				idx.unique = !bNonUnique;
+				idx.setUnique(!bNonUnique);
 				
 				idx.setSchemaName( indexesrs.getString("TABLE_SCHEM") );
-				idx.tableName = indexesrs.getString("TABLE_NAME");
+				idx.setTableName( indexesrs.getString("TABLE_NAME") );
 				String catName = indexesrs.getString("TABLE_CAT");
 
 				//for MySQL
 				if(idx.getSchemaName()==null && catName!=null) { idx.setSchemaName( catName ); }
 				if(idx.getName().equals("PRIMARY")) {
-					idx.setName( SQLUtils.newNameFromTableName(idx.tableName, SQLUtils.pkiNamePattern) );
+					idx.setName( SQLUtils.newNameFromTableName(idx.getTableName(), SQLUtils.pkiNamePattern) );
 				}
 				
 			}
-			idx.columns.add(indexesrs.getString("COLUMN_NAME"));
+			idx.getColumns().add(indexesrs.getString("COLUMN_NAME"));
 		}
 		if(idx!=null) {
 			indexes.add(idx);

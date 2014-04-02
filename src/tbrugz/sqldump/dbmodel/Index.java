@@ -32,13 +32,13 @@ public class Index extends DBObject {
 		}
 	}
 	
-	public boolean unique;
-	public String type;
-	public Boolean reverse;
-	public String tableName; //XXX: Table instead of tableName?
-	public final List<String> columns = new ArrayList<String>();
-	public String comment;
-	public Boolean local;
+	boolean unique;
+	String type;
+	Boolean reverse;
+	String tableName; //XXX: Table instead of tableName?
+	final List<String> columns = new ArrayList<String>();
+	String comment;
+	Boolean local;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
@@ -119,6 +119,58 @@ public class Index extends DBObject {
 			}
 		}
 		return comp;
+	}
+
+	public boolean isUnique() {
+		return unique;
+	}
+
+	public void setUnique(boolean unique) {
+		this.unique = unique;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Boolean getReverse() {
+		return reverse;
+	}
+
+	public void setReverse(Boolean reverse) {
+		this.reverse = reverse;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Boolean getLocal() {
+		return local;
+	}
+
+	public void setLocal(Boolean local) {
+		this.local = local;
+	}
+
+	public List<String> getColumns() {
+		return columns;
 	}
 
 }
