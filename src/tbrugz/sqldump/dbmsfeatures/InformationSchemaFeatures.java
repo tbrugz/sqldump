@@ -193,7 +193,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					eo.setType( DBObjectType.EXECUTABLE );
 				}
 				ExecutableParameter ep = new ExecutableParameter();
-				ep.dataType = rs.getString(3);
+				ep.setDataType(rs.getString(3));
 				eo.setReturnParam(ep);
 				eo.setParams(new ArrayList<ExecutableParameter>());
 				
@@ -201,9 +201,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.setBody( rs.getString(5) );
 			}
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.name = rs.getString(6);
-			ep.dataType = rs.getString(7);
-			ep.position = rs.getInt(8);
+			ep.setName(rs.getString(6));
+			ep.setDataType(rs.getString(7));
+			ep.setPosition(rs.getInt(8));
 			eo.getParams().add(ep);
 		}
 		if(eo!=null) {

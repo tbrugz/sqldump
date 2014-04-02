@@ -22,9 +22,9 @@ public class InformationSchemaRoutine extends ExecutableObject {
 			sb = new StringBuffer();
 			for(int i=0;i<params.size();i++) {
 				if(i>0) { sb.append(", "); }
-				sb.append(params.get(i).name);
+				sb.append(params.get(i).getName());
 				sb.append(" ");
-				sb.append(params.get(i).dataType);
+				sb.append(params.get(i).getDataType());
 			}
 		}
 		
@@ -32,7 +32,7 @@ public class InformationSchemaRoutine extends ExecutableObject {
 				+(sb!=null?sb.toString():"")
 				//+")\n  returns "+returnType+" as \n$BODY$"
 				+")"
-				+(returnParam!=null?"\n  returns "+returnParam.dataType:"")
+				+(returnParam!=null?"\n  returns "+returnParam.getDataType():"")
 				+" as \n$BODY$"
 				+getBody()+"$BODY$"
 				+"\n  language "+externalLanguage+";";

@@ -53,7 +53,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 				eo.setType( DBObjectType.EXECUTABLE );
 			}
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.dataType = rs.getString(3);
+			ep.setDataType(rs.getString(3));
 			//eo.returnType = rs.getString(3);
 			eo.setReturnParam(ep);
 			
@@ -70,8 +70,8 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 				List<ExecutableParameter> lpar = new ArrayList<ExecutableParameter>();
 				for(int i=0;i<params.length;i++) {
 					ExecutableParameter epar = new ExecutableParameter();
-					epar.name = params[i];
-					epar.dataType = paramTypes[i];
+					epar.setName(params[i]);
+					epar.setDataType(paramTypes[i]);
 					lpar.add(epar);
 				}
 				if(lpar.size()>0) {

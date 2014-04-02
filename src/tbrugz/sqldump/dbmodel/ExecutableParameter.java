@@ -16,10 +16,10 @@ public class ExecutableParameter implements Serializable {
 		}
 	}
 	
-	public String name;
-	public int position;
-	public String dataType;
-	public INOUT inout;
+	String name;
+	int position;
+	String dataType;
+	INOUT inout;
 	
 	@Override
 	public String toString() {
@@ -62,6 +62,38 @@ public class ExecutableParameter implements Serializable {
 		if (position != other.position)
 			return false;
 		return true;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	public String getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
+
+	public INOUT getInout() {
+		return inout;
+	}
+
+	public void setInout(INOUT inout) {
+		this.inout = inout;
 	}
 	
 }

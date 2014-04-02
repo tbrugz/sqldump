@@ -753,30 +753,30 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	void grabProceduresColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
 		while(rs.next()) {
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.name = rs.getString("COLUMN_NAME");
-			ep.dataType = rs.getString("TYPE_NAME");
+			ep.setName(rs.getString("COLUMN_NAME"));
+			ep.setDataType(rs.getString("TYPE_NAME"));
 			
 			int type = rs.getInt("COLUMN_TYPE");
 			switch (type) {
 			case DatabaseMetaData.procedureColumnIn:
-				ep.inout = ExecutableParameter.INOUT.IN;
+				ep.setInout(ExecutableParameter.INOUT.IN);
 				break;
 			case DatabaseMetaData.procedureColumnInOut:
-				ep.inout = ExecutableParameter.INOUT.INOUT;
+				ep.setInout(ExecutableParameter.INOUT.INOUT);
 				break;
 			case DatabaseMetaData.procedureColumnOut:
-				ep.inout = ExecutableParameter.INOUT.OUT;
+				ep.setInout(ExecutableParameter.INOUT.OUT);
 				break;
 			default:
 				break;
 			}
 			
 			try {
-				ep.position = rs.getInt("ORDINAL_POSITION");
+				ep.setPosition(rs.getInt("ORDINAL_POSITION"));
 			}
 			catch(SQLException e) {
 				try {
-					ep.position = rs.getInt("SEQUENCE"); //XXX: oracle-only?
+					ep.setPosition(rs.getInt("SEQUENCE")); //XXX: oracle-only?
 				}
 				catch(SQLException e2) {
 					log.warn("column name for procedure parameter ordinal position not found: "+e);
@@ -791,11 +791,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 				//XXX: oracle driver adds 1 to function parameter positions...
 				if("oracle".equals(DBMSResources.instance().dbid())) {
-					ep.position--;
+					ep.setPosition(ep.getPosition()-1);
 				}
 			}
 			
-			if(ep.position==0) { 
+			if(ep.getPosition()==0) { 
 				eo.setReturnParam(ep);
 			}
 			else {
@@ -834,19 +834,19 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	void grabFunctionsColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
 		while(rs.next()) {
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.name = rs.getString("COLUMN_NAME");
-			ep.dataType = rs.getString("TYPE_NAME");
+			ep.setName(rs.getString("COLUMN_NAME"));
+			ep.setDataType(rs.getString("TYPE_NAME"));
 			
 			int type = rs.getInt("COLUMN_TYPE");
 			switch (type) {
 			case DatabaseMetaData.functionColumnIn:
-				ep.inout = ExecutableParameter.INOUT.IN;
+				ep.setInout(ExecutableParameter.INOUT.IN);
 				break;
 			case DatabaseMetaData.functionColumnInOut:
-				ep.inout = ExecutableParameter.INOUT.INOUT;
+				ep.setInout(ExecutableParameter.INOUT.INOUT);
 				break;
 			case DatabaseMetaData.functionColumnOut:
-				ep.inout = ExecutableParameter.INOUT.OUT;
+				ep.setInout(ExecutableParameter.INOUT.OUT);
 				break;
 			//XXX case DatabaseMetaData.functionColumnReturn: //??
 			default:
@@ -854,7 +854,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			
 			try {
-				ep.position = rs.getInt("ORDINAL_POSITION");
+				ep.setPosition(rs.getInt("ORDINAL_POSITION"));
 			}
 			catch(SQLException e) {
 				log.warn("unknown column name for function parameter ordinal position: "+e);
@@ -864,7 +864,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			String pSchem = rs.getString("FUNCTION_SCHEM");
 			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 			
-			if(ep.position==0) {
+			if(ep.getPosition()==0) {
 				eo.setReturnParam(ep);
 			}
 			else {

@@ -336,20 +336,20 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				log.debug("procedure or function found: "+objectName+" / "+subprogramName+" / "+objectType+" / eo="+eo);
 			}
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.name = rs.getString(8);
-			ep.dataType = rs.getString(11);
-			ep.position = rs.getInt(9);
+			ep.setName(rs.getString(8));
+			ep.setDataType(rs.getString(11));
+			ep.setPosition(rs.getInt(9));
 			String inout = rs.getString(12);
 			if(inout!=null) {
 				try {
-					ep.inout = INOUT.getValue(inout);
+					ep.setInout(INOUT.getValue(inout));
 				}
 				catch(IllegalArgumentException e) {
 					log.warn("illegal INOUT value: "+inout);
 				}
 			}
 			//log.info("parameter: "+ep);
-			if(ep.position==0) {
+			if(ep.getPosition()==0) {
 				eo.setReturnParam(ep);
 			}
 			else {
