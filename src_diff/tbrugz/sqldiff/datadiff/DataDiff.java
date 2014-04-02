@@ -220,7 +220,7 @@ public class DataDiff extends AbstractFailable {
 			List<String> keyCols = null;
 			Constraint ctt = table.getPKConstraint();
 			if(ctt!=null) {
-				keyCols = ctt.uniqueColumns;
+				keyCols = ctt.getUniqueColumns();
 			}
 			if(keyCols==null) {
 				if(orderWithAllColumnsIfNoUK) {
