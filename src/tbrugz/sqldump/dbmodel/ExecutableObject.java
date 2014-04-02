@@ -17,7 +17,7 @@ public class ExecutableObject extends DBObject {
 	//public String type;
 	DBObjectType type;
 	String body;
-	public final List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
+	final List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
 	String remarks;
 
 	String packageName;
@@ -205,6 +205,10 @@ public class ExecutableObject extends DBObject {
 
 	public void setBody(String body) {
 		this.body = body;
+	}
+
+	public List<Grant> getGrants() {
+		return grants;
 	}
 	
 }

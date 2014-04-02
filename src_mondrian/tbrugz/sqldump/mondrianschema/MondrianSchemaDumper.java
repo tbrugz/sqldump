@@ -600,7 +600,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			}
 		}
 		else {
-			String pk1stCol = c.uniqueColumns.get(0);
+			String pk1stCol = c.getUniqueColumns().get(0);
 			return newMeasure(pk1stCol, descFactCountMeasure, "count");
 		}
 		return null;
@@ -620,7 +620,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		}
 		
 		Constraint pk = t.getPKConstraint();
-		if(ignoreMeasureColumnsBelongingToPK && pk!=null && pk.uniqueColumns.contains(c.getName())) {
+		if(ignoreMeasureColumnsBelongingToPK && pk!=null && pk.getUniqueColumns().contains(c.getName())) {
 			log.info("column '"+c.getName()+"' belongs to PK. ignoring (as measure)");
 			ok = false;
 		}

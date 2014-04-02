@@ -299,7 +299,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 					sql = addOrderBy(sql, pk);
 				}
 				log.debug("simple-sql["+tname+"]:\n"+sql);
-				dd.runQuery(conn, sql, null, prop, tname, tname, null, pk!=null?pk.uniqueColumns:null);
+				dd.runQuery(conn, sql, null, prop, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
 				dumpedTables.add(tname);
 			}
 			else {
@@ -385,7 +385,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				}
 				
 				log.debug("join-sql["+tname+"]:\n"+sb.toString());
-				dd.runQuery(conn, sb.toString(), null, prop, tname, tname, null, pk!=null?pk.uniqueColumns:null);
+				dd.runQuery(conn, sb.toString(), null, prop, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
 				dumpedTables.add(tname);
 			}
 		}
@@ -511,7 +511,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		if(pk==null) { return; }
 		
 		sb.insert(0, "select * from (\n");
-		sb.append("\n) order by "+Utils.join(pk.uniqueColumns, ", ", null));
+		sb.append("\n) order by "+Utils.join(pk.getUniqueColumns(), ", ", null));
 	}
 
 	static String addOrderBy(String s, Constraint pk) {

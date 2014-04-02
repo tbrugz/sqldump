@@ -382,7 +382,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			grant.table = executable.getName();
 			grant.withGrantOption = grantable;
 			
-			executable.grants.add(grant);
+			executable.getGrants().add(grant);
 		}
 	}
 
@@ -615,12 +615,12 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			Constraint c = new Constraint();
 			String tableName = rs.getString(2);
-			c.type = Constraint.ConstraintType.CHECK;
+			c.setType(Constraint.ConstraintType.CHECK);
 			c.setName( rs.getString(3) );
-			c.checkDescription = rs.getString(5);
+			c.setCheckDescription(rs.getString(5));
 			
 			//ignore NOT NULL constraints
-			if(c.checkDescription.contains(" IS NOT NULL")) { continue; }
+			if(c.getCheckDescription().contains(" IS NOT NULL")) { continue; }
 			
 			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
 			if(t!=null) {
@@ -683,10 +683,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 					}
 					countNotAdded++;
 				}
-				c.type = Constraint.ConstraintType.UNIQUE;
+				c.setType(Constraint.ConstraintType.UNIQUE);
 				c.setName( constraintName );
 			}
-			c.uniqueColumns.add(rs.getString(4));
+			c.getUniqueColumns().add(rs.getString(4));
 			previousConstraint = constraintName;
 			colCount++;
 		}

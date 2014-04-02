@@ -251,8 +251,8 @@ public class SQLQueries extends AbstractSQLProc {
 		//XXX: add columns? query.setColumns(columns)...
 		if(keyCols!=null) {
 			Constraint cpk = new Constraint();
-			cpk.type = ConstraintType.PK;
-			cpk.uniqueColumns = keyCols;
+			cpk.setType(ConstraintType.PK);
+			cpk.setUniqueColumns(keyCols);
 			cpk.setName(SQLUtils.newNameFromTableName(queryName, SQLUtils.pkNamePattern));
 			List<Constraint> lc = query.getConstraints(); 
 			if(lc==null) {

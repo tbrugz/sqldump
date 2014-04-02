@@ -290,9 +290,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			String tableName = rs.getString(2);
 			
 			Constraint c = new Constraint();
-			c.type = Constraint.ConstraintType.CHECK;
+			c.setType(Constraint.ConstraintType.CHECK);
 			c.setName( rs.getString(3) );
-			c.checkDescription = rs.getString(4);
+			c.setCheckDescription(rs.getString(4));
 			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
@@ -341,7 +341,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			
 			if(!constraintId.equals(previousConstraintId)) {
 				c = new Constraint();
-				c.type = Constraint.ConstraintType.UNIQUE;
+				c.setType(Constraint.ConstraintType.UNIQUE);
 				c.setName( constraintName );
 				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
 				if(t!=null) {
@@ -352,7 +352,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 				}
 			}
-			c.uniqueColumns.add(rs.getString(4));
+			c.getUniqueColumns().add(rs.getString(4));
 			previousConstraintId = constraintId;
 			count++;
 		}

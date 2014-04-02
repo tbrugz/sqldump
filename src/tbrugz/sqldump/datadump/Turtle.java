@@ -105,7 +105,7 @@ public class Turtle extends RDFAbstractSyntax {
 		//owl:sameAs
 		if(dumpOwlSameAsForUKs && uks!=null) {
 			for(Constraint uk: uks) {
-				String ukKey = getKey(rs, uk.uniqueColumns, uk.uniqueColumns);
+				String ukKey = getKey(rs, uk.getUniqueColumns(), uk.getUniqueColumns());
 				fos.write(entityId+" owl:sameAs "+
 						"<"+tableName+"/"+ukKey+"> .\n");
 			}

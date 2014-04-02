@@ -949,9 +949,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(count==0) { return null; }//no PK
 
 		Constraint cPK = new Constraint();
-		cPK.type = ConstraintType.PK;
+		cPK.setType(ConstraintType.PK);
 		cPK.setName(pkName);
-		cPK.uniqueColumns.addAll( pkCols.values() );
+		cPK.getUniqueColumns().addAll( pkCols.values() );
 		return cPK;
 	}
 

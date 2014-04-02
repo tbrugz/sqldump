@@ -79,12 +79,12 @@ public class H2Features extends InformationSchemaFeatures {
 			String tableName = rs.getString(2);
 			
 			Constraint c = new Constraint();
-			c.type = Constraint.ConstraintType.UNIQUE;
+			c.setType(Constraint.ConstraintType.UNIQUE);
 			c.setName( rs.getString(3) );
 			String columnList = rs.getString(4);
 			String[] cols = columnList.split(",");
 			for(String ss: cols) {
-				c.uniqueColumns.add(ss.trim());				
+				c.getUniqueColumns().add(ss.trim());
 			}
 			countCols += cols.length;
 			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);

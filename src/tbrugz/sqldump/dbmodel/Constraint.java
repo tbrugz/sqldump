@@ -29,10 +29,10 @@ public class Constraint extends AbstractConstraint implements Serializable {
 		}
 	}
 
-	public ConstraintType type;
+	ConstraintType type;
 	//public String name;
-	public String checkDescription;
-	public List<String> uniqueColumns = new ArrayList<String>();
+	String checkDescription;
+	List<String> uniqueColumns = new ArrayList<String>();
 	
 	public String getDefinition(boolean dumpSchemaName) {
 		switch (type) {
@@ -97,4 +97,29 @@ public class Constraint extends AbstractConstraint implements Serializable {
 		result = prime * result + ((uniqueColumns == null) ? 0 : uniqueColumns.hashCode());
 		return result;
 	}
+
+	public ConstraintType getType() {
+		return type;
+	}
+
+	public void setType(ConstraintType type) {
+		this.type = type;
+	}
+
+	public String getCheckDescription() {
+		return checkDescription;
+	}
+
+	public void setCheckDescription(String checkDescription) {
+		this.checkDescription = checkDescription;
+	}
+
+	public List<String> getUniqueColumns() {
+		return uniqueColumns;
+	}
+
+	public void setUniqueColumns(List<String> uniqueColumns) {
+		this.uniqueColumns = uniqueColumns;
+	}
+	
 }

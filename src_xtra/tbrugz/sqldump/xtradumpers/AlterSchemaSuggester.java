@@ -284,8 +284,8 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		for(Table table: schemaModel.getTables()) {
 			//Unique constraints
 			for(Constraint cons: table.getConstraints()) {
-				if(! (cons.type==ConstraintType.PK || cons.type==ConstraintType.UNIQUE)) { continue; }
-				if(dumpSimpleFKsOnly && (cons.uniqueColumns.size()>1) ) { continue; }
+				if(! (cons.getType()==ConstraintType.PK || cons.getType()==ConstraintType.UNIQUE)) { continue; }
+				if(dumpSimpleFKsOnly && (cons.getUniqueColumns().size()>1) ) { continue; }
 				
 				//Tables
 				for(Table otherT: schemaModel.getTables()) {
@@ -299,17 +299,17 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 					}
 					//log.debug("pk.cols: "+cons.uniqueColumns+" ; other.cols: "+otherTCols);
 					//log.debug("pk.cols: "+cons.uniqueColumns+" ; other.cols: "+otherT.getColumns());
-					if( otherTCols.containsAll(cons.uniqueColumns) ) {
+					if( otherTCols.containsAll(cons.getUniqueColumns()) ) {
 						
 						//Create FK
 						FK fk = new FK();
 						fk.setPkTable( table.getName() );
 						fk.setPkTableSchemaName( table.getSchemaName() );
-						fk.getPkColumns().addAll(cons.uniqueColumns);
+						fk.getPkColumns().addAll(cons.getUniqueColumns());
 						fk.setFkTable( otherT.getName() );
 						fk.setFkTableSchemaName( otherT.getSchemaName() );
-						fk.getFkColumns().addAll(cons.uniqueColumns);
-						fk.fkReferencesPK = (cons.type==ConstraintType.PK);
+						fk.getFkColumns().addAll(cons.getUniqueColumns());
+						fk.fkReferencesPK = (cons.getType()==ConstraintType.PK);
 						fk.setName(suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getPkTable()) + "_FK");
 
 						//Test if FK already exists

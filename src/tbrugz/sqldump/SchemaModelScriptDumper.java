@@ -381,7 +381,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			for(ExecutableObject eo: schemaModel.getExecutables()) {
 				String eoName = DBObject.getFinalName(eo.getSchemaName(), eo.getName(), dumpWithSchemaName);
 				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
-				String grantOutput = compactGrantDump(eo.grants, eoName, toDbId);
+				String grantOutput = compactGrantDump(eo.getGrants(), eoName, toDbId);
 				if(grantOutput!=null && !"".equals(grantOutput)) {
 					categorizedOut(eo.getSchemaName(), eo.getName(), DBObjectType.GRANT, grantOutput);
 				}

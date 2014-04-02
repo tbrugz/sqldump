@@ -47,7 +47,7 @@ public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 			}
 			for(Constraint c: table.getConstraints()) {
 				c.setName( identifierDecorator.get(c.getName()) );
-				procList(c.uniqueColumns, identifierDecorator);
+				procList(c.getUniqueColumns(), identifierDecorator);
 			}
 		}
 		for(FK fk: model.getForeignKeys()) {

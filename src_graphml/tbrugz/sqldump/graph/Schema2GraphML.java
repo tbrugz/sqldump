@@ -285,7 +285,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		if(showConstraints) {
 			StringBuffer sbConstraints = new StringBuffer();
 			for(Constraint cons: t.getConstraints()) {
-				switch(cons.type) {
+				switch(cons.getType()) {
 					case PK: 
 					case CHECK:
 					case UNIQUE:

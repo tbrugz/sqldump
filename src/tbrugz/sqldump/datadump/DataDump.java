@@ -240,7 +240,7 @@ public class DataDump extends AbstractSQLProc {
 
 			List<String> pkCols = null;  
 			if(table.getPKConstraint()!=null) {
-				pkCols = table.getPKConstraint().uniqueColumns;
+				pkCols = table.getPKConstraint().getUniqueColumns();
 			} 
 			
 			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK);
@@ -289,7 +289,7 @@ public class DataDump extends AbstractSQLProc {
 		if(orderClause==null && orderByPK) { 
 			Constraint ctt = table.getPKConstraint();
 			if(ctt!=null) {
-				orderClause = Utils.join(ctt.uniqueColumns, ", ", quoteAllDecorator);
+				orderClause = Utils.join(ctt.getUniqueColumns(), ", ", quoteAllDecorator);
 			}
 			else {
 				log.warn("table '"+tableName+"' has no PK for datadump ordering");
