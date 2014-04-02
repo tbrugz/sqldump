@@ -311,8 +311,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(dumpTriggersWithReferencingTable) {
 				for(Trigger tr: schemaModel.getTriggers()) {
 					//option for trigger output inside table
-					if(table.getName().equals(tr.tableName)) {
-						categorizedOut(tr.getSchemaName(), tr.tableName, DBObjectType.TABLE, tr.getDefinition(dumpWithSchemaName)+"\n");
+					if(table.getName().equals(tr.getTableName())) {
+						categorizedOut(tr.getSchemaName(), tr.getTableName(), DBObjectType.TABLE, tr.getDefinition(dumpWithSchemaName)+"\n");
 					}
 				}
 			}
@@ -330,7 +330,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 
 		//Triggers
 		for(Trigger t: schemaModel.getTriggers()) {
-			if(!dumpTriggersWithReferencingTable || t.tableName==null) {
+			if(!dumpTriggersWithReferencingTable || t.getTableName()==null) {
 				categorizedOut(t.getSchemaName(), t.getName(), DBObjectType.TRIGGER, t.getDefinition(dumpWithSchemaName)+"\n");
 			}
 		}

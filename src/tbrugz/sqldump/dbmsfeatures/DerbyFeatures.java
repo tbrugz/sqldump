@@ -93,7 +93,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			//t.name = rs.getString(1);
 			String event = rs.getString(2);
 			t.eventsManipulation.add("I".equals(event)?"INSERT":"U".equals(event)?"UPDATE":"DELETE");
-			t.tableName = rs.getString(6);
+			t.setTableName(rs.getString(6));
 			t.actionStatement = rs.getString(7);
 			String forEachX = rs.getString(4);
 			t.actionOrientation = "R".equals(forEachX)?"ROW":"STATEMENT";

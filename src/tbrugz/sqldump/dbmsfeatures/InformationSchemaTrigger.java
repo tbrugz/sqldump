@@ -27,16 +27,16 @@ public class InformationSchemaTrigger extends Trigger {
 		
 		return "create trigger "+getName()
 				+"\n  "+conditionTiming+" "+Utils.join(eventsManipulation, " or ")
-				+"\n  on "+tableName
+				+"\n  on "+getTableName()
 				+ (actionOrientation!=null?"\n  for each "+actionOrientation:"")
-				+ (whenClause!=null?"\n  when ( "+whenClause.trim()+" )":"")
+				+ (getWhenClause()!=null?"\n  when ( "+getWhenClause().trim()+" )":"")
 				+"\n  "+actionStatement
 				+(addSplitter?";":"");
 	}
 	
 	@Override
 	public String toString() {
-		return "[ISTrigger:"+getName()+"/"+tableName+":"+conditionTiming+","+actionOrientation+","+eventsManipulation+"]";
+		return "[ISTrigger:"+getName()+"/"+getTableName()+":"+conditionTiming+","+actionOrientation+","+eventsManipulation+"]";
 	}
 
 	@Override

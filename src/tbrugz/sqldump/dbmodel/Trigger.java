@@ -4,10 +4,10 @@ public class Trigger extends DBObject {
 	private static final long serialVersionUID = 1L;
 
 	//TODO: add transient String name, add get/set
-	public String description;
-	public String body;
-	public String tableName;
-	public String whenClause;
+	String description;
+	String body;
+	String tableName;
+	String whenClause;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
@@ -100,6 +100,38 @@ public class Trigger extends DBObject {
 		} else if (!whenClause.equals(other.whenClause))
 			return false;
 		return true;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = body;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	public String getWhenClause() {
+		return whenClause;
+	}
+
+	public void setWhenClause(String whenClause) {
+		this.whenClause = whenClause;
 	}
 
 }

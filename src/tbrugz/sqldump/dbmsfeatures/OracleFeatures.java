@@ -165,11 +165,11 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			Trigger t = new Trigger();
 			t.setName( rs.getString(1) );
 			t.setSchemaName(rs.getString(2));
-			t.tableName = rs.getString(3);
-			t.description = rs.getString(4);
-			t.body = rs.getString(5);
-			t.whenClause = rs.getString(6);
-			if(t.description!=null) { t.description = t.description.trim(); }
+			t.setTableName(rs.getString(3));
+			String description = rs.getString(4);
+			if(description!=null) { t.setDescription(description.trim()); }
+			t.setBody(rs.getString(5));
+			t.setWhenClause(rs.getString(6));
 			
 			model.getTriggers().add(t);
 			count++;

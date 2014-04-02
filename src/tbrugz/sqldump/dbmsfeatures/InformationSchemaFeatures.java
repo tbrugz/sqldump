@@ -140,11 +140,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				count++;
 			}
 			t.eventsManipulation.add(rs.getString(4));
-			t.tableName = rs.getString(6);
+			t.setTableName(rs.getString(6));
 			t.actionStatement = rs.getString(7);
 			t.actionOrientation = rs.getString(8);
 			t.conditionTiming = rs.getString(9);
-			t.whenClause = rs.getString(10);
+			t.setWhenClause(rs.getString(10));
 			rowcount++;
 		}
 		
