@@ -6,10 +6,10 @@ import java.util.List;
 public class Grant implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	public String table;
-	public PrivilegeType privilege;
-	public String grantee;
-	public boolean withGrantOption;
+	String table; //XXX rename to object? may be used by Executables
+	PrivilegeType privilege;
+	String grantee;
+	boolean withGrantOption;
 	
 	@Override
 	public String toString() {
@@ -63,4 +63,37 @@ public class Grant implements Serializable {
 		}
 		return false;
 	}
+
+	public String getTable() {
+		return table;
+	}
+
+	public void setTable(String table) {
+		this.table = table;
+	}
+
+	public PrivilegeType getPrivilege() {
+		return privilege;
+	}
+
+	public void setPrivilege(PrivilegeType privilege) {
+		this.privilege = privilege;
+	}
+
+	public String getGrantee() {
+		return grantee;
+	}
+
+	public void setGrantee(String grantee) {
+		this.grantee = grantee;
+	}
+
+	public boolean isWithGrantOption() {
+		return withGrantOption;
+	}
+
+	public void setWithGrantOption(boolean withGrantOption) {
+		this.withGrantOption = withGrantOption;
+	}
+	
 }

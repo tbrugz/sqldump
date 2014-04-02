@@ -377,10 +377,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			boolean grantable = "YES".equals(rs.getString(2));
 			
 			Grant grant = new Grant();
-			grant.grantee = grantee;
-			grant.privilege = PrivilegeType.EXECUTE;
-			grant.table = executable.getName();
-			grant.withGrantOption = grantable;
+			grant.setGrantee(grantee);
+			grant.setPrivilege(PrivilegeType.EXECUTE);
+			grant.setTable(executable.getName());
+			grant.setWithGrantOption(grantable);
 			
 			executable.getGrants().add(grant);
 		}

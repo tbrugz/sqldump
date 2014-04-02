@@ -34,7 +34,7 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 	}
 	
 	public GrantDiff(Grant grant, String schemaName, boolean isRevoke) {
-		this(schemaName, grant.table, grant.privilege, grant.grantee, grant.withGrantOption, isRevoke);
+		this(schemaName, grant.getTable(), grant.getPrivilege(), grant.getGrantee(), grant.isWithGrantOption(), isRevoke);
 	}
 
 	@Override

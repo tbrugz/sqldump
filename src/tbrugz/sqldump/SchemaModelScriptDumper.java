@@ -543,23 +543,23 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		
 		for(Grant g: grants) {
 			//if privilege is not defined for target DB, do not dump
-			if(toDbId!=null && !privsToDump.contains(g.privilege.toString())) { continue; }
+			if(toDbId!=null && !privsToDump.contains(g.getPrivilege().toString())) { continue; }
 			
-			if(g.withGrantOption) {
-				Set<PrivilegeType> privs = mapWithGrant.get(g.grantee);
+			if(g.isWithGrantOption()) {
+				Set<PrivilegeType> privs = mapWithGrant.get(g.getGrantee());
 				if(privs==null) {
 					privs = new TreeSet<PrivilegeType>();
-					mapWithGrant.put(g.grantee, privs);
+					mapWithGrant.put(g.getGrantee(), privs);
 				}
-				privs.add(g.privilege);
+				privs.add(g.getPrivilege());
 			}
 			else {
-				Set<PrivilegeType> privs = mapWOGrant.get(g.grantee);
+				Set<PrivilegeType> privs = mapWOGrant.get(g.getGrantee());
 				if(privs==null) {
 					privs = new TreeSet<PrivilegeType>();
-					mapWOGrant.put(g.grantee, privs);
+					mapWOGrant.put(g.getGrantee(), privs);
 				}
-				privs.add(g.privilege);
+				privs.add(g.getPrivilege());
 			}
 		}
 		

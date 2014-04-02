@@ -916,11 +916,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			try {
 				Grant grant = new Grant();
 				
-				grant.grantee = grantrs.getString("GRANTEE");
+				grant.setGrantee(grantrs.getString("GRANTEE"));
 				privilege = Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE"));
-				grant.privilege = PrivilegeType.valueOf(privilege);
-				grant.table = grantrs.getString("TABLE_NAME");
-				grant.withGrantOption = "YES".equals(grantrs.getString("IS_GRANTABLE"));
+				grant.setPrivilege(PrivilegeType.valueOf(privilege));
+				grant.setTable(grantrs.getString("TABLE_NAME"));
+				grant.setWithGrantOption("YES".equals(grantrs.getString("IS_GRANTABLE")));
 				grantsList.add(grant);
 			}
 			catch(IllegalArgumentException iae) {
