@@ -254,9 +254,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			s.setName( rs.getString(1) );
 			String minvalueStr = rs.getString(2);
 			if(minvalueStr!=null) {
-				s.minValue = rs.getLong(2);
+				s.setMinValue(rs.getLong(2));
 			}
-			s.incrementBy = 1; //rs.getLong(3);
+			s.setIncrementBy(1); //rs.getLong(3);
 			//s.lastNumber = rs.getLong(4);
 			model.getSequences().add(s);
 			count++;

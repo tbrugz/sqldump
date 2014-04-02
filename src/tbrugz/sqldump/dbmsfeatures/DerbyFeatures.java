@@ -122,10 +122,10 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			Sequence s = new Sequence();
 			s.setSchemaName( schemaPattern );
 			s.setName( rs.getString(1) );
-			s.minValue = rs.getLong(2);
-			s.maxValue = rs.getLong(3);
-			s.lastNumber = rs.getLong(4);
-			s.incrementBy = rs.getLong(5);
+			s.setMinValue(rs.getLong(2));
+			s.setMaxValue(rs.getLong(3));
+			s.setLastNumber(rs.getLong(4));
+			s.setIncrementBy(rs.getLong(5));
 			model.getSequences().add(s);
 			count++;
 		}

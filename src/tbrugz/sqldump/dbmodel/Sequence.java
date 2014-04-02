@@ -6,10 +6,10 @@ package tbrugz.sqldump.dbmodel;
 public class Sequence extends DBObject {
 	private static final long serialVersionUID = 1L;
 
-	public Long minValue;
-	public Long maxValue; //XXX: not used yet
-	public long incrementBy;
-	public transient long lastNumber;
+	Long minValue;
+	Long maxValue; //XXX: not used yet
+	long incrementBy = 1;
+	transient long lastNumber;
 	
 	public static transient boolean dumpStartWith = false;
 
@@ -63,6 +63,38 @@ public class Sequence extends DBObject {
 		} else if (!minValue.equals(other.minValue))
 			return false;
 		return true;
+	}
+
+	public Long getMinValue() {
+		return minValue;
+	}
+
+	public void setMinValue(Long minValue) {
+		this.minValue = minValue;
+	}
+
+	public Long getMaxValue() {
+		return maxValue;
+	}
+
+	public void setMaxValue(Long maxValue) {
+		this.maxValue = maxValue;
+	}
+
+	public long getIncrementBy() {
+		return incrementBy;
+	}
+
+	public void setIncrementBy(long incrementBy) {
+		this.incrementBy = incrementBy;
+	}
+
+	public long getLastNumber() {
+		return lastNumber;
+	}
+
+	public void setLastNumber(long lastNumber) {
+		this.lastNumber = lastNumber;
 	}
 	
 }

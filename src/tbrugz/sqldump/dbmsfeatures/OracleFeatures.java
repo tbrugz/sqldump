@@ -525,9 +525,9 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			Sequence s = new Sequence();
 			s.setName( rs.getString(1) );
 			s.setSchemaName(schemaPattern);
-			s.minValue = rs.getLong(2);
-			s.incrementBy = rs.getLong(3);
-			s.lastNumber = rs.getLong(4);
+			s.setMinValue(rs.getLong(2));
+			s.setIncrementBy(rs.getLong(3));
+			s.setLastNumber(rs.getLong(4));
 			model.getSequences().add(s);
 			count++;
 		}
