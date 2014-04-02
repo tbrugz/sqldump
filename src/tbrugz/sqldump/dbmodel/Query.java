@@ -9,8 +9,8 @@ public class Query extends View {
 	String id;
 	List<String> parameterValues;
 	
-	public String rsDecoratorFactoryClass;
-	public Map<String,String> rsDecoratorArguments;
+	String rsDecoratorFactoryClass;
+	Map<String,String> rsDecoratorArguments;
 	
 	public String getId() {
 		return id;
@@ -31,6 +31,22 @@ public class Query extends View {
 	@Override
 	public String getRelationType() {
 		return "query";
+	}
+
+	public String getRsDecoratorFactoryClass() {
+		return rsDecoratorFactoryClass;
+	}
+
+	public void setRsDecoratorFactoryClass(String rsDecoratorFactoryClass) {
+		this.rsDecoratorFactoryClass = rsDecoratorFactoryClass;
+	}
+
+	public Map<String, String> getRsDecoratorArguments() {
+		return rsDecoratorArguments;
+	}
+
+	public void setRsDecoratorArguments(Map<String, String> rsDecoratorArguments) {
+		this.rsDecoratorArguments = rsDecoratorArguments;
 	}
 	
 }

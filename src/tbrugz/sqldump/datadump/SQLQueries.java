@@ -301,10 +301,10 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		
 		if(rsDecoratorFactory!=null) {
-			query.rsDecoratorFactoryClass = rsDecoratorFactory;
-			query.rsDecoratorArguments = new TreeMap<String, String>();
+			query.setRsDecoratorFactoryClass(rsDecoratorFactory);
+			query.setRsDecoratorArguments(new TreeMap<String, String>());
 			for(String arg: rsFactoryArgs) {
-				query.rsDecoratorArguments.put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+				query.getRsDecoratorArguments().put(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
 			}
 		}
 		
