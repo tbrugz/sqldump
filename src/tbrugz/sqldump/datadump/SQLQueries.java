@@ -224,7 +224,8 @@ public class SQLQueries extends AbstractSQLProc {
 		String colNames = prop.getProperty("sqldump.query."+qid+".cols");
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
-		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, true, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+		//XXX: add prop for 'addAlsoAsTable'? default is false
+		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 	}
 	
 	public int addQueryToModel(String qid, String queryName, String schemaName,
