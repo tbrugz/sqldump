@@ -224,6 +224,7 @@ public class View extends DBObject implements Relation {
 		this.constraints = constraints;
 	}
 
+	@Override
 	public Integer getParameterCount() {
 		return parameterCount;
 	}

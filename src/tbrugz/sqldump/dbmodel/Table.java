@@ -305,4 +305,10 @@ public class Table extends DBObject implements Relation {
 		}
 		return sb.toString();
 	}
+	
+	@Override
+	public Integer getParameterCount() {
+		return null;
+	}
+	
 }
