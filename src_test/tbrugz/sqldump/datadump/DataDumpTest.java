@@ -26,6 +26,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
@@ -89,12 +90,17 @@ public class DataDumpTest {
 	}
 	
 	public void dump1() throws ClassNotFoundException, SQLException, NamingException, IOException {
+		dump1(null);
+	}
+	
+	public void dump1(String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String[] vmparamsDump = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html, json",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
 				"-Dsqldump.datadump.writebom=false",
+				"-Dsqldump.datadump.xml.escape=true",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 				"-Dsqldump.user=h",
@@ -103,6 +109,9 @@ public class DataDumpTest {
 		SQLDump sqld = new SQLDump();
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
+		if(xtraparams!=null) {
+			TestUtil.setProperties(p, xtraparams);
+		}
 		sqld.doMain(params, p, null);
 	}
 	
@@ -150,6 +159,28 @@ public class DataDumpTest {
 		Assert.assertEquals(6, countElements(n.getChildNodes()));
 	}
 
+	@Test(expected=SAXParseException.class)
+	public void testXMLNoEscape() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dump1(new String[]{
+				"-Dsqldump.datadump.xml.escape=false",
+				});
+		File f = new File(DIR_OUT+"/data_ETC.xml");
+		parseXML(f);
+	}
+
+	@Test
+	public void testHTMLEscapeCol() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dump1(new String[]{
+				"-Dsqldump.datadump.xml.escape=false",
+				"-Dsqldump.datadump.xml.escapecols4table@ETC=DESCRIPTION",
+				});
+		File f = new File(DIR_OUT+"/data_ETC.html");
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(7, countElements(n.getChildNodes()));
+	}
+	
 	@Test
 	public void testHTML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dump1();

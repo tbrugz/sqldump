@@ -185,8 +185,8 @@ public class DataDumpUtils {
 
 	//dumpers: XML, HTML
 	//XXXdone: XML format: translate '<', '>', '&'?
-	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String nullValue) {
-		String value = getFormattedXMLValue(elem, type, floatFormatter, df);
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String nullValue, boolean escape) {
+		String value = getFormattedXMLValue(elem, type, floatFormatter, df, escape);
 		if(value == null) {
 			return nullValue;
 		}
@@ -194,7 +194,7 @@ public class DataDumpUtils {
 		return value;
 	} 
 
-	static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df) {
+	static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, boolean escape) {
 		if(elem == null) {
 			return null;
 		}
@@ -208,7 +208,7 @@ public class DataDumpUtils {
 			return null;
 		}
 
-		return xmlEscapeText(getString(elem));
+		return escape?xmlEscapeText(getString(elem)):getString(elem);
 	}
 	
 	/*

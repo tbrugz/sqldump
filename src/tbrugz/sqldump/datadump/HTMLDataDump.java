@@ -3,9 +3,7 @@ package tbrugz.sqldump.datadump;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -15,8 +13,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.SQLUtils;
 
 //XXX: prop for stylesheet?
-//XXX: should extend XMLDataDump?
-public class HTMLDataDump extends DumpSyntax {
+//XXXdone: should extend XMLDataDump?
+public class HTMLDataDump extends XMLDataDump {
 
 	static final Log log = LogFactory.getLog(HTMLDataDump.class);
 
@@ -25,10 +23,10 @@ public class HTMLDataDump extends DumpSyntax {
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
 	
-	protected String tableName;
-	protected int numCol;
-	protected List<String> lsColNames = new ArrayList<String>();
-	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	//protected String tableName;
+	//protected int numCol;
+	//protected List<String> lsColNames = new ArrayList<String>();
+	//protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 
 	protected String padding = "";
 	
@@ -39,12 +37,13 @@ public class HTMLDataDump extends DumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		procStandardProperties(prop);
+		super.procProperties(prop);
+		//procStandardProperties(prop);
 		prepend = prop.getProperty(PROP_HTML_PREPEND);
 		append = prop.getProperty(PROP_HTML_APPEND);
 	}
 
-	@Override
+	/*@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		numCol = md.getColumnCount();
@@ -54,7 +53,7 @@ public class HTMLDataDump extends DumpSyntax {
 			lsColNames.add(md.getColumnName(i+1));
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
-	}
+	}*/
 	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
@@ -98,7 +97,8 @@ public class HTMLDataDump extends DumpSyntax {
 				sb.append("\n\t</td>");
 			}
 			else {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr);
+				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
+						escape || (cols2Escape!=null && cols2Escape.contains(lsColNames.get(i))));
 				//Object value = getValueNotNull( vals.get(i) );
 				sb.append( "<td>"+ value +"</td>");
 			}
@@ -113,9 +113,9 @@ public class HTMLDataDump extends DumpSyntax {
 		if(append!=null) { out(append, fos); }
 	}
 
-	protected void out(String s, Writer pw) throws IOException {
+	/*protected void out(String s, Writer pw) throws IOException {
 		pw.write(padding+s);
-	}
+	}*/
 	
 	@Override
 	public String getSyntaxId() {

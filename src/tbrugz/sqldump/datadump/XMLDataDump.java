@@ -36,6 +36,9 @@ public class XMLDataDump extends DumpSyntax {
 	static final String PREFIX_DUMPROWELEMENT4TABLE = "sqldump.datadump.xml.dumprowelement4table@";
 	static final String PROP_DUMPHEADER4INNERTABLES = "sqldump.datadump.xml.dumpheader4innertables";
 	static final String PROP_DUMPTABLENAMEASROWTAG = "sqldump.datadump.xml.dumptablenameasrowtag";
+
+	static final String PROP_XML_ESCAPE = "sqldump.datadump.xml.escape";
+	static final String PREFIX_ESCAPECOLS_4TABLE = "sqldump.datadump.xml.escapecols4table@";
 	
 	//static final String PREFIX_ROWELEMENT4COLUMN = "sqldump.datadump.xml.rowelement4column@";
 	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
@@ -59,15 +62,17 @@ public class XMLDataDump extends DumpSyntax {
 	boolean dumpNullValues = true;
 	HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
 	boolean dumpTableNameAsRowTag = false;
+	protected boolean escape = false;
+	List<String> cols2Escape = null;
 
 	//dumper properties
-	String tableName;
-	int numCol;
+	protected String tableName;
+	protected int numCol;
 	String rowElement = defaultRowElement;
 	boolean dumpRowElement = defaultDumpRowElement;
 	
-	final List<String> lsColNames = new ArrayList<String>();
-	final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected final List<String> lsColNames = new ArrayList<String>();
+	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -77,6 +82,7 @@ public class XMLDataDump extends DumpSyntax {
 		dumpNullValues = Utils.getPropBool(prop, PROP_DUMPNULLVALUES, dumpNullValues);
 		dumpHeader4InnerTables = HeaderFooterDump.valueOf(prop.getProperty(PROP_DUMPHEADER4INNERTABLES, dumpHeader4InnerTables.name()));
 		dumpTableNameAsRowTag = Utils.getPropBool(prop, PROP_DUMPTABLENAMEASROWTAG, dumpTableNameAsRowTag);
+		escape = Utils.getPropBool(prop, PROP_XML_ESCAPE, escape);
 		this.prop = prop;
 	}
 
@@ -88,13 +94,12 @@ public class XMLDataDump extends DumpSyntax {
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 		
 		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
+		cols2Escape = Utils.getStringListFromProp(prop, PREFIX_ESCAPECOLS_4TABLE+tableName, ",");
 	}
 	
 	@Override
@@ -145,7 +150,8 @@ public class XMLDataDump extends DumpSyntax {
 				//sb.append("\t");
 			}
 			else {
-				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter);
+				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter,
+						escape || (cols2Escape!=null && cols2Escape.contains(lsColNames.get(i))));
 				if(value==null) {
 					if(dumpNullValues) {
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
@@ -179,7 +185,7 @@ public class XMLDataDump extends DumpSyntax {
 		}
 	}
 
-	void out(String s, Writer pw) throws IOException {
+	protected void out(String s, Writer pw) throws IOException {
 		pw.write(padding+s);
 	}
 	
