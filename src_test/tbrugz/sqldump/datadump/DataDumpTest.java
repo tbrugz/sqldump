@@ -181,6 +181,18 @@ public class DataDumpTest {
 		Assert.assertEquals(7, countElements(n.getChildNodes()));
 	}
 	
+	@Test(expected=SAXParseException.class)
+	public void testHTMLNoEscapeCol() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dump1(new String[]{
+				"-Dsqldump.datadump.xml.noescapecols4table@ETC=DESCRIPTION",
+				});
+		File f = new File(DIR_OUT+"/data_ETC.html");
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(7, countElements(n.getChildNodes()));
+	}
+	
 	@Test
 	public void testHTML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dump1();

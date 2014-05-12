@@ -98,7 +98,7 @@ public class HTMLDataDump extends XMLDataDump {
 			}
 			else {
 				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
-						escape || (cols2Escape!=null && cols2Escape.contains(lsColNames.get(i))));
+						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
 				sb.append( "<td>"+ value +"</td>");
 			}

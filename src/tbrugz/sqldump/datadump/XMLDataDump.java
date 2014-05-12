@@ -39,6 +39,7 @@ public class XMLDataDump extends DumpSyntax {
 
 	static final String PROP_XML_ESCAPE = "sqldump.datadump.xml.escape";
 	static final String PREFIX_ESCAPECOLS_4TABLE = "sqldump.datadump.xml.escapecols4table@";
+	static final String PREFIX_NO_ESCAPECOLS_4TABLE = "sqldump.datadump.xml.noescapecols4table@";
 	
 	//static final String PREFIX_ROWELEMENT4COLUMN = "sqldump.datadump.xml.rowelement4column@";
 	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
@@ -64,6 +65,7 @@ public class XMLDataDump extends DumpSyntax {
 	boolean dumpTableNameAsRowTag = false;
 	protected boolean escape = false;
 	List<String> cols2Escape = null;
+	List<String> colsNot2Escape = null;
 
 	//dumper properties
 	protected String tableName;
@@ -100,6 +102,7 @@ public class XMLDataDump extends DumpSyntax {
 		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
 		cols2Escape = Utils.getStringListFromProp(prop, PREFIX_ESCAPECOLS_4TABLE+tableName, ",");
+		colsNot2Escape = Utils.getStringListFromProp(prop, PREFIX_NO_ESCAPECOLS_4TABLE+tableName, ",");
 	}
 	
 	@Override
@@ -150,8 +153,7 @@ public class XMLDataDump extends DumpSyntax {
 				//sb.append("\t");
 			}
 			else {
-				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter,
-						escape || (cols2Escape!=null && cols2Escape.contains(lsColNames.get(i))));
+				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, doEscape(i));
 				if(value==null) {
 					if(dumpNullValues) {
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
@@ -167,6 +169,12 @@ public class XMLDataDump extends DumpSyntax {
 		if(dumpRowElement) {
 			out("\t</"+rowElement+">\n", fos);
 		}
+	}
+	
+	boolean doEscape(final int i) {
+		return escape?
+				(colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))):
+				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
 	}
 	
 	void dumpAndClearBuffer(StringBuilder sb, Writer fos) throws IOException {
