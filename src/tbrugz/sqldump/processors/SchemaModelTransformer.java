@@ -15,6 +15,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractSchemaProcessor;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.LongFactory;
@@ -27,7 +28,8 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 	
 	static final String SUFFIX_REMOVE_SCHEMANAME = ".removeschemaname";
 	static final String SUFFIX_REMOVE_FKS_BYNAME = ".removefksbyname";
-	static final String SUFFIX_REMOVE_TABLES_WITH_FKS = ".removetableswithfks";
+	static final String SUFFIX_REMOVE_TABLES_WITH_FKS = ".removetableswithfks"; //remove tables with *their* fks
+	static final String SUFFIX_REMOVE_VIEWS_DEFINITIONS = ".remove-views-definitions";
 	
 	//XXX option to remove FKs that references non-existent tables?
 	//XXX option to remove FKs from/to table?
@@ -36,11 +38,13 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 	String prefix = DEFAULT_PREFIX;
 	
 	boolean doRemoveSchemaName = false;
+	boolean doRemoveViewsDefinitions = false;
 	
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 		doRemoveSchemaName = Utils.getPropBool(prop, prefix+SUFFIX_REMOVE_SCHEMANAME, doRemoveSchemaName);
+		doRemoveViewsDefinitions = Utils.getPropBool(prop, prefix+SUFFIX_REMOVE_VIEWS_DEFINITIONS, doRemoveSchemaName);
 	}
 
 	@Override
@@ -50,6 +54,12 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		if(tablesToRemove!=null) {
 			removeTablesWithFKs(tablesToRemove);
 		}
+		
+		//views
+		if(doRemoveViewsDefinitions) {
+			removeViewsDefinitions();
+		}
+		//XXX prop to remove parameterCount, parameterValues?
 		
 		//fks
 		removeFKs();
@@ -211,6 +221,18 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		}
 		if(removeTables.size()>0) {
 			log.info("remove: tables not found: "+removeTables);
+		}
+	}
+	
+	void removeViewsDefinitions() {
+		Set<View> views = model.getViews();
+		int count = 0;
+		for(View v: views) {
+			v.setQuery(null);
+			count++;
+		}
+		if(count>0) {
+			log.info(count+" views' definitions removed");
 		}
 	}
 }
