@@ -14,6 +14,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractSchemaProcessor;
@@ -59,7 +60,6 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		if(doRemoveViewsDefinitions) {
 			removeViewsDefinitions();
 		}
-		//XXX prop to remove parameterCount, parameterValues?
 		
 		//fks
 		removeFKs();
@@ -229,6 +229,12 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		int count = 0;
 		for(View v: views) {
 			v.setQuery(null);
+			//XXX prop to remove parameterCount, parameterValues?
+			v.setParameterCount(null);
+			if(v instanceof Query) {
+				Query q = (Query) v;
+				q.setParameterValues(null);
+			}
 			count++;
 		}
 		if(count>0) {
