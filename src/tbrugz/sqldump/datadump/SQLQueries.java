@@ -110,7 +110,11 @@ public class SQLQueries extends AbstractSQLProc {
 			try {
 				stmt = conn.prepareStatement(sql);
 			} catch (SQLException e) {
-				log.warn("error creating prepared statement [id="+qid+";sql="+sql+"]");
+				String message = "error creating prepared statement [id="+qid+";sql="+sql+"]: "+e.getMessage();
+				log.warn(message);
+				if(failonerror) {
+					throw new ProcessingException(message, e);
+				}
 				//continue; //?
 			}
 			
@@ -156,7 +160,7 @@ public class SQLQueries extends AbstractSQLProc {
 				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
-			if(runQueries) {
+			if(runQueries && stmt!=null) {
 				try {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 					DataDump dd = new DataDump();
