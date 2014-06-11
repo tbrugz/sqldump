@@ -222,18 +222,29 @@ public class DataDumpTest {
 		Assert.assertEquals(6, jarr.size());
 	}
 
+	//char UTF8_BOM = '\ufeff';
+	char UTF8_BOM1 = (char) 0xef;
+	char UTF8_BOM2 = (char) 0xbb;
+	char UTF8_BOM3 = (char) 0xbf;
+	//EF BB BF
+	
+	void testJsonForUTF8BOM() {
+		File f = new File(DIR_OUT+"/data_ETC.json");
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		Assert.assertTrue("1st char should be '"+UTF8_BOM1+"'", jsonStr.charAt(0)==UTF8_BOM1);
+		Assert.assertTrue("2nd char should be '"+UTF8_BOM2+"'", jsonStr.charAt(1)==UTF8_BOM2);
+		Assert.assertTrue("3rd char should be '"+UTF8_BOM3+"'", jsonStr.charAt(2)==UTF8_BOM3);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be null", obj==null);
+	}
+	
 	@Test
 	public void testJSONWithBOM() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
 		dump1(new String[]{
 			"-Dsqldump.datadump.writebom=true",
 		});
-		File f = new File(DIR_OUT+"/data_ETC.json");
-		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		Assert.assertTrue("Should start with '﻿'", jsonStr.startsWith("﻿"));
-
-		Object obj = JSONValue.parse(jsonStr);
-		//System.out.println("str: "+jsonStr);
-		Assert.assertTrue("Should be null", obj==null);
+		testJsonForUTF8BOM();
 	}
 
 	@Test
@@ -241,12 +252,7 @@ public class DataDumpTest {
 		dump1(new String[]{
 			"-Dsqldump.datadump.json.writebom=true",
 		});
-		File f = new File(DIR_OUT+"/data_ETC.json");
-		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		Assert.assertTrue("Should start with '﻿'", jsonStr.startsWith("﻿"));
-
-		Object obj = JSONValue.parse(jsonStr);
-		Assert.assertTrue("Should be null", obj==null);
+		testJsonForUTF8BOM();
 	}
 	
 	@Test
