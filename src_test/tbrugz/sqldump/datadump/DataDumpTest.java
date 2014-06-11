@@ -99,7 +99,7 @@ public class DataDumpTest {
 				"-Dsqldump.processingclasses=DataDump",
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html, json",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
-				"-Dsqldump.datadump.writebom=false",
+				//"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.datadump.xml.escape=true",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
@@ -221,6 +221,33 @@ public class DataDumpTest {
 		JSONArray jarr = (JSONArray) obj;
 		Assert.assertEquals(6, jarr.size());
 	}
+
+	@Test
+	public void testJSONWithBOM() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
+		dump1(new String[]{
+			"-Dsqldump.datadump.writebom=true",
+		});
+		File f = new File(DIR_OUT+"/data_ETC.json");
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		Assert.assertTrue("Should start with '﻿'", jsonStr.startsWith("﻿"));
+
+		Object obj = JSONValue.parse(jsonStr);
+		//System.out.println("str: "+jsonStr);
+		Assert.assertTrue("Should be null", obj==null);
+	}
+
+	@Test
+	public void testJSONWithSyntaxBOM() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
+		dump1(new String[]{
+			"-Dsqldump.datadump.json.writebom=true",
+		});
+		File f = new File(DIR_OUT+"/data_ETC.json");
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		Assert.assertTrue("Should start with '﻿'", jsonStr.startsWith("﻿"));
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be null", obj==null);
+	}
 	
 	@Test
 	public void dumpPartitioned() throws IOException, ClassNotFoundException, SQLException, NamingException {
@@ -232,7 +259,7 @@ public class DataDumpTest {
 				"-Dsqldump.query.q1.partitionby=_[col:SUPERVISOR_ID]",
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
-				"-Dsqldump.datadump.writebom=false",
+				//"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.datadump.logeachxrows=1",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
@@ -262,7 +289,7 @@ public class DataDumpTest {
 				"-Dsqldump.query.q1.partitionby=p2|p2_[col:SUPERVISOR_ID]", //this line changes it!
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
-				"-Dsqldump.datadump.writebom=false",
+				//"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.datadump.logeachxrows=1",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
@@ -295,7 +322,7 @@ public class DataDumpTest {
 				"-Dsqldump.query.q1.sql=select * from emp",
 				"-Dsqldump.datadump.dumpsyntaxes=rncsv",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
-				"-Dsqldump.datadump.writebom=false",
+				//"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 				"-Dsqldump.user=h",
@@ -320,7 +347,7 @@ public class DataDumpTest {
 				"-Dsqldump.query.q1.partitionby=p2_[col:SUPERVISOR_ID]",
 				"-Dsqldump.datadump.dumpsyntaxes=rncsv",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename][partitionby].[syntaxfileext]",
-				"-Dsqldump.datadump.writebom=false",
+				//"-Dsqldump.datadump.writebom=false",
 				"-Dsqldump.datadump.logeachxrows=1",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
