@@ -62,6 +62,9 @@ public class DataDump extends AbstractSQLProc {
 	//prefix
 	static final String DATADUMP_PROP_PREFIX = "sqldump.datadump.";
 	
+	//suffixes
+	static final String SUFFIX_DATADUMP_WRITEBOM = "writebom";
+	
 	//generic props
 	public static final String PROP_DATADUMP_OUTFILEPATTERN = "sqldump.datadump.outfilepattern";
 	//static final String PROP_DATADUMP_INSERTINTO = "sqldump.datadump.useinsertintosyntax";
@@ -75,7 +78,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
 	static final String PROP_DATADUMP_LOG_EACH_X_ROWS = "sqldump.datadump.logeachxrows";
 	static final String PROP_DATADUMP_LOG_1ST_ROW = "sqldump.datadump.log1strow";
-	static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.writebom";
+	static final String PROP_DATADUMP_WRITEBOM = DATADUMP_PROP_PREFIX+SUFFIX_DATADUMP_WRITEBOM;
 	static final String PROP_DATADUMP_WRITEAPPEND = "sqldump.datadump.writeappend";
 	static final String PROP_DATADUMP_CREATEEMPTYFILES = "sqldump.datadump.createemptyfiles";
 	static final String PROP_DATADUMP_PARTITIONBY_DATEFORMAT = "sqldump.datadump.partitionby.dateformat";
@@ -547,7 +550,8 @@ public class DataDump extends AbstractSQLProc {
 							boolean newFilename = count==0;
 							Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
 							if(w==null) {
-								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, writeBOM, writeAppend);
+								Boolean syntaxWriteBOM = Utils.getPropBoolean(prop, DATADUMP_PROP_PREFIX+ds.getSyntaxId()+"."+SUFFIX_DATADUMP_WRITEBOM, writeBOM);
+								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, syntaxWriteBOM, writeAppend);
 								w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 							}
 							long countInFilename = countByPatternFinalFilename.get(finalFilename);
