@@ -29,6 +29,8 @@ public final class DBMSResources {
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
+
+	static final DBMSResources instance = new DBMSResources();
 	
 	final Properties papp = new Properties(); //TODO: maybe DBMSResources should not depend on processProperties...
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
@@ -173,12 +175,10 @@ public final class DBMSResources {
 		return null;
 	}
 	
-	static DBMSResources instance;
-	
 	public static DBMSResources instance() {
-		if(instance==null) {
+		/*if(instance==null) {
 			instance = new DBMSResources();
-		}
+		}*/
 		return instance;
 	}
 

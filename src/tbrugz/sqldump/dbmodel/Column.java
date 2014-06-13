@@ -25,13 +25,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		static String dbid;
 		
 		public static void init(Properties prop) { //DBMS
-				if(prop!=null) {
+			usePrecisionMap.clear();
+			if(prop!=null) {
 					dbmsSpecificProps.clear();
 					dbmsSpecificProps.putAll(prop);
-				}
-				
-				usePrecisionMap.clear();
-				setupPrecisionMap(prop);
+					setupPrecisionMap(prop);
+			}
 		}
 		
 		public static void setProperties(Properties prop) {

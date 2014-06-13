@@ -29,10 +29,10 @@ import tbrugz.sqldump.util.Utils;
  */
 public class Turtle extends RDFAbstractSyntax {
 
-	public static final String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
-	public static final String PROP_KEY_COLSEPARATOR = "sqldump.datadump.turtle.keycolseparator"; 
-	public static final String PROP_KEY_INCLUDESCOLNAME = "sqldump.datadump.turtle.keyincludescolname"; 
-	public static final String PROP_KEY_APPENDSTR = "sqldump.datadump.turtle.keyappend"; 
+	static final String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
+	public static final String PROP_KEY_COLSEPARATOR = "sqldump.datadump.turtle.keycolseparator";
+	public static final String PROP_KEY_INCLUDESCOLNAME = "sqldump.datadump.turtle.keyincludescolname";
+	public static final String PROP_KEY_APPENDSTR = "sqldump.datadump.turtle.keyappend";
 	
 	String baseUrl = null;
 	String keyColSeparator = ";";

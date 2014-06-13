@@ -39,11 +39,11 @@ public class DataDumpUtils {
 	static boolean resultSetWarnedForSQLValue = false;
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
-	public static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-	public static final NumberFormat floatFormatterSQL;
+	static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	static final NumberFormat floatFormatterSQL;
 	//public static NumberFormat floatFormatterBR = null;
-	public static final NumberFormat longFormatter;
-	public static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
+	static final NumberFormat longFormatter;
+	static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
 	
 	static {
 		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");

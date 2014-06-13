@@ -27,7 +27,7 @@ import tbrugz.sqldump.dbmodel.TableType;
 public class SchemaDiffer {
 	static final Log log = LogFactory.getLog(SchemaDiffer.class);
 
-	public static boolean mayReplaceDbId = false;
+	static boolean mayReplaceDbId = false;
 	
 	Set<DBObjectType> doDiffTypes = null;
 

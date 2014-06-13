@@ -193,7 +193,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	//public static final String PROP_MONDRIAN_SCHEMA_ALL_POSSIBLE_DEGENERATED = "sqldump.mondrianschema.allnondimormeasureasdegenerated";
 	
 	//possible aggregate functions: "sum", "count", "min", "max", "avg" and "distinct-count" ; mode, median, first, last, concat?
-	public static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
+	static final String[] DEFAULT_MEASURE_AGGREGATORS = {"sum"};
 	
 	static String PATTERN_STR_TABLENAME = "\\[tablename\\]";
 	static String PATTERN_STR_PKCOLUMN = "\\[pkcolumn\\]";
