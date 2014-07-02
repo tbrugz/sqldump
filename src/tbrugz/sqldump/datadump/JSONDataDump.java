@@ -152,6 +152,11 @@ public class JSONDataDump extends DumpSyntax {
 		pw.write(s);
 	}
 	
+	/*@Override
+	public boolean shouldNotWriteBOM() {
+		return true;
+	}*/
+	
 	@Override
 	public String getSyntaxId() {
 		return JSON_SYNTAX_ID;

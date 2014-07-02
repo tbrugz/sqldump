@@ -124,6 +124,10 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		}*/
 	}
 	
+	/*public boolean shouldNotWriteBOM() {
+		return false;
+	}*/
+	
 	/*public void copyPropsTo(DumpSyntax ds) {
 		ds.dateFormatter = this.dateFormatter;
 		ds.floatFormatter = this.floatFormatter;

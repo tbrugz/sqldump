@@ -104,6 +104,7 @@ public class DiffTwoQueries implements Executor {
 		
 		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCEQUERY);
 		String targetSQL = getPropertyFailIfNull(prop, PROP_TARGETQUERY);
+		//XXX warn if no 'order by' present
 		String tableName = prop.getProperty(PROP_TABLENAME);
 		if(tableName==null) {
 			log.info("null '"+PROP_TABLENAME+"', using '"+DEFAULT_TABLE_NAME+"'");
@@ -116,6 +117,7 @@ public class DiffTwoQueries implements Executor {
 			//XXX: option to show prepared statement metadata (columns)
 			throw new RuntimeException(message);
 		}
+		//XXX keyCols to upper?
 
 		//cout
 		String finalPattern = null;
