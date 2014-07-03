@@ -237,7 +237,7 @@
 
 	<target name="dist" depends="jar,jar-source,javadoc,make-ivy-pom" description="builds jars, javadoc, ivy &amp; pom files"/>
 
-	<target name="all" depends="clean,test,publish" description="clean, build, test and publish project"/>
+	<target name="all" depends="clean,javadoc,test,publish" description="clean, build, test and publish project"/>
 
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
