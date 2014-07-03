@@ -9,7 +9,8 @@
 	<classpathentry kind="src" path="src_pivot"/>
 	<classpathentry kind="src" path="src_anttasks"/>
 	<classpathentry kind="src" output="bin/test" path="src_test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="src" path="src_utilities"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.apache.ivyde.eclipse.cpcontainer.IVYDE_CONTAINER/?project=sqldump&amp;ivyXmlPath=ivy.xml&amp;confs=*"/>
 	<classpathentry kind="output" path="bin/main"/>
 </classpath>
