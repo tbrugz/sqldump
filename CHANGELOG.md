@@ -1,4 +1,13 @@
 
+sqldump 0.9.12
+--------------
+- fixes: changes from checkstyle & findbugs
+- model: refactoring: added many getters & setters
+- datadump: '.writebom' changes
+- datadump: xml: escape properties
+- many other small changes/fixes
+
+
 sqldump 0.9.11
 --------------
 - dbms: H2: added grabDBTriggers()
