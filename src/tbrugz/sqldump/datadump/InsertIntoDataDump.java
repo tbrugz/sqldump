@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class InsertIntoDataDump extends DumpSyntax {
@@ -26,6 +27,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	private static final Log log = LogFactory.getLog(InsertIntoDataDump.class);
 	
 	static final String INSERTINTO_SYNTAX_ID = "insertinto";
+	static final String INSERTINTO_PREFIX = "sqldump.datadump.insertinto";
+	
 	static final String PROP_DATADUMP_INSERTINTO_WITHCOLNAMES = "sqldump.datadump.insertinto.withcolumnnames";
 	static final String PROP_INSERTINTO_DUMPCURSORS = "sqldump.datadump.insertinto.dumpcursors";
 	//XXX: option/prop to include or not columns that are cursor expressions (ResultSets) as null
@@ -34,6 +37,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	//compactmode/multiple rows: compatible with mysql, sqlserver, postgresql, ...? oracle: 'insert all ...'
 	//XXX: compactmode: maximum number of rows in one insert statement?
 	static final String PROP_INSERTINTO_COMPACT = "sqldump.datadump.insertinto.compactmode";
+	static final String PROP_INSERTINTO_QUOTESQL = INSERTINTO_PREFIX+".quotesql";
 	
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
@@ -41,6 +45,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
 
 	protected String tableName;
+	protected String tableName4Dump;
 	protected int numCol;
 	String colNames;
 	protected final List<String> lsColNames = new ArrayList<String>();
@@ -50,6 +55,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	boolean doColumnNamesDump = true;
 	boolean doDumpCursors = false;
 	boolean dumpCompactMode = false;
+	boolean doQuoteAllSqlIds = false;
+	
 	String header;
 	String footer;
 	
@@ -69,6 +76,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
 		dumpCompactMode = Utils.getPropBool(prop, PROP_INSERTINTO_COMPACT, dumpCompactMode);
+		doQuoteAllSqlIds = Utils.getPropBool(prop, PROP_INSERTINTO_QUOTESQL, doQuoteAllSqlIds);
 		//XXX replace [schemaname] in header & footer ?
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
@@ -83,6 +91,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
+		this.tableName4Dump = tableName;
 		this.pkCols = pkCols;
 		numCol = md.getColumnCount();
 		lsColTypes.clear();
@@ -94,7 +103,15 @@ public class InsertIntoDataDump extends DumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
-		colNames = "("+Utils.join(lsColNames, ", ")+")";
+		if(doQuoteAllSqlIds) { //quote all
+			String quote = DBMSResources.instance().getIdentifierQuoteString();
+			StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
+			colNames = "("+Utils.join(lsColNames, ", ", quoteAllDecorator)+")";
+			tableName4Dump = quoteAllDecorator.get(tableName);
+		}
+		else {
+			colNames = "("+Utils.join(lsColNames, ", ")+")";
+		}
 	}
 
 	//XXX: option to dump ResultSet columns
@@ -109,7 +126,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 				")", fos);
 		}
 		else {
-			out("insert into "+tableName+
+			out("insert into "+tableName4Dump+
 				(doColumnNamesDump?" "+colNames:"")+
 				" values ("+
 				valsStr+

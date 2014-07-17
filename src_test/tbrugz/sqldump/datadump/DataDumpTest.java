@@ -138,6 +138,16 @@ public class DataDumpTest {
 		String expected = "insert into EMP (ID, NAME, SUPERVISOR_ID, DEPARTMENT_ID, SALARY) values (1, 'john', 1, 1, 2000);";
 		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
 	}
+	
+	@Test
+	public void testSQLWithQuote() throws ClassNotFoundException, SQLException, NamingException, IOException {
+		dump1(new String[]{
+				"-Dsqldump.datadump.insertinto.quotesql=true",
+				});
+		String sqlEmp = IOUtil.readFromFilename(DIR_OUT+"/data_EMP.sql");
+		String expected = "insert into \"EMP\" (\"ID\", \"NAME\", \"SUPERVISOR_ID\", \"DEPARTMENT_ID\", \"SALARY\") values (1, 'john', 1, 1, 2000);";
+		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
+	}
 
 	@Test
 	public void testSQLDate() throws Exception {
