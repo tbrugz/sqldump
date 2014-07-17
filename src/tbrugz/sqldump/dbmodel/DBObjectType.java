@@ -7,6 +7,8 @@ public enum DBObjectType {
 	
 	CONSTRAINT, COLUMN; //non '1st class' objects
 	
+	//RELATION, QUERY // XXX: add generic object types ?
+	
 	//XXX: include PROGRAM, SCHEDULE?
 	//XXX: oracle: java_class, java_resource, java_source: http://docs.oracle.com/cd/B28359_01/server.111/b28286/statements_5013.htm
 	//XXX: executables: FUNCTION, JAVA SOURCE, PACKAGE, PACKAGE BODY, PROCEDURE, TRIGGER, TYPE, TYPE BODY - "select distinct type from all_source"
