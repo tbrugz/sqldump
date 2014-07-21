@@ -13,7 +13,9 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Table;
@@ -312,9 +314,10 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 		
-		if(model.getViews().contains(query)) {
-			System.out.println("removing query: "+query);
-			model.getViews().remove(query);
+		View v = DBIdentifiable.getDBIdentifiableByName(model.getViews(), query.getName());
+		if(v!=null) {
+			boolean removed = model.getViews().remove(v);
+			log.info("removed query '"+v+"'? "+removed);
 		}
 		boolean added = model.getViews().add(query);
 
