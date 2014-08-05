@@ -61,6 +61,22 @@
 		<echo message="env.M2_HOME: ${env.M2_HOME}" />
 	</target>
 
+	<!--target name="mvn-install" depends="info" description="install maven artifacts">
+		<copy file="${maven-pom}" tofile="pom.xml" />
+		<artifact:mvn mavenHome="${maven.home}">
+			<arg value="install"/>
+			<arg value="-Dmaven.test.skip=true"/>
+		</artifact:mvn>
+	</target-->
+	
+	<target name="mvn-install-file" depends="info" description="install maven artifacts">
+		<artifact:mvn>
+			<arg value="install:install-file"/>
+			<arg value="-DpomFile=${maven-pom}" />
+			<arg value="-Dfile=${maven-jar}" />
+		</artifact:mvn>
+	</target>
+
 	<target name="deploy" depends="info" description="deploy snapshot version to Maven snapshot repository">
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
