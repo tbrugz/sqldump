@@ -295,13 +295,20 @@ public class SQLQueries extends AbstractSQLProc {
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
 					query.setColumns(DataDumpUtils.getColumns(rsmd));
+				} catch (SQLException e) {
+					query.setColumns(new ArrayList<Column>());
+					log.warn("resultset metadata's sqlexception: "+e.toString().trim());
+					log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
+				}
+				
+				try {
 					//XXX option to set parameter count by properties?
 					ParameterMetaData pmd = stmt.getParameterMetaData();
 					query.setParameterCount(pmd.getParameterCount());
 				} catch (SQLException e) {
-					query.setColumns(new ArrayList<Column>());
-					log.warn("sqlexception: "+e.toString().trim());
-					log.debug("sqlexception: "+e.getMessage(), e);
+					query.setParameterCount(null);
+					log.warn("parameter metadata's sqlexception: "+e.toString().trim());
+					log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 				}
 			}
 		}
@@ -320,6 +327,7 @@ public class SQLQueries extends AbstractSQLProc {
 			log.info("removed query '"+v+"'? "+removed);
 		}
 		boolean added = model.getViews().add(query);
+		log.info("added query '"+query+"'? "+added);
 
 		if(addAlsoAsTable) {
 			//adding view to table's list
