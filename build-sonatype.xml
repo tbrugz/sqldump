@@ -57,6 +57,7 @@
 	
 	<target name="info">
 		<echo message="java.home: ${java.home}" />
+		<echo message="maven.home: ${maven.home}" />
 		<echo message="env.M2_HOME: ${env.M2_HOME}" />
 	</target>
 
@@ -67,11 +68,21 @@
 			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
-			<!--arg value="-X" />
-			<arg value="-e" /-->
 		</artifact:mvn>
 	</target>
 
+	<target name="deploy-debug" depends="info" description="deploy snapshot version to Maven snapshot repository - debug version">
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="-Durl=${maven-snapshots-repository-url}" />
+			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+			<arg value="-DpomFile=${maven-pom}" />
+			<arg value="-Dfile=${maven-jar}" />
+			<arg value="-X" />
+			<arg value="-e" />
+		</artifact:mvn>
+	</target>
+	
 	<!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
 	<target name="stage" depends="info" description="deploy release version to Maven staging repository">
 		<!-- sign and deploy the main artifact -->
