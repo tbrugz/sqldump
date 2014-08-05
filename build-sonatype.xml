@@ -28,6 +28,8 @@
 	<property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
 	<property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
 
+	<property name="maven-localRepositoryPath" value="${user.home}/.m2/repository" />
+	
 	<!-- target name="init">
 		<mkdir dir="${build}" />
 		<mkdir dir="${dist}/lib" />
@@ -71,9 +73,12 @@
 	
 	<target name="mvn-install-file" depends="info" description="install maven artifacts">
 		<artifact:mvn>
-			<arg value="install:install-file"/>
+			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
+			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
+			<!--arg value="-X" />
+			<arg value="-e" /-->
 		</artifact:mvn>
 	</target>
 
