@@ -85,4 +85,9 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 			co.categorizedOut(script, obj.getSchemaName(), objectType);
 		}
 	}
+	
+	@Override
+	public String getMimeType() {
+		return SQL_MIME_TYPE;
+	}
 }

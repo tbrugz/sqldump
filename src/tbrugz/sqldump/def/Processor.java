@@ -18,4 +18,5 @@ public interface Processor extends ProcessOutputComponent {
 
 	public Connection getConnection();
 
+	public boolean isIdempotent();
 }

@@ -509,4 +509,10 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		}
 		return null;
 	}
+
+	@Override
+	public String getMimeType() {
+		return "application/xml";
+	}
+	
 }

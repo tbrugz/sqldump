@@ -1343,5 +1343,10 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		if(a==null) return b;
 		return (T[]) XOMUtil.concatenate(a, b);
 	}
+	
+	@Override
+	public String getMimeType() {
+		return "application/xml";
+	}
 
 }

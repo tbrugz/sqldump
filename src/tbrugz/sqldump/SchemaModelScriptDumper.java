@@ -616,5 +616,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			Column.useAutoIncrement = true;
 		}
 	}
+	
+	@Override
+	public String getMimeType() {
+		return SQL_MIME_TYPE;
+	}
 
 }

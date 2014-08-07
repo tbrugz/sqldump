@@ -432,4 +432,9 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	public void setPropertiesPrefix(String propertiesPrefix) {
 		// TODO: properties-prefix setting
 	}
+	
+	@Override
+	public String getMimeType() {
+		return SQL_MIME_TYPE;
+	}
 }

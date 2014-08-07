@@ -196,5 +196,10 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	public void setOutputWriter(Writer writer) {
 		outputWriter = writer;
 	}
+	
+	@Override
+	public String getMimeType() {
+		return "application/xml";
+	}
 
 }

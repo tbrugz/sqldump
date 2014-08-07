@@ -93,5 +93,10 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
+	
+	@Override
+	public String getMimeType() {
+		return "application/json";
+	}
 
 }

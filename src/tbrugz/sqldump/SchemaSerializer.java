@@ -124,4 +124,10 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 	public void setPropertiesPrefix(String propertiesPrefix) {
 		// TODO: properties-prefix setting
 	}
+	
+	@Override
+	public String getMimeType() {
+		//XXX: see http://docs.oracle.com/javase/7/docs/api/java/awt/datatransfer/DataFlavor.html
+		return "application/x-java-serialized-object";
+	}
 }

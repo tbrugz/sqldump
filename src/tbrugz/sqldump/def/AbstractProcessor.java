@@ -40,5 +40,15 @@ public abstract class AbstractProcessor extends AbstractFailable implements Proc
 	public Connection getConnection() {
 		return null;
 	}
+	
+	@Override
+	public boolean isIdempotent() {
+		return false;
+	}
+	
+	@Override
+	public String getMimeType() {
+		return null;
+	}
 
 }
