@@ -214,7 +214,7 @@ public class DataDumpUtils {
 	/*
 	 * see: http://stackoverflow.com/a/10035382/616413
 	 */
-	static String xmlEscapeText(String t) {
+	public static String xmlEscapeText(String t) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < t.length(); i++) {
 			char c = t.charAt(i);
