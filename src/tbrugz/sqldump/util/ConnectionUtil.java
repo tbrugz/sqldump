@@ -20,12 +20,15 @@ public class ConnectionUtil {
 	
 	static final Log log = LogFactory.getLog(ConnectionUtil.class);
 	
+	static final String DEFAULT_INITIAL_CONTEXT = "java:/comp/env";
+	
 	//connection props
 	public static final String CONN_PROP_USER = "user";
 	public static final String CONN_PROP_PASSWORD = "password";
 	
-	//connection properties
+	//connection properties suffixes
 	public static final String SUFFIX_CONNECTION_DATASOURCE = ".datasource"; //.(conn(ection))pool(name)
+	public static final String SUFFIX_DATASOURCE_CONTEXTLOOKUP = ".datasource.contextlookup";
 	public static final String SUFFIX_DRIVERCLASS = ".driverclass";
 	public static final String SUFFIX_URL = ".dburl";
 	public static final String SUFFIX_USER = ".user";
@@ -48,12 +51,14 @@ public class ConnectionUtil {
 		log.debug("initDBConnection...");
 		
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
+		String initialContextLookup = papp.getProperty(propsPrefix+SUFFIX_DATASOURCE_CONTEXTLOOKUP, DEFAULT_INITIAL_CONTEXT);
+		
 		String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
 		String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
 
 		Connection conn = null;
 		if(connectionDataSource!=null) {
-			conn = getConnectionFromDataSource(connectionDataSource);
+			conn = getConnectionFromDataSource(connectionDataSource, initialContextLookup);
 		}
 		else {
 			conn = creteNewConnection(propsPrefix, papp, driverClass, dbUrl);
@@ -194,11 +199,11 @@ public class ConnectionUtil {
 	}
 	
 	// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
-	//XXX: prop for initial context lookup? like "java:/comp/env"...
-	static Connection getConnectionFromDataSource(String dataSource) throws SQLException, NamingException {
-		log.debug("getting connection from datasource: "+dataSource);
+	//TODOne: prop for initial context lookup? like "java:/comp/env"...
+	static Connection getConnectionFromDataSource(String dataSource, String contextLookup) throws SQLException, NamingException {
+		log.debug("getting connection from datasource '"+dataSource+"' [context: "+contextLookup+"]");
 		Context initContext = new InitialContext();
-		Context envContext  = (Context) initContext.lookup("java:/comp/env");
+		Context envContext  = (Context) initContext.lookup(contextLookup);
 		DataSource datasource = (DataSource) envContext.lookup(dataSource);
 		return datasource.getConnection();
 	}
