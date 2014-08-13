@@ -17,7 +17,7 @@ public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
 	public static final String DIRECTIVE_INCLUDE = "@includes";
-	static Log log = LogFactory.getLog(ParametrizedProperties.class);
+	static final Log log = LogFactory.getLog(ParametrizedProperties.class);
 
 	static boolean useSystemProperties = false;
 
@@ -103,6 +103,12 @@ public class ParametrizedProperties extends Properties {
 		}
 		
 		return replaceProps(s, this);
+	}
+	
+	@Override
+	public synchronized void clear() {
+		super.clear();
+		loadedPropFiles.clear();
 	}
 
 	public static String replaceProps(String s, Properties p) {
