@@ -241,9 +241,12 @@ public class DataDumpTest {
 	void testJsonForUTF8BOM() {
 		File f = new File(DIR_OUT+"/data_ETC.json");
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		Assert.assertTrue("1st char should be '"+UTF8_BOM1+"'", jsonStr.charAt(0)==UTF8_BOM1);
-		Assert.assertTrue("2nd char should be '"+UTF8_BOM2+"'", jsonStr.charAt(1)==UTF8_BOM2);
-		Assert.assertTrue("3rd char should be '"+UTF8_BOM3+"'", jsonStr.charAt(2)==UTF8_BOM3);
+		Assert.assertEquals(UTF8_BOM1, jsonStr.charAt(0));
+		Assert.assertEquals(UTF8_BOM2, jsonStr.charAt(1));
+		Assert.assertEquals(UTF8_BOM3, jsonStr.charAt(2));
+		//Assert.assertTrue("1st char should be '"+UTF8_BOM1+"' but is '"+jsonStr.charAt(0)+"'", jsonStr.charAt(0)==UTF8_BOM1);
+		//Assert.assertTrue("2nd char should be '"+UTF8_BOM2+"'", jsonStr.charAt(1)==UTF8_BOM2);
+		//Assert.assertTrue("3rd char should be '"+UTF8_BOM3+"'", jsonStr.charAt(2)==UTF8_BOM3);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be null", obj==null);
