@@ -61,9 +61,9 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			if(fileOutput!=null) {
 				outputWriter = new FileWriter(fileOutput);
 			}
-			else {
+			/*else {
 				log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
-			}
+			}*/
 		} catch (IOException e) {
 			log.warn(e);
 		}
