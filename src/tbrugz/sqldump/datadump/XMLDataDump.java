@@ -82,7 +82,12 @@ public class XMLDataDump extends DumpSyntax {
 		defaultRowElement = prop.getProperty(PROP_ROWELEMENT, defaultRowElement);
 		defaultDumpRowElement = Utils.getPropBool(prop, PROP_DUMPROWELEMENT, defaultDumpRowElement);
 		dumpNullValues = Utils.getPropBool(prop, PROP_DUMPNULLVALUES, dumpNullValues);
-		dumpHeader4InnerTables = HeaderFooterDump.valueOf(prop.getProperty(PROP_DUMPHEADER4INNERTABLES, dumpHeader4InnerTables.name()));
+		try {
+			dumpHeader4InnerTables = HeaderFooterDump.valueOf(prop.getProperty(PROP_DUMPHEADER4INNERTABLES, dumpHeader4InnerTables.name()));
+		}
+		catch(IllegalArgumentException e) {
+			log.warn("invalid argument for '"+PROP_DUMPHEADER4INNERTABLES+"': "+e);
+		}
 		dumpTableNameAsRowTag = Utils.getPropBool(prop, PROP_DUMPTABLENAMEASROWTAG, dumpTableNameAsRowTag);
 		escape = Utils.getPropBool(prop, PROP_XML_ESCAPE, escape);
 		this.prop = prop;

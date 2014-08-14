@@ -28,12 +28,20 @@ public class HTMLDataDump extends XMLDataDump {
 	//protected List<String> lsColNames = new ArrayList<String>();
 	//protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 
-	protected String padding = "";
+	protected final String padding;
 	
 	protected String prepend = null;
 	protected String append = null;
 	//TODO: prop for 'dumpColElement'
-	protected boolean dumpColElement = false;
+	protected final boolean dumpColElement = false;
+	
+	public HTMLDataDump() {
+		padding = "";
+	}
+	
+	public HTMLDataDump(String padding) {
+		this.padding = padding;
+	}
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -90,9 +98,10 @@ public class HTMLDataDump extends XMLDataDump {
 				out(sb.toString()+"<td>\n", fos);
 				sb = new StringBuffer();
 				
-				HTMLDataDump htmldd = new HTMLDataDump();
-				htmldd.padding = this.padding+"\t\t";
+				HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t");
+				//htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
+				htmldd.procProperties(prop);
 				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
 				sb.append("\n\t</td>");
 			}
