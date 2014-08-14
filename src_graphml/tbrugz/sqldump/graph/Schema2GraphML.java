@@ -2,6 +2,7 @@ package tbrugz.sqldump.graph;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,8 +23,11 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.TableType;
+import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
@@ -57,7 +61,7 @@ enum EdgeLabelType {
  */
 public class Schema2GraphML extends AbstractFailable implements SchemaModelDumper {
 	
-	static Log log = LogFactory.getLog(Schema2GraphML.class);
+	static final Log log = LogFactory.getLog(Schema2GraphML.class);
 	
 	public static final String PREFIX_SCHEMA2GRAPHML = "sqldump.graphmldump";
 	public static final String SUFFIX_DUMPFORMATCLASS = ".dumpformatclass";
@@ -82,12 +86,14 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	String snippetsFile;
 	
 	File output;
+	PrintStream outputStream;
 	List<String> schemaNamesList = new ArrayList<String>();
 	EdgeLabelType edgeLabel = EdgeLabelType.NONE;
 	boolean showSchemaName = true;
 	boolean showConstraints = false;
 	boolean showIndexes = false;
 	
+	boolean addViewsAsNodes = true; //XXX prop for showing (or not) views as nodes
 	boolean addTableTypeStereotype = true;
 	boolean addSchemaStereotype = false;
 	boolean addVertexTypeStereotype = false;
@@ -103,148 +109,14 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		Set<String> tableIds = new HashSet<String>();
 		
 		for(Table t: schemaModel.getTables()) {
-			TableNode n = new TableNode();
-			String id = t.getSchemaName()+"."+t.getName();
-			n.setId(id);
-			
-			//label
-			if(showSchemaName) {
-				n.setLabel(id);
-			}
-			else {
-				n.setLabel(t.getName());
-			}
-			
-			//columns
-			int colCount = setTableNodeAttributes(n, schemaModel, t);
-			/*StringBuffer sbCols = new StringBuffer();
-			for(Column c: t.getColumns()) {
-				sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
-			}
-			n.setColumnsDesc(sbCols.toString());*/
+			TableNode n = processRelation(schemaModel, t);
+			tableIds.add(n.getId());
+			graphModel.getChildren().add(n);
+		}
 
-			//constraints + indexes
-			int methodCount = setTableNodeMethods(n, schemaModel, t);
-			/*n.setConstraintsDesc("");
-			int constrCount = 0;
-			if(showConstraints) {
-				StringBuffer sbConstraints = new StringBuffer();
-				for(Constraint cons: t.getConstraints()) {
-					switch(cons.type) {
-						case PK: 
-						case CHECK:
-						case UNIQUE:
-							sbConstraints.append(cons.getDefinition(false)+"\n");
-							constrCount++;
-					}
-				}
-				n.setConstraintsDesc(n.getConstraintsDesc()+sbConstraints.toString());
-			}
-			//indexes
-			int indexCount = 0;
-			if(showIndexes) {
-				StringBuffer sbIndexes = new StringBuffer();
-				for(Index idx: schemaModel.getIndexes()) {
-					//log.debug("idx: "+idx+" / t: "+t.name);
-					if(idx.tableName.equals(t.name)) {
-						sbIndexes.append(idx.getDefinition(false)+"\n");
-						indexCount++;
-					}
-				}
-				n.setConstraintsDesc(n.getConstraintsDesc()+sbIndexes.toString());
-			}*/
-	
-			//root, leaf
-			boolean isRoot = true;
-			boolean isLeaf = true;
-			for(FK fk: schemaModel.getForeignKeys()) {
-				if(fk.getPkTable().equals(t.getName())) {
-					isRoot = false;
-				}
-				if(fk.getFkTable().equals(t.getName())) {
-					isLeaf = false;
-				}
-			}
-			n.setRoot(isRoot);
-			n.setLeaf(isLeaf);
-
-			//column number
-			n.setColumnNumber(colCount+methodCount);
-			
-			//node stereotype
-			if(addTableTypeStereotype) {
-				switch (t.getType()) {
-					case SYSTEM_TABLE: 
-					case VIEW:
-					case MATERIALIZED_VIEW:
-					case EXTERNAL_TABLE:
-					case SYNONYM:
-						addStereotype(n, "type@"+t.getType()); break;
-					case TABLE:
-					default:
-						break;
-				}
-			}
-			
-			for(String key: stereotypeNodenames.keySet()) {
-				//List<Pattern> patterns = stereotypeRegexes.get(key);
-				for(String nodename: stereotypeNodenames.get(key)) {
-					if(nodename.equals(t.getName())) {
-						addStereotype(n, "nodename@"+key);
-					}
-				}
-			}
-
-			for(String key: stereotypeRegexes.keySet()) {
-				//List<Pattern> patterns = stereotypeRegexes.get(key);
-				for(Pattern pat: stereotypeRegexes.get(key)) {
-					if(pat.matcher(t.getName()).matches()) {
-						addStereotype(n, "regex@"+key);
-					}
-				}
-			}
-			
-			if(t.getSchemaName()!=null && schemaNamesList.contains(t.getSchemaName())) {
-				if(addSchemaStereotype) {
-					addStereotype(n, "schema@"+t.getSchemaName());
-				}
-			}
-			else {
-				if(addSchemaStereotype) {
-					addStereotype(n, "otherschema.schema@"+t.getSchemaName());
-				}
-				else {
-					addStereotype(n, "otherschema");
-				}
-			}
-			
-			if(addVertexTypeStereotype) {
-				if(n.isRoot() && n.isLeaf()) {
-					//log.debug("table '"+t.getName()+"' is disconnected");
-					addStereotype(n, "disconnected");
-				}
-				else if(n.isRoot()) {
-					//log.debug("table '"+t.getName()+"' is root");
-					addStereotype(n, "root");
-				}
-				else if(n.isLeaf()) {
-					//log.debug("table '"+t.getName()+"' is leaf");
-					addStereotype(n, "leaf");
-				}
-				else {
-					//is in the middle
-					addStereotype(n, "connected");
-				}
-			}
-			if(n.getStereotype()!=null) {
-				log.debug("node '"+t.getName()+"' has stereotype: "+n.getStereotype());
-			}
-			else {
-				log.debug("node '"+t.getName()+"' has no stereotype");
-			}
-			//end stereotype
-			
-			tableIds.add(id);
+		for(View v: schemaModel.getViews()) {
+			TableNode n = processRelation(schemaModel, v);
+			tableIds.add(n.getId());
 			graphModel.getChildren().add(n);
 		}
 		
@@ -266,19 +138,182 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		return graphModel;
 	}
 	
-	int setTableNodeAttributes(TableNode n, SchemaModel schemaModel, Table t) {
+	TableNode processRelation(SchemaModel schemaModel, Relation t) {
+		TableNode n = new TableNode();
+		String id = t.getSchemaName()+"."+t.getName();
+		n.setId(id);
+		
+		//label
+		if(showSchemaName) {
+			n.setLabel(id);
+		}
+		else {
+			n.setLabel(t.getName());
+		}
+		
+		//columns
+		int colCount = setTableNodeAttributes(n, schemaModel, t);
+		/*StringBuffer sbCols = new StringBuffer();
+		for(Column c: t.getColumns()) {
+			sbCols.append(Column.getColumnDesc(c, null, null, null)+"\n");
+		}
+		n.setColumnsDesc(sbCols.toString());*/
+
+		//constraints + indexes
+		int methodCount = setTableNodeMethods(n, schemaModel, t);
+		/*n.setConstraintsDesc("");
+		int constrCount = 0;
+		if(showConstraints) {
+			StringBuffer sbConstraints = new StringBuffer();
+			for(Constraint cons: t.getConstraints()) {
+				switch(cons.type) {
+					case PK: 
+					case CHECK:
+					case UNIQUE:
+						sbConstraints.append(cons.getDefinition(false)+"\n");
+						constrCount++;
+				}
+			}
+			n.setConstraintsDesc(n.getConstraintsDesc()+sbConstraints.toString());
+		}
+		//indexes
+		int indexCount = 0;
+		if(showIndexes) {
+			StringBuffer sbIndexes = new StringBuffer();
+			for(Index idx: schemaModel.getIndexes()) {
+				//log.debug("idx: "+idx+" / t: "+t.name);
+				if(idx.tableName.equals(t.name)) {
+					sbIndexes.append(idx.getDefinition(false)+"\n");
+					indexCount++;
+				}
+			}
+			n.setConstraintsDesc(n.getConstraintsDesc()+sbIndexes.toString());
+		}*/
+
+		//root, leaf
+		boolean isRoot = true;
+		boolean isLeaf = true;
+		for(FK fk: schemaModel.getForeignKeys()) {
+			if(fk.getPkTable().equals(t.getName())) {
+				isRoot = false;
+			}
+			if(fk.getFkTable().equals(t.getName())) {
+				isLeaf = false;
+			}
+		}
+		n.setRoot(isRoot);
+		n.setLeaf(isLeaf);
+
+		//column number
+		n.setColumnNumber(colCount+methodCount);
+		
+		//node stereotype
+		if(addTableTypeStereotype) {
+			if(t instanceof Table) {
+				Table tt = (Table) t;
+				switch (tt.getType()) {
+					case SYSTEM_TABLE: 
+					case VIEW:
+					case MATERIALIZED_VIEW:
+					case EXTERNAL_TABLE:
+					case SYNONYM:
+						addStereotype(n, "type@"+tt.getType()); break;
+					case TABLE:
+					default:
+						break;
+				}
+			}
+			else {
+				addStereotype(n, "type@"+TableType.VIEW);
+			}
+		}
+		
+		for(String key: stereotypeNodenames.keySet()) {
+			//List<Pattern> patterns = stereotypeRegexes.get(key);
+			for(String nodename: stereotypeNodenames.get(key)) {
+				if(nodename.equals(t.getName())) {
+					addStereotype(n, "nodename@"+key);
+				}
+			}
+		}
+
+		for(String key: stereotypeRegexes.keySet()) {
+			//List<Pattern> patterns = stereotypeRegexes.get(key);
+			for(Pattern pat: stereotypeRegexes.get(key)) {
+				if(pat.matcher(t.getName()).matches()) {
+					addStereotype(n, "regex@"+key);
+				}
+			}
+		}
+		
+		if(t.getSchemaName()!=null && schemaNamesList.contains(t.getSchemaName())) {
+			if(addSchemaStereotype) {
+				addStereotype(n, "schema@"+t.getSchemaName());
+			}
+		}
+		else {
+			if(addSchemaStereotype) {
+				addStereotype(n, "otherschema.schema@"+t.getSchemaName());
+			}
+			else {
+				addStereotype(n, "otherschema");
+			}
+		}
+		
+		if(addVertexTypeStereotype) {
+			if(n.isRoot() && n.isLeaf()) {
+				//log.debug("table '"+t.getName()+"' is disconnected");
+				addStereotype(n, "disconnected");
+			}
+			else if(n.isRoot()) {
+				//log.debug("table '"+t.getName()+"' is root");
+				addStereotype(n, "root");
+			}
+			else if(n.isLeaf()) {
+				//log.debug("table '"+t.getName()+"' is leaf");
+				addStereotype(n, "leaf");
+			}
+			else {
+				//is in the middle
+				addStereotype(n, "connected");
+			}
+		}
+		if(n.getStereotype()!=null) {
+			log.debug("node '"+t.getName()+"' has stereotype: "+n.getStereotype());
+		}
+		else {
+			log.debug("node '"+t.getName()+"' has no stereotype");
+		}
+		//end stereotype
+		
+		//tableIds.add(id);
+		return n;
+		//graphModel.getChildren().add(n);
+			
+	}
+	
+	int setTableNodeAttributes(TableNode n, SchemaModel schemaModel, Relation t) {
 		//columns
 		StringBuffer sbCols = new StringBuffer();
 		int colCount = 0;
-		for(Column c: t.getColumns()) {
-			sbCols.append(c.getDefinition()+"\n");
-			colCount++;
+		if(t instanceof Table) {
+			Table tt = (Table) t;
+			for(Column c: tt.getColumns()) {
+				sbCols.append(c.getDefinition()+"\n");
+				colCount++;
+			}
+		}
+		else {
+			for(String c: t.getColumnNames()) {
+				sbCols.append(c+"\n");
+				colCount++;
+			}
 		}
 		n.setColumnsDesc(sbCols.toString());
 		return colCount;
 	}
 
-	int setTableNodeMethods(TableNode n, SchemaModel schemaModel, Table t) {
+	int setTableNodeMethods(TableNode n, SchemaModel schemaModel, Relation t) {
 		//constraints
 		n.setConstraintsDesc("");
 		int constrCount = 0;
@@ -339,12 +374,6 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
-		if(output==null) {
-			log.error("graphml output file is null. won't dump");
-			if(failonerror) { throw new ProcessingException("graphml output file is null. won't dump"); }
-			return;
-		}
-		
 		log.info("dumping graphML: translating model");
 		if(schemaModel==null) {
 			log.error("schemaModel is null!");
@@ -355,12 +384,26 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		log.info("dumping model... [size = "+r.getChildren().size()+"]");
 
 		AbstractDump dg = (AbstractDump) Utils.getClassInstance(dumpFormatClass);
-		Utils.prepareDir(output);
 		
 		try {
+			if(outputStream==null) {
+				if(output==null) {
+					log.error("graphml output file is null. won't dump");
+					if(failonerror) { throw new ProcessingException("graphml output file is null. won't dump"); }
+					return;
+				}
+				Utils.prepareDir(output);
+				outputStream = new PrintStream(output);
+			}
+				
 			if(snippetsFile!=null) { dg.loadSnippets(snippetsFile); }
-			dg.dumpModel(r, new PrintStream(output));
-			log.info("graphML dumped to: "+output.getAbsolutePath());
+			dg.dumpModel(r, outputStream);
+			if(output!=null) {
+				log.info("graphML dumped to: "+output.getAbsolutePath());
+			}
+			else {
+				log.info("graphML dumped");
+			}
 		} catch (FileNotFoundException e) {
 			log.error("error dumping schema: "+e);
 			log.debug("error dumping schema", e);
@@ -375,9 +418,11 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	@Override
 	public void setProperties(Properties prop) {
 		String outFileStr = prop.getProperty(PROP_OUTPUTFILE);
-		if(outFileStr==null) {
-			log.warn("graphml output file ["+PROP_OUTPUTFILE+"] not defined");
-			return;
+		if(outFileStr==null && output==null) {
+			log.debug("graphml output file ["+PROP_OUTPUTFILE+"] not defined");
+		}
+		else {
+			setOutput(new File(outFileStr));
 		}
 		
 		dumpFormatClass = getDumpFormatClass(prop, PREFIX_SCHEMA2GRAPHML+SUFFIX_DUMPFORMATCLASS);
@@ -455,8 +500,6 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		addTableTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_TABLETYPE, addTableTypeStereotype);
 		addSchemaStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_SCHEMA, addSchemaStereotype);
 		addVertexTypeStereotype = Utils.getPropBool(prop, PROP_STEREOTYPE_ADD_VERTEXTYPE, addVertexTypeStereotype);
-		
-		setOutput(new File(outFileStr));
 	}
 	
 	
@@ -513,6 +556,21 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	@Override
 	public String getMimeType() {
 		return "application/xml";
+	}
+	
+	@Override
+	public boolean acceptsOutputStream() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputStream(OutputStream out) {
+		if(out instanceof PrintStream) {
+			this.outputStream = (PrintStream) out;
+		}
+		else {
+			this.outputStream = new PrintStream(out);
+		}
 	}
 	
 }
