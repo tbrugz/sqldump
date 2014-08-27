@@ -749,7 +749,7 @@ public class DataDump extends AbstractSQLProc {
 		if(! writersOpened.containsKey(key)) {
 			File f = new File(fname);
 			File parent = f.getParentFile();
-			if(!parent.isDirectory()) {
+			if(parent!=null && !parent.isDirectory()) {
 				logDir.debug("creating dir: "+parent);
 				parent.mkdirs();
 			}

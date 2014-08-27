@@ -294,7 +294,12 @@ public class SQLQueries extends AbstractSQLProc {
 				log.debug("grabbing colums name & type from prepared statement's metadata [id="+qid+"; name="+queryName+"]");
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
-					query.setColumns(DataDumpUtils.getColumns(rsmd));
+					if(rsmd!=null) {
+						query.setColumns(DataDumpUtils.getColumns(rsmd));
+					}
+					else {
+						log.warn("getMetaData() returned null: empty query? sql:\n"+sql);
+					}
 				} catch (SQLException e) {
 					query.setColumns(new ArrayList<Column>());
 					log.warn("resultset metadata's sqlexception: "+e.toString().trim());
