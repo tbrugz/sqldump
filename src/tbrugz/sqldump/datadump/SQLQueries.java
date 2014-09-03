@@ -37,15 +37,15 @@ import tbrugz.sqldump.util.Utils;
 //XXXdone: option to grab/dump schema corresponding to queries data -> dbmodel.Query
 public class SQLQueries extends AbstractSQLProc {
 	
-	static final String PROP_QUERIES = "sqldump.queries";
-	static final String PROP_QUERIES_RUN = PROP_QUERIES+".runqueries";
-	static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
-	static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
-	static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
+	protected static final String PROP_QUERIES = "sqldump.queries";
+	protected static final String PROP_QUERIES_RUN = PROP_QUERIES+".runqueries";
+	protected static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
+	protected static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
+	protected static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
 
-	static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
+	protected static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
 	
-	static Log log = LogFactory.getLog(SQLQueries.class);
+	static final Log log = LogFactory.getLog(SQLQueries.class);
 	
 	@Override
 	public void process() {
@@ -77,7 +77,7 @@ public class SQLQueries extends AbstractSQLProc {
 			qid = qid.trim();
 			
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
-			List<DumpSyntax> syntaxList = getQuerySyntexes(qid);
+			List<DumpSyntax> syntaxList = getQuerySyntaxes(qid);
 			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
@@ -194,7 +194,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 	}
 	
-	List<DumpSyntax> getQuerySyntexes(String qid) {
+	List<DumpSyntax> getQuerySyntaxes(String qid) {
 		String syntaxes = prop.getProperty("sqldump.query."+qid+".dumpsyntaxes");
 		if(syntaxes==null) {
 			syntaxes = prop.getProperty(DataDump.PROP_DATADUMP_SYNTAXES);
