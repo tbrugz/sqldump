@@ -89,7 +89,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static Log log = LogFactory.getLog(ResultSet2GraphML.class);
 	static Log logsql = LogFactory.getLog(ResultSet2GraphML.class.getName()+".sql");
 	
-	static final String DEFAULT_SNIPPETS = "graphml-snippets-rs.properties";
+	static final String DEFAULT_SNIPPETS = "/graphml-snippets-rs.properties";
 	static final Class<?> DEFAULT_DUMPFORMAT_CLASS = DumpResultSetGraphMLModel.class;
 	
 	static final String PREFIX_RS2GRAPH = "sqldump.graphmlquery";
