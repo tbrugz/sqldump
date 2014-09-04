@@ -80,6 +80,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	public static final String PROP_NODESTEREOTYPEREGEX_PREFIX = "sqldump.graphmldump.nodestereotyperegex.";
 	public static final String PROP_NODESTEREOTYPECONTAINS_PREFIX = "sqldump.graphmldump.nodestereotypecontains.";
 	
+	static final String DEFAULT_SNIPPETS = "/graphml-snippets-sqld.properties";
 	static final Class<?> DEFAULT_DUMPFORMAT_CLASS = DumpSchemaGraphMLModel.class;
 
 	Class<?> dumpFormatClass = null;
@@ -397,7 +398,10 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			}
 				
 			if(snippetsFile!=null) { dg.loadSnippets(snippetsFile); }
+			else { dg.loadSnippets(DEFAULT_SNIPPETS); }
+			
 			dg.dumpModel(r, outputStream);
+			
 			if(output!=null) {
 				log.info("graphML dumped to: "+output.getAbsolutePath());
 			}
