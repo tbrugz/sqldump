@@ -65,6 +65,11 @@
 		<path refid="classpath.run"/>
 		<!--pathelement location="${lib.h2}"/-->
 	</path>
+	
+	<path id="classpath.run.diff">
+		<path refid="classpath.run.jaxb"/>
+		<pathelement location="lib/diffutils-1.2.1.jar"/>
+	</path>
 
 	<path id="classpath.test">
 		<path refid="classpath.run.h2"/>
@@ -164,6 +169,13 @@
 
 	<target name="run" depends="compile">
 		<java classpathref="classpath.run.jaxb" classname="${sqldump.mainclass}" failonerror="true">
+			<arg value="${run.arg}"/>
+		</java>
+		<echo message="run finished" />
+	</target>
+
+	<target name="run-sqldiff" depends="compile">
+		<java classpathref="classpath.run.diff" classname="${sqldump.sqldiff.mainclass}" failonerror="true">
 			<arg value="${run.arg}"/>
 		</java>
 		<echo message="run finished" />

@@ -59,6 +59,7 @@ public class SQLDiff implements Executor {
 	public static final String PROP_JSONINFILE = PREFIX_INPUT+".jsonfile";
 	public static final String PROP_JSONOUTFILE = PREFIX_OUTPUT+".jsonfile";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern"; //XXX: rename to 'sqldiff.output.filepattern'?
+	public static final String PROP_PATCHFILEPATTERN = PREFIX_OUTPUT+".patchfilepattern";
 	
 	//other props
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";
@@ -91,6 +92,7 @@ public class SQLDiff implements Executor {
 	
 	static final String XML_IO_CLASS = "tbrugz.sqldiff.io.XMLDiffIO";
 	static final String JSON_IO_CLASS = "tbrugz.sqldiff.io.JSONDiffIO";
+	static final String PATCH_DUMPER_CLASS = "tbrugz.sqldiff.patch.PatchDumper";
 
 	static final Log log = LogFactory.getLog(SQLDiff.class);
 	
@@ -104,6 +106,8 @@ public class SQLDiff implements Executor {
 
 	String jsoninfile = null;
 	String jsonoutfile = null;
+
+	String patchfilePattern = null;
 	
 	transient int lastDiffCount = 0;
 	
@@ -213,6 +217,17 @@ public class SQLDiff implements Executor {
 			} catch (JAXBException e) {
 				log.warn("error writing json: "+e);
 				log.debug("error writing json: "+e.getMessage(),e);
+			}
+		}
+		
+		if(patchfilePattern!=null) {
+			try {
+				File f = new File(patchfilePattern);
+				DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
+				dd.dumpDiff(diff, f);
+			} catch (JAXBException e) {
+				log.warn("error writing patch: "+e);
+				log.debug("error writing patch: "+e.getMessage(),e);
 			}
 		}
 		
@@ -367,11 +382,14 @@ public class SQLDiff implements Executor {
 		failonerror = Utils.getPropBool(prop, PROP_FAILONERROR, failonerror);
 		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
+		
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
 		xmlinfile = prop.getProperty(PROP_XMLINFILE);
 		xmloutfile = prop.getProperty(PROP_XMLOUTFILE);
 		jsoninfile = prop.getProperty(PROP_JSONINFILE);
 		jsonoutfile = prop.getProperty(PROP_JSONOUTFILE);
+		patchfilePattern = prop.getProperty(PROP_PATCHFILEPATTERN);
+		
 		String colDiffTempStrategy = prop.getProperty(PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
 		if(colDiffTempStrategy!=null) {
 			try {

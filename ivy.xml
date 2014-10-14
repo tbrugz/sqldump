@@ -32,6 +32,9 @@
 		<dependency org="log4j" name="log4j" rev="1.2.16"/>
 		<dependency org="org.eclipse.persistence" name="org.eclipse.persistence.moxy" rev="2.4.0"/>
 
+		<!-- optional sqldiff deps -->
+		<dependency org="com.googlecode.java-diff-utils" name="diffutils" rev="1.2.1"/>
+
 		<!-- test deps -->
 		<dependency org="junit" name="junit" rev="4.11" conf="test->default"/>
 		<dependency org="org.apache.derby" name="derby" rev="10.9.1.0" conf="test->default"/>
