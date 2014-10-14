@@ -226,14 +226,30 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	
 	@Override
 	public String getDefinition() {
-		// TODO Auto-generated method stub
-		return null;
+		switch (diffType) {
+		case ADD:
+			return table.getDefinition(true);
+		case DROP:
+			return "";
+		case RENAME:
+			return "/* table renamed: "+table.getQualifiedName()+" */"; //XXX: show table definition on rename
+		default:
+			throw new IllegalStateException("TableDiff with illegal "+diffType+" state");
+		}
 	}
 	
 	@Override
 	public String getPreviousDefinition() {
-		// TODO Auto-generated method stub
-		return null;
+		switch (diffType) {
+		case ADD:
+			return "";
+		case DROP:
+			return table.getDefinition(true);
+		case RENAME:
+			return "/* table renamed: "+renameFromSchema+"."+renameFromName+" */"; //XXX: show table definition on rename
+		default:
+			throw new IllegalStateException("TableDiff with illegal "+diffType+" state");
+		}
 	}
 
 }

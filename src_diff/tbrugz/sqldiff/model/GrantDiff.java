@@ -94,14 +94,12 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 	
 	@Override
 	public String getDefinition() {
-		// TODO Auto-generated method stub
-		return null;
+		return changeType.equals(ChangeType.ADD)?getDiff():"";
 	}
 	
 	@Override
 	public String getPreviousDefinition() {
-		// TODO Auto-generated method stub
-		return null;
+		return changeType.equals(ChangeType.DROP)?inverse().getDiff():"";
 	}
 
 }

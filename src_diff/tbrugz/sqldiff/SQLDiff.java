@@ -226,14 +226,9 @@ public class SQLDiff implements Executor {
 				log.warn("using PatchDumper with '"+PROP_DBIDDIFF_USEREPLACE+"'==true: duplicate diffs may appear");
 			}
 			
-			try {
-				File f = new File(patchfilePattern);
-				DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
-				dd.dumpDiff(diff, f);
-			} catch (JAXBException e) {
-				log.warn("error writing patch: "+e);
-				log.debug("error writing patch: "+e.getMessage(),e);
-			}
+			File f = new File(patchfilePattern);
+			DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
+			dd.dumpDiff(diff, f);
 		}
 
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);

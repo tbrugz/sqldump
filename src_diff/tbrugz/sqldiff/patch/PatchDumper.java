@@ -26,6 +26,7 @@ import tbrugz.sqldump.util.Utils;
  * other similar(?) project: https://code.google.com/p/google-diff-match-patch/
  * 
  * XXX: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?)
+ * XXX: include grabber info: source (grabber: JDBCGrabber/XML/JSON, JDBC url, JDBC user), date, user, sqldump-version - add properties to SchemaModel?
  */
 public class PatchDumper implements DiffDumper {
 
@@ -41,6 +42,7 @@ public class PatchDumper implements DiffDumper {
 		try {
 			if(diff instanceof SchemaDiff) {
 				SchemaDiff sd = (SchemaDiff) diff;
+				//XXX: write diff header
 				for(Diff d: sd.getChildren()) {
 					diffOne(d, writer);
 				}
@@ -57,12 +59,13 @@ public class PatchDumper implements DiffDumper {
 	}
 	
 	public void diffOne(Diff diff, Writer writer) throws IOException {
+		try {
 		List<String> original = bigStringToLines(diff.getPreviousDefinition());
 		List<String> revised = bigStringToLines(diff.getDefinition());
 		Patch patch = DiffUtils.diff(original, revised);
 		
-		writer.write("### "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
-		writer.write("diff "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
+		//writer.write("### "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
+		writeHeader(writer, diff);
 		for (Delta delta : patch.getDeltas()) {
 			//writer.write(delta.toString()+"\n");
 			//System.out.println(delta);
@@ -72,10 +75,27 @@ public class PatchDumper implements DiffDumper {
 			writeLines(writer, delta.getOriginal().getLines(), "-");
 			writeLines(writer, delta.getRevised().getLines(), "+");
 		}
-		writer.write("###\n");
+		//writer.write("###\n");
+		}
+		catch(RuntimeException e) {
+			log.warn("Error diffing "+diff.getObjectType()+" '"+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"' ("+diff.getChangeType()+"): "+e);
+			throw e;
+		}
+	}
+	
+	void writeHeader(Writer w, Diff diff) throws IOException {
+		String objectId = diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName();
+		StringBuilder sb = new StringBuilder();
+		for(int i=objectId.length();i<60;i++) { sb.append(" "); }
+		
+		w.write("diff "
+			+objectId
+			+sb.toString()
+			+" # type: "+diff.getChangeType()+"\n");
 	}
 	
 	void writeLines(Writer w, List<?> lines, String prepend) throws IOException {
+		if(lines.size()==1 && lines.get(0).equals("")) { return; }
 		for(Object s: lines) {
 			w.write(prepend+s+"\n");
 		}
