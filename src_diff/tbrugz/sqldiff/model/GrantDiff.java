@@ -91,5 +91,17 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 		
 		return changeType.compareTo(o.changeType);
 	}
+	
+	@Override
+	public String getDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String getPreviousDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

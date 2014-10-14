@@ -252,4 +252,15 @@ public class SchemaDiff implements Diff {
 		return grantDiffs;
 	}
 
+	@Override
+	public String getDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String getPreviousDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

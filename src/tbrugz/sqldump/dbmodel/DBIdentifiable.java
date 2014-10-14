@@ -87,7 +87,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 			if(( (object.getSchemaName()==null && obj.schemaName==null) || object.getSchemaName().equals(obj.schemaName)) 
 					&& object.getName().equals(obj.name)) { return (T) obj; }
 		}
-		return null;		
+		return null;
 	}
 	
 	public static DBObjectType getType(DBIdentifiable ident) {

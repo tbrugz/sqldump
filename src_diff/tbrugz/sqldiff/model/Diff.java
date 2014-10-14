@@ -16,4 +16,7 @@ public interface Diff {
 	//XXX add public List<Diff<?>> getChildren()? maybe not (only SchemaDiff would use it)
 	//public Diff<T> inverse()?
 	public Diff inverse();
+	
+	public String getDefinition();
+	public String getPreviousDefinition();
 }

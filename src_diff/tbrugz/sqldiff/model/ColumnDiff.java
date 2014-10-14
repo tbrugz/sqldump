@@ -303,5 +303,15 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	public Column getPreviousColumn() {
 		return previousColumn;
 	}
+	
+	@Override
+	public String getDefinition() {
+		return column!=null?column.getDefinition():"";
+	}
+	
+	@Override
+	public String getPreviousDefinition() {
+		return previousColumn!=null?previousColumn.getDefinition():"";
+	}
 
 }

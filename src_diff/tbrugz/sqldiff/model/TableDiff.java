@@ -223,5 +223,17 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			return false;
 		return true;
 	}
+	
+	@Override
+	public String getDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public String getPreviousDefinition() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

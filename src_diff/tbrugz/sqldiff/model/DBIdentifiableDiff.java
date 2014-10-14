@@ -170,4 +170,14 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		return null;
 	}
 	*/
+	
+	@Override
+	public String getDefinition() {
+		return ident!=null?ident.getDefinition(true):"";
+	}
+	
+	@Override
+	public String getPreviousDefinition() {
+		return previousIdent!=null?previousIdent.getDefinition(true):"";
+	}
 }
