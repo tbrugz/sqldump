@@ -7,8 +7,6 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -25,8 +23,14 @@ import tbrugz.sqldump.util.Utils;
  * 
  * other similar(?) project: https://code.google.com/p/google-diff-match-patch/
  * 
- * XXX: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?)
+ * XXX?: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?) - maybe not the "spirit" of patch files...
  * XXX: include grabber info: source (grabber: JDBCGrabber/XML/JSON, JDBC url, JDBC user), date, user, sqldump-version - add properties to SchemaModel?
+ * XXX: option to include context lines (lines of context around the lines that differ) - https://www.gnu.org/software/diffutils/manual/html_node/Context-Format.html#Context-Format
+ * - option to specify number of lines of context (default: 3 lines?)
+ * 
+ * see also:
+ * http://en.wikipedia.org/wiki/Diff_utility#Unified_format
+ * https://www.gnu.org/software/diffutils/manual/html_node/Unified-Format.html
  */
 public class PatchDumper implements DiffDumper {
 
@@ -38,7 +42,7 @@ public class PatchDumper implements DiffDumper {
 	}
 
 	@Override
-	public void dumpDiff(Diff diff, Writer writer) throws JAXBException, IOException {
+	public void dumpDiff(Diff diff, Writer writer) throws IOException {
 		try {
 			if(diff instanceof SchemaDiff) {
 				SchemaDiff sd = (SchemaDiff) diff;
@@ -102,7 +106,7 @@ public class PatchDumper implements DiffDumper {
 	}
 
 	@Override
-	public void dumpDiff(Diff diff, File file) throws JAXBException, IOException {
+	public void dumpDiff(Diff diff, File file) throws IOException {
 		Utils.prepareDir(file);
 		FileWriter fw = new FileWriter(file);
 		dumpDiff(diff, fw);

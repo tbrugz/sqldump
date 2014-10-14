@@ -20,9 +20,11 @@ import tbrugz.sqldump.util.Utils;
  * XXXdone: prop for 'separator' & 'lineGroupSize'
  * XXXdone: prop for null value? defalut <null>?
  * XXXdone: prop for showing or not column names
+ * XXX change to FWFDataDump? R: read.fwf {utils}: Read Fixed Width Format Files
  * 
  * XXX: problem with 'partitionby' and column of partition is null
  * XXX: add prop for 'recordDemimiter' ?
+ * XXX: option to clip/crop values?
  */
 /**
  * FFC: Formatted Fixed Column
