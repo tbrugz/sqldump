@@ -220,7 +220,12 @@ public class SQLDiff implements Executor {
 			}
 		}
 		
+		//out patch - show changed lines, ... ; dbiddiff: replace changetype
 		if(patchfilePattern!=null) {
+			if(!SchemaDiffer.mayReplaceDbId) {
+				log.warn("using PatchDumper with '"+PROP_DBIDDIFF_USEREPLACE+"'==true: duplicate diffs may appear");
+			}
+			
 			try {
 				File f = new File(patchfilePattern);
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
@@ -230,8 +235,6 @@ public class SQLDiff implements Executor {
 				log.debug("error writing patch: "+e.getMessage(),e);
 			}
 		}
-		
-		//out patch - show changed lines, ... ; dbiddiff: replace changetype
 
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
 		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);

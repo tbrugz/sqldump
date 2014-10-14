@@ -20,6 +20,13 @@ import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * Patch (unified) diff dumper using java-diff-utils <https://code.google.com/p/java-diff-utils/>
+ * 
+ * other similar(?) project: https://code.google.com/p/google-diff-match-patch/
+ * 
+ * XXX: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?)
+ */
 public class PatchDumper implements DiffDumper {
 
 	static final Log log = LogFactory.getLog(PatchDumper.class);
@@ -44,7 +51,7 @@ public class PatchDumper implements DiffDumper {
 			writer.flush();
 		}
 		catch(RuntimeException e) {
-			e.printStackTrace();
+			log.warn("Error generating patch: "+e.getMessage(), e);
 			throw e;
 		}
 	}
@@ -64,8 +71,6 @@ public class PatchDumper implements DiffDumper {
 					+" @@\n");
 			writeLines(writer, delta.getOriginal().getLines(), "-");
 			writeLines(writer, delta.getRevised().getLines(), "+");
-			//writer.write("-"+delta.getOriginal().getLines()+"\n");
-			//writer.write("+"+delta.getRevised()+"\n");
 		}
 		writer.write("###\n");
 	}
