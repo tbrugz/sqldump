@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Properties;
 
 import javax.xml.bind.JAXBException;
 
@@ -29,6 +30,10 @@ public class XMLDiffIO implements DiffGrabber, DiffDumper {
 	@Override
 	public String type() {
 		return "xml";
+	}
+	
+	@Override
+	public void setProperties(Properties prop) {
 	}
 	
 	@Override

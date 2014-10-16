@@ -202,6 +202,7 @@ public class SQLDiff implements Executor {
 			try {
 				File f = new File(xmloutfile);
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(XML_IO_CLASS);
+				dd.setProperties(prop);
 				dd.dumpDiff(diff, f);
 			} catch (JAXBException e) {
 				log.warn("error writing xml: "+e);
@@ -213,6 +214,7 @@ public class SQLDiff implements Executor {
 			try {
 				File f = new File(jsonoutfile);
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(JSON_IO_CLASS);
+				dd.setProperties(prop);
 				dd.dumpDiff(diff, f);
 			} catch (JAXBException e) {
 				log.warn("error writing json: "+e);
@@ -228,6 +230,7 @@ public class SQLDiff implements Executor {
 			
 			File f = new File(patchfilePattern);
 			DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
+			dd.setProperties(prop);
 			dd.dumpDiff(diff, f);
 		}
 

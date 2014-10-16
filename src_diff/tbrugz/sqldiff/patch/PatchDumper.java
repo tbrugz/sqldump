@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,10 @@ public class PatchDumper implements DiffDumper {
 	@Override
 	public String type() {
 		return "patch";
+	}
+	
+	@Override
+	public void setProperties(Properties prop) {
 	}
 
 	@Override
