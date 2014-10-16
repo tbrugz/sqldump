@@ -25,8 +25,8 @@ import tbrugz.sqldump.util.Utils;
  * 
  * XXX?: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?) - maybe not the "spirit" of patch files...
  * XXX: include grabber info: source (grabber: JDBCGrabber/XML/JSON, JDBC url, JDBC user), date, user, sqldump-version - add properties to SchemaModel?
- * XXX: option to include context lines (lines of context around the lines that differ) - https://www.gnu.org/software/diffutils/manual/html_node/Context-Format.html#Context-Format
- * - option to specify number of lines of context (default: 3 lines?)
+ * XXXdone: option to include context lines (lines of context around the lines that differ) - https://www.gnu.org/software/diffutils/manual/html_node/Context-Format.html#Context-Format
+ * - XXX option to specify number of lines of context (default: 3 lines?)
  * 
  * see also:
  * http://en.wikipedia.org/wiki/Diff_utility#Unified_format
@@ -35,6 +35,8 @@ import tbrugz.sqldump.util.Utils;
 public class PatchDumper implements DiffDumper {
 
 	static final Log log = LogFactory.getLog(PatchDumper.class);
+	
+	int context = 3;
 
 	@Override
 	public String type() {
@@ -57,7 +59,10 @@ public class PatchDumper implements DiffDumper {
 			writer.flush();
 		}
 		catch(RuntimeException e) {
-			log.warn("Error generating patch: "+e.getMessage(), e);
+			String message = "Error generating patch: "+e;
+			log.warn(message, e);
+			writer.write("\n# "+message);
+			writer.flush();
 			throw e;
 		}
 	}
@@ -73,11 +78,27 @@ public class PatchDumper implements DiffDumper {
 		for (Delta delta : patch.getDeltas()) {
 			//writer.write(delta.toString()+"\n");
 			//System.out.println(delta);
-			writer.write("@@ -"+delta.getOriginal().getPosition()+","+delta.getOriginal().size()
-					+" +"+delta.getRevised().getPosition()+","+delta.getRevised().size()
-					+" @@\n");
+			int beforeDeltaContextSize = (delta.getOriginal().getPosition())>context?context:delta.getOriginal().getPosition();
+			int beforeDeltaStart = delta.getOriginal().getPosition()-beforeDeltaContextSize;
+			int beforeDeltaEnd = delta.getOriginal().getPosition()-1;
+			
+			int afterDeltaContextSize = ( delta.getOriginal().getPosition()+delta.getOriginal().size()+context < original.size()) ?
+					context:(original.size()-delta.getOriginal().getPosition()-delta.getOriginal().size());
+			int afterDeltaStart = delta.getOriginal().getPosition()+delta.getOriginal().size();
+			int afterDeltaEnd = afterDeltaStart+afterDeltaContextSize-1;
+			
+			writer.write("@@ -"+(delta.getOriginal().getPosition()-beforeDeltaContextSize)+","+delta.getOriginal().size()
+					+" +"+(delta.getRevised().getPosition()-beforeDeltaContextSize)+","+delta.getRevised().size()
+					+" @@"
+					/*+" DELTA:: o:"+delta.getOriginal().getPosition()+" r:"+delta.getRevised().getPosition()
+					+" // BEFORE:: c:"+beforeDeltaContextSize+" | s:"+beforeDeltaStart+" | e:"+beforeDeltaEnd
+					+" // AFTER:: c:"+afterDeltaContextSize+" | s:"+afterDeltaStart+" | e:"+afterDeltaEnd
+					+" // ORIGINAL: "+original.size()+" | REVISED: "+revised.size()*/
+					+"\n");
+			writeLines(writer, original, beforeDeltaStart, beforeDeltaEnd, " ");
 			writeLines(writer, delta.getOriginal().getLines(), "-");
 			writeLines(writer, delta.getRevised().getLines(), "+");
+			writeLines(writer, original, afterDeltaStart, afterDeltaEnd, " ");
 		}
 		//writer.write("###\n");
 		}
@@ -105,6 +126,14 @@ public class PatchDumper implements DiffDumper {
 		}
 	}
 
+	void writeLines(Writer w, List<?> lines, int start, int end, String prepend) throws IOException {
+		if(lines.size()==1 && lines.get(0).equals("")) { return; }
+		for(int i=start;i<=end;i++) {
+			Object s = lines.get(i);
+			w.write(prepend+s+"\n");
+		}
+	}
+	
 	@Override
 	public void dumpDiff(Diff diff, File file) throws IOException {
 		Utils.prepareDir(file);
