@@ -59,7 +59,9 @@ public class SQLDiff implements Executor {
 	public static final String PROP_JSONINFILE = PREFIX_INPUT+".jsonfile";
 	public static final String PROP_JSONOUTFILE = PREFIX_OUTPUT+".jsonfile";
 	public static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern"; //XXX: rename to 'sqldiff.output.filepattern'?
-	public static final String PROP_PATCHFILEPATTERN = PREFIX_OUTPUT+".patchfilepattern";
+	//patch-output
+	public static final String PREFIX_PATCH = PREFIX_OUTPUT+".patch";
+	public static final String PROP_PATCHFILEPATTERN = PREFIX_PATCH+".file";
 	
 	//other props
 	public static final String PROP_DO_DATADIFF = PROP_PREFIX+".dodatadiff";

@@ -15,6 +15,7 @@ import difflib.Delta;
 import difflib.DiffUtils;
 import difflib.Patch;
 import tbrugz.sqldiff.DiffDumper;
+import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.util.Utils;
@@ -27,7 +28,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX?: use CategorizedOut with possible patterns (like outfilepattern): [schemaname], [objecttype], [objectname] (& [changetype]?) - maybe not the "spirit" of patch files...
  * XXX: include grabber info: source (grabber: JDBCGrabber/XML/JSON, JDBC url, JDBC user), date, user, sqldump-version - add properties to SchemaModel?
  * XXXdone: option to include context lines (lines of context around the lines that differ) - https://www.gnu.org/software/diffutils/manual/html_node/Context-Format.html#Context-Format
- * - XXX option to specify number of lines of context (default: 3 lines?)
+ * - XXXdone option to specify number of lines of context (default: 3 lines?)
  * 
  * see also:
  * http://en.wikipedia.org/wiki/Diff_utility#Unified_format
@@ -36,6 +37,8 @@ import tbrugz.sqldump.util.Utils;
 public class PatchDumper implements DiffDumper {
 
 	static final Log log = LogFactory.getLog(PatchDumper.class);
+	
+	public static final String PROP_PATCHFILE_CONTEXT = SQLDiff.PREFIX_PATCH+".contextsize";
 	
 	int context = 3;
 
@@ -46,6 +49,7 @@ public class PatchDumper implements DiffDumper {
 	
 	@Override
 	public void setProperties(Properties prop) {
+		context = Utils.getPropInt(prop, PROP_PATCHFILE_CONTEXT, context);
 	}
 
 	@Override
@@ -92,8 +96,8 @@ public class PatchDumper implements DiffDumper {
 			int afterDeltaStart = delta.getOriginal().getPosition()+delta.getOriginal().size();
 			int afterDeltaEnd = afterDeltaStart+afterDeltaContextSize-1;
 			
-			writer.write("@@ -"+(delta.getOriginal().getPosition()-beforeDeltaContextSize)+","+delta.getOriginal().size()
-					+" +"+(delta.getRevised().getPosition()-beforeDeltaContextSize)+","+delta.getRevised().size()
+			writer.write("@@ -"+(delta.getOriginal().getPosition()-beforeDeltaContextSize+1)+","+delta.getOriginal().size()
+					+" +"+(delta.getRevised().getPosition()-beforeDeltaContextSize+1)+","+delta.getRevised().size()
 					+" @@"
 					/*+" DELTA:: o:"+delta.getOriginal().getPosition()+" r:"+delta.getRevised().getPosition()
 					+" // BEFORE:: c:"+beforeDeltaContextSize+" | s:"+beforeDeltaStart+" | e:"+beforeDeltaEnd
