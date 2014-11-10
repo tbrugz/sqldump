@@ -40,8 +40,7 @@ public class Table extends DBObject implements Relation {
 	
 	@Override
 	public String toString() {
-		return type+":"+name;
-		//return "Table[name:"+name+"]";
+		return type+":"+(schemaName!=null?schemaName+".":"")+name;
 	}
 	
 	public void validateConstraints() {

@@ -29,6 +29,7 @@ import tbrugz.sqldump.util.Utils;
  * XXX: include grabber info: source (grabber: JDBCGrabber/XML/JSON, JDBC url, JDBC user), date, user, sqldump-version - add properties to SchemaModel?
  * XXXdone: option to include context lines (lines of context around the lines that differ) - https://www.gnu.org/software/diffutils/manual/html_node/Context-Format.html#Context-Format
  * - XXXdone option to specify number of lines of context (default: 3 lines?)
+ * TODO: join hunk's contexts if line difference is smaller than (contextsize*2)
  * 
  * see also:
  * http://en.wikipedia.org/wiki/Diff_utility#Unified_format

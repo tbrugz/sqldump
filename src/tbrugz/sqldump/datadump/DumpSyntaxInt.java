@@ -68,4 +68,6 @@ public interface DumpSyntaxInt {
 	// making clone() public instead of protected
 	// public DumpSyntaxInt cloneSpec();
 	public Object clone() throws CloneNotSupportedException;
+	
+	//public boolean canDumpInnerResultSet();
 }

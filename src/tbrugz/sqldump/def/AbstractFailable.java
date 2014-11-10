@@ -15,10 +15,14 @@ public abstract class AbstractFailable {
 
 	public boolean acceptsOutputWriter() { return false; }
 	
-	public void setOutputWriter(Writer writer) {}
+	public void setOutputWriter(Writer writer) {
+		throw new IllegalStateException();
+	}
 
 	public boolean acceptsOutputStream() { return false; }
 	
-	public void setOutputStream(OutputStream out) {}
+	public void setOutputStream(OutputStream out) {
+		throw new IllegalStateException();
+	}
 	
 }
