@@ -13,7 +13,7 @@ public class DiffUtil {
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(type.equals(DBIdentifiable.getType4Diff(d)) 
+			if(type.equals(DBIdentifiable.getType(d)) 
 					&& (d.getSchemaName()!=null?d.getSchemaName().equalsIgnoreCase(schemaName):true) 
 					&& d.getName().equalsIgnoreCase(name)
 					&& d.isDumpable())

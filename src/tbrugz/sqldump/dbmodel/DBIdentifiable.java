@@ -37,7 +37,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(type.equals(getType4Diff(d)) 
+			if(type.equals(getType(d)) 
 					&& (d.getSchemaName()!=null?d.getSchemaName().equals(schemaName):true) 
 					//XXX: better? //&& (schemaName!=null?d.getSchemaName().equals(schemaName):true) 
 					&& d.getName().equals(name)) { return (T) d; }
@@ -48,7 +48,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndName(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(type.equals(getType4Diff(d)) 
+			if(type.equals(getType(d)) 
 					&& d.getName().equals(name)) { return (T) d; }
 		}
 		return null;
@@ -57,7 +57,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(type.equals(getType4Diff(d)) 
+			if(type.equals(getType(d)) 
 					&& d.getName().equalsIgnoreCase(name)) { return (T) d; }
 		}
 		return null;
@@ -70,7 +70,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 					&& ( (schemaName==null && obj.schemaName==null) || (schemaName!=null && schemaName.equals(obj.schemaName)) ) 
 					&& name.equals(obj.name) ) { return (T) obj; }
 		}
-		return null;		
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -102,17 +102,19 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		if(ident instanceof Table) { return DBObjectType.TABLE; }
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
 		if(ident instanceof View) { return DBObjectType.VIEW; }
+		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 
 	//used for 'DROP' statements
 	public static DBObjectType getType4Diff(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
-		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
+		//if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
 
+	//used for 'DROP' statements
 	public static DBObjectType getType4Diff(DBObjectType type) {
 		if(type.equals(DBObjectType.FK)) { return DBObjectType.CONSTRAINT; }
 		return type;
@@ -195,7 +197,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	//XXXdone: use schemaName in compareTo()? see old DBObject.compareTo()...
 	@Override
 	public int compareTo(DBIdentifiable o) {
-		int comp = getType4Diff(this).compareTo(getType4Diff(o));
+		int comp = getType(this).compareTo(getType(o));
 		if(comp==0) {
 			if(getSchemaName()!=null) {
 				if(o.getSchemaName()!=null) {
