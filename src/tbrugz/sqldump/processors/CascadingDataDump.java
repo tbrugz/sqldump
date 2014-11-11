@@ -19,6 +19,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.ModelUtils;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
@@ -228,11 +229,11 @@ public class CascadingDataDump extends AbstractSQLProc {
 	void procFKs4Dump(final Table t, final List<FK> fks, final Table filterTable, final String filter, final boolean exportedKeys, final boolean doIntersect) {
 		List<FK> fki = null;
 		if(exportedKeys) {
-			fki = DBIdentifiable.getExportedKeys(t, model.getForeignKeys());
+			fki = ModelUtils.getExportedKeys(t, model.getForeignKeys());
 			log.debug("fks-ex '"+t.getName()+"': "+fki);
 		}
 		else {
-			fki = DBIdentifiable.getImportedKeys(t, model.getForeignKeys());
+			fki = ModelUtils.getImportedKeys(t, model.getForeignKeys());
 			log.debug("fks-im '"+t.getName()+"': "+fki);
 		}
 		

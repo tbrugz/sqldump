@@ -113,7 +113,7 @@ public class Table extends DBObject implements Relation {
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
-			List<FK> fks = DBIdentifiable.getImportedKeys(this, foreignKeys);
+			List<FK> fks = ModelUtils.getImportedKeys(this, foreignKeys);
 			for(FK fk: fks) {
 				sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
 				countTabElements++;

@@ -1,11 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIdentifiable> {
 	String schemaName;
@@ -120,43 +115,6 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return type;
 	}
 	
-	//move to 'util' class?
-	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
-		List<FK> fks = new ArrayList<FK>();
-		for(FK fk: allFKs) {
-			if( (rel.getSchemaName()==null || fk.fkTableSchemaName==null || rel.getSchemaName().equals(fk.fkTableSchemaName)) 
-					&& rel.getName().equals(fk.fkTable)) {
-				fks.add(fk);
-			}
-		}
-		return fks;
-	}
-
-	//move to 'util' class?
-	public static List<FK> getExportedKeys(Relation rel, Set<FK> allFKs) {
-		List<FK> fks = new ArrayList<FK>();
-		for(FK fk: allFKs) {
-			if( (rel.getSchemaName()==null || fk.pkTableSchemaName==null || rel.getSchemaName().equals(fk.pkTableSchemaName)) 
-					&& rel.getName().equals(fk.pkTable)) {
-				fks.add(fk);
-			}
-		}
-		return fks;
-	}
-	
-	//XXX: refactoring: move to another class/package?
-	public static List<Constraint> getUKs(Relation rel) {
-		List<Constraint> uks = new ArrayList<Constraint>();
-		List<Constraint> constraints = rel.getConstraints();
-		if(constraints!=null) {
-			for(Constraint c: constraints) {
-				if(c.type==ConstraintType.UNIQUE) {
-					uks.add(c);
-				}
-			}
-		}
-		return uks;
-	}
 	
 	@Override
 	public int hashCode() {
