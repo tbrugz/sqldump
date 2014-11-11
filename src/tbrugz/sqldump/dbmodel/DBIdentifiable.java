@@ -107,7 +107,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	}
 
 	//used for 'DROP' statements
-	public static DBObjectType getType4Diff(DBIdentifiable ident) {
+	public static DBObjectType getType4Alter(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
 		//if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
 		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
@@ -115,7 +115,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	}
 
 	//used for 'DROP' statements
-	public static DBObjectType getType4Diff(DBObjectType type) {
+	public static DBObjectType getType4Alter(DBObjectType type) {
 		if(type.equals(DBObjectType.FK)) { return DBObjectType.CONSTRAINT; }
 		return type;
 	}

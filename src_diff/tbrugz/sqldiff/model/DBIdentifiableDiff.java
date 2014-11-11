@@ -68,11 +68,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	String getDropDiffSQL(boolean dumpComments) {
 		if(ownerTableName!=null) {
 			return "alter table "+ownerTableName+" drop "
-					+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
+					+ DBIdentifiable.getType4Alter(previousIdent).desc()+" "+DBObject.getFinalIdentifier(previousIdent.getName())
 					+ (dumpComments?getComment(ident, "new: "):"");
 		}
 		return "drop "
-			+ DBIdentifiable.getType4Diff(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
+			+ DBIdentifiable.getType4Alter(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
 			+ (dumpComments?getComment(ident, "new: "):"");
 	}
 	
@@ -135,7 +135,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 
 	@Override
 	public DBObjectType getObjectType() {
-		return DBIdentifiable.getType4Diff(ident()); //XXX: getType() or getType4Diff()? '4Diff' is better for logging...
+		return DBIdentifiable.getType4Alter(ident()); //XXX: getType() or getType4Diff/Drop()? '4Diff/4Drop' is better for logging...
 	}
 	
 	@Override
@@ -150,7 +150,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	static String getComment(DBIdentifiable dbident, String comment) {
 		if(dbident==null) return "";
 		return "\n/* "+comment
-				+ DBIdentifiable.getType4Diff(dbident).desc()+" "
+				+ DBIdentifiable.getType4Alter(dbident).desc()+" "
 				+ DBObject.getFinalName(dbident, dumpSchemaName)
 				+ " */";
 	}

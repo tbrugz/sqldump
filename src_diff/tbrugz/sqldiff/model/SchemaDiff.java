@@ -131,7 +131,7 @@ public class SchemaDiff implements Diff {
 		int count = 0;
 		for(Diff d: diffs) {
 			String schemaName = d.getNamedObject()!=null?d.getNamedObject().getSchemaName():"";
-			log.debug("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Diff(d.getObjectType()).name()
+			log.debug("diff: "+d.getChangeType()+" ; "+DBIdentifiable.getType4Alter(d.getObjectType()).name()
 					+" ; "+schemaName+"; "+d.getNamedObject().getName());
 			//XXXdone: if diff is ADD+EXECUTABLE, not to include ';'? yep
 			String append = (d.getObjectType().isExecutableType()
@@ -140,7 +140,7 @@ public class SchemaDiff implements Diff {
 			
 			out.categorizedOut(d.getDiff()+append,
 					schemaName,
-					DBIdentifiable.getType4Diff(d.getObjectType()).name(),
+					DBIdentifiable.getType4Alter(d.getObjectType()).name(),
 					d.getNamedObject().getName(),
 					d.getChangeType().name()
 					);
