@@ -38,7 +38,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		//XXX: derby: add procedures/functions? synonyms? check/unique constraints?
 	}
 
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		//String query = "select tableid, viewdefinition "
 		//		+"from sys.sysviews "
@@ -66,7 +67,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		log.info(count+" views grabbed");
 	}
 
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = "select triggername, event, firingtime, type, st.tableid, tablename, triggerdefinition "
 				+"from sys.systables as st, sys.systriggers as tr "
@@ -109,7 +111,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		log.info(count+" triggers grabbed");
 	}
 	
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype "
 				+"from sys.syssequences "

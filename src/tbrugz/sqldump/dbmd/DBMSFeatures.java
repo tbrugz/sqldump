@@ -62,4 +62,15 @@ public interface DBMSFeatures {
 	
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
+	
+	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	
+	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	
+	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	
+	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+
+	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+
 }

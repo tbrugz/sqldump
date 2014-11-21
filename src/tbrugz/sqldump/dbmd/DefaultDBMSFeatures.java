@@ -34,4 +34,29 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	public String sqlDefaultDateFormatPattern() {
 		return null;
 	}
+
+	@Override
+	public void grabDBViews(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
+
+	@Override
+	public void grabDBTriggers(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
+
+	@Override
+	public void grabDBExecutables(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
+
+	@Override
+	public void grabDBSequences(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
+
+	@Override
+	public void grabDBSynonyms(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
 }

@@ -17,7 +17,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	/*

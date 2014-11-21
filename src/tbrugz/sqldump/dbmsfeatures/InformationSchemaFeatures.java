@@ -67,7 +67,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			+"order by table_catalog, table_schema, table_name ";
 	}
 
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		String query = grabDBViewsQuery(schemaPattern);
 		log.debug("grabbing views: sql:\n"+query);
 		Statement st = conn.createStatement();
@@ -118,7 +119,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	/*
 	 * TODOne: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
 	 */
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern);
 		Statement st = conn.createStatement();
@@ -241,7 +243,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
 	}
 	
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		String query = grabDBSequencesQuery(schemaPattern);
 		log.debug("grabbing sequences: sql:\n"+query);

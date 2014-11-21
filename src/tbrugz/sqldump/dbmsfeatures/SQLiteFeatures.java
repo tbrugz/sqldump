@@ -33,15 +33,15 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	@Override
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	@Override
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	@Override

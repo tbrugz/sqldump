@@ -90,7 +90,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
 	}
 
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		String query = grabDBViewsQuery(schemaPattern);
 		log.debug("sql: "+query);
@@ -153,7 +154,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"ORDER BY trigger_name";
 	}
 	
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern);
 		log.debug("sql: "+query);
@@ -187,7 +189,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"order by type, name, line";
 	}
 	
-	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBExecutablesQuery(schemaPattern);
 		log.debug("sql: "+query);
@@ -391,7 +394,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"where owner = '"+schemaPattern+"'";
 	}
 	
-	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
 		String query = grabDBSynonymsQuery(schemaPattern);
 		log.debug("sql: "+query);
@@ -513,7 +517,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"where sequence_owner = '"+schemaPattern+"' order by sequence_name";
 	}
 	
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = grabDBSequencesQuery(schemaPattern);
 		log.debug("sql: "+query);

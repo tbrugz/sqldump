@@ -24,7 +24,7 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn)
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn)
 			throws SQLException {
 		//XXX: use DBA.sys_triggers ?
 		log.warn("grabTriggers: not implemented");
@@ -37,7 +37,7 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBSequences(SchemaModel model, String schemaPattern,
+	public void grabDBSequences(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBSequences: not implemented");
 	}
