@@ -438,7 +438,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(schemaModel.getViews().size()>0) {
 				for(View view: schemaModel.getViews()) {
 					//PKs
-					view.setConstraints(grabRelationPKs(dbmd, view));
+					
+					if(doSchemaGrabPKs) {
+						view.setConstraints(grabRelationPKs(dbmd, view));
+					}
 
 					//Columns & Remarks
 					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
@@ -562,11 +565,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				
 				//PKs
-				table.getConstraints().addAll(grabRelationPKs(dbmd, table));
+				if(doSchemaGrabPKs) {
+					table.getConstraints().addAll(grabRelationPKs(dbmd, table));
+				}
 
 				//FKs
 				if(!tableOnly || deeprecursivedump) {
-					schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, dbmsfeatures, table));
+					schemaModel.getForeignKeys().addAll(grabRelationFKs(dbmd, dbmsfeatures, table, doSchemaGrabFKs, doSchemaGrabExportedFKs));
 				}
 				
 				//GRANTs
@@ -618,12 +623,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//return schemaModel;
 	}
 
-	List<FK> grabRelationFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, Relation relation) throws SQLException {
+	public static List<FK> grabRelationFKs(DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, Relation relation, boolean grabFKs, boolean grabExportedFKs) throws SQLException {
 		String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<FK> ret = new ArrayList<FK>();
 		
 		//FKs
-		if(doSchemaGrabFKs) {
+		if(grabFKs) {
 			log.debug("getting FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getImportedKeys(null, relation.getSchemaName(), relation.getName());
 			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
@@ -631,7 +636,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 
 		//FKs "exported"
-		if(doSchemaGrabExportedFKs) {
+		if(grabExportedFKs) {
 			log.debug("getting 'exported' FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getExportedKeys(null, relation.getSchemaName(), relation.getName());
 			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
@@ -641,11 +646,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return ret;
 	}
 
-	List<Constraint> grabRelationPKs(DatabaseMetaData dbmd, Relation relation) throws SQLException {
+	public static List<Constraint> grabRelationPKs(DatabaseMetaData dbmd, Relation relation) throws SQLException {
 		//String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<Constraint> ret = new ArrayList<Constraint>();
 		
-		if(doSchemaGrabPKs) {
 			//log.debug("getting PKs from "+fullTablename);
 			ResultSet pks = dbmd.getPrimaryKeys(null, relation.getSchemaName(), relation.getName());
 			Constraint pk = grabSchemaPKs(pks, relation);
@@ -654,7 +658,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				//relation.getConstraints().add(pk);
 			}
 			closeResultSetAndStatement(pks);
-		}
 
 		return ret;
 	}
@@ -690,7 +693,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 	}
 	
-	static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
+	private static boolean containsTableWithSchemaAndName(Set<Table> tables, String schemaName, String tableName) {
 		for(Table t: tables) {
 			if(t.getName().equals(tableName) && t.getSchemaName().equals(schemaName)) { return true; }
 		}
@@ -878,7 +881,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	static boolean grabColumnIsAutoincrement = true;
 	
-	static Column retrieveColumn(ResultSet cols) throws SQLException {
+	public static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
 		c.setType(cols.getString("TYPE_NAME"));
@@ -933,7 +936,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return grantsList;
 	}
 	
-	Constraint grabSchemaPKs(ResultSet pks, Relation relation) throws SQLException {
+	static Constraint grabSchemaPKs(ResultSet pks, Relation relation) throws SQLException {
 		Map<Integer, String> pkCols = new TreeMap<Integer, String>();
 		String pkName = null;
 		
@@ -955,7 +958,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return cPK;
 	}
 
-	List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException {
+	static List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;
@@ -1061,7 +1064,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 	}
 	
-	static void closeResultSetAndStatement(ResultSet rs) {
+	public static void closeResultSetAndStatement(ResultSet rs) {
 		try {
 			if(rs!=null) {
 				if(rs.getStatement()!=null) {
