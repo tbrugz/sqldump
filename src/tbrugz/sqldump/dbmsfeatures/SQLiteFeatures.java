@@ -37,7 +37,7 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	@Override

@@ -43,7 +43,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			grabDBTriggers(model, schemaPattern, conn);
 		}
 		if(grabExecutables) {
-			grabDBRoutines(model, schemaPattern, conn);
+			grabDBExecutables(model, schemaPattern, conn);
 		}
 		//if(grabIndexes) {
 			//grabDBIndexes(model, schemaPattern, conn);
@@ -163,7 +163,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				+"order by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
 	}
 	
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern);
 		log.debug("sql: "+query);

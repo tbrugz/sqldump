@@ -34,7 +34,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grab routines: not supported"); //warn level?
 	}
 	

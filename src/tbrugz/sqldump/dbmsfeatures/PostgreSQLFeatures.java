@@ -32,7 +32,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 	}
 	
 	@Override
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern);
 		log.debug("sql: "+query);

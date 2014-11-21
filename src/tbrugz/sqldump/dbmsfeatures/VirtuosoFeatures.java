@@ -31,7 +31,7 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBRoutines(SchemaModel model, String schemaPattern, Connection conn)
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBRoutines: not implemented");
 	}
