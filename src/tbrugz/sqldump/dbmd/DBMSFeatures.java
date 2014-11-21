@@ -72,5 +72,9 @@ public interface DBMSFeatures {
 	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
 
 	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	
+	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	
+	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
 
 }

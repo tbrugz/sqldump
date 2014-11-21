@@ -43,7 +43,7 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBCheckConstraints: not implemented");
 	}

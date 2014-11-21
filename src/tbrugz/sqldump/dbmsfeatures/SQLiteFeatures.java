@@ -45,11 +45,11 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	@Override
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 }

@@ -59,4 +59,14 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	public void grabDBSynonyms(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
 	}
+
+	@Override
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
+			Connection conn) throws SQLException {
+	}
+
+	@Override
+	public void grabDBUniqueConstraints(SchemaModel model,
+			String schemaPattern, Connection conn) throws SQLException {
+	}
 }

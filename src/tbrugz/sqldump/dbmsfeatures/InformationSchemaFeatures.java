@@ -279,7 +279,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				+"order by table_name, constraint_name ";
 	}
 	
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		String query = grabDBCheckConstraintsQuery(schemaPattern);
@@ -324,7 +325,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				+"order by table_name, constraint_name, column_name ";
 	}
 	
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name

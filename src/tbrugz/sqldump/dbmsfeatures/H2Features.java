@@ -65,7 +65,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 
 	@Override
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 		String query = grabDBUniqueConstraintsQuery(schemaPattern);
 		Statement st = conn.createStatement();

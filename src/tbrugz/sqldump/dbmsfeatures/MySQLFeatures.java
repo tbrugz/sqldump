@@ -25,7 +25,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	 * suggestion: using before-triggers: http://forums.mysql.com/read.php?136,152474,240479#msg-240479
 	 */
 	@Override
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 	}
 	
 	//XXX: see in information_schema: referential_constraints ; table_constraints -> PK, UNIQUE

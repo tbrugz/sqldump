@@ -602,7 +602,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		}
 	}
 
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		//check constraints
@@ -650,7 +651,8 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				);
 	}
 
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//unique constraints
