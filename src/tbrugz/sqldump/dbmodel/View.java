@@ -232,6 +232,11 @@ public class View extends DBObject implements Relation {
 	public void setParameterCount(Integer parameterCount) {
 		this.parameterCount = parameterCount;
 	}
+
+	@Override
+	public int getColumnCount() {
+		return columns!=null?columns.size():0;
+	}
 	
 	/*@Override
 	public String getAfterCreateScript() {

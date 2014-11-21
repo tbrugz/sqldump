@@ -27,6 +27,8 @@ public interface Relation extends NamedDBObject {
 	
 	public List<String> getColumnNames();
 
+	public int getColumnCount();
+
 	public List<Constraint> getConstraints();
 	
 	public String getRemarks();

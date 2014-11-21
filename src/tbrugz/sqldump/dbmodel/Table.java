@@ -309,5 +309,10 @@ public class Table extends DBObject implements Relation {
 	public Integer getParameterCount() {
 		return null;
 	}
+
+	@Override
+	public int getColumnCount() {
+		return columns!=null?columns.size():0;
+	}
 	
 }
