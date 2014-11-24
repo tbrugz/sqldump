@@ -638,7 +638,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(grabFKs) {
 			log.debug("getting FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getImportedKeys(null, relation.getSchemaName(), relation.getName());
-			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
+			ret.addAll(grabSchemaFKs(fkrs, dbmsfeatures));
 			closeResultSetAndStatement(fkrs);
 		}
 
@@ -646,7 +646,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(grabExportedFKs) {
 			log.debug("getting 'exported' FKs from "+fullTablename);
 			ResultSet fkrs = dbmd.getExportedKeys(null, relation.getSchemaName(), relation.getName());
-			ret.addAll(grabSchemaFKs(fkrs, relation, dbmsfeatures));
+			ret.addAll(grabSchemaFKs(fkrs, dbmsfeatures));
 			closeResultSetAndStatement(fkrs);
 		}
 		
@@ -977,7 +977,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return cPK;
 	}
 
-	static List<FK> grabSchemaFKs(ResultSet fkrs, Relation table, DBMSFeatures dbmsfeatures) throws SQLException {
+	public static List<FK> grabSchemaFKs(ResultSet fkrs, DBMSFeatures dbmsfeatures) throws SQLException {
 		Map<String, FK> fks = new HashMap<String, FK>();
 		int count=0;
 		boolean askForUkType = true;
