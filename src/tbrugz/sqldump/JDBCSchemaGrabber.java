@@ -147,6 +147,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	Long maxLevel = null;
 	
+	public JDBCSchemaGrabber() {
+		initCounters();
+	}
+	
 	@Override
 	public void setProperties(Properties prop) {
 		log.info("init JDBCSchemaGrabber...");
@@ -222,8 +226,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return true;
 	}
 	
-	Map<TableType, Integer> tablesCountByTableType;
-	Map<DBObjectType, Integer> execCountByType;
+	Map<TableType, Integer> tablesCountByTableType = new HashMap<TableType, Integer>();
+	Map<DBObjectType, Integer> execCountByType = new HashMap<DBObjectType, Integer>();
 	
 	List<Pattern> excludeTableFilters; //XXX: remove as object property & add as grabRelations() parameter?
 	
@@ -288,15 +292,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		log.info("schema grab... schema(s): '"+schemaPattern+"'");
 
-		//init stat objects
-		tablesCountByTableType = new HashMap<TableType, Integer>();
-		for(TableType tt: TableType.values()) {
-			tablesCountByTableType.put(tt, 0);
-		}
-		execCountByType = new HashMap<DBObjectType, Integer>();
-		for(DBObjectType t: DBObjectType.values()) {
-			execCountByType.put(t, 0);
-		}
+		initCounters();
 		
 		//register exclude table filters
 		excludeTableFilters = getExcludeFilters(papp, PROP_SCHEMADUMP_EXCLUDETABLES, "table");
@@ -369,7 +365,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			int countproc = 0, countfunc = 0;
 			try {
 				for(String schemaName: schemasList) {
-					List<ExecutableObject> eos = doGrabProcedures(dbmd, schemaName);
+					List<ExecutableObject> eos = doGrabProcedures(dbmd, schemaName, true);
 					if(eos!=null) {
 						countproc += eos.size();
 						filterObjects(eos, excludeObjectFilters, "procedure");
@@ -390,7 +386,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			
 			try {
 				for(String schemaName: schemasList) {
-					List<ExecutableObject> eos = doGrabFunctions(dbmd, schemaName);
+					List<ExecutableObject> eos = doGrabFunctions(dbmd, schemaName, true);
 					if(eos!=null) {
 						countfunc += eos.size();
 						filterObjects(eos, excludeObjectFilters, "function");
@@ -468,6 +464,17 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			log.debug("error grabbing schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
 			return null;
+		}
+	}
+	
+	synchronized void initCounters() {
+		tablesCountByTableType.clear();
+		for(TableType tt: TableType.values()) {
+			tablesCountByTableType.put(tt, 0);
+		}
+		execCountByType.clear();
+		for(DBObjectType t: DBObjectType.values()) {
+			execCountByType.put(t, 0);
 		}
 	}
 	
@@ -705,25 +712,29 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(feats!=null) { feats.grabDBObjects(model, schemaPattern, conn); }
 	}
 
-	List<ExecutableObject> doGrabProcedures(DatabaseMetaData dbmd, String schemaPattern) throws SQLException {
+	public List<ExecutableObject> doGrabProcedures(DatabaseMetaData dbmd, String schemaPattern, boolean grabParams) throws SQLException {
 		List<ExecutableObject> eos = null;
 		ResultSet rsProc = dbmd.getProcedures(null, schemaPattern, null);
 		eos = grabProcedures(rsProc);
 		closeResultSetAndStatement(rsProc);
-		ResultSet rsProcCols = dbmd.getProcedureColumns(null, schemaPattern, null, null);
-		grabProceduresColumns(eos, rsProcCols);
-		closeResultSetAndStatement(rsProcCols);
+		if(grabParams) {
+			ResultSet rsProcCols = dbmd.getProcedureColumns(null, schemaPattern, null, null);
+			grabProceduresColumns(eos, rsProcCols);
+			closeResultSetAndStatement(rsProcCols);
+		}
 		return eos;
 	}
 	
-	List<ExecutableObject> doGrabFunctions(DatabaseMetaData dbmd, String schemaPattern) throws SQLException {
+	public List<ExecutableObject> doGrabFunctions(DatabaseMetaData dbmd, String schemaPattern, boolean grabParams) throws SQLException {
 		List<ExecutableObject> eos = null;
 		ResultSet rsFunc = dbmd.getFunctions(null, schemaPattern, null);
 		eos = grabFunctions(rsFunc);
 		closeResultSetAndStatement(rsFunc);
-		ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
-		grabFunctionsColumns(eos, rsFuncCols);
-		closeResultSetAndStatement(rsFuncCols);
+		if(grabParams) {
+			ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
+			grabFunctionsColumns(eos, rsFuncCols);
+			closeResultSetAndStatement(rsFuncCols);
+		}
 		return eos;
 	}
 	
@@ -797,6 +808,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					ep.setPosition(ep.getPosition()-1);
 				}
 			}
+			if(eo==null) {
+				log.warn("procedure '"+pSchem+"."+pName+"' not found in "+eos);
+				return;
+			}
 			
 			if(ep.getPosition()==0) { 
 				eo.setReturnParam(ep);
@@ -866,7 +881,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			String pName = rs.getString("FUNCTION_NAME");
 			String pSchem = rs.getString("FUNCTION_SCHEM");
 			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
-			
+			if(eo==null) {
+				log.warn("function '"+pSchem+"."+pName+"' not found in "+eos);
+				return;
+			}
+
 			if(ep.getPosition()==0) {
 				eo.setReturnParam(ep);
 			}

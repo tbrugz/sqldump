@@ -88,7 +88,8 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static DBObjectType getType(DBIdentifiable ident) {
 		if(ident instanceof Column) { return DBObjectType.COLUMN; }
 		if(ident instanceof Constraint) { return DBObjectType.CONSTRAINT; }
-		if(ident instanceof ExecutableObject) { return DBObjectType.EXECUTABLE; }
+		//if(ident instanceof ExecutableObject) { return DBObjectType.EXECUTABLE; }
+		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		if(ident instanceof FK) { return DBObjectType.FK; }
 		//Grant?
 		if(ident instanceof Index) { return DBObjectType.INDEX; }
@@ -105,7 +106,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	public static DBObjectType getType4Alter(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
 		//if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
-		if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
+		//if(ident instanceof ExecutableObject) { return ((ExecutableObject)ident).type; }
 		return DBIdentifiable.getType(ident);
 	}
 
