@@ -33,6 +33,8 @@ public interface Relation extends NamedDBObject {
 	
 	public String getRemarks();
 	
+	public void setRemarks(String remarks);
+	
 	public String getRelationType();
 	
 	public Integer getParameterCount();

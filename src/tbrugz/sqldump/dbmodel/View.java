@@ -192,6 +192,7 @@ public class View extends DBObject implements Relation {
 		this.withReadOnly = withReadOnly;
 	}
 
+	@Override
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}

@@ -64,4 +64,9 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
 	}
+	
+	//public abstract String getRemarks();
+	
+	//public abstract void setRemarks(String remarks);
+	
 }

@@ -245,6 +245,7 @@ public class Table extends DBObject implements Relation {
 		return remarks;
 	}
 
+	@Override
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
