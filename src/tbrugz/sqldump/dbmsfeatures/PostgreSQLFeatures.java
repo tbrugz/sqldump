@@ -21,20 +21,21 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
 	
 	@Override
-	String grabDBRoutinesQuery(String schemaPattern) {
+	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, data_type, external_language, routine_definition "
 				+" , (select array_agg(parameter_name::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
 				+" , (select array_agg(data_type::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_types "
 				+"from information_schema.routines r "
 				+"where routine_definition is not null "
 				+"and specific_schema = '"+schemaPattern+"' "
+				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
 				+"order by routine_catalog, routine_schema, routine_name ";
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBRoutinesQuery(schemaPattern);
+		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);

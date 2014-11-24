@@ -63,18 +63,23 @@ public interface DBMSFeatures {
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
 	
-	void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException;
 
-	void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
+	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException;
-
+	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
+	
+	//XXX: grab views, executables (& triggers?) names
+	//List<NamedDBObject> grabViewNames(String catalog, String schema, String viewNamePattern, Connection conn) throws SQLException;
+	//List<NamedDBObject> grabTriggerNames(String catalog, String schema, String triggerNamePattern, Connection conn) throws SQLException;
+	//List<NamedDBObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, Connection conn) throws SQLException;
+	
 }

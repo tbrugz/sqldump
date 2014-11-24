@@ -24,38 +24,42 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.Utils;
 
+//FIXME: add object names filters
+//TODO: use bind parameter in SQL queries
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	private static final Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;
 	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");
 	
+	@Override
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
 		//Sequence.dumpStartWith = "true".equals(prop.getProperty(PROP_SEQUENCE_STARTWITHDUMP));
 	}
 	
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, conn);
+			grabDBViews(model, schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, conn);
+			grabDBTriggers(model, schemaPattern, null, conn);
 		}
 		if(grabExecutables) {
-			grabDBExecutables(model, schemaPattern, conn);
+			grabDBExecutables(model, schemaPattern, null, conn);
 		}
 		//if(grabIndexes) {
 			//grabDBIndexes(model, schemaPattern, conn);
 		//}
 		if(grabSequences) {
-			grabDBSequences(model, schemaPattern, conn);
+			grabDBSequences(model, schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model, schemaPattern, conn);
+			grabDBCheckConstraints(model, schemaPattern, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model, schemaPattern, conn);
+			grabDBUniqueConstraints(model, schemaPattern, null, conn);
 		}
 	}
 	
@@ -68,7 +72,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		String query = grabDBViewsQuery(schemaPattern);
 		log.debug("grabbing views: sql:\n"+query);
 		Statement st = conn.createStatement();
@@ -120,7 +124,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	 * TODOne: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
 	 */
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern);
 		Statement st = conn.createStatement();
@@ -155,18 +159,19 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" triggers grabbed [rowcount="+rowcount+"]");
 	}
 
-	String grabDBRoutinesQuery(String schemaPattern) {
+	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type, p.ordinal_position "
 				+"from information_schema.routines r, information_schema.parameters p "
 				+"where r.specific_name = p.specific_name and r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
+				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
 				+"order by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBRoutinesQuery(schemaPattern);
+		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -245,7 +250,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		String query = grabDBSequencesQuery(schemaPattern);
 		log.debug("grabbing sequences: sql:\n"+query);
@@ -280,7 +285,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		String query = grabDBCheckConstraintsQuery(schemaPattern);
@@ -316,21 +321,22 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	//order by "column_position"? see grabDBUniqueConstraints()
 	//XXX use key_column_usage? see http://www.postgresql.org/docs/9.1/static/infoschema-key-column-usage.html
-	String grabDBUniqueConstraintsQuery(String schemaPattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
 				+"and tc.constraint_schema = '"+schemaPattern+"' "
 				+"and constraint_type = 'UNIQUE' "
+				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by table_name, constraint_name, column_name ";
 	}
 	
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
-		String query = grabDBUniqueConstraintsQuery(schemaPattern);
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

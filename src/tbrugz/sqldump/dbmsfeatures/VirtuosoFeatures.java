@@ -24,37 +24,38 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn)
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn)
 			throws SQLException {
 		//XXX: use DBA.sys_triggers ?
 		log.warn("grabTriggers: not implemented");
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn)
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBRoutines: not implemented");
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern,
+	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBSequences: not implemented");
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBCheckConstraints: not implemented");
 	}
 
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.key_column_usage kcu "
 				+"where tc.constraint_name = kcu.constraint_name "
 				+"and tc.constraint_schema = '"+schemaPattern+"' "
 				+"and v_key_is_main = 0 "
+				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by tc.table_name, tc.constraint_name, ordinal_position ";
 	}
 }

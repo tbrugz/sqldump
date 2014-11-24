@@ -34,7 +34,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grab routines: not supported"); //warn level?
 	}
 	
@@ -57,17 +57,18 @@ public class H2Features extends InformationSchemaFeatures {
 	
 	
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
 				+"from information_schema.constraints tc "
 				+"where constraint_type = 'UNIQUE' "
+				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by table_name, constraint_name ";
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery(schemaPattern);
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

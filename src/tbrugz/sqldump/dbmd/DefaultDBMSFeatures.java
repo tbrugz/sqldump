@@ -36,37 +36,31 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBSynonyms(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern,
-			Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model,
-			String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
+
 }

@@ -17,17 +17,18 @@ import tbrugz.sqldump.dbmodel.View;
 public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Log log = LogFactory.getLog(DerbyFeatures.class);
 
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, conn);
+			grabDBViews(model, schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, conn);
+			grabDBTriggers(model, schemaPattern, null, conn);
 		}
 		
 		try {
 			if(grabSequences) { 
-				grabDBSequences(model, schemaPattern, conn);
+				grabDBSequences(model, schemaPattern, null, conn);
 			}
 		}
 		catch(SQLSyntaxErrorException e) {
@@ -39,7 +40,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		//String query = "select tableid, viewdefinition "
 		//		+"from sys.sysviews "
@@ -47,6 +48,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		String query = "select st.tablename, sv.tableid, sv.viewdefinition "
 				+"from sys.systables as st, sys.sysviews as sv "
 				+"where st.tableid = sv.tableid "
+				+(viewNamePattern!=null?"and st.tablename = '"+viewNamePattern+"'":"")
 				+"order by tablename ";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -68,11 +70,12 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = "select triggername, event, firingtime, type, st.tableid, tablename, triggerdefinition "
 				+"from sys.systables as st, sys.systriggers as tr "
-				+"where st.tableid = tr.tableid  ";
+				+"where st.tableid = tr.tableid "
+				+(triggerNamePattern!=null?"and triggername ='"+triggerNamePattern+"'":"");
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -112,10 +115,11 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype "
 				+"from sys.syssequences "
+				+(sequenceNamePattern!=null?"where sequencename = '"+sequenceNamePattern+"' ":"")
 				+"order by sequencename ";
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);

@@ -8,11 +8,13 @@ package tbrugz.sqldump.dbmsfeatures;
 public class OracleDbmsMetadataFeatures extends OracleFeatures {
 	
 	@Override
-	String grabDBViewsQuery(String schemaPattern) {
+	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "SELECT owner, VIEW_NAME, 'VIEW' as view_type, "
 				+ "DBMS_METADATA.GET_DDL('VIEW', VIEW_NAME, '"+schemaPattern+"') as TEXT "
 				+ "FROM ALL_VIEWS "
-				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
+				+ "where owner = '"+schemaPattern+"' "
+				+ (viewNamePattern!=null?"and VIEW_NAME = '"+viewNamePattern+"' ":"")
+				+ "ORDER BY VIEW_NAME";
 	}
 	
 	@Override
@@ -25,12 +27,13 @@ public class OracleDbmsMetadataFeatures extends OracleFeatures {
 	}
 	
 	@Override
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String triggerNamePattern) {
 		return "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, "
 				+"DBMS_METADATA.GET_DDL('TRIGGER', TRIGGER_NAME, '"+schemaPattern+"') as TRIGGER_BODY, "
 				+"WHEN_CLAUSE "
 				+"FROM ALL_TRIGGERS "
 				+"where owner = '"+schemaPattern+"' "
+				+(triggerNamePattern!=null?" and trigger_name = '"+triggerNamePattern+"' ":"")
 				//+"and status = 'ENABLED' "
 				+"ORDER BY trigger_name";
 	}

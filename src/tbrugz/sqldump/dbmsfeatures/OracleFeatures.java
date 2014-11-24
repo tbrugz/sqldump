@@ -59,41 +59,43 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, conn);
+			grabDBViews(model, schemaPattern, null, conn);
 			grabDBMaterializedViews(model, schemaPattern, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, conn);
+			grabDBTriggers(model, schemaPattern, null, conn);
 		}
 		if(grabExecutables) {
-			grabDBExecutables(model, schemaPattern, conn);
+			grabDBExecutables(model, schemaPattern, null, conn);
 		}
 		if(grabSynonyms) {
-			grabDBSynonyms(model, schemaPattern, conn);
+			grabDBSynonyms(model, schemaPattern, null, conn);
 		}
 		if(grabIndexes) {
 			grabDBIndexes(model, schemaPattern, conn);
 		}
 		if(grabSequences) {
-			grabDBSequences(model, schemaPattern, conn);
+			grabDBSequences(model, schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model, schemaPattern, conn);
+			grabDBCheckConstraints(model, schemaPattern, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model, schemaPattern, conn);
+			grabDBUniqueConstraints(model, schemaPattern, null, conn);
 		}
 	}
 	
-	String grabDBViewsQuery(String schemaPattern) {
+	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT FROM ALL_VIEWS "
-				+" where owner = '"+schemaPattern+"' ORDER BY VIEW_NAME";
+				+" where owner = '"+schemaPattern+"'"
+				+(viewNamePattern!=null?" and view_name = '"+viewNamePattern+"'":"")
+				+ " ORDER BY VIEW_NAME";
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		String query = grabDBViewsQuery(schemaPattern);
+		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -146,18 +148,19 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" materialized views grabbed");
 	}
 
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String triggerNamePattern) {
 		return "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
 				+"FROM ALL_TRIGGERS "
 				+"where owner = '"+schemaPattern+"' "
+				+(triggerNamePattern!=null?" and trigger_name = '"+triggerNamePattern+"' ":"")
 				//+"and status = 'ENABLED' "
 				+"ORDER BY trigger_name";
 	}
 	
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery(schemaPattern);
+		String query = grabDBTriggersQuery(schemaPattern, triggerNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -181,18 +184,19 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		
 		log.info("["+schemaPattern+"]: "+count+" triggers grabbed");
 	}
-
-	String grabDBExecutablesQuery(String schemaPattern) {
+	
+	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
 		return "select name, type, line, text from all_source "
 				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 				+"and owner = '"+schemaPattern+"' "
+				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
 				+"order by type, name, line";
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBExecutablesQuery(schemaPattern);
+		String query = grabDBExecutablesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -388,16 +392,32 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			executable.getGrants().add(grant);
 		}
 	}
+	
+	/*public List<NamedDBObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, Connection conn) throws SQLException {
+		String sql = "select distinct name, type from all_source "
+				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
+				+"and owner = ? "
+				+"order by type, name";
+		PreparedStatement st = conn.prepareStatement(sql);
+		st.setString(1, schema);
+		ResultSet rs = st.executeQuery();
+		
+		while(rs.next()) {
+			String name = rs.getString(1);
+		}
 
-	String grabDBSynonymsQuery(String schemaPattern) {
+	}*/
+	
+	String grabDBSynonymsQuery(String schemaPattern, String synonymNamePattern) {
 		return "select synonym_name, table_owner, table_name, db_link from all_synonyms "
-				+"where owner = '"+schemaPattern+"'";
+				+"where owner = '"+schemaPattern+"'"
+				+(synonymNamePattern!=null?" and synonym_name = '"+synonymNamePattern+"'":"");
 	}
 	
 	@Override
-	public void grabDBSynonyms(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
-		String query = grabDBSynonymsQuery(schemaPattern);
+		String query = grabDBSynonymsQuery(schemaPattern, synonymNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -512,15 +532,17 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		idx.setComment("unknown index type: '"+typeStr+"'");
 	}
 
-	String grabDBSequencesQuery(String schemaPattern) {
+	String grabDBSequencesQuery(String schemaPattern, String sequenceNamePattern) {
 		return "select sequence_name, min_value, increment_by, last_number from all_sequences "
-				+"where sequence_owner = '"+schemaPattern+"' order by sequence_name";
+				+"where sequence_owner = '"+schemaPattern+"' "
+				+(sequenceNamePattern!=null?" and sequence_name = '"+sequenceNamePattern+"'":"")
+				+"order by sequence_name";
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
-		String query = grabDBSequencesQuery(schemaPattern);
+		String query = grabDBSequencesQuery(schemaPattern, sequenceNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -603,13 +625,14 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		//check constraints
 		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
 				+"from all_constraints "
 				+"where owner = '"+schemaPattern+"' "
+				+(constraintNamePattern!=null?"and constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'C' "
 				+"order by owner, table_name, constraint_name ";
 		Statement st = conn.createStatement();
@@ -652,7 +675,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//unique constraints
@@ -660,6 +683,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"from all_constraints al, all_cons_columns acc "
 				+"where al.constraint_name = acc.constraint_name "
 				+"and al.owner = '"+schemaPattern+"' "
+				+(constraintNamePattern!=null?"and al.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'U' "
 				+"order by owner, table_name, constraint_name, position, column_name ";
 		Statement st = conn.createStatement();
