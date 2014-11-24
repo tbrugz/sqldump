@@ -18,12 +18,14 @@ public class OracleDbmsMetadataFeatures extends OracleFeatures {
 	}
 	
 	@Override
-	String grabDBMaterializedViewsQuery(String schemaPattern) {
+	String grabDBMaterializedViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, "
 				+ "DBMS_METADATA.GET_DDL('MATERIALIZED_VIEW', mview_name, '"+schemaPattern+"') as query, "
 				+" rewrite_enabled, rewrite_capability, refresh_mode, refresh_method, build_mode, fast_refreshable "
 				+" from all_mviews "
-				+" where owner = '"+schemaPattern+"' ORDER BY MVIEW_NAME";
+				+" where owner = '"+schemaPattern+"'"
+				+ (viewNamePattern!=null?"and mview_name = '"+viewNamePattern+"' ":"")
+				+"ORDER BY MVIEW_NAME";
 	}
 	
 	@Override

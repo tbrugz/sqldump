@@ -60,7 +60,6 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
 			grabDBViews(model, schemaPattern, null, conn);
-			grabDBMaterializedViews(model, schemaPattern, conn);
 		}
 		if(grabTriggers) {
 			grabDBTriggers(model, schemaPattern, null, conn);
@@ -94,6 +93,11 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 
 	@Override
 	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+		grabDBNormalViews(model, schemaPattern, viewNamePattern, conn);
+		grabDBMaterializedViews(model, schemaPattern, viewNamePattern, conn);
+	}
+	
+	void grabDBNormalViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
@@ -115,16 +119,18 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
-	String grabDBMaterializedViewsQuery(String schemaPattern) {
+	String grabDBMaterializedViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query, "
 				+" rewrite_enabled, rewrite_capability, refresh_mode, refresh_method, build_mode, fast_refreshable "
 				+" from all_mviews "
-				+" where owner = '"+schemaPattern+"' ORDER BY MVIEW_NAME";
+				+" where owner = '"+schemaPattern+"' "
+				+(viewNamePattern!=null?" and mview_name = '"+viewNamePattern+"' ":"")
+				+"ORDER BY MVIEW_NAME";
 	}
 
-	void grabDBMaterializedViews(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBMaterializedViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
-		String query = grabDBMaterializedViewsQuery(schemaPattern);
+		String query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
