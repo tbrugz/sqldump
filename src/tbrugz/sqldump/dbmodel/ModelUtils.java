@@ -43,7 +43,7 @@ public class ModelUtils {
 	public static List<FK> getImportedKeys(Relation rel, Set<FK> allFKs) {
 		List<FK> fks = new ArrayList<FK>();
 		for(FK fk: allFKs) {
-			if( (rel.getSchemaName()==null || fk.fkTableSchemaName==null || rel.getSchemaName().equals(fk.fkTableSchemaName)) 
+			if( (rel.getSchemaName()==null || fk.getFkTableSchemaName()==null || rel.getSchemaName().equals(fk.getFkTableSchemaName())) 
 					&& rel.getName().equals(fk.fkTable)) {
 				fks.add(fk);
 			}
@@ -54,7 +54,7 @@ public class ModelUtils {
 	public static List<FK> getExportedKeys(Relation rel, Set<FK> allFKs) {
 		List<FK> fks = new ArrayList<FK>();
 		for(FK fk: allFKs) {
-			if( (rel.getSchemaName()==null || fk.pkTableSchemaName==null || rel.getSchemaName().equals(fk.pkTableSchemaName)) 
+			if( (rel.getSchemaName()==null || fk.getPkTableSchemaName()==null || rel.getSchemaName().equals(fk.getPkTableSchemaName())) 
 					&& rel.getName().equals(fk.pkTable)) {
 				fks.add(fk);
 			}

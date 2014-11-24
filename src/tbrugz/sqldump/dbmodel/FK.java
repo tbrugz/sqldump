@@ -70,7 +70,7 @@ public class FK extends AbstractConstraint implements Serializable {
 	String pkTable;
 	String fkTable;
 	String pkTableSchemaName;
-	String fkTableSchemaName;
+	//String fkTableSchemaName; // getFkTableSchemaName() references DBIdentifiable.schemaName!
 	Boolean fkReferencesPK; //FK references a PK? true. references a UK (unique key)? false
 	UpdateRule updateRule;
 	UpdateRule deleteRule;
@@ -148,11 +148,11 @@ public class FK extends AbstractConstraint implements Serializable {
 	}
 
 	public String getFkTableSchemaName() {
-		return fkTableSchemaName;
+		return schemaName;
 	}
 
 	public void setFkTableSchemaName(String fkTableSchemaName) {
-		this.fkTableSchemaName = fkTableSchemaName;
+		this.schemaName = fkTableSchemaName;
 	}
 
 	public List<String> getPkColumns() {
@@ -217,10 +217,10 @@ public class FK extends AbstractConstraint implements Serializable {
 		return result;
 	}
 	
-	@Override
+	/*@Override
 	public String getSchemaName() {
-		return fkTableSchemaName;
-	}
+		return schemaName;
+	}*/
 
 	//XXX: remove dumpDropStatements?
 	public String fkScriptWithAlterTable(boolean dumpDropStatements, boolean dumpWithSchemaName) {
