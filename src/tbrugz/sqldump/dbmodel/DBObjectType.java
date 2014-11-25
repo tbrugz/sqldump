@@ -5,9 +5,9 @@ public enum DBObjectType {
 	MATERIALIZED_VIEW, //sub-types?
 	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
 	
-	CONSTRAINT, COLUMN; //non '1st class' objects
+	CONSTRAINT, COLUMN, //non '1st class' objects
 	
-	//RELATION, QUERY // XXX: add generic object types ?
+	RELATION; //, QUERY; // XXX: add "abstract" object types ?
 	
 	//XXX: include PROGRAM, SCHEDULE?
 	//XXX: oracle: java_class, java_resource, java_source: http://docs.oracle.com/cd/B28359_01/server.111/b28286/statements_5013.htm
@@ -38,6 +38,17 @@ public enum DBObjectType {
 		case PROCEDURE:
 		case TYPE:
 		case TYPE_BODY:
+			return true;
+		default:
+			return false;
+		}
+	}
+	
+	public boolean isAbstractType() {
+		switch (this) {
+		case RELATION:
+		//case QUERY:
+		case EXECUTABLE:
 			return true;
 		default:
 			return false;

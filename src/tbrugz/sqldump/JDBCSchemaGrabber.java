@@ -931,7 +931,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	Set<String> unknownPrivilegesWarned = new HashSet<String>();
 	
-	List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
+	public List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		String privilege = null;
 		while(grantrs.next()) {
@@ -1043,7 +1043,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return ret;
 	}
 	
-	void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
+	public static void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
 		Index idx = null;
 		
 		while(indexesrs.next()) {
