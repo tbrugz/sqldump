@@ -23,7 +23,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			grabDBViews(model, schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, null, conn);
+			grabDBTriggers(model, schemaPattern, null, null, conn);
 		}
 		
 		try {
@@ -70,7 +70,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = "select triggername, event, firingtime, type, st.tableid, tablename, triggerdefinition "
 				+"from sys.systables as st, sys.systriggers as tr "

@@ -40,7 +40,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 	}
 
 	@Override

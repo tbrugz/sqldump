@@ -62,7 +62,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			grabDBViews(model, schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, null, conn);
+			grabDBTriggers(model, schemaPattern, null, null, conn);
 		}
 		if(grabExecutables) {
 			grabDBExecutables(model, schemaPattern, null, conn);
@@ -154,19 +154,20 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" materialized views grabbed");
 	}
 
-	String grabDBTriggersQuery(String schemaPattern, String triggerNamePattern) {
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		return "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
 				+"FROM ALL_TRIGGERS "
 				+"where owner = '"+schemaPattern+"' "
+				+(tableNamePattern!=null?" and table_name = '"+tableNamePattern+"' ":"")
 				+(triggerNamePattern!=null?" and trigger_name = '"+triggerNamePattern+"' ":"")
 				//+"and status = 'ENABLED' "
 				+"ORDER BY trigger_name";
 	}
 	
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String triggerNamePattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery(schemaPattern, triggerNamePattern);
+		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
