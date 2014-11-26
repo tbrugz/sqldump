@@ -41,7 +41,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		return null;
 	}
 
-	@Override
+	/*@Override
 	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		grabDBViews(model.getViews(), schemaPattern, viewNamePattern, conn);
 	}
@@ -74,7 +74,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		grabDBUniqueConstraints(model.getTables(), schemaPattern, constraintNamePattern, conn);
-	}
+	}*/
 
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern,

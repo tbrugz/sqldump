@@ -229,8 +229,8 @@ public final class DBMSResources {
 		}
 		else {
 			//if(features==null) ?
-			log.debug("no specific DBMS features defined. using "+DefaultDBMSFeatures.class.getSimpleName());
 			features = new DefaultDBMSFeatures();
+			log.debug("no specific DBMS features defined. using "+features.getClass().getSimpleName());
 		}
 		initDBMSFeatures(features, papp);
 	}

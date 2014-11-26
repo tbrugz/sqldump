@@ -69,26 +69,26 @@ public interface DBMSFeatures {
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
 	
-	void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
+	//void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException;
+	//void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException;
 	void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException;
+	//void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException;
 	void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException;
+	//void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException;
 	void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException;
 
-	void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException;
+	//void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException;
 	void grabDBSynonyms(Collection<Synonym> synonyms, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
-	void grabDBCheckConstraints(Collection<Table> constraints, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
+	//void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
+	void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
 	
-	void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
-	void grabDBUniqueConstraints(Collection<Table> constraints, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
+	//void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
+	void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
 	
 	//XXX: grab views, executables (& triggers?) names
 	//List<NamedDBObject> grabViewNames(String catalog, String schema, String viewNamePattern, Connection conn) throws SQLException;
