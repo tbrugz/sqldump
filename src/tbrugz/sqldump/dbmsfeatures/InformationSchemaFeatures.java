@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,6 +22,7 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.Utils;
 
@@ -41,25 +43,25 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, null, conn);
+			grabDBViews(model.getViews(), schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, null, null, conn);
+			grabDBTriggers(model.getTriggers(), schemaPattern, null, null, conn);
 		}
 		if(grabExecutables) {
-			grabDBExecutables(model, schemaPattern, null, conn);
+			grabDBExecutables(model.getExecutables(), schemaPattern, null, conn);
 		}
 		//if(grabIndexes) {
 			//grabDBIndexes(model, schemaPattern, conn);
 		//}
 		if(grabSequences) {
-			grabDBSequences(model, schemaPattern, null, conn);
+			grabDBSequences(model.getSequences(), schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model, schemaPattern, null, conn);
+			grabDBCheckConstraints(model.getTables(), schemaPattern, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model, schemaPattern, null, conn);
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
 		}
 	}
 	
@@ -72,7 +74,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		String query = grabDBViewsQuery(schemaPattern);
 		log.debug("grabbing views: sql:\n"+query);
 		Statement st = conn.createStatement();
@@ -101,7 +103,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				}
 			}
 			v.setWithReadOnly( !"YES".equalsIgnoreCase(rs.getString(6)) );
-			model.getViews().add(v);
+			views.add(v);
 			count++;
 		}
 		
@@ -124,7 +126,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	 * TODOne: add when_clause - [ WHEN ( condition ) ] - see http://www.postgresql.org/docs/9.1/static/sql-createtrigger.html
 	 */
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern);
 		Statement st = conn.createStatement();
@@ -136,13 +138,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		while(rs.next()) {
 			String schemaName = rs.getString(2);
 			String name = rs.getString(3);
-			InformationSchemaTrigger t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTriggers(), schemaName, name);
+			InformationSchemaTrigger t = DBIdentifiable.getDBIdentifiableBySchemaAndName(triggers, schemaName, name);
 			
 			if(t==null) {
 				t = new InformationSchemaTrigger();
 				t.setSchemaName( schemaName );
 				t.setName( name );
-				model.getTriggers().add(t);
+				triggers.add(t);
 				count++;
 			}
 			t.eventsManipulation.add(rs.getString(4));
@@ -169,7 +171,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
@@ -184,7 +186,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			if(eo==null || !routineName.equals(eo.getName())) {
 				//end last object
 				if(eo!=null) {
-					if(addExecutableToModel(model, eo)) {
+					if(addExecutableToModel(execs, eo)) {
 						count++;
 					}
 				}
@@ -215,7 +217,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			eo.getParams().add(ep);
 		}
 		if(eo!=null) {
-			if(addExecutableToModel(model, eo)) {
+			if(addExecutableToModel(execs, eo)) {
 				count++;
 			}
 		}
@@ -225,11 +227,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info(count+" executable objects/routines grabbed");
 	}
 	
-	boolean addExecutableToModel(SchemaModel model, ExecutableObject eo) {
-		boolean added = model.getExecutables().add(eo);
+	boolean addExecutableToModel(Collection<ExecutableObject> execs, ExecutableObject eo) {
+		boolean added = execs.add(eo);
 		if(!added) {
-			boolean b1 = model.getExecutables().remove(eo);
-			boolean b2 = model.getExecutables().add(eo);
+			boolean b1 = execs.remove(eo);
+			boolean b2 = execs.add(eo);
 			added = b1 && b2;
 			if(added) {
 				log.debug("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
@@ -250,7 +252,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
+	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		Statement st = conn.createStatement();
 		String query = grabDBSequencesQuery(schemaPattern);
 		log.debug("grabbing sequences: sql:\n"+query);
@@ -267,7 +269,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			}
 			s.setIncrementBy(1); //rs.getLong(3);
 			//s.lastNumber = rs.getLong(4);
-			model.getSequences().add(s);
+			seqs.add(s);
 			count++;
 		}
 		
@@ -285,7 +287,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		String query = grabDBCheckConstraintsQuery(schemaPattern);
@@ -303,7 +305,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			c.setType(Constraint.ConstraintType.CHECK);
 			c.setName( rs.getString(3) );
 			c.setCheckDescription(rs.getString(4));
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 				countConstraints++;
@@ -332,7 +334,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
@@ -355,7 +357,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				c = new Constraint();
 				c.setType(Constraint.ConstraintType.UNIQUE);
 				c.setName( constraintName );
-				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
+				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, schemaName, tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 					countUniqueConstraints++;

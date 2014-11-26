@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
 import java.sql.Statement;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class DerbyFeatures extends DefaultDBMSFeatures {
@@ -20,15 +22,15 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, null, conn);
+			grabDBViews(model.getViews(), schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, null, null, conn);
+			grabDBTriggers(model.getTriggers(), schemaPattern, null, null, conn);
 		}
 		
 		try {
 			if(grabSequences) { 
-				grabDBSequences(model, schemaPattern, null, conn);
+				grabDBSequences(model.getSequences(), schemaPattern, null, conn);
 			}
 		}
 		catch(SQLSyntaxErrorException e) {
@@ -40,7 +42,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		//String query = "select tableid, viewdefinition "
 		//		+"from sys.sysviews "
@@ -60,7 +62,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
 			v.setQuery( rs.getString(3) );
 			v.setSchemaName( schemaPattern );
-			model.getViews().add(v);
+			views.add(v);
 			count++;
 		}
 		
@@ -70,7 +72,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
+	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = "select triggername, event, firingtime, type, st.tableid, tablename, triggerdefinition "
 				+"from sys.systables as st, sys.systriggers as tr "
@@ -105,7 +107,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			String timing = rs.getString(3);
 			t.conditionTiming = "A".equals(timing)?"AFTER":"BEFORE";
 			
-			model.getTriggers().add(t);
+			triggers.add(t);
 			count++;
 		}
 		
@@ -115,7 +117,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
+	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype "
 				+"from sys.syssequences "
@@ -133,7 +135,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			s.setMaxValue(rs.getLong(3));
 			s.setLastNumber(rs.getLong(4));
 			s.setIncrementBy(rs.getLong(5));
-			model.getSequences().add(s);
+			seqs.add(s);
 			count++;
 		}
 		

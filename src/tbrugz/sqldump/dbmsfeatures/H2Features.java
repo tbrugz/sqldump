@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,8 +13,8 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
-import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 
 /*
@@ -34,7 +35,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grab routines: not supported"); //warn level?
 	}
 	
@@ -66,7 +67,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
 		Statement st = conn.createStatement();
@@ -88,7 +89,7 @@ public class H2Features extends InformationSchemaFeatures {
 				c.getUniqueColumns().add(ss.trim());
 			}
 			countCols += cols.length;
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), schemaName, tableName);
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, schemaName, tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 			}

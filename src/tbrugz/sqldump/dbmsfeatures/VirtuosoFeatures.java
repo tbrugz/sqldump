@@ -2,11 +2,15 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.Trigger;
 
 public class VirtuosoFeatures extends InformationSchemaFeatures {
 	static final Log log = LogFactory.getLog(VirtuosoFeatures.class);
@@ -24,26 +28,26 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn)
+	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn)
 			throws SQLException {
 		//XXX: use DBA.sys_triggers ?
 		log.warn("grabTriggers: not implemented");
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn)
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBRoutines: not implemented");
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern,
+	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBSequences: not implemented");
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern,
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern,
 			Connection conn) throws SQLException {
 		log.warn("grabDBCheckConstraints: not implemented");
 	}

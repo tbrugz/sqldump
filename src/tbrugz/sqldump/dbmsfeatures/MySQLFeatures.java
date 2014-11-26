@@ -3,8 +3,10 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.Collection;
 
-import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Table;
 
 public class MySQLFeatures extends InformationSchemaFeatures {
 
@@ -18,7 +20,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
+	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 	}
 	
 	/*
@@ -26,7 +28,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	 * suggestion: using before-triggers: http://forums.mysql.com/read.php?136,152474,240479#msg-240479
 	 */
 	@Override
-	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 	
 	//XXX: see in information_schema: referential_constraints ; table_constraints -> PK, UNIQUE

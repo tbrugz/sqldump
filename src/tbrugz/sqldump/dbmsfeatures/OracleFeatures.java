@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -59,28 +60,28 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
-			grabDBViews(model, schemaPattern, null, conn);
+			grabDBViews(model.getViews(), schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
-			grabDBTriggers(model, schemaPattern, null, null, conn);
+			grabDBTriggers(model.getTriggers(), schemaPattern, null, null, conn);
 		}
 		if(grabExecutables) {
-			grabDBExecutables(model, schemaPattern, null, conn);
+			grabDBExecutables(model.getExecutables(), schemaPattern, null, conn);
 		}
 		if(grabSynonyms) {
-			grabDBSynonyms(model, schemaPattern, null, conn);
+			grabDBSynonyms(model.getSynonyms(), schemaPattern, null, conn);
 		}
 		if(grabIndexes) {
 			grabDBIndexes(model, schemaPattern, conn);
 		}
 		if(grabSequences) {
-			grabDBSequences(model, schemaPattern, null, conn);
+			grabDBSequences(model.getSequences(), schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model, schemaPattern, null, conn);
+			grabDBCheckConstraints(model.getTables(), schemaPattern, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model, schemaPattern, null, conn);
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
 		}
 	}
 	
@@ -91,13 +92,23 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+ " ORDER BY VIEW_NAME";
 	}
 
-	@Override
+	/*@Override
 	public void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
-		grabDBNormalViews(model, schemaPattern, viewNamePattern, conn);
-		grabDBMaterializedViews(model, schemaPattern, viewNamePattern, conn);
+		grabDBNormalViews(model.getViews(), schemaPattern, viewNamePattern, conn);
+		grabDBMaterializedViews(model.getViews(), schemaPattern, viewNamePattern, conn);
+	}*/
+
+	@Override
+	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+		grabDBNormalViews(views, schemaPattern, viewNamePattern, conn);
+		grabDBMaterializedViews(views, schemaPattern, viewNamePattern, conn);
 	}
 	
-	void grabDBNormalViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+	/*void grabDBNormalViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+		grabDBNormalViews(model.getViews(), schemaPattern, viewNamePattern, conn);
+	}*/
+
+	void grabDBNormalViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
 		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
@@ -110,7 +121,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			v.setName( rs.getString(2) );
 			v.setQuery( rs.getString(4) );
 			v.setSchemaName(schemaPattern);
-			model.getViews().add(v);
+			views.add(v);
 			count++;
 		}
 		rs.close();
@@ -128,7 +139,11 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"ORDER BY MVIEW_NAME";
 	}
 
-	void grabDBMaterializedViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+	/*void grabDBMaterializedViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+		grabDBMaterializedViews(model.getViews(), schemaPattern, viewNamePattern, conn);
+	}*/
+	
+	void grabDBMaterializedViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
 		String query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
@@ -145,7 +160,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			v.rewriteCapability = rs.getString(6);
 			v.refreshMode = rs.getString(7);
 			v.refreshMethod = rs.getString(8);
-			model.getViews().add(v);
+			views.add(v);
 			count++;
 		}
 		rs.close();
@@ -164,8 +179,13 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"ORDER BY trigger_name";
 	}
 	
-	@Override
+	/*@Override
 	public void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
+		grabDBTriggers(model.getTriggers(), schemaPattern, tableNamePattern, triggerNamePattern, conn);
+	}*/
+	
+	@Override
+	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
 		log.debug("sql: "+query);
@@ -183,7 +203,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			t.setBody(rs.getString(5));
 			t.setWhenClause(rs.getString(6));
 			
-			model.getTriggers().add(t);
+			triggers.add(t);
 			count++;
 		}
 		rs.close();
@@ -200,8 +220,13 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"order by type, name, line";
 	}
 	
-	@Override
+	/*@Override
 	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+		grabDBExecutables(model.getExecutables(), schemaPattern, execNamePattern, conn);
+	}*/
+	
+	@Override
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBExecutablesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
@@ -219,7 +244,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				//end last object
 				if(eo!=null) {
 					eo.setBody( sb.toString() );
-					boolean added = addExecutableToModel(model, eo);
+					boolean added = addExecutableToModel(execs, eo);
 					if(added) { countExecutables++; }
 				}
 				//new object
@@ -246,7 +271,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		}
 		if(sb!=null) {
 			eo.setBody( sb.toString() );
-			boolean added = addExecutableToModel(model, eo);
+			boolean added = addExecutableToModel(execs, eo);
 			if(added) { countExecutables++; }
 		}
 		rs.close();
@@ -255,14 +280,14 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"]");
 		
 		//grabs metadata
-		grabDBExecutablesMetadata(model, schemaPattern, conn);
+		grabDBExecutablesMetadata(execs, schemaPattern, conn);
 	}
 	
-	boolean addExecutableToModel(SchemaModel model, ExecutableObject eo) {
-		boolean added = model.getExecutables().add(eo);
+	boolean addExecutableToModel(Collection<ExecutableObject> execs, ExecutableObject eo) {
+		boolean added = execs.add(eo);
 		if(!added) {
-			boolean b1 = model.getExecutables().remove(eo);
-			boolean b2 = model.getExecutables().add(eo);
+			boolean b1 = execs.remove(eo);
+			boolean b2 = execs.add(eo);
 			added = b1 && b2;
 			if(added) {
 				log.debug("executable ["+eo.getType()+"] '"+eo.getQualifiedName()+"' replaced in model");
@@ -274,7 +299,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		return added;
 	}
 	
-	void grabDBExecutablesMetadata(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, Connection conn) throws SQLException {
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
 				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
 				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
@@ -302,16 +327,16 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			log.debug("subprogram: "+subprogramName+" ; type="+subprogramType+" -- objName/package="+objectName+" ; objType="+objectType);
 			
 			//is a procedure?
-			eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, schemaPattern, objectName);
+			eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.PROCEDURE, schemaPattern, objectName);
 			if(eo==null) { //not a procedure, maybe a function
-				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, schemaPattern, objectName);
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.FUNCTION, schemaPattern, objectName);
 			}
 			//not a top-level procedure or function, maybe declared inside a package
 			if(eo==null) {
-				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.PROCEDURE, schemaPattern, subprogramName);
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.PROCEDURE, schemaPattern, subprogramName);
 			}
 			if(eo==null) {
-				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getExecutables(), DBObjectType.FUNCTION, schemaPattern, subprogramName);
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.FUNCTION, schemaPattern, subprogramName);
 			}
 			
 			//not a procedure or function, maybe a package (remember packages have no parameters)
@@ -343,7 +368,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 					eo.setType(otype);
 				}
 				
-				model.getExecutables().add(eo);
+				execs.add(eo);
 				newExecutablesCount++;
 			}
 			else {
@@ -421,8 +446,13 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+(synonymNamePattern!=null?" and synonym_name = '"+synonymNamePattern+"'":"");
 	}
 	
-	@Override
+	/*@Override
 	public void grabDBSynonyms(SchemaModel model, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException {
+		grabDBSynonyms(model.getSynonyms(), schemaPattern, synonymNamePattern, conn);
+	}*/
+	
+	@Override
+	public void grabDBSynonyms(Collection<Synonym> synonyms, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
 		String query = grabDBSynonymsQuery(schemaPattern, synonymNamePattern);
 		log.debug("sql: "+query);
@@ -437,7 +467,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			s.objectOwner = rs.getString(2);
 			s.referencedObject = rs.getString(3);
 			s.dbLink = rs.getString(4);
-			model.getSynonyms().add(s);
+			synonyms.add(s);
 			count++;
 		}
 		rs.close();
@@ -546,8 +576,13 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				+"order by sequence_name";
 	}
 	
-	@Override
+	/*@Override
 	public void grabDBSequences(SchemaModel model, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
+		grabDBSequences(model.getSequences(), schemaPattern, sequenceNamePattern, conn);
+	}*/
+	
+	@Override
+	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
 		String query = grabDBSequencesQuery(schemaPattern, sequenceNamePattern);
 		log.debug("sql: "+query);
@@ -562,7 +597,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			s.setMinValue(rs.getLong(2));
 			s.setIncrementBy(rs.getLong(3));
 			s.setLastNumber(rs.getLong(4));
-			model.getSequences().add(s);
+			seqs.add(s);
 			count++;
 		}
 		rs.close();
@@ -631,8 +666,13 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		}
 	}
 
-	@Override
+	/*@Override
 	public void grabDBCheckConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+		grabDBCheckConstraints(model.getTables(), schemaPattern, constraintNamePattern, conn);
+	}*/
+	
+	@Override
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		//check constraints
@@ -658,7 +698,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			//ignore NOT NULL constraints
 			if(c.getCheckDescription().contains(" IS NOT NULL")) { continue; }
 			
-			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, rs.getString(1), tableName);
 			if(t!=null) {
 				t.getConstraints().add(c);
 				count++;
@@ -682,7 +722,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//unique constraints
@@ -707,7 +747,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			if(!constraintName.equals(previousConstraint)) {
 				String tableName = rs.getString(2);
 				c = new Constraint();
-				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), rs.getString(1), tableName);
+				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, rs.getString(1), tableName);
 				if(t!=null) {
 					t.getConstraints().add(c);
 					countUniqueConstraints++;

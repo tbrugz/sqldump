@@ -6,14 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
-import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.util.Utils;
 
 public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
@@ -33,7 +34,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 	}
 	
 	@Override
-	public void grabDBExecutables(SchemaModel model, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
 		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
@@ -80,7 +81,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 				}
 			}
 			
-			if(addExecutableToModel(model, eo)) {
+			if(addExecutableToModel(execs, eo)) {
 				count++;
 			}
 			
@@ -89,7 +90,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		
 		rs.close();
 		st.close();
-		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+model.getExecutables().size()+"]");
+		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
 	}
 	
 }
