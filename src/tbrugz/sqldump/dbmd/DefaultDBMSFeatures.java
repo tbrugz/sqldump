@@ -3,10 +3,10 @@ package tbrugz.sqldump.dbmd;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.Properties;
+import java.util.List;
 
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
-import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
@@ -17,28 +17,8 @@ import tbrugz.sqldump.dbmodel.View;
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 
 	@Override
-	public void procProperties(Properties prop) {
-		super.procProperties(prop);
-	}
-
-	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
-	}
-
-	@Override
-	public Table getTableObject() {
-		return new Table();
-	}
-
-	@Override
-	public FK getForeignKeyObject() {
-		return new FK();
-	}
-	
-	@Override
-	public String sqlDefaultDateFormatPattern() {
-		return null;
 	}
 
 	/*@Override
@@ -114,5 +94,47 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 			String schemaPattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 	}
+
+	@Override
+	public List<DBObjectType> getExecutableObjectTypes() {
+		return null;
+	}
+
+	/*
+	@Override
+	public boolean supportsGrabViews() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabTriggers() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabExecutables() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabSequences() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabSynonyms() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabCheckConstraints() {
+		return false;
+	}
+
+	@Override
+	public boolean supportsGrabUniqueConstraints() {
+		return false;
+	}
+	*/
 
 }

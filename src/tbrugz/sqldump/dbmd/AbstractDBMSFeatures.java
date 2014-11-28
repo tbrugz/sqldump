@@ -54,6 +54,16 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 
 	@Override
+	public Table getTableObject() {
+		return new Table();
+	}
+
+	@Override
+	public FK getForeignKeyObject() {
+		return new FK();
+	}
+	
+	@Override
 	public void addTableSpecificFeatures(Table t, ResultSet rs) {
 	}
 
@@ -70,6 +80,11 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return null;
 	}
 	
+	@Override
+	public String sqlDefaultDateFormatPattern() {
+		return null;
+	}
+
 	@Override
 	public String sqlAlterColumnClause() {
 		return "alter column";

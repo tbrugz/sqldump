@@ -5,10 +5,12 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
@@ -35,12 +37,15 @@ public interface DBMSFeatures {
 	List<Constraint> grabCheckConstraints(String schemaPattern, String constraintPattern) throws SQLException;
 	List<Constraint> grabUniqueConstraints(String schemaPattern, String constraintPattern) throws SQLException;
 	//XXX: add Connection to parameters?
+	
 	boolean supportsGrabViews();
 	boolean supportsGrabTriggers();
 	boolean supportsGrabExecutables();
 	boolean supportsGrabSequences();
+	boolean supportsGrabSynonyms();
 	boolean supportsGrabCheckConstraints();
 	boolean supportsGrabUniqueConstraints();
+	
 	*/
 	/*
 	ResultSet getExplainPlanForQuery(String sql, Connection conn);
@@ -58,6 +63,8 @@ public interface DBMSFeatures {
 	//XXX: add String getDefaultSchemaName()?
 	
 	//XXX: should DBMS's Features return getDefaultDateFormat?
+	
+	List<DBObjectType> getExecutableObjectTypes();
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
