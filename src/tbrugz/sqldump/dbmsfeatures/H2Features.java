@@ -24,13 +24,15 @@ public class H2Features extends InformationSchemaFeatures {
 	static Log log = LogFactory.getLog(H2Features.class);
 
 	@Override
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		// other columns: REMARKS, SQL, QUEUE_SIZE, NO_WAIT, ID
 		return "select trigger_catalog, trigger_schema, trigger_name, lower(trigger_type) as event_manipulation, null as event_object_schema, table_name as event_object_table "
 				+"  , 'call \"'||java_class||'\"' as action_statement "
 				+"  , 'row' as action_orientation, casewhen(before, 'before', 'after') as action_timing, null as action_condition "
 				+"from information_schema.triggers "
 				+"where trigger_schema = '"+schemaPattern+"' "
+				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
+				+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
 				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
 	}
 	

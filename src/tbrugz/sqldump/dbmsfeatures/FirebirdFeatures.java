@@ -13,7 +13,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBViewsQuery(String schemaPattern) {
+	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select '' as table_catalog, '' as table_schema, trim(RDB$RELATION_NAME) as table_name, "
 			+"RDB$VIEW_SOURCE as view_definition, 'NONE' as check_option, '' as is_updatable "
 			+"from RDB$RELATIONS "
@@ -22,7 +22,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		return "select '' as trigger_catalog, '' as trigger_schema, RDB$TRIGGER_NAME AS trigger_name, "
 			+"CASE RDB$TRIGGER_TYPE WHEN 1 THEN 'INSERT' WHEN 2 THEN 'INSERT' WHEN 3 THEN 'UPDATE' WHEN 4 THEN 'UPDATE' WHEN 5 THEN 'DELETE' WHEN 6 THEN 'DELETE' end as event_manipulation, "
 			+"'' as event_object_schema, RDB$RELATION_NAME as event_object_table, " 

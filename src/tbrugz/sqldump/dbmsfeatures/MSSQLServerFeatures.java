@@ -11,7 +11,7 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 	 */
 	//XXX: add event_manipulation value ; also add action_orientation, action_timing, action_condition?
 	@Override
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		return "select null as trigger_catalog, s.name trigger_schema, t.name trigger_name, "+
 			" '' as event_manipulation, ps.name as event_object_schema, p.name as event_object_table, "+
 			" object_definition(t.object_id) action_statement, "+
@@ -21,7 +21,9 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 			"\ninner join sys.all_objects ao on t.object_id = ao.object_id "+
 			"\ninner join sys.schemas s ON s.schema_id = ao.schema_id "+
 			"\ninner join sys.schemas ps ON ps.schema_id = p.schema_id "+
-			"\nwhere s.name = '"+schemaPattern+"'";
+			"\nwhere s.name = '"+schemaPattern+"' " +
+			(tableNamePattern!=null?"and p.name = '"+tableNamePattern+"' ":"") +
+			(triggerNamePattern!=null?"and t.name = '"+triggerNamePattern+"' ":"");
 	}
 	
 }

@@ -51,6 +51,7 @@ public enum TableType {
 			return TableType.BASE_TABLE;
 		}
 		else if(tableType.equals("TYPE")) {
+			//XXX: table of type TYPE?
 			return TableType.TYPE;
 		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
@@ -58,6 +59,10 @@ public enum TableType {
 			return null;
 		}
 		else if(tableType.equalsIgnoreCase("SEQUENCE")) {
+			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
+			return null;
+		}
+		else if(tableType.equalsIgnoreCase("SYSTEM INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
 			return null;
 		}

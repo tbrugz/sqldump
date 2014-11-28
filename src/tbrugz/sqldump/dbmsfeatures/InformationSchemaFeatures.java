@@ -65,17 +65,18 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 	}
 	
-	String grabDBViewsQuery(String schemaPattern) {
+	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
 			+"and table_schema = '"+schemaPattern+"' "
+			+(viewNamePattern!=null?"and table_name = '"+viewNamePattern+"' ":"")
 			+"order by table_catalog, table_schema, table_name ";
 	}
 
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
-		String query = grabDBViewsQuery(schemaPattern);
+		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("grabbing views: sql:\n"+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
@@ -115,10 +116,12 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	/*
 	 * see: http://www.postgresql.org/docs/9.1/static/infoschema-triggers.html
 	 */
-	String grabDBTriggersQuery(String schemaPattern) {
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing, action_condition "
 			+"from information_schema.triggers "
 			+"where trigger_schema = '"+schemaPattern+"' "
+			+(tableNamePattern!=null?"and event_object_table = '"+tableNamePattern+"' ":"")
+			+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
 			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
 	}
 	
@@ -128,7 +131,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery(schemaPattern);
+		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
@@ -163,11 +166,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type, p.ordinal_position "
-				+"from information_schema.routines r, information_schema.parameters p "
-				+"where r.specific_name = p.specific_name and r.routine_definition is not null "
+				+"\nfrom information_schema.routines r left outer join information_schema.parameters p on r.specific_name = p.specific_name "
+				+"\nwhere r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
 				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
-				+"order by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
+				+"\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
 	}
 	
 	@Override
