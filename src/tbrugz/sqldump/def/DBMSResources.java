@@ -121,7 +121,7 @@ public final class DBMSResources {
 	}
 	
 	//TODO: also detect by getUrl()...
-	String detectDbId(DatabaseMetaData dbmd, boolean quiet) {
+	public String detectDbId(DatabaseMetaData dbmd, boolean quiet) {
 		try {
 			String dbProdName = dbmd.getDatabaseProductName();
 			int dbMajorVersion = -1;

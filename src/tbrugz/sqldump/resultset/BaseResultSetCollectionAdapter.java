@@ -82,7 +82,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			}
 		}
 		if(matched==0) {
-			log.warn("column '"+matchCol+"' not matched: missing a getter?");
+			log.warn("column '"+matchCol+"' not matched: missing a getter? [class: "+clazz.getSimpleName()+"]");
 		}
 	}
 
