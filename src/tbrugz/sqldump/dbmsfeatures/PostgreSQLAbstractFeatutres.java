@@ -1,10 +1,17 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.util.Arrays;
+import java.util.List;
+
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 
 public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatures {
 
+	// org.postgresql.jdbc4.Jdbc4DatabaseMetaData.getFunction(String, String, String) not implemented
+	static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.PROCEDURE };
+	
 	@Override
 	public boolean supportsDiffingColumn() {
 		return true;
@@ -31,4 +38,8 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 		throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
 	}
 	
+	@Override
+	public List<DBObjectType> getExecutableObjectTypes() {
+		return Arrays.asList(execTypes);
+	}
 }

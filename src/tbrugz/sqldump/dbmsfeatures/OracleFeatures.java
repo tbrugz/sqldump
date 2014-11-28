@@ -15,7 +15,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmd.AbstractDBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -37,9 +37,13 @@ import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-public class OracleFeatures extends DefaultDBMSFeatures {
+public class OracleFeatures extends AbstractDBMSFeatures {
 	static Log log = LogFactory.getLog(OracleFeatures.class);
 
+	static final DBObjectType[] execTypes = new DBObjectType[]{DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
+		//, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
+	};
+	
 	boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
 	
@@ -896,4 +900,46 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 	public String sqlDefaultDateFormatPattern() {
 		return "'TO_DATE('''yyyy-MM-dd''',''YYYY-MM-DD'')'";
 	}
+
+	@Override
+	public List<DBObjectType> getExecutableObjectTypes() {
+		return Arrays.asList(execTypes);
+	}
+
+	/*
+	@Override
+	public boolean supportsGrabViews() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabTriggers() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabExecutables() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabSequences() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabSynonyms() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabCheckConstraints() {
+		return true;
+	}
+
+	@Override
+	public boolean supportsGrabUniqueConstraints() {
+		return true;
+	}
+	*/
 }
