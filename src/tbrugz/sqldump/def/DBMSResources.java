@@ -203,6 +203,8 @@ public final class DBMSResources {
 	}
 	
 	synchronized void updateSpecificFeaturesClass() {
+		features = getSpecificFeatures(DBMSResources.instance().dbid());
+		/*
 		String dbSpecificFeaturesClass = null;
 		
 		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
@@ -233,6 +235,51 @@ public final class DBMSResources {
 			log.debug("no specific DBMS features defined. using "+features.getClass().getSimpleName());
 		}
 		initDBMSFeatures(features, papp);
+		*/
+	}
+
+	public DBMSFeatures getSpecificFeatures(String dbid) {
+		String dbSpecificFeaturesClass = null;
+		DBMSFeatures feats = null;
+		
+		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
+		if(dbSpecificFeaturesClass!=null) {
+			log.info("using specific grab class: "+dbSpecificFeaturesClass);
+		}
+		else {
+			dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+dbid+".specificgrabclass");
+		}
+		
+		if(dbSpecificFeaturesClass!=null) {
+			//XXX: call Utils.getClassByName()
+			try {
+				Class<?> c = Class.forName(dbSpecificFeaturesClass);
+				feats = (DBMSFeatures) c.newInstance();
+				log.debug("specific DBMS features class: "+c.getName());
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			} catch (InstantiationException e) {
+				throw new RuntimeException(e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		else {
+			//if(features==null) ?
+			feats = new DefaultDBMSFeatures();
+			log.debug("no specific DBMS features defined. using "+feats.getClass().getSimpleName());
+		}
+		initDBMSFeatures(feats, papp);
+		return feats;
+	}
+	
+	public DBMSFeatures getSpecificFeatures(DatabaseMetaData dbmd) {
+		return getSpecificFeatures(dbmd, false);
+	}
+	
+	public DBMSFeatures getSpecificFeatures(DatabaseMetaData dbmd, boolean quiet) {
+		String dbid = detectDbId(dbmd, quiet);
+		return getSpecificFeatures(dbid);
 	}
 	
 	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
