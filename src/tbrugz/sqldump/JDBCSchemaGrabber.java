@@ -832,7 +832,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			ExecutableObject eo = new ExecutableObject();
 			eo.setName(rs.getString("FUNCTION_NAME"));
 			eo.setSchemaName(rs.getString("FUNCTION_SCHEM"));
-			//eo.setPackageName(rs.getString("FUNCTION_CAT"));
+			eo.setPackageName(rs.getString("FUNCTION_CAT"));
 			eo.setRemarks(rs.getString("REMARKS"));
 			
 			eo.setType(DBObjectType.FUNCTION);

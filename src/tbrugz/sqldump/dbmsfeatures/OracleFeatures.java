@@ -277,10 +277,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"]");
+		log.info("["+schemaPattern+(execNamePattern!=null?"."+execNamePattern:"")+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"]");
 		
 		//grabs metadata
-		grabDBExecutablesMetadata(execs, schemaPattern, conn);
+		grabDBExecutablesMetadata(execs, schemaPattern, execNamePattern, conn);
 	}
 	
 	boolean addExecutableToModel(Collection<ExecutableObject> execs, ExecutableObject eo) {
@@ -299,13 +299,14 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 		return added;
 	}
 	
-	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, Connection conn) throws SQLException {
+	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
 				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
 				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
 				+"  from all_procedures p "
 				+"  left outer join all_arguments aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
 				+" where p.owner = '"+schemaPattern+"' "
+				+(execNamePattern!=null?" and p.object_name = '"+execNamePattern+"' ":"")
 				//+"   and p.object_type = 'PACKAGE' "
 				//+"   and p.procedure_name is not null "
 				+"   and aa.position is not null "
@@ -332,10 +333,10 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.FUNCTION, schemaPattern, objectName);
 			}
 			//not a top-level procedure or function, maybe declared inside a package
-			if(eo==null) {
+			if(eo==null && subprogramName!=null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.PROCEDURE, schemaPattern, subprogramName);
 			}
-			if(eo==null) {
+			if(eo==null && subprogramName!=null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.FUNCTION, schemaPattern, subprogramName);
 			}
 			
@@ -400,7 +401,7 @@ public class OracleFeatures extends DefaultDBMSFeatures {
 			paramCount++;
 		}
 
-		log.info("["+schemaPattern+"]: "+newExecutablesCount+" xtra executables grabbed (metadata); "+paramCount+" executable's parameters grabbed");
+		log.info("["+schemaPattern+(execNamePattern!=null?"."+execNamePattern:"")+"]: "+newExecutablesCount+" xtra executables grabbed (metadata); "+paramCount+" executable's parameters grabbed");
 	}
 	
 	void grabExecutablePrivileges(ExecutableObject executable, String schemaPattern, Connection conn) throws SQLException {
