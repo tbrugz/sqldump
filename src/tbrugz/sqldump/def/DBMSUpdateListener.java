@@ -1,5 +1,5 @@
 package tbrugz.sqldump.def;
 
 public interface DBMSUpdateListener {
-	void dbmsUpdated();
+	void dbmsUpdated(); // (DBMSFeatures feat)
 }

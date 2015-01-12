@@ -72,7 +72,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
 		public void dbmsUpdated() {
-			updateFeatures();
+			updateFeatures(null);
 			log.debug("DBMSUpdateListener: DBMSFeatures class: "+features);
 		}
 	};
@@ -105,13 +105,19 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this.table = new NamedTable(schemaName, tableName);
 		
 		if(features==null) {
-			updateFeatures();
+			updateFeatures(null);
 			log.debug("DBMSFeatures class: "+features);
 		}
 	}
 	
-	static void updateFeatures() {
-		features = DBMSResources.instance().databaseSpecificFeaturesClass();
+	public static void updateFeatures(DBMSFeatures feat) {
+		log.debug("updateFeatures: feat="+feat+" [old-feat="+features+"]");
+		if(feat!=null) {
+			features = feat;
+		}
+		else {
+			features = DBMSResources.instance().databaseSpecificFeaturesClass();
+		}
 	}
 	
 	@Override
