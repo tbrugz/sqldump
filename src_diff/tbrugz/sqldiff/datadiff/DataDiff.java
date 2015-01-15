@@ -42,9 +42,12 @@ import tbrugz.sqldump.util.Utils;
 public class DataDiff extends AbstractFailable {
 
 	static final Log log = LogFactory.getLog(DataDiff.class);
+
+	public static final String PATTERN_FILEEXT = "fileext";
 	
 	public static final String PROP_DATADIFF_TABLES = SQLDiff.PROP_PREFIX+".datadiff.tables";
 	public static final String PROP_DATADIFF_IGNORETABLES = SQLDiff.PROP_PREFIX+".datadiff.ignoretables";
+	public static final String PROP_DATADIFF_SYNTAXES = "sqldiff.datadiff.syntaxes";
 	public static final String PROP_DATADIFF_OUTFILEPATTERN = SQLDiff.PROP_PREFIX+".datadiff.outfilepattern";
 	public static final String PROP_DATADIFF_LOOPLIMIT = SQLDiff.PROP_PREFIX+".datadiff.looplimit";
 	public static final String PROP_DATADIFF_IMPORTCHARSET = SQLDiff.PROP_PREFIX+".datadiff.importcharset";
@@ -279,6 +282,7 @@ public class DataDiff extends AbstractFailable {
 			tablesDiffedCount++;
 			//XXX: drop table if imported?
 		}
+		
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
 			log.warn("tables not found for diff: "+Utils.join(tablesToDiffFilter, ", "));
 			//XXX: log which tables do not exist in source or target models
@@ -298,11 +302,11 @@ public class DataDiff extends AbstractFailable {
 		}
 	}
 	
-	String getColumnsForSelect(Table t) {
+	static String getColumnsForSelect(Table t) {
 		return Utils.join(t.getColumnNames(), ", ");
 	}
 
-	String getColumnsForSelect(List<Column> cols) {
+	static String getColumnsForSelect(List<Column> cols) {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<cols.size();i++) {
 			if(i>0) { sb.append(", "); }
@@ -312,7 +316,7 @@ public class DataDiff extends AbstractFailable {
 		return sb.toString();
 	}
 	
-	List<Column> getCommonColumns(Table t1, Table t2) {
+	static List<Column> getCommonColumns(Table t1, Table t2) {
 		List<Column> cols = new ArrayList<Column>();
 		for(Column c: t1.getColumns()) {
 			if(t2.getColumn(c.getName())!=null) {
@@ -327,12 +331,25 @@ public class DataDiff extends AbstractFailable {
 		List<String> dsStrs = new ArrayList<String>();
 		//FIXedME: select DiffSyntax (based on properties?)
 		// maybe add SQLDataDiffSyntax only if 'sqldiff.datadiff.outfilepattern' is set?
-		if(prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN)!=null) {
+		
+		List<String> syntaxes = Utils.getStringListFromProp(prop, PROP_DATADIFF_SYNTAXES, ",");
+		if(syntaxes!=null) {
+			for(String s: syntaxes) {
+				DiffSyntax ds = (DiffSyntax) Utils.getClassInstance(s, "tbrugz.sqldiff.datadiff");
+				if(ds!=null) {
+					ds.procProperties(prop);
+					dss.add(ds);
+					dsStrs.add(ds.getClass().getSimpleName());
+				}
+			}
+		}
+		else if(prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN)!=null) {
 			DiffSyntax ds = new SQLDataDiffSyntax();
 			ds.procProperties(prop);
 			dss.add(ds);
 			dsStrs.add(ds.getClass().getSimpleName());
 		}
+		
 		if(applyDataDiff) {
 			DiffSyntax sdd2db = new SQLDataDiffToDBSyntax();
 			sdd2db.procProperties(prop);
@@ -358,7 +375,8 @@ public class DataDiff extends AbstractFailable {
 		String finalPattern = CategorizedOut.generateFinalOutPattern(outFilePattern,
 				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
 				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
-				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
+				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE),
+				Defs.addSquareBraquets(PATTERN_FILEEXT));
 		return new CategorizedOut(finalPattern);
 	}
 	

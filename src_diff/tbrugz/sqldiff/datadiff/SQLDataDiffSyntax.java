@@ -47,6 +47,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	}
 	
 	//XXX: option to select update strategy: updatealways/if modified, update changed cols/all cols ?
+	//XXX: rename to something like 'dumpRowWithMatchedKey' ?
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
 			ResultSet rsTarget, long count, Writer w) throws IOException,

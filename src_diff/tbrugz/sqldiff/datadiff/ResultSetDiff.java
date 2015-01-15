@@ -110,7 +110,7 @@ public class ResultSetDiff {
 				for(DiffSyntax ds: dss) {
 					//last 'updated' that counts...
 					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called 
-					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update"));
+					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				}
@@ -123,7 +123,7 @@ public class ResultSetDiff {
 					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
-						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete", ds.getDefaultFileExtension()));
 					}
 					}
 					deleteCount++;
@@ -133,7 +133,7 @@ public class ResultSetDiff {
 					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
-						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert", ds.getDefaultFileExtension()));
 					}
 					}
 					dumpCount++;
@@ -145,7 +145,7 @@ public class ResultSetDiff {
 					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
-						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert"));
+						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert", ds.getDefaultFileExtension()));
 					}
 					}
 					dumpCount++;
@@ -155,7 +155,7 @@ public class ResultSetDiff {
 					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
-						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete"));
+						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete", ds.getDefaultFileExtension()));
 					}
 					}
 					deleteCount++;
