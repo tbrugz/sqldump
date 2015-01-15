@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -37,6 +38,39 @@ public class CategorizedOut {
 		}
 	}
 	
+	public static interface Callback {
+		void callOnOpen(Writer w) throws IOException;
+	}
+	
+	class WriterIterator implements Iterator<Writer> {
+		final Iterator<String> it;
+		WriterIterator() {
+			it = filesOpened.iterator();
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return it.hasNext();
+		}
+
+		@Override
+		public Writer next() {
+			try {
+				return getFileWriter(it.next());
+			} catch (IOException e) {
+				log.warn("IOException: "+e.getMessage());
+				return null;
+			}
+		}
+
+		@Override
+		public void remove() {
+			it.remove();
+			//log.warn("remove: not implemented");
+		}
+		
+	}
+	
 	static final Log log = LogFactory.getLog(CategorizedOut.class);
 	
 	public static final String STDOUT = "<stdout>"; 
@@ -48,14 +82,21 @@ public class CategorizedOut {
 	static final Writer nullWriter = new NullWriter();
 	
 	public CategorizedOut(String filePathPattern) {
+		this(filePathPattern, null);
+	}
+	
+	public CategorizedOut(String filePathPattern, Callback cb) {
 		this.filePathPattern = filePathPattern;
+		this.cb = cb;
 	}
 
-	Set<String> filesOpened = new TreeSet<String>();
+	final Set<String> filesOpened = new TreeSet<String>();
 	
 	//String[] categories = null;
 	//XXXdone: final filePathPattern ?
 	final String filePathPattern; // XXX: file: /abc/def/${1}file${2}.sql
+	
+	final Callback cb; 
 	
 	/*public String[] getCategories() {
 		return categories;
@@ -99,9 +140,28 @@ public class CategorizedOut {
 			return nullWriter;
 		}
 		else {
+			boolean alreadyOpened = filesOpened.contains(thisFP);
 			FileWriter fos = getFileWriter(thisFP);
+			if(!alreadyOpened && cb!=null) {
+				cb.callOnOpen(fos);
+			}
+			
 			return fos;
 		}
+	}
+	
+	public boolean alreadyOpened(String... categories) {
+		if(filePathPattern==null) {
+			throw new RuntimeException("filePathPattern not defined, aborting");
+		}
+		
+		String thisFP = getFilePath(categories);
+		return filesOpened.contains(thisFP);
+	}
+	
+	//public List<Writer> getAllOpenedWriters() { //XXX: get writer iterator?
+	public Iterator<Writer> getAllOpenedWritersIterator() {
+		return new WriterIterator();
 	}
 	
 	String getFilePath(String... categories) {
@@ -128,13 +188,12 @@ public class CategorizedOut {
 	}
 	
 	FileWriter getFileWriter(String thisFP) throws IOException {
+		File f = new File(thisFP);
 		boolean alreadyOpened = filesOpened.contains(thisFP);
 		if(!alreadyOpened) {
 			filesOpened.add(thisFP);
 			log.debug("opening '"+thisFP+"' for writing...");
-		}
 		
-		File f = new File(thisFP);
 		File dir = f.getParentFile();
 		if(dir!=null) {
 			
@@ -149,6 +208,7 @@ public class CategorizedOut {
 			}
 		}
 		
+		}
 		}
 		return new FileWriter(f, alreadyOpened);
 	}

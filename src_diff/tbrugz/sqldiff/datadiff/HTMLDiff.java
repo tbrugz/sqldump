@@ -28,13 +28,14 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 		
 		List<String> changedCols = SQLDataDiffSyntax.getChangedCols(lsColNames, valsS, valsT);
 		if(changedCols.size()>0) {
+			//XXX show which columns have changed...
 			dumpRow(rsTarget, count, "change", w);
-			if(shouldFlush) { w.flush(); }
+			if(shouldFlush) { flush(w); }
 			return true;
 		}
 		else {
 			dumpRow(rsTarget, count, "equal", w);
-			if(shouldFlush) { w.flush(); }
+			if(shouldFlush) { flush(w); }
 			return false;
 		}
 	}
@@ -48,14 +49,19 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer w) throws IOException, SQLException {
 		dumpRow(rs, count, "add", w);
-		if(shouldFlush) { w.flush(); }
+		if(shouldFlush) { flush(w); }
 	}
 
 	@Override
 	public void dumpDeleteRow(ResultSet rs, long count, Writer w) throws IOException, SQLException {
 		dumpRow(rs, count, "remove", w);
 		//log.info("dumpDelete: count="+count);
-		if(shouldFlush) { w.flush(); }
+		if(shouldFlush) { flush(w); }
+	}
+
+	void flush(Writer w) throws IOException {
+		//w.flush();
+		w.close();
 	}
 
 }

@@ -132,7 +132,7 @@ public class DiffTwoQueries implements Executor {
 				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
 				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
 		}
-		CategorizedOut cout = new CategorizedOut(finalPattern);
+		//CategorizedOut cout = new CategorizedOut(finalPattern);
 		
 		long loopLimit = Utils.getPropLong(prop, PROP_LOOPLIMIT, DEFAULT_LOOP_LIMIT);
 		
@@ -146,7 +146,7 @@ public class DiffTwoQueries implements Executor {
 		rsdiff.setLimit(loopLimit);
 		try {
 			log.info("starting diff...");
-			rsdiff.diff(rsSource, rsTarget, tableName, keyCols, dss, cout);
+			rsdiff.diff(rsSource, rsTarget, tableName, keyCols, dss, finalPattern);
 		}
 		catch(IllegalArgumentException e) {
 			log.warn("error diffing: "+e);

@@ -164,7 +164,7 @@ public class DataDiff extends AbstractFailable {
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
 		
-		CategorizedOut cout = getCOut();
+		String coutPattern = getCOutPattern();
 		
 		if(sourceMustImportData) {
 			log.info("[source] importing data for datadiff from: "+getImportDataPattern(sourceId));
@@ -274,7 +274,7 @@ public class DataDiff extends AbstractFailable {
 			}
 			
 			log.debug("diff for table '"+table+"'...");
-			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, cout);
+			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, coutPattern);
 			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 			
 			rsSource.close(); rsTarget.close();
@@ -363,11 +363,11 @@ public class DataDiff extends AbstractFailable {
 		return dss;
 	}
 	
-	CategorizedOut getCOut() {
+	String getCOutPattern() {
 		if(outFilePattern==null) {
 			log.warn("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?) - using 'null' writer"); //XXX should be 'warn' level?
 			//if(failonerror) { throw new ProcessingException("outFilePattern is null (prop '"+PROP_DATADIFF_OUTFILEPATTERN+"' not defined?)"); }
-			return new CategorizedOut(CategorizedOut.NULL_WRITER);
+			return CategorizedOut.NULL_WRITER;
 		}
 		
 		log.info("outfilepattern: "+new File(outFilePattern).getAbsolutePath());
@@ -377,7 +377,7 @@ public class DataDiff extends AbstractFailable {
 				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
 				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE),
 				Defs.addSquareBraquets(PATTERN_FILEEXT));
-		return new CategorizedOut(finalPattern);
+		return finalPattern;
 	}
 	
 	Connection getConn(String grabberId) {

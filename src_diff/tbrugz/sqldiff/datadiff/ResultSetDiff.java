@@ -1,15 +1,20 @@
 package tbrugz.sqldiff.datadiff;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 
@@ -31,7 +36,7 @@ public class ResultSetDiff {
 	//XXX: add schemaName ?
 	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
-			List<DiffSyntax> dss, CategorizedOut cout) throws SQLException, IOException {
+			List<DiffSyntax> dss, String coutPattern) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
 		boolean hasNextSource = true;
@@ -60,7 +65,13 @@ public class ResultSetDiff {
 		}
 		log.debug("[table="+tableName+"] key cols: "+keyCols);
 		
+		Map<DiffSyntax, DataDumpUtils.SyntaxCOutCallback> dscbs = new HashMap<DiffSyntax, DataDumpUtils.SyntaxCOutCallback>();
+		Map<DiffSyntax, CategorizedOut> dscouts = new HashMap<DiffSyntax, CategorizedOut>();
+		
 		for(DiffSyntax ds: dss) {
+			DataDumpUtils.SyntaxCOutCallback cb = new DataDumpUtils.SyntaxCOutCallback(ds);
+			dscbs.put(ds, cb);
+			dscouts.put(ds, new CategorizedOut(coutPattern, cb));
 			ds.initDump(tableName, keyCols, md);
 		}
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
@@ -109,7 +120,8 @@ public class ResultSetDiff {
 				if(dumpUpdates) {
 				for(DiffSyntax ds: dss) {
 					//last 'updated' that counts...
-					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called 
+					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called
+					CategorizedOut cout = dscouts.get(ds);
 					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
@@ -123,6 +135,7 @@ public class ResultSetDiff {
 					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
+						CategorizedOut cout = dscouts.get(ds);
 						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete", ds.getDefaultFileExtension()));
 					}
 					}
@@ -133,6 +146,7 @@ public class ResultSetDiff {
 					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
+						CategorizedOut cout = dscouts.get(ds);
 						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert", ds.getDefaultFileExtension()));
 					}
 					}
@@ -145,6 +159,7 @@ public class ResultSetDiff {
 					if(dumpInserts) {
 					log.debug("insert: "+sourceVals+" / ->"+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
+						CategorizedOut cout = dscouts.get(ds);
 						ds.dumpRow(target, count, cout.getCategorizedWriter("", tableName, "insert", ds.getDefaultFileExtension()));
 					}
 					}
@@ -155,6 +170,7 @@ public class ResultSetDiff {
 					if(dumpDeletes) {
 					log.debug("delete: ->"+sourceVals+" / "+targetVals+" // "+hasNextSource+"/"+hasNextTarget);
 					for(DiffSyntax ds: dss) {
+						CategorizedOut cout = dscouts.get(ds);
 						ds.dumpDeleteRow(source, count, cout.getCategorizedWriter("", tableName, "delete", ds.getDefaultFileExtension()));
 					}
 					}
@@ -188,6 +204,15 @@ public class ResultSetDiff {
 		for(DiffSyntax ds: dss) {
 			if(ds.isWriterIndependent()) {
 				ds.dumpFooter(sourceRowCount, null); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
+			}
+			else {
+				CategorizedOut cout = dscouts.get(ds);
+				Iterator<Writer> it = cout.getAllOpenedWritersIterator();
+				while(it.hasNext()) {
+					Writer w = it.next();
+					ds.dumpFooter(sourceRowCount, w);
+					w.close();
+				}
 			}
 		}
 		

@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 
 public class DataDumpUtils {
@@ -44,6 +45,17 @@ public class DataDumpUtils {
 	//public static NumberFormat floatFormatterBR = null;
 	static final NumberFormat longFormatter;
 	static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
+	
+	public static class SyntaxCOutCallback implements CategorizedOut.Callback {
+		final DumpSyntaxInt ds;
+		public SyntaxCOutCallback(DumpSyntaxInt ds) {
+			this.ds = ds;
+		}
+		@Override
+		public void callOnOpen(Writer w) throws IOException {
+			ds.dumpHeader(w);
+		}
+	}
 	
 	static {
 		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");
