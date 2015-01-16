@@ -305,9 +305,14 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			}
 		}
 		else {
+			if(t.getColumnNames()!=null) {
 			for(String c: t.getColumnNames()) {
 				sbCols.append(c+"\n");
 				colCount++;
+			}
+			}
+			else {
+				log.warn("getColumnNames is null... TableNode: "+n.getId()+" relation: "+t);
 			}
 		}
 		n.setColumnsDesc(sbCols.toString());
@@ -397,8 +402,8 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 				outputStream = new PrintStream(output);
 			}
 				
+			dg.loadSnippets(DEFAULT_SNIPPETS);
 			if(snippetsFile!=null) { dg.loadSnippets(snippetsFile); }
-			else { dg.loadSnippets(DEFAULT_SNIPPETS); }
 			
 			dg.dumpModel(r, outputStream);
 			
