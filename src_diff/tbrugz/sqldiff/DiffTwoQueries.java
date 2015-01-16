@@ -41,8 +41,9 @@ public class DiffTwoQueries implements Executor {
 	static final String PROP_SOURCE_CONNPROPPREFIX = PREFIX+".source.connpropprefix";
 	static final String PROP_TARGET_CONNPROPPREFIX = PREFIX+".target.connpropprefix";
 	
-	static final String PROP_SOURCEQUERY = PREFIX+".sourcesql";
-	static final String PROP_TARGETQUERY = PREFIX+".targetsql";
+	static final String PROP_SOURCE_QUERY = PREFIX+".sourcesql";
+	static final String PROP_TARGET_QUERY = PREFIX+".targetsql";
+	static final String PROP_QUERY = PREFIX+".sql";
 	static final String PROP_TABLENAME = PREFIX+".tablename";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
 	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
@@ -102,8 +103,8 @@ public class DiffTwoQueries implements Executor {
 		
 		List<DiffSyntax> dss = getSyntaxes();
 		
-		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCEQUERY);
-		String targetSQL = getPropertyFailIfNull(prop, PROP_TARGETQUERY);
+		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCE_QUERY, PROP_QUERY);
+		String targetSQL = getPropertyFailIfNull(prop, PROP_TARGET_QUERY, PROP_QUERY);
 		//XXX warn if no 'order by' present
 		String tableName = prop.getProperty(PROP_TABLENAME);
 		if(tableName==null) {
@@ -177,10 +178,13 @@ public class DiffTwoQueries implements Executor {
 		return dss;
 	}
 	
-	static String getPropertyFailIfNull(Properties prop, String key) {
+	static String getPropertyFailIfNull(Properties prop, String key, String altKey) {
 		String value = prop.getProperty(key);
+		if(value==null && altKey!=null) {
+			value = prop.getProperty(altKey);
+		}
 		if(value==null) {
-			throw new RuntimeException("property '"+key+"' must not be null");
+			throw new RuntimeException("property '"+key+"'"+(altKey!=null?" (or '"+altKey+"')":"")+" must not be null");
 		}
 		return value;
 	}
