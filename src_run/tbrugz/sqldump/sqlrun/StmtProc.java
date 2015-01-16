@@ -283,10 +283,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 					PreparedStatement stmt = conn.prepareStatement(stmtStr);
 					setParameters(stmt);
 					urows = stmt.executeUpdate();
+					stmt.close();
 				}
 				else {
 					Statement stmt = conn.createStatement();
 					urows = stmt.executeUpdate(replaceParameters(stmtStr));
+					stmt.close();
 				}
 				
 				if(logStmt.isDebugEnabled()) {

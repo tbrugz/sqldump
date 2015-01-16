@@ -27,6 +27,10 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * XXX: add prop 'diff2q[.<env>].table/relation' - table/relation to be diffed (key cols grabbed from table metadata?)
+ *  - add 'diff2q[.<env>].filter' - filter to be applyed in [each] query 
+ */
 public class DiffTwoQueries implements Executor {
 
 	static final Log log = LogFactory.getLog(DiffTwoQueries.class);
