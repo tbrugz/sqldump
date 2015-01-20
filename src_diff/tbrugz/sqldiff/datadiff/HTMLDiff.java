@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -19,17 +20,21 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	
 	boolean shouldFlush = true;
 	
+	public HTMLDiff() {
+		this.nullValueStr = "&#9216;"; // NULL unicode char in HTML
+	}
+	
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
 			ResultSet rsTarget, long count, Writer w) throws IOException,
 			SQLException {
-		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
-		List<String> valsT = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol), dateFormatter );
+		List<Object> valsS = SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol, true);
+		List<Object> valsT = SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol, true);
 		
-		List<String> changedCols = SQLDataDiffSyntax.getChangedCols(lsColNames, valsS, valsT);
-		if(changedCols.size()>0) {
-			//XXX show which columns have changed...
-			dumpRow(rsTarget, count, "change", w);
+		List<Object> fvalS = getFormattedVals(valsS);
+		List<Object> fvalT = getFormattedVals(valsT);
+		if(!equals(fvalS, fvalT)) {
+			dumpRowValues(fvalS, fvalT, count, "change", w);
 			if(shouldFlush) { flush(w); }
 			return true;
 		}
@@ -57,6 +62,46 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 		dumpRow(rs, count, "remove", w);
 		//log.info("dumpDelete: count="+count);
 		if(shouldFlush) { flush(w); }
+	}
+	
+	public void dumpRowValues(List<Object> valsS, List<Object> valsT, long count, String clazz, Writer fos) throws IOException, SQLException {
+		StringBuffer sb = new StringBuffer();
+		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+clazz+"\"":"")+">");
+		for(int i=0;i<lsColNames.size();i++) {
+			Object valueS = valsS.get(i);
+			Object valueT = valsT.get(i);
+			if(valueS.equals(valueT)) {
+				sb.append( "<td>"+ valueS +"</td>" );
+			}
+			else {
+				sb.append( "<td><span class=\"add\">"+ valueS +"</span><span class=\"remove\">"+ valueT +"</span></td>" );
+			}
+		}
+		sb.append("</tr>");
+		out(sb.toString()+"\n", fos);
+	}
+	
+	List<Object> getFormattedVals(List<Object> vals) {
+		List<Object> objs = new ArrayList<Object>();
+		for(int i=0;i<lsColNames.size();i++) {
+			objs.add( DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr, doEscape(i)) );
+		}
+		return objs;
+	}
+	
+	boolean equals(List<Object> valS, List<Object> valT) {
+		for(int i=0;i<valS.size();i++) {
+			Object s = valS.get(i);
+			Object t = valT.get(i);
+			if(s==null && t==null) continue;
+			if((s==null && t!=null) || (s!=null && t==null)) {
+				return false;
+			}
+			if(!s.equals(t)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	void flush(Writer w) throws IOException {

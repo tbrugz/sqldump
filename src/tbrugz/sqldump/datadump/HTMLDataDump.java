@@ -36,7 +36,7 @@ public class HTMLDataDump extends XMLDataDump {
 	protected final boolean dumpColElement = false;
 	
 	public HTMLDataDump() {
-		padding = "";
+		this("");
 	}
 	
 	public HTMLDataDump(String padding) {

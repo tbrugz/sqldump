@@ -176,7 +176,7 @@ public class XMLDataDump extends DumpSyntax {
 		}
 	}
 	
-	boolean doEscape(final int i) {
+	public boolean doEscape(final int i) {
 		return escape?
 				(colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))):
 				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
