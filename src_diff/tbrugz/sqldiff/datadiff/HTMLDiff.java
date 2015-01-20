@@ -18,10 +18,10 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 
 	static final Log log = LogFactory.getLog(HTMLDiff.class);
 	
-	boolean shouldFlush = true;
+	boolean shouldFlush = false;
 	
 	public HTMLDiff() {
-		this.nullValueStr = "&#9216;"; // NULL unicode char in HTML
+		this.nullValueStr = "&#9216;"; // NULL unicode char in HTML - unicode U+2400
 	}
 	
 	@Override
