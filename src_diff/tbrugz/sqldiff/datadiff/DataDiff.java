@@ -260,7 +260,7 @@ public class DataDiff extends AbstractFailable {
 				rsTarget = stmtTarget.executeQuery();
 			}
 			catch(SQLException e) {
-				log.warn("error in sql exec [target]: "+sql);
+				log.warn("error in sql exec [target ; '"+table+"']: "+sql);
 				continue;
 			}
 			
@@ -302,11 +302,11 @@ public class DataDiff extends AbstractFailable {
 		}
 	}
 	
-	static String getColumnsForSelect(Table t) {
+	public static String getColumnsForSelect(Table t) {
 		return Utils.join(t.getColumnNames(), ", ");
 	}
 
-	static String getColumnsForSelect(List<Column> cols) {
+	public static String getColumnsForSelect(List<Column> cols) {
 		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<cols.size();i++) {
 			if(i>0) { sb.append(", "); }
@@ -316,7 +316,7 @@ public class DataDiff extends AbstractFailable {
 		return sb.toString();
 	}
 	
-	static List<Column> getCommonColumns(Table t1, Table t2) {
+	public static List<Column> getCommonColumns(Table t1, Table t2) {
 		List<Column> cols = new ArrayList<Column>();
 		for(Column c: t1.getColumns()) {
 			if(t2.getColumn(c.getName())!=null) {

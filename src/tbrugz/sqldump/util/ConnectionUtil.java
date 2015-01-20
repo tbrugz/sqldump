@@ -210,7 +210,7 @@ public class ConnectionUtil {
 	
 	public static void closeConnection(Connection conn) {
 		if(conn!=null) {
-			log.info("closing connection: "+conn);
+			log.debug("closing connection: "+conn);
 			try {
 				try {
 					conn.rollback();
