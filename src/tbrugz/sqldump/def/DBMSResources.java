@@ -120,6 +120,10 @@ public final class DBMSResources {
 				);
 	}
 	
+	public String detectDbId(DatabaseMetaData dbmd) {
+		return detectDbId(dbmd, true);
+	}
+	
 	//TODO: also detect by getUrl()...
 	public String detectDbId(DatabaseMetaData dbmd, boolean quiet) {
 		try {
@@ -274,7 +278,7 @@ public final class DBMSResources {
 	}
 	
 	public DBMSFeatures getSpecificFeatures(DatabaseMetaData dbmd) {
-		return getSpecificFeatures(dbmd, false);
+		return getSpecificFeatures(dbmd, true);
 	}
 	
 	public DBMSFeatures getSpecificFeatures(DatabaseMetaData dbmd, boolean quiet) {

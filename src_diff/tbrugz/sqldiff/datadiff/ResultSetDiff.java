@@ -33,10 +33,21 @@ public class ResultSetDiff {
 		dumpUpdates = true,
 		dumpDeletes = true;
 	
-	//XXX: add schemaName ?
-	@SuppressWarnings("rawtypes")
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
 			List<DiffSyntax> dss, String coutPattern) throws SQLException, IOException {
+		diff(source, target, tableName, keyCols, dss, coutPattern, null);
+	}
+
+	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
+		List<DiffSyntax> dss = new ArrayList<DiffSyntax>(); dss.add(ds);
+		diff(source, target, tableName, keyCols, dss, null, singleWriter);
+	}
+	
+	//XXX: add schemaName ?
+	@SuppressWarnings("rawtypes")
+	void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+			List<DiffSyntax> dss, String coutPattern, Writer singleWriter) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
 		boolean hasNextSource = true;
@@ -71,7 +82,12 @@ public class ResultSetDiff {
 		for(DiffSyntax ds: dss) {
 			DataDumpUtils.SyntaxCOutCallback cb = new DataDumpUtils.SyntaxCOutCallback(ds);
 			dscbs.put(ds, cb);
-			dscouts.put(ds, new CategorizedOut(coutPattern, cb));
+			if(singleWriter!=null) {
+				dscouts.put(ds, new CategorizedOut(singleWriter, cb));
+			}
+			else {
+				dscouts.put(ds, new CategorizedOut(coutPattern, cb));
+			}
 			ds.initDump(tableName, keyCols, md);
 		}
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]

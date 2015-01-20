@@ -42,6 +42,26 @@ public class CategorizedOut {
 		void callOnOpen(Writer w) throws IOException;
 	}
 	
+	class NonCloseableWriterDecorator extends Writer {
+		final Writer w;
+		NonCloseableWriterDecorator(Writer w) {
+			this.w = w;
+		}
+		
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			w.write(cbuf, off, len);
+		}
+		@Override
+		public void flush() throws IOException {
+			w.flush();
+		}
+		@Override
+		public void close() throws IOException {
+			w.flush();
+		}
+	}
+	
 	class WriterIterator implements Iterator<Writer> {
 		final Iterator<String> it;
 		WriterIterator() {
@@ -70,6 +90,25 @@ public class CategorizedOut {
 		}
 		
 	}
+
+	class InnerWriterIterator implements Iterator<Writer> {
+		boolean hasNext = true;
+		
+		@Override
+		public boolean hasNext() {
+			return hasNext;
+		}
+
+		@Override
+		public Writer next() {
+			hasNext = false;
+			return innerWriter;
+		}
+
+		@Override
+		public void remove() {
+		}
+	}
 	
 	static final Log log = LogFactory.getLog(CategorizedOut.class);
 	
@@ -87,14 +126,24 @@ public class CategorizedOut {
 	
 	public CategorizedOut(String filePathPattern, Callback cb) {
 		this.filePathPattern = filePathPattern;
+		this.innerWriter = null;
 		this.cb = cb;
 	}
 
+	public CategorizedOut(Writer writer, Callback cb) {
+		this.filePathPattern = null;
+		this.innerWriter = new NonCloseableWriterDecorator(writer);
+		this.cb = cb;
+	}
+	
 	final Set<String> filesOpened = new TreeSet<String>();
 	
 	//String[] categories = null;
 	//XXXdone: final filePathPattern ?
 	final String filePathPattern; // XXX: file: /abc/def/${1}file${2}.sql
+	
+	final NonCloseableWriterDecorator innerWriter;
+	boolean innerWriterIgnited = false;
 	
 	final Callback cb; 
 	
@@ -120,11 +169,23 @@ public class CategorizedOut {
 	public void categorizedOut(String message, String... categories) throws IOException {
 		Writer w = getCategorizedWriter(categories);
 		w.write(message+"\n");
-		closeWriter(w);
+		if(innerWriter!=null) {
+			w.flush();
+		}
+		else {
+			closeWriter(w);
+		}
 	}
 
 	public Writer getCategorizedWriter(String... categories) throws IOException {
 		if(filePathPattern==null) {
+			if(innerWriter!=null) {
+				if(!innerWriterIgnited) {
+					cb.callOnOpen(innerWriter);
+					innerWriterIgnited = true;
+				}
+				return innerWriter;
+			}
 			throw new RuntimeException("filePathPattern not defined, aborting");
 		}
 
@@ -152,6 +213,9 @@ public class CategorizedOut {
 	
 	public boolean alreadyOpened(String... categories) {
 		if(filePathPattern==null) {
+			if(innerWriter!=null) {
+				return true;
+			}
 			throw new RuntimeException("filePathPattern not defined, aborting");
 		}
 		
@@ -161,6 +225,9 @@ public class CategorizedOut {
 	
 	//public List<Writer> getAllOpenedWriters() { //XXX: get writer iterator?
 	public Iterator<Writer> getAllOpenedWritersIterator() {
+		if(innerWriter!=null) {
+			return new InnerWriterIterator();
+		}
 		return new WriterIterator();
 	}
 	
