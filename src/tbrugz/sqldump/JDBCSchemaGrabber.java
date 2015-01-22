@@ -45,6 +45,7 @@ import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.ModelMetaData;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -86,6 +87,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	@Deprecated static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS = PREFIX+".ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
+	static final String PROP_SCHEMAGRAB_METADATA = PREFIX+".metadata";
 	
 	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivegrabbasedonfks";
 	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivegrabbasedonfks.deep";
@@ -136,7 +138,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabIndexes = false,
 			doSchemaGrabProceduresAndFunctions = true,
 			doSchemaGrabDbSpecific = false,
-			doSetConnectionReadOnly = false;
+			doSetConnectionReadOnly = false,
+			doGrabMetadata = false;
 
 	boolean ignoretableswithzerocolumns = true,
 		recursivedump = false,
@@ -181,6 +184,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		maxLevel = Utils.getPropLongWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL, maxLevel);
 		
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
+		doGrabMetadata = Utils.getPropBool(papp, PROP_SCHEMAGRAB_METADATA, doSetConnectionReadOnly);
+		
 		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
 		if(tableTypesToGrabStr!=null) {
 			tableTypesToGrab = new ArrayList<TableType>();
@@ -449,6 +454,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					view.setRemarks(t.getRemarks());
 				}
 			}
+		}
+		
+		if(doGrabMetadata) {
+			Map<String,String> meta = ModelMetaData.getProperties(dbmd);
+			schemaModel.setMetadata(meta);
+			log.debug("metadata grabbed: "+meta);
 		}
 
 		filterObjects(schemaModel.getExecutables(), excludeObjectFilters, "executable");

@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "sqlDialect"})
+@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "sqlDialect", "metadata"})
 public class SchemaModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -23,10 +24,19 @@ public class SchemaModel implements Serializable {
 	Set<Synonym> synonyms = new TreeSet<Synonym>();
 	Set<Index> indexes = new TreeSet<Index>();
 	Set<Sequence> sequences = new TreeSet<Sequence>();
+
+	/*
+	 * metadata should contain things like:
+	 * - grabbed info timestamp
+	 * - database url, database username
+	 * - version of sqldump used
+	 * see: tbrugz.sqldump.util.ModelMetaData
+	 */
+	Map<String,String> metadata;
 	
 	//XXX: add List<String>(?) schemasGrabbed? may be used by Schema2GraphML
 	//XXX: add Set<Grant> schemaGrants?
-
+	
 	@XmlElement(name="table")
 	public Set<Table> getTables() {
 		return tables;
@@ -91,11 +101,20 @@ public class SchemaModel implements Serializable {
 		this.sequences = sequences;
 	}
 	
+	@XmlElement(name="sqlDialect")
 	public String getSqlDialect() {
 		return sqlDialect;
 	}
 	public void setSqlDialect(String sqlDialect) {
 		this.sqlDialect = sqlDialect;
+	}
+
+	@XmlElement(name="metadata")
+	public Map<String,String> getMetadata() {
+		return metadata;
+	}
+	public void setMetadata(Map<String,String> metadata) {
+		this.metadata = metadata;
 	}
 	
 }
