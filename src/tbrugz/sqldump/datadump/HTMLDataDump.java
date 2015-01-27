@@ -22,6 +22,7 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
+	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
 	
 	//protected String tableName;
 	//protected int numCol;
@@ -32,6 +33,7 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	protected String prepend = null;
 	protected String append = null;
+	//protected String nullValueClass = null;
 	//TODO: prop for 'dumpColElement'
 	protected final boolean dumpColElement = false;
 	
@@ -49,6 +51,7 @@ public class HTMLDataDump extends XMLDataDump {
 		//procStandardProperties(prop);
 		prepend = prop.getProperty(PROP_HTML_PREPEND);
 		append = prop.getProperty(PROP_HTML_APPEND);
+		//nullValueClass = prop.getProperty(PROP_HTML_NULLVALUE_CLASS);
 	}
 
 	/*@Override
@@ -110,10 +113,11 @@ public class HTMLDataDump extends XMLDataDump {
 				sb.append("\n\t</td>");
 			}
 			else {
-				Object value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
+				Object origVal = vals.get(i);
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
-				sb.append( "<td>"+ value +"</td>");
+				sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
 			}
 		}
 		sb.append("</tr>");
