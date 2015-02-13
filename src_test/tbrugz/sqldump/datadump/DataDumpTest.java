@@ -166,7 +166,7 @@ public class DataDumpTest {
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(6, countElements(n.getChildNodes()));
+		Assert.assertEquals(6, countElementsOfType(n.getChildNodes(),"row"));
 	}
 
 	@Test(expected=SAXParseException.class)
@@ -188,7 +188,7 @@ public class DataDumpTest {
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(7, countElements(n.getChildNodes()));
+		Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
 	}
 	
 	@Test(expected=SAXParseException.class)
@@ -200,7 +200,7 @@ public class DataDumpTest {
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(7, countElements(n.getChildNodes()));
+		Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
 	}
 	
 	@Test
@@ -212,7 +212,7 @@ public class DataDumpTest {
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(7, countElements(n.getChildNodes()));
+		Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
 	}
 	
 	@Test
@@ -392,11 +392,22 @@ public class DataDumpTest {
 		return dBuilder.parse(f);
 	}
 	
-	static int countElements(NodeList nl) {
+	/*static int countElements(NodeList nl) {
 		int count = 0;
 		for(int i=0;i<nl.getLength();i++) {
 			Node n = nl.item(i);
 			if(n.getNodeType()==Node.ELEMENT_NODE) {
+				count++;
+			}
+		}
+		return count;
+	}*/
+
+	static int countElementsOfType(NodeList nl, String tag) {
+		int count = 0;
+		for(int i=0;i<nl.getLength();i++) {
+			Node n = nl.item(i);
+			if(n.getNodeType()==Node.ELEMENT_NODE && tag.equals(n.getNodeName())) {
 				count++;
 			}
 		}

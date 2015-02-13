@@ -235,11 +235,12 @@ public class Utils {
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
 			Object elem = iter.next();
+			String sElem = elem!=null?elem.toString():null;
 			if(decorator!=null) {
-				buffer.append(decorator.get(elem.toString()));
+				buffer.append(decorator.get(sElem));
 			}
 			else {
-				buffer.append(elem.toString());
+				buffer.append(sElem);
 			}
 
 			if (iter.hasNext()) {

@@ -1276,17 +1276,21 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 					dim.name = dim.foreignKey;
 					prevDim.name = prevDim.foreignKey;
 					// renaming bottom level names & hierarchy names...
+					if(dim.hierarchies!=null) {
 					for(Hierarchy h: dim.hierarchies) {
 						int idx = h.levels.length-1;
 						log.info("duplicated dim-name found: renaming dim level '"+h.levels[idx].name+"' to '"+dim.foreignKey+"'");
 						h.levels[idx].name = dim.foreignKey; 
 						setupHierarchyName(h);
 					}
+					}
+					if(prevDim.hierarchies!=null) {
 					for(Hierarchy h: prevDim.hierarchies) {
 						int idx = h.levels.length-1;
 						log.info("duplicated dim-name found: renaming prev dim level '"+h.levels[idx].name+"' to '"+prevDim.foreignKey+"'");
 						h.levels[idx].name = prevDim.foreignKey; 
 						setupHierarchyName(h);
+					}
 					}
 				}
 				
