@@ -37,6 +37,10 @@ public interface Relation extends NamedDBObject {
 	
 	public String getRelationType();
 	
+	public List<Grant> getGrants();
+
+	public void setGrants(List<Grant> grants);
+	
 	public Integer getParameterCount();
 
 }

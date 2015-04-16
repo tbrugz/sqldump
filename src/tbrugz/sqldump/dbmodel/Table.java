@@ -212,10 +212,12 @@ public class Table extends DBObject implements Relation {
 		this.columns = columns;
 	}
 
+	@Override
 	public List<Grant> getGrants() {
 		return grants;
 	}
 
+	@Override
 	public void setGrants(List<Grant> grants) {
 		this.grants = grants;
 	}

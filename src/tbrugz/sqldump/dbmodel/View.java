@@ -34,6 +34,8 @@ public class View extends DBObject implements Relation {
 	List<Column> columns = null;
 	List<Constraint> constraints = null;
 	String remarks;
+	List<Grant> grants;
+	
 	// useful for Queries & parameterized views  
 	// see: http://asktom.oracle.com/pls/asktom/f?p=100:11:0::::P11_QUESTION_ID:1448404423206 ,
 	//  http://stackoverflow.com/questions/4498364/create-parameterized-view-in-sql-server-2008 ,
@@ -237,6 +239,16 @@ public class View extends DBObject implements Relation {
 	@Override
 	public int getColumnCount() {
 		return columns!=null?columns.size():0;
+	}
+	
+	@Override
+	public List<Grant> getGrants() {
+		return grants;
+	}
+
+	@Override
+	public void setGrants(List<Grant> grants) {
+		this.grants = grants;
 	}
 	
 	/*@Override
