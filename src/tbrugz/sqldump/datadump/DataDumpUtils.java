@@ -225,6 +225,7 @@ public class DataDumpUtils {
 	
 	/*
 	 * see: http://stackoverflow.com/a/10035382/616413
+	 * http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references#Predefined_entities_in_XML
 	 */
 	public static String xmlEscapeText(String t) {
 		StringBuilder sb = new StringBuilder();
