@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,6 +15,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
@@ -44,6 +47,9 @@ public class SQLQueries extends AbstractSQLProc {
 	protected static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
 
 	protected static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
+	
+	protected static final String ROLES_DELIMITER_STR = "|";
+	protected static final String ROLES_DELIMITER = Pattern.quote(ROLES_DELIMITER_STR);
 	
 	static final Log log = LogFactory.getLog(SQLQueries.class);
 	
@@ -159,7 +165,8 @@ public class SQLQueries extends AbstractSQLProc {
 			// adding query to model
 			if(addQueriesToModel) {
 				String remarks = prop.getProperty("sqldump.query."+qid+".remarks");
-				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+				String roles = prop.getProperty("sqldump.query."+qid+".roles");
+				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
 			if(runQueries && stmt!=null) {
@@ -223,7 +230,7 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	int addQueryToModelInternal(String qid, String queryName, String defaultSchemaName,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params, String remarks,
+			List<String> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName);
@@ -231,13 +238,13 @@ public class SQLQueries extends AbstractSQLProc {
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
 		//XXX: add prop for 'addAlsoAsTable'? default is false
-		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 	}
 	
 	public int addQueryToModel(String qid, String queryName, String schemaName,
 			String colNames, boolean grabInfoFromMetadata, boolean addAlsoAsTable,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params, String remarks,
+			List<String> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		if(model==null) {
@@ -254,6 +261,8 @@ public class SQLQueries extends AbstractSQLProc {
 		query.setQuery(sql);
 		query.setParameterValues(params);
 		query.setRemarks(remarks);
+		addRolesToQuery(query, roles);
+		
 		//XXX: add columns? query.setColumns(columns)...
 		if(keyCols!=null) {
 			Constraint cpk = new Constraint();
@@ -345,6 +354,18 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		
 		return added?1:0;
+	}
+	
+	protected static void addRolesToQuery(Query query, String rolesFilterStr) {
+		List<String> rolesFilter = Utils.getStringList(rolesFilterStr, ROLES_DELIMITER);
+		if(rolesFilter==null || rolesFilter.size()==0) {
+			return;
+		}
+		List<Grant> grants = new ArrayList<Grant>();
+		for(String role: rolesFilter) {
+			grants.add(new Grant(query.getName(), PrivilegeType.SELECT, role));
+		}
+		query.setGrants(grants);
 	}
 	
 }
