@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmodel;
 import java.io.Serializable;
 import java.util.List;
 
+//XXX: make Grant immutable?
 public class Grant implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -110,4 +111,13 @@ public class Grant implements Serializable {
 		this.withGrantOption = withGrantOption;
 	}
 	
+	public static Grant parseGrant(String grantStr) {
+		grantStr = grantStr.substring(1, grantStr.length()-1);
+		String[] parts = grantStr.split(";");
+		PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
+		String grantee = parts[2].substring(3,  parts[2].length()-1);
+		Grant g = new Grant(parts[0], privilege, grantee);
+		return g;
+	}
+
 }
