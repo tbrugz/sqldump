@@ -115,7 +115,7 @@ public class Grant implements Serializable {
 		grantStr = grantStr.substring(1, grantStr.length()-1);
 		String[] parts = grantStr.split(";");
 		PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
-		String grantee = parts[2].substring(3,  parts[2].length()-1);
+		String grantee = parts[2].substring(3, parts[2].length());
 		Grant g = new Grant(parts[0], privilege, grantee);
 		return g;
 	}

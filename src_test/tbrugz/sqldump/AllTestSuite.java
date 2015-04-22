@@ -21,6 +21,7 @@ import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
+import tbrugz.sqldump.dbmodel.GrantTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
@@ -46,14 +47,16 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//"unit" tests
 	ParametrizedPropertiesTest.class,
 	SQLTokenizersTest.class,
-	ColTypeUtilTest.class,
 	PivotRSTest.class,
 	IOUtilTest.class,
 	CategorizedOutTest.class,
 	CLIProcessorTest.class,
 	DBMSResourcesTest.class,
 	StmtProcTest.class,
+	//model unit tests
+	ColTypeUtilTest.class,
 	DBObjectUtilsTest.class,
+	GrantTest.class,
 
 	//diff "unit" tests
 	ColumnDiffTest.class,
