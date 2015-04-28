@@ -1,4 +1,16 @@
 
+sqldump 0.9.13
+--------------
+- util: ConnectionUtil: added suffix '.datasource.contextlookup'
+- diff: added prop suffix '.patchfilepattern' / PatchDumper - outputs patch (unified diff)
+- def/dbmodel: DBMSFeatures refactoring: added grab views, triggers, executables, sequences & synonyms
+- datadiff: multiple syntax support, added HTMLDiff
+- diff2queries: added prop 'diff2q.sql'
+- sqldump: added prop 'sqldump.schemagrab.metadata'
+- datadump: insertinto, xml & html syntaxes changes
+- many other refactorings & fixes
+
+
 sqldump 0.9.12
 --------------
 - fixes: changes from checkstyle & findbugs
