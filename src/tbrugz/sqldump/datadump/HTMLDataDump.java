@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -11,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.Utils;
 
 //XXX: prop for stylesheet?
 //XXXdone: should extend XMLDataDump?
@@ -22,6 +24,7 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
+	static final String PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT = "sqldump.datadump.html.style.numeric-align-right";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
 	
 	//protected String tableName;
@@ -36,6 +39,7 @@ public class HTMLDataDump extends XMLDataDump {
 	//protected String nullValueClass = null;
 	//TODO: prop for 'dumpColElement'
 	protected final boolean dumpColElement = false;
+	protected boolean dumpStyleNumericAlignRight = false;
 	
 	public HTMLDataDump() {
 		this("");
@@ -52,6 +56,7 @@ public class HTMLDataDump extends XMLDataDump {
 		prepend = prop.getProperty(PROP_HTML_PREPEND);
 		append = prop.getProperty(PROP_HTML_APPEND);
 		//nullValueClass = prop.getProperty(PROP_HTML_NULLVALUE_CLASS);
+		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 	}
 
 	/*@Override
@@ -69,8 +74,11 @@ public class HTMLDataDump extends XMLDataDump {
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		if(prepend!=null) { out(prepend, fos); }
-		out("<table class='"+tableName+"'>", fos);
 		StringBuffer sb = new StringBuffer();
+		sb.append("<table class='"+tableName+"'>");
+		if(dumpStyleNumericAlignRight) {
+			appendStyleNumericAlignRight(sb);
+		}
 		if(dumpColElement) {
 			for(int i=0;i<lsColNames.size();i++) {
 				sb.append("\n\t<col class=\"type_"+lsColTypes.get(i).getSimpleName()+"\"/>");
@@ -81,6 +89,18 @@ public class HTMLDataDump extends XMLDataDump {
 			sb.append("<th>"+lsColNames.get(i)+"</th>");
 		}
 		out(sb.toString()+"</tr>\n", fos);
+	}
+	
+	protected void appendStyleNumericAlignRight(StringBuffer sb) {
+		List<String> styleSelector = new ArrayList<String>();
+		for(int i=0;i<lsColNames.size();i++) {
+			if(lsColTypes.get(i).equals(Integer.class) || lsColTypes.get(i).equals(Double.class)) {
+				styleSelector.add("table."+tableName+" td:nth-child("+(i+1)+")");
+			}
+		}
+		if(styleSelector.size()>0) {
+			sb.append("\n\t<style>\n\t\t").append(Utils.join(styleSelector, ", ")).append(" { text-align: right; }\n\t</style>");
+		}
 	}
 
 	@Override
@@ -117,6 +137,7 @@ public class HTMLDataDump extends XMLDataDump {
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
+				//XXX add type attribute?
 				sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
 			}
 		}
