@@ -261,7 +261,7 @@ public class SQLQueries extends AbstractSQLProc {
 		query.setQuery(sql);
 		query.setParameterValues(params);
 		query.setRemarks(remarks);
-		addRolesToQuery(query, roles);
+		setQueryRoles(query, roles);
 		
 		//XXX: add columns? query.setColumns(columns)...
 		if(keyCols!=null) {
@@ -355,17 +355,30 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		return added?1:0;
 	}
-	
+
+	@Deprecated
 	protected static void addRolesToQuery(Query query, String rolesFilterStr) {
+		setQueryRoles(query, rolesFilterStr);
+	}
+	
+	protected static void setQueryRoles(Query query, String rolesFilterStr) {
 		List<String> rolesFilter = Utils.getStringList(rolesFilterStr, ROLES_DELIMITER);
 		if(rolesFilter==null || rolesFilter.size()==0) {
 			return;
 		}
 		List<Grant> grants = new ArrayList<Grant>();
 		for(String role: rolesFilter) {
-			grants.add(new Grant(query.getName(), PrivilegeType.SELECT, role));
+			if(role!=null && !role.trim().equals("")) {
+				grants.add(new Grant(query.getName(), PrivilegeType.SELECT, role));
+			}
 		}
-		query.setGrants(grants);
+		
+		if(grants.size()>0) {
+			query.setGrants(grants);
+		}
+		else {
+			query.setGrants(null);
+		}
 	}
 	
 }
