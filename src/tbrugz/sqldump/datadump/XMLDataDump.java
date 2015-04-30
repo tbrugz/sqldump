@@ -21,6 +21,7 @@ enum HeaderFooterDump {
 //XXX: option to define per-column 'row' xml-element? cursors already have "table-name"...
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
+//XXX: XMLDataDump to extend AbstractXMLDataDump ? so HTMLDataDump and XMLDataDump would have a common ancestor
 public class XMLDataDump extends DumpSyntax {
 	
 	static final Log log = LogFactory.getLog(XMLDataDump.class);
@@ -57,7 +58,7 @@ public class XMLDataDump extends DumpSyntax {
 	final HeaderFooterDump dumpHeaderFooter;
 	
 	//definitions from properties
-	Properties prop = null;
+	protected Properties prop = null;
 	String defaultRowElement = DEFAULT_ROW_ELEMENT;
 	boolean defaultDumpRowElement = true;
 	boolean dumpNullValues = true;

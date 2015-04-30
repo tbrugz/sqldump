@@ -25,14 +25,19 @@ public class HTMLDataDump extends XMLDataDump {
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
 	static final String PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT = "sqldump.datadump.html.style.numeric-align-right";
+	static final String PROP_HTML_XPEND_INNER_TABLE = "sqldump.datadump.html.xpend-inner-table";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
+	//XXX add props 'sqldump.datadump.html.inner-table.[prepend|append]' ??
 	
 	//protected String tableName;
 	//protected int numCol;
 	//protected List<String> lsColNames = new ArrayList<String>();
 	//protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	
+	protected static final String DEFAULT_PADDING = "";
 
 	protected final String padding;
+	protected final boolean innerTable;
 	
 	protected String prepend = null;
 	protected String append = null;
@@ -40,13 +45,15 @@ public class HTMLDataDump extends XMLDataDump {
 	//TODO: prop for 'dumpColElement'
 	protected final boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
+	protected boolean xpendInnerTable = true;
 	
 	public HTMLDataDump() {
-		this("");
+		this(DEFAULT_PADDING, false);
 	}
 	
-	public HTMLDataDump(String padding) {
+	public HTMLDataDump(String padding, boolean innerTable) {
 		this.padding = padding;
+		this.innerTable = innerTable;
 	}
 	
 	@Override
@@ -57,6 +64,7 @@ public class HTMLDataDump extends XMLDataDump {
 		append = prop.getProperty(PROP_HTML_APPEND);
 		//nullValueClass = prop.getProperty(PROP_HTML_NULLVALUE_CLASS);
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
+		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
 	}
 
 	/*@Override
@@ -73,7 +81,8 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		if(prepend!=null) { out(prepend, fos); }
+		tablePrepend(fos);
+		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
 		StringBuffer sb = new StringBuffer();
 		sb.append("<table class='"+tableName+"'>");
 		if(dumpStyleNumericAlignRight) {
@@ -125,7 +134,7 @@ public class HTMLDataDump extends XMLDataDump {
 				out(sb.toString()+"<td>\n", fos);
 				sb = new StringBuffer();
 				
-				HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t");
+				HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t", true);
 				//htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
 				htmldd.procProperties(prop);
@@ -148,9 +157,18 @@ public class HTMLDataDump extends XMLDataDump {
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
 		out("</table>", fos);
-		if(append!=null) { out(append, fos); }
+		//if(append!=null && (!innerTable || xpendInnerTable)) { out(append, fos); }
+		tableAppend(fos);
 	}
 
+	protected void tablePrepend(Writer fos) throws IOException {
+		if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
+	}
+	
+	protected void tableAppend(Writer fos) throws IOException {
+		if(append!=null && (!innerTable || xpendInnerTable)) { out(append, fos); }
+	}
+	
 	/*protected void out(String s, Writer pw) throws IOException {
 		pw.write(padding+s);
 	}*/
