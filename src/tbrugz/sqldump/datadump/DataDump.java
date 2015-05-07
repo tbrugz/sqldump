@@ -107,11 +107,11 @@ public class DataDump extends AbstractSQLProc {
 	@Deprecated
 	public static final String FILENAME_PATTERN_SYNTAXFILEEXT = "\\$\\{syntaxfileext\\}";
 	
-	static Log log = LogFactory.getLog(DataDump.class);
-	static Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
-	static Log logNewFile = LogFactory.getLog(DataDump.class.getName()+".datadump-file");
-	static Log log1stRow = LogFactory.getLog(DataDump.class.getName()+".datadump-1st");
-	static Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
+	private static final Log log = LogFactory.getLog(DataDump.class);
+	private static final Log logDir = LogFactory.getLog(DataDump.class.getName()+".datadump-dir");
+	private static final Log logNewFile = LogFactory.getLog(DataDump.class.getName()+".datadump-file");
+	private static final Log log1stRow = LogFactory.getLog(DataDump.class.getName()+".datadump-1st");
+	private static final Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
 	
 	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -571,7 +571,7 @@ public class DataDump extends AbstractSQLProc {
 							
 							if(newFilename) {
 								//if(lastWriterMapKey!=null) { ds.flushBuffer(writersOpened.get(lastWriterMapKey)); }
-								log.debug("new filename="+finalFilename+" [charset="+charset+"]");
+								logNewFile.debug("new filename="+finalFilename+" [charset="+charset+"]");
 								ds.dumpHeader(w);
 								writersSyntaxes.put(finalFilename, ds);
 							}
@@ -700,7 +700,7 @@ public class DataDump extends AbstractSQLProc {
 	}
 	
 	static String getDynamicFileName(Properties prop, String tableOrQueryId, String syntaxId) {
-		log.debug("getDynamicOutFileName: id="+tableOrQueryId+"; syntax="+syntaxId);
+		//log.debug("getDynamicOutFileName: id="+tableOrQueryId+"; syntax="+syntaxId);
 		String filename = prop.getProperty(PROP_DATADUMP_OUTFILEPATTERN+".id@"+tableOrQueryId+".syntax@"+syntaxId);
 		if(filename!=null) { return filename; }
 

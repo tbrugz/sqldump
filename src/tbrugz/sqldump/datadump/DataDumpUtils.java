@@ -5,6 +5,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -26,7 +27,7 @@ import tbrugz.sqldump.util.SQLUtils;
 
 public class DataDumpUtils {
 
-	static Log log = LogFactory.getLog(DataDumpUtils.class);
+	private static final Log log = LogFactory.getLog(DataDumpUtils.class);
 	
 	public static final String QUOTE = "'";
 	public static final String DOUBLEQUOTE = "\"";
@@ -306,7 +307,7 @@ public class DataDumpUtils {
 	
 	//XXX: add columnTypeMapper?
 	public static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName, Log log) throws SQLException {
-		int numCol = md.getColumnCount();		
+		int numCol = md.getColumnCount();
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 		for(int i=0;i<numCol;i++) {
@@ -317,7 +318,15 @@ public class DataDumpUtils {
 		}
 		StringBuffer sb = new StringBuffer();
 		for(int i=0;i<numCol;i++) {
-			sb.append("\n\t"+lsColNames.get(i)+" ["+lsColTypes.get(i).getSimpleName()+"/t:"+md.getColumnType(i+1)+"/p:"+md.getPrecision(i+1)+"/s:"+md.getScale(i+1)+"]; ");
+			String colName = lsColNames.get(i);
+			String colType = lsColTypes.get(i).getSimpleName();
+			int type = md.getColumnType(i+1);
+			int precision = md.getPrecision(i+1);
+			int scale = md.getScale(i+1);
+			/*if( (type==Types.DECIMAL || type== Types.NUMERIC) && (precision==0 || precision<0 || scale<0)) {
+				log.warn("numeric type with precision 0 or precision/scale<0 [table="+tableName+",col="+colName+",type="+type+",class="+colType+",precision="+precision+",scale="+scale+"]");
+			}*/
+			sb.append("\n\t"+colName+" ["+colType+"/t:"+type+"/p:"+precision+"/s:"+scale+"]; ");
 		}
 		log.debug("dump columns ["+tableName+"]: "+sb);
 	}
