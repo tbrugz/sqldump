@@ -198,22 +198,34 @@ public class SQLUtils {
 	}
 	
 	static Set<Integer> unknownSQLTypes = new HashSet<Integer>(); 
-	//TODOne: Date class type for dump?
+	
 	//XXX: add BigDecimal (for NUMERIC & DECIMAL), TIMESTAMP (for TIMESTAMP)
+	// see: http://docs.oracle.com/javase/8/docs/api/constant-values.html#java.sql.Types.ARRAY
 	public static Class<?> getClassFromSqlType(int type, int precision, int scale) {
 		//log.debug("type: "+type);
 		switch(type) {
-			case Types.TINYINT: 
-			case Types.SMALLINT:
-			case Types.INTEGER:
-			case Types.BIGINT:
+			case Types.TINYINT:  // -6
+			case Types.SMALLINT: //  5
+			case Types.INTEGER:  //  4
+			case Types.BIGINT:   // -5
 				return Integer.class;
-			case Types.DECIMAL:
-			case Types.NUMERIC:
-				return (scale>0)?Double.class:((precision==0)&&(scale==0))?Double.class:Integer.class; //XXX: doesnt seems to work
-			case Types.REAL:
-			case Types.FLOAT:
-			case Types.DOUBLE:
+			case Types.DECIMAL:  //  3
+			case Types.NUMERIC:  //  2
+				/*
+				 * XXX numeric with precision == 0 (& scale <= 0) ?
+				 * http://stackoverflow.com/questions/1410267/oracle-resultsetmetadata-getprecision-getscale
+				 * 
+				 * oracle: maybe set sys prop: oracle.jdbc.J2EE13Compliant=true
+				 *   http://docs.oracle.com/cd/E19798-01/821-1751/beamw/index.html
+				 *   http://ora-jdbc-source.googlecode.com/svn/trunk/OracleJDBC/src/oracle/jdbc/driver/OracleResultSetMetaData.java
+				 */
+				return ( scale>0 ) ? Double.class:
+					( (precision>0)&&(scale<0) ) ? Double.class: // might work better for oracle if J2EE13Compliant=false -- should it be (precision != 0) && (scale == -127)) ?
+					//( (precision==0)&&(scale==0) ) ? Double.class:
+					Integer.class; // being bold and assuming Integer (if actual data is not, dump syntax will hopefully take care)
+			case Types.REAL:     //  7
+			case Types.FLOAT:    //  6
+			case Types.DOUBLE:   //  8
 				return Double.class;
 			case Types.DATE:
 			case Types.TIMESTAMP:
