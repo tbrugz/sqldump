@@ -161,6 +161,11 @@ public class View extends DBObject implements Relation {
 	}
 
 	@Override
+	public List<String> getColumnTypes() {
+		return Table.getColumnTypes(columns);
+	}
+	
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}

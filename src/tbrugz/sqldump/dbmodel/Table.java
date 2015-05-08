@@ -270,11 +270,25 @@ public class Table extends DBObject implements Relation {
 		return getColumnNames(columns);
 	}
 
+	@Override
+	public List<String> getColumnTypes() {
+		return getColumnNames(columns);
+	}
+	
 	static List<String> getColumnNames(List<Column> columns) {
 		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {
 			ret.add(c.getName());
+		}
+		return ret;
+	}
+
+	static List<String> getColumnTypes(List<Column> columns) {
+		if(columns==null) { return null; }
+		List<String> ret = new ArrayList<String>();
+		for(Column c: columns) {
+			ret.add(c.getType());
 		}
 		return ret;
 	}
