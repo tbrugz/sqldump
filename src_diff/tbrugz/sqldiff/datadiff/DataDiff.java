@@ -237,6 +237,7 @@ public class DataDiff extends AbstractFailable {
 			}
 			
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
+			//log.debug("SQL: "+sql);
 
 			ResultSet rsSource = null, rsTarget=null;
 			

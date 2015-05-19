@@ -124,8 +124,14 @@ public class ResultSetDiff {
 			try {
 				compare = compareVals(sourceVals, targetVals, keyIndexes);
 			}
+			catch(NullPointerException e) {
+				log.error("error comparing rows: source="+sourceVals+" ; target="+targetVals+" ; [ex="+e+"]");
+				//e.printStackTrace();
+				return;
+			}
 			catch(ClassCastException e) {
-				log.error("error compating rows: source="+sourceVals+" ; target="+targetVals+" ; [ex="+e+"]");
+				log.error("error comparing rows: source="+sourceVals+" ; target="+targetVals+" ; [ex="+e+"]");
+				//e.printStackTrace();
 				return;
 			}
 			
@@ -287,7 +293,31 @@ public class ResultSetDiff {
 	static int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
 		int comp = 0;
 		for(int i=0;i<keyIndexes.length; i++) {
-			comp = vals1.get(keyIndexes[i]).compareTo(vals2.get(keyIndexes[i]));
+			try {
+				Comparable v1 = vals1.get(keyIndexes[i]);
+				Comparable v2 = vals2.get(keyIndexes[i]);
+				comp = v1!=null && v2!=null ? v1.compareTo(v2) :
+					 ( v1==null && v2==null ? 0 :
+					 ( v1==null ? -1 : 1 ) ); // "NULLs last", right?
+				
+				if(v1==null && v2!=null) {
+					log.debug("compareVals: v1 null: v2=="+v2+" ; comp = "+comp);
+					//log.info("compareVals: v1 null: v2=="+v2+" ; v2.compareTo(v1): "+v2.compareTo(v1));
+				}
+				if(v1!=null && v2==null) {
+					log.debug("compareVals: v1=="+v1+": v2 null ; comp = "+comp);
+					//log.info("compareVals: v1 =="+v1+": v2 null ; v1.compareTo(v2): "+v1.compareTo(v2));
+				}
+				/* comp = v1!=null ? v1.compareTo(v2) :
+					 ( v2!=null ? v2.compareTo(v1) : 0 ); */
+				//comp = vals1.get(keyIndexes[i]).compareTo(vals2.get(keyIndexes[i]));
+			}
+			catch(NullPointerException e) {
+				log.warn("[NPE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
+			}
+			catch(ClassCastException e) {
+				log.warn("[CCE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
+			}
 			if(comp!=0) return comp;
 		}
 		return comp;
