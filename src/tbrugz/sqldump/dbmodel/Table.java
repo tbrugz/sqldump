@@ -272,7 +272,7 @@ public class Table extends DBObject implements Relation {
 
 	@Override
 	public List<String> getColumnTypes() {
-		return getColumnNames(columns);
+		return getColumnTypes(columns);
 	}
 	
 	static List<String> getColumnNames(List<Column> columns) {

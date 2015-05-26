@@ -64,7 +64,9 @@ public class Constraint extends AbstractConstraint implements Serializable {
 	@Override
 	public String toString() {
 		//return getDefinition(false);
-		return "["+type+":"+name+"]";
+		return "["+type+":"+name+":"
+				+(type==ConstraintType.CHECK?checkDescription:Utils.join(uniqueColumns, ","))
+				+"]";
 	}
 	
 	@Override
