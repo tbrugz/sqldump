@@ -12,5 +12,25 @@ public class GrantTest {
 		Grant gr2 = Grant.parseGrant(grStr);
 		Assert.assertEquals(gr, gr2);
 	}
+	
+	@Test
+	public void testParseBlank() {
+		String grStr = "";
+		Grant gr2 = Grant.parseGrant(grStr);
+		Assert.assertEquals(null, gr2);
+	}
+	
+	@Test
+	public void testParseNull() {
+		String grStr = null;
+		Grant gr2 = Grant.parseGrant(grStr);
+		Assert.assertEquals(null, gr2);
+	}
 
+	@Test
+	public void testParseError() {
+		String grStr = "[]";
+		Grant gr2 = Grant.parseGrant(grStr);
+		Assert.assertEquals(null, gr2);
+	}
 }

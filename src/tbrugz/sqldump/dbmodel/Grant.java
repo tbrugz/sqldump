@@ -3,9 +3,13 @@ package tbrugz.sqldump.dbmodel;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 //XXX: make Grant immutable?
 public class Grant implements Serializable {
 	private static final long serialVersionUID = 1L;
+	static final Log log = LogFactory.getLog(Grant.class);
 	
 	String table; //XXX rename to object? may be used by Views or Executables
 	PrivilegeType privilege;
@@ -111,13 +115,24 @@ public class Grant implements Serializable {
 		this.withGrantOption = withGrantOption;
 	}
 	
-	public static Grant parseGrant(String grantStr) {
-		grantStr = grantStr.substring(1, grantStr.length()-1);
-		String[] parts = grantStr.split(";");
-		PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
-		String grantee = parts[2].substring(3, parts[2].length());
-		Grant g = new Grant(parts[0], privilege, grantee);
-		return g;
+	public static Grant parseGrant(final String grantStrPar) {
+		/*if(grantStr==null || grantStr.length()<2) {
+			log.warn("parseGrant error ["+grantStr+"]");
+			return null;
+		}*/
+		try {
+			String grantStr = grantStrPar.substring(1, grantStrPar.length()-1);
+			String[] parts = grantStr.split(";");
+			PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
+			String grantee = parts[2].substring(3, parts[2].length());
+			Grant g = new Grant(parts[0], privilege, grantee);
+			return g;
+		}
+		catch(Exception e) {
+			log.warn("parseGrant error ["+grantStrPar+"]");
+			//log.debug("parseGrant error ["+grantStr+"]", e);
+			return null;
+		}
 	}
 
 }
