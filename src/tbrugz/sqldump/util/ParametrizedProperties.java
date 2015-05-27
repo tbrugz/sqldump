@@ -26,7 +26,27 @@ public class ParametrizedProperties extends Properties {
 	
 	//TODO: process @includes at 'end'
 	
+	/*
+	 * system properties that may be used in @import
+	 * 
+	 * other sys properties that might be used, maybe...
+	 * java.home
+	 * java.class.path
+	 * java.library.path
+	 * java.io.tmpdir
+	 * java.ext.dirs
+	 * user.name
+	 * 
+	 * see: http://docs.oracle.com/javase/1.5.0/docs/api/java/lang/System.html#getProperties%28%29
+	 */
+	static final String SYSPROPKEY_USER_HOME = "user.home";
+	static final String SYSPROPKEY_USER_DIR = "user.dir";
+	
 	static final String PROPFILEBASEDIR_PATTERN = Pattern.quote("${"+CLIProcessor.PROP_PROPFILEBASEDIR+"}");
+	static final String SYS_USER_HOME_PROP = Pattern.quote("${"+SYSPROPKEY_USER_HOME+"}");
+	static final String SYS_USER_HOME_VALUE = Matcher.quoteReplacement(""+System.getProperty(SYSPROPKEY_USER_HOME));
+	static final String SYS_USER_DIR_PROP = Pattern.quote("${"+SYSPROPKEY_USER_DIR+"}");
+	static final String SYS_USER_DIR_VALUE = Matcher.quoteReplacement(""+System.getProperty(SYSPROPKEY_USER_DIR));
 	
 	@Override
 	public synchronized void load(final InputStream inStream) throws IOException {
@@ -43,6 +63,8 @@ public class ParametrizedProperties extends Properties {
 			if(baseDir!=null) {
 				includes = includes.replaceAll(PROPFILEBASEDIR_PATTERN, Matcher.quoteReplacement(baseDir));
 			}
+			includes = includes.replaceAll(SYS_USER_HOME_PROP, SYS_USER_HOME_VALUE);
+			includes = includes.replaceAll(SYS_USER_DIR_PROP, SYS_USER_DIR_VALUE);
 			String[] files = includes.split(",");
 			for(String f: files) {
 				f = f.trim();
@@ -67,7 +89,7 @@ public class ParametrizedProperties extends Properties {
 						log.info("loaded @include: "+ff.getCanonicalPath());
 					}
 					catch(IOException e2) {
-						log.warn("error loading @include '"+f+"': "+e.getMessage()+" [user.dir='"+System.getProperty("user.dir")+"']");
+						log.warn("error loading @include '"+f+"': "+e.getMessage()+" [user.dir='"+System.getProperty(SYSPROPKEY_USER_DIR)+"']");
 						log.debug("error loading @include: "+f, e);
 					}
 				}
