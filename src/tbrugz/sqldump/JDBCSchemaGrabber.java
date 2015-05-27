@@ -594,10 +594,22 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				
 				//GRANTs
 				if(doSchemaGrabTableGrants) {
+					List<Grant> grants = new ArrayList<Grant>();;
+					{
 					log.debug("getting grants from "+fullTablename);
 					ResultSet grantrs = dbmd.getTablePrivileges(null, table.getSchemaName(), tableName);
-					table.setGrants( grabSchemaGrants(grantrs) );
+					grants.addAll( grabSchemaGrants(grantrs, false) );
 					closeResultSetAndStatement(grantrs);
+					}
+
+					{
+					log.debug("getting column grants from "+fullTablename);
+					ResultSet grantColRs = dbmd.getColumnPrivileges(null, table.getSchemaName(), tableName, null);
+					grants.addAll( grabSchemaGrants(grantColRs, true) );
+					closeResultSetAndStatement(grantColRs);
+					}
+					
+					table.setGrants(grants);
 				}
 				
 				//INDEXes
@@ -942,7 +954,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	Set<String> unknownPrivilegesWarned = new HashSet<String>();
 	
-	public List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
+	public List<Grant> grabSchemaGrants(ResultSet grantrs, boolean grabColumn) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		String privilege = null;
 		while(grantrs.next()) {
@@ -953,6 +965,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				privilege = Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE"));
 				grant.setPrivilege(PrivilegeType.valueOf(privilege));
 				grant.setTable(grantrs.getString("TABLE_NAME"));
+				if(grabColumn) {
+					grant.setColumn(grantrs.getString("COLUMN_NAME"));
+				}
 				grant.setWithGrantOption("YES".equals(grantrs.getString("IS_GRANTABLE")));
 				grantsList.add(grant);
 			}

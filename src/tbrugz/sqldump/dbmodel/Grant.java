@@ -12,6 +12,7 @@ public class Grant implements Serializable {
 	static final Log log = LogFactory.getLog(Grant.class);
 	
 	String table; //XXX rename to object? may be used by Views or Executables
+	String column;
 	PrivilegeType privilege;
 	String grantee;
 	boolean withGrantOption;
@@ -115,6 +116,14 @@ public class Grant implements Serializable {
 		this.withGrantOption = withGrantOption;
 	}
 	
+	public String getColumn() {
+		return column;
+	}
+
+	public void setColumn(String column) {
+		this.column = column;
+	}
+
 	public static Grant parseGrant(final String grantStrPar) {
 		/*if(grantStr==null || grantStr.length()<2) {
 			log.warn("parseGrant error ["+grantStr+"]");
