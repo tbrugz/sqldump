@@ -524,9 +524,28 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	*/
 	
+	static class PrivilegeWithColumn implements Comparable<PrivilegeWithColumn> {
+		final PrivilegeType priv;
+		final String column;
+		
+		public PrivilegeWithColumn(PrivilegeType priv, String column) {
+			this.priv = priv;
+			this.column = column;
+		}
+		
+		@Override
+		public int compareTo(PrivilegeWithColumn o) {
+			int comp = priv.compareTo(o.priv);
+			if(comp!=0) { return comp; }
+			return column!=null?
+				(o.column!=null?column.compareTo(o.column):1):
+				(o.column!=null?-1:0);
+		}
+	}
+	
 	static String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
-		Map<String, Set<PrivilegeType>> mapWithGrant = new TreeMap<String, Set<PrivilegeType>>();
-		Map<String, Set<PrivilegeType>> mapWOGrant = new TreeMap<String, Set<PrivilegeType>>();
+		Map<String, Set<PrivilegeWithColumn>> mapWithGrant = new TreeMap<String, Set<PrivilegeWithColumn>>();
+		Map<String, Set<PrivilegeWithColumn>> mapWOGrant = new TreeMap<String, Set<PrivilegeWithColumn>>();
 		
 		Set<String> privsToDump = new TreeSet<String>();
 		if(toDbId!=null && !toDbId.equals("")) {
@@ -546,32 +565,54 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(toDbId!=null && !privsToDump.contains(g.getPrivilege().toString())) { continue; }
 			
 			if(g.isWithGrantOption()) {
-				Set<PrivilegeType> privs = mapWithGrant.get(g.getGrantee());
+				Set<PrivilegeWithColumn> privs = mapWithGrant.get(g.getGrantee());
 				if(privs==null) {
-					privs = new TreeSet<PrivilegeType>();
+					privs = new TreeSet<PrivilegeWithColumn>();
 					mapWithGrant.put(g.getGrantee(), privs);
 				}
-				privs.add(g.getPrivilege());
+				privs.add(new PrivilegeWithColumn(g.getPrivilege(), g.getColumn()));
 			}
 			else {
-				Set<PrivilegeType> privs = mapWOGrant.get(g.getGrantee());
+				Set<PrivilegeWithColumn> privs = mapWOGrant.get(g.getGrantee());
 				if(privs==null) {
-					privs = new TreeSet<PrivilegeType>();
+					privs = new TreeSet<PrivilegeWithColumn>();
 					mapWOGrant.put(g.getGrantee(), privs);
 				}
-				privs.add(g.getPrivilege());
+				privs.add(new PrivilegeWithColumn(g.getPrivilege(), g.getColumn()));
 			}
 		}
 		
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		
-		for(Entry<String, Set<PrivilegeType>> entry: mapWithGrant.entrySet()) {
-			Set<PrivilegeType> privs = entry.getValue();
-			String privsStr = Utils.join(privs, ", ");
-			sb.append("grant "+privsStr
+		appendGrantDump(mapWithGrant, finalTableName, " WITH GRANT OPTION", sb);
+		appendGrantDump(mapWOGrant, finalTableName, null, sb);
+		
+		if(sb.length()>2) {
+			return sb.substring(0, sb.length()-1);
+		}
+		return "";
+	}
+	
+	static void appendGrantDump(Map<String, Set<PrivilegeWithColumn>> grantMap, String finalTableName, String footerString, StringBuilder sb) {
+		for(Entry<String, Set<PrivilegeWithColumn>> entry: grantMap.entrySet()) {
+			Set<PrivilegeWithColumn> privs = entry.getValue();
+			StringBuilder sb2 = new StringBuilder();
+			boolean is1st = true;
+			for(PrivilegeWithColumn pwc: privs) {
+				if(!is1st) {
+					sb2.append(", ");
+				}
+				sb2.append(pwc.priv);
+				if(pwc.column!=null) {
+					sb2.append(" ("+pwc.column+")");
+				}
+				is1st = false;
+			}
+			sb.append("grant "+sb2.toString()
 					+" on "+finalTableName
 					+" to "+entry.getKey()
-					+" WITH GRANT OPTION"+";\n\n");
+					+(footerString!=null?footerString:"")
+					+";\n\n");
 			/*for(PrivilegeType priv: privs) {
 				sb.append("grant "+priv
 					+" on "+tableName
@@ -579,27 +620,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 					+" WITH GRANT OPTION"+";\n");
 			}*/
 		}
-
-		for(Entry<String, Set<PrivilegeType>> entry: mapWOGrant.entrySet()) {
-			Set<PrivilegeType> privs = entry.getValue();
-			String privsStr = Utils.join(privs, ", ");
-			sb.append("grant "+privsStr
-					+" on "+finalTableName
-					+" to "+entry.getKey()
-					+";\n\n");
-			/*for(PrivilegeType priv: privs) {
-				sb.append("grant "+priv
-					+" on "+tableName
-					+" to "+grantee
-					+";\n");
-			}*/
-		}
-
-		//return sb.toString();
-		if(sb.length()>2) {
-			return sb.substring(0, sb.length()-1);
-		}
-		return "";
+		
 	}
 
 	@Override
