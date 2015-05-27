@@ -17,15 +17,16 @@ public class Grant implements Serializable {
 	String grantee;
 	boolean withGrantOption;
 	
-	public Grant(String owner, PrivilegeType privilege, String grantee, boolean grantOption) {
+	public Grant(String owner, String column, PrivilegeType privilege, String grantee, boolean grantOption) {
 		this.table = owner;
+		this.column = column;
 		this.privilege = privilege;
 		this.grantee = grantee;
 		this.withGrantOption = grantOption;
 	}
 
 	public Grant(String owner, PrivilegeType privilege, String grantee) {
-		this(owner, privilege, grantee, false);
+		this(owner, null, privilege, grantee, false);
 	}
 	
 	public Grant() {
@@ -33,7 +34,9 @@ public class Grant implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "["+table+";priv="+privilege+";to:"+grantee+(withGrantOption?";GO!":"")+"]";
+		return "["+table+";priv="+privilege+";to:"+grantee
+				+";"+(column!=null?"col="+column:"")
+				+";"+(withGrantOption?"GO!":"")+"]";
 	}
 	
 	@Override
@@ -69,6 +72,13 @@ public class Grant implements Serializable {
 				return false;
 		} else if (!table.equals(other.table))
 			return false;
+
+		if (column == null) {
+			if (other.column != null)
+				return false;
+		} else if (!column.equals(other.column))
+			return false;
+
 		if (withGrantOption != other.withGrantOption)
 			return false;
 		return true;
@@ -131,10 +141,15 @@ public class Grant implements Serializable {
 		}*/
 		try {
 			String grantStr = grantStrPar.substring(1, grantStrPar.length()-1);
-			String[] parts = grantStr.split(";");
+			String[] parts = grantStr.split(";", -1);
+			//log.info("parts = "+Arrays.asList(parts));
 			PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
 			String grantee = parts[2].substring(3, parts[2].length());
-			Grant g = new Grant(parts[0], privilege, grantee);
+			//String columnPart = parts[3];
+			String column = (parts[3].length()>0)?parts[3].substring(4):null;
+			//String column = (parts.length>=4)?parts[3].substring(4):null;
+			boolean grantOption = (parts[4].length()>0)?parts[4].equals("GO!"):false;
+			Grant g = new Grant(parts[0], column, privilege, grantee, grantOption);
 			return g;
 		}
 		catch(Exception e) {
