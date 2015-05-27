@@ -524,28 +524,18 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	*/
 	
-	static class PrivilegeWithColumn implements Comparable<PrivilegeWithColumn> {
+	static class PrivilegeWithColumns {
 		final PrivilegeType priv;
-		final String column;
+		final TreeSet<String> columns = new TreeSet<String>();
 		
-		public PrivilegeWithColumn(PrivilegeType priv, String column) {
+		public PrivilegeWithColumns(PrivilegeType priv) {
 			this.priv = priv;
-			this.column = column;
-		}
-		
-		@Override
-		public int compareTo(PrivilegeWithColumn o) {
-			int comp = priv.compareTo(o.priv);
-			if(comp!=0) { return comp; }
-			return column!=null?
-				(o.column!=null?column.compareTo(o.column):1):
-				(o.column!=null?-1:0);
 		}
 	}
 	
 	static String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
-		Map<String, Set<PrivilegeWithColumn>> mapWithGrant = new TreeMap<String, Set<PrivilegeWithColumn>>();
-		Map<String, Set<PrivilegeWithColumn>> mapWOGrant = new TreeMap<String, Set<PrivilegeWithColumn>>();
+		Map<String, List<PrivilegeWithColumns>> mapWithGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
+		Map<String, List<PrivilegeWithColumns>> mapWOGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
 		
 		Set<String> privsToDump = new TreeSet<String>();
 		if(toDbId!=null && !toDbId.equals("")) {
@@ -565,20 +555,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			if(toDbId!=null && !privsToDump.contains(g.getPrivilege().toString())) { continue; }
 			
 			if(g.isWithGrantOption()) {
-				Set<PrivilegeWithColumn> privs = mapWithGrant.get(g.getGrantee());
-				if(privs==null) {
-					privs = new TreeSet<PrivilegeWithColumn>();
-					mapWithGrant.put(g.getGrantee(), privs);
-				}
-				privs.add(new PrivilegeWithColumn(g.getPrivilege(), g.getColumn()));
+				addGrantToMap(mapWithGrant, g);
 			}
 			else {
-				Set<PrivilegeWithColumn> privs = mapWOGrant.get(g.getGrantee());
-				if(privs==null) {
-					privs = new TreeSet<PrivilegeWithColumn>();
-					mapWOGrant.put(g.getGrantee(), privs);
-				}
-				privs.add(new PrivilegeWithColumn(g.getPrivilege(), g.getColumn()));
+				addGrantToMap(mapWOGrant, g);
 			}
 		}
 		
@@ -593,18 +573,42 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		return "";
 	}
 	
-	static void appendGrantDump(Map<String, Set<PrivilegeWithColumn>> grantMap, String finalTableName, String footerString, StringBuilder sb) {
-		for(Entry<String, Set<PrivilegeWithColumn>> entry: grantMap.entrySet()) {
-			Set<PrivilegeWithColumn> privs = entry.getValue();
+	static void addGrantToMap(Map<String, List<PrivilegeWithColumns>> grantMap, Grant g) {
+		List<PrivilegeWithColumns> privs = grantMap.get(g.getGrantee());
+		if(privs==null) {
+			privs = new ArrayList<PrivilegeWithColumns>();
+			grantMap.put(g.getGrantee(), privs);
+		}
+		boolean added = false;
+		for(int i=0;i<privs.size();i++) {
+			if(privs.get(i).priv.equals(g.getPrivilege())) {
+				if(g.getColumn()!=null) {
+					privs.get(i).columns.add(g.getColumn());
+				}
+				added = true;
+			}
+		}
+		if(!added) {
+			PrivilegeWithColumns pwc = new PrivilegeWithColumns(g.getPrivilege());
+			if(g.getColumn()!=null) {
+				pwc.columns.add(g.getColumn());
+			}
+			privs.add(pwc);
+		}
+	}
+	
+	static void appendGrantDump(Map<String, List<PrivilegeWithColumns>> grantMap, String finalTableName, String footerString, StringBuilder sb) {
+		for(Entry<String, List<PrivilegeWithColumns>> entry: grantMap.entrySet()) {
+			List<PrivilegeWithColumns> privs = entry.getValue();
 			StringBuilder sb2 = new StringBuilder();
 			boolean is1st = true;
-			for(PrivilegeWithColumn pwc: privs) {
+			for(PrivilegeWithColumns pwc: privs) {
 				if(!is1st) {
 					sb2.append(", ");
 				}
 				sb2.append(pwc.priv);
-				if(pwc.column!=null) {
-					sb2.append(" ("+pwc.column+")");
+				if(pwc.columns.size()>0) {
+					sb2.append(" ("+Utils.join(pwc.columns, ", ")+")");
 				}
 				is1st = false;
 			}
