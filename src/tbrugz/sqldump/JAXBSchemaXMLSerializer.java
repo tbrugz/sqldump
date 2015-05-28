@@ -106,7 +106,9 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	public SchemaModel grabSchema() {
 		InputStream is = getInputStream();
 		if(is==null) {
-			log.warn("xml serialization input file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] nor resource ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"] are valid");
+			log.warn("xml serialization input file ["
+					+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE+"] nor resource ["
+					+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"] are valid [prefix="+propertiesPrefix+"]");
 			return null;
 		}
 

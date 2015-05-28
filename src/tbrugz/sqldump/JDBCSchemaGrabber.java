@@ -954,6 +954,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	Set<String> unknownPrivilegesWarned = new HashSet<String>();
 	
+	@Deprecated
+	public List<Grant> grabSchemaGrants(ResultSet grantrs) throws SQLException {
+		return grabSchemaGrants(grantrs, false);
+	}
+	
 	public List<Grant> grabSchemaGrants(ResultSet grantrs, boolean grabColumn) throws SQLException {
 		List<Grant> grantsList = new ArrayList<Grant>();
 		String privilege = null;

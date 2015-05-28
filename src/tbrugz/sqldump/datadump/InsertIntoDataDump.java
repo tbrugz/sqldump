@@ -185,8 +185,13 @@ public class InsertIntoDataDump extends DumpSyntax {
 		return INSERTINTO_SYNTAX_ID;
 	}
 
+	/*
+	 * see:
+	 * http://en.wikipedia.org/wiki/SQL
+	 * http://www.iana.org/assignments/media-types/application/sql
+	 */
 	@Override
 	public String getMimeType() {
-		return "text/plain";
+		return "application/sql";
 	}
 }
