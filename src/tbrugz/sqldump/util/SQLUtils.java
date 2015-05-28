@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 
@@ -25,6 +26,18 @@ public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
 	
+	//static final String PROP = "sqldump.datadump.strangePrecisionNumericAsInt";
+	static final String PROP_STRANGE_PRECISION_NUMERIC_AS_INT = "sqldump.sqlutils.strangePrecisionNumericAsInt";
+	
+	static boolean strangePrecisionNumericAsInt = true;
+	
+	public static void setProperties(Properties prop) {
+		if(prop==null) { return; }
+		else {
+			strangePrecisionNumericAsInt = Utils.getPropBool(prop, PROP_STRANGE_PRECISION_NUMERIC_AS_INT, strangePrecisionNumericAsInt);
+		}
+	}
+
 	public static String getRowFromRS(ResultSet rs, int numCol, String table) throws SQLException {
 		return getRowFromRS(rs, numCol, table, ";");
 	}
@@ -219,10 +232,13 @@ public class SQLUtils {
 				 *   http://docs.oracle.com/cd/E19798-01/821-1751/beamw/index.html
 				 *   http://ora-jdbc-source.googlecode.com/svn/trunk/OracleJDBC/src/oracle/jdbc/driver/OracleResultSetMetaData.java
 				 */
-				return ( scale>0 ) ? Double.class:
+				return
+					( scale>0 ) ? Double.class:
 					( (precision>0)&&(scale<0) ) ? Double.class: // might work better for oracle if J2EE13Compliant=false -- should it be (precision != 0) && (scale == -127)) ?
+					( precision>0 ) ? Integer.class:
 					//( (precision==0)&&(scale==0) ) ? Double.class:
-					Integer.class; // being bold and assuming Integer (if actual data is not, dump syntax will hopefully take care)
+					// being bold and assuming Integer (if actual data is not, dump syntax will hopefully take care)
+					(strangePrecisionNumericAsInt?Integer.class:Double.class);
 			case Types.REAL:     //  7
 			case Types.FLOAT:    //  6
 			case Types.DOUBLE:   //  8

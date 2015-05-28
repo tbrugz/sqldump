@@ -31,6 +31,7 @@ import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -91,6 +92,7 @@ public class SQLDump implements Executor {
 		
 		ColTypeUtil.setProperties(papp);
 		DBMSResources.instance().setup(papp);
+		SQLUtils.setProperties(papp);
 		DumpSyntaxRegistry.addSyntaxes(papp.getProperty(PROP_DATADUMP_XTRASYNTAXES));
 	}
 
