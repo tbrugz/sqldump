@@ -18,9 +18,28 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
  */
 public class XsdGenerator {
 
+	/*
+	 *  http://stackoverflow.com/questions/740751/how-do-you-link-xml-to-a-xsd
+	 *  http://stackoverflow.com/questions/16979762/adding-namespaces-to-root-element-of-xml-using-jaxb
+	 *  http://stackoverflow.com/questions/3451615/how-do-i-set-the-xml-namespace-when-using-jersey-jaxb-jax-rs
+	 *  https://blogs.oracle.com/enterprisetechtips/entry/customizing_jaxb
+	 *  http://stackoverflow.com/questions/4312572/jaxb-generated-xml-problem-with-root-element-prefix
+	 *  http://stackoverflow.com/questions/6680804/how-to-debug-marshaling-in-jaxb
+	 *  
+	 *  https://jaxb.java.net/guide/Customizing_Java_packages.html
+	 *  
+	 *  
+	 *  http://docs.oracle.com/javase/7/docs/api/javax/xml/bind/JAXBContext.html
+	 *  com.sun.xml.internal.bind.v2.ContextFactory
+	 */
+	
+	static String schemaFileName = "src/sqld-model.xsd"; // schemamodel.xsd ?
+
 	public class MySchemaOutputResolver extends SchemaOutputResolver {
+		@Override
 		public Result createOutput(String namespaceURI, String suggestedFileName) throws IOException {
-			File file = new File(suggestedFileName);
+			System.out.println("namespaceURI: "+namespaceURI+" ; suggestedFileName: "+suggestedFileName);
+			File file = new File(schemaFileName);
 			StreamResult result = new StreamResult(file);
 			result.setSystemId(file.toURI().toURL().toString());
 			System.out.println("file: "+file.getAbsolutePath());

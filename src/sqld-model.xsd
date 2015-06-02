@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="schemaModel" type="schemaModel"/>
+
+  <xs:complexType name="schemaModel">
+    <xs:sequence>
+      <xs:element name="table" type="table" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="foreignKey" type="fk" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="view" type="view" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="trigger" type="trigger" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="executable" type="executableObject" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="index" type="index" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="sequence" type="sequence" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="synonym" type="synonym" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="sqlDialect" type="xs:string" minOccurs="0"/>
+      <xs:element name="metadata">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="entry" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="key" minOccurs="0" type="xs:string"/>
+                  <xs:element name="value" minOccurs="0" type="xs:string"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="table">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="columns" type="column" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="constraints" type="constraint" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="domainTable" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="grants" type="grant" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+          <xs:element name="type" type="tableType" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dbObject" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="dbIdentifiable">
+        <xs:sequence/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="dbIdentifiable" abstract="true">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="schemaName" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="column">
+    <xs:complexContent>
+      <xs:extension base="dbIdentifiable">
+        <xs:sequence>
+          <xs:element name="autoIncrement" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="columSize" type="xs:int" minOccurs="0"/>
+          <xs:element name="decimalDigits" type="xs:int" minOccurs="0"/>
+          <xs:element name="defaultValue" type="xs:string" minOccurs="0"/>
+          <xs:element name="nullable" type="xs:boolean"/>
+          <xs:element name="ordinalPosition" type="xs:int"/>
+          <xs:element name="pk" type="xs:boolean"/>
+          <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+          <xs:element name="type" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="constraint">
+    <xs:complexContent>
+      <xs:extension base="abstractConstraint">
+        <xs:sequence>
+          <xs:element name="checkDescription" type="xs:string" minOccurs="0"/>
+          <xs:element name="type" type="constraintType" minOccurs="0"/>
+          <xs:element name="uniqueColumns" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="abstractConstraint" abstract="true">
+    <xs:complexContent>
+      <xs:extension base="dbIdentifiable">
+        <xs:sequence>
+          <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="grant">
+    <xs:sequence>
+      <xs:element name="column" type="xs:string" minOccurs="0"/>
+      <xs:element name="grantee" type="xs:string" minOccurs="0"/>
+      <xs:element name="privilege" type="privilegeType" minOccurs="0"/>
+      <xs:element name="table" type="xs:string" minOccurs="0"/>
+      <xs:element name="withGrantOption" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="fk">
+    <xs:complexContent>
+      <xs:extension base="abstractConstraint">
+        <xs:sequence>
+          <xs:element name="deleteRule" type="updateRule" minOccurs="0"/>
+          <xs:element name="fkColumns" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="fkReferencesPK" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="fkTable" type="xs:string" minOccurs="0"/>
+          <xs:element name="fkTableSchemaName" type="xs:string" minOccurs="0"/>
+          <xs:element name="pkColumns" type="xs:string" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="pkTable" type="xs:string" minOccurs="0"/>
+          <xs:element name="pkTableSchemaName" type="xs:string" minOccurs="0"/>
+          <xs:element name="updateRule" type="updateRule" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="view">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="checkOption" type="checkOptionType" minOccurs="0"/>
+          <xs:element name="columns" type="column" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="constraints" type="constraint" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="grants" type="grant" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="parameterCount" type="xs:int" minOccurs="0"/>
+          <xs:element name="query" type="xs:string" minOccurs="0"/>
+          <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+          <xs:element name="withReadOnly" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="trigger">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="body" type="xs:string" minOccurs="0"/>
+          <xs:element name="description" type="xs:string" minOccurs="0"/>
+          <xs:element name="tableName" type="xs:string" minOccurs="0"/>
+          <xs:element name="whenClause" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="executableObject">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="body" type="xs:string" minOccurs="0"/>
+          <xs:element name="packageName" type="xs:string" minOccurs="0"/>
+          <xs:element name="params" type="executableParameter" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          <xs:element name="remarks" type="xs:string" minOccurs="0"/>
+          <xs:element name="returnParam" type="executableParameter" minOccurs="0"/>
+          <xs:element name="type" type="dbObjectType" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="executableParameter">
+    <xs:sequence>
+      <xs:element name="dataType" type="xs:string" minOccurs="0"/>
+      <xs:element name="inout" type="inout" minOccurs="0"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="position" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="index">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="comment" type="xs:string" minOccurs="0"/>
+          <xs:element name="local" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="reverse" type="xs:boolean" minOccurs="0"/>
+          <xs:element name="tableName" type="xs:string" minOccurs="0"/>
+          <xs:element name="type" type="xs:string" minOccurs="0"/>
+          <xs:element name="unique" type="xs:boolean"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="sequence">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="incrementBy" type="xs:long"/>
+          <xs:element name="lastNumber" type="xs:long"/>
+          <xs:element name="maxValue" type="xs:long" minOccurs="0"/>
+          <xs:element name="minValue" type="xs:long" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="synonym">
+    <xs:complexContent>
+      <xs:extension base="dbObject">
+        <xs:sequence>
+          <xs:element name="objectOwner" type="xs:string" minOccurs="0"/>
+          <xs:element name="referencedObject" type="xs:string" minOccurs="0"/>
+          <xs:element name="dbLink" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:simpleType name="constraintType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="PK"/>
+      <xs:enumeration value="UNIQUE"/>
+      <xs:enumeration value="CHECK"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="privilegeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SELECT"/>
+      <xs:enumeration value="INSERT"/>
+      <xs:enumeration value="UPDATE"/>
+      <xs:enumeration value="DELETE"/>
+      <xs:enumeration value="ALTER"/>
+      <xs:enumeration value="REFERENCES"/>
+      <xs:enumeration value="INDEX"/>
+      <xs:enumeration value="DEBUG"/>
+      <xs:enumeration value="FLASHBACK"/>
+      <xs:enumeration value="ON_COMMIT_REFRESH"/>
+      <xs:enumeration value="QUERY_REWRITE"/>
+      <xs:enumeration value="EXECUTE"/>
+      <xs:enumeration value="MERGE_VIEW"/>
+      <xs:enumeration value="RULE"/>
+      <xs:enumeration value="TRIGGER"/>
+      <xs:enumeration value="TRUNCATE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="tableType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TABLE"/>
+      <xs:enumeration value="SYNONYM"/>
+      <xs:enumeration value="SYSTEM_TABLE"/>
+      <xs:enumeration value="VIEW"/>
+      <xs:enumeration value="MATERIALIZED_VIEW"/>
+      <xs:enumeration value="SYSTEM_VIEW"/>
+      <xs:enumeration value="EXTERNAL_TABLE"/>
+      <xs:enumeration value="BASE_TABLE"/>
+      <xs:enumeration value="TYPE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="updateRule">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NO_ACTION"/>
+      <xs:enumeration value="CASCADE"/>
+      <xs:enumeration value="SET_NULL"/>
+      <xs:enumeration value="SET_DEFAULT"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="checkOptionType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="LOCAL"/>
+      <xs:enumeration value="CASCADED"/>
+      <xs:enumeration value="NONE"/>
+      <xs:enumeration value="TRUE"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="inout">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="IN"/>
+      <xs:enumeration value="OUT"/>
+      <xs:enumeration value="INOUT"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="dbObjectType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="TABLE"/>
+      <xs:enumeration value="FK"/>
+      <xs:enumeration value="VIEW"/>
+      <xs:enumeration value="INDEX"/>
+      <xs:enumeration value="EXECUTABLE"/>
+      <xs:enumeration value="TRIGGER"/>
+      <xs:enumeration value="SEQUENCE"/>
+      <xs:enumeration value="SYNONYM"/>
+      <xs:enumeration value="GRANT"/>
+      <xs:enumeration value="MATERIALIZED_VIEW"/>
+      <xs:enumeration value="FUNCTION"/>
+      <xs:enumeration value="JAVA_SOURCE"/>
+      <xs:enumeration value="PACKAGE"/>
+      <xs:enumeration value="PACKAGE_BODY"/>
+      <xs:enumeration value="PROCEDURE"/>
+      <xs:enumeration value="TYPE"/>
+      <xs:enumeration value="TYPE_BODY"/>
+      <xs:enumeration value="CONSTRAINT"/>
+      <xs:enumeration value="COLUMN"/>
+      <xs:enumeration value="RELATION"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

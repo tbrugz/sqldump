@@ -120,6 +120,12 @@
 		</if-->
 	</target>
 
+	<target name="generate-sources" depends="prepare">
+		<echo message="generating xml schema" />
+		<java classpathref="classpath.test" classname="tbrugz.util.XsdGenerator" failonerror="true" fork="true">
+		</java>
+	</target>
+	
 	<target name="compile" depends="prepare">
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
@@ -194,7 +200,7 @@
 	<target name="jar" depends="compile" description="builds jar">
 		<jar destfile="${dist.dir}/jars/sqldump.jar"
 			basedir="${bin.dir}"
-			includes="**/*.class, **/*.properties, **/jaxb.index, **/*.xml, **/*.xsl">
+			includes="**/*.class, **/*.properties, **/jaxb.index, **/*.xml, **/*.xsl, **/*.xsd">
 			<exclude name="log4j.properties"/>
 			<exclude name="**/jaxb.properties"/>
 			<manifest>

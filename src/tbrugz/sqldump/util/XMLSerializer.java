@@ -17,7 +17,8 @@ public class XMLSerializer {
 	final JAXBContext jc;
 	
 	public XMLSerializer(String contextPath) throws JAXBException {
-		this.jc = JAXBContext.newInstance( contextPath );
+		//this.jc = JAXBContext.newInstance( SchemaModel.class );
+		this.jc = JAXBContext.newInstance( contextPath, XMLSerializer.class.getClassLoader());
 	}
 
 	public XMLSerializer(JAXBContext jc) throws JAXBException {
@@ -43,6 +44,8 @@ public class XMLSerializer {
 		//XXX: property for formatting or not JAXB output?
 		//see: http://ws.apache.org/jaxme/release-0.3/manual/ch02s02.html
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		//m.setProperty(Marshaller.JAXB_NO_NAMESPACE_SCHEMA_LOCATION, "http://tbrugz.bitbucket.org/sqldump");
+		//m.setProperty(Marshaller.JAXB_SCHEMA_LOCATION, "http://tbrugz.bitbucket.org/sqldump");
 		m.marshal(object, writer);
 	}
 	
