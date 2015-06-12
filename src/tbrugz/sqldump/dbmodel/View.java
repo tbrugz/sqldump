@@ -22,6 +22,8 @@ import tbrugz.sqldump.util.Utils;
 public class View extends DBObject implements Relation {
 	private static final long serialVersionUID = 1L;
 
+	//private static final Log log = LogFactory.getLog(View.class);
+
 	public enum CheckOptionType {
 		LOCAL, CASCADED, NONE, 
 		TRUE; //true: set for databases that doesn't have local and cascaded options 
@@ -53,10 +55,14 @@ public class View extends DBObject implements Relation {
 	}
 
 	protected String getDefinition(boolean dumpSchemaName, String viewType) {
-		if(PATTERN_CREATE_VIEW.matcher(query).find()) {
+		//try {
+		if(query!=null && PATTERN_CREATE_VIEW.matcher(query).find()) {
 			return query;
-				//+ (sbRemarks.length()>0?";"+sbRemarks.toString():"");
 		}
+		//}
+		//catch(Exception e) {
+		//	log.warn("error View.getDefinition: name="+name+" ; query:"+query, e);
+		//}
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + (viewType!=null?viewType+" ":"") + "view "
 				+ getFinalName(dumpSchemaName)

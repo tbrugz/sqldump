@@ -85,6 +85,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	Properties prop;
 	String outputConnPropPrefix;
 	Connection outputConn = null;
+	Writer outputWriter;
 	
 	static final String PREFIX = "sqldump.schemadump";
 	
@@ -447,12 +448,20 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		if(outFilePattern==null) {
 			outFilePattern = mainOutputFilePattern;
 		}
-		if(outFilePattern==null) {
+		
+		Writer w = null;
+		
+		if(outFilePattern!=null) {
+			w = CategorizedOut.getStaticWriter(outFilePattern);
+		}
+		else if(outputWriter!=null) {
+			w = outputWriter;
+		}
+		else {
 			throw new RuntimeException("output file patterns (e.g. '"+PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN+"') not defined, aborting");
 		}
 		
 		//if 'static' writer
-		Writer w = CategorizedOut.getStaticWriter(outFilePattern);
 		if(w!=null) {
 			w.write(message);
 			w.write("\n");
@@ -645,6 +654,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	@Override
 	public String getMimeType() {
 		return SQL_MIME_TYPE;
+	}
+	
+	@Override
+	public boolean acceptsOutputWriter() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputWriter(Writer writer) {
+		outputWriter = writer;
 	}
 
 }
