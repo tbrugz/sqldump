@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -211,6 +212,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 
 	Properties prop;
 	String fileOutput = "mondrian-schema.xml";
+	Writer outputWriter;
 	boolean validateSchema = false;
 	
 	String mondrianSchemaName;
@@ -328,7 +330,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	}
 	
 	void dumpSchemaInternal(SchemaModel schemaModel) throws XOMException {
-		if(fileOutput==null) {
+		if(fileOutput==null && outputWriter==null) {
 			log.error("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined");
 			if(failonerror) { throw new ProcessingException("prop '"+PROP_MONDRIAN_SCHEMA_OUTFILE+"' not defined"); }
 			return;
@@ -566,11 +568,19 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		setPropertiesBeforeSerialization(schema);
 		
 		try {
-			File fout = new File(fileOutput);
-			Utils.prepareDir(fout);
-			
-			//jaxbOutput(schema, new File(fileOutput));
-			xomOutput(schema, fout);
+			log.info("dumping mondrian schema model...");
+			if(fileOutput!=null) {
+				File fout = new File(fileOutput);
+				Utils.prepareDir(fout);
+				
+				//jaxbOutput(schema, new File(fileOutput));
+				xomOutput(schema, fout);
+				log.info("mondrian schema model dumped to '"+fout.getAbsolutePath()+"'");
+			}
+			else {
+				xomOutput(schema, outputWriter);
+				log.info("mondrian schema model dumped");
+			}
 			
 			if(validateSchema) {
 				Processor msv = new MondrianSchemaValidator();
@@ -625,12 +635,19 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			ok = false;
 		}
 
-		if(!numericTypes.contains(c.getType().toUpperCase())) {
-			if(noMeasureTypeWarned.contains(c.getType().toUpperCase())) {}
-			else {
-				log.debug("not a measure column type: "+c.getType());
-				noMeasureTypeWarned.add(c.getType().toUpperCase());
+		if(c.getType()!=null) {
+			String colName = c.getType().toUpperCase();
+			if(!numericTypes.contains(colName)) {
+				if(noMeasureTypeWarned.contains(colName)) {}
+				else {
+					log.debug("not a measure column type: "+c.getType());
+					noMeasureTypeWarned.add(colName);
+				}
+				ok = false;
 			}
+		}
+		else {
+			log.warn("null column type: "+t.getName()+"."+c.getName());
 			ok = false;
 		}
 
@@ -1151,14 +1168,15 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
 	}
 
-	void xomOutput(ElementDef e, File fileOutput) throws FileNotFoundException {
+	void xomOutput(ElementDef e, File fileOutput) throws IOException {
 		PrintWriter pw = new PrintWriter(fileOutput);
-		XMLOutput out = new XMLOutput(pw);
-		//log.info("dumping mondrian schema model to '"+fileOutput.getAbsolutePath()+"'");
-		log.info("dumping mondrian schema model...");
+		xomOutput(e, pw);
+	}
+	
+	void xomOutput(ElementDef e, Writer writer) throws IOException {
+		XMLOutput out = new XMLOutput(writer);
 		e.displayXML(out, 4);
-		pw.close();
-		log.info("mondrian schema model dumped to '"+fileOutput.getAbsolutePath()+"'");
+		writer.close();
 	}
 	
 	boolean stringEquals(String s1, String s2) {
@@ -1351,6 +1369,16 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 	@Override
 	public String getMimeType() {
 		return "application/xml";
+	}
+	
+	@Override
+	public boolean acceptsOutputWriter() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputWriter(Writer writer) {
+		outputWriter = writer;
 	}
 
 }
