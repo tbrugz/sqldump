@@ -138,10 +138,6 @@ public class DataDump extends AbstractSQLProc {
 	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
 		log.info("data dumping...");
 		
-		String dateFormat = prop.getProperty(PROP_DATADUMP_DATEFORMAT);
-		if(dateFormat!=null) {
-			DataDumpUtils.dateFormatter = new SimpleDateFormat(dateFormat);
-		}
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		boolean orderByPK = Utils.getPropBool(prop, PROP_DATADUMP_ORDERBYPK, true);
 

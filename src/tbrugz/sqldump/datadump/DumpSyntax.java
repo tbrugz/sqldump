@@ -34,11 +34,18 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		//log.debug("date prop: '"+dateProp+"'");
 		String dateFormat = prop.getProperty(dateProp);
 		if(dateFormat!=null) {
-			log.debug("date format: "+dateFormat);
+			log.debug("["+getSyntaxId()+"] date format: "+dateFormat);
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
-		if(dateFormatter==null){
-			dateFormatter = DataDumpUtils.dateFormatter;
+		if(dateFormatter==null) {
+			String newDefaultDateFormat = prop.getProperty(DataDump.PROP_DATADUMP_DATEFORMAT);
+			if(newDefaultDateFormat!=null) {
+				log.debug("["+getSyntaxId()+"] (default) date format: "+newDefaultDateFormat);
+				dateFormatter = new SimpleDateFormat(newDefaultDateFormat);
+			}
+			else {
+				dateFormatter = DataDumpUtils.dateFormatter;
+			}
 		}
 		
 		String nullValue = prop.getProperty("sqldump.datadump."+getSyntaxId()+".nullvalue");
