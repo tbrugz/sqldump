@@ -87,6 +87,8 @@ public class ConnectionUtil {
 		
 		conn.setAutoCommit(autoCommit);
 		
+		//XXX: initsql: log only 1st execution?
+		//XXX: initsql: option to execute multiple statements?
 		String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
 		if(dbInitSql!=null) {
 			try {
