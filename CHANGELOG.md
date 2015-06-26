@@ -8,6 +8,8 @@ sqldump 0.9.13
 - diff2queries: added prop 'diff2q.sql'
 - sqldump: added prop 'sqldump.schemagrab.metadata'
 - datadump: insertinto, xml & html syntaxes changes
+- model: grab/dump grants with columns
+- model/jaxb: added xml schema
 - many other refactorings & fixes
 
 
