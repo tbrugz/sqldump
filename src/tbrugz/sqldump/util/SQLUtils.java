@@ -29,6 +29,8 @@ public class SQLUtils {
 	//static final String PROP = "sqldump.datadump.strangePrecisionNumericAsInt";
 	static final String PROP_STRANGE_PRECISION_NUMERIC_AS_INT = "sqldump.sqlutils.strangePrecisionNumericAsInt";
 	
+	static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
+	
 	static boolean strangePrecisionNumericAsInt = true;
 	
 	public static void setProperties(Properties prop) {
@@ -120,6 +122,17 @@ public class SQLUtils {
 			try {
 
 			if(coltype.equals(Blob.class)) {
+				// http://docs.oracle.com/javase/7/docs/api/java/sql/Types.html#BLOB
+				// http://docs.oracle.com/javase/7/docs/api/java/sql/Blob.html
+				// https://docs.oracle.com/javase/tutorial/jdbc/basics/blob.html
+				//long initTime = System.currentTimeMillis();
+				value = rs.getObject(i);
+				boolean isNull = rs.wasNull();
+				if(!isNull) {
+					value = BLOB_NOTNULL_PLACEHOLDER;
+				}
+				//log.info("wasNull["+i+";"+coltype+"]: "+isNull+" - "+(System.currentTimeMillis()-initTime)+" val:"+value);
+				
 				//XXX: do not dump Blobs this way
 				//value = null; //Blob and ResultSet should be tested first? yes!
 			}
@@ -185,7 +198,7 @@ public class SQLUtils {
 			}
 			else {
 				//XXX: show log.warn on 1st time only?
-				log.warn("unknown type ["+coltype+"], defaulting to String");
+				log.warn("getRow: unknown type ["+coltype+"], defaulting to String");
 				//value = rs.getString(i); // no need to get value again
 			}
 			
@@ -234,11 +247,12 @@ public class SQLUtils {
 				 */
 				return
 					( scale>0 ) ? Double.class:
+					//( scale!=0 ) ? Double.class:
 					( (precision>0)&&(scale<0) ) ? Double.class: // might work better for oracle if J2EE13Compliant=false -- should it be (precision != 0) && (scale == -127)) ?
 					( precision>0 ) ? Integer.class:
 					//( (precision==0)&&(scale==0) ) ? Double.class:
 					// being bold and assuming Integer (if actual data is not, dump syntax will hopefully take care)
-					(strangePrecisionNumericAsInt?Integer.class:Double.class);
+					(strangePrecisionNumericAsInt?Integer.class:Double.class); //"strange" precision: less or equal zero 
 			case Types.REAL:     //  7
 			case Types.FLOAT:    //  6
 			case Types.DOUBLE:   //  8
@@ -250,6 +264,7 @@ public class SQLUtils {
 			case Types.VARCHAR:
 				return String.class;
 			case Types.LONGVARBINARY:
+			case Types.BLOB:
 				return Blob.class;
 			case Types.ARRAY:
 				//return Array.class;
