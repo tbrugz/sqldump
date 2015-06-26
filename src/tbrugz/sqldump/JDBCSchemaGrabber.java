@@ -108,6 +108,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	// xtra/generic grabber properties
 	static final String PROP_SCHEMAINFO_DOMAINTABLES = "sqldump.schemainfo.domaintables";
+	
+	static final String PROP_SCHEMAGRAB_DBSPECIFIC = PREFIX+".db-specific-features";
+	@Deprecated
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
@@ -174,7 +177,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		doSchemaGrabIndexes = Utils.getPropBoolWithDeprecated(prop, PROP_SCHEMAGRAB_INDEXES, PROP_DO_SCHEMADUMP_INDEXES, doSchemaGrabIndexes);
 		doSchemaGrabProceduresAndFunctions = Utils.getPropBool(papp, PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS, doSchemaGrabProceduresAndFunctions);
-		doSchemaGrabDbSpecific = Utils.getPropBool(papp, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
+		doSchemaGrabDbSpecific = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_DBSPECIFIC, PROP_DUMP_DBSPECIFIC, doSchemaGrabDbSpecific);
 		
 		ignoretableswithzerocolumns = Utils.getPropBoolWithDeprecated(papp, PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS, PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS, ignoretableswithzerocolumns);
 		
