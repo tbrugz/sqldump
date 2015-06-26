@@ -39,6 +39,7 @@ public class XMLDataDump extends DumpSyntax {
 	static final String PROP_DUMPTABLENAMEASROWTAG = "sqldump.datadump.xml.dumptablenameasrowtag";
 
 	static final String PROP_XML_ESCAPE = "sqldump.datadump.xml.escape";
+	static final String PREFIX_ESCAPE4TABLE = "sqldump.datadump.xml.escape4table@";
 	static final String PREFIX_ESCAPECOLS_4TABLE = "sqldump.datadump.xml.escapecols4table@";
 	static final String PREFIX_NO_ESCAPECOLS_4TABLE = "sqldump.datadump.xml.noescapecols4table@";
 	
@@ -65,6 +66,7 @@ public class XMLDataDump extends DumpSyntax {
 	HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
 	boolean dumpTableNameAsRowTag = false;
 	protected boolean escape = false;
+	protected boolean escape4table = false;
 	List<String> cols2Escape = null;
 	List<String> colsNot2Escape = null;
 
@@ -107,6 +109,7 @@ public class XMLDataDump extends DumpSyntax {
 		
 		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
+		escape4table = Utils.getPropBool(prop, PREFIX_ESCAPE4TABLE+tableName, escape);
 		cols2Escape = Utils.getStringListFromProp(prop, PREFIX_ESCAPECOLS_4TABLE+tableName, ",");
 		colsNot2Escape = Utils.getStringListFromProp(prop, PREFIX_NO_ESCAPECOLS_4TABLE+tableName, ",");
 	}
@@ -178,7 +181,7 @@ public class XMLDataDump extends DumpSyntax {
 	}
 	
 	public boolean doEscape(final int i) {
-		return escape?
+		return escape4table?
 				(colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))):
 				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
 	}
