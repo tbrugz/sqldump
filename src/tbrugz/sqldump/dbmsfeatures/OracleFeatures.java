@@ -26,6 +26,7 @@ import tbrugz.sqldump.dbmodel.ExecutableParameter.INOUT;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
+import tbrugz.sqldump.dbmodel.Index.IndexType;
 import tbrugz.sqldump.dbmodel.MaterializedView;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -482,20 +483,24 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 
 	String grabDBIndexesQuery(String schemaPattern) {
-		return "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uip.partitioning_type, uip.locality "
-				+"from all_indexes ui, all_ind_columns uic, all_part_indexes uip "
+		return "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uic.column_position, uip.partitioning_type, uip.locality, uie.column_expression "
+				+"from all_indexes ui, all_ind_columns uic, all_part_indexes uip, all_ind_expressions uie "
 				+"where UI.INDEX_NAME = UIC.INDEX_NAME "
 				+"and ui.table_name = uic.table_name "
 				+"and ui.table_owner = uic.table_owner "
 				+"and ui.index_name = uip.index_name (+) "
 				+"and ui.table_name = uip.table_name (+) "
 				+"and ui.table_owner = uip.owner (+) "
+				+"and uic.index_name = uie.index_name (+) "
+				+"and uic.table_name = uie.table_name (+) "
+				+"and uic.table_owner = uie.table_owner (+) "
+				+"and uic.column_position = uie.column_position (+) "
 				+"and ui.owner = '"+schemaPattern+"' "
-				+"order by ui.table_owner, ui.index_name, uic.column_position";
+				+"order by ui.table_owner, ui.index_name, uic.column_position, uie.column_position ";
 	}
 	
 	/*
-	 * TODO: move to OracleDatabaseMetaData
+	 * TODO: move to OracleDatabaseMetaData ?
 	 */
 	void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		log.debug("grabbing indexes");
@@ -540,7 +545,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					idx.setLocal(true);
 				}
 			}
-			idx.getColumns().add(rs.getString(6));
+			if(IndexType.FUNCTION_BASED_NORMAL.equals(idx.getIndexType())) {
+				idx.getColumns().add(rs.getString("COLUMN_EXPRESSION"));
+			}
+			else {
+				idx.getColumns().add(rs.getString("COLUMN_NAME"));
+			}
 			colCount++;
 		}
 		if(idx!=null) {
@@ -565,12 +575,27 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return model.getIndexes().add(idx);
 	}
 	
+	/*
+	 * about oracle index types:
+	 * NORMAL
+	 * IOT - TOP -- http://docs.oracle.com/cd/B28359_01/server.111/b28310/tables012.htm#ADMIN11685
+	 * BITMAP
+	 * FUNCTION-BASED NORMAL - https://docs.oracle.com/cd/E11882_01/appdev.112/e41502/adfns_indexes.htm#ADFNS00505
+	 * DOMAIN - http://docs.oracle.com/cd/B10501_01/appdev.920/a96595/dci07idx.htm
+	 * NORMAL/REV
+	 * ? FUNCTION-BASED DOMAIN 
+	 */
 	static void setIndexType(Index idx, String typeStr) {
 		if(typeStr==null) { return; }
 		if(typeStr.equals("NORMAL")) { return; }
 		if(typeStr.equals("BITMAP")) { idx.setType(typeStr); return; }
 		if(typeStr.equals("NORMAL/REV")) { idx.setReverse(true); return; }
-		//XXX: 'unknown' index types: DOMAIN, FUNCTION-BASED NORMAL, FUNCTION-BASED DOMAIN, IOT - TOP
+		if(typeStr.equals("FUNCTION-BASED NORMAL")) {
+			idx.setIndexType(IndexType.FUNCTION_BASED_NORMAL);
+			idx.setComment("FUNCTION-BASED NORMAL index - experimental");
+			return;
+		}
+		//XXX: 'unknown' index types: DOMAIN, FUNCTION-BASED DOMAIN, IOT - TOP
 		idx.setComment("unknown index type: '"+typeStr+"'");
 	}
 

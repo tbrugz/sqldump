@@ -32,8 +32,14 @@ public class Index extends DBObject {
 		}
 	}
 	
+	public enum IndexType {
+		NORMAL,
+		FUNCTION_BASED_NORMAL
+	}
+	
 	boolean unique;
 	String type;
+	IndexType indexType;
 	Boolean reverse;
 	String tableName; //XXX: Table instead of tableName?
 	final List<String> columns = new ArrayList<String>();
@@ -171,6 +177,14 @@ public class Index extends DBObject {
 
 	public List<String> getColumns() {
 		return columns;
+	}
+
+	public IndexType getIndexType() {
+		return indexType;
+	}
+
+	public void setIndexType(IndexType indexType) {
+		this.indexType = indexType;
 	}
 
 }
