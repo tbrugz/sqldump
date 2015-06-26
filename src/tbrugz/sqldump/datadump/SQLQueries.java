@@ -341,7 +341,7 @@ public class SQLQueries extends AbstractSQLProc {
 			log.info("removed query '"+v+"'? "+removed);
 		}
 		boolean added = model.getViews().add(query);
-		log.info("added query '"+query+"'? "+added);
+		log.debug("added query '"+query+"'? "+added);
 
 		if(addAlsoAsTable) {
 			//adding view to table's list

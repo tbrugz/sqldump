@@ -11,6 +11,7 @@ public class Grant implements Serializable {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(Grant.class);
 	
+	//XXX exclude 'table'? Grant is not (or should be) an 'independent' db object
 	String table; //XXX rename to object? may be used by Views or Executables
 	String column;
 	PrivilegeType privilege;
