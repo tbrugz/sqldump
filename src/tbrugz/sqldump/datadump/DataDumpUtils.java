@@ -142,12 +142,17 @@ public class DataDumpUtils {
 			return floatFormatterSQL.format(elem);
 		}
 		else if(String.class.isAssignableFrom(type)) {
+			// see: http://stackoverflow.com/questions/19176024/how-to-escape-special-characters-in-building-a-json-string
 			String val = getString(elem);
-			val = val.replaceAll(DOUBLEQUOTE, "&quot;");
 			val = val.replaceAll("\\\\", "\\\\\\\\");
-			val = val.replaceAll("\r\n", "\n");
-			val = val.replaceAll("\r", " ");
+			val = val.replaceAll(DOUBLEQUOTE, "\\\\\"");
+			//val = val.replaceAll("\r\n", "\n");
+			val = val.replaceAll("\b", "\\\\b");
+			val = val.replaceAll("\f", "\\\\f");
+			val = val.replaceAll("\r", "\\\\r");
 			val = val.replaceAll("\n", "\\\\n");
+			val = val.replaceAll("\t", "\\\\t");
+			val = val.replaceAll( "/", "\\\\/");
 			return DOUBLEQUOTE+val+DOUBLEQUOTE;
 		}
 		else if(Date.class.isAssignableFrom(type)) {
