@@ -978,7 +978,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		
 		String explainSql = "explain plan\n\tset STATEMENT_ID = '"+id+"' into "+planTable+"\n"
 			+ "for\n"+sql;
-		log.info("explain sql: "+explainSql);
+		log.debug("explain sql: "+explainSql);
 		Statement stmt = conn.createStatement();
 		stmt.execute(explainSql);
 		stmt.close();

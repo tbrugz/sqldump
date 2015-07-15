@@ -139,4 +139,9 @@ public class H2Features extends InformationSchemaFeatures {
 		throw new UnsupportedOperationException("no differences between H2 columns found");
 	}
 	
+	@Override
+	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+		return conn.createStatement().executeQuery("explain plan for "+sql);
+	}
+	
 }

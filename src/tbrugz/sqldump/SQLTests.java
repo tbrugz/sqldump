@@ -77,6 +77,9 @@ public class SQLTests extends AbstractSQLProc {
 		
 		String sql = "SELECT * from table order by column";
 		
+		//conn.createStatement().execute("create table xyz (col1 integer, col2 varchar)");
+		//String sql = "SELECT * from xyz order by col1";
+		
 		ResultSet rs = feats.explainPlan(sql, conn);
 		SQLUtils.dumpRS(rs);
 	}
