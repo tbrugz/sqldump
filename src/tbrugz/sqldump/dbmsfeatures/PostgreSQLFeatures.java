@@ -93,4 +93,12 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
 	}
 	
+	/*
+	 * http://www.postgresql.org/docs/devel/static/sql-explain.html
+	 */
+	@Override
+	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+		return conn.createStatement().executeQuery("explain verbose "+sql);
+	}
+	
 }

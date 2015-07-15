@@ -70,17 +70,16 @@ public class SQLTests extends AbstractSQLProc {
 		//SQLUtils.dumpRS(rs);
 	}
 	
-	@SuppressWarnings("deprecation")
 	static void testFeatures(Connection conn) throws SQLException {
-		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		DBMSFeatures feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
 		
-		String sql = "SELECT * from table order by column";
+		String sql = "select * from table order by column";
 		
 		//conn.createStatement().execute("create table xyz (col1 integer, col2 varchar)");
-		//String sql = "SELECT * from xyz order by col1";
-		
+		//String sql = "select * from xyz order by col1";
 		ResultSet rs = feats.explainPlan(sql, conn);
+		//conn.createStatement().execute("drop table xyz");
+		
 		SQLUtils.dumpRS(rs);
 	}
 

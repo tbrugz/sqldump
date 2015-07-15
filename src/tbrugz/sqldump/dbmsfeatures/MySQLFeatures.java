@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -56,5 +57,14 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
 		return new MySQLDatabaseMetaData(metadata);
+	}
+	
+	/*
+	 * https://dev.mysql.com/doc/refman/5.0/en/explain.html
+	 * https://dev.mysql.com/doc/refman/5.0/en/explain-output.html
+	 */
+	@Override
+	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+		return conn.createStatement().executeQuery("explain "+sql);
 	}
 }
