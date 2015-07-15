@@ -394,8 +394,9 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		try {
 			if(outputStream==null) {
 				if(output==null) {
-					log.error("graphml output file is null. won't dump");
-					if(failonerror) { throw new ProcessingException("graphml output file is null. won't dump"); }
+					String message = "graphml output file [prop '"+PROP_OUTPUTFILE+"'] not defined. won't dump";
+					log.error(message);
+					if(failonerror) { throw new ProcessingException(message); }
 					return;
 				}
 				Utils.prepareDir(output);
