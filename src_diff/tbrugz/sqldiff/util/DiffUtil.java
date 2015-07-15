@@ -3,9 +3,12 @@ package tbrugz.sqldiff.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
+import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.util.Utils;
 
 public class DiffUtil {
 	
@@ -26,6 +29,31 @@ public class DiffUtil {
 		List<T> ret = new ArrayList<T>();
 		ret.add(s);
 		return ret;
+	}
+	
+	public static List<DiffSyntax> getSyntaxes(Properties prop, String propKey) {
+		List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
+		
+		List<String> syntaxes = Utils.getStringListFromProp(prop, propKey, ",");
+		if(syntaxes!=null) {
+			for(String s: syntaxes) {
+				DiffSyntax ds = getSyntax(prop, s);
+				if(ds!=null) {
+					dss.add(ds);
+				}
+			}
+		}
+		
+		return dss;
+	}
+
+	public static DiffSyntax getSyntax(Properties prop, String className) {
+		DiffSyntax ds = (DiffSyntax) Utils.getClassInstance(className, "tbrugz.sqldiff.datadiff");
+		if(ds!=null) {
+			ds.procProperties(prop);
+			return ds;
+		}
+		return null;
 	}
 
 }

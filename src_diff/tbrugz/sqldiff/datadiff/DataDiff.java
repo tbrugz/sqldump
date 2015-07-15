@@ -333,6 +333,7 @@ public class DataDiff extends AbstractFailable {
 		//FIXedME: select DiffSyntax (based on properties?)
 		// maybe add SQLDataDiffSyntax only if 'sqldiff.datadiff.outfilepattern' is set?
 		
+		//XXX: use DiffUtil.getSyntaxes ?
 		List<String> syntaxes = Utils.getStringListFromProp(prop, PROP_DATADIFF_SYNTAXES, ",");
 		if(syntaxes!=null) {
 			for(String s: syntaxes) {

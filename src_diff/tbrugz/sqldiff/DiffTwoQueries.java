@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,9 +13,10 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.datadiff.DataDiff;
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
-import tbrugz.sqldiff.datadiff.SQLDataDiffSyntax;
+import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
@@ -51,10 +51,12 @@ public class DiffTwoQueries implements Executor {
 	static final String PROP_TABLENAME = PREFIX+".tablename";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
 	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
+	static final String PROP_SYNTAXES = PREFIX+".syntaxes";
 	static final String PROP_OUTPATTERN = PREFIX+".outpattern";
-
+	
 	static final long DEFAULT_LOOP_LIMIT = 1000L;
 	static final String DEFAULT_TABLE_NAME = "_table_";
+	static final String DEFAULT_SYNTAX = "SQLDataDiffSyntax";
 	
 	final Properties prop = new ParametrizedProperties();
 
@@ -135,7 +137,8 @@ public class DiffTwoQueries implements Executor {
 			finalPattern = CategorizedOut.generateFinalOutPattern(outPattern,
 				Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME), 
 				Defs.addSquareBraquets(Defs.PATTERN_TABLENAME),
-				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE));
+				Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE),
+				Defs.addSquareBraquets(DataDiff.PATTERN_FILEEXT));
 		}
 		//CategorizedOut cout = new CategorizedOut(finalPattern);
 		
@@ -174,11 +177,10 @@ public class DiffTwoQueries implements Executor {
 	}
 	
 	List<DiffSyntax> getSyntaxes() {
-		//only SQLDataDiffSyntax for now...
-		List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
-		DiffSyntax ds = new SQLDataDiffSyntax();
-		ds.procProperties(prop);
-		dss.add(ds);
+		List<DiffSyntax> dss = DiffUtil.getSyntaxes(prop, PROP_SYNTAXES);
+		if(dss.size()==0) {
+			dss.add(DiffUtil.getSyntax(prop, DEFAULT_SYNTAX));
+		}
 		return dss;
 	}
 	
