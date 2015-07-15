@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.naming.NamingException;
@@ -12,10 +13,13 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLUtils;
 
 public class SQLTests extends AbstractSQLProc {
 
@@ -30,9 +34,9 @@ public class SQLTests extends AbstractSQLProc {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	static void testsInternal(Connection conn) throws Exception {
 		log.info("some tests...");
-		@SuppressWarnings("unused")
 		DatabaseMetaData dbmd = conn.getMetaData();
 
 		//log.info("test: catalogs...");
@@ -50,6 +54,10 @@ public class SQLTests extends AbstractSQLProc {
 		//log.info("test: fks...");
 		//SQLUtils.dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
 
+		//log.info("test: exported fks...");
+		//SQLUtils.dumpRS(dbmd.getExportedKeys(null, "schema", null));
+		//!exportedkeys
+		
 		//log.info("test: grants...");
 		//SQLUtils.dumpRS(dbmd.getTablePrivileges(null, "schema", "table"));
 		
@@ -61,10 +69,27 @@ public class SQLTests extends AbstractSQLProc {
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
 	}
+	
+	@SuppressWarnings("deprecation")
+	static void testFeatures(Connection conn) throws SQLException {
+		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
+		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		
+		String sql = "SELECT * from table order by column";
+		
+		ResultSet rs = feats.explainPlan(sql, conn);
+		SQLUtils.dumpRS(rs);
+	}
 
 	@Override
 	public void process() {
-		tests(conn);
+		try {
+			//tests(conn);
+			testFeatures(conn);
+		}
+		catch(SQLException e) {
+			log.warn("Exception: "+e.getMessage(), e);
+		}
 	}
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, NamingException {

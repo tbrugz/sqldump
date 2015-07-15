@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmd;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
@@ -136,5 +137,10 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		return false;
 	}
 	*/
+	
+	@Override
+	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+		throw new UnsupportedOperationException("explainPlan not implemented");
+	}
 
 }

@@ -967,4 +967,23 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return true;
 	}
 	*/
+	
+	/*
+	 * columns: STATEMENT_ID | PLAN_ID | TIMESTAMP | REMARKS | OPERATION | OPTIONS | OBJECT_NODE | OBJECT_OWNER | OBJECT_NAME | OBJECT_ALIAS | OBJECT_INSTANCE | OBJECT_TYPE | OPTIMIZER | SEARCH_COLUMNS | ID | PARENT_ID | DEPTH | POSITION | COST | CARDINALITY | BYTES | OTHER_TAG | PARTITION_START | PARTITION_STOP | PARTITION_ID | OTHER | OTHER_XML | DISTRIBUTION | CPU_COST | IO_COST | TEMP_SPACE | ACCESS_PREDICATES | FILTER_PREDICATES | PROJECTION | TIME | QBLOCK_NAME
+	 */
+	@Override
+	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+		String id = "sqldump";
+		String planTable = "PLAN_TABLE";
+		
+		String explainSql = "explain plan\n\tset STATEMENT_ID = '"+id+"' into "+planTable+"\n"
+			+ "for\n"+sql;
+		log.info("explain sql: "+explainSql);
+		Statement stmt = conn.createStatement();
+		stmt.execute(explainSql);
+		stmt.close();
+		
+		String planTableSelect = "select * from "+planTable+" where STATEMENT_ID = '"+id+"'";
+		return conn.createStatement().executeQuery(planTableSelect);
+	}
 }
