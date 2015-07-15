@@ -18,6 +18,9 @@ import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 
+/*
+ * TODOne: String: option to use compareToCaseInsensitive
+ */
 public class ResultSetDiff {
 
 	static final Log log = LogFactory.getLog(ResultSetDiff.class);
@@ -26,6 +29,8 @@ public class ResultSetDiff {
 	int logEachXLoops = 1000;
 	
 	long limit = 0;
+	boolean useCaseInsensitive = true; //databases, by default, uses case insensitive order
+	
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
 	//XXX: add property for dumpInserts, dumpUpdates & dumpDeletes
@@ -290,13 +295,13 @@ public class ResultSetDiff {
 	}*/
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	static int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
+	int compareVals(List<Comparable> vals1, List<Comparable> vals2, int[] keyIndexes) {
 		int comp = 0;
 		for(int i=0;i<keyIndexes.length; i++) {
 			try {
 				Comparable v1 = vals1.get(keyIndexes[i]);
 				Comparable v2 = vals2.get(keyIndexes[i]);
-				comp = v1!=null && v2!=null ? v1.compareTo(v2) :
+				comp = v1!=null && v2!=null ? ((useCaseInsensitive && v1 instanceof String)? ((String)v1).compareToIgnoreCase((String)v2) : v1.compareTo(v2)) :
 					 ( v1==null && v2==null ? 0 :
 					 ( v1==null ? -1 : 1 ) ); // "NULLs last", right?
 				
@@ -318,8 +323,12 @@ public class ResultSetDiff {
 			catch(ClassCastException e) {
 				log.warn("[CCE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
 			}
-			if(comp!=0) return comp;
+			if(comp!=0) {
+				//log.debug("compareVals: comp = "+comp+"; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i]));
+				return comp;
+			}
 		}
+		//log.debug("compareVals-z: comp = "+comp);
 		return comp;
 	}
 	
