@@ -42,7 +42,7 @@ public class CategorizedOut {
 		void callOnOpen(Writer w) throws IOException;
 	}
 	
-	class NonCloseableWriterDecorator extends Writer {
+	static class NonCloseableWriterDecorator extends Writer {
 		final Writer w;
 		NonCloseableWriterDecorator(Writer w) {
 			this.w = w;
@@ -59,6 +59,28 @@ public class CategorizedOut {
 		@Override
 		public void close() throws IOException {
 			w.flush();
+		}
+	}
+	
+	static class FlushingWriterDecorator extends Writer {
+		final Writer w;
+		
+		public FlushingWriterDecorator(Writer w) {
+			this.w = w;
+		}
+
+		@Override
+		public void write(char[] cbuf, int off, int len) throws IOException {
+			w.write(cbuf, off, len);
+			w.flush();
+		}
+		@Override
+		public void flush() throws IOException {
+			w.flush();
+		}
+		@Override
+		public void close() throws IOException {
+			w.close();
 		}
 	}
 	
@@ -110,14 +132,42 @@ public class CategorizedOut {
 		}
 	}
 	
+	class StaticWriterIterator implements Iterator<Writer> {
+		boolean hasNext = true;
+		final Writer writer;
+
+		StaticWriterIterator(String pattern) {
+			try {
+				this.writer = getStaticWriter(pattern);
+			} catch (IOException e) {
+				throw new ExceptionInInitializerError(e);
+			}
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return hasNext;
+		}
+
+		@Override
+		public Writer next() {
+			hasNext = false;
+			return writer;
+		}
+
+		@Override
+		public void remove() {
+		}
+	}
+	
 	static final Log log = LogFactory.getLog(CategorizedOut.class);
 	
 	public static final String STDOUT = "<stdout>"; 
 	public static final String STDERR = "<stderr>";
 	public static final String NULL_WRITER = "<null>"; // constant for "/dev/null"
 	
-	static final Writer pwSTDOUT = new PrintWriter(System.out);
-	static final Writer pwSTDERR = new PrintWriter(System.err);
+	static final Writer pwSTDOUT = new NonCloseableWriterDecorator(new PrintWriter(System.out));
+	static final Writer pwSTDERR = new NonCloseableWriterDecorator(new PrintWriter(System.err));
 	static final Writer nullWriter = new NullWriter();
 	
 	public CategorizedOut(String filePathPattern) {
@@ -159,11 +209,11 @@ public class CategorizedOut {
 		return filePathPattern;
 	}
 
-	public void categorizedNewOut(String message, String... categories) throws IOException {
+	/*public void categorizedNewOut(String message, String... categories) throws IOException {
 		Writer w = getCategorizedWriter(categories);
 		w.write(message+"\n");
 		w.flush();
-	}
+	}*/
 	
 	//XXXdone: use getCategorizedWriter() (as categorizedNewOut()) ?
 	public void categorizedOut(String message, String... categories) throws IOException {
@@ -189,9 +239,10 @@ public class CategorizedOut {
 			throw new RuntimeException("filePathPattern not defined, aborting");
 		}
 
-		String thisFP = getFilePath(categories);
-		
-		if(STDOUT.equals(thisFP)) {
+		if(isStaticWriter(filePathPattern)) {
+			return getStaticWriter(filePathPattern);
+		}
+		/*if(STDOUT.equals(thisFP)) {
 			return pwSTDOUT;
 		}
 		else if(STDERR.equals(thisFP)) {
@@ -199,15 +250,17 @@ public class CategorizedOut {
 		}
 		else if(NULL_WRITER.equals(thisFP)) {
 			return nullWriter;
-		}
+		}*/
 		else {
+			String thisFP = getFilePath(categories);
+			
 			boolean alreadyOpened = filesOpened.contains(thisFP);
 			FileWriter fos = getFileWriter(thisFP);
 			if(!alreadyOpened && cb!=null) {
 				cb.callOnOpen(fos);
 			}
 			
-			return fos;
+			return new FlushingWriterDecorator(fos);
 		}
 	}
 	
@@ -227,6 +280,9 @@ public class CategorizedOut {
 	public Iterator<Writer> getAllOpenedWritersIterator() {
 		if(innerWriter!=null) {
 			return new InnerWriterIterator();
+		}
+		if(isStaticWriter(filePathPattern)) {
+			return new StaticWriterIterator(filePathPattern);
 		}
 		return new WriterIterator();
 	}
@@ -280,6 +336,7 @@ public class CategorizedOut {
 		return new FileWriter(f, alreadyOpened);
 	}
 	
+	@SuppressWarnings("el-syntax")
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
 			String outpatternTmp = outpattern;
@@ -291,6 +348,7 @@ public class CategorizedOut {
 		return outpattern;
 	}
 
+	@SuppressWarnings("el-syntax")
 	public static String generateFinalOutPattern(String outpattern, String[]... categoriesArr) {
 		for(int i=0;i<categoriesArr.length;i++) {
 			for(int j=0;j<categoriesArr[i].length;j++) {
@@ -306,7 +364,8 @@ public class CategorizedOut {
 
 	public static void closeWriter(Writer w) throws IOException {
 		w.flush();
-		if(pwSTDOUT.equals(w)) {
+		w.close();
+		/*if(pwSTDOUT.equals(w)) {
 		}
 		else if(pwSTDERR.equals(w)) {
 		}
@@ -314,7 +373,7 @@ public class CategorizedOut {
 		}
 		else {
 			w.close();
-		}
+		}*/
 	}
 
 	public static Writer getStaticWriter(String outPattern) throws IOException {
@@ -330,4 +389,16 @@ public class CategorizedOut {
 		return null;
 	}
 	
+	public static boolean isStaticWriter(String outPattern) {
+		if(STDOUT.equals(outPattern)) {
+			return true;
+		}
+		if(STDERR.equals(outPattern)) {
+			return true;
+		}
+		if(NULL_WRITER.equals(outPattern)) {
+			return true;
+		}
+		return false;
+	}
 }

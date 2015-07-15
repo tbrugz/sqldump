@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
+//XXX: test static writers, inner writers, getCategorizedWriter
 public class CategorizedOutTest {
 
 	@Test
