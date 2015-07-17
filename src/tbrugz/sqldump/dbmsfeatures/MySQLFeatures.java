@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -57,6 +60,15 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
 		return new MySQLDatabaseMetaData(metadata);
+	}
+	
+	/*
+	 * http://stackoverflow.com/questions/4002340/how-to-rename-a-table-column-in-mysql
+	 */
+	@Override
+	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
+		return "alter table "+DBObject.getFinalName(table, true)+" change "+DBObject.getFinalIdentifier(column.getName())
+				+" "+DBObject.getFinalIdentifier(newName)+" "+column.getTypeDefinition();
 	}
 	
 	/*

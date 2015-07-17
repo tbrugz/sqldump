@@ -143,4 +143,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		st.close();
 		log.info(count+" sequences grabbed");
 	}
+	
+	/*
+	 * XXX: implement explainPlan?
+	 * http://stackoverflow.com/questions/5981406/apache-derby-explain-select
+	 */
 }
