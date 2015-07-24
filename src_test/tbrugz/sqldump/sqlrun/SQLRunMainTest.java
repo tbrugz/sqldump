@@ -4,13 +4,12 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class SQLRunMainTest {
 
-	@Test(expected = ProcessingException.class)
-	public void testIt() throws Exception {
+	@Test(expected = IllegalStateException.class)
+	public void testArguments() throws Exception {
 		Properties p = new ParametrizedProperties();
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(new String[]{"aa","ab"}, p, null);

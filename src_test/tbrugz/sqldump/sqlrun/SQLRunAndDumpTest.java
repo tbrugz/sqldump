@@ -1,6 +1,5 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -28,7 +27,7 @@ public class SQLRunAndDumpTest {
 		return conn;
 	}*/
 	
-	public static void setupModel(Connection conn) throws ClassNotFoundException, IOException, SQLException, NamingException {
+	public static void setupModel(Connection conn) throws Exception {
 		String[] vmparamsRun = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				};

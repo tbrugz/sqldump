@@ -428,17 +428,17 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	 * @throws ClassNotFoundException 
 	 * @throws Exception 
 	 */
-	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(args, null, null);
 	}
 	
 	@Override
-	public void doMain(String[] args, Properties p) throws ClassNotFoundException, IOException, SQLException, NamingException {
+	public void doMain(String[] args, Properties p) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
 		doMain(args, p, null);
 	}
 	
-	public void doMain(String[] args, Properties p, Connection c) throws ClassNotFoundException, IOException, SQLException, NamingException {
+	public void doMain(String[] args, Properties p, Connection c) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
 		try {
 			if(p!=null) {
 				papp.putAll(p);
@@ -446,7 +446,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 					String message = "args informed "+Arrays.asList(args)+" but won't be processed";
 					log.warn(message);
 					if(failonerror) { //always true?
-						throw new ProcessingException(message);
+						throw new IllegalStateException(message);
 					}
 				}
 			}

@@ -1,10 +1,7 @@
 package tbrugz.sqldiff.test;
 
-import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-import javax.naming.NamingException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,22 +23,19 @@ public class DerbyDiffTest extends SQLDiffTest {
 
 	@Test
 	@Override
-	public void testDiffAddColumn() throws ClassNotFoundException,
-			SQLException, NamingException, IOException {
+	public void testDiffAddColumn() throws Exception {
 		super.testDiffAddColumn();
 	}
 	
 	@Test
 	@Override
-	public void testDiffCreateTable() throws ClassNotFoundException,
-			SQLException, NamingException, IOException {
+	public void testDiffCreateTable() throws Exception {
 		super.testDiffCreateTable();
 	}
 	
 	@Test
 	@Override
-	public void testDiffCreateView() throws ClassNotFoundException,
-			SQLException, NamingException, IOException {
+	public void testDiffCreateView() throws Exception {
 		super.testDiffCreateView();
 	}
 	

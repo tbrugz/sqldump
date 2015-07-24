@@ -10,7 +10,7 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 public class SQLRunProcessorTest {
 
 	@Test
-	public void setupDB() throws Exception {
+	public void testProcessor() throws Exception {
 		Properties p = new ParametrizedProperties();
 		p.load(CascadingDataDump.class.getResourceAsStream("sqlrun-processor.properties"));
 		SQLDump sqld = new SQLDump();

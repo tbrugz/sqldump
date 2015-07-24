@@ -1,15 +1,11 @@
 package tbrugz.sqldiff.test;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Properties;
-
-import javax.naming.NamingException;
-import javax.xml.bind.JAXBException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -55,7 +51,7 @@ public class SQLDiffTest {
 		dbUser = "h";
 	}
 	
-	void setup4diff() throws ClassNotFoundException, SQLException, NamingException, IOException {
+	void setup4diff() throws Exception {
 		if(conn!=null) {
 			conn.close(); //removes database (for H2)
 		}
@@ -82,7 +78,7 @@ public class SQLDiffTest {
 	}
 	
 	@Test
-	public void testDiffAddColumn() throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void testDiffAddColumn() throws Exception {
 		setup4diff();
 		Statement st = conn.createStatement();
 		st.executeUpdate("alter table emp add column email varchar(100)");
@@ -131,7 +127,7 @@ public class SQLDiffTest {
 	}
 
 	@Test
-	public void testDiffXMLAndJSONOut() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException {
+	public void testDiffXMLAndJSONOut() throws Exception {
 		setup4diff();
 		Statement st = conn.createStatement();
 		st.executeUpdate("alter table emp add column email varchar(100)");
@@ -147,7 +143,7 @@ public class SQLDiffTest {
 	}
 	
 	@Test
-	public void testDiffCreateTable() throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void testDiffCreateTable() throws Exception {
 		setup4diff();
 		Statement st = conn.createStatement();
 		//alter schema 
@@ -190,7 +186,7 @@ public class SQLDiffTest {
 	}
 
 	@Test
-	public void testDiffCreateView() throws ClassNotFoundException, SQLException, NamingException, IOException {
+	public void testDiffCreateView() throws Exception {
 		setup4diff();
 		Statement st = conn.createStatement();
 		//alter schema 
