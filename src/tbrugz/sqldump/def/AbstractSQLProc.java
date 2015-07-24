@@ -13,12 +13,17 @@ public abstract class AbstractSQLProc extends AbstractSchemaProcessor {
 	
 	@Override
 	public Connection getConnection() {
-		return null;
+		return conn;
 	}
 	
 	@Override
 	public boolean needsConnection() {
 		return true;
+	}
+	
+	@Override
+	public Connection getNewConnection() {
+		return null;
 	}
 	
 }

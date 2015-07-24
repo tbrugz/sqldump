@@ -38,7 +38,7 @@ public class Olap4jConnector extends MondrianSchemaValidator {
 	}
 	
 	@Override
-	public Connection getConnection() {
+	public Connection getNewConnection() {
 		return oconn;
 	}
 

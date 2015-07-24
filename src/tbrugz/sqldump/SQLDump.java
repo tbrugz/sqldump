@@ -307,6 +307,11 @@ public class SQLDump implements Executor {
 		return sm;
 	}
 	
+	/**
+	 * Executes the processor
+	 * 
+	 * @return a new connection (if the processor has such capability; if it does not, returns null)
+	 */
 	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
 		sqlproc.setProperties(papp);
 		if(sqlproc.needsConnection()) {
@@ -321,7 +326,7 @@ public class SQLDump implements Executor {
 		//TODO: set fail on error based on (processor) properties ?
 		sqlproc.setFailOnError(failonerror);
 		sqlproc.process();
-		return sqlproc.getConnection();
+		return sqlproc.getNewConnection();
 	}
 	
 	void doProcessDumper(SchemaModelDumper schemaDumper, SchemaModel sm) {

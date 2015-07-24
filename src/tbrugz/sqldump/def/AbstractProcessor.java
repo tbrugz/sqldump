@@ -13,6 +13,10 @@ public abstract class AbstractProcessor extends AbstractFailable implements Proc
 	public void setProperties(Properties prop) {
 		this.prop = prop;
 	}
+	
+	protected Properties getProperties() {
+		return prop;
+	}
 
 	@Override
 	public void setPropertiesPrefix(String propertiesPrefix) {
@@ -38,6 +42,11 @@ public abstract class AbstractProcessor extends AbstractFailable implements Proc
 
 	@Override
 	public Connection getConnection() {
+		return null;
+	}
+	
+	@Override
+	public Connection getNewConnection() {
 		return null;
 	}
 	
