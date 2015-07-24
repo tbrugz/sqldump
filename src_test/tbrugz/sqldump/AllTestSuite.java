@@ -30,6 +30,7 @@ import tbrugz.sqldump.mondrianschema.MondrianTests;
 import tbrugz.sqldump.pivot.DriverTest;
 import tbrugz.sqldump.pivot.QueryTest;
 import tbrugz.sqldump.processors.CascadingDataDumpTest;
+import tbrugz.sqldump.processors.SQLRunProcessorTest;
 import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
@@ -100,6 +101,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//datadump
 	DataDumpTest.class,
 	CascadingDataDumpTest.class,
+	SQLRunProcessorTest.class,
 	
 	//graph
 	R2GTest.class,
