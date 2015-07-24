@@ -19,7 +19,7 @@ import tbrugz.sqldump.util.IOUtil;
 
 public class SQLRunAndDumpTest {
 	
-	public static final String[] NULL_PARAMS = {};
+	public static final String[] NULL_PARAMS = null;
 
 	public String dbpath = "mem:SQLRunAndDumpTest";
 	
@@ -112,12 +112,11 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
-		String[] params = {};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		//setSystemProperties(vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(params, p, null);
+		sqlr.doMain(null, p, null);
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.grabclass=JDBCSchemaGrabber",
@@ -137,7 +136,7 @@ public class SQLRunAndDumpTest {
 		p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
 		//setSystemProperties(vmparamsDump);
-		sqld.doMain(params, p, null);
+		sqld.doMain(null, p, null);
 		
 		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_DEPT.csv");
 		String expected = "ID,NAME,PARENT_ID\n0,CEO,0\n1,HR,0\n2,Engineering,0\n";

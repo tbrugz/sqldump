@@ -9,7 +9,7 @@ import tbrugz.sqldump.TestUtil;
 
 public class StmtExecTest {
 
-	public static final String[] NULL_PARAMS = {};
+	public static final String[] NULL_PARAMS = null;
 	public String dbpath = "mem:StmtExecTest";
 
 	@Test

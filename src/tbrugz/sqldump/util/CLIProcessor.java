@@ -32,7 +32,7 @@ public class CLIProcessor {
 		for(String arg: args) {
 			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
 				String propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-				loadFile(papp, propFilename, true);
+				loadFile(papp, propFilename);
 				loadedCount++;
 			}
 			else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
@@ -51,7 +51,7 @@ public class CLIProcessor {
 		}
 		}
 		if(loadedCount==0) {
-			loadFile(papp, defaultPropFile, false);
+			loadFile(papp, defaultPropFile);
 		}
 		if(!useSysPropSetted) {
 			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
@@ -75,6 +75,10 @@ public class CLIProcessor {
 				log.warn("error loading resource '"+propResource+"': "+e);
 			}
 		}
+	}
+	
+	static void loadFile(Properties p, String propFilename) {
+		loadFile(p, propFilename, true);
 	}
 	
 	static void loadFile(Properties p, String propFilename, boolean logExceptionAsWarn) {

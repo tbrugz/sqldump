@@ -77,7 +77,7 @@ public class DataDumpTest {
 				"-Dsqlrun.user=h",
 				"-Dsqlrun.password=h"
 				};
-		String[] params = {};
+		String[] params = null;
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();

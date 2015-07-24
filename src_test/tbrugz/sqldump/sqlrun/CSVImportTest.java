@@ -4,11 +4,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
 
+import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Test;
 
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class CSVImportTest {
 	
@@ -35,14 +37,15 @@ public class CSVImportTest {
 
 	@Test(expected = ProcessingException.class)
 	public void doImportWithError() throws Exception {
-		String[] params = {"-propfile=test/sqlrun-h2-csv.properties"};
-		String[] vmparams = {
-				"-Dsqlrun.exec.00.statement=drop table unexistent"
-		};
-		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparams);
+		String propsStr = 
+			"@includes=test/sqlrun-h2-csv.properties\n"+
+			"sqlrun.exec.00.statement=drop table unexistent";
+		StringInputStream sis = new StringInputStream(propsStr);
+
+		Properties p = new ParametrizedProperties();
+		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(params, p, null);
+		sqlr.doMain(null, p, null);
 	}
 	
 	static ClassLoader loadJar(URL url) {

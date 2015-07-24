@@ -374,8 +374,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		return cs;
 	}
 	
-	void init(String[] args, Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
-		CLIProcessor.init("sqlrun", args, PROPERTIES_FILENAME, papp);
+	void init(Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		ColTypeUtil.setProperties(papp);
 		
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
@@ -441,8 +440,20 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	public void doMain(String[] args, Properties p, Connection c) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		try {
-			if(p!=null) { papp.putAll(p); }
-			init(args, c);
+			if(p!=null) {
+				papp.putAll(p);
+				if(args!=null) {
+					String message = "args informed "+Arrays.asList(args)+" but won't be processed";
+					log.warn(message);
+					if(failonerror) { //always true?
+						throw new ProcessingException(message);
+					}
+				}
+			}
+			else {
+				CLIProcessor.init("sqlrun", args, PROPERTIES_FILENAME, papp);
+			}
+			init(c);
 			if(conn==null) { return; }
 			doIt();
 		}
