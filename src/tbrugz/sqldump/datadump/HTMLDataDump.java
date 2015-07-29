@@ -43,7 +43,7 @@ public class HTMLDataDump extends XMLDataDump {
 	protected String append = null;
 	//protected String nullValueClass = null;
 	//TODO: prop for 'dumpColElement'
-	protected final boolean dumpColElement = false;
+	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
 	protected boolean xpendInnerTable = true;
 	
@@ -89,9 +89,11 @@ public class HTMLDataDump extends XMLDataDump {
 			appendStyleNumericAlignRight(sb);
 		}
 		if(dumpColElement) {
+			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
-				sb.append("\n\t<col class=\"type_"+lsColTypes.get(i).getSimpleName()+"\"/>");
+				sb.append("\n\t<col type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
 			}
+			sb.append("\n</colgroup>");
 		}
 		sb.append("\n\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
