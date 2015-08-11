@@ -43,6 +43,7 @@ public class View extends DBObject implements Relation {
 	//  http://stackoverflow.com/questions/4498364/create-parameterized-view-in-sql-server-2008 ,
 	//  http://hordine.com/2012/08/workaround-for-parameterized-views-in-mysql/
 	Integer parameterCount; //XXXdone add parameterCount to View?
+	List<String> parameterTypes;
 	
 	//public String checkOptionConstraintName;
 	
@@ -260,6 +261,15 @@ public class View extends DBObject implements Relation {
 	@Override
 	public void setGrants(List<Grant> grants) {
 		this.grants = grants;
+	}
+
+	@Override
+	public List<String> getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public void setParameterTypes(List<String> parameterTypes) {
+		this.parameterTypes = parameterTypes;
 	}
 	
 	/*@Override

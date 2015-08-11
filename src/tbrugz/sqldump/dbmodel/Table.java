@@ -332,4 +332,9 @@ public class Table extends DBObject implements Relation {
 		return columns!=null?columns.size():0;
 	}
 	
+	@Override
+	public List<String> getParameterTypes() {
+		return null;
+	}
+	
 }
