@@ -32,6 +32,13 @@ import tbrugz.sqldump.util.Utils;
        another double quote.  For example:
 
        "aaa","b""bb","ccc"
+   
+   semantic CSV?
+   http://www.w3.org/2013/05/lcsv-charter - CSV on the Web
+   http://tiree.snipit.org/talis/tables/
+   https://github.com/clarkparsia/csv2rdf
+   http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
+   http://www.iana.org/assignments/media-types/text/csv-schema
  */
 public class CSVDataDump extends DumpSyntax {
 	

@@ -91,7 +91,7 @@ public class HTMLDataDump extends XMLDataDump {
 		if(dumpColElement) {
 			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
-				sb.append("\n\t<col type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
+				sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
 			}
 			sb.append("\n</colgroup>");
 		}

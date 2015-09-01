@@ -11,7 +11,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.Utils;
 
 public class DumpSyntaxRegistry {
-	static Log log = LogFactory.getLog(DumpSyntaxRegistry.class);
+	static final Log log = LogFactory.getLog(DumpSyntaxRegistry.class);
 	
 	static final String SYNTAXES_PROPERTIES = "/dumpsyntaxes.properties";
 	static final String PROP_CLASSES = "dumpsyntax.classes";
@@ -74,5 +74,7 @@ public class DumpSyntaxRegistry {
 		}
 		return syntaxes;
 	}
+	
+	//XXX: add clearSyntaxes() ?
 
 }
