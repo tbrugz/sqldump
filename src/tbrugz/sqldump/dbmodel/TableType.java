@@ -7,9 +7,10 @@ public enum TableType {
 	TABLE, SYNONYM, SYSTEM_TABLE,
 	VIEW, MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
-	EXTERNAL_TABLE,
+	EXTERNAL_TABLE, //oracle
 	BASE_TABLE, //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
-	TYPE //XXX 'TYPE' table type? - postgresql
+	TYPE, //XXX 'TYPE' table type? - postgresql
+	FOREIGN_TABLE //postgresql
 	;
 	
 	//non-tables: INDEX, SEQUENCE, ...
@@ -53,6 +54,9 @@ public enum TableType {
 		else if(tableType.equals("TYPE")) {
 			//XXX: table of type TYPE?
 			return TableType.TYPE;
+		}
+		else if(tableType.equals("FOREIGN TABLE")) {
+			return TableType.FOREIGN_TABLE;
 		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");

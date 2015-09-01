@@ -101,4 +101,21 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		return conn.createStatement().executeQuery("explain verbose "+sql);
 	}
 	
+	//TODO: add support for foreign tables..
+	/*
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
+		return new PostgreSqlDatabaseMetaData(metadata);
+	}
+	
+	@Override
+	public Table getTableObject() {
+		return new PostgreSqlTable();
+	}
+	
+	@Override
+	public void addTableSpecificFeatures(Table t, ResultSet rs) {
+	}
+	*/
+
 }
