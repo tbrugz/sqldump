@@ -167,4 +167,10 @@ public class JSONDataDump extends DumpSyntax {
 	public String getMimeType() {
 		return "application/json";
 	}
+
+	// see: https://tools.ietf.org/html/rfc7159#section-8.1
+	@Override
+	public boolean allowWriteBOM() {
+		return false;
+	}
 }

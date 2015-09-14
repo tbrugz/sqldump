@@ -70,4 +70,7 @@ public interface DumpSyntaxInt {
 	public Object clone() throws CloneNotSupportedException;
 	
 	//public boolean canDumpInnerResultSet();
+	
+	public boolean allowWriteBOM();
+	
 }

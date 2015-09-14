@@ -145,5 +145,10 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	//XXX: method supportResultSetDump()?
 	//XXX: method cloneBaseProperties()? duplicateInstance(DumpSyntax)? clone()?
+	
+	@Override
+	public boolean allowWriteBOM() {
+		return true;
+	}
 
 }
