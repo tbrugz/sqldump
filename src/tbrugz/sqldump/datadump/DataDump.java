@@ -548,7 +548,7 @@ public class DataDump extends AbstractSQLProc {
 							Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
 							if(w==null) {
 								Boolean syntaxWriteBOM = Utils.getPropBoolean(prop, DATADUMP_PROP_PREFIX+ds.getSyntaxId()+"."+SUFFIX_DATADUMP_WRITEBOM, writeBOM);
-								if(syntaxWriteBOM && !ds.allowWriteBOM()) {
+								if(syntaxWriteBOM!=null && syntaxWriteBOM && !ds.allowWriteBOM()) {
 									log.warn("syntax '"+ds.getSyntaxId()+"' should not write BOM");
 								}
 								//if(syntaxWriteBOM==null && ds.shouldNotWriteBOM()) { syntaxWriteBOM = false; }
