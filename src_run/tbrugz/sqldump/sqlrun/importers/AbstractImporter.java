@@ -1,6 +1,7 @@
 package tbrugz.sqldump.sqlrun.importers;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -596,6 +597,18 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 					String strFormat = colType.substring(5, colType.indexOf(']'));
 					DateFormat df = new SimpleDateFormat(strFormat);
 					stmt.setDate(index+1, new java.sql.Date( df.parse(value).getTime() ));
+				}
+				else if(colType.equals("blob-location")) {
+					File f = new File(value);
+					if(!f.exists()) {
+						log.warn("file '"+value+"' not found [col# = "+(index+1)+"]");
+					}
+					try {
+						//stmt.setBinaryStream(index+1, new FileInputStream(f));
+						stmt.setBlob(index+1, new FileInputStream(f));
+					} catch (Exception e) {
+						log.warn("Error importing blob file '"+f+"': "+e);
+					}
 				}
 				else {
 					log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
