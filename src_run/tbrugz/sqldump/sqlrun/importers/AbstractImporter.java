@@ -107,6 +107,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
+	Pattern skipLineRegex = null;
 	long logEachXrows = 10000L; //XXX: prop for logEachXrows
 
 	//needed as a property for 'follow' mode
@@ -132,6 +133,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_INSERTTABLE = ".inserttable";
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_SKIP_REGEX = ".skip-line-regex";
 	static final String SUFFIX_COLUMN_TYPES = ".columntypes";
 	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
 	//XXX: add '.onerror.type-(double|date)-value' ?
@@ -154,6 +156,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		SUFFIX_ONERROR_TYPE_INT_SET_VALUE,
 		SUFFIX_RECORDDELIMITER,
 		SUFFIX_SKIP_N,
+		SUFFIX_SKIP_REGEX,
 		SUFFIX_URLMESSAGEBODY,
 		SUFFIX_URLMETHOD,
 		SUFFIX_X_COMMIT_EACH_X_ROWS
@@ -176,6 +179,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
+		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
+		if(skipLineRegexStr!=null) {
+			skipLineRegex = Pattern.compile(skipLineRegexStr);
+		}
 		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
@@ -478,6 +485,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			mustSetupSQLStatement = false;
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
+			counter.input++;
+			return;
+		}
+		if(skipLineRegex!=null && skipLineRegex.matcher(line).find()) {
 			counter.input++;
 			return;
 		}
