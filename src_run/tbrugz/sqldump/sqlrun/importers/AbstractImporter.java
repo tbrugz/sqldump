@@ -430,6 +430,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		while(follow);
 		
 		if(fileIS!=null) { fileIS.close(); fileIS = null; }
+		if(scan!=null) { scan.close(); }
 
 		//show counters
 		long countAll = logCounts(countsByFailoverId, false);
@@ -493,7 +494,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
 					index = filecol2tabcolMap.indexOf(i);
-					stmtSetValue(index, parts[i]);
+					stmtSetValue(index, parts[i], i);
 					//values.add(parts[i]);
 					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);
 				}
@@ -503,7 +504,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				}
 			}
 			else {
-				stmtSetValue(index, parts[i]);
+				stmtSetValue(index, parts[i], i);
 				//values.add(parts[i]);
 			}
 			
@@ -561,14 +562,16 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		return s.replaceAll("\\n", " ");
 	}
 
-	void stmtSetValue(int index, String value) throws SQLException, ParseException {
+	void stmtSetValue(int index, String value, int colTypeIndex) throws SQLException, ParseException {
 		if(value==null) {
 			stmt.setString(index+1, null);
 			return;
 		}
 		if(columnTypes!=null) {
-			if(columnTypes.size()>index) {
-				String colType = columnTypes.get(index);
+			if(columnTypes.size()>colTypeIndex) {
+				String colType = columnTypes.get(colTypeIndex);
+				//log.info("i: "+index+" ; type: "+colType+" ; value: '"+value+"'");
+				
 				if(colType.equals("int")) {
 					try {
 						stmt.setInt(index+1, Integer.parseInt(value.trim()));
@@ -601,7 +604,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				else if(colType.equals("blob-location")) {
 					File f = new File(value);
 					if(!f.exists()) {
-						log.warn("file '"+value+"' not found [col# = "+(index+1)+"]");
+						log.warn("file '"+f+"' not found [col# = "+(index+1)+"]");
 					}
 					try {
 						//stmt.setBinaryStream(index+1, new FileInputStream(f));
