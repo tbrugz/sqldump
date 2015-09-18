@@ -18,6 +18,8 @@ public class CLIProcessor {
 	public static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
 	public static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
 	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
+	public static final String PARAM_VERSION = "--version";
+	public static final String PARAM_HELP = "--help";
 	
 	static final Log log = LogFactory.getLog(CLIProcessor.class);
 	
@@ -46,7 +48,8 @@ public class CLIProcessor {
 				useSysPropSetted = true;
 			}
 			else {
-				log.warn("unrecognized param '"+arg+"'. ignoring...");
+				log.warn("unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP+"' argument");
+				//XXX: show help and exit?
 			}
 		}
 		}
@@ -58,6 +61,30 @@ public class CLIProcessor {
 			useSysPropSetted = true;
 		}
 		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
+	}
+	
+	public static boolean shouldStopExec(final String productName, final String[] args) {
+		if(args!=null) {
+			for(String arg: args) {
+				if(arg.equals(PARAM_VERSION)) {
+					System.out.println((productName!=null?productName+" ":"")+"version: "+Version.getVersion());
+					return true;
+				}
+				else if(arg.equals(PARAM_HELP)) {
+					String out = (productName!=null?productName+" ":"")+"version: "+Version.getVersion()+"\n\n"
+						+ "parameters:\n\n"
+						+ "\t"+PARAM_PROPERTIES_FILENAME+"<file>: use <file> properties\n"
+						+ "\t"+PARAM_PROPERTIES_RESOURCE+"<resource>: use <resource> properties\n"
+						+ "\t"+PARAM_USE_SYSPROPERTIES+"[true|false]: use system properties (default is true)\n"
+						+ "\t"+PARAM_HELP+": show this help and exit\n"
+						+ "\t"+PARAM_VERSION+": show version and exit\n"
+						+ "\nmore info at <https://bitbucket.org/tbrugz/sqldump>\n";
+					System.out.println(out);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	static void loadResource(Properties p, String propResource) {

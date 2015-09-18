@@ -44,6 +44,7 @@ import tbrugz.sqldump.util.Utils;
 public class SQLDiff implements Executor {
 	
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
+	public static final String PRODUCT_NAME = "sqldiff";
 
 	//base props
 	public static final String PROP_PREFIX = "sqldiff";
@@ -465,7 +466,10 @@ public class SQLDiff implements Executor {
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
-		CLIProcessor.init("sqldiff", args, PROPERTIES_FILENAME, prop);
+		if(CLIProcessor.shouldStopExec(PRODUCT_NAME, args)) {
+			return;
+		}
+		CLIProcessor.init(PRODUCT_NAME, args, PROPERTIES_FILENAME, prop);
 		procProterties();
 		DBMSResources.instance().setup(prop);
 

@@ -56,6 +56,7 @@ import tbrugz.sqldump.util.Utils;
 public class SQLDump implements Executor {
 	
 	public static final String CONN_PROPS_PREFIX = "sqldump"; //XXX: change to non-public
+	public static final String PRODUCT_NAME = "sqldump";
 	
 	//sqldump.properties
 	static final String PROP_GRABCLASS = "sqldump.grabclass";
@@ -82,7 +83,7 @@ public class SQLDump implements Executor {
 	final Properties papp = new ParametrizedProperties();
 	
 	void init(String[] args) throws IOException {
-		CLIProcessor.init("sqldump", args, PROPERTIES_FILENAME, papp); //generic arguments init
+		CLIProcessor.init(PRODUCT_NAME, args, PROPERTIES_FILENAME, papp); //generic arguments init
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 		log.info("failonerror: "+failonerror);
@@ -120,6 +121,10 @@ public class SQLDump implements Executor {
 	}
 	
 	public void doMain(String[] args, Properties prop, Connection c) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		if(CLIProcessor.shouldStopExec(PRODUCT_NAME, args)) {
+			return;
+		}
+		
 		if(c!=null) { conn = c; }
 		
 		long initTime = System.currentTimeMillis();

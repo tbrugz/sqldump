@@ -67,6 +67,9 @@ public class DiffTwoQueries implements Executor {
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
+		if(CLIProcessor.shouldStopExec(DIFF2Q, args)) {
+			return;
+		}
 		CLIProcessor.init(DIFF2Q, args, PROPERTIES_FILENAME, prop);
 		DBMSResources.instance().setup(prop);
 

@@ -59,7 +59,8 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	static final Log log = LogFactory.getLog(SQLRun.class);
 	static final String PROPERTIES_FILENAME = "sqlrun.properties";
-	static final String CONN_PROPS_PREFIX = Constants.SQLRUN_PROPS_PREFIX; 
+	static final String CONN_PROPS_PREFIX = Constants.SQLRUN_PROPS_PREFIX;
+	static final String PRODUCT_NAME = "sqlrun";
 	
 	//exec suffixes
 	static final String SUFFIX_FILE = ".file";
@@ -439,6 +440,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	}
 	
 	public void doMain(String[] args, Properties p, Connection c) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
+		if(CLIProcessor.shouldStopExec(PRODUCT_NAME, args)) {
+			return;
+		}
 		try {
 			if(p!=null) {
 				papp.putAll(p);
@@ -451,7 +455,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				}
 			}
 			else {
-				CLIProcessor.init("sqlrun", args, PROPERTIES_FILENAME, papp);
+				CLIProcessor.init(PRODUCT_NAME, args, PROPERTIES_FILENAME, papp);
 			}
 			init(c);
 			if(conn==null) { return; }
