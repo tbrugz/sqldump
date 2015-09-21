@@ -3,6 +3,7 @@ package tbrugz.sqldump.sqlrun.importers;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -612,19 +613,30 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 					DateFormat df = new SimpleDateFormat(strFormat);
 					stmt.setDate(index+1, new java.sql.Date( df.parse(value).getTime() ));
 				}
-				else if(colType.equals("blob-location")) {
+				else if(colType.equals("blob-location") || colType.equals("text-location")) {
 					File f = new File(value);
 					if(!f.exists()) {
 						log.warn("file '"+f+"' not found [col# = "+(index+1)+"]");
 					}
 					try {
-						//stmt.setBinaryStream(index+1, new FileInputStream(f));
-						stmt.setBlob(index+1, new FileInputStream(f));
+						if(colType.equals("blob-location")) {
+							//stmt.setBinaryStream(index+1, new FileInputStream(f));
+							stmt.setBlob(index+1, new FileInputStream(f));
+						}
+						else if(colType.equals("text-location")) {
+							//[inputstream]: asciistream ; [reader]: characterstream, clob, ncharacterstream, nclob
+							stmt.setCharacterStream(index+1, new FileReader(f));
+						}
+						else {
+							//XXX throw?
+							log.warn("unknown colType: "+colType);
+						}
 					} catch (Exception e) {
-						log.warn("Error importing blob file '"+f+"': "+e);
+						log.warn("Error importing '"+colType+"' file '"+f+"': "+e);
 					}
 				}
 				else {
+					//XXX throw?
 					log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
 					stmt.setString(index+1, value);
 				}
