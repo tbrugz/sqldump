@@ -20,6 +20,7 @@ public class ParametrizedProperties extends Properties {
 	static final Log log = LogFactory.getLog(ParametrizedProperties.class);
 
 	static boolean useSystemProperties = false;
+	static boolean useSystemEnvironment = true;
 
 	//List<File> loadedPropFiles = new ArrayList<File>();
 	Map<File, Boolean> loadedPropFiles = new HashMap<File, Boolean>(); //boolean is: hasWarned
@@ -41,6 +42,8 @@ public class ParametrizedProperties extends Properties {
 	 */
 	static final String SYSPROPKEY_USER_HOME = "user.home";
 	static final String SYSPROPKEY_USER_DIR = "user.dir";
+
+	static final String ENVPROPKEY_PREPEND = "env.";
 	
 	static final String PROPFILEBASEDIR_PATTERN = Pattern.quote("${"+CLIProcessor.PROP_PROPFILEBASEDIR+"}");
 	static final String SYS_USER_HOME_PROP = Pattern.quote("${"+SYSPROPKEY_USER_HOME+"}");
@@ -110,8 +113,13 @@ public class ParametrizedProperties extends Properties {
 		if(log.isDebugEnabled()) { logKey(key); }
 		
 		String s = null;
+		// precedence: system props, env vars, (file) properties
 		if(useSystemProperties) {
 			s = System.getProperty(key);
+		}
+		if(useSystemEnvironment && key.startsWith(ENVPROPKEY_PREPEND) && s==null) {
+			//log.info("getenv '"+key+"': "+System.getenv(key.substring(ENVPROPKEY_PREPEND.length())));
+			s = System.getenv(key.substring(ENVPROPKEY_PREPEND.length()));
 		}
 		if(s==null) {
 			s = super.getProperty(key);

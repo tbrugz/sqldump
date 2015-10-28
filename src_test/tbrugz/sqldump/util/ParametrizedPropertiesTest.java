@@ -51,4 +51,11 @@ public class ParametrizedPropertiesTest {
 		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
 		Assert.assertEquals("value1", pp.getProperty("id1"));
 	}
+
+	@Test
+	public void testP4GetEnv() throws IOException {
+		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
+		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		Assert.assertTrue("JAVA_HOME env should be set: "+pp.getProperty("abc"), !pp.getProperty("abc").startsWith("${"));
+	}
 }
