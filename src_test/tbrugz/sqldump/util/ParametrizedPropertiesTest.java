@@ -56,6 +56,18 @@ public class ParametrizedPropertiesTest {
 	public void testP4GetEnv() throws IOException {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
 		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
-		Assert.assertTrue("JAVA_HOME env should be set: "+pp.getProperty("abc"), !pp.getProperty("abc").startsWith("${"));
+		Assert.assertTrue("JAVA_HOME env should be set: "+pp.getProperty("envtest"), !pp.getProperty("envtest").startsWith("${"));
+	}
+
+	@Test
+	public void testP4Coalesce() throws IOException {
+		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
+		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		Assert.assertEquals("aaa", pp.getProperty("prop3"));
+		Assert.assertEquals("aaa", pp.getProperty("prop4"));
+		Assert.assertEquals("bbb", pp.getProperty("prop5"));
+		
+		//ParametrizedProperties.setUseSystemProperties(true);
+		//System.out.println("propDir: "+pp.getProperty("propDir"));
 	}
 }

@@ -13,6 +13,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/*
+ * http://docs.oracle.com/javaee/5/tutorial/doc/bnahq.html - Java Unified Expression Language
+ * http://books.sonatype.com/mvnref-book/reference/resource-filtering-sect-properties.html - Maven Properties
+ */
 public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
@@ -152,10 +156,22 @@ public class ParametrizedProperties extends Properties {
 			if(pos2<0) { break; }
 			count = pos1+1;
 			String prop = sb.substring(pos1+2, pos2);
-			String propSuperValue = p.getProperty(prop);
+			String propSuperValue = null;
+			if(prop.contains("|")) {
+				String[] parts = prop.split("\\|");
+				String propval = null;
+				for(int i=0;i<parts.length;i++) {
+					propval = p.getProperty(parts[i].trim());
+					if(propval!=null) { break; }
+				}
+				propSuperValue = propval;
+			}
+			else {
+				propSuperValue = p.getProperty(prop.trim());
+			}
 			
 			if(useSystemProperties && propSuperValue==null) {
-				propSuperValue = System.getProperty(prop);
+				propSuperValue = System.getProperty(prop.trim());
 			}
 			
 			if(propSuperValue==null) { continue; }
