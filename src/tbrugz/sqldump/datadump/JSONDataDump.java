@@ -7,6 +7,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,6 +16,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.StringDecorator;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: option to use 'milliseconds in Universal Coordinated Time (UTC) since epoch' as date
@@ -29,9 +33,22 @@ import tbrugz.sqldump.util.SQLUtils;
  */
 public class JSONDataDump extends DumpSyntax {
 
-	static Log log = LogFactory.getLog(JSONDataDump.class);
+	static final Log log = LogFactory.getLog(JSONDataDump.class);
 
 	static final String JSON_SYNTAX_ID = "json";
+	static final String PREFIX_JSON = "sqldump.datadump."+JSON_SYNTAX_ID;
+
+	static final String DEFAULT_METADATA_ELEMENT = "@metadata"; // "$metadata" ? see http://json-schema.org/example1.html
+	
+	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
+	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
+	static final String PROP_METADATA_ELEMENT = PREFIX_JSON+".metadata-element";
+	
+	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
+	
+	String dataElement = null; //XXX "data" as default dataElement? "rows"?
+	boolean addMetadata = false;
+	String metadataElement = DEFAULT_METADATA_ELEMENT;
 	
 	String tableName;
 	int numCol;
@@ -47,6 +64,9 @@ public class JSONDataDump extends DumpSyntax {
 	public void procProperties(Properties prop) {
 		dateFormatter = new SimpleDateFormat("\"yyyy-MM-dd\"");
 		procStandardProperties(prop);
+		dataElement = prop.getProperty(PROP_DATA_ELEMENT);
+		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, addMetadata);
+		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, metadataElement);
 	}
 
 	@Override
@@ -72,8 +92,25 @@ public class JSONDataDump extends DumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		if(tableName!=null) {
-			outNoPadding("{ \""+tableName+"\": "
+		String dtElem = dataElement!=null?dataElement:tableName;
+		
+		if(dtElem!=null) {
+			outNoPadding("{ ", fos);
+			//TODOne: add metadata
+			if(addMetadata) {
+				StringBuilder sb = new StringBuilder();
+				//sb.append("\n\t\"schema\": \""+schema+"\"");
+				sb.append("\n\t\"name\": \""+tableName+"\",");
+				sb.append("\n\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
+				sb.append("\n\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
+				
+				outNoPadding("\""+metadataElement+"\": "
+						+"{"
+						+sb.toString()
+						+"},"
+						, fos);
+			}
+			outNoPadding("\""+dtElem+"\": "
 				+(this.pkCols!=null?"{":"[")
 				+"\n", fos);
 		}
@@ -136,7 +173,9 @@ public class JSONDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
-		if(tableName!=null) {
+		String dtElem = dataElement!=null?dataElement:tableName;
+		
+		if(dtElem!=null) {
 			out((usePK?"}":"]")+"}",fos);
 		}
 		else {
@@ -172,5 +211,15 @@ public class JSONDataDump extends DumpSyntax {
 	@Override
 	public boolean allowWriteBOM() {
 		return false;
+	}
+	
+	static final Collection<String> getClassesSimpleName(Collection<Class<?>> s) {
+		Collection<String> ret = new ArrayList<String>();
+		if(s==null) { return null; }
+		Iterator<Class<?>> iter = s.iterator();
+		while (iter.hasNext()) {
+			ret.add(iter.next().getSimpleName());
+		}
+		return ret;
 	}
 }
