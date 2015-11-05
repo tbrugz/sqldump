@@ -69,8 +69,8 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	}
 
 	@Override
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		numCol = md.getColumnCount();		
+	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+		numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {

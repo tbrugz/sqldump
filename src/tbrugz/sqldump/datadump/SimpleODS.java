@@ -70,7 +70,7 @@ public class SimpleODS extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String tableName, List<String> pkCols,
+	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
 		numCol = md.getColumnCount();
 		lsColNames.clear();

@@ -80,7 +80,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.md = md;
 		numCol = md.getColumnCount();

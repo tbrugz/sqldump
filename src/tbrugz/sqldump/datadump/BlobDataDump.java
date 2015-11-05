@@ -69,7 +69,7 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String tableName, List<String> pkCols,
+	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.pkCols = pkCols;
