@@ -211,10 +211,12 @@ public class DataDump extends AbstractSQLProc {
 		LABEL_TABLE:
 		for(Table table: tablesForDataDumpLoop) {
 			String tableName = table.getName();
+			String schemaName = table.getSchemaName();
+			String tableFullName = table.getQualifiedName();
 			if(tables4dump!=null) { tables4dump.remove(tableName); }
 			if(typesToDump!=null) {
 				if(!typesToDump.contains(table.getType())) {
-					log.debug("ignoring table '"+tableName+"' by type [type="+table.getType()+"]");
+					log.debug("ignoring table '"+tableFullName+"' by type [type="+table.getType()+"]");
 					ignoredTables++;
 					continue;
 				}
@@ -222,7 +224,7 @@ public class DataDump extends AbstractSQLProc {
 			if(ignoretablesregex!=null) {
 				for(String tregex: ignoretablesregex) {
 					if(tableName.matches(tregex)) {
-						log.debug("ignoring table '"+tableName+"' by regex [regex="+tregex+"]");
+						log.debug("ignoring table '"+tableFullName+"' by regex [regex="+tregex+"]");
 						ignoredTables++;
 						continue LABEL_TABLE;
 					}
@@ -243,11 +245,12 @@ public class DataDump extends AbstractSQLProc {
 				pkCols = table.getPKConstraint().getUniqueColumns();
 			} 
 			
-			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK);
+			//String quote = conn.getMetaData().getIdentifierQuoteString();
+			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK); //XXX add quote?
 			
 			try {
 				//XXX: table dump with partitionBy?
-				runQuery(conn, sql, null, prop, tableName, tableName, charset, 
+				runQuery(conn, sql, null, prop, schemaName, tableName, tableName, charset, 
 						rowlimit,
 						syntaxList,
 						null, //partitionby
@@ -259,7 +262,7 @@ public class DataDump extends AbstractSQLProc {
 				queriesRunned++;
 			}
 			catch(Exception e) {
-				log.warn("error dumping data from table: "+tableName+"\n\tsql: "+sql+"\n\texception: "+e);
+				log.warn("error dumping data from table: "+tableFullName+"\n\tsql: "+sql+"\n\texception: "+e);
 				log.info("exception:", e);
 				if(failonerror) {
 					throw new ProcessingException(e);
@@ -309,7 +312,7 @@ public class DataDump extends AbstractSQLProc {
 	} 
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
-			String tableOrQueryId, String tableOrQueryName, String[] partitionByPatterns, List<String> keyColumns
+			String schemaName, String tableOrQueryId, String tableOrQueryName, String[] partitionByPatterns, List<String> keyColumns
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
@@ -321,7 +324,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		runQuery(conn, sql, params, prop, tableOrQueryId,
+		runQuery(conn, sql, params, prop, schemaName, tableOrQueryId,
 				tableOrQueryName, charset, rowlimit, syntaxList, 
 				partitionByPatterns, keyColumns, 
 				null, //List<FK> importedFKs
@@ -331,16 +334,16 @@ public class DataDump extends AbstractSQLProc {
 	}
 	
 	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
-			String tableOrQueryId, String tableOrQueryName, String charset,
+			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws SQLException, IOException {
-		runQuery(conn, sql, params, prop, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
+		runQuery(conn, sql, params, prop, schemaName, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
 	}
 	
 	final Set<String> deprecatedPatternWarnedFiles = new HashSet<String>();
 	
 	void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
-			String tableOrQueryId, String tableOrQueryName, String charset, 
+			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
 			String[] partitionByPatterns,
@@ -351,7 +354,7 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		PreparedStatement st = conn.prepareStatement(sql);
 		try {
-			runQuery(conn, st, params, prop, tableOrQueryId,
+			runQuery(conn, st, params, prop, schemaName, tableOrQueryId,
 					tableOrQueryName, charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory);
 		}
@@ -365,7 +368,7 @@ public class DataDump extends AbstractSQLProc {
 	}
 		
 	void runQuery(Connection conn, PreparedStatement st, List<String> params, Properties prop, 
-			String tableOrQueryId, String tableOrQueryName, String charset, 
+			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
 			String[] partitionByPatterns,
@@ -389,14 +392,14 @@ public class DataDump extends AbstractSQLProc {
 				rs = rsDecoratorFactory.getDecoratorOf(rs);
 			}
 			
-			dumpResultSet(rs, prop, tableOrQueryId, tableOrQueryName,
+			dumpResultSet(rs, prop, schemaName, tableOrQueryId, tableOrQueryName,
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
 					initTime);
 	}
 
 	public void dumpResultSet(ResultSet rs, Properties prop, 
-			String tableOrQueryId, String tableOrQueryName, String charset, 
+			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
 			String[] partitionByPatterns,
@@ -460,7 +463,7 @@ public class DataDump extends AbstractSQLProc {
 			//headers
 			for(int i=0;i<syntaxList.size();i++) {
 				DumpSyntax ds = syntaxList.get(i);
-				ds.initDump(tableOrQueryName, keyColumns, md);
+				ds.initDump(schemaName, tableOrQueryName, keyColumns, md);
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
 				

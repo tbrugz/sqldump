@@ -28,6 +28,7 @@ import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 class Query4CDD {
+	//final String schema;
 	//final String tableName;
 	final String sql;
 	final Boolean exported;
@@ -203,7 +204,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				);
 		Constraint ctt = t.getPKConstraint();
 		if(ctt!=null) {
-			tablePKs.put(t.getName(), ctt);				
+			tablePKs.put(t.getName(), ctt);
 		}
 		log.debug("sql[followEx="+followExportedKeys+";doIntersect="+doIntersect+"]: "+sql);
 		Query4CDD qd = new Query4CDD(sql, doIntersect?(Boolean)doIntersect:followExportedKeys);
@@ -300,7 +301,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 					sql = addOrderBy(sql, pk);
 				}
 				log.debug("simple-sql["+tname+"]:\n"+sql);
-				dd.runQuery(conn, sql, null, prop, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
+				dd.runQuery(conn, sql, null, prop, null, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
 				dumpedTables.add(tname);
 			}
 			else {
@@ -386,7 +387,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				}
 				
 				log.debug("join-sql["+tname+"]:\n"+sb.toString());
-				dd.runQuery(conn, sb.toString(), null, prop, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
+				dd.runQuery(conn, sb.toString(), null, prop, null, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
 				dumpedTables.add(tname);
 			}
 		}

@@ -173,7 +173,7 @@ public class SQLQueries extends AbstractSQLProc {
 				try {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 					DataDump dd = new DataDump();
-					dd.runQuery(conn, stmt, params, prop, qid, queryName, charset, rowlimit, syntaxList, 
+					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
 							keyCols, null, null, rsdf);
 				} catch (Exception e) {

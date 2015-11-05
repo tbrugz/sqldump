@@ -19,9 +19,9 @@ public class CSVWithRowNumber extends CSVDataDump {
 	int numCol4RS = 0;
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols,
+	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
-		super.initDump(tableName, pkCols, md);
+		super.initDump(schema, tableName, pkCols, md);
 		lsColNames.add(0, LINE_NUMBER_COL_LABEL);
 		
 		lsColTypes4ResultSet.addAll(lsColTypes);
