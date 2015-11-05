@@ -1,4 +1,11 @@
 
+sqldump ng
+----------
+- dbms: added explainPlan()
+- util: ParametrizedProperties: accept env vars & added coalesce-like function
+- datadump: json: added @metadata
+
+
 sqldump 0.9.13
 --------------
 - util: ConnectionUtil: added suffix '.datasource.contextlookup'

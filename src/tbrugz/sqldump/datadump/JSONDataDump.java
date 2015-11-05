@@ -38,7 +38,8 @@ public class JSONDataDump extends DumpSyntax {
 	static final String JSON_SYNTAX_ID = "json";
 	static final String PREFIX_JSON = "sqldump.datadump."+JSON_SYNTAX_ID;
 
-	static final String DEFAULT_METADATA_ELEMENT = "@metadata"; // "$metadata" ? see http://json-schema.org/example1.html
+	static final String DEFAULT_METADATA_ELEMENT = "$metadata"; // "@metadata"? "$metadata" ?
+	// see http://json-schema.org/example1.html ('$' can be used in js identifier)
 	
 	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
 	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
@@ -103,6 +104,7 @@ public class JSONDataDump extends DumpSyntax {
 				sb.append("\n\t\"name\": \""+tableName+"\",");
 				sb.append("\n\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
 				sb.append("\n\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
+				//sb.append("\n\t\"dataElement\": \""+dataElement+"\"");
 				
 				outNoPadding("\""+metadataElement+"\": "
 						+"{"
@@ -110,7 +112,7 @@ public class JSONDataDump extends DumpSyntax {
 						+"},"
 						, fos);
 			}
-			outNoPadding("\""+dtElem+"\": "
+			outNoPadding("\n\""+dtElem+"\": "
 				+(this.pkCols!=null?"{":"[")
 				+"\n", fos);
 		}
