@@ -44,12 +44,14 @@ public class JSONDataDump extends DumpSyntax {
 	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
 	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
 	static final String PROP_METADATA_ELEMENT = PREFIX_JSON+".metadata-element";
+	static final String PROP_JSONP_CALLBACK = PREFIX_JSON+".callback";
 	
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
 	
 	String dataElement = null; //XXX "data" as default dataElement? "rows"?
 	boolean addMetadata = false;
 	String metadataElement = DEFAULT_METADATA_ELEMENT;
+	String callback = null;
 	
 	String tableName;
 	int numCol;
@@ -68,6 +70,7 @@ public class JSONDataDump extends DumpSyntax {
 		dataElement = prop.getProperty(PROP_DATA_ELEMENT);
 		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, addMetadata);
 		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, metadataElement);
+		callback = prop.getProperty(PROP_JSONP_CALLBACK);
 	}
 
 	@Override
@@ -94,6 +97,10 @@ public class JSONDataDump extends DumpSyntax {
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		String dtElem = dataElement!=null?dataElement:tableName;
+		
+		if(callback!=null) {
+			out(callback+"(", fos);
+		}
 		
 		if(dtElem!=null) {
 			outNoPadding("{ ", fos);
@@ -182,6 +189,10 @@ public class JSONDataDump extends DumpSyntax {
 		}
 		else {
 			out((usePK?"}":"]"),fos);
+		}
+		
+		if(callback!=null) {
+			out(")", fos);
 		}
 	}
 
