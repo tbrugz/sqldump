@@ -103,23 +103,23 @@ public class JSONDataDump extends DumpSyntax {
 		}
 		
 		if(dtElem!=null) {
-			outNoPadding("{ ", fos);
+			out("{\n", fos);
 			//TODOne: add metadata
 			if(addMetadata) {
 				StringBuilder sb = new StringBuilder();
 				//sb.append("\n\t\"schema\": \""+schema+"\"");
-				sb.append("\n\t\"name\": \""+tableName+"\",");
-				sb.append("\n\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
-				sb.append("\n\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
+				sb.append("\n"+padding+"\t\t\"name\": \""+tableName+"\",");
+				sb.append("\n"+padding+"\t\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
+				sb.append("\n"+padding+"\t\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
 				//sb.append("\n\t\"dataElement\": \""+dataElement+"\"");
 				
-				outNoPadding("\""+metadataElement+"\": "
+				out("\t\""+metadataElement+"\": "
 						+"{"
 						+sb.toString()
-						+"},"
+						+"\n"+padding+"\t},"
 						, fos);
 			}
-			outNoPadding("\n\""+dtElem+"\": "
+			outNoPadding("\n"+padding+"\t\""+dtElem+"\": "
 				+(this.pkCols!=null?"{":"[")
 				+"\n", fos);
 		}
@@ -132,7 +132,7 @@ public class JSONDataDump extends DumpSyntax {
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuffer sb = new StringBuffer();
-		sb.append("\t"+(count==0?"":","));
+		sb.append("\t\t"+(count==0?"":","));
 		if(this.pkCols!=null) {
 			sb.append("\"");
 			for(int i=0;i<pkCols.size();i++) {
@@ -152,7 +152,7 @@ public class JSONDataDump extends DumpSyntax {
 				}
 				
 				out(sb.toString()+",\n",fos);
-				out("\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
+				out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
 				sb = new StringBuffer();
 				
 				JSONDataDump jsondd = new JSONDataDump();
@@ -160,8 +160,11 @@ public class JSONDataDump extends DumpSyntax {
 				jsondd.dateFormatter = this.dateFormatter;
 				jsondd.floatFormatter = this.floatFormatter;
 				jsondd.nullValueStr = this.nullValueStr;
-				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fos, true);
-				sb.append("\n\t");
+				//jsondd.addMetadata = this.addMetadata; ?
+				//jsondd's 'dtElem' should be null... jsondd should dump array... (?) 
+				// 'callback' should not be set on inner 'jsondd'
+				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, null, fos, true);
+				sb.append("\n\t\t"+padding);
 			}
 			else {
 				
@@ -176,7 +179,7 @@ public class JSONDataDump extends DumpSyntax {
 
 			}
 		}
-		sb.append(" }");
+		sb.append("}");
 		out(sb.toString()+"\n", fos);
 	}
 
@@ -185,10 +188,10 @@ public class JSONDataDump extends DumpSyntax {
 		String dtElem = dataElement!=null?dataElement:tableName;
 		
 		if(dtElem!=null) {
-			out((usePK?"}":"]")+"}",fos);
+			out((usePK?"}":"\t]")+"\n"+padding+"}",fos);
 		}
 		else {
-			out((usePK?"}":"]"),fos);
+			out((usePK?"}":"\t]"),fos);
 		}
 		
 		if(callback!=null) {

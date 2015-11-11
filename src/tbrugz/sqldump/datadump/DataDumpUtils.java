@@ -292,9 +292,14 @@ public class DataDumpUtils {
 		return buffer.toString();
 	}
 
+	@Deprecated
 	public static void dumpRS(DumpSyntaxInt ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
+		dumpRS(ds, rsmd, rs, null, tableName, writer, resetRS);
+	}
+	
+	public static void dumpRS(DumpSyntaxInt ds, ResultSetMetaData rsmd, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
 		//int ncol = rsmd.getColumnCount();
-		ds.initDump(tableName, null, rsmd);
+		ds.initDump(schema, tableName, null, rsmd);
 		ds.dumpHeader(writer);
 		int count = 0;
 		while(rs.next()) {
