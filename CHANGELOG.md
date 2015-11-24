@@ -3,7 +3,7 @@ sqldump ng
 ----------
 - dbms: added explainPlan()
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
-- datadump: json: added @metadata
+- datadump: json: added @metadata , added jsonp/callback
 
 
 sqldump 0.9.13

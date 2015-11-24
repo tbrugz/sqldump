@@ -268,6 +268,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		
 		SchemaModel schemaModel = new SchemaModel();
+		@SuppressWarnings("deprecation")
 		String schemaPattern = Utils.getPropWithDeprecated(papp, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
 		if(schemaPattern==null) {

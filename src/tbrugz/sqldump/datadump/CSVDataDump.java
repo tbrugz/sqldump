@@ -141,6 +141,7 @@ public class CSVDataDump extends DumpSyntax {
 	
 	void dumpValues(List<?> vals, long count, Writer fos) throws IOException {
 		StringBuffer sb = new StringBuffer();
+		//log.info("lsColTypes:: "+lsColTypes.size()+" / "+lsColTypes+" vals: "+vals.size()); 
 		for(int i=0;i<lsColTypes.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
 				
