@@ -51,7 +51,7 @@ public class CSVDataDump extends DumpSyntax {
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
 	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
 
-	static final String DELIM_RECORD_DEFAULT = "\n";
+	static final String DELIM_RECORD_DEFAULT = "\r\n"; // RFC: record delimiter is \r\n
 	static final String DELIM_COLUMN_DEFAULT = ",";
 	static final String ENCLOSING_DEFAULT = "\""; //XXXxx: should be '"'? yes!
 
