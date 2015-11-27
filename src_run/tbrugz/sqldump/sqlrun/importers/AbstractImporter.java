@@ -109,6 +109,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
 	long skipHeaderN = 0;
 	Pattern skipLineRegex = null;
+	long maxLines = -1;
 	long logEachXrows = 10000L; //XXX: prop for logEachXrows
 
 	//needed as a property for 'follow' mode
@@ -134,6 +135,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	static final String SUFFIX_INSERTTABLE = ".inserttable";
 	static final String SUFFIX_INSERTSQL = ".insertsql";
 	static final String SUFFIX_SKIP_N = ".skipnlines";
+	static final String SUFFIX_LIMIT_LINES = ".limit";
 	static final String SUFFIX_SKIP_REGEX = ".skip-line-regex";
 	static final String SUFFIX_COLUMN_TYPES = ".columntypes";
 	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
@@ -180,6 +182,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
+		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LIMIT_LINES, maxLines);
 		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
 		if(skipLineRegexStr!=null) {
 			skipLineRegex = Pattern.compile(skipLineRegexStr);
@@ -372,6 +375,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		//int[] filecol2tabcolMap = null;
 		do {
 			int linecounter = 0;
+			scanNext:
 			while(scan.hasNext()) {
 				boolean importthisline = true;
 
@@ -389,6 +393,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 				linecounter++;
 				
 				while(importthisline) {
+					if(maxLines >= 0 && counter.input > maxLines) {
+						logRow.info("max (limit) rows reached: "+maxLines+" [linecounter="+linecounter+"]"); 
+						break scanNext;
+					}
 					try {
 						procLineInternal(line, is1stloop);
 						importthisline = false;
@@ -410,7 +418,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 								logRow.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
 										+e);
-								//log.debug("error processing line "+linecounter, e);
+								//log.info("error processing line "+linecounter, e);
 								//XXX: throw ProcessingException()?
 							}
 							importthisline = false;
