@@ -1,15 +1,20 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.net.URL;
+import java.net.URL; 
 import java.net.URLClassLoader;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Properties;
 
 import org.apache.tools.ant.filters.StringInputStream;
+import org.junit.Assert;
 import org.junit.Test;
 
-import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.sqlrun.def.CommitStrategy;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class CSVImportTest {
@@ -47,6 +52,22 @@ public class CSVImportTest {
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(null, p, null);
 	}
+
+	@Test
+	public void doImportWithLimit() throws Exception {
+		String propsStr = 
+			"@includes=test/sqlrun-h2-csv.properties\n"+
+			"sqlrun.exec.20.limit=10";
+		StringInputStream sis = new StringInputStream(propsStr);
+
+		Properties p = new ParametrizedProperties();
+		p.load(sis);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
+		
+		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
+		Assert.assertEquals(10, get1stValue(conn, "select count(*) from ins_csv"));
+	}
 	
 	static ClassLoader loadJar(URL url) {
 		ClassLoader loader = URLClassLoader.newInstance(
@@ -54,5 +75,11 @@ public class CSVImportTest {
 			CSVImportTest.class.getClassLoader()
 		);
 		return loader;
+	}
+	
+	static int get1stValue(Connection conn, String sql) throws SQLException {
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		rs.next();
+		return rs.getInt(1);
 	}
 }

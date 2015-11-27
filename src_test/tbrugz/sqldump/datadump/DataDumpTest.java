@@ -119,7 +119,7 @@ public class DataDumpTest {
 	public void testCSV() throws Exception {
 		dump1();
 		String csvDept = IOUtil.readFromFilename(DIR_OUT+"/data_DEPT.csv");
-		String expected = "ID,NAME,PARENT_ID\n0,CEO,0\n1,HR,0\n2,Engineering,0\n";
+		String expected = "ID,NAME,PARENT_ID\r\n0,CEO,0\r\n1,HR,0\r\n2,Engineering,0\r\n";
 		Assert.assertEquals(expected, csvDept);
 	}
 	
@@ -127,7 +127,7 @@ public class DataDumpTest {
 	public void testCSVDate() throws Exception {
 		dump1();
 		String csvEtc = IOUtil.readFromFilename(DIR_OUT+"/data_ETC.csv");
-		String expected = "ID,DT_X,DESCRIPTION\n1,2013-01-01,lala &\n";
+		String expected = "ID,DT_X,DESCRIPTION\r\n1,2013-01-01,lala &\r\n";
 		Assert.assertEquals(expected, csvEtc.substring(0, expected.length()));
 	}
 	
@@ -290,11 +290,11 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1_1.csv");
-		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n1,john,1,1,2000\n5,wilson,1,1,1000\n";
+		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
 		Assert.assertEquals(expected, csvEmpS1);
 		
 		String csvEmpS2 = IOUtil.readFromFilename(DIR_OUT+"/data_q1_2.csv");
-		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n2,mary,2,2,2000\n3,jane,2,2,1000\n4,lucas,2,2,1200\n";
+		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n2,mary,2,2,2000\r\n3,jane,2,2,1000\r\n4,lucas,2,2,1200\r\n";
 		Assert.assertEquals(expected, csvEmpS2);
 	}
 
@@ -320,15 +320,15 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.csv");
-		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n1,john,1,1,2000\n5,wilson,1,1,1000\n";
+		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
 		Assert.assertEquals(expected, csvEmpS1);
 		
 		String csvEmpS2 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_2.csv");
-		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n2,mary,2,2,2000\n3,jane,2,2,1000\n4,lucas,2,2,1200\n";
+		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n2,mary,2,2,2000\r\n3,jane,2,2,1000\r\n4,lucas,2,2,1200\r\n";
 		Assert.assertEquals(expected, csvEmpS2);
 		
 		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2.csv");
-		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n1,john,1,1,2000\n2,mary,2,2,2000\n3,jane,2,2,1000\n4,lucas,2,2,1200\n5,wilson,1,1,1000\n";
+		expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n2,mary,2,2,2000\r\n3,jane,2,2,1000\r\n4,lucas,2,2,1200\r\n5,wilson,1,1,1000\r\n";
 		Assert.assertEquals(expected, csvEmpAll);
 	}
 	
@@ -352,7 +352,7 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1.rn.csv");
-		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,1,john,1,1,2000\n"+"1,2,mary,2,2,2000\n"+"2,3,jane,2,2,1000\n"+"3,4,lucas,2,2,1200\n"+"4,5,wilson,1,1,1000\n"+"5\n";
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,1,john,1,1,2000\r\n"+"1,2,mary,2,2,2000\r\n"+"2,3,jane,2,2,1000\r\n"+"3,4,lucas,2,2,1200\r\n"+"4,5,wilson,1,1,1000\r\n"+"5\r\n";
 		Assert.assertEquals(expected, csvEmpAll);
 	}
 	
@@ -378,11 +378,11 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.rn.csv");
-		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,1,john,1,1,2000\n"+"1,5,wilson,1,1,1000\n"+"2\n";
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,1,john,1,1,2000\r\n"+"1,5,wilson,1,1,1000\r\n"+"2\r\n";
 		Assert.assertEquals(expected, csvEmpS1);
 		
 		String csvEmpS2 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_2.rn.csv");
-		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\n"+"0,2,mary,2,2,2000\n"+"1,3,jane,2,2,1000\n"+"2,4,lucas,2,2,1200\n"+"3\n";
+		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,2,mary,2,2,2000\r\n"+"1,3,jane,2,2,1000\r\n"+"2,4,lucas,2,2,1200\r\n"+"3\r\n";
 		Assert.assertEquals(expected, csvEmpS2);
 	}
 	
