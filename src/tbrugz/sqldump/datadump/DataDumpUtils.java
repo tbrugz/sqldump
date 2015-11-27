@@ -31,6 +31,7 @@ public class DataDumpUtils {
 	public static final String QUOTE = "'";
 	public static final String DOUBLEQUOTE = "\"";
 	public static final String EMPTY_STRING = "";
+	public static final String NEWLINE = "\n";
 	
 	public static final String CHARSET_UTF8 = "UTF-8";
 	public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
@@ -98,15 +99,19 @@ public class DataDumpUtils {
 		String val = getString(elem);
 		
 		if(enclosing!=null) {
+			// XXX quoting strategy? see: https://docs.python.org/2/library/csv.html:: csv.QUOTE_ALL, csv.QUOTE_MINIMAL, csv.QUOTE_NONNUMERIC, csv.QUOTE_NONE
+			// implement QUOTE_NONNUMERIC & QUOTE_NONE? (enclosing==null equals QUOTE_NONE) 
 			if(csvWriteEnclosingAllFields) {
 				return enclosing+val.replaceAll(enclosing, enclosing+enclosing)+enclosing;
 			}
 			else {
 				//return String.valueOf(elem).replaceAll(enclosing, EMPTY_STRING); //XXX: replace by "'"?
 				if(val.contains(enclosing)) {
+					// doubling "enclosing"...
 					return enclosing+val.replaceAll(enclosing, enclosing+enclosing)+enclosing;
 				}
-				else if(val.contains(separator) || val.contains(lineSeparator)) {
+				else if(val.contains(separator) || val.contains(lineSeparator) || val.contains(NEWLINE)) {
+					// XXX other special chars besides newline (\n) ?
 					return enclosing+val+enclosing;
 				}
 				else {
