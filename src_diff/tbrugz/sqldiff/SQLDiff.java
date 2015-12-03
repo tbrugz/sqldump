@@ -115,6 +115,7 @@ public class SQLDiff implements Executor {
 	String patchfilePattern = null;
 	
 	// writers
+	CategorizedOut categOut = null; 
 	Writer xmlWriter = null;
 	Writer jsonWriter = null;
 	Writer patchWriter = null;
@@ -193,7 +194,7 @@ public class SQLDiff implements Executor {
 		}
 
 		//dump diff
-		if(outfilePattern!=null) {
+		/*if(outfilePattern!=null) {
 			String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
 					new String[]{FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
 					new String[]{FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
@@ -206,6 +207,10 @@ public class SQLDiff implements Executor {
 			//co.categorizedOut(diff.getDiff());
 			//log.info("dumping diff...");
 			diff.outDiffs(co);
+		}*/
+		//dump diff
+		if(categOut!=null) {
+			diff.outDiffs(categOut);
 		}
 		
 		if(xmlWriter!=null) {
@@ -421,6 +426,17 @@ public class SQLDiff implements Executor {
 	}
 	
 	void openFileWriters() throws IOException {
+		if(outfilePattern!=null) {
+			String finalPattern = CategorizedOut.generateFinalOutPattern(outfilePattern, 
+					new String[]{FILENAME_PATTERN_SCHEMA, Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME)},
+					new String[]{FILENAME_PATTERN_OBJECTTYPE, Defs.addSquareBraquets(Defs.PATTERN_OBJECTTYPE)},
+					new String[]{Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME)},
+					new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
+					);
+			CategorizedOut co = new CategorizedOut(finalPattern);
+			log.debug("final pattern: "+finalPattern);
+		}
+		
 		if(xmloutfile!=null) {
 			xmlWriter = new FileWriter(new File(xmloutfile));
 		}
@@ -522,6 +538,10 @@ public class SQLDiff implements Executor {
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
+	}
+	
+	public void setCategorizedOut(CategorizedOut out) {
+		categOut = out;
 	}
 	
 	public void setXmlWriter(Writer writer) {

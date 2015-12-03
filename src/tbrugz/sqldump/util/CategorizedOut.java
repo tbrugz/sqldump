@@ -231,7 +231,7 @@ public class CategorizedOut {
 		if(filePathPattern==null) {
 			if(innerWriter!=null) {
 				if(!innerWriterIgnited) {
-					cb.callOnOpen(innerWriter);
+					if(cb!=null) { cb.callOnOpen(innerWriter); }
 					innerWriterIgnited = true;
 				}
 				return innerWriter;
