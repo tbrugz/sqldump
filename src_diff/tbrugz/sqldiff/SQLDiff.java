@@ -1,7 +1,9 @@
 package tbrugz.sqldiff;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -112,9 +114,14 @@ public class SQLDiff implements Executor {
 
 	String patchfilePattern = null;
 	
+	// writers
+	Writer xmlWriter = null;
+	Writer jsonWriter = null;
+	Writer patchWriter = null;
+	
 	transient int lastDiffCount = 0;
 	
-	int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	public int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -201,24 +208,22 @@ public class SQLDiff implements Executor {
 			diff.outDiffs(co);
 		}
 		
-		if(xmloutfile!=null) {
+		if(xmlWriter!=null) {
 			try {
-				File f = new File(xmloutfile);
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(XML_IO_CLASS);
 				dd.setProperties(prop);
-				dd.dumpDiff(diff, f);
+				dd.dumpDiff(diff, xmlWriter);
 			} catch (JAXBException e) {
 				log.warn("error writing xml: "+e);
 				log.debug("error writing xml: "+e.getMessage(),e);
 			}
 		}
 
-		if(jsonoutfile!=null) {
+		if(jsonWriter!=null) {
 			try {
-				File f = new File(jsonoutfile);
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(JSON_IO_CLASS);
 				dd.setProperties(prop);
-				dd.dumpDiff(diff, f);
+				dd.dumpDiff(diff, jsonWriter);
 			} catch (JAXBException e) {
 				log.warn("error writing json: "+e);
 				log.debug("error writing json: "+e.getMessage(),e);
@@ -226,15 +231,14 @@ public class SQLDiff implements Executor {
 		}
 		
 		//out patch - show changed lines, ... ; dbiddiff: replace changetype
-		if(patchfilePattern!=null) {
+		if(patchWriter!=null) {
 			if(!SchemaDiffer.mayReplaceDbId) {
 				log.warn("using PatchDumper with '"+PROP_DBIDDIFF_USEREPLACE+"'==true: duplicate diffs may appear");
 			}
 			
-			File f = new File(patchfilePattern);
 			DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
 			dd.setProperties(prop);
-			dd.dumpDiff(diff, f);
+			dd.dumpDiff(diff, patchWriter);
 		}
 
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
@@ -367,22 +371,25 @@ public class SQLDiff implements Executor {
 		}
 		
 		log.info(grabberLabel+" model ["+grabberId+"] init");
-		String grabClassName = prop.getProperty("sqldiff."+grabberId+".grabclass");
+		//String connPropPrefix = "sqldiff."+grabberId;
+		String connPropPrefix = prop.getProperty("sqldiff."+grabberId+".connpropprefix", "sqldiff."+grabberId);
+		
+		String grabClassName = prop.getProperty(connPropPrefix+".grabclass");
 		if(grabClassName==null) {
-			throw new ProcessingException("'"+grabberLabel+"' grabber class (id="+grabberId+") not defined");
+			throw new ProcessingException("'"+grabberLabel+"' grabber class not defined [id="+grabberId+" ; prefix="+connPropPrefix+"]");
 		}
 		
 		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
-		schemaGrabber.setPropertiesPrefix("sqldiff."+grabberId);
+		schemaGrabber.setPropertiesPrefix(connPropPrefix);
 		if(schemaGrabber.needsConnection()) {
-			Connection conn = ConnectionUtil.initDBConnection("sqldiff."+grabberId, prop);
+			Connection conn = ConnectionUtil.initDBConnection(connPropPrefix, prop);
 			schemaGrabber.setConnection(conn);
 		}
 		schemaGrabber.setProperties(prop);
 		return schemaGrabber;
 	}
 	
-	void procProterties() {
+	public void procProterties() {
 		failonerror = Utils.getPropBool(prop, PROP_FAILONERROR, failonerror);
 		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
@@ -411,6 +418,18 @@ public class SQLDiff implements Executor {
 		ColumnDiff.addComments = addComments;
 		DBIdentifiableDiff.addComments = addComments;
 		SchemaDiffer.mayReplaceDbId = Utils.getPropBool(prop, PROP_DBIDDIFF_USEREPLACE, SchemaDiffer.mayReplaceDbId);
+	}
+	
+	void openFileWriters() throws IOException {
+		if(xmloutfile!=null) {
+			xmlWriter = new FileWriter(new File(xmloutfile));
+		}
+		if(jsonoutfile!=null) {
+			jsonWriter = new FileWriter(new File(jsonoutfile));
+		}
+		if(patchfilePattern!=null) {
+			patchWriter = new FileWriter(new File(patchfilePattern));
+		}
 	}
 	
 	void applyDiffToDB(SchemaDiff diff, Connection conn) {
@@ -480,6 +499,8 @@ public class SQLDiff implements Executor {
 			return;
 		}
 		
+		openFileWriters();
+		
 		lastDiffCount = doIt();
 	}
 
@@ -496,4 +517,23 @@ public class SQLDiff implements Executor {
 	public int getLastDiffCount() {
 		return lastDiffCount;
 	}
+	
+	public void setProperties(Properties properties) {
+		if(properties!=null) {
+			prop.putAll(properties);
+		}
+	}
+	
+	public void setXmlWriter(Writer writer) {
+		xmlWriter = writer;
+	}
+
+	public void setJsonWriter(Writer writer) {
+		jsonWriter = writer;
+	}
+
+	public void setPatchWriter(Writer writer) {
+		patchWriter = writer;
+	}
+
 }
