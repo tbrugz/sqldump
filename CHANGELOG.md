@@ -4,6 +4,7 @@ sqldump ng
 - dbms: added explainPlan()
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
 - datadump: json: added $metadata , added jsonp/callback
+- diff: added parallel grab (ModelGrabber class)
 
 
 sqldump 0.9.13

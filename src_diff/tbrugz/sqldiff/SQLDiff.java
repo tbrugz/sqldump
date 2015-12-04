@@ -8,6 +8,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
@@ -48,10 +53,13 @@ public class SQLDiff implements Executor {
 	public static final String PROPERTIES_FILENAME = "sqldiff.properties";
 	public static final String PRODUCT_NAME = "sqldiff";
 
+	public static final String ID_SOURCE = "source";
+	public static final String ID_TARGET = "target";
+	
 	//base props
 	public static final String PROP_PREFIX = "sqldiff";
-	public static final String PROP_SOURCE = PROP_PREFIX+".source";
-	public static final String PROP_TARGET = PROP_PREFIX+".target";
+	public static final String PROP_SOURCE = PROP_PREFIX+"."+ID_SOURCE;
+	public static final String PROP_TARGET = PROP_PREFIX+"."+ID_TARGET;
 	public static final String PROP_TYPES_TO_DIFF = PROP_PREFIX+".typestodiff";
 	
 	//schema input/output props
@@ -122,7 +130,36 @@ public class SQLDiff implements Executor {
 	
 	transient int lastDiffCount = 0;
 	
-	public int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	class ModelGrabber implements Callable<SchemaModel> {
+		
+		final SchemaModelGrabber schemaGrabber;
+		final String grabberMode;
+		final String grabberId;
+		
+		public ModelGrabber(SchemaModelGrabber grabber, String grabberMode, String grabberId) {
+			this.grabberMode = grabberMode;
+			this.grabberId = grabberId;
+			this.schemaGrabber = grabber;
+		}
+		
+		public ModelGrabber(String grabberMode, String grabberId) throws ClassNotFoundException, SQLException, NamingException {
+			this.grabberMode = grabberMode;
+			this.grabberId = grabberId;
+			this.schemaGrabber = initGrabber(grabberMode, grabberId, prop);
+		}
+		
+		@Override
+		public SchemaModel call() throws Exception {
+			//get grabber
+			//this.schemaGrabber = initGrabber(grabberMode, grabberId, prop);
+			
+			//grab schemas
+			log.info("grabbing '"+grabberMode+"' model ["+grabberId+"]");
+			return schemaGrabber.grabSchema();
+		}
+	}
+	
+	public int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -147,17 +184,32 @@ public class SQLDiff implements Executor {
 		
 		//from
 		sourceId = prop.getProperty(PROP_SOURCE);
-		fromSchemaGrabber = initGrabber("source", sourceId, prop);
+		fromSchemaGrabber = initGrabber(ID_SOURCE, sourceId, prop);
 		
 		//to
 		targetId = prop.getProperty(PROP_TARGET);
-		toSchemaGrabber = initGrabber("target", targetId, prop);
+		toSchemaGrabber = initGrabber(ID_TARGET, targetId, prop);
 		
-		//grab schemas
+		//XXX: add allowParallel property?
+		// grab schemas - parallel execution
+		ModelGrabber sourceGrabber = new ModelGrabber(fromSchemaGrabber, ID_SOURCE, sourceId);
+		ModelGrabber targetGrabber = new ModelGrabber(toSchemaGrabber, ID_TARGET, targetId);
+		
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		
+		Future<SchemaModel> futureSourceSM = executor.submit(sourceGrabber);
+		Future<SchemaModel> futureTargetSM = executor.submit(targetGrabber);
+		
+		fromSM = futureSourceSM.get(); //blocks for return
+		toSM = futureTargetSM.get();
+		executor.shutdown();
+		
+		/*// grab schemas - sequential
 		log.info("grabbing 'source' model ["+sourceId+"]");
 		fromSM = fromSchemaGrabber.grabSchema();
 		log.info("grabbing 'target' model ["+targetId+"]");
 		toSM = toSchemaGrabber.grabSchema();
+		*/
 		
 		//XXX: option to set dialect from properties?
 		String dialect = toSM.getSqlDialect();
@@ -497,7 +549,7 @@ public class SQLDiff implements Executor {
 	}
 
 	@Override
-	public void doMain(String[] args, Properties properties) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	public void doMain(String[] args, Properties properties) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
@@ -520,7 +572,7 @@ public class SQLDiff implements Executor {
 		lastDiffCount = doIt();
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
 		SQLDiff sqldiff = new SQLDiff();
 		sqldiff.doMain(args, sqldiff.prop);
 	}
