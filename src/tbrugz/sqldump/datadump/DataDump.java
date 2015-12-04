@@ -116,6 +116,8 @@ public class DataDump extends AbstractSQLProc {
 	
 	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
+	final Set<String> bomWarned = new HashSet<String>();
+	
 	/*
 	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
 	 *
@@ -551,8 +553,9 @@ public class DataDump extends AbstractSQLProc {
 							Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
 							if(w==null) {
 								Boolean syntaxWriteBOM = Utils.getPropBoolean(prop, DATADUMP_PROP_PREFIX+ds.getSyntaxId()+"."+SUFFIX_DATADUMP_WRITEBOM, writeBOM);
-								if(syntaxWriteBOM!=null && syntaxWriteBOM && !ds.allowWriteBOM()) {
+								if(syntaxWriteBOM!=null && syntaxWriteBOM && !ds.allowWriteBOM() && !bomWarned.contains(ds.getSyntaxId())) {
 									log.warn("syntax '"+ds.getSyntaxId()+"' should not write BOM");
+									bomWarned.add(ds.getSyntaxId());
 								}
 								//if(syntaxWriteBOM==null && ds.shouldNotWriteBOM()) { syntaxWriteBOM = false; }
 								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, syntaxWriteBOM, writeAppend);
