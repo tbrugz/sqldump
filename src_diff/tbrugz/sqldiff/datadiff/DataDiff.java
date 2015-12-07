@@ -15,6 +15,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,6 +48,38 @@ public class DataDiff extends AbstractFailable {
 
 	static final Log log = LogFactory.getLog(DataDiff.class);
 
+	class ResultSetGrabber implements Callable<ResultSet> {
+		
+		final String id;
+		final Connection conn;
+		final String sql;
+		final Table table;
+		final boolean mustImport;
+		
+		public ResultSetGrabber(String id, Connection conn, Table table, String sql, boolean mustImport) {
+			this.id = id;
+			this.conn = conn;
+			this.table = table;
+			this.sql = sql;
+			this.mustImport = mustImport;
+		}
+		
+		@Override
+		public ResultSet call() throws SQLException, FileNotFoundException {
+			if(mustImport) {
+				importData(table, conn, id);
+			}
+			try {
+				PreparedStatement stmtSource = conn.prepareStatement(sql);
+				return stmtSource.executeQuery();
+			}
+			catch(SQLException e) {
+				log.warn("error in sql exec ["+id+" ; '"+table+"']: "+sql);
+				throw e;
+			}
+		}
+	}
+	
 	public static final String PATTERN_FILEEXT = "fileext";
 	
 	public static final String PROP_DATADIFF_TABLES = SQLDiff.PROP_PREFIX+".datadiff.tables";
@@ -121,7 +158,7 @@ public class DataDiff extends AbstractFailable {
 		targetConn = conn;
 	}
 
-	public void process() throws SQLException, IOException {
+	public void process() throws SQLException, IOException, InterruptedException, ExecutionException {
 		if(sourceSchemaModel==null || targetSchemaModel==null) {
 			log.error("can't datadiff if source or taget models are null");
 			if(failonerror) { throw new ProcessingException("can't datadiff if source or taget models are null"); }
@@ -264,11 +301,29 @@ public class DataDiff extends AbstractFailable {
 		}
 	}
 	
-	boolean doDiff(Table table, String sql, ResultSetDiff rsdiff, List<String> keyCols, List<DiffSyntax> dss, boolean sourceMustImportData, boolean targetMustImportData, String coutPattern) throws SQLException, IOException {
+	boolean doDiff(Table table, String sql, ResultSetDiff rsdiff, List<String> keyCols, List<DiffSyntax> dss, boolean sourceMustImportData, boolean targetMustImportData, String coutPattern) throws SQLException, IOException, InterruptedException, ExecutionException {
 		ResultSet rsSource = null, rsTarget=null;
 		
 		//XXX: drop table if imported?
 		
+		if(sourceMustImportData && targetMustImportData) {
+			log.warn("'source' & 'target' set to import data: it will probably not work...");
+		}
+		
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		
+		ResultSetGrabber sRunS = new ResultSetGrabber("source", sourceConn, table, sql, sourceMustImportData);
+		ResultSetGrabber sRunT = new ResultSetGrabber("target", targetConn, table, sql, targetMustImportData);
+		
+		Future<ResultSet> futureSourceSM = executor.submit(sRunS);
+		Future<ResultSet> futureTargetSM = executor.submit(sRunT);
+		
+		rsSource = futureSourceSM.get(); //blocks for return
+		rsTarget = futureTargetSM.get();
+		executor.shutdown();
+		
+		// if sequential run is needed...
+		/*
 		if(sourceMustImportData) {
 			importData(table, sourceConn, sourceId);
 		}
@@ -292,6 +347,7 @@ public class DataDiff extends AbstractFailable {
 			log.warn("error in sql exec [target ; '"+table+"']: "+sql);
 			return false;
 		}
+		*/
 		
 		//TODOne: check if rsmetadata is equal between RSs...
 		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
