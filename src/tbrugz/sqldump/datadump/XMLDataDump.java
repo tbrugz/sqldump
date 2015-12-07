@@ -71,6 +71,7 @@ public class XMLDataDump extends DumpSyntax {
 	List<String> colsNot2Escape = null;
 
 	//dumper properties
+	protected String schemaName;
 	protected String tableName;
 	protected int numCol;
 	String rowElement = defaultRowElement;
@@ -98,6 +99,7 @@ public class XMLDataDump extends DumpSyntax {
 
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+		this.schemaName = schema;
 		this.tableName = tableName;
 		numCol = md.getColumnCount();
 		lsColNames.clear();

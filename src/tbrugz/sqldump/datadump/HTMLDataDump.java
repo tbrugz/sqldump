@@ -14,8 +14,11 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-//XXX: prop for stylesheet?
-//XXXdone: should extend XMLDataDump?
+/*
+ * XXX: prop for stylesheet?
+ * 
+ * see: https://developer.mozilla.org/en/docs/Web/HTML/Element/table
+ */
 public class HTMLDataDump extends XMLDataDump {
 
 	static final Log log = LogFactory.getLog(HTMLDataDump.class);
@@ -24,6 +27,7 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
+	static final String PROP_HTML_ADD_CAPTION = "sqldump.datadump.html.add-caption";
 	static final String PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT = "sqldump.datadump.html.style.numeric-align-right";
 	static final String PROP_HTML_XPEND_INNER_TABLE = "sqldump.datadump.html.xpend-inner-table";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
@@ -42,6 +46,7 @@ public class HTMLDataDump extends XMLDataDump {
 	protected String prepend = null;
 	protected String append = null;
 	//protected String nullValueClass = null;
+	protected boolean dumpCaptionElement = false;
 	//TODO: prop for 'dumpColElement'
 	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
@@ -63,6 +68,7 @@ public class HTMLDataDump extends XMLDataDump {
 		prepend = prop.getProperty(PROP_HTML_PREPEND);
 		append = prop.getProperty(PROP_HTML_APPEND);
 		//nullValueClass = prop.getProperty(PROP_HTML_NULLVALUE_CLASS);
+		dumpCaptionElement = Utils.getPropBool(prop, PROP_HTML_ADD_CAPTION, dumpCaptionElement);
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
 	}
@@ -88,6 +94,10 @@ public class HTMLDataDump extends XMLDataDump {
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
 		}
+		if(dumpCaptionElement){
+			//XXX: set caption?
+			sb.append("\n\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
+		}
 		if(dumpColElement) {
 			sb.append("\n<colgroup>");
 			for(int i=0;i<lsColNames.size();i++) {
@@ -95,11 +105,13 @@ public class HTMLDataDump extends XMLDataDump {
 			}
 			sb.append("\n</colgroup>");
 		}
+		//XXX: add thead?
 		sb.append("\n\t<tr>");
 		for(int i=0;i<lsColNames.size();i++) {
 			sb.append("<th>"+lsColNames.get(i)+"</th>");
 		}
 		out(sb.toString()+"</tr>\n", fos);
+		//XXX: add tbody?
 	}
 	
 	protected void appendStyleNumericAlignRight(StringBuffer sb) {
@@ -158,6 +170,7 @@ public class HTMLDataDump extends XMLDataDump {
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
+		//XXX: add /tbody?
 		out("</table>", fos);
 		//if(append!=null && (!innerTable || xpendInnerTable)) { out(append, fos); }
 		tableAppend(fos);
