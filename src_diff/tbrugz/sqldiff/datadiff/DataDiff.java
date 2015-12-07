@@ -238,50 +238,11 @@ public class DataDiff extends AbstractFailable {
 			
 			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
 			//log.debug("SQL: "+sql);
-
-			ResultSet rsSource = null, rsTarget=null;
 			
-			if(sourceMustImportData) {
-				importData(table, sourceConn, sourceId);
+			boolean didDiff = doDiff(table, sql, rsdiff, keyCols, dss, sourceMustImportData, targetMustImportData, coutPattern);
+			if(didDiff) {
+				tablesDiffedCount++;
 			}
-			try {
-				PreparedStatement stmtSource = sourceConn.prepareStatement(sql);
-				rsSource = stmtSource.executeQuery();
-			}
-			catch(SQLException e) {
-				log.warn("error in sql exec [source ; '"+table+"']: "+sql);
-				continue;
-			}
-			
-			if(targetMustImportData) {
-				importData(table, targetConn, targetId);
-			}
-			try {
-				PreparedStatement stmtTarget = targetConn.prepareStatement(sql);
-				rsTarget = stmtTarget.executeQuery();
-			}
-			catch(SQLException e) {
-				log.warn("error in sql exec [target ; '"+table+"']: "+sql);
-				continue;
-			}
-			
-			//TODOne: check if rsmetadata is equal between RSs...
-			ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
-			ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsTarget.getMetaData());
-			if(!sRSColmd.equals(tRSColmd)) {
-				log.warn("["+table+"] metadata from ResultSets differ. diff disabled");
-				log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
-				continue;
-			}
-			
-			log.debug("diff for table '"+table+"'...");
-			rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, coutPattern);
-			log.info("table '"+table+"' data diff: "+rsdiff.getStats());
-			
-			rsSource.close(); rsTarget.close();
-			
-			tablesDiffedCount++;
-			//XXX: drop table if imported?
 		}
 		
 		if(tablesToDiffFilter!=null && tablesToDiffFilter.size()>0) {
@@ -301,6 +262,52 @@ public class DataDiff extends AbstractFailable {
 		if(targetConnCreated) {
 			ConnectionUtil.closeConnection(targetConn);
 		}
+	}
+	
+	boolean doDiff(Table table, String sql, ResultSetDiff rsdiff, List<String> keyCols, List<DiffSyntax> dss, boolean sourceMustImportData, boolean targetMustImportData, String coutPattern) throws SQLException, IOException {
+		ResultSet rsSource = null, rsTarget=null;
+		
+		//XXX: drop table if imported?
+		
+		if(sourceMustImportData) {
+			importData(table, sourceConn, sourceId);
+		}
+		try {
+			PreparedStatement stmtSource = sourceConn.prepareStatement(sql);
+			rsSource = stmtSource.executeQuery();
+		}
+		catch(SQLException e) {
+			log.warn("error in sql exec [source ; '"+table+"']: "+sql);
+			return false;
+		}
+		
+		if(targetMustImportData) {
+			importData(table, targetConn, targetId);
+		}
+		try {
+			PreparedStatement stmtTarget = targetConn.prepareStatement(sql);
+			rsTarget = stmtTarget.executeQuery();
+		}
+		catch(SQLException e) {
+			log.warn("error in sql exec [target ; '"+table+"']: "+sql);
+			return false;
+		}
+		
+		//TODOne: check if rsmetadata is equal between RSs...
+		ResultSetColumnMetaData sRSColmd = new ResultSetColumnMetaData(rsSource.getMetaData()); 
+		ResultSetColumnMetaData tRSColmd = new ResultSetColumnMetaData(rsTarget.getMetaData());
+		if(!sRSColmd.equals(tRSColmd)) {
+			log.warn("["+table+"] metadata from ResultSets differ. diff disabled");
+			log.debug("["+table+"] diff:\nsource: "+sRSColmd+" ;\ntarget: "+tRSColmd);
+			return false;
+		}
+		
+		log.debug("diff for table '"+table+"'...");
+		rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, coutPattern);
+		log.info("table '"+table+"' data diff: "+rsdiff.getStats());
+		
+		rsSource.close(); rsTarget.close();
+		return true;
 	}
 	
 	public static String getColumnsForSelect(Table t) {
