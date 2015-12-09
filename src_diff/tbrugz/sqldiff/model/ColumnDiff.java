@@ -46,6 +46,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			return schemaName;
 		}
 		
+		@Override
+		public String toString() {
+			return "NamedTable:"+(schemaName!=null?schemaName+".":"")+tableName;
+		}
+		
 		public int compareTo(NamedDBObject o) {
 			int comp = schemaName!=null?schemaName.compareTo(o.getSchemaName()):o.getSchemaName()!=null?1:0; //XXX: return -1? 1?
 			if(comp!=0) return comp;

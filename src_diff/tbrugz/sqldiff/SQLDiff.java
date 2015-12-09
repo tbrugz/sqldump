@@ -359,24 +359,8 @@ public class SQLDiff implements Executor {
 				log.warn(message);
 				if(failonerror) { throw new ProcessingException(message); }
 			}
-				
-			if(applyToConn==null) {
-				log.warn("connection is null!");
-				//XXX: throw exception?
-			}
-			else {
-				if(applyToModel!=null) {
-					if(doApplyValidate) {
-						DiffValidator dv = new DiffValidator(applyToModel);
-						dv.validateDiff(diff);
-					}
-				}
-				else {
-					log.info("no 'apply-to' model defined, diff may not be validated");
-				}
-				DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
-				applyDiffToDB(diff, applyToConn);
-			}
+			
+			applySchemaDiff(diff, applyToModel, applyToConn, doApplyValidate);
 		}
 
 		//data diff!
@@ -406,6 +390,27 @@ public class SQLDiff implements Executor {
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		
 		return diff.getDiffList().size();
+	}
+	
+	void applySchemaDiff(SchemaDiff diff, SchemaModel applyToModel, Connection applyToConn, boolean doApplyValidate) throws SQLException {
+		if(applyToConn==null) {
+			String message = "applySchemaDiff: connection is null!";
+			log.warn(message);
+			if(failonerror) { throw new ProcessingException(message); }
+		}
+		else {
+			if(applyToModel!=null) {
+				if(doApplyValidate) {
+					DiffValidator dv = new DiffValidator(applyToModel);
+					dv.validateDiff(diff);
+				}
+			}
+			else {
+				log.info("no 'apply-to' model defined, diff may not be validated");
+			}
+			DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
+			applyDiffToDB(diff, applyToConn);
+		}
 	}
 	
 	static SchemaModelGrabber initSchemaModelGrabberInstance(String grabClassName) {
@@ -486,21 +491,28 @@ public class SQLDiff implements Executor {
 					new String[]{Defs.addSquareBraquets(Defs.PATTERN_CHANGETYPE)}
 					);
 			CategorizedOut co = new CategorizedOut(finalPattern);
+			setCategorizedOut(co);
 			log.debug("final pattern: "+finalPattern);
 		}
 		
 		if(xmloutfile!=null) {
-			xmlWriter = new FileWriter(new File(xmloutfile));
+			File f = new File(xmloutfile);
+			Utils.prepareDir(f);
+			xmlWriter = new FileWriter(f);
 		}
 		if(jsonoutfile!=null) {
-			jsonWriter = new FileWriter(new File(jsonoutfile));
+			File f = new File(jsonoutfile);
+			Utils.prepareDir(f);
+			jsonWriter = new FileWriter(f);
 		}
 		if(patchfilePattern!=null) {
-			patchWriter = new FileWriter(new File(patchfilePattern));
+			File f = new File(patchfilePattern);
+			Utils.prepareDir(f);
+			patchWriter = new FileWriter(f);
 		}
 	}
 	
-	void applyDiffToDB(SchemaDiff diff, Connection conn) {
+	void applyDiffToDB(SchemaDiff diff, Connection conn) throws SQLException {
 		//do not apply DDLs with comments
 		boolean savedAddComments = ColumnDiff.addComments;
 		ColumnDiff.addComments = false;
@@ -542,6 +554,11 @@ public class SQLDiff implements Executor {
 		}
 
 		ColumnDiff.addComments = savedAddComments;
+		
+		if(execCount>0 && errorCount==0) {
+			log.info("committing "+execCount+" changes...");
+			conn.commit();
+		}
 		
 		if(failonerror && errorCount>0) {
 			throw new ProcessingException(errorCount+" sqlExceptions occured", lastEx);
