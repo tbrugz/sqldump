@@ -135,7 +135,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 
 	@Override
 	public DBObjectType getObjectType() {
-		return DBIdentifiable.getType4Alter(ident()); //XXX: getType() or getType4Diff/Drop()? '4Diff/4Drop' is better for logging...
+		return DBIdentifiable.getType(ident()); //XXX: getType() or getType4Alter()? 'getType4Alter' is better for logging...
 	}
 	
 	@Override
@@ -150,7 +150,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	static String getComment(DBIdentifiable dbident, String comment) {
 		if(dbident==null) return "";
 		return "\n/* "+comment
-				+ DBIdentifiable.getType4Alter(dbident).desc()+" "
+				+ DBIdentifiable.getType(dbident).desc()+" "
 				+ DBObject.getFinalName(dbident, dumpSchemaName)
 				+ " */";
 	}

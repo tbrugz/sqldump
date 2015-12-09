@@ -102,7 +102,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 
-	//used for 'DROP' statements
+	//used for 'ALTER TABLE <xxx> DROP' statements
 	public static DBObjectType getType4Alter(DBIdentifiable ident) {
 		if(ident instanceof FK) { return DBObjectType.CONSTRAINT; }
 		//if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
