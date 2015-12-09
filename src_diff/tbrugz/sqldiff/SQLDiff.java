@@ -523,16 +523,27 @@ public class SQLDiff implements Executor {
 		int execCount = 0;
 		int errorCount = 0;
 		int updateCount = 0;
+		int skipCount = 0;
+		
 		SQLException lastEx = null;
 		for(Diff d: diffs) {
+			diffCount++;
+			//sqldiff.applydiff.DROP=COLUMN, TABLE, ...
+			List<String> types = Utils.getStringListFromProp(prop, "sqldiff.applydiff."+d.getChangeType(), ",");
+			if(types!=null && !types.contains(d.getObjectType().toString())) {
+				log.info("diff #"+diffCount+": '"+d.getNamedObject()+"'s type ["+d.getObjectType()+"] not in '"+d.getChangeType()+"' types: "+types);
+				skipCount++;
+				continue;
+			}
+			
 			try {
 				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
-				diffCount++;
 				List<String> sqls = d.getDiffList();
 				for(int i=0;i<sqls.size();i++) {
 					String sql = sqls.get(i);
 					log.info("executing diff #"+diffCount
-						+(sqls.size()>1?" ["+(i+1)+"/"+sqls.size()+"]: ":": ")
+						+(sqls.size()>1?" ["+(i+1)+"/"+sqls.size()+"]: ":" ")
+						+("[ "+d.getChangeType()+": "+d.getNamedObject()+" ]: ")
 						+sql);
 					execCount++;
 					updateCount += conn.createStatement().executeUpdate(sql);
@@ -544,14 +555,13 @@ public class SQLDiff implements Executor {
 				if(failonerror) { break; }
 			}
 		}
-		if(execCount>0) {
-			log.info(execCount+" statements executed"
+		log.info(
+				(execCount>0?execCount:"no")
+				+" diff statements executed"
 				+(errorCount>0?" [#errors = "+errorCount+"]":"")
-				+" [#update = "+updateCount+"]");
-		}
-		else {
-			log.info("no diff statements executed");
-		}
+				+(updateCount>0?" [#updates = "+updateCount+"]":"")
+				+(skipCount>0?" [#skiped = "+skipCount+"]":"")
+				);
 
 		ColumnDiff.addComments = savedAddComments;
 		
