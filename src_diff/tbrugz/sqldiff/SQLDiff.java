@@ -290,7 +290,7 @@ public class SQLDiff implements Executor {
 		//out patch - show changed lines, ... ; dbiddiff: replace changetype
 		if(patchWriter!=null) {
 			if(!SchemaDiffer.mayReplaceDbId) {
-				log.warn("using PatchDumper with '"+PROP_DBIDDIFF_USEREPLACE+"'==true: duplicate diffs may appear");
+				log.warn("using PatchDumper with '"+PROP_DBIDDIFF_USEREPLACE+"'=="+SchemaDiffer.mayReplaceDbId+": duplicate diffs may appear");
 			}
 			
 			DiffDumper dd = (DiffDumper) Utils.getClassInstance(PATCH_DUMPER_CLASS);
