@@ -130,4 +130,9 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 		//XXX: see http://docs.oracle.com/javase/7/docs/api/java/awt/datatransfer/DataFlavor.html
 		return "application/x-java-serialized-object";
 	}
+	
+	@Override
+	public void setId(String grabberId) {
+	}
+	
 }

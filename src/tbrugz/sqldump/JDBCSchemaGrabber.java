@@ -129,6 +129,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	Properties papp = new ParametrizedProperties();
 	Properties propOriginal;
 	DBMSFeatures feats = null;
+	String grabberId;
 	
 	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
@@ -159,7 +160,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	@Override
 	public void setProperties(Properties prop) {
-		log.info("init JDBCSchemaGrabber...");
+		log.info(getIdDesc()+"init JDBCSchemaGrabber...");
 		
 		propOriginal = prop;
 		//papp = prop;
@@ -261,7 +262,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(log.isInfoEnabled()) {
 			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
 			if(catalogs!=null && catalogs.size()>0) {
-				log.info("catalogs: "+catalogs);
+				log.info(getIdDesc()+"catalogs: "+catalogs);
 			}
 			//log.debug("schemas: "+SQLUtils.getSchemaNames(dbmd));
 			//XXX: show current catalog/schema? maybe not: https://forums.oracle.com/thread/1097687
@@ -273,7 +274,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
-			log.info("schemaPattern not defined. schemas avaiable: "+schemas);
+			log.info(getIdDesc()+"schemaPattern not defined. schemas avaiable: "+schemas);
 			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
 			if(schemaPattern!=null) { equalsUsername = true; }
@@ -286,7 +287,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			
 			if(schemaPattern!=null) {
-				log.info("setting suggested schema: '"+schemaPattern+"'"
+				log.info(getIdDesc()+"setting suggested schema: '"+schemaPattern+"'"
 						+(equalsUsername?" (same as username)":"") );
 				papp.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 				propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
@@ -299,7 +300,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			return null;
 		}
 		
-		log.info("schema grab... schema(s): '"+schemaPattern+"'");
+		log.info(getIdDesc()+"schema grab... schema(s): '"+schemaPattern+"'");
 
 		initCounters();
 		
@@ -344,7 +345,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(recursivedump) {
 			int lastTableCount = schemaModel.getTables().size();
 			int level = 0;
-			log.info("grabbing tables recursively["+level+"]: #ini:"+lastTableCount
+			log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #ini:"+lastTableCount
 					+(maxLevel!=null?" [maxlevel="+maxLevel+"]":" [maxlevel not defined]"));
 			while(true) {
 				level++;
@@ -353,7 +354,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				int newTableCount = schemaModel.getTables().size();
 				boolean wontGrowMore = (newTableCount <= lastTableCount);
 				boolean maxLevelReached = (maxLevel!=null && level>=maxLevel);
-				log.info("grabbing tables recursively["+level+"]: #last:"+lastTableCount+" #now:"+newTableCount
+				log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #last:"+lastTableCount+" #now:"+newTableCount
 						+(wontGrowMore?" [won't grow more]":"")
 						+(maxLevelReached?" [maxlevel reached]":"")
 						);
@@ -364,10 +365,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		}
 		
-		log.info(schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
-		log.info(schemaModel.getForeignKeys().size()+" FKs grabbed");
+		log.info(getIdDesc()+schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
+		log.info(getIdDesc()+schemaModel.getForeignKeys().size()+" FKs grabbed");
 		if(doSchemaGrabIndexes) {
-			log.info(schemaModel.getIndexes().size()+" indexes grabbed");
+			log.info(getIdDesc()+schemaModel.getIndexes().size()+" indexes grabbed");
 		}
 		
 		if(doSchemaGrabProceduresAndFunctions) {
@@ -391,7 +392,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			catch(SQLException e) {
 				log.warn("sql exception grabbing procedures: "+e);
 			}
-			log.info(countproc+" procedures grabbed ["+executableStats()+"]");
+			log.info(getIdDesc()+countproc+" procedures grabbed ["+executableStats()+"]");
 			
 			try {
 				for(String schemaName: schemasList) {
@@ -413,13 +414,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn("sql exception grabbing functions: "+e);
 			}
 			//XXX: add ["+executableStats()+"]?
-			log.info(countfunc+" functions grabbed");
+			log.info(getIdDesc()+countfunc+" functions grabbed");
 		}
 		
 		//XXX schema GRANTs ? how/where to add in schemaModel?
 		if(doGrabAllSchemaGrants) {
 			for(String schemaName: schemasList) {
-				log.info("getting grants from schema "+schemaName);
+				log.info(getIdDesc()+"getting grants from schema "+schemaName);
 				//XXX filter by GRANTEE, not GRANTOR/SCHEMA ? schema != user (in some databases?)
 				//XXX no grants for 'role's? (tested on oracle)
 				ResultSet grantrs = dbmd.getTablePrivileges(null, schemaName, null);
@@ -1175,6 +1176,16 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 			}
 		}
+	}
+	
+	
+	@Override
+	public void setId(String grabberId) {
+		this.grabberId = grabberId;
+	}
+	
+	String getIdDesc() {
+		return grabberId!=null?"["+grabberId+"] ":"";
 	}
 	
 }

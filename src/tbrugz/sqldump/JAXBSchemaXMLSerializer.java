@@ -43,12 +43,13 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	String fileOutput;
 	Writer outputWriter;
 	XMLSerializer xmlser;
+	String grabberId;
 	
 	public JAXBSchemaXMLSerializer() {
 		try {
 			xmlser = new XMLSerializer(JAXB_SCHEMA_PACKAGES);
 		} catch (JAXBException e) {
-			log.error("impossible to create JAXBContext: "+e);
+			log.error(getIdDesc()+"impossible to create JAXBContext: "+e);
 			log.info("impossible to create JAXBContext", e);
 			if(failonerror) { throw new ProcessingException(e); }
 		}
@@ -89,14 +90,14 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			outputWriter.flush();
 			if(fileOutput!=null) {
 				File fout = new File(fileOutput);
-				log.info("xml schema model dumped to '"+fout.getAbsolutePath()+"'");
+				log.info(getIdDesc()+"xml schema model dumped to '"+fout.getAbsolutePath()+"'");
 			}
 			else {
-				log.info("xml schema model dumped to output-stream");
+				log.info(getIdDesc()+"xml schema model dumped to output-stream");
 			}
 		}
 		catch(Exception e) {
-			log.error("error dumping schema: "+e);
+			log.error(getIdDesc()+"error dumping schema: "+e);
 			log.debug("error dumping schema", e);
 			if(failonerror) { throw new ProcessingException(e); }
 		}
@@ -117,7 +118,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			is.close();
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
-			log.info("xml schema model grabbed from '"+inputDescription+"'");
+			log.info(getIdDesc()+"xml schema model grabbed from '"+inputDescription+"'");
 			return sm;
 		}
 		catch(Exception e) {
@@ -202,6 +203,15 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	@Override
 	public String getMimeType() {
 		return "application/xml";
+	}
+	
+	@Override
+	public void setId(String grabberId) {
+		this.grabberId = grabberId;
+	}
+	
+	String getIdDesc() {
+		return grabberId!=null?"["+grabberId+"] ":"";
 	}
 
 }

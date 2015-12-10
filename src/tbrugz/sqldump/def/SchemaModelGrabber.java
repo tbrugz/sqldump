@@ -13,5 +13,7 @@ public interface SchemaModelGrabber extends ProcessComponent {
 	public void setConnection(Connection conn);
 
 	public SchemaModel grabSchema();
+	
+	public void setId(String grabberId);
 
 }
