@@ -116,9 +116,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
 	static final String[] DEFAULT_SCHEMA_NAMES = {
-		"public", //postgresql, h2, hsqldb
-		"APP",    //derby
-		"",       //'schema-less' databases
+		"public", // postgresql, h2, hsqldb
+		"APP",    // derby
+		"",       // 'schema-less' databases
+		"Default" // neo4j
 	};
 	
 	Connection conn;

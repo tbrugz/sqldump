@@ -355,7 +355,7 @@ public class SQLDump implements Executor {
 			}
 		}
 		else {
-			DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
+			DBMSResources.instance().updateMetaData(conn.getMetaData(), true); //XXX: really needed?
 		}
 	}
 	

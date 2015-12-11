@@ -26,6 +26,9 @@ public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
 	
+	final static String COL_TABLE_CAT = "TABLE_CAT"; //"table_cat"
+	final static String COL_TABLE_SCHEM = "TABLE_SCHEM"; //"table_schem"
+	
 	//static final String PROP = "sqldump.datadump.strangePrecisionNumericAsInt";
 	static final String PROP_STRANGE_PRECISION_NUMERIC_AS_INT = "sqldump.sqlutils.strangePrecisionNumericAsInt";
 	
@@ -335,11 +338,11 @@ public class SQLUtils {
 	public static List<String> getSchemaNames(DatabaseMetaData dbmd) throws SQLException {
 		List<String> ret = null;
 		ResultSet rsSchemas = dbmd.getSchemas();
-		ret = getColumnValues(rsSchemas, "table_schem");
+		ret = getColumnValues(rsSchemas, COL_TABLE_SCHEM);
 		if(ret.size()==0) { //XXX: remove?
 			log.info("no schemas found, getting schemas from catalog names...");
 			ResultSet rsCatalogs = dbmd.getCatalogs();
-			ret = getColumnValues(rsCatalogs, "table_cat");
+			ret = getColumnValues(rsCatalogs, COL_TABLE_CAT);
 			if(ret.size()==0) {
 				ret.add("");
 			}
@@ -351,7 +354,14 @@ public class SQLUtils {
 	public static List<String> getCatalogNames(DatabaseMetaData dbmd) throws SQLException {
 		List<String> ret = null;
 		ResultSet rsCatalogs = dbmd.getCatalogs();
-		ret = getColumnValues(rsCatalogs, "table_cat");
+		try {
+			ret = getColumnValues(rsCatalogs, COL_TABLE_CAT);
+		}
+		catch(SQLException e) {
+			log.warn("getCatalogNames: can't get column '"+COL_TABLE_CAT+"': "+e);
+			log.info("getCatalogs's columns: "+SQLUtils.getColumnNames(rsCatalogs.getMetaData()));
+			throw e;
+		}
 		//log.debug("catalogs: "+ret);
 		return ret;
 	}

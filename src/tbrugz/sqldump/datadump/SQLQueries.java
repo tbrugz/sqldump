@@ -318,7 +318,9 @@ public class SQLQueries extends AbstractSQLProc {
 				try {
 					//XXX option to set parameter count by properties?
 					ParameterMetaData pmd = stmt.getParameterMetaData();
-					query.setParameterCount(pmd.getParameterCount());
+					if(pmd!=null) {
+						query.setParameterCount(pmd.getParameterCount());
+					}
 					//XXX set parameter type names??
 				} catch (SQLException e) {
 					query.setParameterCount(null);
