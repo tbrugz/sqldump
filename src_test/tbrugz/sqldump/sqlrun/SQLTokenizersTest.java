@@ -40,5 +40,41 @@ public class SQLTokenizersTest {
 		Assert.assertEquals("eee';'", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
+
+	@Test
+	public void testTokenComment() {
+		SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\ncde;eee';'");
+		
+		Assert.assertEquals("abc--;\ncde", p.next());
+		Assert.assertEquals("eee';'", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+
+	@Test
+	public void testTokenCommentExtraNl() {
+		SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\n;cde;eee");
+		
+		Assert.assertEquals("abc--;\n", p.next());
+		Assert.assertEquals("cde", p.next());
+		Assert.assertEquals("eee", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
 	
+	@Test
+	public void testTokenBlockComment() {
+		SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*;*/cde'';eee';'");
+		
+		Assert.assertEquals("abc/*;*/cde''", p.next());
+		Assert.assertEquals("eee';'", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+	
+	@Test
+	public void testTokenBlockComment2() {
+		SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*aa*/cde;eee");
+		
+		Assert.assertEquals("abc/*aa*/cde", p.next());
+		Assert.assertEquals("eee", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
 }

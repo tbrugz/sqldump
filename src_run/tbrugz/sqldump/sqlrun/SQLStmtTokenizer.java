@@ -35,22 +35,55 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 		int commBlPos = sql.indexOf("/*", searchFrom);
 		int skip = 1;
 
-		//log.info("aposPos: "+aposPos+"; semicolonPos: "+semicolonPos+"; commPos:"+commPos); 
+		//log.info("aposPos: "+aposPos+"; semicolonPos: "+semicolonPos+"; commPos:"+commPos+"; commBlPos:"+commBlPos); 
 		
-		if(aposPos==-1) {
-			if(semicolonPos==-1) {
-				String ret = sql.substring(pos);
-				pos = sql.length();
-				searchFrom = pos;
-				return ret;
+		if( (aposPos==-1) && (semicolonPos==-1) ) {
+			String ret = sql.substring(pos);
+			pos = sql.length();
+			searchFrom = pos;
+			return ret;
+		}
+		if( (aposPos==-1) || (semicolonPos<aposPos) ) {
+			int endPos = semicolonPos;
+			if(commPos>=0 && commPos<semicolonPos) {
+				int nlPos = sql.indexOf("\n", commPos);
+				//log.info("nlPos: "+nlPos);
+				if(nlPos>semicolonPos) {
+					searchFrom = nlPos+1;
+					return next();
+				}
+				endPos = nlPos;
+				//skip = 2;
 			}
+			if(commBlPos>=0 && commBlPos<semicolonPos) {
+				int commBlEndPos = sql.indexOf("*/", commBlPos);
+				//log.info("commBlEndPos: "+commBlEndPos); 
+				if(commBlEndPos>semicolonPos) {
+					searchFrom = commBlEndPos+2;
+					return next();
+				}
+				endPos = semicolonPos;
+				//skip = 0;
+			}
+			String ret = sql.substring(pos, endPos);
+			pos = endPos+skip;
+			searchFrom = pos;
+			return ret;
+		}
+		/*else if(semicolonPos<aposPos) {
 			int endPos = semicolonPos;
 			if(commPos>=0 && commPos<semicolonPos) {
 				int nlPos = sql.indexOf("\n", commPos);
 				endPos = nlPos;
+				skip = 2;
 			}
 			if(commBlPos>=0 && commBlPos<semicolonPos) {
-				int commBlEndPos = sql.indexOf("*/", commBlPos);
+				int commBlEndPos = sql.indexOf("* /", commBlPos);
+				log.info("commBlEndPos: "+commBlEndPos); 
+				if(commBlEndPos+2<semicolonPos) {
+					searchFrom = commBlEndPos+2;
+					return next();
+				}
 				endPos = commBlEndPos+2;
 				skip = 0;
 			}
@@ -58,23 +91,7 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 			pos = endPos+skip;
 			searchFrom = pos;
 			return ret;
-		}
-		else if(semicolonPos<aposPos) {
-			int endPos = semicolonPos;
-			if(commPos>=0 && commPos<semicolonPos) {
-				int nlPos = sql.indexOf("\n", commPos);
-				endPos = nlPos;
-			}
-			if(commBlPos>=0 && commBlPos<semicolonPos) {
-				int commBlEndPos = sql.indexOf("*/", commBlPos);
-				endPos = commBlEndPos+2;
-				skip = 0;
-			}
-			String ret = sql.substring(pos, endPos);
-			pos = endPos+skip;
-			searchFrom = pos;
-			return ret;
-		}
+		}*/
 		else {
 			searchFrom = sql.indexOf("'", aposPos+1)+1;
 			return next();
