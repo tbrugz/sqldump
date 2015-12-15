@@ -1,6 +1,7 @@
 package tbrugz.sqldump.sqlrun;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,9 +9,11 @@ import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Scanner;
 
-public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
+import tbrugz.sqldump.datadump.DataDumpUtils;
 
-	//final static String DEFAULT_CHARSET = DataDumpUtils.CHARSET_UTF8;
+public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iterable<String> {
+
+	final static String DEFAULT_CHARSET = DataDumpUtils.CHARSET_UTF8;
 	//TODOne: option to define inputEncoding
 	//XXX: option to define recordDelimiter?
 	static final String recordDelimiter = ";";
@@ -38,6 +41,10 @@ public class SQLStmtScanner implements Iterator<String>, Iterable<String> {
 	/*public SQLStmtScanner(InputStream is) {
 		this(is, DEFAULT_CHARSET);
 	}*/
+	
+	public SQLStmtScanner(String string) {
+		this(new ByteArrayInputStream(string.getBytes()), DEFAULT_CHARSET, false);
+	}
 	
 	@Override
 	public Iterator<String> iterator() {

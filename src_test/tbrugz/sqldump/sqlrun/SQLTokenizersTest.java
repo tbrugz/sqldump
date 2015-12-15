@@ -1,25 +1,52 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+@RunWith(Parameterized.class)
 public class SQLTokenizersTest {
 
-	Iterator<String> scanner;
+	/*@Parameters
+	public static Collection<Class<? extends AbstractTokenizer>> data() {
+		Collection<Class<? extends AbstractTokenizer>> list = new ArrayList<Class<? extends AbstractTokenizer>>();
+		list.add(SQLStmtScanner.class); list.add(SQLStmtTokenizer.class);
+		return list;
+	}*/
+
+	@Parameters
+	public static Collection<Object[]> data() {
+		Collection<Object[]> list = new ArrayList<Object[]>();
+		//list.add(new Object[]{SQLStmtScanner.class, null});
+		list.add(new Object[]{SQLStmtTokenizer.class, null});
+		return list;
+	}
 	
-	public SQLTokenizersTest() {
-		String str = "";
-		InputStream is = new ByteArrayInputStream(str.getBytes());
-		scanner = new SQLStmtScanner(is, "UTF-8", false);
+	Class<AbstractTokenizer> clazz;
+	
+	public SQLTokenizersTest(Class<AbstractTokenizer> clazz, Object z) {
+		this.clazz = clazz;
+	}
+	
+	static AbstractTokenizer createTokenizer(Class<AbstractTokenizer> clazz, String str) {
+		if(clazz.equals(SQLStmtTokenizer.class)) {
+			return new SQLStmtTokenizer(str);
+		}
+		if(clazz.equals(SQLStmtScanner.class)) {
+			return new SQLStmtScanner(str);
+		}
+		throw new RuntimeException("unknown tokenizer: "+clazz);
 	}
 	
 	@Test
 	public void testSQLStmtTokenizer() {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc;cde'';eee';'");
+		AbstractTokenizer p = createTokenizer(clazz, "abc;cde'';eee';'");
+		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc;cde'';eee';'");
 		
 		Assert.assertEquals(true, p.hasNext());
 		Assert.assertEquals("abc", p.next());
@@ -32,7 +59,8 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenComment() {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\ncde;eee';'");
+		AbstractTokenizer p = createTokenizer(clazz, "abc--;\ncde;eee';'");
+		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\ncde;eee';'");
 		
 		Assert.assertEquals("abc--;\ncde", p.next());
 		Assert.assertEquals("eee';'", p.next());
@@ -41,7 +69,8 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenCommentExtraNl() {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\n;cde;eee");
+		AbstractTokenizer p = createTokenizer(clazz, "abc--;\n;cde;eee");
+		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\n;cde;eee");
 		
 		Assert.assertEquals("abc--;\n", p.next());
 		Assert.assertEquals("cde", p.next());
@@ -51,19 +80,58 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testTokenBlockComment() {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*;*/cde'';eee';'");
+		//AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';");
+		AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';'");
+		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*;*/cde'';eee';'");
 		
 		Assert.assertEquals("abc/*;*/cde''", p.next());
 		Assert.assertEquals("eee';'", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
+
+	@Test
+	public void testTokenBlockCommentNoEnd1() {
+		AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';");
+		
+		Assert.assertEquals("abc/*;*/cde''", p.next());
+		Assert.assertEquals("eee';", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+
+	@Test
+	public void testTokenBlockCommentNoEnd2() {
+		AbstractTokenizer p = createTokenizer(clazz, "eee';");
+		
+		Assert.assertEquals("eee';", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
 	
 	@Test
 	public void testTokenBlockComment2() {
-		SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*aa*/cde;eee");
+		AbstractTokenizer p = createTokenizer(clazz, "abc/*aa*/cde;eee");
+		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*aa*/cde;eee");
 		
 		Assert.assertEquals("abc/*aa*/cde", p.next());
 		Assert.assertEquals("eee", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+
+	@Test
+	public void testTokenCommentLine1() {
+		AbstractTokenizer p = createTokenizer(clazz, "abc;eee--zz\nx;bbb");
+		
+		Assert.assertEquals("abc", p.next());
+		Assert.assertEquals("eee--zz\nx", p.next());
+		Assert.assertEquals("bbb", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+
+	@Test
+	public void testTokenCommentLine2() {
+		AbstractTokenizer p = createTokenizer(clazz, "abc;eee--zzx;ab");
+		
+		Assert.assertEquals("abc", p.next());
+		Assert.assertEquals("eee--zzx;ab", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
 }

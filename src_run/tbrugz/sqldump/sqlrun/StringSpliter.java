@@ -6,13 +6,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 @Deprecated
-public class StringSpliter implements Iterator<String>, Iterable<String> {
+public class StringSpliter implements AbstractTokenizer, Iterator<String>, Iterable<String> {
 
 	static final Log log = LogFactory.getLog(StringSpliter.class);
 
 	final String[] stmtTokenizer;
 	final int length;
 	int pos = 0;
+	
+	public StringSpliter(String fileStr) {
+		this(fileStr, true);
+	}
 	
 	public StringSpliter(String fileStr, boolean split) {
 		if(split) {

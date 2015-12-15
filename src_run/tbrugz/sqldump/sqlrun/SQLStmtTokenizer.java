@@ -5,7 +5,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
+public class SQLStmtTokenizer implements AbstractTokenizer, Iterator<String>, Iterable<String> {
 
 	static final Log log = LogFactory.getLog(SQLStmtTokenizer.class);
 	
@@ -35,7 +35,7 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 		int commBlPos = sql.indexOf("/*", searchFrom);
 		int skip = 1;
 
-		//log.info("aposPos: "+aposPos+"; semicolonPos: "+semicolonPos+"; commPos:"+commPos+"; commBlPos:"+commBlPos); 
+		//log.info("aposPos: "+aposPos+"; semicolonPos: "+semicolonPos+"; commPos:"+commPos+"; commBlPos:"+commBlPos+"; searchFrom: "+searchFrom); 
 		
 		if( (aposPos==-1) && (semicolonPos==-1) ) {
 			String ret = sql.substring(pos);
@@ -48,25 +48,33 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 			if(commPos>=0 && commPos<semicolonPos) {
 				int nlPos = sql.indexOf("\n", commPos);
 				//log.info("nlPos: "+nlPos);
-				if(nlPos>semicolonPos) {
+				//if(nlPos>semicolonPos) {
 					searchFrom = nlPos+1;
 					return next();
-				}
-				endPos = nlPos;
+				//}
+				//endPos = nlPos;
 				//skip = 2;
 			}
 			if(commBlPos>=0 && commBlPos<semicolonPos) {
 				int commBlEndPos = sql.indexOf("*/", commBlPos);
 				//log.info("commBlEndPos: "+commBlEndPos); 
-				if(commBlEndPos>semicolonPos) {
+				//if(commBlEndPos>semicolonPos) {
 					searchFrom = commBlEndPos+2;
 					return next();
-				}
-				endPos = semicolonPos;
+				//}
+				//endPos = semicolonPos;
 				//skip = 0;
 			}
-			String ret = sql.substring(pos, endPos);
-			pos = endPos+skip;
+			//log.info("endPos: "+endPos+" ;; pos:"+pos+" ;; sql="+sql );
+			String ret = null;
+			if(endPos<pos) {
+				ret = sql.substring(pos);
+				pos = sql.length();
+			}
+			else {
+				ret = sql.substring(pos, endPos);
+				pos = endPos+skip;
+			}
 			searchFrom = pos;
 			return ret;
 		}
@@ -94,6 +102,13 @@ public class SQLStmtTokenizer implements Iterator<String>, Iterable<String> {
 		}*/
 		else {
 			searchFrom = sql.indexOf("'", aposPos+1)+1;
+			if(searchFrom==0) {
+				String ret = sql.substring(pos);
+				pos = sql.length();
+				searchFrom = pos;
+				return ret;
+			}
+			//log.info("; searchFrom: "+searchFrom); 
 			return next();
 		}
 	}
