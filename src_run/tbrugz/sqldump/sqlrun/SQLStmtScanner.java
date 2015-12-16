@@ -17,6 +17,7 @@ public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iter
 	//TODOne: option to define inputEncoding
 	//XXX: option to define recordDelimiter?
 	static final String recordDelimiter = ";";
+
 	final boolean escapeBackslashApos; //mysql uses this escape - default is false
 	final String inputEncoding;
 	final Scanner scan;
@@ -57,7 +58,8 @@ public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iter
 	}
 
 	@Override
-	public String next() { 
+	public String next() {
+		//skipComments();
 		String token = scan.next();
 		int countApos = countApos(token);
 		StringBuilder sb = new StringBuilder();
@@ -93,4 +95,18 @@ public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iter
 		} while(fromIndex>0);
 		return occurences;
 	}
+	
+	/*static final Pattern commentLine = Pattern.compile("--.*\n");
+	static final Pattern commentBlock = Pattern.compile("/\\*[^\\* /]*\\* /");
+	
+	void skipComments() {
+		try {
+		scan.skip(commentLine);
+		}
+		catch(NoSuchElementException e) {}
+		try {
+		scan.skip(commentBlock);
+		}
+		catch(NoSuchElementException e) {}
+	}*/
 }

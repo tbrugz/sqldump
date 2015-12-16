@@ -46,7 +46,6 @@ public class SQLTokenizersTest {
 	@Test
 	public void testSQLStmtTokenizer() {
 		AbstractTokenizer p = createTokenizer(clazz, "abc;cde'';eee';'");
-		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc;cde'';eee';'");
 		
 		Assert.assertEquals(true, p.hasNext());
 		Assert.assertEquals("abc", p.next());
@@ -60,7 +59,6 @@ public class SQLTokenizersTest {
 	@Test
 	public void testTokenComment() {
 		AbstractTokenizer p = createTokenizer(clazz, "abc--;\ncde;eee';'");
-		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\ncde;eee';'");
 		
 		Assert.assertEquals("abc--;\ncde", p.next());
 		Assert.assertEquals("eee';'", p.next());
@@ -70,7 +68,6 @@ public class SQLTokenizersTest {
 	@Test
 	public void testTokenCommentExtraNl() {
 		AbstractTokenizer p = createTokenizer(clazz, "abc--;\n;cde;eee");
-		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc--;\n;cde;eee");
 		
 		Assert.assertEquals("abc--;\n", p.next());
 		Assert.assertEquals("cde", p.next());
@@ -80,9 +77,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testTokenBlockComment() {
-		//AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';");
 		AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';'");
-		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*;*/cde'';eee';'");
 		
 		Assert.assertEquals("abc/*;*/cde''", p.next());
 		Assert.assertEquals("eee';'", p.next());
@@ -109,13 +104,21 @@ public class SQLTokenizersTest {
 	@Test
 	public void testTokenBlockComment2() {
 		AbstractTokenizer p = createTokenizer(clazz, "abc/*aa*/cde;eee");
-		//SQLStmtTokenizer p = new SQLStmtTokenizer("abc/*aa*/cde;eee");
 		
 		Assert.assertEquals("abc/*aa*/cde", p.next());
 		Assert.assertEquals("eee", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
 
+	@Test
+	public void testTokenBlockCommentErr() {
+		AbstractTokenizer p = createTokenizer(clazz, "abc;a/*a;s");
+		
+		Assert.assertEquals("abc", p.next());
+		Assert.assertEquals("a/*a;s", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+	
 	@Test
 	public void testTokenCommentLine1() {
 		AbstractTokenizer p = createTokenizer(clazz, "abc;eee--zz\nx;bbb");
