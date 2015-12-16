@@ -1,10 +1,12 @@
-package tbrugz.sqldump.sqlrun;
+package tbrugz.sqldump.sqlrun.tokenzr;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 
 public class SQLStmtScannerTest {
 

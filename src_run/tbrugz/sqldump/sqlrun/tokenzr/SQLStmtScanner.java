@@ -1,4 +1,4 @@
-package tbrugz.sqldump.sqlrun;
+package tbrugz.sqldump.sqlrun.tokenzr;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.sqlrun.AbstractTokenizer;
 
 public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iterable<String> {
 

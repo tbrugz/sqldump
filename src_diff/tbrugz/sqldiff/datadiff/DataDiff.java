@@ -38,7 +38,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
-import tbrugz.sqldump.sqlrun.SQLStmtScanner;
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.StringDecorator;

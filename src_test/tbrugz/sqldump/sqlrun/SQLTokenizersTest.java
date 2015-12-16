@@ -9,6 +9,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
+
 @RunWith(Parameterized.class)
 public class SQLTokenizersTest {
 
