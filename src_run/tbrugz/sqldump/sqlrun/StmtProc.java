@@ -25,6 +25,7 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.StringSpliter;
@@ -55,11 +56,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 	public enum TokenizerStrategy {
 		STMT_TOKENIZER,
 		STMT_SCANNER,
+		STMT_SCANNER_NG,
 		STRING_SPLITTER;
 		
 		public static final String STMT_TOKENIZER_CLASS = "SQLStmtTokenizer";
 		public static final String STRING_SPLITTER_CLASS = "StringSpliter";
 		public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
+		public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
 		
 		public static TokenizerStrategy getTokenizer(String tokenizer) {
 			if(tokenizer == null) {
@@ -78,6 +81,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 			else if(STMT_SCANNER_CLASS.equals(tokenizer)) {
 				log.info("using '"+tokenizer+"' tokenizer class");
 				return TokenizerStrategy.STMT_SCANNER;
+			}
+			else if(STMT_SCANNER_NG_CLASS.equals(tokenizer)) {
+				log.info("using '"+tokenizer+"' tokenizer class");
+				return TokenizerStrategy.STMT_SCANNER_NG;
 			}
 			else {
 				throw new IllegalArgumentException("unknown string tokenizer class: "+tokenizer);
@@ -108,6 +115,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 		//FIXedME: SQLStmtTokenizer not working (on big files?)
 		Iterable<String> stmtTokenizer = null;
 		switch(tokenizerStrategy) {
+		case STMT_SCANNER_NG:
+			//XXX option to define charset
+			stmtTokenizer = new SQLStmtNgScanner(file, inputEncoding);
+			break;
 		case STMT_SCANNER:
 			//XXX option to define charset
 			stmtTokenizer = new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
