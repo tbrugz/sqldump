@@ -5,6 +5,8 @@ sqldump ng
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
 - datadump: json: added $metadata , added jsonp/callback
 - diff: added parallel grab (ModelGrabber class)
+- diff: added prop 'sqldiff.applydiff.<changetype>' - filter diffs to apply by type
+- dbms: initial Neo4j support
 
 
 sqldump 0.9.13
