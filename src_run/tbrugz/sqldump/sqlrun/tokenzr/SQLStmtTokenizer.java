@@ -5,9 +5,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.sqlrun.AbstractTokenizer;
-
-public class SQLStmtTokenizer implements AbstractTokenizer, Iterator<String>, Iterable<String> {
+public class SQLStmtTokenizer implements Tokenizer, Iterator<String>, Iterable<String> {
 
 	static final Log log = LogFactory.getLog(SQLStmtTokenizer.class);
 	

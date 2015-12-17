@@ -10,9 +10,8 @@ import java.util.Iterator;
 import java.util.Scanner;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.sqlrun.AbstractTokenizer;
 
-public class SQLStmtScanner implements AbstractTokenizer, Iterator<String>, Iterable<String> {
+public class SQLStmtScanner implements Tokenizer, Iterator<String>, Iterable<String> {
 
 	final static String DEFAULT_CHARSET = DataDumpUtils.CHARSET_UTF8;
 	//TODOne: option to define inputEncoding

@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
 
@@ -30,13 +31,13 @@ public class SQLTokenizersTest {
 		return list;
 	}
 	
-	Class<AbstractTokenizer> clazz;
+	Class<Tokenizer> clazz;
 	
-	public SQLTokenizersTest(Class<AbstractTokenizer> clazz, Object z) {
+	public SQLTokenizersTest(Class<Tokenizer> clazz, Object z) {
 		this.clazz = clazz;
 	}
 	
-	static AbstractTokenizer createTokenizer(Class<AbstractTokenizer> clazz, String str) {
+	static Tokenizer createTokenizer(Class<Tokenizer> clazz, String str) {
 		if(clazz.equals(SQLStmtTokenizer.class)) {
 			return new SQLStmtTokenizer(str);
 		}
@@ -48,7 +49,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testSQLStmtTokenizer() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc;cde'';eee';'");
+		Tokenizer p = createTokenizer(clazz, "abc;cde'';eee';'");
 		
 		Assert.assertEquals(true, p.hasNext());
 		Assert.assertEquals("abc", p.next());
@@ -61,7 +62,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenComment() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc--;\ncde;eee';'");
+		Tokenizer p = createTokenizer(clazz, "abc--;\ncde;eee';'");
 		
 		Assert.assertEquals("abc--;\ncde", p.next());
 		Assert.assertEquals("eee';'", p.next());
@@ -70,7 +71,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenCommentExtraNl() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc--;\n;cde;eee");
+		Tokenizer p = createTokenizer(clazz, "abc--;\n;cde;eee");
 		
 		Assert.assertEquals("abc--;\n", p.next());
 		Assert.assertEquals("cde", p.next());
@@ -80,7 +81,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testTokenBlockComment() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';'");
+		Tokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';'");
 		
 		Assert.assertEquals("abc/*;*/cde''", p.next());
 		Assert.assertEquals("eee';'", p.next());
@@ -89,7 +90,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenBlockCommentNoEnd1() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';");
+		Tokenizer p = createTokenizer(clazz, "abc/*;*/cde'';eee';");
 		
 		Assert.assertEquals("abc/*;*/cde''", p.next());
 		Assert.assertEquals("eee';", p.next());
@@ -98,7 +99,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenBlockCommentNoEnd2() {
-		AbstractTokenizer p = createTokenizer(clazz, "eee';");
+		Tokenizer p = createTokenizer(clazz, "eee';");
 		
 		Assert.assertEquals("eee';", p.next());
 		Assert.assertEquals(false, p.hasNext());
@@ -106,7 +107,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testTokenBlockComment2() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc/*aa*/cde;eee");
+		Tokenizer p = createTokenizer(clazz, "abc/*aa*/cde;eee");
 		
 		Assert.assertEquals("abc/*aa*/cde", p.next());
 		Assert.assertEquals("eee", p.next());
@@ -115,7 +116,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenBlockCommentErr() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc;a/*a;s");
+		Tokenizer p = createTokenizer(clazz, "abc;a/*a;s");
 		
 		Assert.assertEquals("abc", p.next());
 		Assert.assertEquals("a/*a;s", p.next());
@@ -124,7 +125,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	public void testTokenCommentLine1() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc;eee--zz\nx;bbb");
+		Tokenizer p = createTokenizer(clazz, "abc;eee--zz\nx;bbb");
 		
 		Assert.assertEquals("abc", p.next());
 		Assert.assertEquals("eee--zz\nx", p.next());
@@ -134,7 +135,7 @@ public class SQLTokenizersTest {
 
 	@Test
 	public void testTokenCommentLine2() {
-		AbstractTokenizer p = createTokenizer(clazz, "abc;eee--zzx;ab");
+		Tokenizer p = createTokenizer(clazz, "abc;eee--zzx;ab");
 		
 		Assert.assertEquals("abc", p.next());
 		Assert.assertEquals("eee--zzx;ab", p.next());

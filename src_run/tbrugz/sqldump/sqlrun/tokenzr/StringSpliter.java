@@ -5,10 +5,8 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.sqlrun.AbstractTokenizer;
-
 @Deprecated
-public class StringSpliter implements AbstractTokenizer, Iterator<String>, Iterable<String> {
+public class StringSpliter implements Tokenizer, Iterator<String>, Iterable<String> {
 
 	static final Log log = LogFactory.getLog(StringSpliter.class);
 
