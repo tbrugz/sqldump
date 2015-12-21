@@ -70,7 +70,7 @@ public class Trigger extends DBObject {
 	
 	/* ignoring whitespaces */
 	@Override
-	public boolean equals4Diff(Object obj) {
+	public boolean equals4Diff(DBIdentifiable obj) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))

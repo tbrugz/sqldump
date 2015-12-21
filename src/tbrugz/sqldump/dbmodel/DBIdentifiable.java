@@ -149,7 +149,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return true;
 	}
 	
-	public boolean equals4Diff(Object obj) {
+	public boolean equals4Diff(DBIdentifiable obj) {
 		return equals(obj);
 	}
 	

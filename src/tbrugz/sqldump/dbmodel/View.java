@@ -139,7 +139,7 @@ public class View extends DBObject implements Relation {
 
 	/* ignoring whitespaces */
 	@Override
-	public boolean equals4Diff(Object obj) {
+	public boolean equals4Diff(DBIdentifiable obj) {
 		if(obj instanceof View) {
 			View v = (View) obj;
 			//return name.equals(v.name) && query.equals(v.query);
