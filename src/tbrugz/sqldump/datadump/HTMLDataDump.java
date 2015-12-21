@@ -39,6 +39,7 @@ public class HTMLDataDump extends XMLDataDump {
 	//protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	protected static final String DEFAULT_PADDING = "";
+	protected static final boolean DEFAULT_ADD_CAPTION = false;
 
 	protected final String padding;
 	protected final boolean innerTable;
@@ -46,7 +47,7 @@ public class HTMLDataDump extends XMLDataDump {
 	protected String prepend = null;
 	protected String append = null;
 	//protected String nullValueClass = null;
-	protected boolean dumpCaptionElement = false;
+	protected boolean dumpCaptionElement = DEFAULT_ADD_CAPTION;
 	//TODO: prop for 'dumpColElement'
 	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
@@ -68,7 +69,7 @@ public class HTMLDataDump extends XMLDataDump {
 		prepend = prop.getProperty(PROP_HTML_PREPEND);
 		append = prop.getProperty(PROP_HTML_APPEND);
 		//nullValueClass = prop.getProperty(PROP_HTML_NULLVALUE_CLASS);
-		dumpCaptionElement = Utils.getPropBool(prop, PROP_HTML_ADD_CAPTION, dumpCaptionElement);
+		dumpCaptionElement = Utils.getPropBool(prop, PROP_HTML_ADD_CAPTION, DEFAULT_ADD_CAPTION);
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
 	}

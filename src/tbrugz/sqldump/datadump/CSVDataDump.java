@@ -54,7 +54,8 @@ public class CSVDataDump extends DumpSyntax {
 	static final String DELIM_RECORD_DEFAULT = "\r\n"; // RFC: record delimiter is \r\n
 	static final String DELIM_COLUMN_DEFAULT = ",";
 	static final String ENCLOSING_DEFAULT = "\""; //XXXxx: should be '"'? yes!
-
+	static final boolean DEFAULT_COLUMNNAMESHEADER = true;
+	
 	static final String CSV_SYNTAX_ID = "csv";
 	
 	String tableName;
@@ -64,7 +65,7 @@ public class CSVDataDump extends DumpSyntax {
 	ResultSetMetaData md;
 	
 	boolean doTableNameHeaderDump = false;
-	boolean doColumnNamesHeaderDump = true;
+	boolean doColumnNamesHeaderDump = DEFAULT_COLUMNNAMESHEADER;
 	String columnDelimiter;
 	String recordDelimiter;
 	String enclosing;
@@ -76,7 +77,7 @@ public class CSVDataDump extends DumpSyntax {
 		columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
 		enclosing = prop.getProperty(PROP_DATADUMP_ENCLOSING, ENCLOSING_DEFAULT);
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
-		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, doColumnNamesHeaderDump);
+		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
 	}
 	
 	@Override

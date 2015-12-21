@@ -51,6 +51,8 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	//static final String DEFAULT_NULL_VALUE = "";
 	static final Log log = LogFactory.getLog(FFCDataDump.class);
 	
+	static final long DEFAULT_LINEGROUPSIZE = 20;
+	
 	static final String recordDemimiter = "\n";
 	
 	transient int numCol;
@@ -63,7 +65,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
-		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FFC_LINEGROUPSIZE);
+		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FFC_LINEGROUPSIZE, DEFAULT_LINEGROUPSIZE);
 		if(propLineGroupSize!=null && propLineGroupSize>0) {
 			lineGroupSize = (int)(long) propLineGroupSize;
 		}
@@ -104,7 +106,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		//colsMaxLenght.addAll(headersColsMaxLenght);
 	}
 	
-	int lineGroupSize = 20;
+	int lineGroupSize = (int) DEFAULT_LINEGROUPSIZE;
 
 	String separator = "|";
 	String firstColSep = "+";
