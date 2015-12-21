@@ -25,9 +25,20 @@ import tbrugz.sqldump.util.Utils;
  * XXX: problem with 'partitionby' and column of partition is null
  * XXX: add prop for 'recordDemimiter' ?
  * XXX: option to clip/crop values?
+ * 
+ * http://stackoverflow.com/questions/7666780/why-are-fixed-width-file-formats-still-in-use
+ * http://docs.aws.amazon.com/redshift/latest/dg/t_unloading_fixed_width_data.html - fixedwidth '0:3,1:100,2:30,3:2,4:6';
+ * https://docs.tibco.com/pub/enterprise-runtime-for-R/4.0.0/doc/html/Language_Reference/utils/read.fwf.html
+ * http://stackoverflow.com/questions/14383710/read-fixed-width-text-file
  */
 /**
  * FFC: Formatted Fixed Column
+ * 
+ * a.k.a: FF (fixed field), FWF (fixed width format)
+ * 
+ * see:
+ * https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.fwf.html
+ * https://www.treasury.gov/resource-center/sanctions/SDN-List/Documents/dat_spec.txt
  */
 public class FFCDataDump extends DumpSyntax implements Cloneable {
 
@@ -73,6 +84,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
+		lastBlockLineSize = 0;
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnName(i+1));
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));

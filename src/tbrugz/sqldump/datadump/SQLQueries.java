@@ -110,7 +110,7 @@ public class SQLQueries extends AbstractSQLProc {
 				sql = ParametrizedProperties.replaceProps(sql, prop);
 			}
 			if(sql==null) {
-				log.warn("no SQL defined for query [id="+qid+"]");
+				log.warn("no SQL defined for query [id="+qid+";propkey='"+"sqldump.query."+qid+".sql(file)"+"']");
 				continue;
 			}
 			
