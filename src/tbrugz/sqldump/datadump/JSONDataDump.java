@@ -131,7 +131,7 @@ public class JSONDataDump extends DumpSyntax {
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t"+(count==0?"":","));
 		if(this.pkCols!=null) {
 			sb.append("\"");
@@ -153,7 +153,7 @@ public class JSONDataDump extends DumpSyntax {
 				
 				out(sb.toString()+",\n",fos);
 				out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				
 				JSONDataDump jsondd = new JSONDataDump();
 				jsondd.padding = this.padding+"\t\t";

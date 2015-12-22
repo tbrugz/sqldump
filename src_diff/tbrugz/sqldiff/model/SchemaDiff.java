@@ -59,7 +59,7 @@ public class SchemaDiff implements Diff {
 		}
 		for(DBObjectType type: DBObjectType.values()) {
 			List<Diff> diffsoftype = getDiffsByDBObjectType(diffs, type);
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			boolean changed = false;
 			sb.append(String.format(formatStr, type));
 			//sb.append("changes ["+type+"]: ");
@@ -151,7 +151,7 @@ public class SchemaDiff implements Diff {
 	
 	@Override
 	public String getDiff() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		
 		List<Diff> diffs = getChildren();
 

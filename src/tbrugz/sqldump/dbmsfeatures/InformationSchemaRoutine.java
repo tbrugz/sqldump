@@ -17,9 +17,9 @@ public class InformationSchemaRoutine extends ExecutableObject {
 			return getBody();
 		}
 		
-		StringBuffer sb = null;
+		StringBuilder sb = null;
 		if(params!=null) {
-			sb = new StringBuffer();
+			sb = new StringBuilder();
 			for(int i=0;i<params.size();i++) {
 				if(i>0) { sb.append(", "); }
 				sb.append(params.get(i).getName());

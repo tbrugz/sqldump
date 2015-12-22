@@ -281,7 +281,7 @@ public class DataDumpUtils {
 	}
 
 	public static String join4sql(Collection<?> s, DateFormat df, String delimiter) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
 			Object obj = iter.next();
@@ -333,7 +333,7 @@ public class DataDumpUtils {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for(int i=0;i<numCol;i++) {
 			String colName = lsColNames.get(i);
 			String colType = lsColTypes.get(i).getSimpleName();

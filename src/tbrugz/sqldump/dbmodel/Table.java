@@ -66,7 +66,7 @@ public class Table extends DBObject implements Relation {
 		//List<String> pkCols = new ArrayList<String>();
 		String tableName = getFinalName(dumpWithSchemaName);
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		//Table
 		if(dumpDropStatements) {
 			sb.append("drop table "+tableName+";\n\n");
@@ -167,7 +167,7 @@ public class Table extends DBObject implements Relation {
 	
 	public String getAfterCreateTableScript(boolean dumpSchemaName, boolean dumpRemarks) {
 		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if(dumpRemarks) {
 			String stmp = getRelationRemarks(this, dumpSchemaName);
 			if(stmp!=null && stmp.length()>0) { sb.append(stmp+";\n"); }
@@ -294,7 +294,7 @@ public class Table extends DBObject implements Relation {
 	}
 	
 	static String getRelationRemarks(Relation rel, boolean dumpSchemaName) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String tableComment = rel.getRemarks();
 		if(tableComment!=null && !tableComment.trim().equals("")) {
 			tableComment = tableComment.replaceAll("'", "''");
@@ -304,7 +304,7 @@ public class Table extends DBObject implements Relation {
 	}
 	
 	static String getColumnRemarks(List<Column> columns, Relation rel, boolean dumpSchemaName) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		//XXX: column comments should be ordered by col name?
 		int commentCount = 0;
 		if(columns!=null) {

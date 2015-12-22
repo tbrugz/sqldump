@@ -75,7 +75,7 @@ public class View extends DBObject implements Relation {
 	}
 	
 	protected String getConstraintsSnippet() {
-		StringBuffer sbConstraints = new StringBuffer();
+		StringBuilder sbConstraints = new StringBuilder();
 		if(constraints!=null) {
 			for(int i=0;i<constraints.size();i++) {
 				Constraint cons = constraints.get(i);
@@ -105,7 +105,7 @@ public class View extends DBObject implements Relation {
 	}
 	
 	protected String getRemarksSnippet(boolean dumpSchemaName) {
-		StringBuffer sbRemarks = new StringBuffer();
+		StringBuilder sbRemarks = new StringBuilder();
 
 		String stmp1 = Table.getRelationRemarks(this, dumpSchemaName);
 		String stmp2 = Table.getColumnRemarks(columns, this, dumpSchemaName);

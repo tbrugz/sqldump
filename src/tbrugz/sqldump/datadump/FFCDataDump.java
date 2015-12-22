@@ -206,7 +206,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		dumpColumnNames(fos);
 		
 		//print buffer
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		for(int i=0;i<valuesBuffer.size();i++) {
 			if(show1stColSeparator) { sb.append(separator); }
@@ -234,7 +234,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	}
 	
 	void dumpColumnNames(Writer fos) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if(showColNames) {
 			if(showColNamesLines) {
 				//upper line
@@ -257,7 +257,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		out(sb.toString(), fos); //+"\n"
 	}
 	
-	void appendLine(StringBuffer sb, boolean isBlock1stLine) {
+	void appendLine(StringBuilder sb, boolean isBlock1stLine) {
 		if(show1stColSeparator) { sb.append(firstColSep); }
 		//lower line
 		int colsSize = 0;
@@ -274,7 +274,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		sb.append(recordDemimiter);
 	}
 	
-	void appendString(StringBuffer sb, int len, String value, int colIndex) {
+	void appendString(StringBuilder sb, int len, String value, int colIndex) {
 		if(len==0) {
 			log.warn("FFCSyntax error: len="+len+"; value: "+value+"; bufsize="+valuesBuffer.size());
 		}
@@ -286,7 +286,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		}
 	}
 
-	void appendPattern(StringBuffer sb, int len, String pattern, String separator) {
+	void appendPattern(StringBuilder sb, int len, String pattern, String separator) {
 		//sb.append( String.format("%"+len+"s"+separator, value) );
 		for(int i=0;i<len;i++) {
 			sb.append( pattern );
@@ -307,7 +307,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 			dumpColumnNames(fos);
 		}
 		else if(showTrailerLine && !showTrailerLineAllBlocks) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			appendLine(sb, false);
 			out(sb.toString(), fos);
 		}

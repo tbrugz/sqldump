@@ -107,7 +107,7 @@ public class CSVDataDump extends DumpSyntax {
 			out("[table "+tableName+"]", fos, recordDelimiter);
 		}
 		if(doColumnNamesHeaderDump) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			for(int i=0;i<numCol;i++) {
 				sb.append( (i!=0?columnDelimiter:"") + lsColNames.get(i));
 			}
@@ -141,7 +141,7 @@ public class CSVDataDump extends DumpSyntax {
 	}
 	
 	void dumpValues(List<?> vals, long count, Writer fos) throws IOException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		//log.info("lsColTypes:: "+lsColTypes.size()+" / "+lsColTypes+" vals: "+vals.size()); 
 		for(int i=0;i<lsColTypes.size();i++) {
 			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {

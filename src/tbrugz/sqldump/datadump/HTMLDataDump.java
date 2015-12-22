@@ -90,7 +90,7 @@ public class HTMLDataDump extends XMLDataDump {
 	public void dumpHeader(Writer fos) throws IOException {
 		tablePrepend(fos);
 		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("<table class='"+tableName+"'>");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
@@ -115,7 +115,7 @@ public class HTMLDataDump extends XMLDataDump {
 		//XXX: add tbody?
 	}
 	
-	protected void appendStyleNumericAlignRight(StringBuffer sb) {
+	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<lsColNames.size();i++) {
 			if(lsColTypes.get(i).equals(Integer.class) || lsColTypes.get(i).equals(Double.class)) {
@@ -133,7 +133,7 @@ public class HTMLDataDump extends XMLDataDump {
 	}
 	
 	public void dumpRow(ResultSet rs, long count, String clazz, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+clazz+"\"":"")+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
@@ -147,7 +147,7 @@ public class HTMLDataDump extends XMLDataDump {
 				}
 				
 				out(sb.toString()+"<td>\n", fos);
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				
 				HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t", true);
 				//htmldd.padding = this.padding+"\t\t";

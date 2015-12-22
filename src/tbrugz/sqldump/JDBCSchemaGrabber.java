@@ -496,7 +496,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	}
 	
 	String tableStats() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int countTT = 0;
 		for(TableType tt: tablesCountByTableType.keySet()) {
 			int count = tablesCountByTableType.get(tt);
@@ -509,7 +509,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	}
 	
 	String executableStats() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int countT = 0;
 		for(DBObjectType t: execCountByType.keySet()) {
 			int count = execCountByType.get(t);

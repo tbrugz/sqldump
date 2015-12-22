@@ -230,7 +230,7 @@ public class Utils {
 	}*/
 
 	public static String join(Collection<?> s, String delimiter, StringDecorator decorator) {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buffer = new StringBuilder();
 		if(s==null) { return null; }
 		Iterator<?> iter = s.iterator();
 		while (iter.hasNext()) {
@@ -421,7 +421,7 @@ public class Utils {
 	
 	static String readTextIntern(String message, String replacer) {
 		System.out.print(message);
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		InputStream is = System.in;
 		try {
 			int read = 0;

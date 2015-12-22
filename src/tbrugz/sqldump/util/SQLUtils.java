@@ -52,7 +52,7 @@ public class SQLUtils {
 	}
 
 	public static String getRowFromRS(ResultSet rs, int numCol, String table, String delimiter, String enclosing) throws SQLException {
-		StringBuffer sbTmp = new StringBuffer();
+		StringBuilder sbTmp = new StringBuilder();
 		for(int i=1;i<=numCol;i++) {
 			String value = rs.getString(i);
 			sbTmp.append(enclosing+value+enclosing);
@@ -297,7 +297,7 @@ public class SQLUtils {
 
 	public static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
 		int ncol = rsmd.getColumnCount();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		//System.out.println(ncol);
 		//System.out.println();
 		for(int i=1;i<=ncol;i++) {

@@ -241,7 +241,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int linecount = 0;
 		int countExecutables = 0;
 		ExecutableObject eo = null;
-		StringBuffer sb = null;
+		StringBuilder sb = null;
 		
 		while(rs.next()) {
 			int line = rs.getInt(3);
@@ -254,7 +254,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				}
 				//new object
 				eo = new ExecutableObject();
-				sb = new StringBuffer();
+				sb = new StringBuilder();
 				eo.setName( rs.getString(1) );
 				try {
 					eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );

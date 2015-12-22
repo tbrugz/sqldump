@@ -669,7 +669,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	
 	//TODO: map of statements (one for each failoverId)?
 	void setupSQLStatement(String[] parts) throws SQLException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		if(insertSQL!=null) {
 			log.debug("original insert sql: "+insertSQL);
 			filecol2tabcolMap = new ArrayList<Integer>();

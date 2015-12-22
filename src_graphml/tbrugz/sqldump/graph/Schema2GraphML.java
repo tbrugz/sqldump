@@ -295,7 +295,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 	
 	int setTableNodeAttributes(TableNode n, SchemaModel schemaModel, Relation t) {
 		//columns
-		StringBuffer sbCols = new StringBuffer();
+		StringBuilder sbCols = new StringBuilder();
 		int colCount = 0;
 		if(t instanceof Table) {
 			Table tt = (Table) t;
@@ -324,7 +324,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		n.setConstraintsDesc("");
 		int constrCount = 0;
 		if(showConstraints) {
-			StringBuffer sbConstraints = new StringBuffer();
+			StringBuilder sbConstraints = new StringBuilder();
 			for(Constraint cons: t.getConstraints()) {
 				switch(cons.getType()) {
 					case PK: 
@@ -339,7 +339,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 		//indexes
 		int indexCount = 0;
 		if(showIndexes) {
-			StringBuffer sbIndexes = new StringBuffer();
+			StringBuilder sbIndexes = new StringBuilder();
 			for(Index idx: schemaModel.getIndexes()) {
 				//log.debug("idx: "+idx+" / t: "+t.name);
 				if(idx.getTableName().equals(t.getName())) {

@@ -478,7 +478,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	}
 	
 	static boolean areAllImported(List<Query4CDD> qs) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		boolean ret = true;
 		for(Query4CDD q: qs) {
 			sb.append(q.exported+", ");
@@ -494,7 +494,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	}
 
 	static boolean areAllExported(List<Query4CDD> qs) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		boolean ret = true;
 		for(Query4CDD q: qs) {
 			sb.append(q.exported+", ");

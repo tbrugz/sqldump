@@ -65,7 +65,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	}
 	
 	public void dumpRowValues(List<Object> valsS, List<Object> valsT, long count, String clazz, Writer fos) throws IOException, SQLException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+clazz+"\"":"")+">");
 		for(int i=0;i<lsColNames.size();i++) {
 			Object valueS = valsS.get(i);

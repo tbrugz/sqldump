@@ -397,7 +397,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	}
 	
 	static String suggestAcronym(Collection<String> strings) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for(String col: strings) {
 			String[] strs = col.split("_");
 			for(String s: strs) {
@@ -408,7 +408,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	}
 
 	static String suggestAcronym(String string) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String[] strs = string.split("_");
 		for(String s: strs) {
 			sb.append(s.length()>0?s.substring(0, 1):"_");

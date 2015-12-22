@@ -147,7 +147,7 @@ public class ParametrizedProperties extends Properties {
 
 	public static String replaceProps(String s, Properties p) {
 		if(s==null) { return null; }
-		StringBuffer sb = new StringBuffer(s);
+		StringBuilder sb = new StringBuilder(s);
 		//s.replaceAll("\\$\\{(.*?)\\}", );
 		int count = 0;
 		int pos1;
