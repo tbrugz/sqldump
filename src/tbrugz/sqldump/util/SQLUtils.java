@@ -29,19 +29,22 @@ public class SQLUtils {
 	final static String COL_TABLE_CAT = "TABLE_CAT"; //"table_cat"
 	final static String COL_TABLE_SCHEM = "TABLE_SCHEM"; //"table_schem"
 	
-	//static final String PROP = "sqldump.datadump.strangePrecisionNumericAsInt";
 	static final String PROP_STRANGE_PRECISION_NUMERIC_AS_INT = "sqldump.sqlutils.strangePrecisionNumericAsInt";
+	static final String PROP_DEFAULT_TYPE_IS_STRING = "sqldump.sqlutils.defaultTypeIsString";
+	static final String PROP_CLOB_TYPE_IS_STRING = "sqldump.sqlutils.clobTypeIsString";
 	
 	static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
 	
 	static boolean strangePrecisionNumericAsInt = true;
-	static boolean defaultTypeIsString = true; //XXX: add prop for 'defaultTypeIsString'?
-	static boolean clobTypeIsString = true; //XXX: add prop for 'clobTypeIsString'?
+	static boolean defaultTypeIsString = true;
+	static boolean clobTypeIsString = true;
 	
 	public static void setProperties(Properties prop) {
 		if(prop==null) { return; }
 		else {
 			strangePrecisionNumericAsInt = Utils.getPropBool(prop, PROP_STRANGE_PRECISION_NUMERIC_AS_INT, strangePrecisionNumericAsInt);
+			defaultTypeIsString = Utils.getPropBool(prop, PROP_DEFAULT_TYPE_IS_STRING, defaultTypeIsString);
+			clobTypeIsString = Utils.getPropBool(prop, PROP_CLOB_TYPE_IS_STRING, clobTypeIsString);
 		}
 	}
 
