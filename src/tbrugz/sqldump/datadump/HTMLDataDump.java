@@ -153,7 +153,7 @@ public class HTMLDataDump extends XMLDataDump {
 				//htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
 				htmldd.procProperties(prop);
-				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 				sb.append("\n\t</td>");
 			}
 			else {

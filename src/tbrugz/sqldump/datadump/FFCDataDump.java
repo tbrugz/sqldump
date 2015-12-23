@@ -30,6 +30,11 @@ import tbrugz.sqldump.util.Utils;
  * http://docs.aws.amazon.com/redshift/latest/dg/t_unloading_fixed_width_data.html - fixedwidth '0:3,1:100,2:30,3:2,4:6';
  * https://docs.tibco.com/pub/enterprise-runtime-for-R/4.0.0/doc/html/Language_Reference/utils/read.fwf.html
  * http://stackoverflow.com/questions/14383710/read-fixed-width-text-file
+ * 
+ * XXX: word-wrap?
+ * https://tools.ietf.org/html/rfc3676
+ * https://en.wikipedia.org/wiki/Plain_text
+ * http://stackoverflow.com/questions/5837556/how-to-disable-word-wrapping-in-plain-text-files-in-chrome
  */
 /**
  * FFC: Formatted Fixed Column
@@ -364,6 +369,6 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 
 	@Override
 	public String getMimeType() {
-		return "text/plain";
+		return "text/plain"; //XXX add ";Format=Fixed" ?
 	}
 }

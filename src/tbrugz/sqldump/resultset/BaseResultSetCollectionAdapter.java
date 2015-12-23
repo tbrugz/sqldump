@@ -96,9 +96,11 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			if(methods.size()>=columnIndex) {
 				m = methods.get(columnIndex-1);
 			}
+			//else {throw new IndexOutOfBoundsException} ?
 			if(m==null) {
 				log.warn("method is null ["+(columnIndex-1)+"/"+methods.size()+"]");
-				return null;
+				throw new IndexOutOfBoundsException("method index "+columnIndex+" not found");
+				//return null;
 			}
 			Object oret = m.invoke(currentElement, (Object[]) null);
 			if(oret==null) { return null; }
