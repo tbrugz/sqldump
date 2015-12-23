@@ -14,11 +14,11 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	final List<E> list;
 	int position;
 
-	public ResultSetListAdapter(String name, List<String> uniqueCols, List<E> list, Class<E> clazz) throws IntrospectionException {
+	public ResultSetListAdapter(String name, List<String> uniqueCols, List<E> list, Class<? extends E> clazz) throws IntrospectionException {
 		this(name, uniqueCols, null, list, clazz);
 	}
 	
-	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list, Class<E> clazz) throws IntrospectionException {
+	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list, Class<? extends E> clazz) throws IntrospectionException {
 		super(name, uniqueCols, allCols, clazz);
 		this.list = list;
 		//Initially the cursor is positioned before the first row

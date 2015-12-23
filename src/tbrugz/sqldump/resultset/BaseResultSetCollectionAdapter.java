@@ -25,15 +25,15 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 
 	E currentElement;
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Class<E> clazz) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, Class<? extends E> clazz) throws IntrospectionException {
 		this(name, uniqueCols, null, false, clazz);
 	}
 	
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, Class<E> clazz) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, Class<? extends E> clazz) throws IntrospectionException {
 		this(name, uniqueCols, allCols, false, clazz);
 	}
 
-	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Class<E> clazz) throws IntrospectionException {
+	public BaseResultSetCollectionAdapter(String name, List<String> uniqueCols, List<String> allCols, boolean onlyUniqueCols, Class<? extends E> clazz) throws IntrospectionException {
 		this.name = name;
 		
 		columnNames = new ArrayList<String>();
@@ -55,13 +55,14 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 			}
 			else {
+				// add all!
 				addMatchProperties(clazz, propertyDescriptors, null, columnNames);
 			}
 		}
 		log.debug("resultset:cols: "+columnNames);
 	}
 	
-	void addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
+	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
 		int matched = 0;
 		for (PropertyDescriptor prop : propertyDescriptors) {
 			if(matchCol==null || matchCol.equals(prop.getName())) {
@@ -77,20 +78,24 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				columnNames.add(pname);
 				methods.add(m);
-				if(matchCol!=null) { return; }
+				if(matchCol!=null) { return 1; }
 				matched++;
 			}
 		}
 		if(matched==0) {
 			log.warn("column '"+matchCol+"' not matched: missing a getter? [class: "+clazz.getSimpleName()+"]");
 		}
+		return matched;
 	}
 
 	@Override
 	public String getString(int columnIndex) throws SQLException {
 		String ret = null;
+		Method m = null;
 		try {
-			Method m = methods.get(columnIndex-1);
+			if(methods.size()>=columnIndex) {
+				m = methods.get(columnIndex-1);
+			}
 			if(m==null) {
 				log.warn("method is null ["+(columnIndex-1)+"/"+methods.size()+"]");
 				return null;
@@ -101,6 +106,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
+			log.warn("method: "+m+" ; elem: "+currentElement+" ; ex: "+e); 
 			e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
