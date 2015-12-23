@@ -160,7 +160,7 @@ public class XMLDataDump extends DumpSyntax {
 				else {
 					xmldd.procProperties(prop);
 				}*/
-				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 				//sb.append("\t");
 			}
 			else {

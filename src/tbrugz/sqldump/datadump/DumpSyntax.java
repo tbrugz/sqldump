@@ -2,8 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -60,9 +58,9 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		floatFormatter = Utils.getFloatFormatter(floatLocale, floatFormat, getSyntaxId());
 	}
 	
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+	/*public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		initDump(null, tableName, pkCols, md);
-	}
+	}*/
 	
 	//XXX: remove from here?
 	public Object getValueNotNull(Object o) {

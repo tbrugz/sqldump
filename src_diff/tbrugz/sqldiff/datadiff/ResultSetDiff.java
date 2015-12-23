@@ -93,7 +93,7 @@ public class ResultSetDiff {
 			else {
 				dscouts.put(ds, new CategorizedOut(coutPattern, cb));
 			}
-			ds.initDump(tableName, keyCols, md);
+			ds.initDump(null, tableName, keyCols, md);
 		}
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;

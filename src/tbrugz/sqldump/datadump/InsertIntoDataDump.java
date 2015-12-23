@@ -140,7 +140,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 					if(rsInt==null) { continue; }
 					InsertIntoDataDump iidd = new InsertIntoDataDump();
 					iidd.procProperties(prop);
-					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, lsColNames.get(i), fos, true);
+					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 				}
 			}
 		}

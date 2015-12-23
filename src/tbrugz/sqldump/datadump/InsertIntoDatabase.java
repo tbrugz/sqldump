@@ -45,9 +45,9 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	long updated = 0;
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols,
+	public void initDump(String schemaName, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
-		super.initDump(tableName, pkCols, md);
+		super.initDump(schemaName, tableName, pkCols, md);
 
 		//setup
 		autoCommit = Utils.getPropBool(prop, PROP_IIDB_AUTOCOMMIT, autoCommit);

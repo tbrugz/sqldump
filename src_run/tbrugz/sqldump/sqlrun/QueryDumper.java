@@ -107,7 +107,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 			throws SQLException, IOException {
 		int count = 0;
 		
-		ds.initDump(queryName, uniqueColumns, rs.getMetaData());
+		ds.initDump(null, queryName, uniqueColumns, rs.getMetaData());
 
 		ds.dumpHeader(w);
 		while(rs.next()) {

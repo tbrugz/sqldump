@@ -48,9 +48,9 @@ public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax {
 	
 	
 	@Override
-	public void initDump(String tableName, List<String> pkCols,
+	public void initDump(String schemaName, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
-		super.initDump(tableName, pkCols, md);
+		super.initDump(schemaName, tableName, pkCols, md);
 		try {
 			conn = ConnectionUtil.initDBConnection(connPropPrefix, prop, autoCommit);
 		} catch (ClassNotFoundException e) {

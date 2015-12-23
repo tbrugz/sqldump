@@ -34,7 +34,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	}
 	
 	@Override
-	public void initDump(String tableName, List<String> cols, ResultSetMetaData md)
+	public void initDump(String schemaName, String tableName, List<String> cols, ResultSetMetaData md)
 			throws SQLException {
 		pkCols = cols;
 		if(cols!=null && pkCols.size()==0) {
@@ -45,7 +45,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 			//XXX: throw RuntimeException / IllegalArgument ?
 			return;
 		}
-		super.initDump(tableName, cols, md);
+		super.initDump(schemaName, tableName, cols, md);
 	}
 	
 	@Override
