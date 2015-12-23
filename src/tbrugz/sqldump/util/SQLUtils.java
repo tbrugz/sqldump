@@ -35,6 +35,8 @@ public class SQLUtils {
 	static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
 	
 	static boolean strangePrecisionNumericAsInt = true;
+	static boolean defaultTypeIsString = true; //XXX: add prop for 'defaultTypeIsString'?
+	static boolean clobTypeIsString = true; //XXX: add prop for 'clobTypeIsString'?
 	
 	public static void setProperties(Properties prop) {
 		if(prop==null) { return; }
@@ -201,7 +203,10 @@ public class SQLUtils {
 			}
 			else {
 				//XXX: show log.warn on 1st time only?
-				log.warn("getRow: unknown type ["+coltype+"], defaulting to String");
+				log.warn("getRow: unknown type ["+coltype+"], defaulting to "+(defaultTypeIsString?"String":"Object"));
+				if(!defaultTypeIsString) {
+					value = rs.getObject(i);
+				}
 				//value = rs.getString(i); // no need to get value again
 			}
 			
@@ -265,6 +270,7 @@ public class SQLUtils {
 				return Date.class;
 			case Types.CHAR:
 			case Types.VARCHAR:
+			//case Types.CLOB:
 				return String.class;
 			case Types.LONGVARBINARY:
 			case Types.BLOB:
@@ -276,12 +282,18 @@ public class SQLUtils {
 			case Types.OTHER:
 				return Object.class;
 			default:
+				if(clobTypeIsString && type==Types.CLOB) {
+					return String.class;
+				}
 				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
 				if(!unknownSQLTypes.contains(type)) {
-					log.warn("unknown SQL type ["+type+"], defaulting to String");
+					log.warn("unknown SQL type ["+type+"], defaulting to "+(defaultTypeIsString?"String":"Object"));
 					unknownSQLTypes.add(type);
 				}
-				return String.class;
+				if(defaultTypeIsString) {
+					return String.class;
+				}
+				return Object.class;
 		}
 	}
 	
