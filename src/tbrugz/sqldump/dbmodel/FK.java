@@ -80,12 +80,12 @@ public class FK extends AbstractConstraint implements Serializable {
 	
 	@Override
 	public String toString() {
-		return name+"["+fkTable+">-"+pkTable+"]";
+		return (schemaName!=null?schemaName+".":"")+name+"["+fkTable+">-"+pkTable+"]";
 		//return "fk:"+name+"["+fkTable+"<-"+pkTable+"]";
 	}
 
 	public String toStringFull() {
-		return name+"["+fkTable+"("+fkColumns+")"+">-"+pkTable+"("+pkColumns+")"+"]";
+		return (schemaName!=null?schemaName+".":"")+name+"["+fkTable+"("+fkColumns+")"+">-"+pkTable+"("+pkColumns+")"+"]";
 	}
 	
 	/*public String getName() {
