@@ -973,6 +973,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return true;
 	}
 	
+	final static String DEFAULT_EXPLAIN_COLUMNS = "PLAN_ID, TIMESTAMP, OPERATION, OPTIONS, OBJECT_OWNER, OBJECT_NAME, OBJECT_ALIAS, OBJECT_INSTANCE, OBJECT_TYPE, OPTIMIZER, SEARCH_COLUMNS, ID, PARENT_ID, DEPTH, POSITION, COST, CARDINALITY, BYTES, CPU_COST, IO_COST, TIME";
+	
 	/*
 	 * see: http://docs.oracle.com/cd/B19306_01/server.102/b14211/ex_plan.htm#i16938
 	 * columns: STATEMENT_ID | PLAN_ID | TIMESTAMP | REMARKS | OPERATION | OPTIONS | OBJECT_NODE | OBJECT_OWNER | OBJECT_NAME | OBJECT_ALIAS | OBJECT_INSTANCE | OBJECT_TYPE | OPTIMIZER | SEARCH_COLUMNS | ID | PARENT_ID | DEPTH | POSITION | COST | CARDINALITY | BYTES | OTHER_TAG | PARTITION_START | PARTITION_STOP | PARTITION_ID | OTHER | OTHER_XML | DISTRIBUTION | CPU_COST | IO_COST | TEMP_SPACE | ACCESS_PREDICATES | FILTER_PREDICATES | PROJECTION | TIME | QBLOCK_NAME
@@ -989,7 +991,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		stmt.execute(explainSql);
 		stmt.close();
 		
-		String planTableSelect = "select * from "+planTable+" where STATEMENT_ID = '"+id+"'";
+		String planTableSelect = "select "+DEFAULT_EXPLAIN_COLUMNS+" from "+planTable+" where STATEMENT_ID = '"+id+"'";
 		return conn.createStatement().executeQuery(planTableSelect);
 	}
 }
