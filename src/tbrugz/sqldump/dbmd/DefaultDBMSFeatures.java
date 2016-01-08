@@ -139,6 +139,11 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	*/
 	
 	@Override
+	public boolean supportsExplainPlan() {
+		return false;
+	}
+	
+	@Override
 	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
 		throw new UnsupportedOperationException("explainPlan not implemented");
 	}

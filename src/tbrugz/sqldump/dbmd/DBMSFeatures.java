@@ -102,6 +102,8 @@ public interface DBMSFeatures {
 	//List<NamedDBObject> grabTriggerNames(String catalog, String schema, String triggerNamePattern, Connection conn) throws SQLException;
 	//List<NamedDBObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, Connection conn) throws SQLException;
 	
+	boolean supportsExplainPlan();
+	
 	/**
 	 * Returns the execution plan for a statement. Returned resultset column names are database-dependent (at least for now)
 	 * 

@@ -139,6 +139,11 @@ public class H2Features extends InformationSchemaFeatures {
 		throw new UnsupportedOperationException("no differences between H2 columns found");
 	}
 	
+	@Override
+	public boolean supportsExplainPlan() {
+		return true;
+	}
+	
 	/*
 	 * http://www.h2database.com/html/grammar.html#explain
 	 */

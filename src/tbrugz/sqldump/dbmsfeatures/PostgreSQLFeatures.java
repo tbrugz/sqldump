@@ -93,6 +93,11 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
 	}
 	
+	@Override
+	public boolean supportsExplainPlan() {
+		return true;
+	}
+	
 	/*
 	 * http://www.postgresql.org/docs/devel/static/sql-explain.html
 	 */

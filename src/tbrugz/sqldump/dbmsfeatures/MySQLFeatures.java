@@ -71,6 +71,11 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 				+" "+DBObject.getFinalIdentifier(newName)+" "+column.getTypeDefinition();
 	}
 	
+	@Override
+	public boolean supportsExplainPlan() {
+		return true;
+	}
+	
 	/*
 	 * https://dev.mysql.com/doc/refman/5.0/en/explain.html
 	 * https://dev.mysql.com/doc/refman/5.0/en/explain-output.html
