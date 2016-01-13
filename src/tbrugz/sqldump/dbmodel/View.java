@@ -173,6 +173,11 @@ public class View extends DBObject implements Relation {
 	}
 	
 	@Override
+	public List<String> getColumnRemarks() {
+		return Table.getColumnRemarks(columns);
+	}
+	
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}

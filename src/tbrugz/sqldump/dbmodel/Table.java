@@ -275,6 +275,11 @@ public class Table extends DBObject implements Relation {
 		return getColumnTypes(columns);
 	}
 	
+	@Override
+	public List<String> getColumnRemarks() {
+		return getColumnRemarks(columns);
+	}
+	
 	static List<String> getColumnNames(List<Column> columns) {
 		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
@@ -289,6 +294,15 @@ public class Table extends DBObject implements Relation {
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {
 			ret.add(c.getType());
+		}
+		return ret;
+	}
+	
+	static List<String> getColumnRemarks(List<Column> columns) {
+		if(columns==null) { return null; }
+		List<String> ret = new ArrayList<String>();
+		for(Column c: columns) {
+			ret.add(c.getRemarks());
 		}
 		return ret;
 	}
