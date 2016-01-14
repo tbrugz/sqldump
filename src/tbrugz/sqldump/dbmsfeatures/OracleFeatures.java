@@ -6,9 +6,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -973,25 +976,35 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return true;
 	}
 	
-	final static String DEFAULT_EXPLAIN_COLUMNS = "PLAN_ID, TIMESTAMP, OPERATION, OPTIONS, OBJECT_OWNER, OBJECT_NAME, OBJECT_ALIAS, OBJECT_INSTANCE, OBJECT_TYPE, OPTIMIZER, SEARCH_COLUMNS, ID, PARENT_ID, DEPTH, POSITION, COST, CARDINALITY, BYTES, CPU_COST, IO_COST, TIME";
+	final static String PADDING = ".";
+	final static String DEFAULT_EXPLAIN_COLUMNS = "ID, PARENT_ID, DEPTH, /*lpad('.', level, '.' ) || OPERATION as OPERATION,*/ lpad('"+PADDING+"', (depth-1)*3, '"+PADDING+"' ) || OPERATION as OPERATION, OPTIONS, OBJECT_OWNER, OBJECT_NAME, /* OBJECT_ALIAS, OBJECT_INSTANCE, */ OBJECT_TYPE, OPTIMIZER, SEARCH_COLUMNS, /*POSITION,*/ COST, CARDINALITY, BYTES, CPU_COST, IO_COST, TIME";
 	
 	/*
-	 * see: http://docs.oracle.com/cd/B19306_01/server.102/b14211/ex_plan.htm#i16938
+	 * see: https://docs.oracle.com/cd/B28359_01/server.111/b28274/ex_plan.htm#i16938
 	 * columns: STATEMENT_ID | PLAN_ID | TIMESTAMP | REMARKS | OPERATION | OPTIONS | OBJECT_NODE | OBJECT_OWNER | OBJECT_NAME | OBJECT_ALIAS | OBJECT_INSTANCE | OBJECT_TYPE | OPTIMIZER | SEARCH_COLUMNS | ID | PARENT_ID | DEPTH | POSITION | COST | CARDINALITY | BYTES | OTHER_TAG | PARTITION_START | PARTITION_STOP | PARTITION_ID | OTHER | OTHER_XML | DISTRIBUTION | CPU_COST | IO_COST | TEMP_SPACE | ACCESS_PREDICATES | FILTER_PREDICATES | PROJECTION | TIME | QBLOCK_NAME
 	 */
 	@Override
 	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
-		String id = "sqldump";
+		Date now = new Date();
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		String id = "sqldump_"+df.format(now); //XXX: add random?
 		String planTable = "PLAN_TABLE";
 		
 		String explainSql = "explain plan\n\tset STATEMENT_ID = '"+id+"' into "+planTable+"\n"
 			+ "for\n"+sql;
-		log.debug("explain sql: "+explainSql);
+		//log.debug("explain sql:\n"+explainSql);
 		Statement stmt = conn.createStatement();
 		stmt.execute(explainSql);
 		stmt.close();
 		
-		String planTableSelect = "select "+DEFAULT_EXPLAIN_COLUMNS+" from "+planTable+" where STATEMENT_ID = '"+id+"'";
+		String planTableSelect = "select "+DEFAULT_EXPLAIN_COLUMNS
+				+"\nfrom "+planTable
+				+"\nconnect by prior id = parent_id "
+				+"\nand prior statement_id = statement_id "
+				+"\nstart with parent_id = 0 "
+				+"\nand statement_id = '"+id+"' "
+				+"\norder by id ";
+		//log.debug("plan_table sql:\n"+explainSql);
 		return conn.createStatement().executeQuery(planTableSelect);
 	}
 }
