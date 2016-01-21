@@ -1,6 +1,8 @@
 package tbrugz.sqldump.util;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.DatabaseMetaData;
@@ -310,7 +312,11 @@ public class SQLUtils {
 		dumpRS(rs, rs.getMetaData(), out);
 	}
 
-	public static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
+	public static void dumpRS(ResultSet rs, Writer w) throws SQLException, IOException {
+		dumpRS(rs, rs.getMetaData(), w);
+	}
+	
+	static StringBuilder dumpRS2StringBuilder(ResultSet rs, ResultSetMetaData rsmd) throws SQLException {
 		int ncol = rsmd.getColumnCount();
 		StringBuilder sb = new StringBuilder();
 		//System.out.println(ncol);
@@ -326,7 +332,17 @@ public class SQLUtils {
 			}
 			sb.append("\n");
 		}
-		out.println("\n"+sb.toString()+"\n");
+		return sb;
+	}
+	
+	public static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, PrintStream out) throws SQLException {
+		StringBuilder sb = dumpRS2StringBuilder(rs, rsmd);
+		out.println(sb.toString());
+	}
+
+	public static void dumpRS(ResultSet rs, ResultSetMetaData rsmd, Writer w) throws SQLException, IOException {
+		StringBuilder sb = dumpRS2StringBuilder(rs, rsmd);
+		w.write(sb.toString());
 	}
 	
 	public static String getColumnNames(ResultSetMetaData md) throws SQLException {
