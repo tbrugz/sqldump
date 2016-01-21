@@ -114,4 +114,8 @@ public interface DBMSFeatures {
 	 */
 	ResultSet explainPlan(String sql, Connection conn) throws SQLException;
 	
+	/*
+	 * http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
+	 * XXX add: boolean isValidConnection(Connection conn);
+	 */
 }

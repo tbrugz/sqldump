@@ -94,6 +94,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	String remarks;
 	Boolean autoIncrement;
 	//XXX add transient String tableName; //??
+	//XXX Boolean updateable; //?? - http://english.stackexchange.com/questions/56431/correct-spelling-updatable-or-updateable
 	int ordinalPosition; //XXXdone add column position in table? nice for column compare...
 
 	public static transient boolean useAutoIncrement = false;
