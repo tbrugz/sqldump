@@ -145,11 +145,16 @@ public class StatsProc extends AbstractSQLProc {
 					String n = sd.get(c.getName());
 					String t = table.getName();
 					String a = c.getName();
+					String sqlPrefix = "select '"+t+"' as table_name, '"+a+"' as column_name, "+
+							"'"+c.getType()+"' as type_name, "+
+							c.getColumSize()+" as column_size, "+
+							//c.getDecimalDigits()+" as decimal_digits, '"+
+							//c.isNullable()+"' as nullable,"+
+							"count(*) as count_all, ";
 					boolean isLob = isNonDistinctableColumnType(c.getType());
 					//XXX: add type, precision, scale?
 					if(isLob) {
-						cols.add("select '"+t+"' as table_name, '"+a+"' as column_name, "
-								+ "count(*) as count_all, "
+						cols.add(sqlPrefix
 								+ "null as count_non_null, "
 								+ "null as count_null, "
 								+ "null as cardinality, null as selectivity "
@@ -157,8 +162,7 @@ public class StatsProc extends AbstractSQLProc {
 						countLobColumn++;
 					}
 					else {
-						cols.add("select '"+t+"' as table_name, '"+a+"' as column_name, "
-								+ "count(*) as count_all, "
+						cols.add(sqlPrefix
 								+ "count("+n+") as count_non_null, "
 								+ "count(*) - count("+n+") as count_null, "
 								+ "count(distinct "+n+") as cardinality, case when count("+n+")=0 then null else cast(count(distinct "+n+") as float)/count("+n+") end as selectivity "
