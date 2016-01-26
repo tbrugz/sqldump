@@ -75,6 +75,7 @@ public class DataDiff extends AbstractFailable {
 			}
 			catch(SQLException e) {
 				log.warn("error in sql exec ["+id+" ; '"+table+"']: "+sql);
+				//conn.rollback();
 				throw e;
 			}
 		}
@@ -158,7 +159,7 @@ public class DataDiff extends AbstractFailable {
 		targetConn = conn;
 	}
 
-	public void process() throws SQLException, IOException, InterruptedException, ExecutionException {
+	public void process() throws SQLException, IOException, InterruptedException {
 		if(sourceSchemaModel==null || targetSchemaModel==null) {
 			log.error("can't datadiff if source or taget models are null");
 			if(failonerror) { throw new ProcessingException("can't datadiff if source or taget models are null"); }
@@ -301,7 +302,7 @@ public class DataDiff extends AbstractFailable {
 		}
 	}
 	
-	boolean doDiff(Table table, String sql, ResultSetDiff rsdiff, List<String> keyCols, List<DiffSyntax> dss, boolean sourceMustImportData, boolean targetMustImportData, String coutPattern) throws SQLException, IOException, InterruptedException, ExecutionException {
+	boolean doDiff(Table table, String sql, ResultSetDiff rsdiff, List<String> keyCols, List<DiffSyntax> dss, boolean sourceMustImportData, boolean targetMustImportData, String coutPattern) throws SQLException, IOException, InterruptedException {
 		ResultSet rsSource = null, rsTarget=null;
 		
 		//XXX: drop table if imported?
@@ -310,6 +311,7 @@ public class DataDiff extends AbstractFailable {
 			log.warn("'source' & 'target' set to import data: it will probably not work...");
 		}
 		
+		try {
 		ExecutorService executor = Executors.newFixedThreadPool(2);
 		
 		ResultSetGrabber sRunS = new ResultSetGrabber("source", sourceConn, table, sql, sourceMustImportData);
@@ -318,9 +320,16 @@ public class DataDiff extends AbstractFailable {
 		Future<ResultSet> futureSourceSM = executor.submit(sRunS);
 		Future<ResultSet> futureTargetSM = executor.submit(sRunT);
 		
+		executor.shutdown();
+		
+		//XXX: set timeout? .get(60, TimeUnit.SECONDS);
 		rsSource = futureSourceSM.get(); //blocks for return
 		rsTarget = futureTargetSM.get();
-		executor.shutdown();
+		}
+		catch(ExecutionException e) {
+			log.warn("doDiff exception [table="+table+"]: "+e);
+			return false;
+		}
 		
 		// if sequential run is needed...
 		/*
