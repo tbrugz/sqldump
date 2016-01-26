@@ -154,6 +154,7 @@ public class PatchDumper implements DiffDumper {
 	}
 	
 	List<String> bigStringToLines(String s) {
+		if(s==null) { s = ""; }
 		return Arrays.asList(s.split("\n"));
 	}
 	

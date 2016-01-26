@@ -71,7 +71,7 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 	@SuppressWarnings("unchecked")
 	public static <T extends DBIdentifiable> T getDBIdentifiableByName(Collection<? extends DBIdentifiable> dbids, String name) {
 		for(DBIdentifiable d: dbids) {
-			if(d.getName().equals(name)) { return (T) d; }
+			if(d.getName()!=null && d.getName().equals(name)) { return (T) d; }
 		}
 		return null;
 	}
