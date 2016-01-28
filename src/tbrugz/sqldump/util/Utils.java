@@ -201,7 +201,7 @@ public class Utils {
 	 * http://stackoverflow.com/questions/1515437/java-function-for-arrays-like-phps-join
 	 */
 	public static String join(Collection<?> s, String delimiter) {
-		return join(s, delimiter, StringDecorator.getInstance());
+		return join(s, delimiter, null);
 	}
 	
 	/*@Deprecated

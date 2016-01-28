@@ -9,15 +9,20 @@ import java.lang.reflect.Method;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.Utils;
+
 public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractResultSet {
 	
 	static final Log log = LogFactory.getLog(BaseResultSetCollectionAdapter.class);
 
+	static String collectionValuesJoiner = null;
+	
 	final String name;
 	final List<String> columnNames;
 	final ResultSetMetaData metadata;
@@ -104,7 +109,12 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			}
 			Object oret = m.invoke(currentElement, (Object[]) null);
 			if(oret==null) { return null; }
-			ret = String.valueOf(oret);
+			if(collectionValuesJoiner!=null && oret instanceof Collection) {
+				ret = Utils.join((Collection<?>) oret, collectionValuesJoiner);
+			}
+			else {
+				ret = String.valueOf(oret);
+			}
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -141,4 +151,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		return getString(columnLabel);
 	}
 	
+	public static void setCollectionValuesJoiner(String collectionValuesJoiner) {
+		BaseResultSetCollectionAdapter.collectionValuesJoiner = collectionValuesJoiner;
+	}
 }
