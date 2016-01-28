@@ -199,10 +199,10 @@ public class SQLDiff implements Executor {
 		
 		Future<SchemaModel> futureSourceSM = executor.submit(sourceGrabber);
 		Future<SchemaModel> futureTargetSM = executor.submit(targetGrabber);
+		executor.shutdown();
 		
 		fromSM = futureSourceSM.get(); //blocks for return
 		toSM = futureTargetSM.get();
-		executor.shutdown();
 		
 		/*// grab schemas - sequential
 		log.info("grabbing 'source' model ["+sourceId+"]");
