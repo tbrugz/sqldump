@@ -30,6 +30,8 @@ import tbrugz.sqldump.util.Utils;
  * 
  * http://www.programmerinterview.com/index.php/database-sql/cardinality-versus-selectivity/
  * select count(*), count(distinct COL) from TABLE
+ * 
+ * http://www.slideshare.net/khuranashailja/data-quality-and-data-profiling
  *
  * XXX: CategorizedOut: use [schemaname]?
  */

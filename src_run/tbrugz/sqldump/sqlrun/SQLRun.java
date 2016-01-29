@@ -54,6 +54,9 @@ import tbrugz.sqldump.util.Utils;
  * XXX: remove dependency from CSVImporter, RegexImporter
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
+ * 
+ * see also:
+ * http://www.postgresql.org/docs/9.2/static/populate.html
 */
 public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
