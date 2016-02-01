@@ -48,6 +48,7 @@ public class DiffTwoQueries implements Executor {
 	static final String PROP_SOURCE_QUERY = PREFIX+".sourcesql";
 	static final String PROP_TARGET_QUERY = PREFIX+".targetsql";
 	static final String PROP_QUERY = PREFIX+".sql";
+	static final String PROP_SCHEMANAME = PREFIX+".schemaname";
 	static final String PROP_TABLENAME = PREFIX+".tablename";
 	static final String PROP_KEYCOLS = PREFIX+".keycols";
 	static final String PROP_LOOPLIMIT = PREFIX+".looplimit";
@@ -120,6 +121,7 @@ public class DiffTwoQueries implements Executor {
 			log.info("null '"+PROP_TABLENAME+"', using '"+DEFAULT_TABLE_NAME+"'");
 			tableName = DEFAULT_TABLE_NAME;
 		}
+		String schemaName = prop.getProperty(PROP_SCHEMANAME);
 		List<String> keyCols = Utils.getStringListFromProp(prop, PROP_KEYCOLS, ",");
 		if(keyCols==null || keyCols.size()==0 || keyCols.get(0).trim().equals("")) {
 			String message = "prop '"+PROP_KEYCOLS+"' must not be null or empty";
@@ -157,7 +159,7 @@ public class DiffTwoQueries implements Executor {
 		rsdiff.setLimit(loopLimit);
 		try {
 			log.info("starting diff...");
-			rsdiff.diff(rsSource, rsTarget, tableName, keyCols, dss, finalPattern);
+			rsdiff.diff(rsSource, rsTarget, schemaName, tableName, keyCols, dss, finalPattern);
 		}
 		catch(IllegalArgumentException e) {
 			log.warn("error diffing: "+e);

@@ -38,20 +38,27 @@ public class ResultSetDiff {
 		dumpUpdates = true,
 		dumpDeletes = true;
 	
-	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+	public void diff(ResultSet source, ResultSet target, String schemaName, String tableName, List<String> keyCols,
 			List<DiffSyntax> dss, String coutPattern) throws SQLException, IOException {
-		diff(source, target, tableName, keyCols, dss, coutPattern, null);
+		diff(source, target, schemaName, tableName, keyCols, dss, coutPattern, null);
 	}
 
+	@Deprecated
 	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
 			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
 		List<DiffSyntax> dss = new ArrayList<DiffSyntax>(); dss.add(ds);
-		diff(source, target, tableName, keyCols, dss, null, singleWriter);
+		diff(source, target, null, tableName, keyCols, dss, null, singleWriter);
+	}
+	
+	public void diff(ResultSet source, ResultSet target, String schemaName, String tableName, List<String> keyCols,
+			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
+		List<DiffSyntax> dss = new ArrayList<DiffSyntax>(); dss.add(ds);
+		diff(source, target, schemaName, tableName, keyCols, dss, null, singleWriter);
 	}
 	
 	//XXX: add schemaName ?
 	@SuppressWarnings("rawtypes")
-	void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+	void diff(ResultSet source, ResultSet target, String schemaName, String tableName, List<String> keyCols,
 			List<DiffSyntax> dss, String coutPattern, Writer singleWriter) throws SQLException, IOException {
 		boolean readSource = true;
 		boolean readTarget = true;
@@ -79,7 +86,7 @@ public class ResultSetDiff {
 				throw new IllegalArgumentException("key column not found: "+key);
 			}
 		}
-		log.debug("[table="+tableName+"] key cols: "+keyCols);
+		log.debug("[table="+(schemaName!=null?schemaName+".":"")+tableName+"] key cols: "+keyCols);
 		
 		Map<DiffSyntax, DataDumpUtils.SyntaxCOutCallback> dscbs = new HashMap<DiffSyntax, DataDumpUtils.SyntaxCOutCallback>();
 		Map<DiffSyntax, CategorizedOut> dscouts = new HashMap<DiffSyntax, CategorizedOut>();
@@ -93,7 +100,7 @@ public class ResultSetDiff {
 			else {
 				dscouts.put(ds, new CategorizedOut(coutPattern, cb));
 			}
-			ds.initDump(null, tableName, keyCols, md);
+			ds.initDump(schemaName, tableName, keyCols, md);
 		}
 		//Writer w = new PrintWriter(System.out); //XXXxx: change to COut ? - [schemaname](?), [tablename], [changetype]
 		identicalRowsCount = updateCount = dumpCount = deleteCount = sourceRowCount = targetRowCount = 0;

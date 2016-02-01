@@ -372,7 +372,7 @@ public class DataDiff extends AbstractFailable {
 		}
 		
 		log.debug("diff for table '"+table+"'...");
-		rsdiff.diff(rsSource, rsTarget, table.getName(), keyCols, dss, coutPattern);
+		rsdiff.diff(rsSource, rsTarget, table.getSchemaName(), table.getName(), keyCols, dss, coutPattern);
 		log.info("table '"+table+"' data diff: "+rsdiff.getStats());
 		
 		rsSource.close(); rsTarget.close();

@@ -61,7 +61,7 @@ public class ResultSetDiffTest {
 		Assert.assertEquals(1, ds.size());
 		
 		log.info("s: 1 t: 2");
-		rsd.diff(rsla1, rsla2, "table1", TestBean.getUniqueCols(), ds, pattern);
+		rsd.diff(rsla1, rsla2, null, "table1", TestBean.getUniqueCols(), ds, pattern);
 		Assert.assertEquals(2, rsd.getDumpCount());
 		Assert.assertEquals(1, rsd.getUpdateCount());
 		Assert.assertEquals(1, rsd.getDeleteCount());
@@ -69,7 +69,7 @@ public class ResultSetDiffTest {
 		
 		log.info("s: 2 t: 1");
 		rsla1.beforeFirst(); rsla2.beforeFirst();
-		rsd.diff(rsla2, rsla1, "table2", TestBean.getUniqueCols(), ds, pattern);
+		rsd.diff(rsla2, rsla1, null, "table2", TestBean.getUniqueCols(), ds, pattern);
 		Assert.assertEquals(1, rsd.getDumpCount());
 		Assert.assertEquals(1, rsd.getUpdateCount());
 		Assert.assertEquals(2, rsd.getDeleteCount());
