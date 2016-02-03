@@ -8,6 +8,8 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 /* implements Comparable<ExecutableObject>: not allowed?!
  * 
  * create package: http://www.stanford.edu/dept/itss/docs/oracle/10g/server.101/b10759/statements_6006.htm
+ * 
+ * see: https://en.wikipedia.org/wiki/SQL/JRT
  */
 public class ExecutableObject extends DBObject {
 	private static final long serialVersionUID = 1L;

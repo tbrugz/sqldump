@@ -4,5 +4,5 @@ public interface NamedDBObject /* extends Comparable<NamedDBObject>? */ {
 	public String getName();
 	public String getSchemaName();
 	
-	//public String getQualifiedName();
+	//public default String getQualifiedName(); // java8
 }

@@ -168,7 +168,7 @@ public class DiffTwoQueries implements Executor {
 			throw e;
 		}
 
-		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
+		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms] [outpattern: "+outPattern+"]");
 	}
 
 	@Override

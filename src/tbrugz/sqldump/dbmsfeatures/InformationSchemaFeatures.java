@@ -26,8 +26,11 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.util.Utils;
 
-//FIXME: add object names filters
-//TODO: use bind parameter in SQL queries
+/*
+ * see: https://en.wikipedia.org/wiki/Information_schema
+ * FIXME: add object names filters
+ * TODO: use bind parameter in SQL queries
+ */
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	private static final Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
