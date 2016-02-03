@@ -46,8 +46,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''"); // "DATE ''yyyy-MM-dd''" ?
 
 	protected String tableName;
-	protected String tableName4Dump;
-	protected String schemaName4Dump;
+	protected String schemaName;
+	protected String fullTableName4Dump;
 	protected int numCol;
 	String colNames;
 	protected final List<String> lsColNames = new ArrayList<String>();
@@ -95,8 +95,9 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public void initDump(String schemaName, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
-		this.tableName4Dump = tableName;
-		this.schemaName4Dump = schemaName;
+		this.schemaName = schemaName;
+		String tableName4Dump = tableName;
+		String schemaName4Dump = schemaName;
 		this.pkCols = pkCols;
 		numCol = md.getColumnCount();
 		lsColTypes.clear();
@@ -118,6 +119,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		else {
 			colNames = "("+Utils.join(lsColNames, ", ")+")";
 		}
+		fullTableName4Dump = getTable4Dump(schemaName4Dump, tableName4Dump);
 	}
 
 	//XXX: option to dump ResultSet columns
@@ -132,7 +134,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 				")", fos);
 		}
 		else {
-			out("insert into "+getTable4Dump()+
+			out("insert into "+fullTableName4Dump+
 				(doColumnNamesDump?" "+colNames:"")+
 				" values ("+
 				valsStr+
@@ -163,7 +165,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 			out(thisHeader, fos);
 		}
 		if(dumpCompactMode) {
-			out("insert into "+getTable4Dump()+
+			out("insert into "+fullTableName4Dump+
 				(doColumnNamesDump?" "+colNames:"")+
 				" values", fos);
 		}
@@ -186,8 +188,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 		*/
 	}
 	
-	protected String getTable4Dump() {
-		return (doDumpSchemaName&&schemaName4Dump!=null?schemaName4Dump+".":"")+tableName4Dump;
+	protected String getTable4Dump(String schema, String table) {
+		return (doDumpSchemaName&&schema!=null?schema+".":"")+table;
 	}
 
 	@Override
