@@ -326,7 +326,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			allRSCols.add(rsmd.getColumnLabel(i+1));
 		}
 		if(!allRSCols.containsAll(allCols)) {
-			log.warn("query '"+queryId+"' ["+queryType+"] doesn't contain all required columns [required cols are: "+allCols+"; avaiable cols are: "+allRSCols+"]");
+			log.warn("query '"+queryId+"' ["+queryType+"] doesn't contain all required columns [required cols are: "+allCols+"; available cols are: "+allRSCols+"]");
 			return false;
 		}
 		return true;

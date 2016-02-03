@@ -69,7 +69,7 @@ public class ConnectionUtil {
 			try {
 				Properties pclient = conn.getClientInfo();
 				if(pclient.size()==0) {
-					log.debug("no Connection.getClientInfo() info avaiable");
+					log.debug("no Connection.getClientInfo() info available");
 				}
 				else {
 					for(Object key: pclient.keySet()) {

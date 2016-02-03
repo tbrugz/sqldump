@@ -286,7 +286,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		
 		//oneHierarchyPerDim = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM, oneHierarchyPerDim);
 		//if(prop.getProperty(PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM)!=null) {
-		//	log.warn("prop '"+PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM+"' not avaiable");
+		//	log.warn("prop '"+PROP_MONDRIAN_SCHEMA_ONEHIERPERDIM+"' not available");
 		//}
 		
 		addDimForEachHierarchy = Utils.getPropBool(prop, PROP_MONDRIAN_SCHEMA_ADDDIMFOREACHHIERARCHY, addDimForEachHierarchy);

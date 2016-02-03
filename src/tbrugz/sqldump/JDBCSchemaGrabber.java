@@ -275,7 +275,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		if(schemaPattern==null) {
 			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
-			log.info(getIdDesc()+"schemaPattern not defined. schemas avaiable: "+schemas);
+			log.info(getIdDesc()+"schemaPattern not defined. schemas available: "+schemas);
 			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
 			if(schemaPattern!=null) { equalsUsername = true; }
@@ -296,8 +296,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 
 		if(schemaPattern==null) {
-			log.error("schema name undefined & no suggestion avaiable, aborting...");
-			if(failonerror) { throw new ProcessingException("schema name undefined & no suggestion avaiable, aborting..."); }
+			log.error("schema name undefined & no suggestion available, aborting...");
+			if(failonerror) { throw new ProcessingException("schema name undefined & no suggestion available, aborting..."); }
 			return null;
 		}
 		
@@ -823,7 +823,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				catch(SQLException e2) {
 					log.warn("column name for procedure parameter ordinal position not found: "+e);
-					log.debug("grabProceduresColumns: columns avaiable: "+SQLUtils.getColumnNames(rs.getMetaData()));
+					log.debug("grabProceduresColumns: columns available: "+SQLUtils.getColumnNames(rs.getMetaData()));
 				}
 			}
 			
@@ -944,7 +944,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			catch(Exception e) {
 				grabColumnIsAutoincrement = false;
-				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not avaiable");
+				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not available");
 			}
 		}
 		if(autoInc) { c.setAutoIncrement(true); }

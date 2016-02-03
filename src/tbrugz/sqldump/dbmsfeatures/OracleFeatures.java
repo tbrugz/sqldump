@@ -902,7 +902,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//log.info("OracleFK: "+ofk);
 			} catch (SQLException e) {
 				grabXtraFKColumns = false;
-				log.warn("addFKSpecificFeatures: column 'STATUS', 'VALIDATED' or 'RELY' not avaiable [ex: "+e+"]");
+				log.warn("addFKSpecificFeatures: column 'STATUS', 'VALIDATED' or 'RELY' not available [ex: "+e+"]");
 				if(log.isDebugEnabled()) {
 					try { log.debug("rowlist: "+SQLUtils.getColumnNames(rs.getMetaData()));	}
 					catch(SQLException ee) { ee.printStackTrace(); }

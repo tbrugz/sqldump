@@ -438,7 +438,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			//XXX: sleep only in follow mode?
 			if(follow) { Thread.sleep(sleepMilis); }
 			if(fileIS!=null && fileIS.available()>0) {
-				//log.debug("avaiable: "+fileIS.available());
+				//log.debug("available: "+fileIS.available());
 				scan = createScanner(); 
 			}
 			is1stloop = false;
