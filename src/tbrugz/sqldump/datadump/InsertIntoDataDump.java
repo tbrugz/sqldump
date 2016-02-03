@@ -38,14 +38,16 @@ public class InsertIntoDataDump extends DumpSyntax {
 	//XXX: compactmode: maximum number of rows in one insert statement?
 	static final String PROP_INSERTINTO_COMPACT = "sqldump.datadump.insertinto.compactmode";
 	static final String PROP_INSERTINTO_QUOTESQL = INSERTINTO_PREFIX+".quotesql";
+	static final String PROP_INSERTINTO_DUMPSCHEMA = INSERTINTO_PREFIX+".dumpschema";
 	
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
 	static final String COMPACTMODE_IDENT = "  ";
-	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''");
+	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''"); // "DATE ''yyyy-MM-dd''" ?
 
 	protected String tableName;
 	protected String tableName4Dump;
+	protected String schemaName4Dump;
 	protected int numCol;
 	String colNames;
 	protected final List<String> lsColNames = new ArrayList<String>();
@@ -56,6 +58,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 	boolean doDumpCursors = false;
 	boolean dumpCompactMode = false;
 	boolean doQuoteAllSqlIds = false;
+	boolean doDumpSchemaName = false;
 	
 	String header;
 	String footer;
@@ -77,6 +80,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
 		dumpCompactMode = Utils.getPropBool(prop, PROP_INSERTINTO_COMPACT, dumpCompactMode);
 		doQuoteAllSqlIds = Utils.getPropBool(prop, PROP_INSERTINTO_QUOTESQL, doQuoteAllSqlIds);
+		doDumpSchemaName = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPSCHEMA, doDumpSchemaName);
 		//XXX replace [schemaname] in header & footer ?
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
@@ -89,9 +93,10 @@ public class InsertIntoDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+	public void initDump(String schemaName, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.tableName = tableName;
 		this.tableName4Dump = tableName;
+		this.schemaName4Dump = schemaName;
 		this.pkCols = pkCols;
 		numCol = md.getColumnCount();
 		lsColTypes.clear();
@@ -108,6 +113,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 			StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 			colNames = "("+Utils.join(lsColNames, ", ", quoteAllDecorator)+")";
 			tableName4Dump = quoteAllDecorator.get(tableName);
+			schemaName4Dump = quoteAllDecorator.get(schemaName);
 		}
 		else {
 			colNames = "("+Utils.join(lsColNames, ", ")+")";
@@ -126,7 +132,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 				")", fos);
 		}
 		else {
-			out("insert into "+tableName4Dump+
+			out("insert into "+getTable4Dump()+
 				(doColumnNamesDump?" "+colNames:"")+
 				" values ("+
 				valsStr+
@@ -157,7 +163,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 			out(thisHeader, fos);
 		}
 		if(dumpCompactMode) {
-			out("insert into "+tableName+
+			out("insert into "+getTable4Dump()+
 				(doColumnNamesDump?" "+colNames:"")+
 				" values", fos);
 		}
@@ -178,6 +184,10 @@ public class InsertIntoDataDump extends DumpSyntax {
 			out("", fos);
 		}
 		*/
+	}
+	
+	protected String getTable4Dump() {
+		return (doDumpSchemaName&&schemaName4Dump!=null?schemaName4Dump+".":"")+tableName4Dump;
 	}
 
 	@Override

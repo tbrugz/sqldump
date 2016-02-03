@@ -90,7 +90,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 			}
 		}
 		
-		out("delete from "+tableName+
+		out("delete from "+getTable4Dump()+
 				" where "+
 				Utils.join(wheres, " and ")+
 				";", w);
@@ -146,7 +146,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 			}
 		}
 		
-		out("update "+tableName+" set "+
+		out("update "+getTable4Dump()+" set "+
 				Utils.join(sets, ", ")+
 				" where "+
 				Utils.join(wheres, " and ")+

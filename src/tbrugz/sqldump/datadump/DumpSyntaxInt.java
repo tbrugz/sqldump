@@ -21,7 +21,7 @@ public interface DumpSyntaxInt {
 	
 	public String getDefaultFileExtension();
 
-	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
+	public void initDump(String schemaName, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
 	
 	//@Deprecated
 	//public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException;
