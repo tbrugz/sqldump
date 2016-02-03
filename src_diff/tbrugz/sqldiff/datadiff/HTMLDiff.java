@@ -74,7 +74,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 				sb.append( "<td>"+ valueS +"</td>" );
 			}
 			else {
-				sb.append( "<td><span class=\"add\">"+ valueS +"</span><span class=\"remove\">"+ valueT +"</span></td>" );
+				sb.append( "<td><span class=\"add\">"+ valueT +"</span><span class=\"remove\">"+ valueS +"</span></td>" );
 			}
 		}
 		sb.append("</tr>");

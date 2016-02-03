@@ -142,7 +142,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 				}
 			}
 			else {
-				wheres.add(colname+" = "+valsT.get(i));
+				wheres.add(colname+" = "+valsT.get(i)); //is PK, valsT.get(i) == valsS.get(i)
 			}
 		}
 		
