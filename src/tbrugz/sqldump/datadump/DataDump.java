@@ -508,6 +508,10 @@ public class DataDump extends AbstractSQLProc {
 					doSyntaxDumpList.set(i, true);
 					filenameList.set(i, filename);
 				}
+				
+				if(ds.isFetcherSyntax() && syntaxList.size()>1) {
+					log.warn("Dump syntax '"+ds.getSyntaxId()+"' is fetcher syntax but other syntaxes are selected [syntaxList="+getSyntaxListNames(syntaxList)+"]");
+				}
 			}
 			
 			//Map<String, String> lastPartitionIdByPartitionPattern = new HashMap<String, String>();
@@ -534,6 +538,10 @@ public class DataDump extends AbstractSQLProc {
 								continue;
 							}
 							
+							if(ds.isPartitionable() && !"".equals(partitionByPattern)) {
+								throw new RuntimeException("Dump syntax '"+ds.getSyntaxId()+"' is not partitionable but partition pattern defined [partitionPattern="+partitionByPattern+"]");
+							}
+							
 							if(ds.isStateful() && !"".equals(partitionByPattern)) {
 								String dskey = ds.getSyntaxId()+"$"+partitionByPattern;
 								DumpSyntax ds2 = statefulDumpSyntaxes.get(dskey);
@@ -541,7 +549,7 @@ public class DataDump extends AbstractSQLProc {
 									try {
 										ds2 = (DumpSyntax) ds.clone();
 									} catch (CloneNotSupportedException e) {
-										throw new IOException("Error cloning dump syntax "+ds.getClass().getSimpleName()+" [partitionPattern="+partitionByPattern+"]", e);
+										throw new IOException("Error cloning syntax '"+ds.getSyntaxId()+"' [partitionPattern="+partitionByPattern+"]", e);
 									}
 									statefulDumpSyntaxes.put(dskey, ds2);
 								}
@@ -896,6 +904,14 @@ public class DataDump extends AbstractSQLProc {
 		}
 		
 		return syntaxList;
+	}
+	
+	public static List<String> getSyntaxListNames(List<DumpSyntax> syntaxList) {
+		List<String> names = new ArrayList<String>();
+		for(DumpSyntax ds: syntaxList) {
+			names.add(ds.getSyntaxId());
+		}
+		return names;
 	}
 	
 	static long getTableRowLimit(Properties prop, String tableOrQueryName) {

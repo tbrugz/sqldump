@@ -154,5 +154,15 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	public boolean allowWriteBOM() {
 		return true;
 	}
+	
+	@Override
+	public boolean isPartitionable() {
+		return true;
+	}
+	
+	@Override
+	public boolean isFetcherSyntax() {
+		return false;
+	}
 
 }

@@ -76,4 +76,23 @@ public interface DumpSyntaxInt {
 	
 	public boolean allowWriteBOM();
 	
+	/**
+	 * Returns if the dump syntax may be used with a partitioned strategy
+	 * 
+	 * see: WebRowSetSingleSyntax
+	 * 
+	 * @return
+	 */
+	public boolean isPartitionable();
+	
+	/**
+	 * Returns if the dump syntax does fetch rows from the ResultSet. Normally the dump syntax's
+	 * dumpRow() should just dump the current row.
+	 * 
+	 * see: WebRowSetSingleSyntax
+	 * 
+	 * @return
+	 */
+	public boolean isFetcherSyntax();
+	
 }

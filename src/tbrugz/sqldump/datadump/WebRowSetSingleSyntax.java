@@ -79,6 +79,23 @@ public class WebRowSetSingleSyntax extends DumpSyntax {
 		return true;
 	}
 	
+	/**
+	 * WebRowSetSingleSyntax fetches all rows from the resultset itself
+	 */
+	@Override
+	public boolean isFetcherSyntax() {
+		return true;
+	}
+	
+	/**
+	 * WebRowSetSingleSyntax cant be used in a partitioned strategy because all rows are written
+	 * by the dumpFooter() method.
+	 */
+	@Override
+	public boolean isPartitionable() {
+		return false;
+	}
+	
 	void dumpHeaderInternal(ResultSet rs) throws SQLException {
 		wrs = new WebRowSetImpl();
 		wrs.populate(rs);
