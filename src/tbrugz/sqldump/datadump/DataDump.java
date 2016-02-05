@@ -534,14 +534,14 @@ public class DataDump extends AbstractSQLProc {
 								continue;
 							}
 							
-							if(ds.isStateful()) {
+							if(ds.isStateful() && !"".equals(partitionByPattern)) {
 								String dskey = ds.getSyntaxId()+"$"+partitionByPattern;
 								DumpSyntax ds2 = statefulDumpSyntaxes.get(dskey);
 								if(ds2==null) {
 									try {
 										ds2 = (DumpSyntax) ds.clone();
 									} catch (CloneNotSupportedException e) {
-										throw new IOException("Error cloning dump syntax", e);
+										throw new IOException("Error cloning dump syntax "+ds.getClass().getSimpleName()+" [partitionPattern="+partitionByPattern+"]", e);
 									}
 									statefulDumpSyntaxes.put(dskey, ds2);
 								}
