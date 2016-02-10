@@ -538,7 +538,7 @@ public class DataDump extends AbstractSQLProc {
 								continue;
 							}
 							
-							if(ds.isPartitionable() && !"".equals(partitionByPattern)) {
+							if(!ds.isPartitionable() && !"".equals(partitionByPattern)) {
 								throw new RuntimeException("Dump syntax '"+ds.getSyntaxId()+"' is not partitionable but partition pattern defined [partitionPattern="+partitionByPattern+"]");
 							}
 							

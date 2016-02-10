@@ -34,7 +34,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	static final String PROP_IIDB_DROP_CREATE_TABLES = PREFIX_IIDB+".dropcreatetables";
 	static final String PROP_IIDB_FALLBACK_TO_FILE = PREFIX_IIDB+".fallbacktofile";
 	
-	boolean fallbackToFile = false;
+	boolean fallbackToFile = false; //TODO: remove the fallback...
 	Connection conn = null;
 	PreparedStatement stmt = null;
 	
