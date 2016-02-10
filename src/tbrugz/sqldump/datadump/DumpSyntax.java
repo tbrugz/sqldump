@@ -1,7 +1,10 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -164,5 +167,44 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	public boolean isFetcherSyntax() {
 		return false;
 	}
+	
+	@Override
+	public void dumpHeader() throws IOException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
+	}
+	
+	@Override
+	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
+	}
+	
+	@Override
+	public void dumpFooter(long count) throws IOException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
+	}
+	
+	@Override
+	public boolean acceptsOutputWriter() {
+		return true;
+	}
 
+	@Override
+	public boolean acceptsOutputStream() {
+		return false;
+	}
+	
+	@Override
+	public void dumpHeader(OutputStream os) throws IOException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not accept OutputStream");
+	}
+	
+	@Override
+	public void dumpRow(ResultSet rs, long count, OutputStream os) throws IOException, SQLException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not accept OutputStream");
+	}
+	
+	@Override
+	public void dumpFooter(long count, OutputStream os) throws IOException {
+		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not accept OutputStream");
+	}
 }

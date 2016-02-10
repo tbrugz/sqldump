@@ -111,7 +111,7 @@ public class ResultSetDiff {
 		//XXX: what about stateful syntaxes?
 		for(DiffSyntax ds: dss) {
 			if(ds.isWriterIndependent()) {
-				ds.dumpHeader(null);
+				ds.dumpHeader();
 			}
 		}
 		while(true) {
@@ -237,7 +237,7 @@ public class ResultSetDiff {
 		//XXX: what about stateful syntaxes?
 		for(DiffSyntax ds: dss) {
 			if(ds.isWriterIndependent()) {
-				ds.dumpFooter(sourceRowCount, null); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
+				ds.dumpFooter(sourceRowCount); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
 			}
 			else {
 				CategorizedOut cout = dscouts.get(ds);

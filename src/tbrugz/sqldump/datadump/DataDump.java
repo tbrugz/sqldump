@@ -479,7 +479,7 @@ public class DataDump extends AbstractSQLProc {
 				
 				if(ds.isWriterIndependent()) { 
 					doSyntaxDumpList.set(i, true);
-					ds.dumpHeader(null);
+					ds.dumpHeader();
 					continue;
 				}
 				
@@ -534,7 +534,7 @@ public class DataDump extends AbstractSQLProc {
 						DumpSyntax ds = syntaxList.get(i);
 						if(doSyntaxDumpList.get(i)) {
 							if(ds.isWriterIndependent()) {
-								ds.dumpRow(rs, count, null); //writer indepentend syntax should not care abount 'countInPartition' line number, right?
+								ds.dumpRow(rs, count); //writer indepentend syntax should not care abount 'countInPartition' line number, right?
 								continue;
 							}
 							
@@ -653,7 +653,7 @@ public class DataDump extends AbstractSQLProc {
 				if(doSyntaxDumpList.get(i)) {
 					//writer-independent footers
 					if(ds.isWriterIndependent()) {
-						ds.dumpFooter(count, null);
+						ds.dumpFooter(count);
 					}
 					else {
 						//static writers footers

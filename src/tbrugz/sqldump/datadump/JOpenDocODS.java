@@ -2,7 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -21,7 +20,7 @@ import org.jopendocument.dom.spreadsheet.SpreadSheet;
 
 import tbrugz.sqldump.util.SQLUtils;
 
-public class JOpenDocODS extends DumpSyntax {
+public class JOpenDocODS extends WriterIndependentDumpSyntax {
 	static final Log log = LogFactory.getLog(JOpenDocODS.class);
 	
 	static final String JOPENODS_SYNTAX_ID = "jopen-ods";
@@ -78,18 +77,17 @@ public class JOpenDocODS extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) throws IOException {
+	public void dumpHeader() throws IOException {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos)
-			throws IOException, SQLException {
+	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, false);
 		values.add(new Vector<Object>(vals));
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count) throws IOException {
 		try {
 			TableModel model = new DefaultTableModel(values, new Vector<String>(lsColNames));
 			

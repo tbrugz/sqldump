@@ -2,7 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -27,7 +26,7 @@ import tbrugz.sqldump.util.SQLUtils;
 /*
  * see: http://incubator.apache.org/odftoolkit/simple/document/cookbook/Table.html
  */
-public class SimpleODS extends DumpSyntax {
+public class SimpleODS extends WriterIndependentDumpSyntax {
 
 	static final Log log = LogFactory.getLog(SimpleODS.class);
 	
@@ -101,7 +100,7 @@ public class SimpleODS extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) throws IOException {
+	public void dumpHeader() throws IOException {
 		try {
 			sd = newSpreadSheet();
 			t = sd.addTable();
@@ -121,7 +120,7 @@ public class SimpleODS extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos)
+	public void dumpRow(ResultSet rs, long count)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, false);
 		int row = (int)count+1;
@@ -155,7 +154,7 @@ public class SimpleODS extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count) throws IOException {
 		try {
 			// commons-io...
 			//WriterOutputStream out = new WriterOutputStream(fos);

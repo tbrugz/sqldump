@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -25,7 +24,7 @@ import tbrugz.sqldump.util.Utils;
 /*
  * add support for blobs (file: <tablename>_<pkcolumns>_<pkid>.blob ? specific prop !) - if table has no PK, no blob dumping (?)
  */
-public class BlobDataDump extends DumpSyntax {
+public class BlobDataDump extends WriterIndependentDumpSyntax {
 
 	static Log log = LogFactory.getLog(BlobDataDump.class);
 	
@@ -95,14 +94,14 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader(Writer fos) {
+	public void dumpHeader() {
 	}
 	
 	//XX: prop for setting ROWID_JOINER
 	static String ROWID_JOINER = "_";
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer writer) throws IOException, SQLException {
+	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException {
 		if(pkCols==null) { return; }
 		
 		List<String> pkVals = new ArrayList<String>();
@@ -157,7 +156,7 @@ public class BlobDataDump extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) {
+	public void dumpFooter(long count) {
 	}
 	
 	@Override

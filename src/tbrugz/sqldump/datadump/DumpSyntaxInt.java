@@ -1,6 +1,7 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -94,5 +95,24 @@ public interface DumpSyntaxInt {
 	 * @return
 	 */
 	public boolean isFetcherSyntax();
+	
+	/** Dumps header for Writer-independent syntaxes */
+	public void dumpHeader() throws IOException;
+
+	/** Dumps row for Writer-independent syntaxes */
+	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException;
+
+	/** Dumps footer for Writer-independent syntaxes */
+	public void dumpFooter(long count) throws IOException;
+	
+	public boolean acceptsOutputWriter();
+	
+	public boolean acceptsOutputStream();
+
+	public void dumpHeader(OutputStream os) throws IOException;
+
+	public void dumpRow(ResultSet rs, long count, OutputStream os) throws IOException, SQLException;
+
+	public void dumpFooter(long count, OutputStream os) throws IOException;
 	
 }

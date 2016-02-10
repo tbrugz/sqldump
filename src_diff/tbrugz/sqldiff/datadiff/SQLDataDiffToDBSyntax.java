@@ -3,6 +3,7 @@ package tbrugz.sqldiff.datadiff;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.List;
@@ -61,8 +62,19 @@ public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax {
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
-		super.dumpFooter(count, fos);
+	public void dumpHeader() throws IOException {
+		super.dumpHeader((Writer) null);
+	}
+	
+	@Override
+	public void dumpRow(ResultSet rs, long count) throws IOException,
+			SQLException {
+		super.dumpRow(rs, count, (Writer) null);
+	}
+	
+	@Override
+	public void dumpFooter(long count) throws IOException {
+		super.dumpFooter(count, (Writer) null);
 		try {
 			conn.commit();
 		} catch (SQLException e) {
