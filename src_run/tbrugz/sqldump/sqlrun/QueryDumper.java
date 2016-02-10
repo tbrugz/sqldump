@@ -1,7 +1,9 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.sql.Connection;
@@ -93,10 +95,17 @@ public class QueryDumper extends AbstractFailable implements Executor {
 			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		}
 		
-		Writer w = getWriter(outputStream);
-		int count = dumpResultSet(rs, dumpSyntax, w, queryName, null);
-		w.flush();
-		//w.close();
+		int count = 0;
+		if(dumpSyntax.acceptsOutputStream()) {
+			OutputStream os = getOutputStream(outputStream);
+			count = dumpResultSet(rs, dumpSyntax, os, queryName, null);
+			os.flush();
+		}
+		else {
+			Writer w = getWriter(outputStream);
+			count = dumpResultSet(rs, dumpSyntax, w, queryName, null);
+			w.flush();
+		}
 		
 		long totalTime = System.currentTimeMillis() - initTime;
 		log.info("query '"+execId+"' dumped [lines = "+count+"; elapsed = "+totalTime+"ms]");
@@ -114,7 +123,23 @@ public class QueryDumper extends AbstractFailable implements Executor {
 			ds.dumpRow(rs, count, w);
 			count++;
 		}
-		ds.dumpFooter(count,w);
+		ds.dumpFooter(count, w);
+		return count;
+	}
+
+	int dumpResultSet(ResultSet rs, DumpSyntaxInt ds, OutputStream os,
+			String queryName, List<String> uniqueColumns)
+			throws SQLException, IOException {
+		int count = 0;
+		
+		ds.initDump(null, queryName, uniqueColumns, rs.getMetaData());
+
+		ds.dumpHeader(os);
+		while(rs.next()) {
+			ds.dumpRow(rs, count, os);
+			count++;
+		}
+		ds.dumpFooter(count, os);
 		return count;
 	}
 	
@@ -150,6 +175,17 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		return new FileWriter(writerName);
 	}
 
+	static OutputStream getOutputStream(String output) throws IOException {
+		if(CategorizedOut.STDOUT.equals(output)) {
+			return System.out;
+		}
+		if(CategorizedOut.STDERR.equals(output)) {
+			return System.err;
+		}
+		
+		return new FileOutputStream(output);
+	}
+	
 	@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
 	}
