@@ -3,6 +3,7 @@ package tbrugz.sqldump.util;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
@@ -38,6 +39,12 @@ public class CategorizedOut {
 		}
 	}
 	
+	public static class NullOutputStream extends OutputStream {
+		@Override
+		public void write(int b) throws IOException {
+		}
+	}
+	
 	public static interface Callback {
 		void callOnOpen(Writer w) throws IOException;
 	}
@@ -60,6 +67,40 @@ public class CategorizedOut {
 		public void close() throws IOException {
 			w.flush();
 		}
+	}
+
+	static class NonCloseableOutputStreamDecorator extends OutputStream {
+		final OutputStream os;
+		
+		NonCloseableOutputStreamDecorator(OutputStream os) {
+			this.os = os;
+		}
+		
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			os.write(b, off, len);
+		}
+		
+		@Override
+		public void write(byte[] b) throws IOException {
+			os.write(b);
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			os.write(b);
+		}
+		
+		@Override
+		public void flush() throws IOException {
+			os.flush();
+		}
+		
+		@Override
+		public void close() throws IOException {
+			os.flush();
+		}
+		
 	}
 	
 	static class FlushingWriterDecorator extends Writer {
@@ -169,6 +210,10 @@ public class CategorizedOut {
 	static final Writer pwSTDOUT = new NonCloseableWriterDecorator(new PrintWriter(System.out));
 	static final Writer pwSTDERR = new NonCloseableWriterDecorator(new PrintWriter(System.err));
 	static final Writer nullWriter = new NullWriter();
+
+	static final OutputStream osSTDOUT = new NonCloseableOutputStreamDecorator(System.out);
+	static final OutputStream osSTDERR = new NonCloseableOutputStreamDecorator(System.err);
+	static final OutputStream nullOS = new NullOutputStream();
 	
 	public CategorizedOut(String filePathPattern) {
 		this(filePathPattern, null);
@@ -401,4 +446,31 @@ public class CategorizedOut {
 		}
 		return false;
 	}
+	
+	public static OutputStream getStaticOutputStream(String outPattern) throws IOException {
+		if(STDOUT.equals(outPattern)) {
+			return osSTDOUT;
+		}
+		if(STDERR.equals(outPattern)) {
+			return osSTDERR;
+		}
+		if(NULL_WRITER.equals(outPattern)) {
+			return nullOS;
+		}
+		return null;
+	}
+	
+	public static boolean isStaticOutputStream(String outPattern) throws IOException {
+		if(STDOUT.equals(outPattern)) {
+			return true;
+		}
+		if(STDERR.equals(outPattern)) {
+			return true;
+		}
+		if(NULL_WRITER.equals(outPattern)) {
+			return true;
+		}
+		return false;
+	}
+
 }

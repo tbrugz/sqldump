@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
@@ -131,6 +132,41 @@ public class DataDump extends AbstractSQLProc {
 	 * XXX: use java.nio.charset.Charset.availableCharsets() ?
 	 *  
 	 */
+	
+	static class Outputter {
+		final OutputStream os;
+		final Writer w;
+		
+		private Outputter(OutputStream os) {
+			this.os = os;
+			this.w = null;
+		}
+
+		private Outputter(Writer w) {
+			this.os = null;
+			this.w = w;
+		}
+		
+		/*Object getOutput(DumpSyntax ds) {
+			if(ds.isWriterIndependent()) {
+				return null;
+			}
+			if(ds.acceptsOutputStream()) {
+				return os;
+			}
+			return w;
+		}*/
+		
+		static Outputter getOutputter(OutputStream os) {
+			if(os==null) { return null; }
+			return new Outputter(os);
+		}
+
+		static Outputter getOutputter(Writer w) {
+			if(w==null) { return null; }
+			return new Outputter(w);
+		}
+	}
 	
 	@Override
 	public void process() {
@@ -439,7 +475,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			SQLUtils.setupForNewQuery(md.getColumnCount());
 			
-			Map<String, Writer> writersOpened = new HashMap<String, Writer>();
+			Map<String, Outputter> writersOpened = new HashMap<String, Outputter>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
 			if(partitionByPatterns==null) { partitionByPatterns = new String[]{ "" }; }
@@ -558,16 +594,22 @@ public class DataDump extends AbstractSQLProc {
 							
 							String finalFilename = getFinalFilenameForAbstractFilename(filenameList.get(i), partitionByStrId);
 							boolean newFilename = count==0;
-							Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
-							if(w==null) {
+							Outputter out = null;
+							if(ds.acceptsOutputStream()) {
+								out = Outputter.getOutputter( CategorizedOut.getStaticOutputStream(filenameList.get(i)) );
+							}
+							else {
+								out = Outputter.getOutputter( CategorizedOut.getStaticWriter(filenameList.get(i)) );
+							}
+							if(out==null) {
 								Boolean syntaxWriteBOM = Utils.getPropBoolean(prop, DATADUMP_PROP_PREFIX+ds.getSyntaxId()+"."+SUFFIX_DATADUMP_WRITEBOM, writeBOM);
 								if(syntaxWriteBOM!=null && syntaxWriteBOM && !ds.allowWriteBOM() && !bomWarned.contains(ds.getSyntaxId())) {
 									log.warn("syntax '"+ds.getSyntaxId()+"' should not write BOM");
 									bomWarned.add(ds.getSyntaxId());
 								}
 								//if(syntaxWriteBOM==null && ds.shouldNotWriteBOM()) { syntaxWriteBOM = false; }
-								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, syntaxWriteBOM, writeAppend);
-								w = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
+								newFilename = isSetNewFilename(writersOpened, finalFilename, partitionByPattern, charset, syntaxWriteBOM, writeAppend, ds.acceptsOutputStream());
+								out = writersOpened.get(getWriterMapKey(finalFilename, partitionByPattern));
 							}
 							long countInFilename = countByPatternFinalFilename.get(finalFilename);
 							
@@ -586,12 +628,23 @@ public class DataDump extends AbstractSQLProc {
 							if(newFilename) {
 								//if(lastWriterMapKey!=null) { ds.flushBuffer(writersOpened.get(lastWriterMapKey)); }
 								logNewFile.debug("new filename="+finalFilename+" [charset="+charset+"]");
-								ds.dumpHeader(w);
+								if(ds.acceptsOutputStream()) {
+									ds.dumpHeader(out.os);
+								}
+								else {
+									ds.dumpHeader(out.w);
+								}
 								writersSyntaxes.put(finalFilename, ds);
 							}
 							try {
 								if(hasData) {
-									ds.dumpRow(rs, countInFilename, w);
+									if(ds.acceptsOutputStream()) {
+										ds.dumpRow(rs, countInFilename, out.os);
+									}
+									else {
+										ds.dumpRow(rs, countInFilename, out.w);
+									}
+									
 									countByPatternFinalFilename.put(finalFilename, ++countInFilename);
 								}
 								else {
@@ -686,20 +739,26 @@ public class DataDump extends AbstractSQLProc {
 			}
 	}
 	
-	static void closeWriter(Map<String, Writer> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename) throws IOException {
-		Writer w = writersOpened.get(key);
+	static void closeWriter(Map<String, Outputter> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename) throws IOException {
+		Outputter out = writersOpened.get(key);
 		String filename = getFilenameFromWriterMapKey(key);
 		//String key = getWriterMapKey(filename, partitionByPattern);
 		long rowsDumped = countByPatternFinalFilename.get(filename);
 
 		DumpSyntax ds = writersSyntaxes.get(filename);
 		try {
-			ds.dumpFooter(rowsDumped, w);
-			w.close();
+			if(ds.acceptsOutputStream()) {
+				ds.dumpFooter(rowsDumped, out.os);
+				out.os.close();
+			}
+			else {
+				ds.dumpFooter(rowsDumped, out.w);
+				out.w.close();
+			}
 			//log.info("closed stream; filename: "+filename);
 		}
 		catch(Exception e) {
-			log.warn("error closing stream: "+w+"; filename: "+filename, e);
+			log.warn("error closing stream: "+out+"; filename: "+filename, e);
 			log.debug("error closing stream: ", e);
 		}
 	}
@@ -757,7 +816,7 @@ public class DataDump extends AbstractSQLProc {
 		return key.substring(0, key.indexOf("$$"));
 	}
 	
-	static boolean isSetNewFilename(Map<String, Writer> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM, boolean append) throws UnsupportedEncodingException, FileNotFoundException {
+	static boolean isSetNewFilename(Map<String, Outputter> writersOpened, String fname, String partitionBy, String charset, Boolean writeBOM, boolean append, boolean isOutputStream) throws UnsupportedEncodingException, FileNotFoundException {
 		String key = getWriterMapKey(fname, partitionBy);
 		//log.debug("isSet: "+key+" ; contains = "+writersOpened.containsKey(key));
 		if(! writersOpened.containsKey(key)) {
@@ -775,9 +834,18 @@ public class DataDump extends AbstractSQLProc {
 			encoder.onUnmappableCharacter(CodingErrorAction.REPLACE);
 			
 			logNewFile.debug("creating file"+(append?" [append]":"")+": "+fname);
-			OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, append), encoder);
-			writeBOMifNeeded(w, charset, writeBOM);
-			writersOpened.put(key, w);
+			Outputter out = null;
+			if(isOutputStream) {
+				FileOutputStream fos = new FileOutputStream(fname, append);
+				//writeBOMifNeeded(w, charset, writeBOM);
+				out = new Outputter(fos);
+			}
+			else {
+				OutputStreamWriter w = new OutputStreamWriter(new FileOutputStream(fname, append), encoder);
+				writeBOMifNeeded(w, charset, writeBOM);
+				out = new Outputter(w);
+			}
+			writersOpened.put(key, out);
 			//filesOpened.add(fname);
 			return true;
 		}

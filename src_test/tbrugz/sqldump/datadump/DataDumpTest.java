@@ -1,8 +1,10 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.Writer;
+import java.io.ObjectInputStream;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +32,7 @@ import org.xml.sax.SAXParseException;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
+import tbrugz.sqldump.datadump.DataDump.Outputter;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
@@ -46,12 +49,12 @@ public class DataDumpTest {
 	@Test
 	public void testEncoding() throws IOException {
 		//DataDump dd = new DataDump();
-		Map<String, Writer> map = new HashMap<String, Writer>();
-		DataDump.isSetNewFilename(map, DIR_OUT+"t1-utf8.txt", "", DataDumpUtils.CHARSET_UTF8, null, false);
-		DataDump.isSetNewFilename(map, DIR_OUT+"t1-iso8859.txt", "", DataDumpUtils.CHARSET_ISO_8859_1, null, false); //ISO8859_1
+		Map<String, Outputter> map = new HashMap<String, Outputter>();
+		DataDump.isSetNewFilename(map, DIR_OUT+"t1-utf8.txt", "", DataDumpUtils.CHARSET_UTF8, null, false, false);
+		DataDump.isSetNewFilename(map, DIR_OUT+"t1-iso8859.txt", "", DataDumpUtils.CHARSET_ISO_8859_1, null, false, false); //ISO8859_1
 		for(String s: map.keySet()) {
-			map.get(s).write("Pôrto Alégre");
-			map.get(s).close();
+			map.get(s).w.write("Pôrto Alégre");
+			map.get(s).w.close();
 		}
 	}
 	
@@ -89,11 +92,11 @@ public class DataDumpTest {
 		Utils.deleteDirRegularContents(new File(DIR_OUT));
 	}
 	
-	public void dump1() throws ClassNotFoundException, SQLException, NamingException, IOException {
-		dump1(null);
+	void dump1() throws ClassNotFoundException, SQLException, NamingException, IOException {
+		dumpWithParams(null);
 	}
 	
-	public void dump1(String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
+	void dumpWithParams(String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		String[] vmparamsDump = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
@@ -106,6 +109,10 @@ public class DataDumpTest {
 				"-Dsqldump.user=h",
 				"-Dsqldump.password=h"
 				};
+		dump1(vmparamsDump, xtraparams);
+	}
+	
+	void dump1(String[] vmparamsDump, String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sqld = new SQLDump();
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
@@ -141,7 +148,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testSQLWithQuote() throws ClassNotFoundException, SQLException, NamingException, IOException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.insertinto.quotesql=true",
 				});
 		String sqlEmp = IOUtil.readFromFilename(DIR_OUT+"/data_EMP.sql");
@@ -171,7 +178,7 @@ public class DataDumpTest {
 
 	@Test(expected=SAXParseException.class)
 	public void testXMLNoEscape() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.xml.escape=false",
 				});
 		File f = new File(DIR_OUT+"/data_ETC.xml");
@@ -180,7 +187,7 @@ public class DataDumpTest {
 
 	@Test
 	public void testHTMLEscapeCol() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.xml.escape=false",
 				"-Dsqldump.datadump.xml.escapecols4table@ETC=DESCRIPTION",
 				});
@@ -193,7 +200,7 @@ public class DataDumpTest {
 	
 	@Test(expected=SAXParseException.class)
 	public void testHTMLNoEscapeCol() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.xml.noescapecols4table@ETC=DESCRIPTION",
 				});
 		File f = new File(DIR_OUT+"/data_ETC.html");
@@ -254,7 +261,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testJSONWithBOM() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 			"-Dsqldump.datadump.writebom=true",
 		});
 		testJsonForUTF8BOM();
@@ -262,7 +269,7 @@ public class DataDumpTest {
 
 	@Test
 	public void testJSONWithSyntaxBOM() throws IOException, ParserConfigurationException, SAXException, ClassNotFoundException, SQLException, NamingException {
-		dump1(new String[]{
+		dumpWithParams(new String[]{
 			"-Dsqldump.datadump.json.writebom=true",
 		});
 		testJsonForUTF8BOM();
@@ -385,6 +392,29 @@ public class DataDumpTest {
 		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,2,mary,2,2,2000\r\n"+"1,3,jane,2,2,1000\r\n"+"2,4,lucas,2,2,1200\r\n"+"3\r\n";
 		Assert.assertEquals(expected, csvEmpS2);
 	}
+	
+	@Test
+	public void testRowsetSer() throws Exception {
+		String[] vmparamsDump = {
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.processingclasses=DataDump",
+				"-Dsqldump.datadump.dumpsyntaxes=rowset-ser",
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		dumpWithParams(vmparamsDump);
+
+		DumpSyntax ds = new CacheRowSetSyntax();
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DIR_OUT+"/data_ETC."+ds.getDefaultFileExtension()));
+		Object o = ois.readObject();
+		ois.close();
+		Assert.assertTrue("Shoud be an instance of ResultSet", o instanceof ResultSet);
+	}
+	
+	//----------------------------------
 	
 	static Document parseXML(File f) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
