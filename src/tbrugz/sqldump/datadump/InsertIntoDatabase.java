@@ -32,9 +32,10 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	static final String PROP_IIDB_BATCH_MODE = PREFIX_IIDB+".batchmode";
 	static final String PROP_IIDB_COMMIT_SIZE = PREFIX_IIDB+".commitsize";
 	static final String PROP_IIDB_DROP_CREATE_TABLES = PREFIX_IIDB+".dropcreatetables";
-	static final String PROP_IIDB_FALLBACK_TO_FILE = PREFIX_IIDB+".fallbacktofile";
+	//was: writes insert to file if error when inserting into database (default is false)
+	//static final String PROP_IIDB_FALLBACK_TO_FILE = PREFIX_IIDB+".fallbacktofile";
 	
-	boolean fallbackToFile = false; //TODO: remove the fallback...
+	//boolean fallbackToFile = false; //TODOne: remove the fallback...
 	Connection conn = null;
 	PreparedStatement stmt = null;
 	
@@ -53,7 +54,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		autoCommit = Utils.getPropBool(prop, PROP_IIDB_AUTOCOMMIT, autoCommit);
 		batchMode = Utils.getPropBool(prop, PROP_IIDB_BATCH_MODE, batchMode);
 		commitSize = Utils.getPropInt(prop, PROP_IIDB_COMMIT_SIZE, commitSize);
-		fallbackToFile = Utils.getPropBool(prop, PROP_IIDB_FALLBACK_TO_FILE, fallbackToFile);
+		//fallbackToFile = Utils.getPropBool(prop, PROP_IIDB_FALLBACK_TO_FILE, fallbackToFile);
 		String connPropPrefix = prop.getProperty(PROP_IIDB_CONN_PREFIX);
 		if(connPropPrefix==null) {
 			throw new ProcessingException("connection prefix is null [prop '"+PROP_IIDB_CONN_PREFIX+"'], can't proceed");
@@ -97,15 +98,15 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	}
 	
 	@Override
-	public void dumpHeader(Writer fos) {
+	public void dumpHeader() {
 	}
 	
 	@Override
-	public void dumpRow(ResultSet rs, long count, Writer fos)
+	public void dumpRow(ResultSet rs, long count)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, doDumpCursors);
 		
-		try {
+		//try {
 
 		//populate statement
 		for(int i=0;i<lsColTypes.size();i++) {
@@ -140,18 +141,18 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			log.debug("commit? "+ (count+1));
 		}
 		
-		} catch (SQLException e) {
+		/*} catch (SQLException e) {
 			if(fallbackToFile) {
 				super.dumpRow(rs, count, fos);
 			}
 			else {
 				throw e;
 			}
-		}
+		}*/
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count) throws IOException {
 		try {
 			//dumpFooterInternal(count);
 			
@@ -171,12 +172,12 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 				log.warn("may not have imported all rows [count="+count+" updated="+updated+"]");
 			}
 		} catch (SQLException e) {
-			if(fallbackToFile) {
-				super.dumpFooter(count, fos);
-			}
-			else {
+			//if(fallbackToFile) {
+			//	super.dumpFooter(count, fos);
+			//}
+			//else {
 				throw new ProcessingException(e);
-			}
+			//}
 		}
 	}
 	
@@ -195,7 +196,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 	
 	@Override
 	public boolean isWriterIndependent() {
-		return !fallbackToFile;
+		return true; //!fallbackToFile;
 	}
 	
 	@Override
@@ -251,6 +252,21 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 			stmt.setString(i+1, (String) vals.get(i));
 		}
 	}*/
+	
+	@Override
+	public void dumpHeader(Writer fos) throws IOException {
+		dumpHeader();
+	}
+	
+	@Override
+	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
+		dumpRow(rs, count);
+	}
+	
+	@Override
+	public void dumpFooter(long count, Writer fos) throws IOException {
+		dumpFooter(count);
+	}
 
 	static String getSQLType(Class<?> type) {
 		if(Integer.class.isAssignableFrom(type)) {
