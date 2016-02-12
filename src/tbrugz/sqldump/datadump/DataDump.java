@@ -464,14 +464,26 @@ public class DataDump extends AbstractSQLProc {
 				partitionByDateFormatter = new SimpleDateFormat(partitionByDF);
 			}
 			
-			boolean hasData = rs.next();
-			//so empty tables do not create empty dump files
-			if(!hasData) {
-				log.info("table/query '"+tableOrQueryName+"' returned 0 rows");
-				if(!createEmptyDumpFiles) {
-					return;
+			boolean shouldCallNext = true;
+			for(int i=0;i<syntaxList.size();i++) {
+				DumpSyntax ds = syntaxList.get(i);
+				if(ds.isFetcherSyntax()) {
+					shouldCallNext = false;
 				}
 			}
+			
+			boolean hasData = true;
+			if(shouldCallNext) {
+				hasData = rs.next();
+				//so empty tables do not create empty dump files
+				if(!hasData) {
+					log.info("table/query '"+tableOrQueryName+"' returned 0 rows");
+					if(!createEmptyDumpFiles) {
+						return;
+					}
+				}
+			}
+			//XXX else { //warn if multiple syntaxes? }
 			
 			SQLUtils.setupForNewQuery(md.getColumnCount());
 			

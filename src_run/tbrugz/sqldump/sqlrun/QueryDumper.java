@@ -119,11 +119,14 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		ds.initDump(null, queryName, uniqueColumns, rs.getMetaData());
 
 		ds.dumpHeader(w);
-		while(rs.next()) {
+		boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
+		while(hasNext) {
 			ds.dumpRow(rs, count, w);
 			count++;
+			hasNext = rs.next();
 		}
 		ds.dumpFooter(count, w);
+		
 		return count;
 	}
 
@@ -135,11 +138,14 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		ds.initDump(null, queryName, uniqueColumns, rs.getMetaData());
 
 		ds.dumpHeader(os);
-		while(rs.next()) {
+		boolean hasNext = ds.isFetcherSyntax()?true:rs.next();
+		while(hasNext) {
 			ds.dumpRow(rs, count, os);
 			count++;
+			hasNext = rs.next();
 		}
 		ds.dumpFooter(count, os);
+		
 		return count;
 	}
 	

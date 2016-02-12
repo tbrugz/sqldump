@@ -405,13 +405,34 @@ public class DataDumpTest {
 				"-Dsqldump.user=h",
 				"-Dsqldump.password=h"
 				};
-		dumpWithParams(vmparamsDump);
+		dump1(vmparamsDump, null);
 
 		DumpSyntax ds = new CacheRowSetSyntax();
-		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DIR_OUT+"/data_ETC."+ds.getDefaultFileExtension()));
+		ObjectInputStream ois = new ObjectInputStream(new FileInputStream(DIR_OUT+"/data_EMP."+ds.getDefaultFileExtension()));
 		Object o = ois.readObject();
 		ois.close();
 		Assert.assertTrue("Shoud be an instance of ResultSet", o instanceof ResultSet);
+		//id,name,supervisor_id,department_id,salary
+		//1,john,1,1,2000
+		//2,mary,2,2,2000
+		
+		ResultSet rs = (ResultSet) o;
+		Assert.assertTrue(rs.first());
+		Assert.assertEquals("2000", rs.getString(5));
+		Assert.assertEquals("1", rs.getString(3));
+		Assert.assertTrue(rs.next());
+		// 2nd row
+		Assert.assertEquals(2, rs.getInt(1));
+		Assert.assertEquals("mary", rs.getString(2));
+		Assert.assertTrue(rs.next());
+		// 3rd row
+		Assert.assertTrue(rs.next());
+		// 4th row
+		Assert.assertTrue(rs.next());
+		// 5th row...
+		Assert.assertFalse(rs.next());
+
+		rs.close();
 	}
 	
 	//----------------------------------
