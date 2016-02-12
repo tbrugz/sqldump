@@ -66,6 +66,7 @@ public class ResultSetDiff {
 		boolean hasNextTarget = true;
 		List<Comparable> sourceVals = null;
 		List<Comparable> targetVals = null;
+		final String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
 		
 		ResultSetMetaData md = source.getMetaData();
 		int numCol = md.getColumnCount();
@@ -86,7 +87,7 @@ public class ResultSetDiff {
 				throw new IllegalArgumentException("key column not found: "+key);
 			}
 		}
-		log.debug("[table="+(schemaName!=null?schemaName+".":"")+tableName+"] key cols: "+keyCols);
+		log.debug("[table="+fullTableName+"] key cols: "+keyCols);
 		
 		Map<DiffSyntax, DataDumpUtils.SyntaxCOutCallback> dscbs = new HashMap<DiffSyntax, DataDumpUtils.SyntaxCOutCallback>();
 		Map<DiffSyntax, CategorizedOut> dscouts = new HashMap<DiffSyntax, CategorizedOut>();
@@ -217,7 +218,7 @@ public class ResultSetDiff {
 			count++;
 			
 			if( (logEachXLoops>0) && (count>0) && (count%logEachXLoops==0) ) { 
-				log.info("[table="+tableName+"] "+count+" rows compared ; stats: "+getCompactStats());
+				log.info("[table="+fullTableName+"] "+count+" rows compared ; stats: "+getCompactStats());
 				loggedLastLine = true;
 			}
 			else {
@@ -225,12 +226,12 @@ public class ResultSetDiff {
 			}
 			
 			if(limit>0 && count>=limit) {
-				log.info("limit reached: "+limit+" [table="+tableName+"]");
+				log.info("limit reached: "+limit+" [table="+fullTableName+"]");
 				break;
 			}
 		}
 		if(!loggedLastLine) {
-			log.info("[table="+tableName+"] "+count+" rows compared ; stats: "+getCompactStats());
+			log.info("[table="+fullTableName+"] "+count+" rows compared ; stats: "+getCompactStats());
 		}
 		
 		//footer for writer-independent syntaxes
