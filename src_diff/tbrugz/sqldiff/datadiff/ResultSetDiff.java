@@ -89,12 +89,12 @@ public class ResultSetDiff {
 		}
 		log.debug("[table="+fullTableName+"] key cols: "+keyCols);
 		
-		Map<DiffSyntax, DataDumpUtils.SyntaxCOutCallback> dscbs = new HashMap<DiffSyntax, DataDumpUtils.SyntaxCOutCallback>();
+		//Map<DiffSyntax, DataDumpUtils.SyntaxCOutCallback> dscbs = new HashMap<DiffSyntax, DataDumpUtils.SyntaxCOutCallback>();
 		Map<DiffSyntax, CategorizedOut> dscouts = new HashMap<DiffSyntax, CategorizedOut>();
 		
 		for(DiffSyntax ds: dss) {
-			DataDumpUtils.SyntaxCOutCallback cb = new DataDumpUtils.SyntaxCOutCallback(ds);
-			dscbs.put(ds, cb);
+			DataDumpUtils.SyntaxCOutCallback cb = new DataDumpUtils.SyntaxCOutCallback(ds); //XXX: callback will call DiffSyntax.dumpHeader()
+			//dscbs.put(ds, cb);
 			if(singleWriter!=null) {
 				dscouts.put(ds, new CategorizedOut(singleWriter, cb));
 			}

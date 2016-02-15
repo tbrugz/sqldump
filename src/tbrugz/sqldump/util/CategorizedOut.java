@@ -322,8 +322,12 @@ public class CategorizedOut {
 	}
 	
 	//public List<Writer> getAllOpenedWriters() { //XXX: get writer iterator?
-	public Iterator<Writer> getAllOpenedWritersIterator() {
+	public Iterator<Writer> getAllOpenedWritersIterator() throws IOException {
 		if(innerWriter!=null) {
+			if(!innerWriterIgnited) {
+				if(cb!=null) { cb.callOnOpen(innerWriter); }
+				innerWriterIgnited = true;
+			}
 			return new InnerWriterIterator();
 		}
 		if(isStaticWriter(filePathPattern)) {
