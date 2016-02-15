@@ -14,13 +14,14 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DbUpdaterSyntax;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.ConnectionUtil;
 
 /*
  * TODO: option to use PreparedStatements (one for each datadiff type - insert, update, delete)
  */
-public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax {
+public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax implements DbUpdaterSyntax {
 
 	static final Log log = LogFactory.getLog(SQLDataDiffToDBSyntax.class);
 	
@@ -42,16 +43,26 @@ public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax {
 		this.prop = prop;
 		connPropPrefix = prop.getProperty(PROP_SDD2DB_CONN_PREFIX);
 		//XXX: option to use props 'sqldiff.applydifftosource' & 'sqldiff.applydiffto' ?
-		if(connPropPrefix==null) {
-			throw new ProcessingException("connection prefix is null [prop '"+PROP_SDD2DB_CONN_PREFIX+"'], can't proceed");
-		}
 	}
 	
+	@Override
+	public void setUpdaterConnection(Connection conn) {
+		this.conn = conn;
+	}
 	
 	@Override
 	public void initDump(String schemaName, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
 		super.initDump(schemaName, tableName, pkCols, md);
+		if(conn==null) {
+			createConnection();
+		}
+	}
+	
+	void createConnection() throws SQLException {
+		if(connPropPrefix==null) {
+			throw new ProcessingException("connection prefix is null [prop '"+PROP_SDD2DB_CONN_PREFIX+"'], can't proceed");
+		}
 		try {
 			conn = ConnectionUtil.initDBConnection(connPropPrefix, prop, autoCommit);
 		} catch (ClassNotFoundException e) {

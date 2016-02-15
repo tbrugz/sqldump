@@ -20,7 +20,7 @@ import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-public class InsertIntoDatabase extends InsertIntoDataDump {
+public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterSyntax {
 
 	static final Log log = LogFactory.getLog(InsertIntoDatabase.class);
 	
@@ -55,11 +55,18 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		batchMode = Utils.getPropBool(prop, PROP_IIDB_BATCH_MODE, batchMode);
 		commitSize = Utils.getPropInt(prop, PROP_IIDB_COMMIT_SIZE, commitSize);
 		//fallbackToFile = Utils.getPropBool(prop, PROP_IIDB_FALLBACK_TO_FILE, fallbackToFile);
+		updated = 0;
+		if(conn==null) {
+			createConnection();
+		}
+		initSyntaxInternal();
+	}
+	
+	void createConnection() {
 		String connPropPrefix = prop.getProperty(PROP_IIDB_CONN_PREFIX);
 		if(connPropPrefix==null) {
 			throw new ProcessingException("connection prefix is null [prop '"+PROP_IIDB_CONN_PREFIX+"'], can't proceed");
 		}
-		updated = 0;
 		//log.info("ac="+autoCommit+";batch="+batchMode+";commitsize="+commitSize+";fallback="+fallbackToFile);
 		
 		//create connection
@@ -72,7 +79,9 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 		if(conn==null) {
 			throw new RuntimeException("undefined connection properties");
 		}
-		
+	}
+	
+	void initSyntaxInternal() throws SQLException {
 		//drop & create table
 		boolean dropCreateTables = Utils.getPropBool(prop, PROP_IIDB_DROP_CREATE_TABLES, false);
 		if(dropCreateTables) {
@@ -95,6 +104,11 @@ public class InsertIntoDatabase extends InsertIntoDataDump {
 				")";
 		log.debug("stmt[autocommit="+autoCommit+";batch="+batchMode+"]: "+sql);
 		stmt = conn.prepareStatement(sql);
+	}
+	
+	@Override
+	public void setUpdaterConnection(Connection conn) {
+		this.conn = conn;
 	}
 	
 	@Override
