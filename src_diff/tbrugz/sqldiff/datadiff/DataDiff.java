@@ -175,7 +175,7 @@ public class DataDiff extends AbstractFailable {
 		
 		//XXX: order to diff tables... DAG based on tables & FKs (target or source FKs? show if there is diff?)
 		//targetSchemaModel.getForeignKeys();
-		// return list of (table, set<DmlType>) : DmlType is Insert/Update/Delete, set may be null (meaning: all)
+		// return List<Pair<Table, Set<DmlType>>> : DmlType is Insert/Update/Delete, set may be null (meaning: all)
 		
 		Map<String, Table> sourceTablesMap = new HashMap<String, Table>();
 		for(Table t: sourceTables) {

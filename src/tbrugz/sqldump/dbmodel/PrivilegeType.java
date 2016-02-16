@@ -4,6 +4,7 @@ public enum PrivilegeType {
 	SELECT, INSERT, UPDATE, DELETE, ALTER, REFERENCES, INDEX,
 	DEBUG, FLASHBACK, ON_COMMIT_REFRESH, QUERY_REWRITE, EXECUTE, MERGE_VIEW, //Oracle
 	RULE, TRIGGER, TRUNCATE, //UNKNOWN?, //PostgreSQL
+	//SHOW? // mysql - http://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html
 	;
 	//XXX: filter privilegetype on output based on dbid... see: column-type-mapping.properties
 	

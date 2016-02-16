@@ -477,8 +477,8 @@ public class DataDump extends AbstractSQLProc {
 				hasData = rs.next();
 				//so empty tables do not create empty dump files
 				if(!hasData) {
-					log.info("table/query '"+tableOrQueryName+"' returned 0 rows");
 					if(!createEmptyDumpFiles) {
+						log.info("table/query '"+tableOrQueryName+"' returned 0 rows [no output generated]");
 						return;
 					}
 				}
@@ -703,11 +703,13 @@ public class DataDump extends AbstractSQLProc {
 				);
 
 			//footers
+			int footerCount = 0, wiFooterCount = 0, swFooterCount = 0;
 			Set<String> filenames = writersOpened.keySet();
 			for(String filename: filenames) {
 				//for(String partitionByPattern: partitionByPatterns) {
 				//FIXedME: should be count for this file/partition, not resultset. Last countInPartition would work for last partition only
 				closeWriter(writersOpened, writersSyntaxes, filename, countByPatternFinalFilename);
+				footerCount++;
 			}
 			writersOpened.clear();
 			writersSyntaxes.clear();
@@ -719,18 +721,20 @@ public class DataDump extends AbstractSQLProc {
 					//writer-independent footers
 					if(ds.isWriterIndependent()) {
 						ds.dumpFooter(count);
+						wiFooterCount++;
 					}
 					else {
 						//static writers footers
 						Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
 						if(w!=null) {
 							ds.dumpFooter(count, w);
+							swFooterCount++;
 						}
 					}
 				}
 			}
 			
-			log.debug("wrote all footers for table/query: "+tableOrQueryName);
+			log.debug("wrote all footers [count="+footerCount+" ; wi="+wiFooterCount+" ; sw="+swFooterCount+"] for table/query: "+tableOrQueryName);
 			
 			rs.close();
 			
