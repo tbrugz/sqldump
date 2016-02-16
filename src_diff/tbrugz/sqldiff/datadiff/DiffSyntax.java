@@ -19,4 +19,7 @@ public interface DiffSyntax extends DumpSyntaxInt {
 	public void dumpDeleteRow(ResultSet rs, long count, Writer w)
 			throws IOException, SQLException;
 	
+	public void dumpStats(long insertCount, long updateCount, long deleteCount, long identicalRowsCount,
+			long sourceRowCount, long targetRowCount, Writer w) throws IOException, SQLException;
+	
 }

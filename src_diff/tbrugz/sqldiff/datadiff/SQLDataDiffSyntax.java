@@ -96,6 +96,13 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 				";", w);
 		if(shouldFlush) { w.flush(); }
 	}
+	
+	@Override
+	public void dumpStats(long insertCount, long updateCount, long deleteCount, long identicalRowsCount,
+			long sourceRowCount, long targetRowCount, Writer w) throws IOException, SQLException {
+		out("/* counts: I,U,D,E / S,T == "+insertCount+","+updateCount+","+deleteCount+","+identicalRowsCount+" / "+sourceRowCount+","+targetRowCount+" */", w);
+		if(shouldFlush) { w.flush(); }
+	}
 
 	//XXX: option to show old values in comment
 	/*

@@ -245,6 +245,7 @@ public class ResultSetDiff {
 				Iterator<Writer> it = cout.getAllOpenedWritersIterator();
 				while(it.hasNext()) {
 					Writer w = it.next();
+					ds.dumpStats(dumpCount, updateCount, deleteCount, identicalRowsCount, sourceRowCount, targetRowCount, w);
 					ds.dumpFooter(sourceRowCount, w);
 					w.close();
 				}

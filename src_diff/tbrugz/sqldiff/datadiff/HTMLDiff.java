@@ -64,6 +64,11 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 		if(shouldFlush) { flush(w); }
 	}
 	
+	@Override
+	public void dumpStats(long insertCount, long updateCount, long deleteCount, long identicalRowsCount,
+			long sourceRowCount, long targetRowCount, Writer w) throws IOException, SQLException {
+	}
+	
 	public void dumpRowValues(List<Object> valsS, List<Object> valsT, long count, String clazz, Writer fos) throws IOException, SQLException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+clazz+"\"":"")+">");

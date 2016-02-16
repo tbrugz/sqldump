@@ -395,9 +395,11 @@ public class DataDiff extends AbstractFailable {
 	
 	public static List<Column> getCommonColumns(Table t1, Table t2) {
 		List<Column> cols = new ArrayList<Column>();
-		for(Column c: t1.getColumns()) {
-			if(t2.getColumn(c.getName())!=null) {
-				cols.add(c);
+		if(t1.getColumns()!=null) {
+			for(Column c: t1.getColumns()) {
+				if(t2.getColumn(c.getName())!=null) {
+					cols.add(c);
+				}
 			}
 		}
 		return cols;
