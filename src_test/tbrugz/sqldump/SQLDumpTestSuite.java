@@ -121,5 +121,5 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	SQLRunAndDumpTest.class,
 	//RoundTripTest.class,
 })
-public class AllTestSuite {
+public class SQLDumpTestSuite {
 }

@@ -193,7 +193,7 @@
 			<classpath location="${bin.cobertura.dir}" />
 			<classpath refid="classpath.test" />
 			<formatter type="xml"/>
-			<test name="tbrugz.sqldump.AllTestSuite" todir="${dist.dir}"/>
+			<test name="tbrugz.sqldump.SQLDumpTestSuite" todir="${dist.dir}"/>
 		</junit>
 	</target>
 
