@@ -21,10 +21,12 @@ public class PivotQueryParser {
 	static final String MEASURES_SHOW_INROWS = "+measures-show-inrows";
 	static final String MEASURES_SHOW_ALLWAYS = "+measures-show-allways";
 
+	@SuppressWarnings("rawtypes")
 	final Map<String, Comparable> colsToPivot;
 	final List<String> colsNotToPivot;
 	final int flags;
 	
+	@SuppressWarnings("rawtypes")
 	public PivotQueryParser(String sql) {
 		Matcher m = PATTERN_PIVOT_CLAUSE.matcher(sql);
 		boolean found = m.find();

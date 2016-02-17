@@ -304,7 +304,7 @@ public class SQLDump implements Executor {
 		}
 		
 		if(sm!=null) {
-			DBMSResources.instance().updateDbId(sm.getSqlDialect());
+			DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: really needed?
 		}
 		else {
 			log.warn("no model grabbed!");

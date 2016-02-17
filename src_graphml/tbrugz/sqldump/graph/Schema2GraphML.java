@@ -443,6 +443,7 @@ public class Schema2GraphML extends AbstractFailable implements SchemaModelDumpe
 			dumpFormatClass = DEFAULT_DUMPFORMAT_CLASS;
 		}
 		
+		@SuppressWarnings("deprecation")
 		String schemaPattern = Utils.getPropWithDeprecated(prop, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
 		schemaNamesList = new ArrayList<String>();

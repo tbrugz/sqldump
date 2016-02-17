@@ -150,6 +150,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	
 	Map<DBObjectType, DBObjectType> mappingBetweenDBObjectTypes = new HashMap<DBObjectType, DBObjectType>();
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setProperties(Properties prop) {
 		//init control vars
@@ -172,7 +173,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 
-		fromDbId = DBMSResources.instance().dbid();
+		//fromDbId = DBMSResources.instance().dbid();
 		toDbId = prop.getProperty(Defs.PROP_TO_DB_ID);
 		dumpFKsInsideTable = !doSchemaDumpFKsAtEnd;
 		
@@ -224,6 +225,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {
 		
+		fromDbId = schemaModel.getSqlDialect();
+		
 		if(outputConnPropPrefix!=null) {
 			outputConn = ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
 		}
@@ -241,7 +244,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		
-		if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
+		//if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
+		if(fromDbId!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, fromDbId); }
 		if(toDbId!=null) { colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId); }
 		
 		setupScriptDumpSpecificFeatures(toDbId!=null?toDbId:fromDbId);
