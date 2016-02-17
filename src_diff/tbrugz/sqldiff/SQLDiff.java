@@ -481,6 +481,7 @@ public class SQLDiff implements Executor {
 		ColumnDiff.addComments = addComments;
 		DBIdentifiableDiff.addComments = addComments;
 		SchemaDiffer.mayReplaceDbId = Utils.getPropBool(prop, PROP_DBIDDIFF_USEREPLACE, SchemaDiffer.mayReplaceDbId);
+		DBMSResources.instance().setup(prop);
 	}
 	
 	void openFileWriters() throws IOException {
@@ -585,8 +586,8 @@ public class SQLDiff implements Executor {
 			return;
 		}
 		CLIProcessor.init(PRODUCT_NAME, args, PROPERTIES_FILENAME, prop);
+		
 		procProterties();
-		DBMSResources.instance().setup(prop);
 
 		if(outfilePattern==null && xmloutfile==null) {
 			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"'] defined. can't dump diff script";
