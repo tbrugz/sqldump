@@ -142,11 +142,11 @@ public class SQLDiff implements Executor {
 			this.schemaGrabber = grabber;
 		}
 		
-		public ModelGrabber(String grabberMode, String grabberId) throws ClassNotFoundException, SQLException, NamingException {
+		/*public ModelGrabber(String grabberMode, String grabberId) throws ClassNotFoundException, SQLException, NamingException {
 			this.grabberMode = grabberMode;
 			this.grabberId = grabberId;
 			this.schemaGrabber = initGrabber(grabberMode, grabberId, prop);
-		}
+		}*/
 		
 		@Override
 		public SchemaModel call() throws Exception {

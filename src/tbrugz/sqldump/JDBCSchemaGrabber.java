@@ -255,8 +255,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			else { log.warn("can't detect database type"); }
 		}*/
 
-		DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
-		feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		//DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
+		//feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		//feats.procProperties(papp);
+		feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
 		ConnectionUtil.showDBInfo(conn.getMetaData());
@@ -321,7 +323,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			schemasList.add(schemaName.trim());
 		}
 		
-		schemaModel.setSqlDialect(DBMSResources.instance().dbid());
+		//schemaModel.setSqlDialect(DBMSResources.instance().dbid());
+		schemaModel.setSqlDialect(feats.getId());
 
 		if(doSchemaGrabTables) {
 			
@@ -833,7 +836,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(eo==null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 				//XXX: oracle driver adds 1 to function parameter positions...
-				if("oracle".equals(DBMSResources.instance().dbid())) {
+				if( "oracle".equals(feats.getId()) ) {
 					ep.setPosition(ep.getPosition()-1);
 				}
 			}

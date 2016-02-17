@@ -259,6 +259,7 @@ public final class DBMSResources {
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
 				feats = (DBMSFeatures) c.newInstance();
+				feats.setId(dbid);
 				log.debug("specific DBMS features class: "+c.getName());
 			} catch (ClassNotFoundException e) {
 				throw new RuntimeException(e);
@@ -270,7 +271,7 @@ public final class DBMSResources {
 		}
 		else {
 			//if(features==null) ?
-			feats = new DefaultDBMSFeatures();
+			feats = new DefaultDBMSFeatures(dbid);
 			log.debug("no specific DBMS features defined. using "+feats.getClass().getSimpleName());
 		}
 		initDBMSFeatures(feats, papp);

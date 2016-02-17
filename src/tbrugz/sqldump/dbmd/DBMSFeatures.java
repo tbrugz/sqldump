@@ -25,6 +25,8 @@ public interface DBMSFeatures {
 	void procProperties(Properties prop); //XXX: really needed?
 	void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException; //XXX: remove this too?
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata);
+	void setId(String id);
+	String getId();
 	
 	/*
 	//TODO: add standart methods for grabbing DB Objects - use 'get' instead of 'grab'?
