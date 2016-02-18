@@ -1,7 +1,6 @@
 package tbrugz.sqldump.mondrianschema;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -390,6 +389,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		for(Table t: schemaModel.getTables()) {
 			List<FK> fks = new ArrayList<FK>();
 			boolean isRoot = true;
+			@SuppressWarnings("unused")
 			boolean isLeaf = true;
 			
 			for(FK fk: schemaModel.getForeignKeys()) {
@@ -711,9 +711,9 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		//pkTable.setName(fk.pkTable);
 		
 		String dimName = fk.getPkTable();
-		if(false) {
+		/*if(false) {
 			dimName = fk.getName();
-		}
+		}*/
 		
 		if(listContains(ignoreDims, dimName)) {
 			return;

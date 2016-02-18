@@ -18,7 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.dbmd.DBMSFeatures;
+//import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
@@ -160,7 +160,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		
 		int sqlrunCounter = 0;
 		
-		//TODO: use procIds instead of execkeys (?)
+		//TODO!!: use procIds instead of execkeys (?)
 		for(String key: execkeys) {
 			boolean exec = doExec(key, sqlrunCounter);
 			if(exec) {
@@ -249,6 +249,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			// .statement
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
 				setExecProperties(srproc, papp, execFailOnError);
+				@SuppressWarnings("unused")
 				int urows = srproc.execStatement(execValue);
 			}
 			// .import
@@ -277,6 +278,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				importer.setDefaultFileEncoding(defaultEncoding);
 				importer.setCommitStrategy(commitStrategy);
 				setExecProperties(importer, papp, execFailOnError);
+				@SuppressWarnings("unused")
 				long imported = 0;
 				try {
 					imported = importer.importData();
@@ -408,12 +410,12 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 
 		//inits DBMSResources
 		DBMSResources.instance().setup(papp);
-		DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
+		//DBMSResources.instance().updateMetaData(conn.getMetaData()); //XXX: really needed?
 		
 		//inits specific DBMSFeatures class
 		//XXX: really needed?
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
-		log.debug("DBMSFeatures: "+feats);
+		//DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
+		//log.debug("DBMSFeatures: "+feats);
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
 		defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);

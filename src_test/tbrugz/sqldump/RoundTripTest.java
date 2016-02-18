@@ -1,13 +1,5 @@
 package tbrugz.sqldump;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import javax.naming.NamingException;
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
-
-import org.codehaus.jettison.json.JSONException;
 import org.junit.Test;
 
 import tbrugz.sqldiff.SQLDiff;

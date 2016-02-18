@@ -83,6 +83,7 @@ public class SchemaDiffTest {
 		sm2.getTables().add(t);
 		
 		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
+		@SuppressWarnings("unused")
 		int renameCount = RenameDetector.detectAndDoColumnRenames(sd.getColumnDiffs(), 0.5);
 		SchemaDiff.logInfo(sd);
 		

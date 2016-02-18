@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.SQLRun;
-import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 

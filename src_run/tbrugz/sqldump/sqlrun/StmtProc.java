@@ -35,6 +35,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
+@SuppressWarnings("deprecation")
 public class StmtProc extends AbstractFailable implements Executor {
 	static final Log log = LogFactory.getLog(StmtProc.class);
 	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
@@ -107,7 +108,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	long batchExecCounter = 0;
 	Statement batchStmt = null;
 
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException {
 		setupProperties();
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
