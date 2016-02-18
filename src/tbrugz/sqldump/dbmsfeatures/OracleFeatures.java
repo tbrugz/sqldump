@@ -51,18 +51,6 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
 	
-	String id;
-	
-	@Override
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	@Override
-	public String getId() {
-		return id;
-	}
-	
 	@Override
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);

@@ -36,6 +36,25 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabViews = true;
 	protected boolean grabUniqueConstraints = true;
 	protected boolean grabCheckConstraints = true;
+	
+	String id;
+	
+	public AbstractDBMSFeatures() {
+	}
+	
+	public AbstractDBMSFeatures(String id) {
+		this.id = id;
+	}
+	
+	@Override
+	public void setId(String id) {
+		this.id = id;
+	}
+	
+	@Override
+	public String getId() {
+		return id;
+	}
 
 	@Override
 	public void procProperties(Properties prop) {
@@ -115,6 +134,11 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected String createAlterColumn(NamedDBObject table, Column column, String xtraSql) {
 		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getName()
 				+(xtraSql!=null?xtraSql:"");
+	}
+	
+	@Override
+	public String getIdentifierQuoteString() {
+		return "\"";
 	}
 	
 }

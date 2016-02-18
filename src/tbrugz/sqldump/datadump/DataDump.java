@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -170,11 +171,15 @@ public class DataDump extends AbstractSQLProc {
 	
 	@Override
 	public void process() {
-		dumpData(conn, model.getTables(), prop);
+		try {
+			dumpData(conn, model.getTables(), prop);
+		} catch (SQLException e) {
+			throw new ProcessingException(e);
+		}
 	}
 
 	//TODOne: filter tables by table type (table, view, ...)
-	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) {
+	void dumpData(Connection conn, Collection<Table> tablesForDataDump, Properties prop) throws SQLException {
 		log.info("data dumping...");
 		
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
@@ -246,6 +251,9 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		String quote = feat.getIdentifierQuoteString();
+		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDumpLoop) {
 			String tableName = table.getName();
@@ -283,8 +291,7 @@ public class DataDump extends AbstractSQLProc {
 				pkCols = table.getPKConstraint().getUniqueColumns();
 			} 
 			
-			//String quote = conn.getMetaData().getIdentifierQuoteString();
-			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK); //XXX add quote?
+			String sql = getQuery(table, selectColumns, whereClause, orderClause, orderByPK, quote);
 			
 			try {
 				//XXX: table dump with partitionBy?
@@ -320,11 +327,16 @@ public class DataDump extends AbstractSQLProc {
 		}
 	}
 	
-	//XXX: move to DataDumpUtils?
+	/*@Deprecated
 	public static String getQuery(Table table, String selectColumns, String whereClause, String orderClause, boolean orderByPK) {
+		return getQuery(table, selectColumns, whereClause, orderClause, orderByPK, "\"");
+	}*/
+	
+	//XXX: move to DataDumpUtils?
+	public static String getQuery(Table table, String selectColumns, String whereClause, String orderClause, boolean orderByPK, String quote) {
 		String tableName = table.getName();
 		
-		String quote = DBMSResources.instance().getIdentifierQuoteString();
+		//String quote = DBMSResources.instance().getIdentifierQuoteString();
 		StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 		
 		if(orderClause==null && orderByPK) { 

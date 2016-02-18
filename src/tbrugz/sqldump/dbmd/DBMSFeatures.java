@@ -120,4 +120,7 @@ public interface DBMSFeatures {
 	 * http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most
 	 * XXX add: boolean isValidConnection(Connection conn);
 	 */
+	
+	String getIdentifierQuoteString();
+
 }

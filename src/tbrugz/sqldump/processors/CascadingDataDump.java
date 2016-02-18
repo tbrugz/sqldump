@@ -22,7 +22,6 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.ModelUtils;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
-import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -74,7 +73,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	static boolean addAlias = true;
 	static boolean addSQLremarks = true;
 	
-	String quote = DBMSResources.instance().getIdentifierQuoteString();
+	//String quote = DBMSResources.instance().getIdentifierQuoteString();
 	//StringDecorator quoter = new StringDecorator.StringQuoterDecorator(quote);
 	StringDecorator quoter = null; //XXX add prop?
 	

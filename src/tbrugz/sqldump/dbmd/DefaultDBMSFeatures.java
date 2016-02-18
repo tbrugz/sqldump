@@ -17,23 +17,11 @@ import tbrugz.sqldump.dbmodel.View;
 
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 
-	String id;
-	
 	public DefaultDBMSFeatures() {
 	}
 	
 	public DefaultDBMSFeatures(String id) {
-		this.id = id;
-	}
-	
-	@Override
-	public void setId(String id) {
-		this.id = id;
-	}
-	
-	@Override
-	public String getId() {
-		return id;
+		super(id);
 	}
 	
 	@Override

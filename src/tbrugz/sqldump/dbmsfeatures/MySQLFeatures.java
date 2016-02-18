@@ -84,4 +84,9 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
 		return conn.createStatement().executeQuery("explain "+sql);
 	}
+	
+	@Override
+	public String getIdentifierQuoteString() {
+		return "`";
+	}
 }

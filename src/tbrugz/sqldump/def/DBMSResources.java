@@ -186,6 +186,7 @@ public final class DBMSResources {
 		return instance;
 	}
 
+	@Deprecated
 	/* DatabaseMetaData.getIdentifierQuoteString() already does it */
 	public String getIdentifierQuoteString() {
 		return identifierQuoteString;

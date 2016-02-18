@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Relation;
@@ -16,6 +17,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -30,7 +32,7 @@ public class ModelValidator extends AbstractSQLProc {
 	
 	static final Log log = LogFactory.getLog(ModelValidator.class);
 	
-	StringDecorator sqlIdDecorator = new StringDecorator.StringQuoterDecorator(DBMSResources.instance().getIdentifierQuoteString());
+	StringDecorator sqlIdDecorator = null;
 	
 	Writer wout;
 
@@ -38,16 +40,26 @@ public class ModelValidator extends AbstractSQLProc {
 	public void process() {
 		try {
 			doIt();
+		} catch (SQLException e) {
+			log.warn("SQLException: "+e);
+			if(failonerror) {
+				throw new ProcessingException(e);
+			}
 		} catch (IOException e) {
-			log.warn("IO Exception: "+e);
-			log.debug("IO Exception: "+e.getMessage(), e);
-			//XXX fail on error?
+			log.warn("IOException: "+e);
+			log.debug("IOException: "+e.getMessage(), e);
+			if(failonerror) {
+				throw new ProcessingException(e);
+			}
 		}
 	}
 
-	void doIt() throws IOException {
+	void doIt() throws IOException, SQLException {
 		
 		int relationsCount = 0, relationsValidated = 0;
+		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		sqlIdDecorator = new StringDecorator.StringQuoterDecorator(feat.getIdentifierQuoteString());
 		
 		// tables
 		for(Table t: model.getTables()) {

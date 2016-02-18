@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -41,7 +42,6 @@ import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
-import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class DataDiff extends AbstractFailable {
@@ -91,7 +91,7 @@ public class DataDiff extends AbstractFailable {
 	public static final String PROP_DATADIFF_IMPORTCHARSET = SQLDiff.PROP_PREFIX+".datadiff.importcharset";
 	public static final String PROP_DATADIFF_USECOMMONCOLUMNS = SQLDiff.PROP_PREFIX+".datadiff.usecommoncolumns";
 	
-	StringDecorator quoteAllDecorator;
+	//StringDecorator quoteAllDecorator;
 	
 	Properties prop = null;
 	List<String> tablesToDiffFilter = new ArrayList<String>();
@@ -114,8 +114,8 @@ public class DataDiff extends AbstractFailable {
 	public void setProperties(Properties prop) {
 		tablesToDiffFilter = Utils.getStringListFromProp(prop, PROP_DATADIFF_TABLES, ",");
 		tablesToIgnore = Utils.getStringListFromProp(prop, PROP_DATADIFF_IGNORETABLES, ",");
-		String quote = DBMSResources.instance().getIdentifierQuoteString();
-		quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
+		//String quote = DBMSResources.instance().getIdentifierQuoteString();
+		//quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 		outFilePattern = prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN);
 		loopLimit = Utils.getPropLong(prop, PROP_DATADIFF_LOOPLIMIT, loopLimit);
 
@@ -203,6 +203,9 @@ public class DataDiff extends AbstractFailable {
 			targetMustImportData = mustImportData(targetId);
 		}
 		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sourceConn.getMetaData());
+		String quote = feat.getIdentifierQuoteString();
+		
 		ResultSetDiff rsdiff = new ResultSetDiff();
 		rsdiff.setLimit(loopLimit);
 		
@@ -278,7 +281,7 @@ public class DataDiff extends AbstractFailable {
 				}
 			}
 			
-			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true);
+			String sql = DataDump.getQuery(table, columnsForSelect, null, null, true, quote);
 			//log.debug("SQL: "+sql);
 			
 			boolean didDiff = doDiff(table, sql, rsdiff, keyCols, dss, sourceMustImportData, targetMustImportData, coutPattern);
