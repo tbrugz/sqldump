@@ -16,7 +16,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
@@ -64,17 +65,10 @@ public class InsertIntoDataDump extends DumpSyntax {
 	String footer;
 	
 	Properties prop;
+	DBMSFeatures feat;
 	
 	@Override
 	public void procProperties(Properties prop) {
-		String dbmsDatePattern = DBMSResources.instance().databaseSpecificFeaturesClass().sqlDefaultDateFormatPattern();
-		if(dbmsDatePattern!=null) {
-			log.debug("dbms default date format: "+dbmsDatePattern);
-			dateFormatter = new SimpleDateFormat(dbmsDatePattern);
-		}
-		else {
-			dateFormatter = sqlDefaultDateFormatter;
-		}
 		procStandardProperties(prop);
 		doColumnNamesDump = Utils.getPropBool(prop, PROP_DATADUMP_INSERTINTO_WITHCOLNAMES, doColumnNamesDump);
 		doDumpCursors = Utils.getPropBool(prop, PROP_INSERTINTO_DUMPCURSORS, doDumpCursors);
@@ -109,8 +103,20 @@ public class InsertIntoDataDump extends DumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
+		
+		if(feat==null) {
+			feat = new DefaultDBMSFeatures();
+		}
+		String dbmsDatePattern = feat.sqlDefaultDateFormatPattern();
+		if(dbmsDatePattern!=null) {
+			log.debug("dbms default date format: "+dbmsDatePattern);
+			dateFormatter = new SimpleDateFormat(dbmsDatePattern);
+		}
+		else {
+			dateFormatter = sqlDefaultDateFormatter;
+		}
 		if(doQuoteAllSqlIds) { //quote all
-			String quote = DBMSResources.instance().getIdentifierQuoteString();
+			String quote = feat.getIdentifierQuoteString();
 			StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 			colNames = "("+Utils.join(lsColNames, ", ", quoteAllDecorator)+")";
 			tableName4Dump = quoteAllDecorator.get(tableName);
@@ -119,6 +125,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		else {
 			colNames = "("+Utils.join(lsColNames, ", ")+")";
 		}
+		
 		fullTableName4Dump = getTable4Dump(schemaName4Dump, tableName4Dump);
 	}
 
@@ -148,6 +155,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 					if(rsInt==null) { continue; }
 					InsertIntoDataDump iidd = new InsertIntoDataDump();
 					iidd.procProperties(prop);
+					iidd.setFeatures(this.feat);
 					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 				}
 			}
@@ -205,5 +213,15 @@ public class InsertIntoDataDump extends DumpSyntax {
 	@Override
 	public String getMimeType() {
 		return "application/sql";
+	}
+	
+	@Override
+	public boolean needsDBMSFeatures() {
+		return true;
+	}
+	
+	@Override
+	public void setFeatures(DBMSFeatures features) {
+		this.feat = features;
 	}
 }

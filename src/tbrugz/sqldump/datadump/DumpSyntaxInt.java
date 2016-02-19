@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 
@@ -114,5 +115,9 @@ public interface DumpSyntaxInt {
 	public void dumpRow(ResultSet rs, long count, OutputStream os) throws IOException, SQLException;
 
 	public void dumpFooter(long count, OutputStream os) throws IOException;
+	
+	public boolean needsDBMSFeatures();
+	
+	public void setFeatures(DBMSFeatures features);
 	
 }

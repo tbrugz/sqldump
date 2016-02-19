@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.Utils;
@@ -206,5 +207,14 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	@Override
 	public void dumpFooter(long count, OutputStream os) throws IOException {
 		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not accept OutputStream");
+	}
+	
+	@Override
+	public boolean needsDBMSFeatures() {
+		return false;
+	}
+	
+	@Override
+	public void setFeatures(DBMSFeatures features) {
 	}
 }

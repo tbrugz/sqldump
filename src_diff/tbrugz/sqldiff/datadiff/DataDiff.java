@@ -218,7 +218,7 @@ public class DataDiff extends AbstractFailable {
 			log.info("[target] importing data for datadiff from: "+getImportDataPattern(targetId));
 		}
 
-		List<DiffSyntax> dss = getSyntaxes(prop, applyDataDiff);
+		List<DiffSyntax> dss = getSyntaxes(prop, feat, applyDataDiff);
 		if(dss.size()==0) {
 			String message = "no datadiff syntaxes defined: no table's data will be diffed..."; 
 			log.error(message);
@@ -408,7 +408,7 @@ public class DataDiff extends AbstractFailable {
 		return cols;
 	}
 	
-	static List<DiffSyntax> getSyntaxes(Properties prop, boolean applyDataDiff) throws SQLException {
+	static List<DiffSyntax> getSyntaxes(Properties prop, DBMSFeatures feat, boolean applyDataDiff) throws SQLException {
 		List<DiffSyntax> dss = new ArrayList<DiffSyntax>();
 		List<String> dsStrs = new ArrayList<String>();
 		//FIXedME: select DiffSyntax (based on properties?)
@@ -421,6 +421,7 @@ public class DataDiff extends AbstractFailable {
 				DiffSyntax ds = (DiffSyntax) Utils.getClassInstance(s, "tbrugz.sqldiff.datadiff");
 				if(ds!=null) {
 					ds.procProperties(prop);
+					if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 					dss.add(ds);
 					dsStrs.add(ds.getClass().getSimpleName());
 				}
@@ -429,6 +430,7 @@ public class DataDiff extends AbstractFailable {
 		else if(prop.getProperty(PROP_DATADIFF_OUTFILEPATTERN)!=null) {
 			DiffSyntax ds = new SQLDataDiffSyntax();
 			ds.procProperties(prop);
+			if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 			dss.add(ds);
 			dsStrs.add(ds.getClass().getSimpleName());
 		}
@@ -436,6 +438,7 @@ public class DataDiff extends AbstractFailable {
 		if(applyDataDiff) {
 			DiffSyntax sdd2db = new SQLDataDiffToDBSyntax();
 			sdd2db.procProperties(prop);
+			if(sdd2db.needsDBMSFeatures()) { sdd2db.setFeatures(feat); }
 			dss.add(sdd2db);
 			dsStrs.add(sdd2db.getClass().getSimpleName());
 		}

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
@@ -23,6 +24,7 @@ import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 import tbrugz.sqldump.dbmodel.Query;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.IOUtil;
@@ -83,7 +85,8 @@ public class SQLQueries extends AbstractSQLProc {
 			qid = qid.trim();
 			
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
-			List<DumpSyntax> syntaxList = getQuerySyntaxes(qid);
+			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
+			List<DumpSyntax> syntaxList = getQuerySyntaxes(qid, feat);
 			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
@@ -201,7 +204,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 	}
 	
-	List<DumpSyntax> getQuerySyntaxes(String qid) {
+	List<DumpSyntax> getQuerySyntaxes(String qid, DBMSFeatures feat) {
 		String syntaxes = prop.getProperty("sqldump.query."+qid+".dumpsyntaxes");
 		if(syntaxes==null) {
 			syntaxes = prop.getProperty(DataDump.PROP_DATADUMP_SYNTAXES);
@@ -217,6 +220,7 @@ public class SQLQueries extends AbstractSQLProc {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
 					ds.procProperties(prop);
+					if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 					syntaxList.add(ds);
 					syntaxAdded = true;
 				}

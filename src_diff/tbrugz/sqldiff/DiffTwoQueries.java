@@ -18,6 +18,7 @@ import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldiff.datadiff.ResultSetDiff;
 import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;
@@ -109,9 +110,10 @@ public class DiffTwoQueries implements Executor {
 			if(targetConn==null) { targetConn = commonConn; }
 		}
 		
-		DBMSResources.instance().updateMetaData(sourceConn.getMetaData(), true);
-		
-		List<DiffSyntax> dss = getSyntaxes();
+		//DBMSResources.instance().updateMetaData(sourceConn.getMetaData(), true);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(sourceConn.getMetaData());
+
+		List<DiffSyntax> dss = getSyntaxes(feat);
 		
 		String sourceSQL = getPropertyFailIfNull(prop, PROP_SOURCE_QUERY, PROP_QUERY);
 		String targetSQL = getPropertyFailIfNull(prop, PROP_TARGET_QUERY, PROP_QUERY);
@@ -181,10 +183,10 @@ public class DiffTwoQueries implements Executor {
 		diff2t.doMain(args, diff2t.prop);
 	}
 	
-	List<DiffSyntax> getSyntaxes() {
-		List<DiffSyntax> dss = DiffUtil.getSyntaxes(prop, PROP_SYNTAXES);
+	List<DiffSyntax> getSyntaxes(DBMSFeatures feat) {
+		List<DiffSyntax> dss = DiffUtil.getSyntaxes(prop, feat, PROP_SYNTAXES);
 		if(dss.size()==0) {
-			dss.add(DiffUtil.getSyntax(prop, DEFAULT_SYNTAX));
+			dss.add(DiffUtil.getSyntax(prop, feat, DEFAULT_SYNTAX));
 		}
 		return dss;
 	}

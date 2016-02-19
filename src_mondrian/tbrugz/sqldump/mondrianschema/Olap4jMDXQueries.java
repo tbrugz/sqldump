@@ -23,7 +23,9 @@ import org.olap4j.metadata.Hierarchy;
 
 import tbrugz.sqldump.datadump.DataDump;
 import tbrugz.sqldump.datadump.DumpSyntax;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.def.AbstractSQLProc;
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.QueryDumper;
@@ -153,7 +155,8 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 				}
 				*/
 				else {
-					dumpQueryResultSetAdapterDD(id, qid, cellset);
+					DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+					dumpQueryResultSetAdapterDD(id, qid, cellset, feat);
 				}
 				
 				count++;
@@ -209,7 +212,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		log.info("query '"+id+"' dumped [ResultSetAdapter;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
-	void dumpQueryResultSetAdapterDD(String id, String qname, CellSet cellSet) throws SQLException, IOException {
+	void dumpQueryResultSetAdapterDD(String id, String qname, CellSet cellSet, DBMSFeatures feat) throws SQLException, IOException {
 		long initTime = System.currentTimeMillis();
 		CellSetResultSetAdapter csrsad = new CellSetResultSetAdapter(cellSet);
 		List<String> syntaxes = Utils.getStringListFromProp(prop, PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_SYNTAXES, ",");
@@ -218,7 +221,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 			throw new ProcessingException("datadump syntax list must be defined [prop '"+PREFIX_MDXQUERIES+SUFFIX_MDXQUERIES_SYNTAXES+"']");
 		}
 		DataDump dd = new DataDump();
-		List<DumpSyntax> ds = DataDump.getSyntaxList(prop, syntaxes.toArray(new String[]{}));
+		List<DumpSyntax> ds = DataDump.getSyntaxList(prop, feat, syntaxes.toArray(new String[]{}));
 		dd.dumpResultSet(csrsad, prop, null, id, /*tableOrQueryName*/ qname, /*charset*/ null,
 				/*rowlimit*/ ROW_LIMIT, /*syntaxList*/ ds, /*partitionByPatterns*/ null, /*keyColumns*/ null, /*importedFKs*/ null,
 				/*uniqueKeys*/ null, /*rsDecoratorFactory*/ null, initTime);

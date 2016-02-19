@@ -187,7 +187,10 @@ public class DataDump extends AbstractSQLProc {
 
 		List<String> tables4dump = getTables4dump(prop);
 		
-		List<DumpSyntax> syntaxList = getSyntaxList(prop, PROP_DATADUMP_SYNTAXES);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		String quote = feat.getIdentifierQuoteString();
+		
+		List<DumpSyntax> syntaxList = getSyntaxList(prop, feat, PROP_DATADUMP_SYNTAXES);
 		if(syntaxList==null) {
 			log.error("no datadump syntax(es) defined [prop '"+PROP_DATADUMP_SYNTAXES+"']");
 			if(failonerror) {
@@ -250,9 +253,6 @@ public class DataDump extends AbstractSQLProc {
 				}
 			}
 		}
-		
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
-		String quote = feat.getIdentifierQuoteString();
 		
 		LABEL_TABLE:
 		for(Table table: tablesForDataDumpLoop) {
@@ -366,7 +366,9 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
-		List<DumpSyntax> syntaxList = getSyntaxList(prop, PROP_DATADUMP_SYNTAXES);
+		
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		List<DumpSyntax> syntaxList = getSyntaxList(prop, feat, PROP_DATADUMP_SYNTAXES);
 		if(syntaxList==null) {
 			log.error("no datadump syntax defined");
 			if(failonerror) {
@@ -972,17 +974,17 @@ public class DataDump extends AbstractSQLProc {
 		return null;
 	}
 		
-	static List<DumpSyntax> getSyntaxList(Properties prop, String dumpSyntaxesProperty) {
+	static List<DumpSyntax> getSyntaxList(Properties prop, DBMSFeatures feat, String dumpSyntaxesProperty) {
 		String syntaxes = prop.getProperty(dumpSyntaxesProperty);
 		if(syntaxes==null) {
 			return null;
 		}
 		
 		String[] syntaxArr = syntaxes.split(",");
-		return getSyntaxList(prop, syntaxArr);
+		return getSyntaxList(prop, feat, syntaxArr);
 	}
 	
-	public static List<DumpSyntax> getSyntaxList(Properties prop, String[] dumpSyntaxes) {
+	public static List<DumpSyntax> getSyntaxList(Properties prop, DBMSFeatures feat, String[] dumpSyntaxes) {
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		for(String syntax: dumpSyntaxes) {
 			boolean syntaxAdded = false;
@@ -990,6 +992,7 @@ public class DataDump extends AbstractSQLProc {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
 					ds.procProperties(prop);
+					if(ds.needsDBMSFeatures()) { ds.setFeatures(feat); }
 					syntaxList.add(ds);
 					syntaxAdded = true;
 				}
