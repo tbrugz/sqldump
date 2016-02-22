@@ -68,7 +68,8 @@ public class DiffApplyTest {
 	@Test
 	public void testDiffAlterColumnNullable() throws Exception {
 		//exec DDL
-		execDDLId2("alter table emp alter column department_id set not null"); //was 100
+		execDDLId2("alter table emp alter column department_id set not null"); //was null
+		//execDDLId2("alter table emp alter column name set null"); //was not null
 		
 		//run diff
 		SQLDiff sqldiff = new SQLDiff();

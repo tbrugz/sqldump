@@ -28,6 +28,7 @@ import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
@@ -214,7 +215,9 @@ public class SQLDiff implements Executor {
 		//XXX: option to set dialect from properties?
 		String dialect = toSM.getSqlDialect();
 		log.debug("diff dialect set to: "+dialect);
-		DBMSResources.instance().updateDbId(dialect);
+		//DBMSResources.instance().updateDbId(dialect);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
+		ColumnDiff.updateFeatures(feat);
 
 		//do diff
 		log.info("diffing...");
@@ -408,7 +411,7 @@ public class SQLDiff implements Executor {
 			else {
 				log.info("no 'apply-to' model defined, diff may not be validated");
 			}
-			DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
+			//DBMSResources.instance().updateMetaData(applyToConn.getMetaData());
 			applyDiffToDB(diff, applyToConn);
 		}
 	}

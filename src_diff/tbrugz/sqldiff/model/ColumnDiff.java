@@ -94,7 +94,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	final transient NamedTable table;
 	
 	public static boolean addComments = true;
-	static DBMSFeatures features;
+	protected static DBMSFeatures features;
 	public static TempColumnAlterStrategy useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
 
 	public ColumnDiff(ChangeType changeType, NamedDBObject table, Column oldColumn, Column newColumn) {
