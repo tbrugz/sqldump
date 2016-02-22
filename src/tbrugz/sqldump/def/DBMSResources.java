@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
-import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -24,7 +23,7 @@ public final class DBMSResources {
 
 	static final Log log = LogFactory.getLog(DBMSResources.class);
 
-	static final String DEFAULT_QUOTE_STRING = "\"";
+	//static final String DEFAULT_QUOTE_STRING = "\"";
 	
 	static final String DEFAULT_DBID = "<default>"; 
 	
@@ -37,7 +36,7 @@ public final class DBMSResources {
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
 
 	String dbId;
-	String identifierQuoteString = DEFAULT_QUOTE_STRING;
+	//@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	DBMSFeatures features;
 	
 	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
@@ -84,7 +83,7 @@ public final class DBMSResources {
 			}
 			else {
 				log.warn("can't detect database type");
-				updateIdentifierQuoteString();
+				//updateIdentifierQuoteString();
 				updateSpecificFeaturesClass();
 				fireUpdateToListeners();
 			}
@@ -94,7 +93,7 @@ public final class DBMSResources {
 			if(!quiet) { log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId); }
 		}
 
-		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
+		//SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
 	
 	public void updateDbId(String newid) {
@@ -106,7 +105,7 @@ public final class DBMSResources {
 		log.debug("updating dbid: '"+newid+"' [old="+dbId+"]");
 		if(dbIds.contains(newid) || newid==null) {
 			dbId = newid;
-			updateIdentifierQuoteString();
+			//updateIdentifierQuoteString();
 			updateSpecificFeaturesClass();
 			fireUpdateToListeners();
 		}
@@ -115,11 +114,12 @@ public final class DBMSResources {
 		}
 	}
 	
+	/*@Deprecated
 	void updateIdentifierQuoteString() {
 		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", 
 				(identifierQuoteString!=null ? identifierQuoteString : DEFAULT_QUOTE_STRING)
 				);
-	}
+	}*/
 	
 	public String detectDbId(DatabaseMetaData dbmd) {
 		return detectDbId(dbmd, true);
@@ -187,13 +187,13 @@ public final class DBMSResources {
 		return instance;
 	}
 
-	@Deprecated
+	//@Deprecated
 	/* DatabaseMetaData.getIdentifierQuoteString() already does it */
-	public String getIdentifierQuoteString() {
-		return identifierQuoteString;
+	//public String getIdentifierQuoteString() {
+	//	return identifierQuoteString;
 		//log.debug("quote ["+dbId+"]: "+dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring"));
 		//return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);
-	}
+	//}
 	
 	public String dbid() {
 		return dbId;
