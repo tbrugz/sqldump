@@ -8,12 +8,14 @@ import org.junit.Test;
 
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.SchemaModelScriptDumper;
+import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.processors.SQLDialectTransformer;
 import tbrugz.sqldump.util.IOUtil;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 public class ScriptDumperTest {
 
@@ -52,11 +54,13 @@ public class ScriptDumperTest {
 		p.setProperty(SchemaModelScriptDumper.PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN, file);
 		p.setProperty(Defs.PROP_TO_DB_ID, DB_MYSQL);
 		
-		DBMSResources.instance().updateDbId(DB_MYSQL);
+		//DBMSResources.instance().updateDbId(DB_MYSQL);
 		//DBMSResources.instance().setup(p);
 		//ColTypeUtil.setProperties(p);
 		//SQLUtils.setProperties(p);
 		//Column.ColTypeUtil.setDbId(DB_MYSQL);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(DB_MYSQL);
+		SQLIdentifierDecorator.dumpIdentifierQuoteString = feat.getIdentifierQuoteString();
 		
 		sd.setProperties(p);
 		sd.dumpSchema(sm);

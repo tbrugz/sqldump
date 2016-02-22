@@ -37,7 +37,7 @@ public final class DBMSResources {
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
 
 	String dbId;
-	@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
+	//@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	DBMSFeatures features;
 	
 	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
@@ -84,8 +84,8 @@ public final class DBMSResources {
 			}
 			else {
 				log.warn("can't detect database type");
-				updateIdentifierQuoteString();
-				updateSpecificFeaturesClass();
+				//updateIdentifierQuoteString();
+				updateSpecificFeaturesClass(DBMSResources.instance().dbid());
 				fireUpdateToListeners();
 			}
 		}
@@ -94,7 +94,7 @@ public final class DBMSResources {
 			if(!quiet) { log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId); }
 		}
 
-		updateIdentifierQuoteString();
+		//updateIdentifierQuoteString();
 	}
 	
 	public void updateDbId(String newid) {
@@ -106,8 +106,8 @@ public final class DBMSResources {
 		log.debug("updating dbid: '"+newid+"' [old="+dbId+"]");
 		if(dbIds.contains(newid) || newid==null) {
 			dbId = newid;
-			updateIdentifierQuoteString();
-			updateSpecificFeaturesClass();
+			//updateIdentifierQuoteString();
+			updateSpecificFeaturesClass(dbId);
 			fireUpdateToListeners();
 		}
 		else {
@@ -115,14 +115,14 @@ public final class DBMSResources {
 		}
 	}
 	
-	@Deprecated
+	/*@Deprecated
 	void updateIdentifierQuoteString() {
 		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", 
 				//(identifierQuoteString!=null ? identifierQuoteString : DEFAULT_QUOTE_STRING)
 				DEFAULT_QUOTE_STRING
 				);
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
-	}
+	}*/
 	
 	public String detectDbId(DatabaseMetaData dbmd) {
 		return detectDbId(dbmd, true);
@@ -206,13 +206,19 @@ public final class DBMSResources {
 	public DBMSFeatures databaseSpecificFeaturesClass() {
 		if(features!=null) { return features; }
 		
-		updateSpecificFeaturesClass();
+		updateSpecificFeaturesClass(DBMSResources.instance().dbid());
 		
 		return features;
 	}
 	
+	/*@Deprecated
 	synchronized void updateSpecificFeaturesClass() {
 		features = getSpecificFeatures(DBMSResources.instance().dbid());
+	}*/
+	
+	protected synchronized void updateSpecificFeaturesClass(String dbid) {
+		features = getSpecificFeatures(dbid);
+		SQLIdentifierDecorator.dumpIdentifierQuoteString = features.getIdentifierQuoteString();
 		/*
 		String dbSpecificFeaturesClass = null;
 		
