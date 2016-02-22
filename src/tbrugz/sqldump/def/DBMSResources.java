@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
-import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
@@ -26,6 +25,8 @@ public final class DBMSResources {
 	static final Log log = LogFactory.getLog(DBMSResources.class);
 
 	static final String DEFAULT_QUOTE_STRING = "\"";
+	
+	static final String DEFAULT_DBID = "<default>"; 
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
@@ -247,6 +248,10 @@ public final class DBMSResources {
 		String dbSpecificFeaturesClass = null;
 		DBMSFeatures feats = null;
 		
+		if(dbid==null) {
+			dbid = DEFAULT_DBID;
+		}
+		
 		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
 		if(dbSpecificFeaturesClass!=null) {
 			log.info("using specific grab class: "+dbSpecificFeaturesClass);
@@ -272,8 +277,10 @@ public final class DBMSResources {
 		}
 		else {
 			//if(features==null) ?
-			feats = new DefaultDBMSFeatures(dbid);
-			log.debug("no specific DBMS features defined. using "+feats.getClass().getSimpleName());
+			log.warn("unknown dbid: "+dbid);
+			throw new RuntimeException("unknown dbid: "+dbid);
+			//feats = new DefaultDBMSFeatures(dbid);
+			//log.warn("no specific DBMS features defined. using "+feats.getClass().getSimpleName());
 		}
 		initDBMSFeatures(feats, papp);
 		return feats;
