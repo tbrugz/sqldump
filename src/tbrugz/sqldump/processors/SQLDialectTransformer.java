@@ -71,6 +71,12 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 				
 			}
 		}
+		if(toDialectId!=null) {
+			model.setSqlDialect(toDialectId);
+		}
+		else if(toANSI) {
+			model.setSqlDialect(null); //???
+		}
 		log.info("model transformer ended ok");
 	}
 	

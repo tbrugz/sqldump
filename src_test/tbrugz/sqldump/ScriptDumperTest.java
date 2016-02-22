@@ -134,5 +134,16 @@ public class ScriptDumperTest {
 		String expected = "create table \"DEPT\" (\n	\"ID\" INTEGER not null,\n	\"NAME\" VARCHAR2(100),\n	\"PARENT_ID\" INTEGER,\n	constraint \"DEPT_PK\" primary key (\"ID\")\n);";
 		Assert.assertEquals(expected, sql.substring(0, expected.length()));
 	}
+
+	@Test
+	public void dumpMysqlFull() throws Exception {
+		String file = OUTDIR+"/empdept-mysql-full.sql";
+		String[] args1 = { "-propfile=src_test/tbrugz/sqldump/sqld-mysql.properties" };
+		SQLDump.main(args1);
+		
+		String sql = IOUtil.readFromFilename(file);
+		String expected = "create table `DEPT` (\n	`ID` INTEGER not null,\n	`NAME` VARCHAR(100),\n	`PARENT_ID` INTEGER,\n	constraint `DEPT_PK` primary key (`ID`)\n);";
+		Assert.assertEquals(expected, sql.substring(0, expected.length()));
+	}
 	
 }
