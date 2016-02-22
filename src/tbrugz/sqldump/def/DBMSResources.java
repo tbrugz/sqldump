@@ -12,9 +12,11 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -23,9 +25,9 @@ public final class DBMSResources {
 
 	static final Log log = LogFactory.getLog(DBMSResources.class);
 
-	//static final String DEFAULT_QUOTE_STRING = "\"";
+	static final String DEFAULT_QUOTE_STRING = "\"";
 	
-	static final String DEFAULT_DBID = "<default>"; 
+	public static final String DEFAULT_DBID = "<default>"; 
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
 	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
@@ -36,7 +38,7 @@ public final class DBMSResources {
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
 
 	String dbId;
-	//@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
+	@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	DBMSFeatures features;
 	
 	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
@@ -83,7 +85,7 @@ public final class DBMSResources {
 			}
 			else {
 				log.warn("can't detect database type");
-				//updateIdentifierQuoteString();
+				updateIdentifierQuoteString();
 				updateSpecificFeaturesClass();
 				fireUpdateToListeners();
 			}
@@ -93,7 +95,7 @@ public final class DBMSResources {
 			if(!quiet) { log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId); }
 		}
 
-		//SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
+		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
 	}
 	
 	public void updateDbId(String newid) {
@@ -105,7 +107,7 @@ public final class DBMSResources {
 		log.debug("updating dbid: '"+newid+"' [old="+dbId+"]");
 		if(dbIds.contains(newid) || newid==null) {
 			dbId = newid;
-			//updateIdentifierQuoteString();
+			updateIdentifierQuoteString();
 			updateSpecificFeaturesClass();
 			fireUpdateToListeners();
 		}
@@ -114,12 +116,14 @@ public final class DBMSResources {
 		}
 	}
 	
-	/*@Deprecated
+	@Deprecated
 	void updateIdentifierQuoteString() {
 		identifierQuoteString = dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", 
-				(identifierQuoteString!=null ? identifierQuoteString : DEFAULT_QUOTE_STRING)
+				//(identifierQuoteString!=null ? identifierQuoteString : DEFAULT_QUOTE_STRING)
+				DEFAULT_QUOTE_STRING
 				);
-	}*/
+		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
+	}
 	
 	public String detectDbId(DatabaseMetaData dbmd) {
 		return detectDbId(dbmd, true);

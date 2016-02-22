@@ -58,6 +58,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	CLIProcessorTest.class,
 	DBMSResourcesTest.class,
 	StmtProcTest.class,
+	ScriptDumperTest.class,
 	//model unit tests
 	ColTypeUtilTest.class,
 	DBObjectUtilsTest.class,

@@ -12,6 +12,7 @@ import tbrugz.sqldiff.model.ColumnDiff.TempColumnAlterStrategy;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class ColumnDiffTest {
@@ -22,12 +23,18 @@ public class ColumnDiffTest {
 	public static void beforeClass() {
 		table.setName("a");
 		ColumnDiff.addComments = false;
+		SQLIdentifierDecorator.dumpQuoteAll = false;
 	}
 	
 	@Before
 	public void before() {
-		DBMSResources.instance().updateDbId(null);
+		updateDbId(null);
 		ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
+	}
+	
+	void updateDbId(String s) {
+		//DBMSResources.instance().updateDbId(s);
+		ColumnDiff.updateFeatures(DBMSResources.instance().getSpecificFeatures(s));
 	}
 	
 	@Test
@@ -60,7 +67,7 @@ public class ColumnDiffTest {
 
 	@Test
 	public void testRenameH2() {
-		DBMSResources.instance().updateDbId("h2");
+		updateDbId("h2");
 		
 		Column c1 = newColumn("c1","varchar",10);
 		Column c2 = newColumn("c2","varchar",20);
@@ -138,7 +145,7 @@ public class ColumnDiffTest {
 
 	@Test
 	public void testAlterOracle() {
-		DBMSResources.instance().updateDbId("oracle");
+		updateDbId("oracle");
 		
 		Column c1 = newColumn("cx","varchar",10);
 		Column c2 = newColumn("cx","varchar",20);
@@ -150,7 +157,7 @@ public class ColumnDiffTest {
 
 	@Test
 	public void testAlterPgsqlDataType() {
-		DBMSResources.instance().updateDbId("pgsql");
+		updateDbId("pgsql");
 		
 		Column c1 = newColumn("cx","varchar",10);
 		Column c2 = newColumn("cx","varchar",20);
@@ -162,7 +169,7 @@ public class ColumnDiffTest {
 
 	@Test
 	public void testAlterPgsqlNullable() {
-		DBMSResources.instance().updateDbId("pgsql");
+		updateDbId("pgsql");
 		
 		Column c1 = newColumn("cx","varchar",10);
 		Column c2 = newColumn("cx","varchar",10, false);

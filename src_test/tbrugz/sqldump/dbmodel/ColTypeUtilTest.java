@@ -21,10 +21,15 @@ public class ColTypeUtilTest {
 				Column.ColTypeUtil.usePrecision(type));
 	}
 	
+	void updateDbId(String id) {
+		//DBMSResources.instance().updateDbId(id);
+		Column.ColTypeUtil.setDbId(id);
+	}
+	
 	@Test
 	public void testColTypes() {
-		DBMSResources.instance().updateDbId("derby");
-		DBMSResources.instance().updateDbId(null);
+		updateDbId("derby");
+		updateDbId(null);
 		assertIt("numeric", true);
 		
 		assertIt("long raw", false);
@@ -42,7 +47,7 @@ public class ColTypeUtilTest {
 
 	@Test
 	public void testDerbyColTypes() {
-		DBMSResources.instance().updateDbId("derby");
+		updateDbId("derby");
 		assertIt("numeric", true);
 		assertIt("long raw", false);
 		assertIt("blob", false);
@@ -52,7 +57,7 @@ public class ColTypeUtilTest {
 
 	@Test
 	public void testHSQLDBColTypes() {
-		DBMSResources.instance().updateDbId("hsqldb");
+		updateDbId("hsqldb");
 		assertIt("blob", false);
 		assertIt("varchar", true);
 		
@@ -62,7 +67,7 @@ public class ColTypeUtilTest {
 	
 	@Test
 	public void testMSAccessColTypes() {
-		DBMSResources.instance().updateDbId("msaccess");
+		updateDbId("msaccess");
 		assertIt("varchar", true);
 		
 		//ms-access specific
@@ -73,7 +78,7 @@ public class ColTypeUtilTest {
 	
 	@Test
 	public void testSQLTypesProps() {
-		DBMSResources.instance().updateDbId(null);
+		updateDbId(null);
 		
 		Properties p = new Properties();
 		p.setProperty("sqldump.sqltypes.ignoreprecision", "VARCHAR,varchar2");

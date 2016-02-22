@@ -120,7 +120,8 @@ public class SQLRunAndDumpTest {
 		String[] vmparamsDump = {
 					"-Dsqldump.grabclass=JDBCSchemaGrabber",
 					"-Dsqldump.processingclasses=DataDump, JAXBSchemaXMLSerializer, SchemaModelScriptDumper",
-					"-Dsqldump.schemadump.outputfilepattern=work/output/dbobjects.sql",
+					"-Dsqldump.schemadump.outputfilepattern=work/output/SQLRunAndDumpTest/dbobjects.sql",
+					"-Dsqldump.schemadump.quoteallsqlidentifiers=true",
 					"-Dsqldump.schemadump.dumpdropstatements=true",
 					"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",
