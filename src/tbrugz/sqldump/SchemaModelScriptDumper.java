@@ -245,8 +245,18 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		Properties colTypeConversionProp = new ParametrizedProperties();
 		
 		//if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
-		if(fromDbId!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, fromDbId); }
-		if(toDbId!=null) { colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId); }
+		if(fromDbId!=null) {
+			if(!DBMSResources.instance().getDbIds().contains(fromDbId)) {
+				throw new ProcessingException("invalid '"+Defs.PROP_FROM_DB_ID+"' prop: "+fromDbId);
+			}
+			colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, fromDbId);
+		}
+		if(toDbId!=null) {
+			if(!DBMSResources.instance().getDbIds().contains(toDbId)) {
+				throw new ProcessingException("invalid '"+Defs.PROP_TO_DB_ID+"' prop: "+toDbId);
+			}
+			colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId);
+		}
 		
 		setupScriptDumpSpecificFeatures(toDbId!=null?toDbId:fromDbId);
 		
@@ -269,7 +279,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				default: break;
 			}
 			
-			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable && dumpFKs, dumpDropStatements, dumpScriptComments, colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
+			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE,
+					table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable && dumpFKs, dumpDropStatements, dumpScriptComments,
+							colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
 			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName, dumpRemarks);
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);

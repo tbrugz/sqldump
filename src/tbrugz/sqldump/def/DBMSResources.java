@@ -12,7 +12,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -95,7 +94,7 @@ public final class DBMSResources {
 			if(!quiet) { log.info("database type identifier ('"+Defs.PROP_FROM_DB_ID+"'): "+this.dbId); }
 		}
 
-		SQLIdentifierDecorator.dumpIdentifierQuoteString = identifierQuoteString;
+		updateIdentifierQuoteString();
 	}
 	
 	public void updateDbId(String newid) {
@@ -349,6 +348,7 @@ public final class DBMSResources {
 		Column.ColTypeUtil.setDbId(DBMSResources.instance().dbid());
 		Map<Class<?>, Class<?>> mapper = DBMSResources.instance().databaseSpecificFeaturesClass().getColumnTypeMapper();
 		SQLUtils.setupColumnTypeMapper(mapper);
+		//ColumnDiff.updateFeatures(DBMSResources.instance().getSpecificFeatures(s));
 	}
 	
 }

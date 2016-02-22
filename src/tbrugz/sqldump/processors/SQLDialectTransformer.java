@@ -52,10 +52,14 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 					log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 					//newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDialectId+"."+ansiColType);
 				}
+				else {
+					// ansi type is null, use original type
+					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, colType.toUpperCase());
+					log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+				}
 				
-				if(newColType!=null) {
+				if(newColType!=null && !newColType.equalsIgnoreCase(colType)) {
 					col.setType(newColType);
-					 
 				}
 				else if(ansiColType!=null) {
 					col.setType(ansiColType);
