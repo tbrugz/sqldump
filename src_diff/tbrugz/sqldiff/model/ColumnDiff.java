@@ -77,7 +77,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
 		public void dbmsUpdated() {
-			updateFeatures(null);
+			//updateFeatures(null);
 			log.debug("DBMSUpdateListener: DBMSFeatures class: "+features);
 		}
 	};
@@ -121,7 +121,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			features = feat;
 		}
 		else {
-			features = DBMSResources.instance().databaseSpecificFeaturesClass();
+			//features = null;
+			//features = DBMSResources.instance().getSpecificFeatures(DBMSResources.DEFAULT_DBID);
+			//features = DBMSResources.instance().databaseSpecificFeaturesClass();
+			throw new RuntimeException("DBMSFeatures is null!");
 		}
 	}
 	

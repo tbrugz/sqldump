@@ -14,7 +14,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DumpSyntaxRegistry;
-import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
@@ -142,7 +141,6 @@ public class SQLDump implements Executor {
 		
 		SchemaModelGrabber schemaGrabber = null;
 		List<ProcessComponent> processors = new ArrayList<ProcessComponent>();
-		//DBMSResources.instance().updateMetaData(null);
 		
 		//class names
 		String grabClassName = Utils.getPropWithDeprecated(papp, PROP_GRABCLASS, PROP_SCHEMAGRAB_GRABCLASS, null);
@@ -254,8 +252,8 @@ public class SQLDump implements Executor {
 		SchemaModel sm = null;
 		
 		//inits DBMSFeatures if not already initted
-		DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXX: really needed?
-		log.debug("DBMSFeatures: "+feats);
+		//DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass(); //XXXxx: really needed?
+		//log.debug("DBMSFeatures: "+feats);
 		
 		for(ProcessComponent pc: processors) {
 			count++;
@@ -304,7 +302,7 @@ public class SQLDump implements Executor {
 		}
 		
 		if(sm!=null) {
-			DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXX: really needed?
+			//DBMSResources.instance().updateDbId(sm.getSqlDialect()); //XXXxx: really needed?
 		}
 		else {
 			log.warn("no model grabbed!");
@@ -355,7 +353,7 @@ public class SQLDump implements Executor {
 			}
 		}
 		else {
-			DBMSResources.instance().updateMetaData(conn.getMetaData(), true); //XXX: really needed?
+			//DBMSResources.instance().updateMetaData(conn.getMetaData(), true); //XXXxx: really needed?
 		}
 	}
 	

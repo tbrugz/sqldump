@@ -76,7 +76,7 @@ public class ScriptDumperTest {
 		p.setProperty(SchemaModelScriptDumper.PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN, file);
 		p.setProperty(Defs.PROP_TO_DB_ID, DB_ORACLE);
 
-		DBMSResources.instance().updateDbId(DB_ORACLE);
+		//DBMSResources.instance().updateDbId(DB_ORACLE);
 		
 		sd.setProperties(p);
 		sd.dumpSchema(sm);
@@ -100,7 +100,7 @@ public class ScriptDumperTest {
 		String file = OUTDIR+"/empdept-"+DB_MYSQL+".sql";
 		p.setProperty(SchemaModelScriptDumper.PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN, file);
 		p.setProperty(Defs.PROP_TO_DB_ID, DB_MYSQL);
-		DBMSResources.instance().updateDbId(DB_MYSQL);
+		//DBMSResources.instance().updateDbId(DB_MYSQL);
 		
 		SQLDialectTransformer dt = new SQLDialectTransformer();
 		dt.setSchemaModel(sm);
@@ -120,7 +120,7 @@ public class ScriptDumperTest {
 		String file = OUTDIR+"/empdept-"+DB_ORACLE+".sql";
 		p.setProperty(SchemaModelScriptDumper.PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN, file);
 		p.setProperty(Defs.PROP_TO_DB_ID, DB_ORACLE);
-		DBMSResources.instance().updateDbId(DB_ORACLE);
+		//DBMSResources.instance().updateDbId(DB_ORACLE);
 		
 		SQLDialectTransformer dt = new SQLDialectTransformer();
 		dt.setSchemaModel(sm);

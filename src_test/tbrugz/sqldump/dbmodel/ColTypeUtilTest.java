@@ -8,8 +8,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
-import tbrugz.sqldump.def.DBMSResources;
-
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ColTypeUtilTest {
 	

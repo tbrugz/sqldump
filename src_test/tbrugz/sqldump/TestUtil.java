@@ -20,7 +20,7 @@ public class TestUtil {
 	public static Connection getConn(Properties prop, String prefix) throws ClassNotFoundException, SQLException, NamingException {
 		Connection conn = ConnectionUtil.initDBConnection(prefix, prop);
 		DBMSResources.instance().setup(prop);
-		DBMSResources.instance().updateMetaData(conn.getMetaData());
+		//DBMSResources.instance().updateMetaData(conn.getMetaData());
 		return conn;
 	}
 

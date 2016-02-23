@@ -36,9 +36,9 @@ public final class DBMSResources {
 	final Properties papp = new Properties(); //TODO: maybe DBMSResources should not depend on processProperties...
 	final Properties dbmsSpecificResource = new ParametrizedProperties();
 
-	String dbId;
+	@Deprecated String dbId;
 	//@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
-	DBMSFeatures features;
+	@Deprecated DBMSFeatures features;
 	
 	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
 	
@@ -70,11 +70,13 @@ public final class DBMSResources {
 		updateMetaData(dbmd);
 	}*/
 	
-	public void updateMetaData(DatabaseMetaData dbmd) {
+	/*@Deprecated
+	protected void updateMetaData(DatabaseMetaData dbmd) {
 		updateMetaData(dbmd, false);
-	}
+	}*/
 	
-	public void updateMetaData(DatabaseMetaData dbmd, boolean quiet) {
+	/*@Deprecated
+	protected void updateMetaData(DatabaseMetaData dbmd, boolean quiet) {
 		String dbIdTmp = papp.getProperty(Defs.PROP_FROM_DB_ID);
 		if( (Utils.getPropBool(papp, PROP_FROM_DB_ID_AUTODETECT, true) || dbIdTmp==null) && dbmd != null) {
 			String dbid = detectDbId(dbmd, quiet);
@@ -95,9 +97,10 @@ public final class DBMSResources {
 		}
 
 		//updateIdentifierQuoteString();
-	}
+	}*/
 	
-	public void updateDbId(String newid) {
+	/*@Deprecated
+	protected void updateDbId(String newid) {
 		if( (newid!=null) && newid.equals(dbId) ) {
 			log.debug("same dbid, no update");
 			return;
@@ -113,7 +116,7 @@ public final class DBMSResources {
 		else {
 			log.warn("unknown dbid: '"+newid+"' ; keeping '"+dbId+"' as dbid");
 		}
-	}
+	}*/
 	
 	/*@Deprecated
 	void updateIdentifierQuoteString() {
@@ -198,12 +201,13 @@ public final class DBMSResources {
 		//return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);
 	//}
 	
-	public String dbid() {
+	@Deprecated
+	protected String dbid() {
 		return dbId;
 	}
 	
-	//TODOne: cache DBMSFeatures?
-	public DBMSFeatures databaseSpecificFeaturesClass() {
+	@Deprecated
+	protected DBMSFeatures databaseSpecificFeaturesClass() {
 		if(features!=null) { return features; }
 		
 		updateSpecificFeaturesClass(DBMSResources.instance().dbid());
@@ -304,7 +308,7 @@ public final class DBMSResources {
 		return getSpecificFeatures(dbid);
 	}
 	
-	void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
+	protected void initDBMSFeatures(DBMSFeatures feats, Properties prop) {
 		feats.procProperties(prop);
 		//TODOne: all classes that use DBMSSpecific features should be called here? what about a listener?
 	}
@@ -345,7 +349,7 @@ public final class DBMSResources {
 		return updateListeners.remove(listener);
 	}
 	
-	void fireUpdateToListeners() {
+	protected void fireUpdateToListeners() {
 		for(DBMSUpdateListener listener: updateListeners) {
 			listener.dbmsUpdated();
 		}
