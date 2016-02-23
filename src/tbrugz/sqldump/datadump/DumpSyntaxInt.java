@@ -82,8 +82,6 @@ public interface DumpSyntaxInt {
 	 * Returns if the dump syntax may be used with a partitioned strategy
 	 * 
 	 * see: WebRowSetSingleSyntax
-	 * 
-	 * @return
 	 */
 	public boolean isPartitionable();
 	
@@ -92,8 +90,6 @@ public interface DumpSyntaxInt {
 	 * dumpRow() should just dump the current row.
 	 * 
 	 * see: WebRowSetSingleSyntax
-	 * 
-	 * @return
 	 */
 	public boolean isFetcherSyntax();
 	

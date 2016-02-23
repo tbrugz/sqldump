@@ -109,9 +109,9 @@ public interface DBMSFeatures {
 	/**
 	 * Returns the execution plan for a statement. Returned resultset column names are database-dependent (at least for now)
 	 * 
-	 * @param sql
-	 * @param conn
-	 * @return
+	 * @param sql the query to explain
+	 * @param conn the database connection
+	 * @return a ResultSet with the plan explained
 	 * @throws SQLException
 	 */
 	ResultSet explainPlan(String sql, Connection conn) throws SQLException;
