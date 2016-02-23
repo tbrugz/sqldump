@@ -83,7 +83,8 @@ Dependencies
 	[MonetDB](http://dev.monetdb.org/downloads/Java/Latest/),
 	[Firebird](http://jaybirdwiki.firebirdsql.org/),
 	[Virtuoso](http://docs.openlinksw.com/virtuoso/VirtuosoDriverJDBC.html),
-	[jTDS/SQLServer](http://jtds.sourceforge.net/)
+	[jTDS/SQLServer](http://jtds.sourceforge.net/),
+	[Neo4j](https://github.com/neo4j-contrib/neo4j-jdbc)
 	)
 - [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
 - [jettison](http://jettison.codehaus.org/) - optional, for JSON output
@@ -94,11 +95,13 @@ Dependencies
 
 Building from sources (with ant & ivy)
 --------------------------------------
-- Install Ivy (`mkdirs -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.4.0.jar http://www.apache.org/dist/ant/ivy/2.4.0/maven2/2.4.0/ivy-2.4.0.jar`) (if not done already)
 - Run `hg clone https://bitbucket.org/tbrugz/sqldump <project-dir>` (if not done already)
-- Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
-  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp ivysettings.template.xml ivysettings.xml`)
-- Copy `build.template.properties` to `build.properties`
+- Run `ant prepare`
+- Install Ivy (`mkdirs -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.4.0.jar http://www.apache.org/dist/ant/ivy/2.4.0/maven2/2.4.0/ivy-2.4.0.jar`)
+  or `ant ivy-install` (if not done already)
+- (*obsolete*) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
+  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
+- (*obsolete*) Copy `templates/build.properties` to `build.properties`
 - (optional) Edit `build.properties`
 - Run `ant resolve`
 - Run `ant dist` or `ant publish` (optional: `ant test`)

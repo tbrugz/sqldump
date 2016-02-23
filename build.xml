@@ -1,4 +1,4 @@
-<project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant" default="dist">
+<project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant" default="dist" basedir=".">
 
 	<property name="src.dir" value="src"/>
 	<property name="src.diff.dir" value="src_diff"/>
@@ -104,7 +104,7 @@
 	<path id="classpath.findbugs">
 		<pathelement path="${ivy.findbugs.classpath}"/>
 	</path>
-
+	
 	<target name="prepare">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
@@ -118,6 +118,18 @@
 				<copy file="sqldump.properties.template" tofile="sqldump.properties" verbose="on"/>
 			</else>
 		</if-->
+		<copy todir="." verbose="true">
+			<fileset dir="templates">
+				<include name="**/*.properties"/>
+				<include name="**/*.xml"/>
+				<present targetdir="." present="srconly" />
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="ivy-install">
+		<mkdir dir="${user.home}/.ant/lib/"/>
+		<get src="http://www.apache.org/dist/ant/ivy/${ivy.install.version}/maven2/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
 	</target>
 
 	<target name="generate-sources" depends="prepare">
