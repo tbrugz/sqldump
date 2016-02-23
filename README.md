@@ -94,13 +94,14 @@ Dependencies
 
 Building from sources (with ant & ivy)
 --------------------------------------
+- Install Ivy (`mkdirs -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.4.0.jar http://www.apache.org/dist/ant/ivy/2.4.0/maven2/2.4.0/ivy-2.4.0.jar`) (if not done already)
 - Run `hg clone https://bitbucket.org/tbrugz/sqldump <project-dir>` (if not done already)
 - Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
-  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml))
+  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp ivysettings.template.xml ivysettings.xml`)
 - Copy `build.template.properties` to `build.properties`
-- Edit `build.properties`
+- (optional) Edit `build.properties`
 - Run `ant resolve`
-- Run `ant dist`
+- Run `ant dist` or `ant publish` (optional: `ant test`)
 
 
 Running (with sources)
@@ -141,3 +142,4 @@ Command-line options
 Misc/End notes
 --------------
 To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/jenkins-config.md)
+
