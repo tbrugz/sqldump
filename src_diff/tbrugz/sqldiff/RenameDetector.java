@@ -15,6 +15,7 @@ import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldiff.util.SimilarityCalculator;
+import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Index;
@@ -106,7 +107,7 @@ public class RenameDetector {
 		return renames;
 	}
 
-	static List<RenameTuple> detectIndexRenames(Collection<DBIdentifiableDiff> dbidDiffs, double minSimilarity) {
+	static List<RenameTuple> detectDbIdRenames(Collection<DBIdentifiableDiff> dbidDiffs, DBObjectType dbotype, double minSimilarity) {
 		List<DBIdentifiableDiff> lIdAdd = getDiffsOfType(dbidDiffs, ChangeType.ADD);
 		List<DBIdentifiableDiff> lIdDrop = getDiffsOfType(dbidDiffs, ChangeType.DROP);
 		
@@ -119,14 +120,16 @@ public class RenameDetector {
 		
 		for(int i=0;i<lIdAdd.size();i++) {
 			DBIdentifiableDiff diffAdd = lIdAdd.get(i);
-			if(diffAdd.getObjectType()!=DBObjectType.INDEX) { continue; }
+			if(diffAdd.getObjectType()!=dbotype) { continue; }
 			for(int j=0;j<lIdDrop.size();j++) {
 				DBIdentifiableDiff diffDrop = lIdDrop.get(j);
-				if(diffAdd.getObjectType()!=DBObjectType.INDEX) { continue; }
+				if(diffAdd.getObjectType()!=dbotype) { continue; }
 				
 				//XXX: SimilarityCalculator...
 				double similarity = 1;
-				if(equalsApartFromName(diffAdd.ident(), diffDrop.ident())) {
+				if( ( (diffAdd.getOwnerTableName()==null && diffDrop.getOwnerTableName()==null)
+					|| (""+diffAdd.getOwnerTableName()).equals(diffDrop.getOwnerTableName()) )
+					&& equalsApartFromName(diffAdd.ident(), diffDrop.ident()) ) {
 					renames.add(new RenameTuple(diffAdd, diffDrop, similarity));
 				}
 			}
@@ -193,12 +196,20 @@ public class RenameDetector {
 
 	public static int detectAndDoIndexRenames(Collection<DBIdentifiableDiff> dbIdDiffs, double minSimilarity) {
 		//get renames
-		List<RenameTuple> renames = detectIndexRenames(dbIdDiffs, minSimilarity);
+		List<RenameTuple> renames = detectDbIdRenames(dbIdDiffs, DBObjectType.INDEX, minSimilarity);
 
 		//validate & do renames
 		return validateAndDoRenames(dbIdDiffs, renames, "index");
 	}
 
+	public static int detectAndDoConstraintRenames(Collection<DBIdentifiableDiff> dbIdDiffs, double minSimilarity) {
+		//get renames
+		List<RenameTuple> renames = detectDbIdRenames(dbIdDiffs, DBObjectType.CONSTRAINT, minSimilarity);
+
+		//validate & do renames
+		return validateAndDoRenames(dbIdDiffs, renames, "constraint");
+	}
+	
 	static int validateAndDoRenames(Collection<? extends Diff> diffs, List<RenameTuple> renames, String diffType) {
 		if(renames.size()==0) {
 			log.info("no "+diffType+" renames detected");
@@ -235,8 +246,18 @@ public class RenameDetector {
 				&& i1.getReverse()==i2.getReverse()
 				&& i1.getIndexType()==i2.getIndexType()
 				&& i1.getTableName().equals(i2.getTableName())
-				&& ( i1.getType()==null && i2.getType()==null || i1.getType().equals(i2.getType()) )
+				&& ( (i1.getType()==null && i2.getType()==null) || i1.getType().equals(i2.getType()) )
 				&& i1.isUnique() == i2.isUnique()
+				) {
+				return true;
+			}
+		}
+		else if(o1 instanceof Constraint && o2 instanceof Constraint) {
+			Constraint c1 = (Constraint) o1;
+			Constraint c2 = (Constraint) o2;
+			if(c1.getType()==c2.getType()
+				&& c1.getUniqueColumns().equals(c2.getUniqueColumns())
+				&& ( (c1.getCheckDescription()==null && c2.getCheckDescription()==null) || c1.getCheckDescription().equals(c2.getCheckDescription()) )
 				) {
 				return true;
 			}
