@@ -54,11 +54,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 				return ret;
 			case ALTER:
 			case RENAME: {
-				if(DBIdentifiable.getType(ident)==DBObjectType.INDEX) {
+				if(DBIdentifiable.getType(ident)==DBObjectType.INDEX || DBIdentifiable.getType(ident)==DBObjectType.CONSTRAINT) {
 					return DiffUtil.singleElemList( getRenameDiffSQL(addComments) );
 				}
 				else {
-					throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
+					throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff() for type "+DBIdentifiable.getType(ident));
 				}
 			}
 		}
@@ -85,17 +85,18 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	String getRenameDiffSQL(boolean dumpComments) {
 		if(ownerTableName!=null) {
 			return
-				"alter table "+ownerTableName+" rename "+DBIdentifiable.getType4Alter(ident)
-					+ previousIdent.getName()
+				"alter table "+ownerTableName+" rename "+DBIdentifiable.getType4Alter(ident).desc()
+					+ " " + previousIdent.getName()
 					+ " to " + ident.getName()
 					+ (dumpComments?getComment(previousIdent, "old: "):"");
 		}
 		else {
-			return "alter "+DBIdentifiable.getType4Alter(ident)
+			return "alter "+DBIdentifiable.getType4Alter(ident).desc()
 				+ " " + previousIdent.getName()
 				+ " rename to " + ident.getName()
 				+ (dumpComments?getComment(previousIdent, "old: "):"");
 		}
+		//derby: RENAME INDEX idx TO new_idx
 	}
 	
 	@Override

@@ -35,6 +35,7 @@ public class RenameDetectorTest {
 	public static void setupClass() {
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures("h2");
 		ColumnDiff.updateFeatures(feat);
+		DBIdentifiableDiff.addComments = false;
 	}
 	
 	@Before
@@ -140,6 +141,9 @@ public class RenameDetectorTest {
 		RenameDetector.detectAndDoIndexRenames(lt, 0.5);
 		Assert.assertEquals(1, lt.size());
 		Assert.assertEquals(ChangeType.RENAME, lt.get(0).getChangeType());
+		List<String> dl = lt.get(0).getDiffList();
+		Assert.assertEquals(1, dl.size());
+		Assert.assertEquals("alter index idx1a rename to idx1b", dl.get(0));
 	}
 
 	@Test
@@ -164,6 +168,10 @@ public class RenameDetectorTest {
 			RenameDetector.detectAndDoConstraintRenames(l, 0.5);
 			Assert.assertEquals(1, l.size());
 			Assert.assertEquals(ChangeType.RENAME, l.get(0).getChangeType());
+
+			List<String> dl = l.get(0).getDiffList();
+			Assert.assertEquals(1, dl.size());
+			Assert.assertEquals("alter table table1 rename constraint cons1a to cons2a", dl.get(0));
 		}
 		{
 			DBIdentifiableDiff dbd3 = new DBIdentifiableDiff(ChangeType.ADD, null, c2, "table3");
