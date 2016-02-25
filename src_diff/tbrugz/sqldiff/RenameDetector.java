@@ -26,6 +26,11 @@ class RenameTuple {
 		this.drop = drop;
 		this.similarity = similarity;
 	}
+	
+	@Override
+	public String toString() {
+		return "RenameTuple[ add="+add+" ; drop="+drop+" ]";
+	}
 }
 
 public class RenameDetector {

@@ -57,7 +57,7 @@ public class Index extends DBObject {
 	
 	@Override
 	public String toString() {
-		return "[Index:"+getSchemaName()+"."+getName()+":t:"+tableName+",u?:"+unique+",c:"+columns+"]";
+		return "[Index:"+(getSchemaName()!=null?getSchemaName()+".":"")+getName()+":t:"+tableName+",u?:"+unique+",c:"+columns+"]";
 	}
 	
 	@Override
