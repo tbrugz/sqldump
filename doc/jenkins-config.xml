@@ -33,7 +33,7 @@
   <builders>
     <hudson.tasks.Ant plugin="ant@1.1">
       <targets>resolve</targets>
-      <properties>ivy.settings.file=ivysettings.template.xml</properties>
+      <properties>ivy.settings.file=templates/ivysettings.xml</properties>
     </hudson.tasks.Ant>
     <hudson.tasks.Ant plugin="ant@1.1">
       <targets>all codeanalysis</targets>

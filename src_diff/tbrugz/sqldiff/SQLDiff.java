@@ -227,6 +227,7 @@ public class SQLDiff implements Executor {
 		
 		//detect renames
 		//XXX: add DiffProcessor?
+		//XXX: add prop 'sqldiff.renamedetection.types'?
 		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
 		if(doRenameDetection) {
 			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
@@ -235,6 +236,7 @@ public class SQLDiff implements Executor {
 			renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
 			renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
 			renames += RenameDetector.detectAndDoConstraintRenames(diff.getDbIdDiffs(), minSimilarity);
+			//XXX detect FK renames?
 			if(renames>0) {
 				SchemaDiff.logInfo(diff);
 			}
