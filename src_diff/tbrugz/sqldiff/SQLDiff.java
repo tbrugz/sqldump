@@ -233,6 +233,7 @@ public class SQLDiff implements Executor {
 			int renames = 0;
 			renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
 			renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
+			renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
 			if(renames>0) {
 				SchemaDiff.logInfo(diff);
 			}

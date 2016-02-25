@@ -11,9 +11,13 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.ChangeType;
 import tbrugz.sqldiff.model.ColumnDiff;
+import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldiff.util.SimilarityCalculator;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Table;
 
 class RenameTuple {
@@ -101,6 +105,35 @@ public class RenameDetector {
 		
 		return renames;
 	}
+
+	static List<RenameTuple> detectIndexRenames(Collection<DBIdentifiableDiff> dbidDiffs, double minSimilarity) {
+		List<DBIdentifiableDiff> lIdAdd = getDiffsOfType(dbidDiffs, ChangeType.ADD);
+		List<DBIdentifiableDiff> lIdDrop = getDiffsOfType(dbidDiffs, ChangeType.DROP);
+		
+		log.debug("lIdAdd-size: '"+lIdAdd.size()+"' ; lIdDrop-size: '"+lIdDrop.size()+"'");
+		if(lIdAdd.size()==0 || lIdDrop.size()==0) {
+			return new ArrayList<RenameTuple>();
+		}
+		
+		List<RenameTuple> renames = new ArrayList<RenameTuple>();
+		
+		for(int i=0;i<lIdAdd.size();i++) {
+			DBIdentifiableDiff diffAdd = lIdAdd.get(i);
+			if(diffAdd.getObjectType()!=DBObjectType.INDEX) { continue; }
+			for(int j=0;j<lIdDrop.size();j++) {
+				DBIdentifiableDiff diffDrop = lIdDrop.get(j);
+				if(diffAdd.getObjectType()!=DBObjectType.INDEX) { continue; }
+				
+				//XXX: SimilarityCalculator...
+				double similarity = 1;
+				if(equalsApartFromName(diffAdd.ident(), diffDrop.ident())) {
+					renames.add(new RenameTuple(diffAdd, diffDrop, similarity));
+				}
+			}
+		}
+		
+		return renames;
+	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	static void doRenames(Collection/*<? extends Diff>*/ diffs, List<RenameTuple> renames) {
@@ -115,6 +148,11 @@ public class RenameDetector {
 			else if(rt.add instanceof ColumnDiff) {
 				ColumnDiff cdrename = new ColumnDiff(ChangeType.RENAME, rt.add.getNamedObject(), ((ColumnDiff)rt.drop).getPreviousColumn(), ((ColumnDiff)rt.add).getColumn());
 				added = diffs.add(cdrename);
+			}
+			else if(rt.add instanceof DBIdentifiableDiff) {
+				DBIdentifiableDiff dff = (DBIdentifiableDiff) rt.add;
+				DBIdentifiableDiff idrename = new DBIdentifiableDiff(ChangeType.RENAME, (DBIdentifiable) rt.drop.getNamedObject(), (DBIdentifiable) rt.add.getNamedObject(), dff.getOwnerTableName());
+				added = diffs.add(idrename);
 			}
 			if(!added) { throw new RuntimeException("could not add rename: "+rt); }
 			removedCount += diffs.remove(rt.add)?1:0;
@@ -152,7 +190,15 @@ public class RenameDetector {
 		//validate & do renames
 		return validateAndDoRenames(columnDiffs, renames, "column");
 	}
-	
+
+	public static int detectAndDoIndexRenames(Collection<DBIdentifiableDiff> dbIdDiffs, double minSimilarity) {
+		//get renames
+		List<RenameTuple> renames = detectIndexRenames(dbIdDiffs, minSimilarity);
+
+		//validate & do renames
+		return validateAndDoRenames(dbIdDiffs, renames, "index");
+	}
+
 	static int validateAndDoRenames(Collection<? extends Diff> diffs, List<RenameTuple> renames, String diffType) {
 		if(renames.size()==0) {
 			log.info("no "+diffType+" renames detected");
@@ -178,5 +224,24 @@ public class RenameDetector {
 			}
 		}
 		return ret;
+	}
+	
+	static boolean equalsApartFromName(DBIdentifiable o1, DBIdentifiable o2) {
+		if(o1 instanceof Index && o2 instanceof Index) {
+			Index i1 = (Index) o1;
+			Index i2 = (Index) o2;
+			if(i1.getColumns().equals(i2.getColumns())
+				&& i1.getLocal()==i2.getLocal()
+				&& i1.getReverse()==i2.getReverse()
+				&& i1.getIndexType()==i2.getIndexType()
+				&& i1.getTableName().equals(i2.getTableName())
+				&& ( i1.getType()==null && i2.getType()==null || i1.getType().equals(i2.getType()) )
+				&& i1.isUnique() == i2.isUnique()
+				) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

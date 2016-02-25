@@ -53,8 +53,14 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 				ret.add( getAddDiffSQL(false) + (addComments?getComment(previousIdent, "replacing: "):"") );
 				return ret;
 			case ALTER:
-			case RENAME:
-				throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
+			case RENAME: {
+				if(DBIdentifiable.getType(ident)==DBObjectType.INDEX) {
+					return DiffUtil.singleElemList( getRenameDiffSQL(addComments) );
+				}
+				else {
+					throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff()");
+				}
+			}
 		}
 		throw new IllegalStateException("unknown changetype "+changeType+" on DBIdentifiableDiff.getDiff()");
 	}
@@ -62,7 +68,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	String getAddDiffSQL(boolean dumpComments) {
 		return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")
 					+ ident.getDefinition(true).trim()
-					+ (dumpComments?getComment(previousIdent, "old: "):"");		
+					+ (dumpComments?getComment(previousIdent, "old: "):"");
 	}
 
 	String getDropDiffSQL(boolean dumpComments) {
@@ -74,6 +80,22 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		return "drop "
 			+ DBIdentifiable.getType4Alter(previousIdent).desc()+" "+DBObject.getFinalName(previousIdent, dumpSchemaName)
 			+ (dumpComments?getComment(ident, "new: "):"");
+	}
+
+	String getRenameDiffSQL(boolean dumpComments) {
+		if(ownerTableName!=null) {
+			return
+				"alter table "+ownerTableName+" rename "+DBIdentifiable.getType4Alter(ident)
+					+ previousIdent.getName()
+					+ " to " + ident.getName()
+					+ (dumpComments?getComment(previousIdent, "old: "):"");
+		}
+		else {
+			return "alter "+DBIdentifiable.getType4Alter(ident)
+				+ " " + previousIdent.getName()
+				+ " rename to " + ident.getName()
+				+ (dumpComments?getComment(previousIdent, "old: "):"");
+		}
 	}
 	
 	@Override
@@ -180,4 +202,14 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	public String getPreviousDefinition() {
 		return previousIdent!=null?previousIdent.getDefinition(true):"";
 	}
+	
+	@Override
+	public String toString() {
+		return "DbIdDiff["+changeType+";"+ident()+"]";
+	}
+	
+	public String getOwnerTableName() {
+		return ownerTableName;
+	}
+	
 }
