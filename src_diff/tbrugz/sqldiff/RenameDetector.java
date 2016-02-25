@@ -262,8 +262,11 @@ public class RenameDetector {
 				return true;
 			}
 		}
+		else if(DBIdentifiable.getType(o1)==DBIdentifiable.getType(o2)) {
+			log.warn("equalsApartFromName: unknown type: "+DBIdentifiable.getType(o1));
+		}
 		else {
-			log.warn("equalsApartFromName: unknown/incompatible types: "+DBIdentifiable.getType(o1)+", "+DBIdentifiable.getType(o2));
+			log.debug("equalsApartFromName: incompatible types: "+DBIdentifiable.getType(o1)+", "+DBIdentifiable.getType(o2));
 		}
 		
 		return false;

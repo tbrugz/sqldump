@@ -58,7 +58,8 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 					return DiffUtil.singleElemList( getRenameDiffSQL(addComments) );
 				}
 				else {
-					throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff() for type "+DBIdentifiable.getType(ident));
+					throw new IllegalStateException("changetype "+changeType+" not defined on DBIdentifiableDiff.getDiff() for type "+
+						DBIdentifiable.getType(ident));
 				}
 			}
 		}
@@ -84,6 +85,12 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 
 	String getRenameDiffSQL(boolean dumpComments) {
 		if(ownerTableName!=null) {
+			/*
+			 * constraint:
+			 * ok: oracle, postgresql
+			 * nok: h2 (not possible) - http://stackoverflow.com/questions/17510167/h2-database-is-it-possible-to-rename-a-constraint
+			 * nok?: mysql
+			 */
 			return
 				"alter table "+ownerTableName+" rename "+DBIdentifiable.getType4Alter(ident).desc()
 					+ " " + previousIdent.getName()
@@ -91,12 +98,19 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 					+ (dumpComments?getComment(previousIdent, "old: "):"");
 		}
 		else {
+			/*
+			 * index:
+			 * ok: oracle, postgresql, h2 - http://www.h2database.com/html/grammar.html#alter_index_rename
+			 * nok: derby: RENAME INDEX idx TO new_idx
+			 * nok: mysql 5.7+: alter table t rename index idx1 to idx2
+			 * nok: mariadb: http://stackoverflow.com/questions/19797105/does-mariadb-support-renaming-an-index
+			 *      https://mariadb.atlassian.net/browse/MDEV-7318
+			 */
 			return "alter "+DBIdentifiable.getType4Alter(ident).desc()
 				+ " " + previousIdent.getName()
 				+ " rename to " + ident.getName()
 				+ (dumpComments?getComment(previousIdent, "old: "):"");
 		}
-		//derby: RENAME INDEX idx TO new_idx
 	}
 	
 	@Override

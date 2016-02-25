@@ -49,10 +49,6 @@ public interface DBMSFeatures {
 	boolean supportsGrabUniqueConstraints();
 	
 	*/
-	/*
-	ResultSet getExplainPlanForQuery(String sql, Connection conn);
-	boolean supportsExplainPlan();
-	*/
 	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
 	void addColumnSpecificFeatures(Column c, ResultSet rs);
@@ -77,6 +73,9 @@ public interface DBMSFeatures {
 	
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
+	
+	//boolean supportsRenameConstraint();
+	//boolean supportsRenameIndex();
 	
 	//void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
@@ -114,6 +113,7 @@ public interface DBMSFeatures {
 	 * @return a ResultSet with the plan explained
 	 * @throws SQLException
 	 */
+	//getExplainPlanForQuery?
 	ResultSet explainPlan(String sql, Connection conn) throws SQLException;
 	
 	/*
