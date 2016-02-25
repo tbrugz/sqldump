@@ -110,8 +110,9 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this.table = new NamedTable(schemaName, tableName);
 		
 		if(features==null) {
-			updateFeatures(null);
-			log.debug("DBMSFeatures class: "+features);
+			//updateFeatures(null);
+			//log.debug("DBMSFeatures class: "+features);
+			log.warn("DBMSFeatures class is null...");
 		}
 	}
 	
