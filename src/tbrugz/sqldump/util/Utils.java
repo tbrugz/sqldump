@@ -15,6 +15,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,7 +26,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-
 import java.io.FileFilter;
 
 import javax.swing.JFrame;
@@ -342,11 +342,15 @@ public class Utils {
 	public static boolean propertyExists(Properties prop, String key) {
 		return prop.getProperty(key)!=null;
 	}
-
-		
+	
 	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter) {
 		String strings = prop.getProperty(key);
 		return getStringList(strings, delimiter);
+	}
+
+	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter, Object[] allowedValues) {
+		String strings = prop.getProperty(key);
+		return getStringList(strings, delimiter, allowedValues);
 	}
 	
 	public static List<String> getStringList(String strings, String delimiter) {
@@ -359,6 +363,29 @@ public class Utils {
 			return ret;
 		}
 		return null;
+	}
+
+	public static List<String> getStringList(String strings, String delimiter, Object[] allowedValues) {
+		List<String> sl = getStringList(strings, delimiter);
+		List<String> sret = new ArrayList<String>();
+		if(sl==null) return null;
+		Arrays.sort(allowedValues);
+		
+		for(String s: sl) {
+			boolean added = false;
+			for(Object sok: allowedValues) {
+				if(sok.toString().equals(s)) {
+					sret.add(s);
+					added = true;
+					break;
+				}
+			}
+			if(!added) {
+				log.warn("not allowed value: "+s);
+			}
+		}
+		
+		return sret;
 	}
 	
 	public static List<String> splitStringWithTrim(String string, String delimiter) {

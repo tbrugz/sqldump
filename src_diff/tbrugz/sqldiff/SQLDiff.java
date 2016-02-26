@@ -30,6 +30,7 @@ import tbrugz.sqldiff.validate.DiffValidator;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
@@ -88,6 +89,7 @@ public class SQLDiff implements Executor {
 	//rename detection
 	public static final String PROP_DO_RENAMEDETECTION = PROP_PREFIX+".dorenamedetection";
 	public static final String PROP_RENAMEDETECT_MINSIMILARITY = PROP_PREFIX+".renamedetection.minsimilarity";
+	public static final String PROP_RENAMEDETECT_TYPES = PROP_PREFIX+".renamedetection.types";
 
 	//apply diff props
 	static final String PROP_DO_APPLYDIFF = PROP_PREFIX+".doapplydiff";
@@ -229,13 +231,30 @@ public class SQLDiff implements Executor {
 		//XXX: add DiffProcessor?
 		//XXX: add prop 'sqldiff.renamedetection.types'?
 		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
+		
+		
 		if(doRenameDetection) {
 			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
 			int renames = 0;
-			renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
-			renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
-			renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
-			renames += RenameDetector.detectAndDoConstraintRenames(diff.getDbIdDiffs(), minSimilarity);
+			String[] allowedTypes = { DBObjectType.TABLE.toString(), DBObjectType.COLUMN.toString(), DBObjectType.INDEX.toString(), DBObjectType.CONSTRAINT.toString() };
+			List<String> renameTypes = Utils.getStringListFromProp(prop, PROP_RENAMEDETECT_TYPES, ",", allowedTypes); // DBObjectType.values() ?
+			
+			if(renameTypes!=null) {
+				log.info("types to detect renames: "+renameTypes);
+			}
+			
+			if(renameTypes==null || renameTypes.contains(DBObjectType.TABLE.toString())) {
+				renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.COLUMN.toString())) {
+				renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.INDEX.toString())) {
+				renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.CONSTRAINT.toString())) {
+				renames += RenameDetector.detectAndDoConstraintRenames(diff.getDbIdDiffs(), minSimilarity);
+			}
 			//XXX detect FK renames?
 			if(renames>0) {
 				SchemaDiff.logInfo(diff);
