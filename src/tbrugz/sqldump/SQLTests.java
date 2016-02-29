@@ -89,7 +89,7 @@ public class SQLTests extends AbstractSQLProc {
 			//tests(conn);
 			testFeatures(conn);
 		}
-		catch(SQLException e) {
+		catch(Exception e) {
 			log.warn("Exception: "+e.getMessage(), e);
 		}
 	}

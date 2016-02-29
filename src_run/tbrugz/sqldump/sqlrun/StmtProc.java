@@ -153,10 +153,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 		
 		for(String stmtStr: stmtTokenizer) {
 			if(stmtStr==null) { continue; }
+			//XXX: remove SQL comments before trim()?
 			stmtStr = stmtStr.trim();
 			if(stmtStr.equals("")) { continue; }
 			
 			try {
+				//log.debug("stmt: "+stmtStr);
 				urowsTotal += execStatementInternal(stmtStr);
 				countOk++;
 			}
@@ -317,6 +319,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 			}
 		}
 		catch(SQLException e) {
+			//log.warn("error in stmt: "+stmtStr);
 			try {
 				conn.rollback();
 			}
