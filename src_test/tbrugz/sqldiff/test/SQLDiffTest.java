@@ -228,4 +228,22 @@ public class SQLDiffTest {
 		st.executeUpdate(diff1st.getDiff());
 		st.executeUpdate(dinv.getDiff()); //remove?
 	}
+
+	@Test
+	public void testNoDiff() throws Exception {
+		setup4diff();
+		
+		List<Diff> diffs = null;
+		SchemaDiff schemaDiff = null;
+
+		//test diff size
+		{
+		SchemaModel sm2 = schemaJdbcGrabber.grabSchema();
+		schemaDiff = differ.diffSchemas(smOriginal, sm2);
+		System.out.println("diff:\n"+schemaDiff.getDiff());
+		diffs = schemaDiff.getChildren();
+		Assert.assertEquals(0, diffs.size());
+		}
+	}
+	
 }
