@@ -173,94 +173,52 @@ public class SQLDiff implements Executor {
 		
 		SchemaDiff diff = null;
 		
+		String diffDialect = DBMSResources.DEFAULT_DBID; //XXX: fix default diff dialect
+		
 		long initTime = System.currentTimeMillis();
 		
 		if(xmlinfile!=null) {
 			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(XML_IO_CLASS);
 			diff = (SchemaDiff) dg.grabDiff(new File(xmlinfile));
+			setupFeatures(diffDialect);
 		}
 		else if(jsoninfile!=null) {
 			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(JSON_IO_CLASS);
 			diff = (SchemaDiff) dg.grabDiff(new File(jsoninfile));
+			setupFeatures(diffDialect);
 		}
 		else {
-		
-		//from
-		sourceId = prop.getProperty(PROP_SOURCE);
-		fromSchemaGrabber = initGrabber(ID_SOURCE, sourceId, prop);
-		
-		//to
-		targetId = prop.getProperty(PROP_TARGET);
-		toSchemaGrabber = initGrabber(ID_TARGET, targetId, prop);
-		
-		//XXX: add allowParallel property?
-		// grab schemas - parallel execution
-		ModelGrabber sourceGrabber = new ModelGrabber(fromSchemaGrabber, ID_SOURCE, sourceId);
-		ModelGrabber targetGrabber = new ModelGrabber(toSchemaGrabber, ID_TARGET, targetId);
-		
-		ExecutorService executor = Executors.newFixedThreadPool(2);
-		
-		Future<SchemaModel> futureSourceSM = executor.submit(sourceGrabber);
-		Future<SchemaModel> futureTargetSM = executor.submit(targetGrabber);
-		executor.shutdown();
-		
-		fromSM = futureSourceSM.get(); //blocks for return
-		toSM = futureTargetSM.get();
-		
-		/*// grab schemas - sequential
-		log.info("grabbing 'source' model ["+sourceId+"]");
-		fromSM = fromSchemaGrabber.grabSchema();
-		log.info("grabbing 'target' model ["+targetId+"]");
-		toSM = toSchemaGrabber.grabSchema();
-		*/
-		
-		//XXX: option to set dialect from properties?
-		String dialect = toSM.getSqlDialect();
-		log.debug("diff dialect set to: "+dialect);
-		//DBMSResources.instance().updateDbId(dialect);
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
-		ColumnDiff.updateFeatures(feat);
-
-		//do diff
-		log.info("diffing...");
-		SchemaDiffer differ = new SchemaDiffer();
-		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
-		diff = differ.diffSchemas(fromSM, toSM);
-		
-		//detect renames
-		//XXX: add DiffProcessor?
-		//XXX: add prop 'sqldiff.renamedetection.types'?
-		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
-		
-		
-		if(doRenameDetection) {
-			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
-			int renames = 0;
-			String[] allowedTypes = { DBObjectType.TABLE.toString(), DBObjectType.COLUMN.toString(), DBObjectType.INDEX.toString(), DBObjectType.CONSTRAINT.toString() };
-			List<String> renameTypes = Utils.getStringListFromProp(prop, PROP_RENAMEDETECT_TYPES, ",", allowedTypes); // DBObjectType.values() ?
+			//from
+			sourceId = prop.getProperty(PROP_SOURCE);
+			fromSchemaGrabber = initGrabber(ID_SOURCE, sourceId, prop);
 			
-			if(renameTypes!=null) {
-				log.info("types to detect renames: "+renameTypes);
-			}
+			//to
+			targetId = prop.getProperty(PROP_TARGET);
+			toSchemaGrabber = initGrabber(ID_TARGET, targetId, prop);
 			
-			if(renameTypes==null || renameTypes.contains(DBObjectType.TABLE.toString())) {
-				renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
-			}
-			if(renameTypes==null || renameTypes.contains(DBObjectType.COLUMN.toString())) {
-				renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
-			}
-			if(renameTypes==null || renameTypes.contains(DBObjectType.INDEX.toString())) {
-				renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
-			}
-			if(renameTypes==null || renameTypes.contains(DBObjectType.CONSTRAINT.toString())) {
-				renames += RenameDetector.detectAndDoConstraintRenames(diff.getDbIdDiffs(), minSimilarity);
-			}
-			//XXX detect FK renames?
-			if(renames>0) {
-				SchemaDiff.logInfo(diff);
-			}
-		}
-		
+			//XXX: add allowParallel property?
+			// grab schemas - parallel execution
+			ModelGrabber sourceGrabber = new ModelGrabber(fromSchemaGrabber, ID_SOURCE, sourceId);
+			ModelGrabber targetGrabber = new ModelGrabber(toSchemaGrabber, ID_TARGET, targetId);
+			
+			ExecutorService executor = Executors.newFixedThreadPool(2);
+			
+			Future<SchemaModel> futureSourceSM = executor.submit(sourceGrabber);
+			Future<SchemaModel> futureTargetSM = executor.submit(targetGrabber);
+			executor.shutdown();
+			
+			fromSM = futureSourceSM.get(); //blocks for return
+			toSM = futureTargetSM.get();
+			
+			/*// grab schemas - sequential
+			log.info("grabbing 'source' model ["+sourceId+"]");
+			fromSM = fromSchemaGrabber.grabSchema();
+			log.info("grabbing 'target' model ["+targetId+"]");
+			toSM = toSchemaGrabber.grabSchema();
+			*/
+			
+			diff = doDiffSchemas(fromSM, toSM);
+			doDetectRenames(diff); //XXX: should detect renames even when using XML_IO_CLASS or JSON_IO_CLASS ?
 		}
 		
 		//delete files from dir...
@@ -417,7 +375,61 @@ public class SQLDiff implements Executor {
 		
 		return diff.getDiffList().size();
 	}
+
+	void setupFeatures(String dialect) {
+		log.debug("diff dialect set to: "+dialect);
+		//DBMSResources.instance().updateDbId(dialect);
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
+		ColumnDiff.updateFeatures(feat);
+	}
 	
+	SchemaDiff doDiffSchemas(SchemaModel fromSM, SchemaModel toSM) {
+		//XXX: option to set dialect from properties?
+		String dialect = toSM.getSqlDialect();
+		setupFeatures(dialect);
+		
+		//do diff
+		log.info("diffing...");
+		SchemaDiffer differ = new SchemaDiffer();
+		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
+		return differ.diffSchemas(fromSM, toSM);
+	}
+	
+	void doDetectRenames(SchemaDiff diff) {
+		//detect renames
+		//XXX: add DiffProcessor?
+		//XXX: add prop 'sqldiff.renamedetection.types'?
+		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
+		
+		if(doRenameDetection) {
+			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
+			int renames = 0;
+			String[] allowedTypes = { DBObjectType.TABLE.toString(), DBObjectType.COLUMN.toString(), DBObjectType.INDEX.toString(), DBObjectType.CONSTRAINT.toString() };
+			List<String> renameTypes = Utils.getStringListFromProp(prop, PROP_RENAMEDETECT_TYPES, ",", allowedTypes); // DBObjectType.values() ?
+			
+			if(renameTypes!=null) {
+				log.info("types to detect renames: "+renameTypes);
+			}
+			
+			if(renameTypes==null || renameTypes.contains(DBObjectType.TABLE.toString())) {
+				renames += RenameDetector.detectAndDoTableRenames(diff.getTableDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.COLUMN.toString())) {
+				renames += RenameDetector.detectAndDoColumnRenames(diff.getColumnDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.INDEX.toString())) {
+				renames += RenameDetector.detectAndDoIndexRenames(diff.getDbIdDiffs(), minSimilarity);
+			}
+			if(renameTypes==null || renameTypes.contains(DBObjectType.CONSTRAINT.toString())) {
+				renames += RenameDetector.detectAndDoConstraintRenames(diff.getDbIdDiffs(), minSimilarity);
+			}
+			//XXX detect FK renames?
+			if(renames>0) {
+				SchemaDiff.logInfo(diff);
+			}
+		}
+	}
+
 	void applySchemaDiff(SchemaDiff diff, SchemaModel applyToModel, Connection applyToConn, boolean doApplyValidate) throws SQLException {
 		if(applyToConn==null) {
 			String message = "applySchemaDiff: connection is null!";
