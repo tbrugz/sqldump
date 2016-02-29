@@ -161,6 +161,8 @@ public class SchemaDiffer {
 			diffs(DBObjectType.SEQUENCE, diff.getDbIdDiffs(), modelOrig.getSequences(), modelNew.getSequences());
 		}
 		
+		diff.setSqlDialect(modelNew.getSqlDialect());
+		
 		//XXX: query tableDiffs and columnDiffs: set schema.type: ADD, ALTER, DROP 
 		SchemaDiff.logInfo(diff);
 		

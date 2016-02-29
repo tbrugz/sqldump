@@ -173,18 +173,20 @@ public class SQLDiff implements Executor {
 		
 		SchemaDiff diff = null;
 		
-		String diffDialect = DBMSResources.DEFAULT_DBID; //XXX: fix default diff dialect
+		String diffDialect = DBMSResources.DEFAULT_DBID;
 		
 		long initTime = System.currentTimeMillis();
 		
 		if(xmlinfile!=null) {
 			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(XML_IO_CLASS);
 			diff = (SchemaDiff) dg.grabDiff(new File(xmlinfile));
+			if(diff.getSqlDialect()!=null) { diffDialect = diff.getSqlDialect(); }
 			setupFeatures(diffDialect);
 		}
 		else if(jsoninfile!=null) {
 			DiffGrabber dg = (DiffGrabber) Utils.getClassInstance(JSON_IO_CLASS);
 			diff = (SchemaDiff) dg.grabDiff(new File(jsoninfile));
+			if(diff.getSqlDialect()!=null) { diffDialect = diff.getSqlDialect(); }
 			setupFeatures(diffDialect);
 		}
 		else {
@@ -218,6 +220,7 @@ public class SQLDiff implements Executor {
 			*/
 			
 			diff = doDiffSchemas(fromSM, toSM);
+			diffDialect = diff.getSqlDialect();
 			doDetectRenames(diff); //XXX: should detect renames even when using XML_IO_CLASS or JSON_IO_CLASS ?
 		}
 		

@@ -39,7 +39,8 @@ public class SchemaDiff implements Diff {
 	@XmlElement(name="dbidDiff")
 	final Set<DBIdentifiableDiff> dbidDiffs = new TreeSet<DBIdentifiableDiff>();
 	
-	//XXX add String sqlDialect; ?
+	@XmlElement(name="sqlDialect")
+	String sqlDialect;
 
 	@SuppressWarnings("unchecked")
 	public static void logInfo(SchemaDiff diff) {
@@ -251,7 +252,15 @@ public class SchemaDiff implements Diff {
 	public Set<GrantDiff> getGrantDiffs() {
 		return grantDiffs;
 	}
+	
+	public String getSqlDialect() {
+		return sqlDialect;
+	}
 
+	public void setSqlDialect(String sqlDialect) {
+		this.sqlDialect = sqlDialect;
+	}
+	
 	@Override
 	public String getDefinition() {
 		// TODO Auto-generated method stub
