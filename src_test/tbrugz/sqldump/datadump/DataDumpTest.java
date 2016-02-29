@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -239,18 +240,25 @@ public class DataDumpTest {
 		Assert.assertEquals(6, jarr.size());
 	}
 
-	//char UTF8_BOM = '\ufeff';
-	char UTF8_BOM1 = (char) 0xef;
-	char UTF8_BOM2 = (char) 0xbb;
-	char UTF8_BOM3 = (char) 0xbf;
+	byte UTF8_BOM1 = (byte) 0xef;
+	byte UTF8_BOM2 = (byte) 0xbb;
+	byte UTF8_BOM3 = (byte) 0xbf;
 	//EF BB BF
 	
-	void testJsonForUTF8BOM() {
+	void testJsonForUTF8BOM() throws IOException {
 		File f = new File(DIR_OUT+"/data_ETC.json");
+		ByteBuffer bb = IOUtil.readFileBytes(f.getAbsolutePath());
+		
+		log.info("utf-8 BOM: "+UTF8_BOM1+","+UTF8_BOM2+","+UTF8_BOM3);
+		
+		Assert.assertEquals(UTF8_BOM1, bb.get(0));
+		Assert.assertEquals(UTF8_BOM2, bb.get(1));
+		Assert.assertEquals(UTF8_BOM3, bb.get(2));
+		
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		Assert.assertEquals(UTF8_BOM1, jsonStr.charAt(0));
-		Assert.assertEquals(UTF8_BOM2, jsonStr.charAt(1));
-		Assert.assertEquals(UTF8_BOM3, jsonStr.charAt(2));
+		//Assert.assertEquals(UTF8_BOM1, jsonStr.charAt(0));
+		//Assert.assertEquals(UTF8_BOM2, jsonStr.charAt(1));
+		//Assert.assertEquals(UTF8_BOM3, jsonStr.charAt(2));
 		//Assert.assertTrue("1st char should be '"+UTF8_BOM1+"' but is '"+jsonStr.charAt(0)+"'", jsonStr.charAt(0)==UTF8_BOM1);
 		//Assert.assertTrue("2nd char should be '"+UTF8_BOM2+"'", jsonStr.charAt(1)==UTF8_BOM2);
 		//Assert.assertTrue("3rd char should be '"+UTF8_BOM3+"'", jsonStr.charAt(2)==UTF8_BOM3);

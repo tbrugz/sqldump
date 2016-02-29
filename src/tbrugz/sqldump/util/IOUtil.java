@@ -1,5 +1,6 @@
 package tbrugz.sqldump.util;
 
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,6 +38,25 @@ public class IOUtil {
 		return sw.toString();
 	}
 
+	public static ByteBuffer readFileBytes(String filename) throws IOException {
+		return readFileBytes(new FileInputStream(filename));
+	}
+	
+	public static ByteBuffer readFileBytes(InputStream is) throws IOException {
+		ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE*2);
+		
+		byte[] buf = new byte[BUFFER_SIZE];
+		
+		int iread = is.read(buf);
+		
+		while(iread>0) {
+			bb.put(buf);
+			iread = is.read(buf);
+		}
+		
+		return bb;
+	}
+	
 	public static String readFromFilename(String fileName) {
 		try {
 			Reader reader = new FileReader(fileName);
