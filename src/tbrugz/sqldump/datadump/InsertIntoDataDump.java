@@ -44,7 +44,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
 	static final String COMPACTMODE_IDENT = "  ";
-	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat("''yyyy-MM-dd''"); // "DATE ''yyyy-MM-dd''" ?
+	static final String DEFAULT_DATEFORMAT = "'DATE' ''yyyy-MM-dd''";
+	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat(DEFAULT_DATEFORMAT);
 
 	protected String tableName;
 	protected String schemaName;
@@ -79,6 +80,7 @@ public class InsertIntoDataDump extends DumpSyntax {
 		header = prop.getProperty(PROP_INSERTINTO_HEADER);
 		footer = prop.getProperty(PROP_INSERTINTO_FOOTER);
 		this.prop = prop;
+		//postProcProperties(); //dateFormatter should not be set to default value
 	}
 	
 	@Override
@@ -107,13 +109,15 @@ public class InsertIntoDataDump extends DumpSyntax {
 		if(feat==null) {
 			feat = new DefaultDBMSFeatures();
 		}
-		String dbmsDatePattern = feat.sqlDefaultDateFormatPattern();
-		if(dbmsDatePattern!=null) {
-			log.debug("dbms default date format: "+dbmsDatePattern);
-			dateFormatter = new SimpleDateFormat(dbmsDatePattern);
-		}
-		else {
-			dateFormatter = sqlDefaultDateFormatter;
+		if(dateFormatter==null) {
+			String dbmsDatePattern = feat.sqlDefaultDateFormatPattern();
+			if(dbmsDatePattern!=null) {
+				log.debug("dbms default date format: "+dbmsDatePattern);
+				dateFormatter = new SimpleDateFormat(dbmsDatePattern);
+			}
+			else {
+				dateFormatter = sqlDefaultDateFormatter;
+			}
 		}
 		if(doQuoteAllSqlIds) { //quote all
 			String quote = feat.getIdentifierQuoteString();

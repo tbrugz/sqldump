@@ -74,11 +74,14 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			if(colType==null) { throw new IllegalArgumentException("colType should not be null"); }
 			colType = colType.toUpperCase();
 			if(usePrecisionMap.containsKey(colType)) { return usePrecisionMap.get(colType); }
-			String usePrecision = dbmsSpecificProps.getProperty("type."+colType+".useprecision");
+			Boolean usePrecision = Utils.getPropBoolean(dbmsSpecificProps, "type."+colType+".useprecision");
 			if(usePrecision==null) {
-				usePrecision = dbmsSpecificProps.getProperty("type."+colType+"@"+dbid+".useprecision");
+				usePrecision = Utils.getPropBoolean(dbmsSpecificProps, "type."+colType+"@"+dbid+".useprecision");
 			}
-			return !"false".equals(usePrecision);
+			if(usePrecision==null) {
+				if(colType.contains("(")) { usePrecision = false; }
+			}
+			return usePrecision==null || usePrecision;
 		}
 	}
 	
@@ -176,7 +179,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			+getNullableSnippet()
 			+(useAutoIncrement?
 				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
-			 :"");
+			:"");
 	}
 	
 	//XXX: complete syntax parameter? may return 'default null'

@@ -161,10 +161,21 @@ public class DataDumpTest {
 	public void testSQLDate() throws Exception {
 		dump1();
 		String sqlEtc = IOUtil.readFromFilename(DIR_OUT+"/data_ETC.sql");
-		String expected = "insert into ETC (ID, DT_X, DESCRIPTION) values (1, '2013-01-01', 'lala &');";
+		String expected = "insert into ETC (ID, DT_X, DESCRIPTION) values (1, DATE '2013-01-01', 'lala &');";
 		Assert.assertEquals(expected, sqlEtc.substring(0, expected.length()));
 	}
 
+	@Test
+	public void testSQLDateNonDefault() throws Exception {
+		String[] vmparamsDump = {
+				"-Dsqldump.datadump.insertinto.dateformat='TIMESTAMP '''yyyy-MM-dd''"
+		};
+		dumpWithParams(vmparamsDump);
+		String sqlEtc = IOUtil.readFromFilename(DIR_OUT+"/data_ETC.sql");
+		String expected = "insert into ETC (ID, DT_X, DESCRIPTION) values (1, TIMESTAMP '2013-01-01', 'lala &');";
+		Assert.assertEquals(expected, sqlEtc.substring(0, expected.length()));
+	}
+	
 	@Test
 	public void testXML() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dump1();

@@ -84,6 +84,7 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 		}*/
 		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
 		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		postProcProperties();
 	}
 
 	@Override

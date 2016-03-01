@@ -70,6 +70,7 @@ public interface DBMSFeatures {
 	//String sqlAlterColumnNullableDefinition(NamedDBObject table, Column column);
 	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);
 	String sqlDefaultDateFormatPattern();
+	//String sqlDefaultTimestampFormatPattern();
 	
 	boolean supportsDiffingColumn();
 	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);

@@ -288,6 +288,11 @@ public class Utils {
 	}
 
 	/** returns Boolean, so that return can be null */
+	public static Boolean getPropBoolean(Properties prop, String key) {
+		return getPropBoolean(prop, key, null);
+	}
+	
+	/** returns Boolean, so that return can be null */
 	public static Boolean getPropBoolean(Properties prop, String key, Boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }

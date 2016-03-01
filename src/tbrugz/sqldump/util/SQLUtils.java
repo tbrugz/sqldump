@@ -3,6 +3,7 @@ package tbrugz.sqldump.util;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.DatabaseMetaData;
@@ -271,8 +272,13 @@ public class SQLUtils {
 			case Types.DOUBLE:   //  8
 				return Double.class;
 			case Types.DATE:
-			case Types.TIMESTAMP:
 				return Date.class;
+			case Types.TIMESTAMP:
+			//case Types.TIMESTAMP_WITH_TIMEZONE: //java8
+			case 2014: //TIMESTAMP_WITH_TIMEZONE  //java8
+			case -101: //oracle TIMESTAMP WITH TIMEZONE
+			case -102: //oracle TIMESTAMP WITH LOCAL TIMEZONE
+				return Date.class; //return Timestamp.class;
 			case Types.CHAR:
 			case Types.VARCHAR:
 			//case Types.CLOB:
@@ -434,6 +440,17 @@ public class SQLUtils {
 			logger.info("next SQLException: "+se);
 			se = se.getNextException();
 		} 
+	}
+	
+	public static String getTypeName(int type) throws IllegalArgumentException, IllegalAccessException {
+		Field[] fields = Types.class.getDeclaredFields();
+		for(Field f: fields) {
+			int v = f.getInt(null);
+			if(type==v) {
+				return f.getName();
+			}
+		}
+		return null;
 	}
 
 }

@@ -95,6 +95,7 @@ public class XMLDataDump extends DumpSyntax {
 		dumpTableNameAsRowTag = Utils.getPropBool(prop, PROP_DUMPTABLENAMEASROWTAG, dumpTableNameAsRowTag);
 		escape = Utils.getPropBool(prop, PROP_XML_ESCAPE, escape);
 		this.prop = prop;
+		postProcProperties();
 	}
 
 	@Override

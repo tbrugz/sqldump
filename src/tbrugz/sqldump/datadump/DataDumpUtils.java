@@ -338,12 +338,18 @@ public class DataDumpUtils {
 			String colName = lsColNames.get(i);
 			String colType = lsColTypes.get(i).getSimpleName();
 			int type = md.getColumnType(i+1);
+			String typename = null;
+			try {
+				typename = SQLUtils.getTypeName(type);
+			} catch (Exception e) {
+				log.warn("getTypeName: exception: "+e);
+			}
 			int precision = md.getPrecision(i+1);
 			int scale = md.getScale(i+1);
 			/*if( (type==Types.DECIMAL || type== Types.NUMERIC) && (precision==0 || precision<0 || scale<0)) {
 				log.warn("numeric type with precision 0 or precision/scale<0 [table="+tableName+",col="+colName+",type="+type+",class="+colType+",precision="+precision+",scale="+scale+"]");
 			}*/
-			sb.append("\n\t"+colName+" ["+colType+"/t:"+type+"/p:"+precision+"/s:"+scale+"]; ");
+			sb.append("\n\t"+colName+" ["+colType+"/t:"+type+"/tn:"+typename+"/p:"+precision+"/s:"+scale+"]; ");
 		}
 		log.debug("dump columns ["+tableName+"]: "+sb);
 	}

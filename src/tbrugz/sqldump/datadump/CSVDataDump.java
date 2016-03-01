@@ -78,6 +78,7 @@ public class CSVDataDump extends DumpSyntax {
 		enclosing = prop.getProperty(PROP_DATADUMP_ENCLOSING, ENCLOSING_DEFAULT);
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
 		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
+		postProcProperties();
 	}
 	
 	@Override

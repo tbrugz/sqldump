@@ -44,12 +44,12 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		if(dateFormatter==null) {
 			String newDefaultDateFormat = prop.getProperty(DataDump.PROP_DATADUMP_DATEFORMAT);
 			if(newDefaultDateFormat!=null) {
-				log.debug("["+getSyntaxId()+"] (default) date format: "+newDefaultDateFormat);
+				log.warn("["+getSyntaxId()+"] (default) date format (deprecated): "+newDefaultDateFormat);
 				dateFormatter = new SimpleDateFormat(newDefaultDateFormat);
 			}
-			else {
+			/*else {
 				dateFormatter = DataDumpUtils.dateFormatter;
-			}
+			}*/
 		}
 		
 		String nullValue = prop.getProperty("sqldump.datadump."+getSyntaxId()+".nullvalue");
@@ -60,6 +60,12 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		String floatLocale = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatlocale");
 		String floatFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatformat");
 		floatFormatter = Utils.getFloatFormatter(floatLocale, floatFormat, getSyntaxId());
+	}
+
+	public void postProcProperties() {
+		if(dateFormatter==null) {
+			dateFormatter = DataDumpUtils.dateFormatter;
+		}
 	}
 	
 	/*public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
