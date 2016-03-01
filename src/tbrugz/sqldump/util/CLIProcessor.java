@@ -2,6 +2,7 @@ package tbrugz.sqldump.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -54,7 +55,7 @@ public class CLIProcessor {
 		}
 		}
 		if(loadedCount==0) {
-			loadFile(papp, defaultPropFile);
+			loadFile(papp, defaultPropFile, true);
 		}
 		if(!useSysPropSetted) {
 			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
@@ -105,28 +106,26 @@ public class CLIProcessor {
 	}
 	
 	static void loadFile(Properties p, String propFilename) {
-		loadFile(p, propFilename, true);
+		loadFile(p, propFilename, false);
 	}
 	
-	static void loadFile(Properties p, String propFilename, boolean logExceptionAsWarn) {
+	static void loadFile(Properties p, String propFilename, boolean defaultFile) {
 		File propFile = new File(propFilename);
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
 		p.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
 		
 		try {
-			log.info("loading properties file: "+propFile);
+			log.info("loading "+(defaultFile?"default ":"")+"properties file: "+propFile);
 			InputStream propIS = new FileInputStream(propFile);
 			p.load(propIS);
 			propIS.close();
 		}
+		catch(FileNotFoundException e) {
+			log.warn((defaultFile?"default ":"")+"properties file '"+propFile+"' not found: "+e.getMessage());
+		}
 		catch(IOException e) {
-			if(logExceptionAsWarn) {
-				log.warn("error loading file '"+propFile+"': "+e);
-			}
-			else {
-				log.debug("error loading file '"+propFile+"': "+e);
-			}
+			log.warn("error loading "+(defaultFile?"default ":"")+"file '"+propFile+"': "+e);
 		}
 	}
 

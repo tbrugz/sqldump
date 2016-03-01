@@ -84,7 +84,7 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 	public void setProperties(Properties prop) {
 		toDialectId = prop.getProperty(Defs.PROP_TO_DB_ID);
 		if(toDialectId==null) {
-			Boolean transformToANSI = Utils.getPropBoolean(prop, PROP_TRANSFORM_TO_ANSI, null);
+			Boolean transformToANSI = Utils.getPropBoolean(prop, PROP_TRANSFORM_TO_ANSI);
 			if(transformToANSI!=null) {
 				toANSI = transformToANSI;
 			}

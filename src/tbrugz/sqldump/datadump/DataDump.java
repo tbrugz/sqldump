@@ -471,7 +471,7 @@ public class DataDump extends AbstractSQLProc {
 				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 			}
 
-			boolean createEmptyDumpFiles = Utils.getPropBoolean(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
+			boolean createEmptyDumpFiles = Utils.getPropBool(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
 			
 			String partitionByDF = prop.getProperty(PROP_DATADUMP_PARTITIONBY_DATEFORMAT);
 			if(partitionByDF!=null) {
@@ -511,8 +511,8 @@ public class DataDump extends AbstractSQLProc {
 			
 			String partitionByStrId = "";
 			
-			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM, null);
-			boolean writeAppend = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEAPPEND, false);
+			Boolean writeBOM = Utils.getPropBoolean(prop, PROP_DATADUMP_WRITEBOM);
+			boolean writeAppend = Utils.getPropBool(prop, PROP_DATADUMP_WRITEAPPEND, false);
 			
 			boolean dolog1stRow = Utils.getPropBool(prop, PROP_DATADUMP_LOG_1ST_ROW, true);
 			boolean logNumberOfOpenedWriters = true;
