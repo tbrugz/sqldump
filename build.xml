@@ -250,7 +250,7 @@
 		</jar>
 	</target>
 
-	<target name="javadoc" depends="prepare" description="builds javadoc">
+	<target name="javadoc" depends="prepare" description="builds javadoc" unless="javadoc.skip">
 		<!--
 		https://ant.apache.org/manual/Tasks/javadoc.html
 		This task, however, has no notion of "changed" files, unlike the javac task
