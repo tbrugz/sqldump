@@ -2,6 +2,7 @@ package tbrugz.sqldump;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -120,6 +121,10 @@ public class SQLDump implements Executor {
 	}
 	
 	public void doMain(String[] args, Properties prop, Connection c) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		doMain(args, prop, c, null);
+	}
+	
+	public void doMain(String[] args, Properties prop, Connection c, Writer writer) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		if(CLIProcessor.shouldStopExec(PRODUCT_NAME, args)) {
 			return;
 		}
@@ -216,7 +221,7 @@ public class SQLDump implements Executor {
 			processors.addAll(getProcessComponentClasses(processingClassesAfterDumpersStr));
 		}
 		
-		doMainProcess(schemaGrabber, processors);
+		doMainProcess(schemaGrabber, processors, writer);
 		
 		}
 		//XXX: error-processors (like SendMail)?
@@ -226,7 +231,7 @@ public class SQLDump implements Executor {
 		}
 	}
 	
-	void doMainProcess(SchemaModelGrabber grabber, List<ProcessComponent> processors) throws ClassNotFoundException, SQLException, NamingException {
+	void doMainProcess(SchemaModelGrabber grabber, List<ProcessComponent> processors, Writer writer) throws ClassNotFoundException, SQLException, NamingException {
 
 		int numOfProcessors = processors.size();
 		StringBuilder sb = new StringBuilder();
@@ -265,10 +270,10 @@ public class SQLDump implements Executor {
 				sm = doProcessGrabber((SchemaModelGrabber)pc);
 			}
 			else if(pc instanceof SchemaModelDumper) {
-				doProcessDumper((SchemaModelDumper)pc, sm);
+				doProcessDumper((SchemaModelDumper)pc, sm, writer);
 			}
 			else if(pc instanceof Processor) {
-				Connection newConn = doProcessProcessor((Processor)pc, sm);
+				Connection newConn = doProcessProcessor((Processor)pc, sm, writer);
 				if(newConn!=null) {
 					conn = newConn;
 				}
@@ -315,7 +320,7 @@ public class SQLDump implements Executor {
 	 * 
 	 * @return a new connection (if the processor has such capability; if it does not, returns null)
 	 */
-	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm) throws ClassNotFoundException, SQLException, NamingException {
+	Connection doProcessProcessor(Processor sqlproc, SchemaModel sm, Writer writer) throws ClassNotFoundException, SQLException, NamingException {
 		sqlproc.setProperties(papp);
 		if(sqlproc.needsConnection()) {
 			if(conn==null) {
@@ -328,13 +333,19 @@ public class SQLDump implements Executor {
 		}
 		//TODO: set fail on error based on (processor) properties ?
 		sqlproc.setFailOnError(failonerror);
+		if(writer!=null && sqlproc.acceptsOutputWriter()) {
+			sqlproc.setOutputWriter(writer);
+		}
 		sqlproc.process();
 		return sqlproc.getNewConnection();
 	}
 	
-	void doProcessDumper(SchemaModelDumper schemaDumper, SchemaModel sm) {
+	void doProcessDumper(SchemaModelDumper schemaDumper, SchemaModel sm, Writer writer) {
 		schemaDumper.setProperties(papp);
 		schemaDumper.setFailOnError(failonerror);
+		if(writer!=null && schemaDumper.acceptsOutputWriter()) {
+			schemaDumper.setOutputWriter(writer);
+		}
 		schemaDumper.dumpSchema(sm);
 	}
 	
