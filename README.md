@@ -102,9 +102,10 @@ Building from sources (with ant & ivy)
 - (*obsolete*) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
   (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
 - (*obsolete*) Copy `templates/build.properties` to `build.properties`
-- (optional) Edit `build.properties`
+- (*optional*) Edit `build.properties`
 - Run `ant resolve`
-- Run `ant dist` or `ant publish` (optional: `ant test`)
+- (*optional*) `ant test`
+- Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`)
 
 
 Running (with sources)

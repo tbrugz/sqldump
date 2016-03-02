@@ -105,7 +105,7 @@
 		<pathelement path="${ivy.findbugs.classpath}"/>
 	</path>
 	
-	<target name="prepare">
+	<target name="prepare" description="prepares build">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
 		<mkdir dir="${lib.dir}"/>
