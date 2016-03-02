@@ -3,9 +3,13 @@ package tbrugz.sqldump.dbmodel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.util.LongFactory;
+import tbrugz.util.NonNullGetMap;
 
 public class ModelUtils {
 
@@ -73,6 +77,20 @@ public class ModelUtils {
 			}
 		}
 		return uks;
+	}
+	
+	public static String getExecutableCountsByType(Set<ExecutableObject> execs) {
+		StringBuilder sb = new StringBuilder();
+		Map<DBObjectType, Long> map = new NonNullGetMap<DBObjectType, Long>(new TreeMap<DBObjectType, Long>(), new LongFactory());
+		for(ExecutableObject eo: execs) {
+			map.put(eo.getType(), map.get(eo.getType())+1);
+		}
+		boolean is1st = true;
+		for(Map.Entry<DBObjectType, Long> e: map.entrySet()) {
+			if(is1st) { is1st = false; } else { sb.append("\n"); }
+			sb.append(e.getKey()+": "+e.getValue());
+		}
+		return sb.toString();
 	}
 
 }

@@ -1,5 +1,6 @@
 package tbrugz.sqldiff;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -111,6 +112,18 @@ public class SchemaDiffer {
 		}
 	}	
 	
+	static final DBObjectType[] diffableTypes = {
+		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE, DBObjectType.SYNONYM,
+		DBObjectType.INDEX, DBObjectType.SEQUENCE,
+		DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY
+	};
+	
+	static final Set<DBObjectType> diffableTypesSet = new HashSet<DBObjectType>();
+	
+	static {
+		diffableTypesSet.addAll(Arrays.asList(diffableTypes));
+	}
+	
 	public SchemaDiff diffSchemas(SchemaModel modelOrig, SchemaModel modelNew) {
 		if(modelOrig == null || modelNew == null) {
 			log.warn("source, target, or both models are null");
@@ -121,6 +134,12 @@ public class SchemaDiffer {
 		
 		if(doDiffTypes!=null) {
 			log.info("diffing types: "+doDiffTypes);
+			Set<DBObjectType> setDiff = new HashSet<DBObjectType>();
+			setDiff.addAll(doDiffTypes);
+			setDiff.removeAll(diffableTypesSet);
+			if(setDiff.size()>0) {
+				log.warn("undiffable types: "+setDiff);
+			}
 		}
 		
 		//Tables
@@ -143,6 +162,20 @@ public class SchemaDiffer {
 		//Executables
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.EXECUTABLE)) {
 			diffs(DBObjectType.EXECUTABLE, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables());
+		}
+		else {
+			//log.debug("countsByType-orig::\n"+ModelUtils.getExecutableCountsByType(modelOrig.getExecutables()));
+			//log.debug("countsByType-new::\n"+ModelUtils.getExecutableCountsByType(modelNew.getExecutables()));
+			DBObjectType[] types = { DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY };
+			//int count = 0;
+			for(DBObjectType et: types) {
+				//log.debug("diffSchemas: execs["+count+"]: #dbid="+diff.getDbIdDiffs().size()+" #orig="+modelOrig.getExecutables().size()+" #new="+modelNew.getExecutables().size());
+				if(doDiffTypes.contains(et)) {
+					diffs(et, diff.getDbIdDiffs(), modelOrig.getExecutables(), modelNew.getExecutables(), null, null, true);
+				}
+				//count++;
+			}
+			//log.debug("diffSchemas: execs-end["+count+"]: #dbid="+diff.getDbIdDiffs().size()+" #orig="+modelOrig.getExecutables().size()+" #new="+modelNew.getExecutables().size());
 		}
 
 		//Synonyms
@@ -174,8 +207,23 @@ public class SchemaDiffer {
 	}
 
 	public void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName) {
+		diffs(objType, diffs, listOrig, listNew, origOwnerTableName, newOwnerTableName, false);
+	}
+	
+	public void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName, boolean filterByType) {
 		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
+		int countAdd = 0, countReplace = 0, countDrop = 0, countSource = 0, countTarget = 0, countSourceInit=0, countTargetInit=0;
+		/*List<DBIdentifiable> lo = new ArrayList<DBIdentifiable>();
+		lo.addAll(listOrig);
+		List<DBIdentifiable> ln = new ArrayList<DBIdentifiable>();
+		ln.addAll(listNew);*/
+		
 		for(DBIdentifiable cOrig: listOrig) {
+			//DBIdentifiable cOrig = (DBIdentifiable) lo.get(i);
+			countSourceInit++;
+			if(filterByType && DBIdentifiable.getType(cOrig)!=objType) { continue; }
+			countSource++;
+			
 			DBIdentifiable cNew = DiffUtil.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType(cOrig), cOrig.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
@@ -196,6 +244,7 @@ public class SchemaDiffer {
 						diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, cNew, origOwnerTableName));
 						diffs.add(new DBIdentifiableDiff(ChangeType.ADD, cOrig, cNew, newOwnerTableName));
 					}
+					countReplace++;
 				}
 			}
 			else {
@@ -205,9 +254,16 @@ public class SchemaDiffer {
 				}
 				log.debug("drop "+objType+": orig: "+cOrig);
 				diffs.add(new DBIdentifiableDiff(ChangeType.DROP, cOrig, null, origOwnerTableName));
+				countDrop++;
 			}
 		}
+		
 		for(DBIdentifiable cNew: listNew) {
+			//DBIdentifiable cNew = (DBIdentifiable) ln.get(i);
+			countTargetInit++;
+			if(filterByType && DBIdentifiable.getType(cNew)!=objType) { continue; }
+			countTarget++;
+
 			if(newDBObjectsThatExistsInOrigModel.contains(cNew)) { continue; }
 			if(!cNew.isDumpable()) {
 				log.debug("new object not dumpable: "+cNew);
@@ -215,7 +271,12 @@ public class SchemaDiffer {
 			}
 			log.debug("add "+objType+": new: "+cNew);
 			diffs.add(new DBIdentifiableDiff(ChangeType.ADD, null, cNew, newOwnerTableName));
+			countAdd++;
 		}
+		log.debug("diffs["+objType+"]: #add="+countAdd+" #replace="+countReplace+" #drop="+countDrop+
+				" #source="+countSource+"/"+countSourceInit+"/"+listOrig.size()+
+				" #target="+countTarget+"/"+countTargetInit+"/"+listNew.size()
+				);
 	}
 	
 	static Set<FK> getFKsFromTable(Set<FK> fks, String table) {
