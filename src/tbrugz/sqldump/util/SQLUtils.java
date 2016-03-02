@@ -275,9 +275,10 @@ public class SQLUtils {
 				return Date.class;
 			case Types.TIMESTAMP:
 			//case Types.TIMESTAMP_WITH_TIMEZONE: //java8
-			case 2014: //TIMESTAMP_WITH_TIMEZONE  //java8
+			case 2014: //TIMESTAMP_WITH_TIMEZONE  //java8 - https://docs.oracle.com/javase/8/docs/api/java/sql/Types.html#TIMESTAMP_WITH_TIMEZONE
 			case -101: //oracle TIMESTAMP WITH TIMEZONE
 			case -102: //oracle TIMESTAMP WITH LOCAL TIMEZONE
+			//pgsql - http://www.postgresql.org/docs/current/static/datatype-datetime.html
 				return Date.class; //return Timestamp.class;
 			case Types.CHAR:
 			case Types.VARCHAR:

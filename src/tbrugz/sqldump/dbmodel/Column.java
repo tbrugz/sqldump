@@ -78,6 +78,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			if(usePrecision==null) {
 				usePrecision = Utils.getPropBoolean(dbmsSpecificProps, "type."+colType+"@"+dbid+".useprecision");
 			}
+			// add types.useprecision.regex? types.ignoreprecision.regex? ex: types.ignoreprecision.regex=TIMESTAMP\(\d+\)
 			if(usePrecision==null) {
 				if(colType.contains("(")) { usePrecision = false; }
 			}

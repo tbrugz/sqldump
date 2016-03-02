@@ -251,6 +251,10 @@
 	</target>
 
 	<target name="javadoc" depends="prepare" description="builds javadoc">
+		<!--
+		https://ant.apache.org/manual/Tasks/javadoc.html
+		This task, however, has no notion of "changed" files, unlike the javac task
+		-->
 		<!--echo message="java.home: ${java.home}" /-->
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" classpathref="classpath.compile">
 			<sourcepath location="${src.dir}"/>
