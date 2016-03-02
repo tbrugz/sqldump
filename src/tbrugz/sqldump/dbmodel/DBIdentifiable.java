@@ -116,7 +116,6 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		return type;
 	}
 	
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

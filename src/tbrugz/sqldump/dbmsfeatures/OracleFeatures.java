@@ -319,7 +319,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//+"   and p.procedure_name is not null "
 				+"   and aa.position is not null "
 				+" order by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
-		log.debug("sql: "+query);
+		log.debug("grabbing executables' metadata - sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 

@@ -327,46 +327,42 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		schemaModel.setSqlDialect(feats.getId());
 
 		if(doSchemaGrabTables) {
-			
-		List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMAGRAB_TABLEFILTER, ","); 
-		for(String schemaName: schemasList) {
-			if(tablePatterns==null) {
-				grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
-			}
-			else {
-				for(String tableName: tablePatterns) {
-					grabRelations(schemaModel, dbmd, feats, schemaName, tableName, false);
+			List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMAGRAB_TABLEFILTER, ","); 
+			for(String schemaName: schemasList) {
+				if(tablePatterns==null) {
+					grabRelations(schemaModel, dbmd, feats, schemaName, null, false);
+				}
+				else {
+					for(String tableName: tablePatterns) {
+						grabRelations(schemaModel, dbmd, feats, schemaName, tableName, false);
+					}
 				}
 			}
-		}
-		
 		}
 		
 		//TODO: option to grab all FKs from schema...
 		
 		if(doSchemaGrabTables) {
-		
-		if(recursivedump) {
-			int lastTableCount = schemaModel.getTables().size();
-			int level = 0;
-			log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #ini:"+lastTableCount
-					+(maxLevel!=null?" [maxlevel="+maxLevel+"]":" [maxlevel not defined]"));
-			while(true) {
-				level++;
-				grabTablesRecursivebasedOnFKs(dbmd, feats, schemaModel, schemaPattern, grabExportedFKsAlso);
-				
-				int newTableCount = schemaModel.getTables().size();
-				boolean wontGrowMore = (newTableCount <= lastTableCount);
-				boolean maxLevelReached = (maxLevel!=null && level>=maxLevel);
-				log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #last:"+lastTableCount+" #now:"+newTableCount
-						+(wontGrowMore?" [won't grow more]":"")
-						+(maxLevelReached?" [maxlevel reached]":"")
-						);
-				if(wontGrowMore || maxLevelReached) { break; }
-				lastTableCount = newTableCount;
+			if(recursivedump) {
+				int lastTableCount = schemaModel.getTables().size();
+				int level = 0;
+				log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #ini:"+lastTableCount
+						+(maxLevel!=null?" [maxlevel="+maxLevel+"]":" [maxlevel not defined]"));
+				while(true) {
+					level++;
+					grabTablesRecursivebasedOnFKs(dbmd, feats, schemaModel, schemaPattern, grabExportedFKsAlso);
+					
+					int newTableCount = schemaModel.getTables().size();
+					boolean wontGrowMore = (newTableCount <= lastTableCount);
+					boolean maxLevelReached = (maxLevel!=null && level>=maxLevel);
+					log.info(getIdDesc()+"grabbing tables recursively["+level+"]: #last:"+lastTableCount+" #now:"+newTableCount
+							+(wontGrowMore?" [won't grow more]":"")
+							+(maxLevelReached?" [maxlevel reached]":"")
+							);
+					if(wontGrowMore || maxLevelReached) { break; }
+					lastTableCount = newTableCount;
+				}
 			}
-		}
-		
 		}
 		
 		log.info(getIdDesc()+schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
@@ -898,7 +894,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			case DatabaseMetaData.functionColumnOut:
 				ep.setInout(ExecutableParameter.INOUT.OUT);
 				break;
-			//XXX case DatabaseMetaData.functionColumnReturn: //??
+			case DatabaseMetaData.functionColumnResult: //??
+			case DatabaseMetaData.functionColumnUnknown:
 			default:
 				break;
 			}
