@@ -303,6 +303,7 @@ public class SQLDiff implements Executor {
 		
 		//apply schema diff to database?
 		if(doApplySchemaDiff) {
+			boolean connectionCreated = false;
 			Connection applyToConn = null;
 			SchemaModel applyToModel = null;
 			
@@ -316,6 +317,7 @@ public class SQLDiff implements Executor {
 					String connPrefix = "sqldiff."+prop.getProperty(PROP_SOURCE);
 					log.info("initting 'source' connection to apply diff [prefix = '"+connPrefix+"']");
 					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
+					connectionCreated = true;
 				}
 			}
 			else if(applyToId!=null) {
@@ -335,11 +337,13 @@ public class SQLDiff implements Executor {
 					String connPrefix = "sqldiff."+applyToId;
 					log.info("initting 'apply-to' connection to apply diff [prefix = '"+connPrefix+"']");
 					applyToConn = ConnectionUtil.initDBConnection(connPrefix, prop);
+					connectionCreated = true;
 				}
 			}
 			else if(applyToConnPrefix!=null) {
 				log.info("initting connection to apply diff [prefix = '"+applyToConnPrefix+"']");
 				applyToConn = ConnectionUtil.initDBConnection(applyToConnPrefix, prop);
+				connectionCreated = true;
 			}
 			else {
 				String message = "applydiff (ditt-to-db) target (prop '"+PROP_APPLYDIFF_TOSOURCE+"' or '"+PROP_APPLYDIFF_TOCONN+"') not defined";
@@ -348,6 +352,8 @@ public class SQLDiff implements Executor {
 			}
 			
 			applySchemaDiff(diff, applyToModel, applyToConn, doApplyValidate);
+			
+			if(connectionCreated) { ConnectionUtil.closeConnection(applyToConn); }
 		}
 
 		//data diff!
@@ -372,7 +378,12 @@ public class SQLDiff implements Executor {
 			dd.process();
 		}
 		
-		//XXX close connections if open?
+		if(fromSchemaGrabber!=null) {
+			ConnectionUtil.closeConnection(fromSchemaGrabber.getConnection());
+		}
+		if(toSchemaGrabber!=null) {
+			ConnectionUtil.closeConnection(toSchemaGrabber.getConnection());
+		}
 		
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		

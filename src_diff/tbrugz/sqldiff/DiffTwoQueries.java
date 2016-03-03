@@ -83,7 +83,10 @@ public class DiffTwoQueries implements Executor {
 		
 		Connection sourceConn = null;
 		Connection targetConn = null;
+		Connection commonConn = null;
+		String outPattern = null;
 		
+		try {
 		//source
 		String sourceConnPropPrefix = prop.getProperty(PROP_SOURCE_CONNPROPPREFIX);
 		if(sourceConnPropPrefix!=null) {
@@ -105,7 +108,7 @@ public class DiffTwoQueries implements Executor {
 			log.info("using common connection prop prefix '"+commonConnPropPrefix+"' for ["
 					+(sourceConn==null?"source"+(targetConn==null?", target":""):(targetConn==null?"target":""))
 					+"]");
-			Connection commonConn = ConnectionUtil.initDBConnection(commonConnPropPrefix, prop);
+			commonConn = ConnectionUtil.initDBConnection(commonConnPropPrefix, prop);
 			if(sourceConn==null) { sourceConn = commonConn; }
 			if(targetConn==null) { targetConn = commonConn; }
 		}
@@ -135,7 +138,7 @@ public class DiffTwoQueries implements Executor {
 
 		//cout
 		String finalPattern = null;
-		String outPattern = prop.getProperty(PROP_OUTPATTERN);
+		outPattern = prop.getProperty(PROP_OUTPATTERN);
 		if(outPattern==null) {
 			log.info("null '"+PROP_OUTPATTERN+"', using stdout");
 			finalPattern = CategorizedOut.STDOUT;
@@ -168,6 +171,12 @@ public class DiffTwoQueries implements Executor {
 			log.info("source-sql columns: "+DataDumpUtils.getColumnNames(rsSource.getMetaData()));
 			log.info("target-sql columns: "+DataDumpUtils.getColumnNames(rsSource.getMetaData()));
 			throw e;
+		}
+		}
+		finally {
+			ConnectionUtil.closeConnection(sourceConn);
+			ConnectionUtil.closeConnection(targetConn);
+			ConnectionUtil.closeConnection(commonConn);
 		}
 
 		log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms] [outpattern: "+outPattern+"]");

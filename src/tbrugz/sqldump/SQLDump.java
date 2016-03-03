@@ -77,6 +77,7 @@ public class SQLDump implements Executor {
 	static final Log log = LogFactory.getLog(SQLDump.class);
 	
 	Connection conn;
+	boolean connCreated = false;
 	boolean failonerror = true;
 	boolean jmxCreateMBean = false;
 
@@ -97,11 +98,11 @@ public class SQLDump implements Executor {
 		DumpSyntaxRegistry.addSyntaxes(papp.getProperty(PROP_DATADUMP_XTRASYNTAXES));
 	}
 
-	void end(boolean closeConnection) throws SQLException {
+	/*void end(boolean closeConnection) throws SQLException {
 		if(closeConnection) {
 			ConnectionUtil.closeConnection(conn);
 		}
-	}
+	}*/
 	
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sdd = new SQLDump();
@@ -219,7 +220,9 @@ public class SQLDump implements Executor {
 		}
 		//XXX: error-processors (like SendMail)?
 		finally {
-			end(c==null);
+			if(connCreated) {
+				ConnectionUtil.closeConnection(conn);
+			}
 			log.info("...done [elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 		}
 	}
@@ -357,6 +360,7 @@ public class SQLDump implements Executor {
 			}
 		}
 		else {
+			connCreated = true;
 			//DBMSResources.instance().updateMetaData(conn.getMetaData(), true); //XXXxx: really needed?
 		}
 	}
