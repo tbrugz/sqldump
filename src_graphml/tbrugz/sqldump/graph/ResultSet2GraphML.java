@@ -114,6 +114,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	//edge-only cols
 	static final String COL_SOURCE_TYPE = "SOURCE_TYPE"; //optional
 	static final String COL_TARGET_TYPE = "TARGET_TYPE"; //optional
+	//static final String COL_SOURCE_LABEL = "SOURCE_LABEL"; //optional?
+	//static final String COL_TARGET_LABEL = "TARGET_LABEL"; //optional?
 	
 	//required cols for node, edge
 	static final String[] NODE_COLS = { COL_OBJECT, COL_OBJECT_LABEL };

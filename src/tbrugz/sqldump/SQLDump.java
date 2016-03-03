@@ -103,13 +103,6 @@ public class SQLDump implements Executor {
 		}
 	}
 	
-	/**
-	 * @param args
-	 * @throws NamingException 
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IOException 
-	 */
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sdd = new SQLDump();
 		sdd.doMain(args, null, null);

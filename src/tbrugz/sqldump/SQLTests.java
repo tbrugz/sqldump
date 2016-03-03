@@ -38,6 +38,11 @@ public class SQLTests extends AbstractSQLProc {
 	static void testsInternal(Connection conn) throws Exception {
 		log.info("some tests...");
 		DatabaseMetaData dbmd = conn.getMetaData();
+		//DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures("oracle");
+		//dbmd = feat.getMetadataDecorator(dbmd);
+		log.info("dbmd: "+dbmd);
+		
+		long initTime = System.currentTimeMillis();
 
 		//log.info("test: catalogs...");
 		//SQLUtils.dumpRS(dbmd.getCatalogs());
@@ -68,6 +73,7 @@ public class SQLTests extends AbstractSQLProc {
 		//Statement st = conn.createStatement();
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
+		log.info("elapsed: "+(System.currentTimeMillis()-initTime)+"ms");
 	}
 	
 	static void testFeatures(Connection conn) throws SQLException {
@@ -81,6 +87,14 @@ public class SQLTests extends AbstractSQLProc {
 		//conn.createStatement().execute("drop table xyz");
 		
 		SQLUtils.dumpRS(rs);
+	}
+	
+	static int countRsRows(ResultSet rs) throws SQLException {
+		int count = 0;
+		while(rs.next()) {
+			count++;
+		}
+		return count;
 	}
 
 	@Override

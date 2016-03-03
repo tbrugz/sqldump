@@ -452,7 +452,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					//Columns & Remarks
 					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
 					if(t==null) {
-						log.warn("view not found in grabbed tables' list: "+view.getSchemaName()+"."+view.getName());
+						log.debug("view not found in grabbed tables' list: "+view.getSchemaName()+"."+view.getName());
 						continue;
 					}
 					view.setSimpleColumns(t.getColumns());

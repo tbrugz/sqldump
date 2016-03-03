@@ -112,7 +112,7 @@ public interface DBMSFeatures {
 	 * @param sql the query to explain
 	 * @param conn the database connection
 	 * @return a ResultSet with the plan explained
-	 * @throws SQLException
+	 * @throws SQLException if a database access error occurs
 	 */
 	//getExplainPlanForQuery?
 	ResultSet explainPlan(String sql, Connection conn) throws SQLException;

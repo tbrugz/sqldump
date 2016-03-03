@@ -426,14 +426,6 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		}
 	}
 	
-	/**
-	 * @param args
-	 * @throws NamingException 
-	 * @throws SQLException 
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
-	 * @throws Exception 
-	 */
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(args, null, null);
