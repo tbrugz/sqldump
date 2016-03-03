@@ -29,7 +29,10 @@ public final class DBMSResources {
 	public static final String DEFAULT_DBID = "<default>"; 
 	
 	static final String PROP_FROM_DB_ID_AUTODETECT = "sqldump.fromdbid.autodetect";
-	static final String PROP_DBMS_SPECIFICGRABCLASS = "sqldump.dbms.specificgrabclass";
+	
+	static final String PREFIX_DBMS = "sqldump.dbms";
+	static final String SUFFIX_SPECIFICGRABCLASS = ".specificgrabclass";
+	static final String PROP_DBMS_SPECIFICGRABCLASS = PREFIX_DBMS + SUFFIX_SPECIFICGRABCLASS;
 
 	static final DBMSResources instance = new DBMSResources();
 	
@@ -265,12 +268,19 @@ public final class DBMSResources {
 			dbid = DEFAULT_DBID;
 		}
 		
-		dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
+		String specificKey = PREFIX_DBMS+"@"+dbid+SUFFIX_SPECIFICGRABCLASS;
+		dbSpecificFeaturesClass = papp.getProperty(specificKey);
 		if(dbSpecificFeaturesClass!=null) {
-			log.info("using specific grab class: "+dbSpecificFeaturesClass);
+			log.info("using specific grab class for ["+dbid+"]: "+dbSpecificFeaturesClass);
 		}
 		else {
-			dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+dbid+".specificgrabclass");
+			dbSpecificFeaturesClass = papp.getProperty(PROP_DBMS_SPECIFICGRABCLASS);
+			if(dbSpecificFeaturesClass!=null) {
+				log.info("using *global* specific grab class: "+dbSpecificFeaturesClass);
+			}
+			else {
+				dbSpecificFeaturesClass = dbmsSpecificResource.getProperty("dbms."+dbid+".specificgrabclass");
+			}
 		}
 		
 		if(dbSpecificFeaturesClass!=null) {
