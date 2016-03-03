@@ -473,9 +473,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			Synonym s = new Synonym();
 			s.setName( rs.getString(1) );
 			s.setSchemaName(schemaPattern);
-			s.objectOwner = rs.getString(2);
-			s.referencedObject = rs.getString(3);
-			s.dbLink = rs.getString(4);
+			s.setObjectOwner( rs.getString(2) );
+			s.setReferencedObject( rs.getString(3) );
+			s.setDbLink( rs.getString(4) );
 			synonyms.add(s);
 			count++;
 		}

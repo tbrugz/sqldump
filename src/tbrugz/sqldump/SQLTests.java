@@ -21,6 +21,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 
+@SuppressWarnings("all")
 public class SQLTests extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(SQLTests.class);
@@ -34,7 +35,6 @@ public class SQLTests extends AbstractSQLProc {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	static void testsInternal(Connection conn) throws Exception {
 		log.info("some tests...");
 		DatabaseMetaData dbmd = conn.getMetaData();

@@ -4,9 +4,9 @@ public class Synonym extends DBObject {
 	private static final long serialVersionUID = 1L;
 
 	boolean publik;
-	public String objectOwner;
-	public String referencedObject;
-	public String dbLink;
+	String objectOwner;
+	String referencedObject;
+	String dbLink;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
@@ -64,6 +64,30 @@ public class Synonym extends DBObject {
 		} else if (!referencedObject.equals(other.referencedObject))
 			return false;
 		return true;
+	}
+
+	public String getObjectOwner() {
+		return objectOwner;
+	}
+
+	public void setObjectOwner(String objectOwner) {
+		this.objectOwner = objectOwner;
+	}
+
+	public String getReferencedObject() {
+		return referencedObject;
+	}
+
+	public void setReferencedObject(String referencedObject) {
+		this.referencedObject = referencedObject;
+	}
+	
+	public String getDbLink() {
+		return dbLink;
+	}
+	
+	public void setDbLink(String dbLink) {
+		this.dbLink = dbLink;
 	}
 
 }

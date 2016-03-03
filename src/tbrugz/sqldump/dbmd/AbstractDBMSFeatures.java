@@ -36,6 +36,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabViews = true;
 	protected boolean grabUniqueConstraints = true;
 	protected boolean grabCheckConstraints = true;
+	//XXX: protected boolean grabMaterializedViews = true;
 	
 	String id;
 	
