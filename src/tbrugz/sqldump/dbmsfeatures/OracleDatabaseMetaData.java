@@ -28,6 +28,8 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		// only tables & materialized views may have comments/remarks
 		// http://docs.oracle.com/cd/B19306_01/server.102/b14200/statements_4009.htm
 		
+		//log.info("getTables: types="+Arrays.toString(types));
+		
 		Connection conn = metadata.getConnection();
 		List<String> params = new ArrayList<String>();
 		

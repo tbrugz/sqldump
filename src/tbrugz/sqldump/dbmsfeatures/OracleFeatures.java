@@ -656,15 +656,23 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	@Override
 	public void addTableSpecificFeatures(Table t, ResultSet rs) {
+		String columnName = null;
 		if(t instanceof OracleTable) {
 			OracleTable ot = (OracleTable) t;
 			try {
-				ot.tableSpace = rs.getString("TABLESPACE_NAME");
-				ot.temporary = "YES".equals(rs.getString("TEMPORARY"));
-				ot.logging = "YES".equals(rs.getString("LOGGING"));
-				if("YES".equals(rs.getString("PARTITIONED"))) {
+				columnName = "TABLESPACE_NAME";
+				ot.tableSpace = rs.getString(columnName);
+				columnName = "TEMPORARY";
+				ot.temporary = "YES".equals(rs.getString(columnName));
+				columnName = "LOGGING";
+				ot.logging = "YES".equals(rs.getString(columnName));
+				
+				// partition...
+				columnName = "PARTITIONED";
+				if("YES".equals(rs.getString(columnName))) {
 					ot.partitioned = true;
-					ot.partitionType = OracleTable.PartitionType.valueOf(rs.getString("PARTITIONING_TYPE"));
+					columnName = "PARTITIONING_TYPE";
+					ot.partitionType = OracleTable.PartitionType.valueOf(rs.getString(columnName));
 					
 					//get partition type, columns
 					getPartitionColumns(ot, rs.getStatement().getConnection());
@@ -675,7 +683,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			catch(SQLException e) {
 				//try {
 					//log.warn("OracleSpecific: "+e+"; col names: ("+SQLUtils.getColumnNames(rs.getMetaData())+")");
-					log.warn("OracleSpecific: "+e);
+					log.warn("OracleSpecific [lastcol="+columnName+"]: "+e);
 				/*} catch (SQLException e1) {
 					e1.printStackTrace();
 				}*/
