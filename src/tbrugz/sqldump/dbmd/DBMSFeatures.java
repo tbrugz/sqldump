@@ -80,6 +80,8 @@ public interface DBMSFeatures {
 	
 	//void grabDBViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
+
+	void grabDBMaterializedViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException;
 	
 	//void grabDBTriggers(SchemaModel model, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException;
 	void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException;

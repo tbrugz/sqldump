@@ -68,6 +68,11 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	public void grabDBViews(Collection<View> views, String schemaPattern,
 			String viewNamePattern, Connection conn) throws SQLException {
 	}
+	
+	@Override
+	public void grabDBMaterializedViews(Collection<View> views, String schemaPattern,
+			String viewNamePattern, Connection conn) throws SQLException {
+	}
 
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern,

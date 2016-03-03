@@ -44,7 +44,8 @@ import tbrugz.sqldump.util.Utils;
 public class OracleFeatures extends AbstractDBMSFeatures {
 	static Log log = LogFactory.getLog(OracleFeatures.class);
 
-	static final DBObjectType[] execTypes = new DBObjectType[]{DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
+	static final DBObjectType[] execTypes = new DBObjectType[]{
+		DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
 		//, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
 	};
 	
@@ -69,6 +70,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		if(grabViews) {
 			grabDBViews(model.getViews(), schemaPattern, null, conn);
+		}
+		if(grabMaterializedViews) {
+			grabDBMaterializedViews(model.getViews(), schemaPattern, null, conn);
 		}
 		if(grabTriggers) {
 			grabDBTriggers(model.getTriggers(), schemaPattern, null, null, conn);
@@ -109,7 +113,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		grabDBNormalViews(views, schemaPattern, viewNamePattern, conn);
-		grabDBMaterializedViews(views, schemaPattern, viewNamePattern, conn);
+		//grabDBMaterializedViews(views, schemaPattern, viewNamePattern, conn);
 	}
 	
 	/*void grabDBNormalViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
@@ -117,7 +121,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}*/
 
 	void grabDBNormalViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
-		log.debug("grabbing views");
+		log.debug("grabbing (normal) views");
 		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
 		Statement st = conn.createStatement();
@@ -150,8 +154,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	/*void grabDBMaterializedViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		grabDBMaterializedViews(model.getViews(), schemaPattern, viewNamePattern, conn);
 	}*/
-	
-	void grabDBMaterializedViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
+
+	@Override
+	public void grabDBMaterializedViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
 		String query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);

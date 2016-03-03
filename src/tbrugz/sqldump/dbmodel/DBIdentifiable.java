@@ -97,8 +97,9 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		if(ident instanceof Synonym) { return DBObjectType.SYNONYM; }
 		if(ident instanceof Table) { return DBObjectType.TABLE; }
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
+		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; } //MaterializedView extends View: must come first in "if" order
 		if(ident instanceof View) { return DBObjectType.VIEW; }
-		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; }
+		
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}
 

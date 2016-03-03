@@ -17,6 +17,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	public static final String PROP_GRAB_INDEXES = "sqldump.dbspecificfeatures.grabindexes";
 	public static final String PROP_GRAB_EXECUTABLES = "sqldump.dbspecificfeatures.grabexecutables";
 	public static final String PROP_GRAB_VIEWS = "sqldump.dbspecificfeatures.grabviews";
+	public static final String PROP_GRAB_MATERIALIZED_VIEWS = "sqldump.dbspecificfeatures.grabmaterializedviews";
 	public static final String PROP_GRAB_TRIGGERS = "sqldump.dbspecificfeatures.grabtriggers";
 	public static final String PROP_GRAB_SYNONYMS = "sqldump.dbspecificfeatures.grabsynonyms";
 	public static final String PROP_GRAB_SEQUENCES = "sqldump.dbspecificfeatures.grabsequences";
@@ -34,6 +35,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	protected boolean grabSynonyms = true;
 	protected boolean grabTriggers = true;
 	protected boolean grabViews = true;
+	protected boolean grabMaterializedViews = true;
 	protected boolean grabUniqueConstraints = true;
 	protected boolean grabCheckConstraints = true;
 	//XXX: protected boolean grabMaterializedViews = true;
@@ -65,6 +67,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		grabSynonyms = Utils.getPropBool(prop, PROP_GRAB_SYNONYMS, grabSynonyms);
 		grabTriggers = Utils.getPropBool(prop, PROP_GRAB_TRIGGERS, grabTriggers);
 		grabViews = Utils.getPropBool(prop, PROP_GRAB_VIEWS, grabViews);
+		grabMaterializedViews = Utils.getPropBool(prop, PROP_GRAB_MATERIALIZED_VIEWS, grabMaterializedViews);
 		grabUniqueConstraints = grabCheckConstraints = Utils.getPropBool(prop, PROP_GRAB_CONSTRAINTS_XTRA, grabUniqueConstraints);
 	}
 	

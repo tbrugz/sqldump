@@ -113,8 +113,8 @@ public class SchemaDiffer {
 	}	
 	
 	static final DBObjectType[] diffableTypes = {
-		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE, DBObjectType.SYNONYM,
-		DBObjectType.INDEX, DBObjectType.SEQUENCE,
+		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.MATERIALIZED_VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE,
+		DBObjectType.SYNONYM, DBObjectType.INDEX, DBObjectType.SEQUENCE,
 		DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY
 	};
 	
@@ -151,6 +151,11 @@ public class SchemaDiffer {
 		//Views
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.VIEW)) {
 			diffs(DBObjectType.VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews());
+		}
+
+		//Materialized Views
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.MATERIALIZED_VIEW)) {
+			diffs(DBObjectType.MATERIALIZED_VIEW, diff.getDbIdDiffs(), modelOrig.getViews(), modelNew.getViews(), null, null, true);
 		}
 		
 		//Triggers
