@@ -55,6 +55,15 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		}
 		if(!onlyUniqueCols) {
 			if(allCols!=null) {
+				{
+					List<String> commonCols = new ArrayList<String>();
+					commonCols.addAll(uniqueCols);
+					commonCols.retainAll(allCols);
+					if(commonCols.size()>0) {
+						log.warn("uniqueCols & xtraCols have ["+commonCols.size()+"] columns in common: "+commonCols);
+					}
+				}
+				
 				for(String col: allCols) {
 					addMatchProperties(clazz, propertyDescriptors, col, columnNames);
 				}
@@ -62,6 +71,11 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			else {
 				// add all!
 				addMatchProperties(clazz, propertyDescriptors, null, columnNames);
+			}
+		}
+		else {
+			if(allCols!=null) {
+				log.warn("onlyUniqueCols is true but allCols not null: "+allCols);
 			}
 		}
 		log.debug("resultset:cols: "+columnNames);

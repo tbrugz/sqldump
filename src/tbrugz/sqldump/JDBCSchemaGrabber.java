@@ -1080,7 +1080,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return ret;
 	}
 	
-	public static void grabSchemaIndexes(ResultSet indexesrs, Set<Index> indexes) throws SQLException {
+	public static void grabSchemaIndexes(ResultSet indexesrs, Collection<Index> indexes) throws SQLException {
 		Index idx = null;
 		
 		while(indexesrs.next()) {
