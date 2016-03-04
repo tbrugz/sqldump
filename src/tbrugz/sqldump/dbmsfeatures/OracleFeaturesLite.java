@@ -9,6 +9,9 @@ import tbrugz.sqldump.dbmodel.Table;
 
 /**
  * Does not create decorator for DatabaseMetaData - use driver plain methods
+ * 
+ * known limitations:
+ * - oracle's driver getTables() does not seems to distinguish TABLEs from MATERIALIZED VIEWs
  */
 public class OracleFeaturesLite extends OracleFeatures {
 

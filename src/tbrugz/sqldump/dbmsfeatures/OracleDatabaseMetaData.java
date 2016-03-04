@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -21,6 +22,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		super(metadata);
 	}
 
+	/**
+	 * @param types avaiable table types: TABLE, SYNONYM, VIEW, MATERIALIZED VIEW, EXTERNAL TABLE
+	 */
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
 		//REMARKS String => comment describing column (may be null)
@@ -30,55 +34,80 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		
 		//log.info("getTables: types="+Arrays.toString(types));
 		
+		List<String> ltypes = null;
+		if(types!=null) { ltypes = Arrays.asList(types); };
+		boolean firstTypeAdded = false;
+		
 		Connection conn = metadata.getConnection();
 		List<String> params = new ArrayList<String>();
 		
-		String sql = "select tables.* from (\n";
+		StringBuilder sql = new StringBuilder();
+				sql.append("select tables.* from (\n");
 		//tables
-		sql += "select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, comm.comments as REMARKS, " 
+		if(ltypes==null || ltypes.contains("TABLE")) {
+			sql.append("select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, comm.comments as REMARKS, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, PARTITIONED, PARTITIONING_TYPE, "
 				+"at.owner as TABLE_SCHEM_FILTER "
 				+"from all_tables at, all_part_tables apt, all_tab_comments comm "
 				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) and at.owner = comm.owner (+) and at.table_name = comm.TABLE_NAME (+) "
-				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n";
+				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n");
+			firstTypeAdded = true;
+		}
 		//synonyms
-		sql += "union select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
+		if(ltypes==null || ltypes.contains("SYNONYM")) {
+			if(firstTypeAdded) { sql.append("union\n"); } else { firstTypeAdded = true; }
+			sql.append("select '' as TABLE_CAT, allt.owner as TABLE_SCHEM, SYNONYM_NAME as TABLE_NAME, 'SYNONYM' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
 				+"alls.owner as TABLE_SCHEM_FILTER "
 				+"from all_synonyms alls, all_tables allt "
-				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n";
+				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n");
+		}
 		//views
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
+		if(ltypes==null || ltypes.contains("VIEW")) {
+			if(firstTypeAdded) { sql.append("union\n"); } else { firstTypeAdded = true; }
+			sql.append("select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
-				+"from all_views \n";
+				+"from all_views \n");
+		}
 		//materialized views
-		sql += "union select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, allmv.MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, mvcomm.comments as REMARKS, "
+		if(ltypes==null || ltypes.contains("MATERIALIZED VIEW")) {
+			if(firstTypeAdded) { sql.append("union\n"); } else { firstTypeAdded = true; }
+			sql.append("select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, allmv.MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, mvcomm.comments as REMARKS, "
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"allmv.owner as TABLE_SCHEM_FILTER "
-				+"from all_tables allt, all_mviews allmv, all_mview_comments mvcomm where allt.owner = allmv.owner and allt.table_name = allmv.mview_name and allt.owner = mvcomm.owner and allt.table_name = mvcomm.mview_name ";
+				+"from all_tables allt, all_mviews allmv, all_mview_comments mvcomm "
+				+"where allt.owner = allmv.owner and allt.table_name = allmv.mview_name and allt.owner = mvcomm.owner and allt.table_name = mvcomm.mview_name ");
+		}
 		//external tables
-		sql += "union select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKS, "
+		if(ltypes==null || ltypes.contains("EXTERNAL TABLE")) {
+			if(firstTypeAdded) { sql.append("union\n"); } else { firstTypeAdded = true; }
+			sql.append("select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKS, "
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
-				+"from all_external_tables \n";
-		sql += ") tables "
-			+ "where 1=1 ";
+				+"from all_external_tables \n");
+		}
+		if(!firstTypeAdded) {
+			throw new SQLException("not one table type valid: "+ltypes);
+		}
+		sql.append(
+			") tables \n"
+			+ "where 1=1 ");
 			//+ ", all_tab_comments comm \nwhere tables.TABLE_SCHEM = comm.owner (+) and tables.TABLE_NAME = comm.TABLE_NAME (+) ";
 			//+ "\n left outer join all_tab_comments comm on tables.TABLE_SCHEM = comm.owner and tables.TABLE_NAME = comm.TABLE_NAME "
 			//+ "\n left outer join all_mview_comments mvcomm on tables.TABLE_SCHEM = mvcomm.owner and tables.TABLE_NAME = mvcomm.mview_name ";
 		if(schemaPattern!=null) {
-			sql += "and TABLE_SCHEM_FILTER = ? ";
+			sql.append("and TABLE_SCHEM_FILTER = ? ");
 			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
-			sql += "and tables.TABLE_NAME = ? ";
+			sql.append("and tables.TABLE_NAME = ? ");
 			params.add(tableNamePattern);
 		}
-		sql += "order by tables.TABLE_SCHEM, tables.TABLE_NAME";
+		sql.append("order by tables.TABLE_SCHEM, tables.TABLE_NAME");
 		
-		PreparedStatement st = conn.prepareStatement(sql);
+		PreparedStatement st = conn.prepareStatement(sql.toString());
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
