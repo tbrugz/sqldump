@@ -42,7 +42,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class OracleFeatures extends AbstractDBMSFeatures {
-	static Log log = LogFactory.getLog(OracleFeatures.class);
+	private static Log log = LogFactory.getLog(OracleFeatures.class);
 
 	static final DBObjectType[] execTypes = new DBObjectType[]{
 		DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE

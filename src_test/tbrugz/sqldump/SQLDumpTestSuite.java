@@ -24,6 +24,7 @@ import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
 import tbrugz.sqldump.dbmodel.GrantTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
+//import tbrugz.sqldump.dbmsfeatures.oracle.OracleTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
@@ -121,6 +122,9 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//roundtrip
 	SQLRunAndDumpTest.class,
 	//RoundTripTest.class,
+	
+	//DBMSs
+	//OracleTest.class,
 })
 public class SQLDumpTestSuite {
 }

@@ -8,20 +8,28 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.Utils;
 
 /**
  * Does not create decorator for DatabaseMetaData - use driver plain methods
  * 
  * known limitations:
  * - oracle's driver getTables() does not seems to distinguish TABLEs from MATERIALIZED VIEWs: using SimpleDBMD
- *   addresses this problem
+ *   addresses this problem - maybe...
  */
 public class OracleFeaturesLite extends OracleFeatures {
+	private static Log log = LogFactory.getLog(OracleFeaturesLite.class);
+	
+	public static final String PROP_USE_SIMPLE_DBMD = "sqldump.dbms.oraclelite.use-simple-dbmd";
 	
 	/**
 	 * Adds a getTables() method that knows of materialized views
@@ -42,12 +50,13 @@ public class OracleFeaturesLite extends OracleFeatures {
 				String tableNamePattern, String[] types) throws SQLException {
 			List<String> ltypes = null;
 			if(types!=null) { ltypes = Arrays.asList(types); };
-			boolean addMV = ltypes==null || ltypes.contains(MV);
 			
 			StringBuilder sb = new StringBuilder();
 			List<String> params = new ArrayList<String>();
 			
-			sb.append("select * from (select null as table_cat, o.owner as table_schem, o.object_name as table_name, ");
+			boolean addMV = ltypes==null || ltypes.contains(MV);
+			sb.append("select distinct table_cat, table_schem, table_name, table_type, remarks "
+				+"\nfrom (select null as table_cat, o.owner as table_schem, o.object_name as table_name, ");
 			if(addMV) {
 				sb.append("case when mv.owner is not null then 'MATERIALIZED VIEW' else o.object_type end as table_type, ");
 			}
@@ -59,9 +68,16 @@ public class OracleFeaturesLite extends OracleFeatures {
 			if(addMV) {
 				sb.append("left outer join all_mviews mv on o.owner = mv.owner and o.object_name = mv.mview_name ");
 			}
+			//sb.append("\nwhere object_type != 'TABLE' or (o.owner, o.object_name) not in (select owner, mview_name from all_mviews) ");
+			sb.append(") s");
+			
+			/*sb.append("select * from (select null as table_cat, o.owner as table_schem, o.object_name as table_name, "+
+					"o.object_type as table_type, null as remarks "+
+					"\nfrom all_objects o"+
+					"\nwhere object_type != 'TABLE' or (owner, object_name) not in (select owner, mview_name from all_mviews)) s");*/
 			
 			// object_type
-			sb.append(") s\nwhere table_type in (");
+			sb.append("\nwhere table_type in (");
 			boolean added1st = false;
 			if(ltypes==null || ltypes.contains(T)) {
 				sb.append("'").append(T).append("'"); added1st = true;
@@ -93,7 +109,7 @@ public class OracleFeaturesLite extends OracleFeatures {
 			}
 			sb.append("order by table_schem, table_name");
 			
-			log.info("sql:\n"+sb);
+			log.debug("sql:\n"+sb);
 			
 			/*if(!added1st) {
 				throw new SQLException("not one table type valid: "+ltypes);
@@ -107,8 +123,14 @@ public class OracleFeaturesLite extends OracleFeatures {
 			return st.executeQuery();
 		}
 	}
-
-	boolean useSimpleDBMD = true;
+	
+	boolean useSimpleDBMD = false;
+	
+	@Override
+	public void procProperties(Properties prop) {
+		super.procProperties(prop);
+		useSimpleDBMD = Utils.getPropBool(prop, PROP_USE_SIMPLE_DBMD, useSimpleDBMD);
+	}
 	
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {

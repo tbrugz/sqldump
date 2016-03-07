@@ -46,9 +46,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		//tables
 		if(ltypes==null || ltypes.contains("TABLE")) {
 			sql.append("select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, comm.comments as REMARKS, " 
-				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, PARTITIONED, PARTITIONING_TYPE, "
-				+"at.owner as TABLE_SCHEM_FILTER "
-				+"from all_tables at, all_part_tables apt, all_tab_comments comm "
+				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, "
+				+"PARTITIONED, PARTITIONING_TYPE, at.owner as TABLE_SCHEM_FILTER\n"
+				+"from all_tables at, all_part_tables apt, all_tab_comments comm\n"
 				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) and at.owner = comm.owner (+) and at.table_name = comm.TABLE_NAME (+) "
 				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n");
 			firstTypeAdded = true;
@@ -98,11 +98,11 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			//+ "\n left outer join all_tab_comments comm on tables.TABLE_SCHEM = comm.owner and tables.TABLE_NAME = comm.TABLE_NAME "
 			//+ "\n left outer join all_mview_comments mvcomm on tables.TABLE_SCHEM = mvcomm.owner and tables.TABLE_NAME = mvcomm.mview_name ";
 		if(schemaPattern!=null) {
-			sql.append("and TABLE_SCHEM_FILTER = ? ");
+			sql.append("and TABLE_SCHEM_FILTER like ? ");
 			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
-			sql.append("and tables.TABLE_NAME = ? ");
+			sql.append("and tables.TABLE_NAME like ? ");
 			params.add(tableNamePattern);
 		}
 		sql.append("order by tables.TABLE_SCHEM, tables.TABLE_NAME");
