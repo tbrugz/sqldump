@@ -44,7 +44,7 @@ public class ResultSetDiff {
 	}
 
 	@Deprecated
-	public void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
+	private void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
 			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
 		List<DiffSyntax> dss = new ArrayList<DiffSyntax>(); dss.add(ds);
 		diff(source, target, null, tableName, keyCols, dss, null, singleWriter);

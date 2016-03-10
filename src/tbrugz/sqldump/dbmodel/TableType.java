@@ -4,13 +4,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public enum TableType {
-	TABLE, SYNONYM, SYSTEM_TABLE,
+	TABLE, SYNONYM,
+	SYSTEM_TABLE,   //h2
 	VIEW, MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
 	EXTERNAL_TABLE, //oracle
-	BASE_TABLE, //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
-	TYPE, //XXX 'TYPE' table type? - postgresql
-	FOREIGN_TABLE //postgresql
+	BASE_TABLE,     //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
+	TYPE,           //XXX 'TYPE' table type? - postgresql
+	FOREIGN_TABLE   //postgresql
 	;
 	
 	//non-tables: INDEX, SEQUENCE, ...
@@ -23,6 +24,10 @@ public enum TableType {
 	
 	public String getName() {
 		return toString().toLowerCase().replace('_', ' ');
+	}
+
+	public String getNameUpperCase() {
+		return toString().toUpperCase().replace('_', ' ');
 	}
 	
 	public static TableType getTableType(String tableType, String tableName) {
