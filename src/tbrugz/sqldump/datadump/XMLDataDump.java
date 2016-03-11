@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -22,7 +21,7 @@ enum HeaderFooterDump {
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
 //XXX: XMLDataDump to extend AbstractXMLDataDump ? so HTMLDataDump and XMLDataDump would have a common ancestor
-public class XMLDataDump extends DumpSyntax {
+public class XMLDataDump extends AbstractDumpSyntax {
 	
 	static final Log log = LogFactory.getLog(XMLDataDump.class);
 	
@@ -71,14 +70,8 @@ public class XMLDataDump extends DumpSyntax {
 	List<String> colsNot2Escape = null;
 
 	//dumper properties
-	protected String schemaName;
-	protected String tableName;
-	protected int numCol;
 	String rowElement = defaultRowElement;
 	boolean dumpRowElement = defaultDumpRowElement;
-	
-	protected final List<String> lsColNames = new ArrayList<String>();
-	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -100,15 +93,7 @@ public class XMLDataDump extends DumpSyntax {
 
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.schemaName = schema;
-		this.tableName = tableName;
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
-		}
+		super.initDump(schema, tableName, pkCols, md);
 		
 		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -34,12 +33,12 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	static final String ODS_FILEEXT = "ods";
 	static final String PROP_ODS_OUTFILEPATTERN = "sqldump.datadump."+ODS_SYNTAX_ID+".outfilepattern";
 	
-	protected int numCol;
+	/*protected int numCol;
 	protected final List<String> lsColNames = new ArrayList<String>();
-	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();*/
 
 	String outFilePattern;
-	String tableName;
+	//String tableName;
 
 	//stateful props
 	transient SpreadsheetDocument sd;
@@ -71,7 +70,8 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
-		numCol = md.getColumnCount();
+		super.initDump(schema, tableName, pkCols, md);
+		/*numCol = md.getColumnCount();
 		lsColNames.clear();
 		lsColTypes.clear();
 		for(int i=0;i<numCol;i++) {
@@ -80,7 +80,7 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
-		this.tableName = tableName;
+		this.tableName = tableName;*/
 	}
 	
 	static SpreadsheetDocument newSpreadSheet() throws Exception {

@@ -45,7 +45,7 @@ import tbrugz.sqldump.util.Utils;
  * https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.fwf.html
  * https://www.treasury.gov/resource-center/sanctions/SDN-List/Documents/dat_spec.txt
  */
-public class FFCDataDump extends DumpSyntax implements Cloneable {
+public class FFCDataDump extends AbstractDumpSyntax implements Cloneable {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
 	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
@@ -60,9 +60,6 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 	
 	static final String recordDemimiter = "\n";
 	
-	transient int numCol;
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	boolean showColNames = true, showColNamesLines = true,
 			show1stColSeparator = true, mergeBlocksSeparatorLines = true,
 			showTrailerLine = true, showTrailerLineAllBlocks = false;
@@ -89,14 +86,9 @@ public class FFCDataDump extends DumpSyntax implements Cloneable {
 
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
+		super.initDump(schema, tableName, pkCols, md);
 		lastBlockLineSize = 0;
 		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
-			
 			if(Number.class.isAssignableFrom(lsColTypes.get(i))) {
 				leftAlignField.add(false);
 			}

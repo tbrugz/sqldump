@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.IOUtil;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -44,13 +43,8 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	String propOutFilePattern;
 	
 	// variables from query/table
-	String tableName;
-	List<String> pkCols;
 	List<String> columnsToDump;
 	String outFilePattern;
-	
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -70,23 +64,11 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
-		this.tableName = tableName;
-		this.pkCols = pkCols;
-		
-		int numCol = md.getColumnCount();		
-		lsColNames.clear();
-		lsColTypes.clear();
+		super.initDump(schema, tableName, pkCols, md);
 		if(pkCols==null) {
 			//XXX: blob dump really needs PK/UK?
 			log.warn("can't dump: needs unique key [query/table: "+tableName+"]");
 			return;
-		}
-		
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 		
 		columnsToDump = Utils.getStringListFromProp(prop, PREFIX_BLOB_COLUMNS+tableName, ",");

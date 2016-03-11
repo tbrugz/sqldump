@@ -5,7 +5,6 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -40,7 +39,7 @@ import tbrugz.sqldump.util.Utils;
    http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
    http://www.iana.org/assignments/media-types/text/csv-schema
  */
-public class CSVDataDump extends DumpSyntax {
+public class CSVDataDump extends AbstractDumpSyntax {
 	
 	static Log log = LogFactory.getLog(CSVDataDump.class);
 	
@@ -58,10 +57,6 @@ public class CSVDataDump extends DumpSyntax {
 	
 	static final String CSV_SYNTAX_ID = "csv";
 	
-	String tableName;
-	int numCol;
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	ResultSetMetaData md;
 	
 	boolean doTableNameHeaderDump = false;
@@ -83,17 +78,8 @@ public class CSVDataDump extends DumpSyntax {
 	
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.tableName = tableName;
+		super.initDump(schema, tableName, pkCols, md);
 		this.md = md;
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
-		}
 
 		//doTableNameHeaderDump = (Boolean) os[5];
 		//doColumnNamesHeaderDump = (Boolean) os[6];

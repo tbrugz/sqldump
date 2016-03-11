@@ -5,7 +5,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public abstract class WriterIndependentDumpSyntax extends DumpSyntax {
+public abstract class WriterIndependentDumpSyntax extends AbstractDumpSyntax {
 
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {

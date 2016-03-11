@@ -7,7 +7,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -23,7 +22,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class InsertIntoDataDump extends DumpSyntax {
+public class InsertIntoDataDump extends AbstractDumpSyntax {
 
 	private static final Log log = LogFactory.getLog(InsertIntoDataDump.class);
 	
@@ -47,14 +46,8 @@ public class InsertIntoDataDump extends DumpSyntax {
 	static final String DEFAULT_DATEFORMAT = "'DATE' ''yyyy-MM-dd''";
 	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat(DEFAULT_DATEFORMAT);
 
-	protected String tableName;
-	protected String schemaName;
 	protected String fullTableName4Dump;
-	protected int numCol;
 	String colNames;
-	protected final List<String> lsColNames = new ArrayList<String>();
-	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	protected List<String> pkCols = null;
 	
 	boolean doColumnNamesDump = true;
 	boolean doDumpCursors = false;
@@ -90,21 +83,9 @@ public class InsertIntoDataDump extends DumpSyntax {
 
 	@Override
 	public void initDump(String schemaName, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.tableName = tableName;
-		this.schemaName = schemaName;
+		super.initDump(schemaName, tableName, pkCols, md);
 		String tableName4Dump = tableName;
 		String schemaName4Dump = schemaName;
-		this.pkCols = pkCols;
-		numCol = md.getColumnCount();
-		lsColTypes.clear();
-		lsColNames.clear();
-		//List<String> lsColNames = new ArrayList<String>();
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
-		}
 		
 		if(feat==null) {
 			feat = new DefaultDBMSFeatures();

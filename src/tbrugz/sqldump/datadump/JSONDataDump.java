@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: http://dataprotocols.org/json-table-schema/
  */
-public class JSONDataDump extends DumpSyntax {
+public class JSONDataDump extends AbstractDumpSyntax {
 
 	static final Log log = LogFactory.getLog(JSONDataDump.class);
 
@@ -54,15 +54,9 @@ public class JSONDataDump extends DumpSyntax {
 	String metadataElement = DEFAULT_METADATA_ELEMENT;
 	String callback = null;
 	
-	String tableName;
-	int numCol;
-	List<String> lsColNames = new ArrayList<String>();
-	List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	
 	String padding = "";
 	
 	boolean usePK = false; //XXX: option to set prop usePK
-	List<String> pkCols;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -79,19 +73,7 @@ public class JSONDataDump extends DumpSyntax {
 
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.tableName = tableName;
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-		}
-		for(int i=0;i<numCol;i++) {
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
-		}
-		if(usePK) {
-			this.pkCols = pkCols;
-		}
+		super.initDump(schema, tableName, pkCols, md);
 		if(lsColNames.size()!=lsColTypes.size()) {
 			log.warn("diff lsColNames/lsColTypes sizes: "+lsColNames.size()+" ; "+lsColTypes.size());
 		}
@@ -107,7 +89,7 @@ public class JSONDataDump extends DumpSyntax {
 		}
 		
 		if(dtElem!=null) {
-			out("{\n", fos);
+			out("{", fos);
 			//TODOne: add metadata
 			if(addMetadata) {
 				StringBuilder sb = new StringBuilder();
@@ -117,18 +99,18 @@ public class JSONDataDump extends DumpSyntax {
 				sb.append("\n"+padding+"\t\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
 				//sb.append("\n\t\"dataElement\": \""+dataElement+"\"");
 				
-				out("\t\""+metadataElement+"\": "
+				out("\n\t\""+metadataElement+"\": "
 						+"{"
 						+sb.toString()
 						+"\n"+padding+"\t},"
 						, fos);
 			}
 			outNoPadding("\n"+padding+"\t\""+dtElem+"\": "
-				+(this.pkCols!=null?"{":"[")
+				+(usePK?"{":"[")
 				+"\n", fos);
 		}
 		else {
-			outNoPadding((this.pkCols!=null?"{":"[")
+			outNoPadding((usePK?"{":"[")
 				+"\n", fos);
 		}
 	}
@@ -137,7 +119,7 @@ public class JSONDataDump extends DumpSyntax {
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t"+(count==0?"":","));
-		if(this.pkCols!=null) {
+		if(usePK) {
 			sb.append("\"");
 			for(int i=0;i<pkCols.size();i++) {
 				if(i>0) { sb.append("_"); }
@@ -192,10 +174,10 @@ public class JSONDataDump extends DumpSyntax {
 		String dtElem = dataElement!=null?dataElement:tableName;
 		
 		if(dtElem!=null) {
-			out((usePK?"}":"\t]")+"\n"+padding+"}",fos);
+			out((usePK?"\t}":"\t]")+"\n"+padding+"}",fos);
 		}
 		else {
-			out((usePK?"}":"\t]"),fos);
+			out((usePK?"\t}":"\t]"),fos);
 		}
 		
 		if(callback!=null) {
