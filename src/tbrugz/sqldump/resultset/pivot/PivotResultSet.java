@@ -138,7 +138,7 @@ public class PivotResultSet extends AbstractResultSet {
 		colsToPivotNotFound.addAll(colsToPivotNames);
 		colsNotToPivotNotFound.addAll(colsNotToPivot);
 		for(int i=1;i<=rsColsCount;i++) {
-			String colName = rsmd.getColumnName(i);
+			String colName = rsmd.getColumnLabel(i);
 			rsColNames.add(colName);
 
 			int index = colsNotToPivot.indexOf(colName);

@@ -328,7 +328,7 @@ public class DataDumpUtils {
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
+			lsColNames.add(md.getColumnLabel(i+1));
 		}
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
@@ -358,7 +358,7 @@ public class DataDumpUtils {
 		int numCol = md.getColumnCount();
 		List<String> names = new ArrayList<String>();
 		for(int i=0;i<numCol;i++) {
-			names.add(md.getColumnName(i+1));
+			names.add(md.getColumnLabel(i+1));
 		}
 		return names;
 	}
@@ -378,7 +378,7 @@ public class DataDumpUtils {
 		for(int i=0;i<numCol;i++) {
 			int colpos = i+1;
 			Column c = new Column();
-			c.setName(md.getColumnName(colpos));
+			c.setName(md.getColumnLabel(colpos));
 			c.setType(md.getColumnTypeName(colpos));
 			int precision = md.getPrecision(colpos);
 			int scale = md.getScale(colpos);

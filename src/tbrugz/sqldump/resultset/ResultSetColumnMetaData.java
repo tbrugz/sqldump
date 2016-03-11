@@ -20,7 +20,7 @@ public class ResultSetColumnMetaData {
 			this.numCol = md.getColumnCount();
 			
 			for(int i=0;i<numCol;i++) {
-				colNames.add(md.getColumnName(i+1));
+				colNames.add(md.getColumnLabel(i+1));
 			}
 			for(int i=0;i<numCol;i++) {
 				colTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));

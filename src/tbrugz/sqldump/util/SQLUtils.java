@@ -357,7 +357,7 @@ public class SQLUtils {
 		List<String> lsColNames = new ArrayList<String>();
 		//List<Class> lsColTypes = new ArrayList<Class>();
 		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
+			lsColNames.add(md.getColumnLabel(i+1));
 		}
 		//for(int i=0;i<numCol;i++) {
 		//	lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1)));

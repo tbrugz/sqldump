@@ -43,12 +43,12 @@ public class ResultSetDiff {
 		diff(source, target, schemaName, tableName, keyCols, dss, coutPattern, null);
 	}
 
-	@Deprecated
+	/*@Deprecated
 	private void diff(ResultSet source, ResultSet target, String tableName, List<String> keyCols,
 			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
 		List<DiffSyntax> dss = new ArrayList<DiffSyntax>(); dss.add(ds);
 		diff(source, target, null, tableName, keyCols, dss, null, singleWriter);
-	}
+	}*/
 	
 	public void diff(ResultSet source, ResultSet target, String schemaName, String tableName, List<String> keyCols,
 			DiffSyntax ds, Writer singleWriter) throws SQLException, IOException {
@@ -73,7 +73,7 @@ public class ResultSetDiff {
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
+			lsColNames.add(md.getColumnLabel(i+1));
 		}
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
