@@ -31,6 +31,7 @@ import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.StringSpliter;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
+import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -50,6 +51,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	boolean useBatchUpdate = false;
 	boolean usePreparedStatement = true;
 	boolean escapeBackslashedApos = false;
+	boolean replacePropsOnFileContents = true; //XXX: add prop for 'replacePropsOnFileContents'
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
@@ -159,6 +161,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 			
 			try {
 				//log.debug("stmt: "+stmtStr);
+				if(replacePropsOnFileContents) {
+					//replacing ${...} parameters
+					stmtStr = ParametrizedProperties.replaceProps(stmtStr, papp);
+				}
 				urowsTotal += execStatementInternal(stmtStr);
 				countOk++;
 			}
