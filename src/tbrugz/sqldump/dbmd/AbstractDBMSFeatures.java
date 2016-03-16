@@ -29,6 +29,8 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	public static final String PROP_DUMP_TABLE_LOGGING = "sqldump.dbspecificfeatures.dumplogging";
 	public static final String PROP_DUMP_TABLE_PARTITION = "sqldump.dbspecificfeatures.dumppartition";
 	
+	public static final String PREFIX_DBMS = "sqldump.dbms";
+	
 	protected boolean grabExecutables = true;
 	protected boolean grabIndexes = true;
 	protected boolean grabSequences = true;

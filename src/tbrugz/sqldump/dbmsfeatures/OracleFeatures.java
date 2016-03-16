@@ -44,13 +44,16 @@ import tbrugz.sqldump.util.Utils;
 public class OracleFeatures extends AbstractDBMSFeatures {
 	private static Log log = LogFactory.getLog(OracleFeatures.class);
 
+	public static final String PROP_USE_DBA_TRIGGERS = PREFIX_DBMS+".oracle.trigger.use-dba-triggers";
+	
 	static final DBObjectType[] execTypes = new DBObjectType[]{
 		DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
 		//, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
 	};
 	
-	boolean dumpSequenceStartWith = true;
+	//boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
+	boolean useDbaTriggers = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -61,6 +64,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		OracleTable.dumpPhysicalAttributes = Utils.getPropBool(prop, PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES, OracleTable.dumpPhysicalAttributes);
 		OracleTable.dumpLoggingClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_LOGGING, OracleTable.dumpLoggingClause);
 		OracleTable.dumpPartitionClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_PARTITION, OracleTable.dumpPartitionClause);
+		useDbaTriggers = Utils.getPropBool(prop, PROP_USE_DBA_TRIGGERS, useDbaTriggers);
 	}
 	
 	/* (non-Javadoc)
@@ -184,7 +188,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		return "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
-				+"FROM ALL_TRIGGERS "
+				+"FROM "+(useDbaTriggers?"DBA_TRIGGERS ":"ALL_TRIGGERS ")
 				+"where owner = '"+schemaPattern+"' "
 				+(tableNamePattern!=null?" and table_name = '"+tableNamePattern+"' ":"")
 				+(triggerNamePattern!=null?" and trigger_name = '"+triggerNamePattern+"' ":"")

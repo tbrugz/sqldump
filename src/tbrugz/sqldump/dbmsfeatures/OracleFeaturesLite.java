@@ -29,7 +29,7 @@ import tbrugz.sqldump.util.Utils;
 public class OracleFeaturesLite extends OracleFeatures {
 	private static Log log = LogFactory.getLog(OracleFeaturesLite.class);
 	
-	public static final String PROP_USE_SIMPLE_DBMD = "sqldump.dbms.oraclelite.use-simple-dbmd";
+	public static final String PROP_USE_SIMPLE_DBMD = PREFIX_DBMS+".oraclelite.use-simple-dbmd";
 	
 	/**
 	 * Adds a getTables() method that knows of materialized views
