@@ -44,6 +44,15 @@ import tbrugz.sqldump.util.Utils;
 public class OracleFeatures extends AbstractDBMSFeatures {
 	private static Log log = LogFactory.getLog(OracleFeatures.class);
 
+	public static final String PROP_USE_DBA_METAOBJECTS = PREFIX_DBMS+".oracle.use-dba-metaobjects";
+	/*
+	 * https://docs.oracle.com/cd/B28359_01/server.111/b28320/statviews_2108.htm
+	 * 
+	 * ALL_TRIGGERS describes the triggers on tables accessible to the current user. If the user has 
+	 * the CREATE ANY TRIGGER privilege, then this view describes all triggers in the database.
+	 * 
+	 * DBA_TRIGGERS describes all triggers in the database.
+	 */
 	public static final String PROP_USE_DBA_TRIGGERS = PREFIX_DBMS+".oracle.trigger.use-dba-triggers";
 	
 	static final DBObjectType[] execTypes = new DBObjectType[]{
@@ -53,7 +62,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	//boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
-	boolean useDbaTriggers = true;
+	static boolean useDbaMetadataObjects = true;
+	boolean useDbaTriggers = useDbaMetadataObjects;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -64,6 +74,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		OracleTable.dumpPhysicalAttributes = Utils.getPropBool(prop, PROP_DUMP_TABLE_PHYSICAL_ATTRIBUTES, OracleTable.dumpPhysicalAttributes);
 		OracleTable.dumpLoggingClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_LOGGING, OracleTable.dumpLoggingClause);
 		OracleTable.dumpPartitionClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_PARTITION, OracleTable.dumpPartitionClause);
+		useDbaMetadataObjects = Utils.getPropBool(prop, PROP_USE_DBA_METAOBJECTS, useDbaMetadataObjects);
 		useDbaTriggers = Utils.getPropBool(prop, PROP_USE_DBA_TRIGGERS, useDbaTriggers);
 	}
 	
@@ -102,7 +113,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT FROM ALL_VIEWS "
+		return "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT"
+				+" FROM "+(useDbaMetadataObjects?"DBA_VIEWS ":"ALL_VIEWS ")
 				+" where owner = '"+schemaPattern+"'"
 				+(viewNamePattern!=null?" and view_name = '"+viewNamePattern+"'":"")
 				+ " ORDER BY VIEW_NAME";
@@ -149,7 +161,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	String grabDBMaterializedViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query, "
 				+" rewrite_enabled, rewrite_capability, refresh_mode, refresh_method, build_mode, fast_refreshable "
-				+" from all_mviews "
+				+" from "+(useDbaMetadataObjects?"dba_mviews ":"all_mviews ")
 				+" where owner = '"+schemaPattern+"' "
 				+(viewNamePattern!=null?" and mview_name = '"+viewNamePattern+"' ":"")
 				+"ORDER BY MVIEW_NAME";
@@ -230,7 +242,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
-		return "select name, type, line, text from all_source "
+		return "select name, type, line, text "
+				+"from all_source " // (useDbaMetadataObjects?"dba_source ":"all_source ")
 				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 				+"and owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
@@ -459,7 +472,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}*/
 	
 	String grabDBSynonymsQuery(String schemaPattern, String synonymNamePattern) {
-		return "select synonym_name, table_owner, table_name, db_link from all_synonyms "
+		return "select synonym_name, table_owner, table_name, db_link "
+				+"from "+(useDbaMetadataObjects?"dba_synonyms ":"all_synonyms ")
 				+"where owner = '"+schemaPattern+"'"
 				+(synonymNamePattern!=null?" and synonym_name = '"+synonymNamePattern+"'":"");
 	}
@@ -612,7 +626,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 
 	String grabDBSequencesQuery(String schemaPattern, String sequenceNamePattern) {
-		return "select sequence_name, min_value, increment_by, last_number from all_sequences "
+		return "select sequence_name, min_value, increment_by, last_number "
+				+"from "+(useDbaMetadataObjects?"dba_sequences ":"all_sequences ")
 				+"where sequence_owner = '"+schemaPattern+"' "
 				+(sequenceNamePattern!=null?" and sequence_name = '"+sequenceNamePattern+"'":"")
 				+"order by sequence_name";
@@ -727,7 +742,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		
 		//check constraints
 		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
-				+"from all_constraints "
+				+"from "+(useDbaMetadataObjects?"dba_constraints ":"all_constraints ")
 				+"where owner = '"+schemaPattern+"' "
 				+(constraintNamePattern!=null?"and constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'C' "
@@ -777,7 +792,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 		//unique constraints
 		String query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
-				+"from all_constraints al, all_cons_columns acc "
+				+"from "+(useDbaMetadataObjects?"dba_constraints al, dba_cons_columns acc ":"all_constraints al, all_cons_columns acc ")
 				+"where al.constraint_name = acc.constraint_name "
 				+"and al.owner = '"+schemaPattern+"' "
 				+(constraintNamePattern!=null?"and al.constraint_name = '"+constraintNamePattern+"' ":"")

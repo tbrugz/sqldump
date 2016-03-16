@@ -17,6 +17,8 @@ import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	
 	static Log log = LogFactory.getLog(OracleDatabaseMetaData.class);
+
+	boolean useDbaMetadataObjects = OracleFeatures.useDbaMetadataObjects;
 	
 	public OracleDatabaseMetaData(DatabaseMetaData metadata) {
 		super(metadata);
@@ -48,7 +50,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			sql.append("select '' as TABLE_CAT, at.owner as TABLE_SCHEM, at.TABLE_NAME, 'TABLE' as TABLE_TYPE, comm.comments as REMARKS, " 
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, "
 				+"PARTITIONED, PARTITIONING_TYPE, at.owner as TABLE_SCHEM_FILTER\n"
-				+"from all_tables at, all_part_tables apt, all_tab_comments comm\n"
+				+(useDbaMetadataObjects?
+					"from dba_tables at, dba_part_tables apt, dba_tab_comments comm\n":
+					"from all_tables at, all_part_tables apt, all_tab_comments comm\n"
+				)
 				+"where at.owner = apt.owner (+) and at.table_name = apt.table_name (+) and at.owner = comm.owner (+) and at.table_name = comm.TABLE_NAME (+) "
 				+"and (at.owner, at.table_name) not in (select owner, mview_name from all_mviews union select owner, table_name from all_external_tables) \n");
 			firstTypeAdded = true;
@@ -60,7 +65,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				//+"-- ,alls.owner as synonym_owner, allt.owner as table_owner \n" 
 				+"alls.owner as TABLE_SCHEM_FILTER "
-				+"from all_synonyms alls, all_tables allt "
+				+(useDbaMetadataObjects?
+						"from dba_synonyms alls, dba_tables allt ":
+						"from all_synonyms alls, all_tables allt "
+					)
 				+"where alls.table_owner = allt.owner and alls.table_name = allt.table_name \n");
 		}
 		//views
@@ -69,7 +77,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			sql.append("select '' as TABLE_CAT, owner as TABLE_SCHEM, VIEW_NAME as TABLE_NAME, 'VIEW' as TABLE_TYPE, null as REMARKS, " 
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
-				+"from all_views \n");
+				+"from "
+				+(useDbaMetadataObjects?"dba_views \n":"all_views \n")
+				);
 		}
 		//materialized views
 		if(ltypes==null || ltypes.contains("MATERIALIZED VIEW")) {
@@ -77,7 +87,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			sql.append("select '' as TABLE_CAT, allmv.owner as TABLE_SCHEM, allmv.MVIEW_NAME as TABLE_NAME, 'MATERIALIZED VIEW' as TABLE_TYPE, mvcomm.comments as REMARKS, "
 				+"TABLESPACE_NAME, decode(TEMPORARY,'N','NO','Y','YES',null) as TEMPORARY, LOGGING, NUM_ROWS, BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"allmv.owner as TABLE_SCHEM_FILTER "
-				+"from all_tables allt, all_mviews allmv, all_mview_comments mvcomm "
+				+(useDbaMetadataObjects?
+					"from dba_tables allt, dba_mviews allmv, dba_mview_comments mvcomm ":
+					"from all_tables allt, all_mviews allmv, all_mview_comments mvcomm "
+				)
 				+"where allt.owner = allmv.owner and allt.table_name = allmv.mview_name and allt.owner = mvcomm.owner and allt.table_name = mvcomm.mview_name ");
 		}
 		//external tables
@@ -86,7 +99,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			sql.append("select '' as TABLE_CAT, owner as TABLE_SCHEM, TABLE_NAME, 'EXTERNAL TABLE' as TABLE_TYPE, null as REMARKS, "
 				+"null as TABLESPACE_NAME, null as TEMPORARY, null as LOGGING, null as NUM_ROWS, null as BLOCKS, null as PARTITIONED, null as PARTITIONING_TYPE, "
 				+"owner as TABLE_SCHEM_FILTER "
-				+"from all_external_tables \n");
+				+"from "
+				+(useDbaMetadataObjects?"dba_external_tables \n":"all_external_tables \n")
+				);
 		}
 		if(!firstTypeAdded) {
 			throw new SQLException("not one table type valid: "+ltypes);
@@ -126,7 +141,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		sql += "select '' as TABLE_CAT, col.owner as TABLE_SCHEM, col.TABLE_NAME, col.COLUMN_NAME, data_type as TYPE_NAME, "
 				+"nvl(data_precision, data_length) as COLUMN_SIZE, data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, "
 				+"COLUMN_ID as ORDINAL_POSITION, comments as REMARKS, DATA_DEFAULT "
-				+"from all_tab_columns col, all_col_comments com "
+				+"from "+(useDbaMetadataObjects?"dba_tab_columns col, dba_col_comments com ":"all_tab_columns col, all_col_comments com ")
 				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
 				+") ";
 		if(schemaPattern!=null) {
@@ -195,8 +210,9 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY, \n"
 				+"       acuk.constraint_type as UK_CONSTRAINT_TYPE, " //returns type of unique key: P - primary, U - unique
 				+"       acfk.status, acfk.validated, acfk.rely "
-				+"from all_constraints acfk, all_cons_columns accfk, \n"
-				+" all_constraints acuk, all_cons_columns accuk \n"
+				+"from "
+				+(useDbaMetadataObjects?"dba_constraints acfk, dba_cons_columns accfk, dba_constraints acuk, dba_cons_columns accuk \n":
+					"all_constraints acfk, all_cons_columns accfk, all_constraints acuk, all_cons_columns accuk \n")
 				+"where acfk.owner = accfk.owner and acfk.constraint_name = accfk.constraint_name and acfk.constraint_type = 'R' \n"
 				+"  and acuk.owner = accuk.owner and acuk.constraint_name = accuk.constraint_name and acuk.constraint_type in ('P','U') \n"
 				+"  and acfk.r_owner = acuk.owner and acfk.r_constraint_name = acuk.constraint_name \n"
