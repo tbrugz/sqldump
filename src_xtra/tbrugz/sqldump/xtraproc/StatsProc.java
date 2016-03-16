@@ -92,10 +92,12 @@ public class StatsProc extends AbstractSQLProc {
 		Map<String,Integer> map = new HashMap<String,Integer>();
 
 		CategorizedOut cout = new CategorizedOut(cbtFileOutput);
+		String sql = null;
 		
 		try {
 			for(Table table: model.getTables()) {
-				ResultSet rs = conn.createStatement().executeQuery("select count(*) from "+table.getFinalQualifiedName());
+				sql = "select count(*) from "+table.getFinalQualifiedName();
+				ResultSet rs = conn.createStatement().executeQuery(sql);
 				rs.next();
 				int count = rs.getInt(1);
 				map.put(table.getName(), count);
@@ -103,7 +105,7 @@ public class StatsProc extends AbstractSQLProc {
 			}
 		}
 		catch(SQLException e) {
-			log.warn("error counting rows", e);
+			log.warn("doCountsByTable: error counting rows [sql="+sql+"]", e);
 			if(failonerror) {
 				throw new ProcessingException(e);
 			}
@@ -196,7 +198,7 @@ public class StatsProc extends AbstractSQLProc {
 			
 		}
 		catch(SQLException e) {
-			log.warn("error counting rows", e);
+			log.warn("doStatsByColumn: error counting rows", e);
 			if(failonerror) {
 				throw new ProcessingException(e);
 			}
