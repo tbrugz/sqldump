@@ -243,4 +243,30 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		return st.executeQuery();
 	}
 	
+	@Override
+	public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
+		Connection conn = metadata.getConnection();
+		
+		String sql = "select null as table_cat, " +
+				"  acc.owner as table_schem, " +
+				"  acc.table_name, " +
+				"  acc.column_name, " +
+				"  acc.position as key_seq, " +
+				"  acc.constraint_name as pk_name " +
+				"\nfrom " +
+				(useDbaMetadataObjects?"dba_constraints ac, dba_cons_columns acc ":"all_constraints ac, all_cons_columns acc ") +
+				"\nwhere ac.constraint_name = acc.constraint_name " +
+				"  and ac.table_name = acc.table_name " +
+				"  and ac.owner = acc.owner " +
+				"  and ac.constraint_type = 'P' " +
+				"  and ac.owner = ? " +
+				"  and ac.table_name = ? " +
+				"\norder by acc.position ";
+		
+		log.debug("sql:\n"+sql);
+		PreparedStatement st = conn.prepareStatement(sql);
+		st.setString(1, schema);
+		st.setString(2, table);
+		return st.executeQuery();
+	}
 }

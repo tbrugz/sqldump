@@ -800,7 +800,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"order by owner, table_name, constraint_name, position, column_name ";
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery(query);  
 		
 		int colCount = 0;
 		int countNotAdded = 0;
