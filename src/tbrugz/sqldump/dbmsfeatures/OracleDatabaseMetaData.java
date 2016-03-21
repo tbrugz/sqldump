@@ -269,4 +269,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		st.setString(2, table);
 		return st.executeQuery();
 	}
+	
+	/*
+	 * XXX add methods used by JDBCSchemaGrabber: (?)
+	 * getProcedures
+	 * getProcedureColumns
+	 * getFunctions
+	 * getFunctionColumns
+	 * getTablePrivileges
+	 * getColumnPrivileges
+	 */
 }

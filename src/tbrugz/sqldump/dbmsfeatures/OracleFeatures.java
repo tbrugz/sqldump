@@ -243,7 +243,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
 		return "select name, type, line, text "
-				+"from all_source " // (useDbaMetadataObjects?"dba_source ":"all_source ")
+				+"from all_source " //XXX (useDbaMetadataObjects?"dba_source ":"all_source ")
 				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 				+"and owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
@@ -331,10 +331,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
-				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
+				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end "
+				+"        from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, " // useDbaMetadataObjects?
 				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
-				+"  from all_procedures p "
-				+"  left outer join all_arguments aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
+				+"  from all_procedures p " //XXX (useDbaMetadataObjects?"dba_procedures ":"all_procedures ")
+				+"  left outer join all_arguments aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "//dba_arguments, all_arguments
 				+" where p.owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and p.object_name = '"+execNamePattern+"' ":"")
 				//+"   and p.object_type = 'PACKAGE' "
@@ -435,6 +436,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	void grabExecutablePrivileges(ExecutableObject executable, String schemaPattern, Connection conn) throws SQLException {
+		// XXX useDbaMetadataObjects? dba_tab_privs, all_tab_privs
 		String sql = "SELECT grantee, grantable FROM all_tab_privs WHERE table_schema = ? AND table_name = ? AND privilege = 'EXECUTE'";
 		log.debug("sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
@@ -510,8 +512,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	String grabDBIndexesQuery(String schemaPattern) {
 		return "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uic.column_position, uip.partitioning_type, uip.locality, uie.column_expression "
-				+"from all_indexes ui, all_ind_columns uic, all_part_indexes uip, all_ind_expressions uie "
-				+"where UI.INDEX_NAME = UIC.INDEX_NAME "
+				+"\nfrom "
+				+(useDbaMetadataObjects?
+						"dba_indexes ui, dba_ind_columns uic, dba_part_indexes uip, dba_ind_expressions uie ":
+						"all_indexes ui, all_ind_columns uic, all_part_indexes uip, all_ind_expressions uie ")
+				+"\nwhere UI.INDEX_NAME = UIC.INDEX_NAME "
 				+"and ui.table_name = uic.table_name "
 				+"and ui.table_owner = uic.table_owner "
 				+"and ui.index_name = uip.index_name (+) "
@@ -844,7 +849,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void getPartitionColumns(OracleTable ot, Connection conn) throws SQLException {
 		String query = "select column_name, column_position "
-				+"from all_part_key_columns "
+				+"from "+(useDbaMetadataObjects?"dba_part_key_columns ":"all_part_key_columns ")
 				+"where object_type = 'TABLE' "
 				+"and owner = '"+ot.getSchemaName()+"' "
 				+"and name = '"+ot.getName()+"' "
@@ -864,7 +869,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void getPartitions(OracleTable ot, Connection conn) throws SQLException {
 		String query = "select table_owner, table_name, partition_name, partition_position, tablespace_name, high_value, high_value_length "
-				+"from all_tab_partitions "
+				+"from "+(useDbaMetadataObjects?"dba_tab_partitions ":"all_tab_partitions ")
 				+"where table_owner = '"+ot.getSchemaName()+"' "
 				+"and table_name = '"+ot.getName()+"' "
 				+"order by table_name, partition_position ";
