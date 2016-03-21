@@ -42,6 +42,10 @@ public class RenameDetector {
 	
 	static final Log log = LogFactory.getLog(RenameDetector.class);
 	
+	public static final DBObjectType[] RENAME_TYPES = {
+		DBObjectType.TABLE, DBObjectType.COLUMN, DBObjectType.INDEX, DBObjectType.CONSTRAINT
+	};
+	
 	static List<RenameTuple> detectTableRenames(Collection<TableDiff> tableDiffs, double minSimilarity) {
 		List<TableDiff> ltadd = getDiffsOfType(tableDiffs, ChangeType.ADD);
 		List<TableDiff> ltdrop = getDiffsOfType(tableDiffs, ChangeType.DROP);

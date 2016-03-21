@@ -15,7 +15,6 @@ import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -374,7 +373,7 @@ public class Utils {
 		List<String> sl = getStringList(strings, delimiter);
 		List<String> sret = new ArrayList<String>();
 		if(sl==null) return null;
-		Arrays.sort(allowedValues);
+		//Arrays.sort(allowedValues);
 		
 		for(String s: sl) {
 			boolean added = false;

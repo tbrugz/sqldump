@@ -100,6 +100,8 @@ public class SQLDiff implements Executor {
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
 	
+	public static final boolean DEFAULT_DO_RENAME_DETECTION = false; //XXX: should be true?
+	
 	//props from SchemaModelScriptDumper
 	@Deprecated static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
 	@Deprecated static final String FILENAME_PATTERN_OBJECTTYPE = "${objecttype}";
@@ -413,13 +415,12 @@ public class SQLDiff implements Executor {
 		//detect renames
 		//XXX: add DiffProcessor?
 		//XXX: add prop 'sqldiff.renamedetection.types'?
-		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, false); //XXX: should be true?
+		boolean doRenameDetection = Utils.getPropBool(prop, PROP_DO_RENAMEDETECTION, DEFAULT_DO_RENAME_DETECTION);
 		
 		if(doRenameDetection) {
 			double minSimilarity = Utils.getPropDouble(prop, PROP_RENAMEDETECT_MINSIMILARITY, RENAMEDETECT_MINSIMILARITY_DEFAULT);
 			int renames = 0;
-			String[] allowedTypes = { DBObjectType.TABLE.toString(), DBObjectType.COLUMN.toString(), DBObjectType.INDEX.toString(), DBObjectType.CONSTRAINT.toString() };
-			List<String> renameTypes = Utils.getStringListFromProp(prop, PROP_RENAMEDETECT_TYPES, ",", allowedTypes); // DBObjectType.values() ?
+			List<String> renameTypes = Utils.getStringListFromProp(prop, PROP_RENAMEDETECT_TYPES, ",", RenameDetector.RENAME_TYPES); // DBObjectType.values() ?
 			
 			if(renameTypes!=null) {
 				log.info("types to detect renames: "+renameTypes);
