@@ -210,7 +210,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"       acfk.constraint_name as FK_NAME, acfk.r_constraint_name as PK_NAME, '' as DEFERRABILITY, \n"
 				+"       acuk.constraint_type as UK_CONSTRAINT_TYPE, " //returns type of unique key: P - primary, U - unique
 				+"       acfk.status, acfk.validated, acfk.rely "
-				+"from "
+				+"\nfrom "
 				+(useDbaMetadataObjects?"dba_constraints acfk, dba_cons_columns accfk, dba_constraints acuk, dba_cons_columns accuk \n":
 					"all_constraints acfk, all_cons_columns accfk, all_constraints acuk, all_cons_columns accuk \n")
 				+"where acfk.owner = accfk.owner and acfk.constraint_name = accfk.constraint_name and acfk.constraint_type = 'R' \n"
@@ -276,7 +276,76 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	 * getProcedureColumns
 	 * getFunctions
 	 * getFunctionColumns
-	 * getTablePrivileges
-	 * getColumnPrivileges
 	 */
+	
+	/*
+	 * TABLE_CAT String => table catalog (may be null)
+	 * TABLE_SCHEM String => table schema (may be null)
+	 * TABLE_NAME String => table name
+	 * GRANTOR String => grantor of access (may be null)
+	 * GRANTEE String => grantee of access
+	 * PRIVILEGE String => name of access (SELECT, INSERT, UPDATE, REFRENCES, ...)
+	 * IS_GRANTABLE String => "YES" if grantee is permitted to grant to others; "NO" if not; null if unknown
+	 */
+	@Override
+	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+		List<String> params = new ArrayList<String>();
+		
+		String sql = "select null as table_cat, owner as table_schem, table_name, grantor, grantee, privilege, grantable as is_grantable "+
+				"\nfrom "+(useDbaMetadataObjects?"dba_tab_privs ":"all_tab_privs ")+
+				"\nwhere 1=1";
+		if(schemaPattern!=null) {
+			sql += " and owner like ?";
+			params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+			sql += " and table_name like ?";
+			params.add(schemaPattern);
+		}
+		Connection conn = metadata.getConnection();
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
+		log.debug("sql[getTablePrivileges]:\n"+sql);
+		return st.executeQuery();
+	}
+	
+	/*
+	 * TABLE_CAT String => table catalog (may be null)
+	 * TABLE_SCHEM String => table schema (may be null)
+	 * TABLE_NAME String => table name
+	 * COLUMN_NAME String => column name 
+	 * GRANTOR String => grantor of access (may be null)
+	 * GRANTEE String => grantee of access
+	 * PRIVILEGE String => name of access (SELECT, INSERT, UPDATE, REFRENCES, ...)
+	 * IS_GRANTABLE String => "YES" if grantee is permitted to grant to others; "NO" if not; null if unknown
+	 */
+	@Override
+	public ResultSet getColumnPrivileges(String catalog, String schema, String tableName, String columnNamePattern) throws SQLException {
+		List<String> params = new ArrayList<String>();
+		
+		String sql = "select null as table_cat, owner as table_schem, table_name, column_name, grantor, grantee, privilege, grantable as is_grantable "+
+				"\nfrom "+(useDbaMetadataObjects?"dba_col_privs ":"all_col_privs ")+
+				"\nwhere 1=1";
+		if(schema!=null) {
+			sql += " and owner = ?";
+			params.add(schema);
+		}
+		sql += " and table_name = ?";
+		params.add(tableName);
+		if(columnNamePattern!=null) {
+			sql += " and column_name like ?";
+			params.add(columnNamePattern);
+		}
+		
+		Connection conn = metadata.getConnection();
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
+		log.debug("sql[getColumnPrivileges]:\n"+sql);
+		return st.executeQuery();
+	}
+	
 }
