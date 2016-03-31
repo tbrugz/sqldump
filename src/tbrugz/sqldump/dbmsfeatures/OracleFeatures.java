@@ -13,7 +13,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -267,6 +270,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		int countExecutables = 0;
 		ExecutableObject eo = null;
 		StringBuilder sb = null;
+		Map<DBObjectType, Integer> countMap = new TreeMap<DBObjectType, Integer>();
 		
 		while(rs.next()) {
 			int line = rs.getInt(3);
@@ -295,6 +299,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					//XXX: optimize it: make one query instead of many
 					grabExecutablePrivileges(eo, schemaPattern, conn);
 				}
+				
+				Integer count = countMap.get(eo.getType());
+				if(count==null) { count = 1; }
+				else { count++; }
+				countMap.put(eo.getType(), count);
 			}
 			sb.append(rs.getString(4)); //+"\n"
 			linecount++;
@@ -307,7 +316,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		rs.close();
 		st.close();
 		
-		log.info("["+schemaPattern+(execNamePattern!=null?"."+execNamePattern:"")+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"]");
+		StringBuilder buf = new StringBuilder();
+		for(Entry<DBObjectType, Integer> e: countMap.entrySet()) {
+			buf.append("#"+e.getKey()+"="+e.getValue()+";");
+		}
+		log.info("["+schemaPattern+(execNamePattern!=null?"."+execNamePattern:"")+"]: "+countExecutables+" executable objects grabbed [linecount="+linecount+"] ["+buf+"]");
 		
 		//grabs metadata
 		grabDBExecutablesMetadata(execs, schemaPattern, execNamePattern, conn);

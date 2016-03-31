@@ -370,6 +370,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(doSchemaGrabIndexes) {
 			log.info(getIdDesc()+schemaModel.getIndexes().size()+" indexes grabbed");
 		}
+		//XXX show #grants grabbed?
 		
 		if(doSchemaGrabProceduresAndFunctions) {
 			int countproc = 0, countfunc = 0;
@@ -459,6 +460,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					view.setRemarks(t.getRemarks());
 				}
 			}
+			dbSpecificLogs(schemaModel);
 		}
 		
 		if(doGrabMetadata) {
@@ -518,6 +520,42 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 		return sb.toString();
+	}
+	
+	void dbSpecificLogs(SchemaModel schemaModel) {
+		if(!doSchemaGrabIndexes && schemaModel.getIndexes().size()>0) { //XXX: really?
+			log.info(getIdDesc()+schemaModel.getIndexes().size()+" indexes grabbed");
+		}
+		if(schemaModel.getViews().size()>0) {
+			log.info(getIdDesc()+schemaModel.getViews().size()+" views grabbed");
+		}
+		if(schemaModel.getExecutables().size()>0) {
+			Map<String, Integer> countMap = new TreeMap<String, Integer>();
+			List<String> l = new ArrayList<String>();
+			for(ExecutableObject eo: schemaModel.getExecutables()) {
+				String type = eo.getType().toString();
+				if(!eo.isDumpable()) { type += "(no-body)"; }
+				
+				Integer count = countMap.get(type);
+				if(count==null) { count = 1; }
+				else { count++; }
+				countMap.put(type, count);
+			}
+			for(Entry<String, Integer> e: countMap.entrySet()) {
+				l.add("#"+e.getKey()+"="+e.getValue());
+			}
+			
+			log.info(getIdDesc()+schemaModel.getExecutables().size()+" executables grabbed ["+Utils.join(l, ", ")+"]");
+		}
+		if(schemaModel.getTriggers().size()>0) {
+			log.info(getIdDesc()+schemaModel.getTriggers().size()+" triggers grabbed");
+		}
+		if(schemaModel.getSequences().size()>0) {
+			log.info(getIdDesc()+schemaModel.getSequences().size()+" sequences grabbed");
+		}
+		if(schemaModel.getSynonyms().size()>0) {
+			log.info(getIdDesc()+schemaModel.getSynonyms().size()+" synonyms grabbed");
+		}
 	}
 	
 	//XXX shoud it be "grabTables"?
@@ -723,7 +761,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			//if(!schemaPattern.equals(id.schemaName) && !containsTableWithSchemaAndName(schemaModel.tables, id.schemaName, id.name)) {
 			if(!containsTableWithSchemaAndName(schemaModel.getTables(), id.getSchemaName(), id.getName())) {
 				log.debug("recursivegrab-grabschema: "+id.getSchemaName()+"."+id.getName());
-				grabRelations(schemaModel, dbmd, dbmsfeatures, id.getSchemaName(), id.getName(), true);				
+				grabRelations(schemaModel, dbmd, dbmsfeatures, id.getSchemaName(), id.getName(), true);
 			}
 		}
 	}
