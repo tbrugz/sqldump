@@ -135,7 +135,15 @@ public class ResultSetDiff {
 			
 			int compare = 0;
 			try {
-				compare = compareVals(sourceVals, targetVals, keyIndexes);
+				if(sourceVals==null && targetVals==null) {
+					log.info("both source & target have no rows? source["+sourceRowCount+"]="+sourceVals+" ; target["+targetRowCount+"]="+targetVals);
+					break;
+				}
+				else if(sourceVals==null) { compare = -1; }
+				else if(targetVals==null) { compare = 1; }
+				else {
+					compare = compareVals(sourceVals, targetVals, keyIndexes);
+				}
 			}
 			catch(NullPointerException e) {
 				log.error("error comparing rows: source="+sourceVals+" ; target="+targetVals+" ; [ex="+e+"]");
@@ -327,7 +335,7 @@ public class ResultSetDiff {
 				//comp = vals1.get(keyIndexes[i]).compareTo(vals2.get(keyIndexes[i]));
 			}
 			catch(NullPointerException e) {
-				log.warn("[NPE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
+				log.warn("[NPE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+(vals1!=null? vals1.get(keyIndexes[i]) : "NULL")+" ; v2="+(vals2!=null? vals2.get(keyIndexes[i]) : "NULL")+" [ex: "+e+"]");
 			}
 			catch(ClassCastException e) {
 				log.warn("[CCE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
