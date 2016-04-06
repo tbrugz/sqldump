@@ -79,7 +79,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_DO_SCHEMADUMP_EXPORTEDFKS = "sqldump.doschemadump.exportedfks";
 	@Deprecated
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
-	static final String PROP_SCHEMAGRAB_GRANTS = PREFIX+".grants";
+	public static final String PROP_SCHEMAGRAB_GRANTS = PREFIX+".grants";
 	static final String PROP_SCHEMAGRAB_ALLGRANTS = PREFIX+".allgrants"; //XXX: xperimental
 	static final String PROP_SCHEMAGRAB_INDEXES = PREFIX+".indexes";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
@@ -620,7 +620,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					//String colDesc = getColumnDesc(c, columnTypeMapping, papp.getProperty(PROP_FROM_DB_ID), papp.getProperty(PROP_TO_DB_ID));
 				}
 				closeResultSetAndStatement(cols);
-				if(numCol==0) {	
+				if(numCol==0) {
 					log.warn("zero columns on table '"+fullTablename+"'? [ignored="+ignoretableswithzerocolumns+"]");
 					if(ignoretableswithzerocolumns) { continue; }
 				}

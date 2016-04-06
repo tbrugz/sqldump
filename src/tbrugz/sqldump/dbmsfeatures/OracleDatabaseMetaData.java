@@ -300,14 +300,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		}
 		if(tableNamePattern!=null) {
 			sql += " and table_name like ?";
-			params.add(schemaPattern);
+			params.add(tableNamePattern);
 		}
 		Connection conn = metadata.getConnection();
 		PreparedStatement st = conn.prepareStatement(sql);
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
-		log.debug("sql[getTablePrivileges]:\n"+sql);
+		log.debug("sql[getTablePrivileges]:\n"+sql+"\nparams="+params);
 		return st.executeQuery();
 	}
 	
@@ -344,7 +344,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
-		log.debug("sql[getColumnPrivileges]:\n"+sql);
+		log.debug("sql[getColumnPrivileges]:\n"+sql+"\nparams="+params);
 		return st.executeQuery();
 	}
 	
