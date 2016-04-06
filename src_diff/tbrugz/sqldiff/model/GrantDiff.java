@@ -49,7 +49,8 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 			(changeType.equals(ChangeType.DROP)?"revoke ":"grant ")
 			+privilege
 			+" on "+namedTable.getName()
-			+" to "+grantee;
+			+(changeType.equals(ChangeType.DROP)?" from ":" to ")
+			+grantee;
 			//+";\n\n";
 	}
 
