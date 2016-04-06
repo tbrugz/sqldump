@@ -10,10 +10,11 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "sqlDialect", "metadata"})
+@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "sqlDialect", "modelId", "metadata"})
 public class SchemaModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
+	String modelId;
 	String sqlDialect;
 
 	Set<Table> tables = new TreeSet<Table>();
@@ -107,6 +108,15 @@ public class SchemaModel implements Serializable {
 	}
 	public void setSqlDialect(String sqlDialect) {
 		this.sqlDialect = sqlDialect;
+	}
+	
+	@XmlElement(name="modelId")
+	public String getModelId() {
+		return modelId;
+	}
+	
+	public void setModelId(String modelId) {
+		this.modelId = modelId;
 	}
 
 	@XmlElement(name="metadata")
