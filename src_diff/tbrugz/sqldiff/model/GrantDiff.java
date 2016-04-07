@@ -3,6 +3,7 @@ package tbrugz.sqldiff.model;
 import java.util.List;
 
 import tbrugz.sqldiff.util.DiffUtil;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
@@ -48,7 +49,8 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 		return 
 			(changeType.equals(ChangeType.DROP)?"revoke ":"grant ")
 			+privilege
-			+" on "+namedTable.getName()
+			+" on "
+			+DBObject.getFinalName(namedTable, true)
 			+(changeType.equals(ChangeType.DROP)?" from ":" to ")
 			+grantee;
 			//+";\n\n";
