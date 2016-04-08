@@ -17,6 +17,9 @@ import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * TODO: add grab materialized views...
+ */
 public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 
 	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
@@ -106,7 +109,17 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		return conn.createStatement().executeQuery("explain verbose "+sql);
 	}
 	
-	//TODO: add support for foreign tables..
+	/*
+	 * TODO: add support for foreign tables..
+	 * 
+	 * create FOREIGN table (...)
+	 * 
+	 * footer:
+	 * SERVER servername
+	 * OPTIONS (schema 'SCHEMA', table 'TABLE');
+	 * 
+	 * select * from information_schema._pg_foreign_tables
+	 */
 	/*
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
