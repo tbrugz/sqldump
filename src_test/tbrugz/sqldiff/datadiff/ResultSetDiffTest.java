@@ -57,7 +57,7 @@ public class ResultSetDiffTest {
 		
 		Properties prop = new Properties();
 		prop.setProperty(DataDiff.PROP_DATADIFF_OUTFILEPATTERN, "");
-		List<DiffSyntax> ds = DataDiff.getSyntaxes(prop, null, false);
+		List<DiffSyntax> ds = DataDiff.getSyntaxes(prop, null, false); //XXX more tests with different syntaxes?
 		Assert.assertEquals(1, ds.size());
 		
 		log.info("s: 1 t: 2");

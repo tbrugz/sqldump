@@ -21,7 +21,6 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 
-@SuppressWarnings("all")
 public class SQLTests extends AbstractSQLProc {
 
 	static final Log log = LogFactory.getLog(SQLTests.class);
@@ -35,13 +34,22 @@ public class SQLTests extends AbstractSQLProc {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	static void testsInternal(Connection conn) throws Exception {
 		log.info("some tests...");
-		DatabaseMetaData dbmd = conn.getMetaData();
-		//DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures("oracle");
-		//dbmd = feat.getMetadataDecorator(dbmd);
-		log.info("dbmd: "+dbmd);
 		
+		DatabaseMetaData dbmd = conn.getMetaData();
+		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures("oracle");
+		dbmd = feat.getMetadataDecorator(dbmd);
+		
+		//DBMSFeatures featz = new OracleFeaturesLite();
+		//featz.setId("oracle");
+		//dbmd = featz.getMetadataDecorator(dbmd);
+		
+		log.info("dbmd: "+dbmd);
+
+		String schema = "schema";
+		String relation = "relation";
 		long initTime = System.currentTimeMillis();
 
 		//log.info("test: catalogs...");
@@ -51,10 +59,13 @@ public class SQLTests extends AbstractSQLProc {
 		//SQLUtils.dumpRS(dbmd.getTableTypes());
 
 		//log.info("test: tables...");
-		//SQLUtils.dumpRS(dbmd.getTables(null, null, null, null));
+		//SQLUtils.dumpRS(dbmd.getTables(null, schema, null, null));
 
 		//log.info("test: columns...");
-		//SQLUtils.dumpRS(dbmd.getColumns(null, "schema", "table", null));
+		//SQLUtils.dumpRS(dbmd.getColumns(null, schema, relation, null));
+		
+		//log.info("test: pks...");
+		//SQLUtils.dumpRS(dbmd.getPrimaryKeys(null, schema, relation));
 		
 		//log.info("test: fks...");
 		//SQLUtils.dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
@@ -74,6 +85,7 @@ public class SQLTests extends AbstractSQLProc {
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
 		log.info("elapsed: "+(System.currentTimeMillis()-initTime)+"ms");
+		//Thread.sleep(60000);
 	}
 	
 	static void testFeatures(Connection conn) throws SQLException {
@@ -100,8 +112,8 @@ public class SQLTests extends AbstractSQLProc {
 	@Override
 	public void process() {
 		try {
-			//tests(conn);
-			testFeatures(conn);
+			tests(conn);
+			//testFeatures(conn);
 		}
 		catch(Exception e) {
 			log.warn("Exception: "+e.getMessage(), e);
