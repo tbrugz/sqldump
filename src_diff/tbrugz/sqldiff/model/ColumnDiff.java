@@ -201,6 +201,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 		else {
 			//XXX: return all diffs in one query? return List<String>?
+			//XXX: add to AbstractDBMSFeatures ??
 			//oracle-like syntax?
 			alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+features.sqlAlterColumnClause()+" "+column.getName();
 			if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {

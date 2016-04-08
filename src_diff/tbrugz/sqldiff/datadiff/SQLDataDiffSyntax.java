@@ -26,7 +26,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	static final String PROP_DATADIFF_ADDCOMMENTS = DATADIFF_PREFIX+".addcomments";
 	
 	boolean shouldFlush = false;
-	boolean addComments = true; //XXXdone: add property for addComments
+	boolean addComments = false;
 	
 	@Override
 	public void procProperties(Properties prop) {

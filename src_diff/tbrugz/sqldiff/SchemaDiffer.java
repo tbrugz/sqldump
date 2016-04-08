@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -31,14 +33,31 @@ public class SchemaDiffer {
 	static boolean mayReplaceDbId = true;
 	
 	Set<DBObjectType> doDiffTypes = null;
+	
+	static final TableType[] diffableTableTypesArray = {
+		TableType.BASE_TABLE, TableType.EXTERNAL_TABLE, TableType.FOREIGN_TABLE,
+		TableType.SYSTEM_TABLE, TableType.TABLE
+		//, TableType.TYPE ?
+	};
+	static final List<TableType> diffableTableTypes;
+	static {
+		diffableTableTypes = Arrays.asList(diffableTableTypesArray);
+	}
 
 	void diffTables(SchemaModel modelOrig, SchemaModel modelNew, SchemaDiff diff) {
 		//tables
 		Set<Table> newTablesThatExistsInOrigModel = new HashSet<Table>();
+		Map<TableType, Integer> nonDiffableTableTypesPresent = new TreeMap<TableType, Integer>();
+		
 		if(modelOrig.getTables().size()>0) {
-			
+		
 		for(Table tOrig: modelOrig.getTables()) {
-			if(! tOrig.getType().equals(TableType.TABLE)) continue;
+			if( !diffableTableTypes.contains(tOrig.getType()) ) {
+				Integer count = nonDiffableTableTypesPresent.get(tOrig.getType());
+				if(count==null) { count = 1; } else { count++; }
+				nonDiffableTableTypesPresent.put(tOrig.getType(), count);
+				continue;
+			}
 			
 			Table tNew = DBIdentifiable.getDBIdentifiableBySchemaAndName(modelNew.getTables(), tOrig.getSchemaName(), tOrig.getName());
 			if(tNew==null) {
@@ -105,10 +124,19 @@ public class SchemaDiffer {
 		addTables.addAll(modelNew.getTables());
 		addTables.removeAll(newTablesThatExistsInOrigModel);
 		for(Table t: addTables) {
-			if(! t.getType().equals(TableType.TABLE)) continue;
+			if( !diffableTableTypes.contains(t.getType()) ) {
+				Integer count = nonDiffableTableTypesPresent.get(t.getType());
+				if(count==null) { count = 1; } else { count++; }
+				nonDiffableTableTypesPresent.put(t.getType(), count);
+				continue;
+			}
 
 			TableDiff td = new TableDiff(ChangeType.ADD, t);
 			diff.getTableDiffs().add(td);
+		}
+		
+		if(nonDiffableTableTypesPresent.size()>0) {
+			log.warn("non-diffable tables by type: "+nonDiffableTableTypesPresent);
 		}
 	}	
 	
