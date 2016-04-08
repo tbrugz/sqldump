@@ -4,7 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public enum TableType {
-	TABLE, SYNONYM,
+	TABLE,
+	SYNONYM,
 	SYSTEM_TABLE,   //h2
 	VIEW, MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
@@ -89,4 +90,19 @@ public enum TableType {
 		
 		return false;
 	}*/
+	
+	//XXX table-sets: TYPE? SYNONYM?
+	
+	public static final TableType[] COMMON_TABLE_TYPES = { TABLE, BASE_TABLE };
+
+	public static final TableType[] PHYSICAL_TABLE_TYPES = { TABLE, BASE_TABLE, SYSTEM_TABLE, MATERIALIZED_VIEW };
+	
+	public static final TableType[] VIEW_TABLE_TYPES = { VIEW, SYSTEM_VIEW, MATERIALIZED_VIEW };
+
+	public static final TableType[] EXTERNAL_TABLE_TYPES = { EXTERNAL_TABLE, FOREIGN_TABLE };
+	
+	/*public static TableType[] getCommonTableTypes() {
+		return COMMON_TABLE_TYPES;
+	}*/
+	
 }

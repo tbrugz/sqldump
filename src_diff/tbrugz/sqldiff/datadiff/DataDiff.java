@@ -271,6 +271,7 @@ public class DataDiff extends AbstractFailable {
 				keyCols = ctt.getUniqueColumns();
 			}
 			if(keyCols==null) {
+				//see: DatabaseMetaData.getBestRowIdentifier
 				if(orderWithAllColumnsIfNoUK) {
 					log.info("table '"+table+"' has no PK. using all columns in 'order by'");
 					keyCols = Utils.splitStringWithTrim(columnsForSelect, ",");
