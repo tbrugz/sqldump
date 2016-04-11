@@ -1,6 +1,7 @@
 package tbrugz.sqldump.sqlrun.importers;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -15,6 +16,8 @@ public class CSVImporter extends AbstractImporter {
 
 	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
 	static final String SUFFIX_EMPTY_STRING_AS_NULL = ".emptystringasnull";
+	
+	static final String[] EMPTY_STRING_ARRAY = {};
 
 	static final String[] CSV_AUX_SUFFIXES = {
 		SUFFIX_COLUMNDELIMITER
@@ -40,13 +43,29 @@ public class CSVImporter extends AbstractImporter {
 		return ret;
 	}
 
+	
 	// TODO: parse strings inside quotes '"'
 	@Override
 	String[] procLine(String line, long processedLines) throws SQLException {
 		lastLine = line;
 		lastLineComplete = null;
 		if(!isLastLineComplete()) { return null; }
+		
 		String[] parts = line.split(columnDelimiter);
+		List<String> pl = new ArrayList<String>();
+		StringBuilder sb = new StringBuilder();
+		for(String s: parts) {
+			sb.append(s);
+			if( countCharacters(sb.toString(), '"')%2==0 ) {
+				pl.add(sb.toString());
+				sb = new StringBuilder();
+			}
+			else { 
+				sb.append(columnDelimiter);
+			}
+		}
+		parts = pl.toArray(EMPTY_STRING_ARRAY);
+		
 		if(setNullWhenEmptyString && parts!=null) {
 			for(int i=0;i<parts.length;i++) {
 				if("".equals(parts[i])) {
@@ -61,8 +80,8 @@ public class CSVImporter extends AbstractImporter {
 	boolean isLastLineComplete() {
 		if(lastLineComplete!=null) { return lastLineComplete; }
 		int count = countCharacters(lastLine, '"');
-		//log.info("line[#quote="+count+"]: "+lastLine);
 		lastLineComplete = count%2==0;
+		//log.info("line[#quote="+count+";complete="+lastLineComplete+"]: "+lastLine);
 		return lastLineComplete;
 	}
 
