@@ -398,7 +398,18 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 						break scanNext;
 					}
 					try {
-						procLineInternal(line, is1stloop);
+						boolean isLineComplete = procLineInternal(line, is1stloop);
+						StringBuilder sb = new StringBuilder();
+						sb.append(line);
+						while(!isLineComplete) {
+							line = scan.next();
+							String rdr = recordDelimiterReplacer();
+							if(rdr!=null) {
+								sb.append(rdr); // should be scan.lastDelimiter?!?
+							}
+							sb.append(line);
+							isLineComplete = procLineInternal(sb.toString(), is1stloop);
+						}
 						importthisline = false;
 						//log.debug("procline-ok ["+linecounter+"]: failid="+failoverId);
 					}
@@ -475,10 +486,15 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	long lastOutputCountCommit = 0;
 	long lastOutputCountLog = 0;
 	
-	void procLineInternal(String line, boolean is1stloop) throws SQLException {
+	/**
+	 * @return true if parser should proceed to next line, false otherwise
+	 */
+	boolean procLineInternal(String line, boolean is1stloop) throws SQLException {
 		//log.info("line["+processedLines+"]: "+line);
 		IOCounter counter = countsByFailoverId.get(failoverId);
 		String[] parts = procLine(line, counter.input);
+		if(!isLastLineComplete()) { return false; }
+		
 		if(parts==null) {
 			String lineTrunc = strTruncated(line, ERRORLINE_MAXSIZE);
 			log.debug("line could not be processed: "+lineTrunc);
@@ -495,11 +511,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
 			counter.input++;
-			return;
+			return true;
 		}
 		if(skipLineRegex!=null && skipLineRegex.matcher(line).find()) {
 			counter.input++;
-			return;
+			return true;
 		}
 		
 		//List<String> values = new ArrayList<String>();
@@ -573,6 +589,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			log.info("[exec-id="+execId+"] "+counter.output+" rows imported");
 			lastOutputCountLog = counter.output;
 		}
+		return true;
 	}
 	
 	String strTruncated(String s, int max) {
@@ -743,6 +760,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	}
 
 	abstract String[] procLine(String line, long processedLines) throws SQLException;
+
+	abstract boolean isLastLineComplete();
+	
+	abstract String recordDelimiterReplacer();
 	
 	static Map<String,String> cookiesHeader = new HashMap<String, String>();
 

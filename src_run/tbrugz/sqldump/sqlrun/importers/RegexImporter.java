@@ -77,4 +77,15 @@ public class RegexImporter extends AbstractImporter {
 		}
 		return parts;
 	}
+	
+	@Override
+	boolean isLastLineComplete() {
+		return true;
+	}
+
+	@Override
+	String recordDelimiterReplacer() {
+		return null;
+	}
+	
 }

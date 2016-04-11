@@ -37,8 +37,10 @@ public class CSVImporter extends AbstractImporter {
 		return ret;
 	}
 
+	// TODO: parse strings inside quotes '"'
 	@Override
 	String[] procLine(String line, long processedLines) throws SQLException {
+		if(!isLastLineComplete()) { return null; }
 		String[] parts = line.split(columnDelimiter);
 		if(setNullWhenEmptyString && parts!=null) {
 			for(int i=0;i<parts.length;i++) {
@@ -49,4 +51,16 @@ public class CSVImporter extends AbstractImporter {
 		}
 		return parts;
 	}
+	
+	
+	@Override
+	boolean isLastLineComplete() {
+		return true;
+	}
+
+	@Override
+	String recordDelimiterReplacer() {
+		return null;
+	}
+	
 }
