@@ -575,9 +575,15 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 			}
 		}
 		else {
-			int changedRows = stmt.executeUpdate();
-			counter.input++;
-			counter.output += changedRows;
+			try {
+				int changedRows = stmt.executeUpdate();
+				counter.input++;
+				counter.output += changedRows;
+			}
+			catch(SQLException e) {
+				//log.debug("sql err: parts="+Arrays.toString(parts));
+				throw e;
+			}
 		}
 
 		if(commitEachXrows>0 && (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0)) {
