@@ -18,7 +18,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.datadump.DataDumpUtils;
-//import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
@@ -28,9 +27,6 @@ import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
-import tbrugz.sqldump.sqlrun.importers.CSVImporter;
-import tbrugz.sqldump.sqlrun.importers.FFCImporter;
-import tbrugz.sqldump.sqlrun.importers.RegexImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
@@ -48,10 +44,8 @@ import tbrugz.sqldump.util.Utils;
  * ~TODO: commit/autocommit? when? each X statements? config per processing? (autocommit|statement|file|execid|run)?
  * XXX: each procid may have its own commit strategy?
  * XXX: rollback strategy? savepoint(s)?
- * XXXdone: CSV importer
  * XXX: Fixed Column importer? FC importer with spec...
  * XXXdone: Regex importer (parses log lines, ...)
- * XXX: remove dependency from CSVImporter, RegexImporter
  * TODOne: add 'global' props: sqlrun.dir / sqlrun.loginvalidstatments
  * TODO: prop 'sqlrun.runonly(inorder)=<id1>, <id2>' - should precede standard 'auto-ids'
  * 
@@ -255,20 +249,8 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			// .import
 			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
 				String importType = execValue;
-				AbstractImporter importer = null;
-				//csv
-				if("CSV".equalsIgnoreCase(importType)) {
-					importer = new CSVImporter();
-				}
-				//regex
-				else if("REGEX".equalsIgnoreCase(importType)) {
-					importer = new RegexImporter();
-				}
-				//ffc
-				else if("FFC".equalsIgnoreCase(importType)) {
-					importer = new FFCImporter();
-				}
-				else {
+				AbstractImporter importer = getImporter(importType);
+				if(importer==null) {
 					log.warn("unknown import type: "+importType);
 					return false;
 				}
@@ -384,11 +366,10 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		ColTypeUtil.setProperties(papp);
 		
 		allAuxSuffixes.addAll(Arrays.asList(AUX_SUFFIXES));
-		allAuxSuffixes.addAll(new StmtProc().getAuxSuffixes());
-		allAuxSuffixes.addAll(new CSVImporter().getAuxSuffixes());
-		allAuxSuffixes.addAll(new RegexImporter().getAuxSuffixes());
-		allAuxSuffixes.addAll(new FFCImporter().getAuxSuffixes());
-		allAuxSuffixes.addAll(new QueryDumper().getAuxSuffixes());
+		List<Executor> loe = getAllExecutors();
+		for(Executor e: loe) {
+			allAuxSuffixes.addAll(e.getAuxSuffixes());
+		}
 		filterByIds = Utils.getStringListFromProp(papp, PROP_FILTERBYIDS, ",");
 		
 		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
@@ -466,6 +447,35 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	@Override
 	public void setFailOnError(boolean failonerror) {
 		this.failonerror = failonerror;
+	}
+
+	static final String[] EXECUTOR_CLASSES = {
+		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter",
+		"StmtProc", "QueryDumper"
+	};
+	
+	static final String[] IMPORTER_IDS = {
+		"csv", "csvplain", "ffc", "regex"
+	};
+	static final String[] IMPORTER_CLASSES = {
+		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter"
+	};
+	
+	AbstractImporter getImporter(String id) {
+		for(int i=0;i<IMPORTER_IDS.length;i++) {
+			if(IMPORTER_IDS[i].equals(id)) {
+				return (AbstractImporter) Utils.getClassInstance(IMPORTER_CLASSES[i], "tbrugz.sqldump.sqlrun.importers");
+			}
+		}
+		return null;
+	}
+
+	List<Executor> getAllExecutors() {
+		List<Executor> loe = new ArrayList<Executor>();
+		for(int i=0;i<EXECUTOR_CLASSES.length;i++) {
+			loe.add( (Executor)Utils.getClassInstance(EXECUTOR_CLASSES[i], "tbrugz.sqldump.sqlrun", "tbrugz.sqldump.sqlrun.importers") );
+		}
+		return loe;
 	}
 	
 }
