@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.Utils;
 
-public class CSVImporter extends AbstractImporter {
+public class CSVImporterPlain extends AbstractImporter {
 	static final Log log = LogFactory.getLog(CSVImporter.class);
 
 	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
@@ -22,9 +22,6 @@ public class CSVImporter extends AbstractImporter {
 	
 	String columnDelimiter = ",";
 	boolean setNullWhenEmptyString = false;
-	
-	String lastLine = null;
-	Boolean lastLineComplete = null;
 	
 	@Override
 	void setImporterProperties(Properties prop, String importerPrefix) {
@@ -43,9 +40,6 @@ public class CSVImporter extends AbstractImporter {
 	// TODO: parse strings inside quotes '"'
 	@Override
 	String[] procLine(String line, long processedLines) throws SQLException {
-		lastLine = line;
-		lastLineComplete = null;
-		if(!isLastLineComplete()) { return null; }
 		String[] parts = line.split(columnDelimiter);
 		if(setNullWhenEmptyString && parts!=null) {
 			for(int i=0;i<parts.length;i++) {
@@ -59,24 +53,12 @@ public class CSVImporter extends AbstractImporter {
 	
 	@Override
 	boolean isLastLineComplete() {
-		if(lastLineComplete!=null) { return lastLineComplete; }
-		int count = countCharacters(lastLine, '"');
-		//log.info("line[#quote="+count+"]: "+lastLine);
-		lastLineComplete = count%2==0;
-		return lastLineComplete;
+		return true;
 	}
 
-	static int countCharacters(String s, char c) {
-		int count = 0;
-		for(int i=0;i<s.length();i++) {
-			if(s.charAt(i)==c) { count++; }
-		}
-		return count;
-	}
-	
 	@Override
 	String recordDelimiterReplacer() {
-		return "\n";
+		return null;
 	}
 	
 }
