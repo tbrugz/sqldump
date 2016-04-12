@@ -246,8 +246,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
 		return "select name, type, line, text "
-				+"from all_source " //XXX (useDbaMetadataObjects?"dba_source ":"all_source ")
-				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
+				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
+				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 				+"and owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
 				+"order by type, name, line";
@@ -343,18 +343,20 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+		String argumentsTable = (useDbaMetadataObjects?"dba_arguments":"all_arguments");
+		
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
 				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end "
-				+"        from all_arguments aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, " // useDbaMetadataObjects?
+				+"        from "+argumentsTable+" aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
 				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
-				+"  from all_procedures p " //XXX (useDbaMetadataObjects?"dba_procedures ":"all_procedures ")
-				+"  left outer join all_arguments aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "//dba_arguments, all_arguments
-				+" where p.owner = '"+schemaPattern+"' "
+				+"\nfrom "+(useDbaMetadataObjects?"dba_procedures p ":"all_procedures p ")
+				+"  left outer join "+argumentsTable+" aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
+				+"\nwhere p.owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and p.object_name = '"+execNamePattern+"' ":"")
 				//+"   and p.object_type = 'PACKAGE' "
 				//+"   and p.procedure_name is not null "
 				+"   and aa.position is not null "
-				+" order by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
+				+"\norder by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
 		log.debug("grabbing executables' metadata - sql: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
