@@ -75,7 +75,7 @@ public class SQLStmtNgScanner implements Tokenizer, Iterator<String>, Iterable<S
 		do {
 			doBreak = true;
 			tokenz = sb.toString();
-			log.info("token: "+tokenz);
+			//log.info("token: "+tokenz);
 			
 			int iniApos = tokenz.indexOf(STRING_INI);
 			int iniBlComment = tokenz.indexOf(COMMENT_BLOCK_INI);
@@ -121,6 +121,8 @@ public class SQLStmtNgScanner implements Tokenizer, Iterator<String>, Iterable<S
 			}*/
 		} while(!doBreak);
 
+		//log.info("token: "+tokenz);
+		
 		return sb.toString();
 	}
 

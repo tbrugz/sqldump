@@ -7,7 +7,8 @@ public enum TableType {
 	TABLE,
 	SYNONYM,
 	SYSTEM_TABLE,   //h2
-	VIEW, MATERIALIZED_VIEW,
+	VIEW,
+	MATERIALIZED_VIEW,
 	SYSTEM_VIEW,
 	EXTERNAL_TABLE, //oracle
 	BASE_TABLE,     //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
@@ -95,7 +96,7 @@ public enum TableType {
 	
 	public static final TableType[] COMMON_TABLE_TYPES = { TABLE, BASE_TABLE };
 
-	public static final TableType[] PHYSICAL_TABLE_TYPES = { TABLE, BASE_TABLE, SYSTEM_TABLE, MATERIALIZED_VIEW };
+	public static final TableType[] PHYSICAL_TABLE_TYPES = { TABLE, BASE_TABLE, SYSTEM_TABLE, MATERIALIZED_VIEW }; //? should be 'Materialized'?
 	
 	public static final TableType[] VIEW_TABLE_TYPES = { VIEW, SYSTEM_VIEW, MATERIALIZED_VIEW };
 
