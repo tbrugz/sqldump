@@ -196,6 +196,7 @@ public class Table extends DBObject implements Relation {
 		return type.getName();
 	}
 	
+	//XXX: rename to getTableType()?
 	public TableType getType() {
 		return type;
 	}

@@ -11,7 +11,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
  * 
  * see: https://en.wikipedia.org/wiki/SQL/JRT
  */
-public class ExecutableObject extends DBObject {
+public class ExecutableObject extends DBObject implements TypedDBObject {
 	private static final long serialVersionUID = 1L;
 
 	static transient SQLIdentifierDecorator sqlId = new SQLIdentifierDecorator();
@@ -159,6 +159,11 @@ public class ExecutableObject extends DBObject {
 		if (type != other.type)
 			return false;
 		return true;
+	}
+	
+	@Override
+	public DBObjectType getDBObjectType() {
+		return type;
 	}
 	
 	public DBObjectType getType() {
