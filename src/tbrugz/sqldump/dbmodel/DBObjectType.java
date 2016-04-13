@@ -28,6 +28,11 @@ public enum DBObjectType {
 		}
 	}
 	
+	public static DBObjectType parse(String s) {
+		s = s.replace(' ', '_').toUpperCase();
+		return DBObjectType.valueOf(s);
+	}
+	
 	public boolean isExecutableType() {
 		switch (this) {
 		case EXECUTABLE: //generic type, but anyway...

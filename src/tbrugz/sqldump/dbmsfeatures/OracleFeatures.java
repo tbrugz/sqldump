@@ -286,7 +286,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				sb = new StringBuilder();
 				eo.setName( rs.getString(1) );
 				try {
-					eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );
+					eo.setType( DBObjectType.parse(rs.getString(2)) );
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));

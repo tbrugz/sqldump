@@ -24,7 +24,6 @@ import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.util.Utils;
 
 /*
  * see: https://en.wikipedia.org/wiki/Information_schema
@@ -202,7 +201,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.setSchemaName( schemaPattern );
 				eo.setName( routineName );
 				try {
-					eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );
+					eo.setType( DBObjectType.parse(rs.getString(2)) );
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));

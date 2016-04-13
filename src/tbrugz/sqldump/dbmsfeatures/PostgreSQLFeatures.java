@@ -15,7 +15,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
-import tbrugz.sqldump.util.Utils;
 
 /*
  * TODO: add grab materialized views...
@@ -51,7 +50,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 			eo.setSchemaName( schemaPattern );
 			eo.setName( rs.getString(1) );
 			try {
-				eo.setType( DBObjectType.valueOf(Utils.normalizeEnumStringConstant(rs.getString(2))) );
+				eo.setType( DBObjectType.parse(rs.getString(2)) );
 			}
 			catch(IllegalArgumentException iae) {
 				log.warn("unknown object type: "+rs.getString(2));
