@@ -104,7 +104,8 @@ public interface DBMSFeatures {
 	//XXX: grab views, executables (& triggers?) names
 	//List<NamedDBObject> grabViewNames(String catalog, String schema, String viewNamePattern, Connection conn) throws SQLException;
 	//List<NamedDBObject> grabTriggerNames(String catalog, String schema, String triggerNamePattern, Connection conn) throws SQLException;
-	//List<NamedDBObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, Connection conn) throws SQLException;
+	
+	List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException;
 	
 	boolean supportsExplainPlan();
 	

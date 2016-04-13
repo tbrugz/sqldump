@@ -1,12 +1,17 @@
 package tbrugz.sqldump.dbmd;
 
+import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
@@ -147,4 +152,11 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return "\"";
 	}
 	
+	@Override
+	public List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException {
+		List<ExecutableObject> execs = new ArrayList<ExecutableObject>();
+		grabDBExecutables(execs, schema, executableNamePattern, conn);
+		return execs;
+	}
+
 }
