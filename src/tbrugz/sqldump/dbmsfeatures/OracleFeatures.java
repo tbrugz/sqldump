@@ -474,20 +474,30 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 	}
 	
-	/*public List<NamedDBObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, Connection conn) throws SQLException {
-		String sql = "select distinct name, type from all_source "
+	/*
+	 * TODO: filter by name & type
+	 */
+	@Override
+	public List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException {
+		String sql = "select distinct owner, name, type"
+				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
 				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
 				+"and owner = ? "
-				+"order by type, name";
+				+"order by owner, name, type";
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, schema);
 		ResultSet rs = st.executeQuery();
 		
+		List<ExecutableObject> leo = new ArrayList<ExecutableObject>();
 		while(rs.next()) {
-			String name = rs.getString(1);
+			ExecutableObject eo = new ExecutableObject();
+			eo.setSchemaName( rs.getString(1) );
+			eo.setName( rs.getString(2) );
+			eo.setType( DBObjectType.parse(rs.getString(3)) );
+			leo.add(eo);
 		}
-
-	}*/
+		return leo;
+	}
 	
 	String grabDBSynonymsQuery(String schemaPattern, String synonymNamePattern) {
 		return "select synonym_name, table_owner, table_name, db_link "
