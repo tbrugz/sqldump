@@ -47,6 +47,7 @@ public class SQLTests extends AbstractSQLProc {
 		//dbmd = featz.getMetadataDecorator(dbmd);
 		
 		log.info("dbmd: "+dbmd);
+		log.info("conn info: "+dbmd.getUserName()+" @ "+dbmd.getURL());
 
 		String schema = "schema";
 		String relation = "relation";
@@ -68,22 +69,35 @@ public class SQLTests extends AbstractSQLProc {
 		//SQLUtils.dumpRS(dbmd.getPrimaryKeys(null, schema, relation));
 		
 		//log.info("test: fks...");
-		//SQLUtils.dumpRS(dbmd.getImportedKeys(null, "schema", "table"));
+		//SQLUtils.dumpRS(dbmd.getImportedKeys(null, schema, relation));
 
 		//log.info("test: exported fks...");
-		//SQLUtils.dumpRS(dbmd.getExportedKeys(null, "schema", null));
+		//SQLUtils.dumpRS(dbmd.getExportedKeys(null, schema, null));
 		//!exportedkeys
 		
 		//log.info("test: grants...");
-		//SQLUtils.dumpRS(dbmd.getTablePrivileges(null, "schema", "table"));
+		//SQLUtils.dumpRS(dbmd.getTablePrivileges(null, schema, relation));
 		
 		//log.info("test: indexes...");
-		//SQLUtils.dumpRS(dbmd.getIndexInfo(null, "schema", "table", false, false));
+		//SQLUtils.dumpRS(dbmd.getIndexInfo(null, schema, relation, false, false));
+
+		//log.info("test: getProcedures...");
+		//SQLUtils.dumpRS(dbmd.getProcedures(null, schema, null));
+
+		//log.info("test: getProcedureColumns...");
+		//SQLUtils.dumpRS(dbmd.getProcedureColumns(null, schema, null, null));
+		
+		//log.info("test: getFunctions...");
+		//SQLUtils.dumpRS(dbmd.getFunctions(null, schema, null));
+
+		//log.info("test: getFunctionColumns...");
+		//SQLUtils.dumpRS(dbmd.getFunctionColumns(null, schema, null, null));
 		
 		//String sql = "select * from xxx";
 		//Statement st = conn.createStatement();
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
+		
 		log.info("elapsed: "+(System.currentTimeMillis()-initTime)+"ms");
 		//Thread.sleep(60000);
 	}

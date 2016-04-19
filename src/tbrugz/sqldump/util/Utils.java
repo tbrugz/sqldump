@@ -279,11 +279,15 @@ public class Utils {
 	public static boolean getPropBool(Properties prop, String key) {
 		return getPropBool(prop, key, false);
 	}
+	
+	public static boolean isTrue(String value) {
+		return "true".equals(value);
+	}
 
 	public static boolean getPropBool(Properties prop, String key, boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
-		return "true".equals(value.trim());
+		return isTrue(value.trim());
 	}
 
 	/** returns Boolean, so that return can be null */
@@ -295,7 +299,7 @@ public class Utils {
 	public static Boolean getPropBoolean(Properties prop, String key, Boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
-		return "true".equals(value.trim());
+		return isTrue(value.trim());
 	}
 	
 	public static Integer getPropInt(Properties prop, String key) {
