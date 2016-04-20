@@ -155,12 +155,18 @@ public class SQLDiff implements Executor {
 		
 		@Override
 		public SchemaModel call() throws Exception {
-			//get grabber
-			//this.schemaGrabber = initGrabber(grabberMode, grabberId, prop);
-			
-			//grab schemas
-			log.info("grabbing '"+grabberMode+"' model ["+grabberId+"]");
-			return schemaGrabber.grabSchema();
+			try {
+				//get grabber
+				//this.schemaGrabber = initGrabber(grabberMode, grabberId, prop);
+				
+				//grab schemas
+				log.info("grabbing '"+grabberMode+"' model ["+grabberId+"]");
+				return schemaGrabber.grabSchema();
+			}
+			catch(Exception e) {
+				log.warn("ModelGrabber:: call[grabSchema]: "+e, e);
+				throw e;
+			}
 		}
 	}
 	
