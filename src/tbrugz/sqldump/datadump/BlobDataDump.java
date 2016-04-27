@@ -46,13 +46,15 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	List<String> columnsToDump;
 	String outFilePattern;
 	
+	boolean noColsDumpedWarning = false;
+	
 	@Override
 	public void procProperties(Properties prop) {
 		propOutFilePattern = prop.getProperty(PROP_BLOB_OUTFILEPATTERN);
-		if(propOutFilePattern==null) {
-			log.warn("prop '"+PROP_BLOB_OUTFILEPATTERN+"' should be set");
+		/*if(propOutFilePattern==null) {
+			log.warn("prop '"+PROP_BLOB_OUTFILEPATTERN+"' not set");
 			//XXX: if not found, use DataDump.PROP_DATADUMP_OUTFILEPATTERN
-		}
+		}*/
 		this.prop = prop;
 	}
 
@@ -65,14 +67,18 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	public void initDump(String schema, String tableName, List<String> pkCols,
 			ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
-		if(pkCols==null) {
-			//XXX: blob dump really needs PK/UK?
-			log.warn("can't dump: needs unique key [query/table: "+tableName+"]");
-			return;
-		}
-		
 		columnsToDump = Utils.getStringListFromProp(prop, PREFIX_BLOB_COLUMNS+tableName, ",");
 		outFilePattern = prop.getProperty(PREFIX_BLOB_OUTFILEPATTERN+tableName, propOutFilePattern);
+		noColsDumpedWarning = false;
+		
+		if(!validSyntaxSetup()) {
+			//XXX: blob dump really needs PK/UK?
+			log.warn("no unique key found & outpattern contains PK (or null outpattern...) [query/table: "+tableName+"] ; outpattern = "+outFilePattern);
+		}
+	}
+	
+	boolean validSyntaxSetup() {
+		return outFilePattern!=null && (pkCols != null || !outFilePattern.matches(REGEX_ROWID));
 	}
 
 	@Override
@@ -84,13 +90,17 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	
 	@Override
 	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException {
-		if(pkCols==null) { return; }
+		if(!validSyntaxSetup()) { return; }
 		
-		List<String> pkVals = new ArrayList<String>();
-		for(String pkcol: pkCols) {
-			pkVals.add(rs.getString(pkcol));
+		String rowid = "";
+		boolean dumpedAtLeast1col = false;
+		if(pkCols!=null) {
+			List<String> pkVals = new ArrayList<String>();
+			for(String pkcol: pkCols) {
+				pkVals.add(rs.getString(pkcol));
+			}
+			rowid = Utils.join(pkVals, ROWID_JOINER);
 		}
-		String rowid = Utils.join(pkVals, ROWID_JOINER);
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			Class<?> c = lsColTypes.get(i);
@@ -98,6 +108,7 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 				if(!columnsToDump.contains(colName)) { continue; } 
 			}
 			else if(! c.equals(Blob.class)) { continue; } //Clob also?
+			dumpedAtLeast1col = true;
 			
 			String filename = outFilePattern
 					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
@@ -117,7 +128,7 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 					}
 				}
 			}
-			log.debug("blob filename: "+filename+"; col: "+colName);
+			log.debug("blob filename [col="+colName+"]: "+filename);
 			
 			//open file, open blob, write content, close both
 			try {
@@ -134,6 +145,10 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 				log.debug("sql error: "+e.getMessage(), e);
 				pkCols = null; //warn only once per table/query
 			}
+		}
+		if(! dumpedAtLeast1col && ! noColsDumpedWarning) {
+			log.warn("no columns dumped (columns must be BLOBs or be defined in 'columns2dump' prop) [table: "+tableName+"]");
+			noColsDumpedWarning = true;
 		}
 	}
 
