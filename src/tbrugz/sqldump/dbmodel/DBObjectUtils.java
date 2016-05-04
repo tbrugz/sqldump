@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldump.util.StringUtils;
+
 public class DBObjectUtils {
 	
 	static final String NL = "\n";
@@ -14,13 +16,10 @@ public class DBObjectUtils {
 		if(s1a.length!=s2a.length) { return false; }
 		
 		for(int i=0;i<s1a.length;i++) {
-			if(!equalsWithTrim(s1a[i], s2a[i])) { return false; }
+			//if(!StringUtils.equalsWithTrim(s1a[i], s2a[i])) { return false; }
+			if(!StringUtils.equalsWithRightTrim(s1a[i], s2a[i])) { return false; }
 		}
 		return true;
 	}
 	
-	public static boolean equalsWithTrim(String s1, String s2) {
-		return s1.trim().equals(s2.trim());
-	}
-
 }
