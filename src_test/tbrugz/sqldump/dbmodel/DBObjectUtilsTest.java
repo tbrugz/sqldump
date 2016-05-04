@@ -9,7 +9,7 @@ public class DBObjectUtilsTest {
 	
 	@Test
 	public void testEqualsEachLineOk() {
-		String s1 = " ab \n z";
+		String s1 = "ab \nz ";
 		String s2 = "ab\nz";
 		Assert.assertTrue(DBObjectUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
 	}

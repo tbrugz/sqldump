@@ -1,5 +1,7 @@
 package tbrugz.sqldump.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class StringUtils {
@@ -16,7 +18,16 @@ public class StringUtils {
 	}
 	
 	public static String rtrim(String s) {
-		return RTRIM.matcher(s).replaceAll("");
+		return RTRIM.matcher(s).replaceFirst("");
 	}
+	
+	public static <T> List<String> getClassSimpleNameList(List<Class<T>> classes) {
+		List<String> ret = new ArrayList<String>();
+		for(Class<T> c: classes) {
+			ret.add(c.getSimpleName());
+		}
+		return ret;
+	}
+	
 
 }

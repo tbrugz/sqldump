@@ -988,7 +988,7 @@ public class DataDump extends AbstractSQLProc {
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		for(String syntax: dumpSyntaxes) {
 			boolean syntaxAdded = false;
-			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
+			for(Class<DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
 					ds.procProperties(prop);

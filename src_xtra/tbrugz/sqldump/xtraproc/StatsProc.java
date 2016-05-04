@@ -77,7 +77,7 @@ public class StatsProc extends AbstractSQLProc {
 			if(countsByTable) { doCountsByTable(); }
 			if(statsByColumn) { doStatsByColumn(); }
 			if(!countsByTable && !statsByColumn) {
-				log.warn("no 'countsByTable' nor 'statsByColumn' activated...");
+				log.warn("no 'countsByTable' (prop 'counts-by-table') nor 'statsByColumn' (prop 'stats-by-column') activated...");
 			}
 		}
 		catch(IOException e) {

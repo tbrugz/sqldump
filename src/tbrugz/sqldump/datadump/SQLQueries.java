@@ -30,6 +30,7 @@ import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXXdone: partition over (columnX) - different outputfiles for different values of columnX
@@ -214,9 +215,10 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		String[] syntaxArr = syntaxes.split(",");
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
+		boolean allSyntaxesAdded = true;
 		for(String syntax: syntaxArr) {
 			boolean syntaxAdded = false;
-			for(Class<? extends DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
+			for(Class<DumpSyntax> dsc: DumpSyntaxRegistry.getSyntaxes()) {
 				DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(dsc);
 				if(ds!=null && ds.getSyntaxId().equals(syntax.trim())) {
 					ds.procProperties(prop);
@@ -227,7 +229,11 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 			if(!syntaxAdded) {
 				log.warn("unknown datadump syntax: "+syntax.trim());
+				allSyntaxesAdded = false;
 			}
+		}
+		if(!allSyntaxesAdded) {
+			log.info("not all syntaxes added... syntaxes avaiable: " + StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
 		}
 		return syntaxList;
 	}

@@ -16,7 +16,7 @@ public class DumpSyntaxRegistry {
 	static final String SYNTAXES_PROPERTIES = "/dumpsyntaxes.properties";
 	static final String PROP_CLASSES = "dumpsyntax.classes";
 
-	static final List<Class<? extends DumpSyntax>> syntaxes = new ArrayList<Class<? extends DumpSyntax>>();
+	static final List<Class<DumpSyntax>> syntaxes = new ArrayList<Class<DumpSyntax>>();
 	static boolean initted = false;
 	
 	static void init() throws IOException {
@@ -44,7 +44,7 @@ public class DumpSyntaxRegistry {
 				log.warn("dump syntaxes already contains "+cc.getName());
 			}
 			else {
-				syntaxes.add((Class<? extends DumpSyntax>)cc);
+				syntaxes.add((Class<DumpSyntax>)cc);
 				return true;
 			}
 		}
@@ -72,7 +72,7 @@ public class DumpSyntaxRegistry {
 		}
 	}
 	
-	public static List<Class<? extends DumpSyntax>> getSyntaxes() {
+	public static List<Class<DumpSyntax>> getSyntaxes() {
 		if(!initted) {
 			try {
 				init();
