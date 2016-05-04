@@ -101,6 +101,7 @@ Building from sources (with ant & ivy)
   or `ant ivy-install` (if not done already)
 - (*obsolete*) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
   (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
+- (*optional/eclipse*) Use [IvyDE](https://ant.apache.org/ivy/ivyde/), import project, right click + `Ivy > Resolve`
 - (*obsolete*) Copy `templates/build.properties` to `build.properties`
 - (*optional*) Edit `build.properties`
 - Run `ant resolve`
