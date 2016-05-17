@@ -147,18 +147,7 @@ public class DataDumpUtils {
 			return floatFormatterSQL.format(elem);
 		}
 		else if(String.class.isAssignableFrom(type)) {
-			// see: http://stackoverflow.com/questions/19176024/how-to-escape-special-characters-in-building-a-json-string
-			String val = getString(elem);
-			val = val.replaceAll("\\\\", "\\\\\\\\");
-			val = val.replaceAll(DOUBLEQUOTE, "\\\\\"");
-			//val = val.replaceAll("\r\n", "\n");
-			val = val.replaceAll("\b", "\\\\b");
-			val = val.replaceAll("\f", "\\\\f");
-			val = val.replaceAll("\r", "\\\\r");
-			val = val.replaceAll("\n", "\\\\n");
-			val = val.replaceAll("\t", "\\\\t");
-			val = val.replaceAll( "/", "\\\\/");
-			return DOUBLEQUOTE+val+DOUBLEQUOTE;
+			return getFormattedJSONString(elem);
 		}
 		else if(Date.class.isAssignableFrom(type)) {
 			//XXXdone: JSON dateFormatter?
@@ -169,7 +158,22 @@ public class DataDumpUtils {
 			return longFormatter.format((Long)elem);
 		}
 
-		return getString(elem);
+		return getFormattedJSONString(elem);
+	}
+	
+	public static String getFormattedJSONString(Object elem) {
+		// see: http://stackoverflow.com/questions/19176024/how-to-escape-special-characters-in-building-a-json-string
+		String val = getString(elem);
+		val = val.replaceAll("\\\\", "\\\\\\\\");
+		val = val.replaceAll(DOUBLEQUOTE, "\\\\\"");
+		//val = val.replaceAll("\r\n", "\n");
+		val = val.replaceAll("\b", "\\\\b");
+		val = val.replaceAll("\f", "\\\\f");
+		val = val.replaceAll("\r", "\\\\r");
+		val = val.replaceAll("\n", "\\\\n");
+		val = val.replaceAll("\t", "\\\\t");
+		val = val.replaceAll( "/", "\\\\/");
+		return DOUBLEQUOTE+val+DOUBLEQUOTE;
 	}
 
 	//dumpers: insertinto, updatebypk
@@ -178,11 +182,7 @@ public class DataDumpUtils {
 			return null;
 		}
 		else if(elem instanceof String) {
-			/* XXX?: String escaping? "\n, \r, ', ..."
-			 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
-			 */
-			elem = getString(elem).replaceAll("'", "''");
-			return DEFAULT_SQL_STRING_ENCLOSING+elem+DEFAULT_SQL_STRING_ENCLOSING;
+			return getFormattedSQLString(elem);
 		}
 		else if(elem instanceof Date) {
 			return df.format((Date)elem);
@@ -193,6 +193,9 @@ public class DataDumpUtils {
 		else if(elem instanceof Double) {
 			//log.debug("format:: "+elem+" / "+floatFormatterSQL.format((Double)elem));
 			return floatFormatterSQL.format((Double)elem);
+		}
+		else if(elem instanceof Integer || elem instanceof Long) {
+			return getString(elem);
 		}
 		else if(elem instanceof ResultSet) {
 			if(!resultSetWarnedForSQLValue) {
@@ -205,8 +208,16 @@ public class DataDumpUtils {
 			return String.valueOf(elem);
 		}*/
 
-		return getString(elem);
-	} 
+		return getFormattedSQLString(elem);
+	}
+	
+	public static String getFormattedSQLString(Object elem) {
+		/* XXX?: String escaping? "\n, \r, ', ..."
+		 * see: http://www.orafaq.com/wiki/SQL_FAQ#How_does_one_escape_special_characters_when_writing_SQL_queries.3F 
+		 */
+		elem = getString(elem).replaceAll("'", "''");
+		return DEFAULT_SQL_STRING_ENCLOSING+elem+DEFAULT_SQL_STRING_ENCLOSING;
+	}
 
 	//dumpers: XML, HTML
 	//XXXdone: XML format: translate '<', '>', '&'?
