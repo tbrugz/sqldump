@@ -306,6 +306,7 @@
 	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
+		<!--<ivy:dependencytree/>-->
 		<antcall target="resolve-ivy-classpath"/>
 	</target>
 
