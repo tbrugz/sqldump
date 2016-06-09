@@ -133,12 +133,17 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 			//open file, open blob, write content, close both
 			try {
 				InputStream is = rs.getBinaryStream(colName);
-				File dir = new File(filename).getParentFile();
-				dir.mkdirs();
-				FileOutputStream fos = new FileOutputStream(filename);
-				IOUtil.pipeStreams(is, fos);
-				is.close();
-				fos.close();
+				if(is!=null) {
+					File dir = new File(filename).getParentFile();
+					dir.mkdirs();
+					FileOutputStream fos = new FileOutputStream(filename);
+					IOUtil.pipeStreams(is, fos);
+					is.close();
+					fos.close();
+				}
+				else {
+					log.debug("blob value [col="+colName+"] is null [filename="+filename+"]");
+				}
 			}
 			catch(SQLException e) {
 				log.warn("sql error: "+e.getMessage()+"; errcode="+e.getErrorCode()+"; mixing BlobDataDump with other dumpers may cause problems");
