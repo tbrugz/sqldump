@@ -972,7 +972,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		c.setName( cols.getString("COLUMN_NAME") );
 		c.setType(cols.getString("TYPE_NAME"));
 		c.setNullable("YES".equals(cols.getString("IS_NULLABLE")));
-		c.setColumSize(cols.getInt("COLUMN_SIZE"));
+		Object columnSize = cols.getObject("COLUMN_SIZE");
+		if(columnSize!=null) {
+			int icolumnSize = ((Number) columnSize).intValue();
+			c.setColumSize(icolumnSize);
+		}
 		c.setOrdinalPosition(cols.getInt("ORDINAL_POSITION"));
 		c.setRemarks(cols.getString("REMARKS"));
 		boolean autoInc = false;
@@ -991,7 +995,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			int iDecimalDigits = ((Number) decimalDigits).intValue();
 			if(iDecimalDigits!=0) {
 				c.setDecimalDigits(iDecimalDigits);
-			} 
+			}
 		}
 		return c;
 	}

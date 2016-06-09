@@ -90,7 +90,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	static Log log = LogFactory.getLog(Column.class);
 	
 	String type;
-	Integer columSize;
+	Integer columnSize;
 	Integer decimalDigits;
 	transient boolean pk;
 	boolean nullable = true;
@@ -113,7 +113,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			Column c = (Column) obj;
 			return name.equals(c.name)
 					&& (type!=null?type.equals(c.type):c.type==null)
-					&& (columSize!=null?columSize.equals(c.columSize):c.columSize==null)
+					&& (columnSize!=null?columnSize.equals(c.columnSize):c.columnSize==null)
 					&& (decimalDigits!=null?decimalDigits.equals(c.decimalDigits):c.decimalDigits==null)
 					&& (defaultValue!=null?defaultValue.equals(c.defaultValue):c.defaultValue==null)
 					&& (nullable == c.nullable)
@@ -128,7 +128,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + ((columSize == null) ? 0 : columSize.hashCode());
+		result = prime * result + ((columnSize == null) ? 0 : columnSize.hashCode());
 		result = prime * result + ((decimalDigits == null) ? 0 : decimalDigits.hashCode());
 		result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
 		result = prime * result + ((nullable) ? 0 : 1);
@@ -172,7 +172,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		String colType = type.trim();
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 		return colType
-			+(usePrecision?"("+columSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");
+			+((usePrecision && columnSize!=null)?"("+columnSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");
 	}
 	
 	public String getColumnConstraints() {
@@ -210,12 +210,13 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		this.type = type;
 	}
 
+	//TODO: rename [g|s]etColumSize -> [g|s]etColumnSize
 	public Integer getColumSize() {
-		return columSize;
+		return columnSize;
 	}
 
-	public void setColumSize(Integer columSize) {
-		this.columSize = columSize;
+	public void setColumSize(Integer columnSize) {
+		this.columnSize = columnSize;
 	}
 
 	public Integer getDecimalDigits() {
