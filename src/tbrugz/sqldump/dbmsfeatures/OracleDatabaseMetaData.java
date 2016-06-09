@@ -139,7 +139,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		String sql = "select * from (";
 		//strange: non-default columns must be at end (or 'sqlexception: already closed stream' can occur). maybe because DATA_DEFAULT is of type LONG/MEMO (read from a stream?)
 		sql += "select '' as TABLE_CAT, col.owner as TABLE_SCHEM, col.TABLE_NAME, col.COLUMN_NAME, data_type as TYPE_NAME, "
-				+"nvl(data_precision, data_length) as COLUMN_SIZE, data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, "
+				+"case data_type when 'NUMBER' then "
+				+"  case when data_precision is null and data_scale = 0 then 38 else data_precision end "
+				+"  else nvl(data_precision, data_length) end as COLUMN_SIZE, "
+				+"data_scale as DECIMAL_DIGITS, decode(NULLABLE, 'Y', 'YES', 'N', 'NO', null) as IS_NULLABLE, "
 				+"COLUMN_ID as ORDINAL_POSITION, comments as REMARKS, DATA_DEFAULT "
 				+"from "+(useDbaMetadataObjects?"dba_tab_columns col, dba_col_comments com ":"all_tab_columns col, all_col_comments com ")
 				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
