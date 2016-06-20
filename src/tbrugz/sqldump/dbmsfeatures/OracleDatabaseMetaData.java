@@ -121,13 +121,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			params.add(tableNamePattern);
 		}
 		sql.append("order by tables.TABLE_SCHEM, tables.TABLE_NAME");
-		
+
 		PreparedStatement st = conn.prepareStatement(sql.toString());
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery();
+		return st.executeQuery();		
+		//return executeQuery(conn, sql, params);
 	}
 	
 	@Override
@@ -294,11 +295,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
 		List<String> params = new ArrayList<String>();
 		
-		String sql = "select null as table_cat, owner as table_schem, table_name, grantor, grantee, privilege, grantable as is_grantable "+
+		String tableSchemaColumn = (useDbaMetadataObjects?"owner":"table_schema");
+		
+		String sql = "select null as table_cat, "+tableSchemaColumn+" as table_schem, "+
+				"table_name, grantor, grantee, privilege, grantable as is_grantable "+
 				"\nfrom "+(useDbaMetadataObjects?"dba_tab_privs ":"all_tab_privs ")+
 				"\nwhere 1=1";
 		if(schemaPattern!=null) {
-			sql += " and owner like ?";
+			sql += " and "+tableSchemaColumn+" like ?";
 			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
@@ -306,12 +310,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			params.add(tableNamePattern);
 		}
 		Connection conn = metadata.getConnection();
+		
 		PreparedStatement st = conn.prepareStatement(sql);
 		for(int i=0;i<params.size();i++) {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql[getTablePrivileges]:\n"+sql+"\nparams="+params);
 		return st.executeQuery();
+		//return executeQuery(conn, sql, params);
 	}
 	
 	/*
@@ -328,11 +334,13 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	public ResultSet getColumnPrivileges(String catalog, String schema, String tableName, String columnNamePattern) throws SQLException {
 		List<String> params = new ArrayList<String>();
 		
-		String sql = "select null as table_cat, owner as table_schem, table_name, column_name, grantor, grantee, privilege, grantable as is_grantable "+
+		String tableSchemaColumn = (useDbaMetadataObjects?"owner":"table_schema");
+		
+		String sql = "select null as table_cat, "+tableSchemaColumn+" as table_schem, table_name, column_name, grantor, grantee, privilege, grantable as is_grantable "+
 				"\nfrom "+(useDbaMetadataObjects?"dba_col_privs ":"all_col_privs ")+
 				"\nwhere 1=1";
 		if(schema!=null) {
-			sql += " and owner = ?";
+			sql += " and "+tableSchemaColumn+" = ?";
 			params.add(schema);
 		}
 		sql += " and table_name = ?";
@@ -349,6 +357,26 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		}
 		log.debug("sql[getColumnPrivileges]:\n"+sql+"\nparams="+params);
 		return st.executeQuery();
+	}
+	
+	static ResultSet executeQuery(Connection conn, StringBuilder sql, List<String> params) throws SQLException {
+		return executeQuery(conn, sql.toString(), params);
+	}
+	
+	static ResultSet executeQuery(Connection conn, String sql, List<String> params) throws SQLException {
+		PreparedStatement st = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			st.setString(i+1, params.get(i));
+		}
+		log.debug("sql:\n"+sql);
+		
+		try {
+			return st.executeQuery();
+		}
+		catch(SQLException e) {
+			log.warn("Exception: sql=\n"+sql);
+			throw e;
+		}
 	}
 	
 }

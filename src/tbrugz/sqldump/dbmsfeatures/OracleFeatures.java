@@ -78,7 +78,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		OracleTable.dumpLoggingClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_LOGGING, OracleTable.dumpLoggingClause);
 		OracleTable.dumpPartitionClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_PARTITION, OracleTable.dumpPartitionClause);
 		useDbaMetadataObjects = Utils.getPropBool(prop, PROP_USE_DBA_METAOBJECTS, useDbaMetadataObjects);
-		useDbaTriggers = Utils.getPropBool(prop, PROP_USE_DBA_TRIGGERS, useDbaTriggers);
+		useDbaTriggers = Utils.getPropBool(prop, PROP_USE_DBA_TRIGGERS, Utils.getPropBool(prop, PROP_USE_DBA_METAOBJECTS, useDbaTriggers));
 	}
 	
 	/* (non-Javadoc)
@@ -451,9 +451,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	void grabExecutablePrivileges(ExecutableObject executable, String schemaPattern, Connection conn) throws SQLException {
+		String tableSchemaColumn = (useDbaMetadataObjects?"owner":"table_schema");
 		String sql = "SELECT grantee, grantable "+
 				"FROM "+(useDbaMetadataObjects?"dba_tab_privs ":"all_tab_privs ")+
-				"WHERE owner = ? AND table_name = ? AND privilege = 'EXECUTE'";
+				"WHERE "+tableSchemaColumn+" = ? AND table_name = ? AND privilege = 'EXECUTE'";
 		log.debug("sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, schemaPattern);
