@@ -3,7 +3,7 @@ package tbrugz.sqldump.def;
 //XXX: rename to Constants?
 public class Defs {
 
-	public static final String PROP_TO_DB_ID = "sqldump.todbid";
+	@Deprecated public static final String PROP_TO_DB_ID = "sqldump.todbid";
 	public static final String PROP_FROM_DB_ID = "sqldump.fromdbid";
 
 	// grabber properties

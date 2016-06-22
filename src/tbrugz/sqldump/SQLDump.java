@@ -374,14 +374,21 @@ public class SQLDump implements Executor {
 		String[] processingClasses = processingClassesStr.split(",");
 		for(String procClass: processingClasses) {
 			procClass = procClass.trim();
-			ProcessComponent sqlproc = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
-			if(sqlproc!=null) {
-				processors.add(sqlproc);
+			try {
+				ProcessComponent sqlproc = (ProcessComponent) Utils.getClassInstance(procClass, Defs.DEFAULT_CLASSLOADING_PACKAGES);
+				if(sqlproc!=null) {
+					processors.add(sqlproc);
+				}
+				else {
+					String message = "Error initializing processing class: '"+procClass+"'";
+					log.error(message);
+					if(failonerror) { throw new ProcessingException(message); }
+				}
 			}
-			else {
-				String message = "Error initializing processing class: '"+procClass+"'";
-				log.error(message);
-				if(failonerror) { throw new ProcessingException(message); }
+			catch(Throwable e) {
+				String message = "processor '"+procClass+"' error: "+e;
+				log.warn(message);
+				if(failonerror) { throw new ProcessingException(message, e); }
 			}
 		}
 		return processors;

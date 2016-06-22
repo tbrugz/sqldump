@@ -16,6 +16,7 @@ import tbrugz.sqldump.util.Utils;
 public class SQLDialectTransformer extends AbstractSchemaProcessor {
 
 	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
+	static final String PROP_TRANSFORM_TO_DBID = "sqldump.schematransform.todbid";
 	
 	static Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
@@ -80,9 +81,10 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 		log.info("model transformer ended ok");
 	}
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void setProperties(Properties prop) {
-		toDialectId = prop.getProperty(Defs.PROP_TO_DB_ID);
+		toDialectId = Utils.getPropWithDeprecated(prop, PROP_TRANSFORM_TO_DBID, Defs.PROP_TO_DB_ID, null);
 		if(toDialectId==null) {
 			Boolean transformToANSI = Utils.getPropBoolean(prop, PROP_TRANSFORM_TO_ANSI);
 			if(transformToANSI!=null) {
