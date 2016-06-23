@@ -128,7 +128,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	//TODO: add property for 'useAbsolute'
 	static boolean useAbsolute = true;
 	//TODO: add property for 'doNotDumpNonConnectedNodes'
-	static boolean doNotDumpNonConnectedNodes = true;
+	static boolean doNotDumpNonConnectedNodes = false;
 	//XXX: add property for 'ignoreSelfReference4InitialAndFinalNodes'
 	static boolean ignoreSelfReference4InitialAndFinalNodes = true;
 	
@@ -174,9 +174,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				String object = rsNodes.getString(COL_OBJECT);
 				String objectLabel = rsNodes.getString(COL_OBJECT_LABEL);
 
-				RSNode node = newNode();
-				node.setId(object);
-				node.setLabel(objectLabel);
+				RSNode node = newNode(object, objectLabel);
 				if(hasObjectType) {
 					String objectType = rsNodes.getString(COL_OBJECT_TYPE);
 					node.setStereotype(normalize(objectType));
@@ -227,19 +225,15 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		while(rsEdges.next()) {
 			String source = rsEdges.getString(COL_SOURCE);
 			String target = rsEdges.getString(COL_TARGET);
-			Double edgeWidth = null;
-			String edgeType = "";
 
 			if(edgeOnlyStrategy) {
-				Node sourceNode = newNode();
-				sourceNode.setId(source);
-				sourceNode.setLabel(source);
-				if(hasSourceType) {
-					String sourceType = rsEdges.getString(COL_SOURCE_TYPE);
-					sourceNode.setStereotype(normalize(sourceType));
-				}
-				
-				if(nodeSet.add(sourceNode.getId())) {
+				if(nodeSet.add(source)) {
+					Node sourceNode = newNode(source, source);
+					if(hasSourceType) {
+						String sourceType = rsEdges.getString(COL_SOURCE_TYPE);
+						sourceNode.setStereotype(normalize(sourceType));
+					}
+					
 					nodes.add(sourceNode);
 					log.debug("source node "+source+" of stereotype "+sourceNode.getStereotype());
 				}
@@ -247,15 +241,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 					log.debug("source node "+source+" already processed");
 				}
 	
-				Node targetNode = newNode();
-				targetNode.setId(target);
-				targetNode.setLabel(target);
-				if(hasTargetType) {
-					String targetType = rsEdges.getString(COL_TARGET_TYPE);
-					targetNode.setStereotype(normalize(targetType));
-				}
-				
-				if(nodeSet.add(targetNode.getId())) {
+				if(nodeSet.add(target)) {
+					Node targetNode = newNode(target, target);
+					if(hasTargetType) {
+						String targetType = rsEdges.getString(COL_TARGET_TYPE);
+						targetNode.setStereotype(normalize(targetType));
+					}
+					
 					nodes.add(targetNode);
 					log.debug("target node "+target+" of stereotype "+targetNode.getStereotype());
 				}
@@ -270,7 +262,7 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				continue;
 			}
 			if(hasEdgeWidth) {
-				edgeWidth = rsEdges.getDouble(COL_EDGE_WIDTH);
+				Double edgeWidth = rsEdges.getDouble(COL_EDGE_WIDTH);
 				if(!hasEdgeLabel) {
 					edge.setName(nf.format(edgeWidth));
 				}
@@ -281,7 +273,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				if(width<minWidth) { minWidth = width; }
 			}
 			if(hasEdgeType) {
-				edgeType = rsEdges.getString(COL_EDGE_TYPE);
+				String edgeType = rsEdges.getString(COL_EDGE_TYPE);
+				edge.setStereotype(edgeType);
 			}
 			if(hasEdgeLabel) {
 				edge.setName(rsEdges.getString(COL_EDGE_LABEL) 
@@ -290,9 +283,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			edge.setSource(source);
 			edge.setTarget(target);
-			edge.setStereotype(edgeType);
 			edges.add(edge);
-			if( (!ignoreSelfReference4InitialAndFinalNodes) || (!source.equals(target)) ) {
+			if( ! (ignoreSelfReference4InitialAndFinalNodes && source.equals(target)) ) {
 				edgeSourceSet.add(source);
 				edgeTargetSet.add(target);
 			}
@@ -300,24 +292,29 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		
 		int nodeCount = 0, edgeCount = 0;
 		
+		Set<String> nodesDumped = new HashSet<String>();
+		
 		for(Node n: nodes) {
 			if(doNotDumpNonConnectedNodes && !edgeSourceSet.contains(n.getId()) && !edgeTargetSet.contains(n.getId())) { continue; }
 			//XXX: add source-only or target-only stereotypes?
 			if(!edgeSourceSet.contains(n.getId())) { n.setFinalNode(true); }
 			if(!edgeTargetSet.contains(n.getId())) { n.setInitialNode(true); }
 			graphModel.getChildren().add(n);
+			nodesDumped.add(n.getId());
 			nodeCount++;
 		}
 		for(WeightedEdge e: edges) {
 			if(!nodeSet.contains(e.getSource())) { log.warn("node source '"+e.getSource()+"' not found"); continue; }
 			if(!nodeSet.contains(e.getTarget())) { log.warn("node target '"+e.getTarget()+"' not found"); continue; }
+			if(!nodesDumped.contains(e.getSource())) { log.warn("node source '"+e.getSource()+"' not dumped"); continue; }
+			if(!nodesDumped.contains(e.getTarget())) { log.warn("node target '"+e.getTarget()+"' not dumped"); continue; }
 			
 			log.debug("edge '"+e+"' ["+e.getName()+"] has stereotype: "+e.getStereotype()+"; oldW: "+e.getWidth()+", newW: "+getNewWidth(e.getWidth(), minWidth, maxWidth));
 			e.setWidth(getNewWidth(e.getWidth(), minWidth, maxWidth));
 			graphModel.getChildren().add(e);
 			edgeCount++;
 		}
-		log.info("graph '"+qid+"': #nodes="+nodeCount+" ; #edges="+edgeCount);
+		log.info("graph '"+qid+"': #nodes="+nodeCount+" ; #edges="+edgeCount+" // #nodeSet="+nodeSet.size()+" ; #nodes="+nodes.size());
 		
 		return graphModel;
 	}
@@ -531,8 +528,10 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		return rsNodes==null;
 	}
 	
-	static RSNode newNode() {
+	static RSNode newNode(String id, String label) {
 		RSNode node = new RSNode();
+		node.setId(id);
+		node.setLabel(label);
 		node.setHeight(50f);
 		node.setStereotype(null);
 		return node;
@@ -551,6 +550,11 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		else {
 			this.outputStream = new PrintStream(out);
 		}
+	}
+	
+	@Override
+	public String getMimeType() {
+		return "application/graphml+xml";
 	}
 	
 }
