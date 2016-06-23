@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -464,6 +465,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			
 			//edges query
 			String sqlEdges = prop.getProperty(queryPrefix+".sql");
+			List<String> sqlEdgesParams = new ArrayList<String>();
+			sqlEdgesParams = getQueryParams(queryPrefix, false);
+			log.debug("sqlEdgesParams: "+sqlEdgesParams);
 			if(sqlEdges==null) {
 				//load from file
 				String sqlfile = prop.getProperty(queryPrefix+".sqlfile");
@@ -475,6 +479,9 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 
 			//nodes optional query
 			String sqlNodes = prop.getProperty(queryPrefix+".nodesql");
+			List<String> sqlNodesParams = new ArrayList<String>();
+			sqlNodesParams = getQueryParams(queryPrefix, true);
+			log.debug("sqlNodesParams: "+sqlNodesParams);
 			if(sqlNodes==null) {
 				//load from file
 				String sqlfile = prop.getProperty(queryPrefix+".nodesqlfile");
@@ -497,14 +504,20 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			}
 			
 			logsql.info("edges sql: "+sqlEdges);
-			Statement st = conn.createStatement();
-			ResultSet rsEdges = st.executeQuery(sqlEdges);
+			PreparedStatement st = conn.prepareStatement(sqlEdges);
+			for(int j=0;j<sqlEdgesParams.size();j++) {
+				st.setString(j+1, sqlEdgesParams.get(j));
+			}
+			ResultSet rsEdges = st.executeQuery();
 			ResultSet rsNodes = null;
 
 			if(sqlNodes!=null) {
 				logsql.info("nodes sql: "+sqlNodes);
-				st = conn.createStatement();
-				rsNodes = st.executeQuery(sqlNodes);
+				st = conn.prepareStatement(sqlNodes);
+				for(int j=0;j<sqlNodesParams.size();j++) {
+					st.setString(j+1, sqlNodesParams.get(j));
+				}
+				rsNodes = st.executeQuery();
 			}
 			
 			snippets = prop.getProperty(queryPrefix+".snippetsfile");
@@ -522,6 +535,19 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			if(dumped) { i++; }
 		}
 		log.info(i+" [of "+queriesArr.length+"] graphmlqueries dumped");
+	}
+	
+	List<String> getQueryParams(String queryPrefix, boolean node) {
+		int paramCount = 1;
+		List<String> params = new ArrayList<String>();
+		while(true) {
+			String paramStr = prop.getProperty(queryPrefix+"."+(node?"node":"")+"param."+paramCount);
+			if(paramStr==null) { break; }
+			params.add(paramStr);
+			log.debug("added bind param #"+paramCount+": "+paramStr);
+			paramCount++;
+		}
+		return params;
 	}
 	
 	static boolean isEdgeOnlyStrategy(ResultSet rsEdges, ResultSet rsNodes) {
