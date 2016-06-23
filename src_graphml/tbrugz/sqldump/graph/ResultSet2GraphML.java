@@ -3,6 +3,7 @@ package tbrugz.sqldump.graph;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -136,7 +137,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 	static double edgeMaxWidth = 7.0; 
 	
 	Class<?> dumpFormatClass = null;
-	File output;
+	File outputFile;
+	PrintStream outputStream;
 	String snippets;
 	
 	static String initialNodeLabel = "";
@@ -401,9 +403,21 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				log.warn("error opening snippets file: "+snippets);
 			}
 		}
-		Utils.prepareDir(output);
-		dg.dumpModel(r, new PrintStream(output));
-		log.info("graphmlquery written to '"+output.getAbsolutePath()+"'");
+		
+		if(outputFile!=null) {
+			Utils.prepareDir(outputFile);
+			if(outputStream==null) {
+				outputStream = new PrintStream(outputFile);
+			}
+		}
+		dg.dumpModel(r, outputStream);
+		if(outputFile!=null) {
+			log.info("graphmlquery written to '"+outputFile.getAbsolutePath()+"'");
+		}
+		else {
+			log.info("graphmlquery written to output stream");
+		}
+		
 		return true;
 	}
 
@@ -476,8 +490,13 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 			String propOutFile = queryPrefix+".outputfile";
 			String outputfile = prop.getProperty(propOutFile);
 			if(outputfile==null) {
-				log.error("output file not defined (prop '"+propOutFile+"')");
-				return;
+				if(outputStream==null) {
+					log.warn("output file not defined (prop '"+propOutFile+"') & output stream not set");
+					return;
+				}
+			}
+			else {
+				outputFile = new File(outputfile);
 			}
 			
 			logsql.info("edges sql: "+sqlEdges);
@@ -491,7 +510,6 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 				rsNodes = st.executeQuery(sqlNodes);
 			}
 			
-			output = new File(outputfile);
 			snippets = prop.getProperty(queryPrefix+".snippetsfile");
 			dumpFormatClass = Schema2GraphML.getDumpFormatClass(prop,
 					queryPrefix+Schema2GraphML.SUFFIX_DUMPFORMATCLASS);
@@ -518,6 +536,21 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		node.setHeight(50f);
 		node.setStereotype(null);
 		return node;
+	}
+	
+	@Override
+	public boolean acceptsOutputStream() {
+		return true;
+	}
+	
+	@Override
+	public void setOutputStream(OutputStream out) {
+		if(out instanceof PrintStream) {
+			this.outputStream = (PrintStream) out;
+		}
+		else {
+			this.outputStream = new PrintStream(out);
+		}
 	}
 	
 }
