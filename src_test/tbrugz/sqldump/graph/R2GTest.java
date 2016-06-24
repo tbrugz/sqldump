@@ -57,6 +57,7 @@ public class R2GTest {
 		prop.setProperty("sqldump.graphmlqueries", "q2");
 		Connection conn = ConnectionUtil.initDBConnection("sqldump", prop);
 		
+		ResultSet2GraphML.doNotDumpNonConnectedNodes = true;
 		Processor proc = new ResultSet2GraphML();
 		proc.setProperties(prop);
 		proc.setConnection(conn);
