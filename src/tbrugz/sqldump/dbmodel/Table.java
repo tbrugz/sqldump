@@ -299,7 +299,7 @@ public class Table extends DBObject implements Relation {
 		return ret;
 	}
 	
-	static List<String> getColumnRemarks(List<Column> columns) {
+	public static List<String> getColumnRemarks(List<Column> columns) {
 		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {
@@ -308,10 +308,15 @@ public class Table extends DBObject implements Relation {
 		return ret;
 	}
 	
-	static String getRelationRemarks(Relation rel, boolean dumpSchemaName) {
+	public static String getRelationRemarks(Relation rel, boolean dumpSchemaName) {
+		return getRelationRemarks(rel, dumpSchemaName, false);
+	}
+	
+	public static String getRelationRemarks(Relation rel, boolean dumpSchemaName, boolean dumpIfNull) {
 		StringBuilder sb = new StringBuilder();
 		String tableComment = rel.getRemarks();
-		if(tableComment!=null && !tableComment.trim().equals("")) {
+		if(dumpIfNull || (tableComment!=null && !tableComment.trim().equals(""))) {
+			if(tableComment==null) { tableComment = ""; }
 			tableComment = tableComment.replaceAll("'", "''");
 			sb.append("comment on "+rel.getRelationType()+" "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
 		}
@@ -324,17 +329,27 @@ public class Table extends DBObject implements Relation {
 		int commentCount = 0;
 		if(columns!=null) {
 			for(Column c: columns) {
-				String comment = c.getRemarks();
-				if(comment!=null && !comment.trim().equals("")) {
-					//XXXdone: escape comment
-					comment = comment.replaceAll("'", "''");
+				String remarks = getColumnRemarks(rel, c, dumpSchemaName, false);
+				if(remarks!=null) {
 					if(commentCount>0) { sb.append(";\n"); }
-					sb.append("comment on column "+DBObject.getFinalName(rel, dumpSchemaName)+"."+DBObject.getFinalIdentifier(c.name)+" is '"+comment+"'");
+					sb.append(remarks);
 					commentCount++;
+					//sb.append(";\n");
 				}
 			}
 		}
 		return sb.toString();
+	}
+	
+	public static String getColumnRemarks(NamedDBObject rel, Column c, boolean dumpSchemaName, boolean dumpIfNull) {
+		String comment = c.getRemarks();
+		if(dumpIfNull || (comment!=null && !comment.trim().equals("")) ) {
+			//XXXdone: escape comment
+			if(comment==null) { comment = ""; }
+			comment = comment.replaceAll("'", "''");
+			return "comment on column "+DBObject.getFinalName(rel, dumpSchemaName)+"."+DBObject.getFinalIdentifier(c.name)+" is '"+comment+"'";
+		}
+		return null;
 	}
 	
 	@Override

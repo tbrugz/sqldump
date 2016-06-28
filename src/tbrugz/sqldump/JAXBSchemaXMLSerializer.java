@@ -33,7 +33,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INRESOURCE = ".inresource";
 	
-	static final String JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
+	public static final String JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	

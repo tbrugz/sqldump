@@ -21,6 +21,12 @@ public class StringUtils {
 		return rtrim(s1).equals(rtrim(s2));
 	}
 	
+	public static boolean equalsNullsAllowed(String s1, String s2) {
+		return (s1==null && s2==null) ? true :
+			(s1==null || s2==null) ? false :
+			s1.equals(s2);
+	}
+	
 	public static String rtrim(String s) {
 		return RTRIM.matcher(s).replaceFirst("");
 	}

@@ -15,6 +15,7 @@ import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.StringUtils;
 
 //@XmlJavaTypeAdapter(TableDiffAdapter.class)
 public class TableDiff implements Diff, Comparable<TableDiff> {
@@ -23,17 +24,23 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
 	final String renameFromSchema;
 	final String renameFromName;
+	final String newRemarks;
 	final Table table;
 	
-	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName) {
+	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName, String newRemarks) {
 		this.diffType = changeType;
 		this.table = table;
 		this.renameFromSchema = renameFromSchema;
 		this.renameFromName = renameFromName;
+		this.newRemarks = newRemarks;
 	}
 
 	public TableDiff(ChangeType changeType, Table table) {
-		this(changeType, table, null, null);
+		this(changeType, table, null, null, null);
+	}
+	
+	public static TableDiff getTableDiffAddRemarks(Table table, String newRemarks) {
+		return new TableDiff(ChangeType.REMARKS, table, null, null, newRemarks);
 	}
 	
 	@Override
@@ -46,7 +53,10 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				return "alter table "+(renameFromSchema!=null?renameFromSchema+".":"")+renameFromName+" rename to "+table.getFinalQualifiedName();
 			case DROP:
 				return "drop table "+table.getFinalQualifiedName();
+			case REMARKS:
+				return Table.getRelationRemarks(table, true, true);
 			case ALTER:
+				//throw new IllegalStateException("ALTER table without remarks?");
 			case REPLACE:
 				throw new IllegalStateException("cannot "+diffType.name()+" a table");
 			default:
@@ -89,6 +99,12 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 					ColumnDiff tcd = new ColumnDiff(ChangeType.ALTER, newTable, cOrig, cNew);
 					diffs.add(tcd);
 				}
+				
+				if(!StringUtils.equalsNullsAllowed(cOrig.getRemarks(), cNew.getRemarks())) {
+					ColumnDiff tcd = new ColumnDiff(ChangeType.REMARKS, newTable, cOrig, cNew);
+					diffs.add(tcd);
+				}
+				
 				//else {
 					//log.info("equal columns: cOrig: "+cOrig+", cNew: "+cNew);
 				//}
@@ -115,6 +131,15 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
 		}
 		diffs.addAll(dbiddiffs);
+		
+		//comments??
+		String otRemarks = origTable.getRemarks();
+		String ntRemarks = newTable.getRemarks();
+		if(!StringUtils.equalsNullsAllowed(otRemarks, ntRemarks)) {
+			//diffs.add(new RemarksDiff(newTable.getName(), null, ntRemarks));
+			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, ntRemarks));
+			log.info("added Remakrs");
+		}
 		
 		//grants
 		diffGrants(diffs, origTable, newTable);

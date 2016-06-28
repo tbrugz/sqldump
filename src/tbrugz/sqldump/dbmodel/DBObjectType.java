@@ -5,7 +5,7 @@ public enum DBObjectType {
 	MATERIALIZED_VIEW, //sub-types?
 	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
 	
-	CONSTRAINT, COLUMN, //non '1st class' objects
+	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
 	RELATION; //, QUERY; // XXX: add "abstract" object types ?
 	

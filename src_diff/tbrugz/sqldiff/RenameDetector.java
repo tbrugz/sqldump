@@ -148,7 +148,7 @@ public class RenameDetector {
 			boolean added = false;
 			int removedCount = 0;
 			if(rt.add instanceof TableDiff) {
-				TableDiff tdrename = new TableDiff(ChangeType.RENAME, (Table) rt.add.getNamedObject(), rt.drop.getNamedObject().getSchemaName(), rt.drop.getNamedObject().getName());
+				TableDiff tdrename = new TableDiff(ChangeType.RENAME, (Table) rt.add.getNamedObject(), rt.drop.getNamedObject().getSchemaName(), rt.drop.getNamedObject().getName(), null);
 				added = diffs.add(tdrename);
 				//TODO add & drop columns!
 			}

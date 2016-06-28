@@ -12,6 +12,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.DBMSUpdateListener;
 import tbrugz.sqldump.util.Utils;
@@ -152,11 +153,17 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 				/*colChange = features.sqlAlterColumnClause()+" "+DBObject.getFinalIdentifier(previousColumn.getName())
 					+" rename to "+DBObject.getFinalIdentifier(column.getName());
 				break;*/
+			case REMARKS:
+				return DiffUtil.singleElemList( Table.getColumnRemarks(table, column, true, true) );
 			case DROP:
 				colChange = "drop column "+DBObject.getFinalIdentifier(previousColumn.getName());
 				break;
 			case REPLACE:
 				throw new IllegalArgumentException("illegal ChangeType for ColumnDiff: "+changeType);
+		}
+		
+		if(colChange==null) {
+			throw new IllegalArgumentException("illegal change [changeType="+changeType+"] for ColumnDiff: "+colChange);
 		}
 		return DiffUtil.singleElemList( "alter table "+DBObject.getFinalName(table, true)+" "+colChange );
 	}
