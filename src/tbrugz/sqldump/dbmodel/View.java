@@ -104,7 +104,8 @@ public class View extends DBObject implements Relation {
 				);		
 	}
 	
-	protected String getRemarksSnippet(boolean dumpSchemaName) {
+	@Override
+	public String getRemarksSnippet(boolean dumpSchemaName) {
 		StringBuilder sbRemarks = new StringBuilder();
 
 		String stmp1 = Table.getRelationRemarks(this, dumpSchemaName);

@@ -165,6 +165,11 @@ public class Table extends DBObject implements Relation {
 		return "";
 	}
 	
+	@Override
+	public String getRemarksSnippet(boolean dumpSchemaName) {
+		return getAfterCreateTableScript(dumpSchemaName, true);
+	}
+	
 	public String getAfterCreateTableScript(boolean dumpSchemaName, boolean dumpRemarks) {
 		//e.g.: COMMENT ON COLUMN [schema.]table.column IS 'text'
 		StringBuilder sb = new StringBuilder();

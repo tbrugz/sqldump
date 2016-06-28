@@ -48,4 +48,7 @@ public interface Relation extends NamedDBObject {
 	public Integer getParameterCount();
 
 	public List<String> getParameterTypes();
+	
+	public String getRemarksSnippet(boolean dumpSchemaName);
+	
 }

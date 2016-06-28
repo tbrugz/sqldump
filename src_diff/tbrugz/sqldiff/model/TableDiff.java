@@ -138,7 +138,6 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		if(!StringUtils.equalsNullsAllowed(otRemarks, ntRemarks)) {
 			//diffs.add(new RemarksDiff(newTable.getName(), null, ntRemarks));
 			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, ntRemarks));
-			log.info("added Remakrs");
 		}
 		
 		//grants
