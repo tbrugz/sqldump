@@ -24,23 +24,23 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
 	final String renameFromSchema;
 	final String renameFromName;
-	final String newRemarks;
+	final String previousRemarks;
 	final Table table;
 	
-	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName, String newRemarks) {
+	public TableDiff(ChangeType changeType, Table table, String renameFromSchema, String renameFromName, String previousRemarks) {
 		this.diffType = changeType;
 		this.table = table;
 		this.renameFromSchema = renameFromSchema;
 		this.renameFromName = renameFromName;
-		this.newRemarks = newRemarks;
+		this.previousRemarks = previousRemarks;
 	}
 
 	public TableDiff(ChangeType changeType, Table table) {
 		this(changeType, table, null, null, null);
 	}
 	
-	public static TableDiff getTableDiffAddRemarks(Table table, String newRemarks) {
-		return new TableDiff(ChangeType.REMARKS, table, null, null, newRemarks);
+	public static TableDiff getTableDiffAddRemarks(Table table, String previousRemarks) {
+		return new TableDiff(ChangeType.REMARKS, table, null, null, previousRemarks);
 	}
 	
 	@Override
@@ -137,7 +137,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		String ntRemarks = newTable.getRemarks();
 		if(!StringUtils.equalsNullsAllowed(otRemarks, ntRemarks)) {
 			//diffs.add(new RemarksDiff(newTable.getName(), null, ntRemarks));
-			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, ntRemarks));
+			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, otRemarks));
 		}
 		
 		//grants
@@ -257,6 +257,8 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			return "";
 		case RENAME:
 			return "/* table renamed: "+table.getQualifiedName()+" */"; //XXX: show table definition on rename
+		case REMARKS:
+			return Table.getRelationRemarks(table, true, true);
 		default:
 			throw new IllegalStateException("TableDiff with illegal "+diffType+" state");
 		}
@@ -271,6 +273,8 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 			return table.getDefinition(true);
 		case RENAME:
 			return "/* table renamed: "+renameFromSchema+"."+renameFromName+" */"; //XXX: show table definition on rename
+		case REMARKS:
+			return Table.getRemarksSql(table, previousRemarks, true);
 		default:
 			throw new IllegalStateException("TableDiff with illegal "+diffType+" state");
 		}

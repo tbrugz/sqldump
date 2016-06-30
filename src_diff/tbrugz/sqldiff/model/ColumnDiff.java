@@ -329,11 +329,19 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public String getDefinition() {
+		if(type==ChangeType.REMARKS) {
+			return Table.getColumnRemarks(table, column, true, true);
+		}
+		
 		return column!=null?column.getDefinition():"";
 	}
 	
 	@Override
 	public String getPreviousDefinition() {
+		if(type==ChangeType.REMARKS) {
+			return Table.getColumnRemarks(table, previousColumn, true, true);
+		}
+		
 		return previousColumn!=null?previousColumn.getDefinition():"";
 	}
 

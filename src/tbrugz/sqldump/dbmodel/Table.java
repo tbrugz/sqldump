@@ -321,11 +321,16 @@ public class Table extends DBObject implements Relation {
 		StringBuilder sb = new StringBuilder();
 		String tableComment = rel.getRemarks();
 		if(dumpIfNull || (tableComment!=null && !tableComment.trim().equals(""))) {
-			if(tableComment==null) { tableComment = ""; }
-			tableComment = tableComment.replaceAll("'", "''");
-			sb.append("comment on "+rel.getRelationType()+" "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
+			sb.append(getRemarksSql(rel, tableComment, dumpSchemaName));
+			//sb.append("comment on "+rel.getRelationType()+" "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+tableComment+"'"); //;\n
 		}
 		return sb.toString();
+	}
+	
+	public static String getRemarksSql(Relation rel, String remarks, boolean dumpSchemaName) {
+		if(remarks==null) { remarks = ""; }
+		remarks = remarks.replaceAll("'", "''");
+		return "comment on "+rel.getRelationType()+" "+DBObject.getFinalName(rel, dumpSchemaName)+" is '"+remarks+"'";
 	}
 	
 	static String getColumnRemarks(List<Column> columns, Relation rel, boolean dumpSchemaName) {

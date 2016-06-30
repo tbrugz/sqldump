@@ -11,6 +11,6 @@ public class TDiff {
 	public ChangeType changeType;
 	public String renameFromSchema;
 	public String renameFromName;
-	public String newRemarks;
+	public String previousRemarks;
 	public Table table;
 }

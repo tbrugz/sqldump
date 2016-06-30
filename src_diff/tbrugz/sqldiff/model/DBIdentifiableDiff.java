@@ -62,6 +62,7 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 						DBIdentifiable.getType(ident));
 				}
 			}
+			//case REMARKS: //XXX add REMARKS for DBIdentifiableDiff ?
 		}
 		throw new IllegalStateException("unknown changetype "+changeType+" on DBIdentifiableDiff.getDiff()");
 	}
