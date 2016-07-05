@@ -1,7 +1,7 @@
 package tbrugz.sqldump.datadump;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Matcher;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,7 +36,7 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	protected final List<String> lsColNames = new ArrayList<String>();
 	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();*/
 
-	String outFilePattern;
+	//String outFilePattern;
 	//String tableName;
 
 	//stateful props
@@ -46,10 +45,10 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	
 	@Override
 	public void procProperties(Properties prop) {
-		outFilePattern = prop.getProperty(PROP_ODS_OUTFILEPATTERN);
+		/*outFilePattern = prop.getProperty(PROP_ODS_OUTFILEPATTERN);
 		if(outFilePattern==null) {
 			log.warn("prop '"+PROP_ODS_OUTFILEPATTERN+"' must be set");
-		}
+		}*/
 	}
 
 	@Override
@@ -100,7 +99,7 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	}
 
 	@Override
-	public void dumpHeader() throws IOException {
+	public void dumpHeader(OutputStream os) throws IOException {
 		try {
 			sd = newSpreadSheet();
 			t = sd.addTable();
@@ -120,7 +119,7 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	}
 
 	@Override
-	public void dumpRow(ResultSet rs, long count)
+	public void dumpRow(ResultSet rs, long count, OutputStream os)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, false);
 		int row = (int)count+1;
@@ -154,19 +153,19 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count) throws IOException {
+	public void dumpFooter(long count, OutputStream os) throws IOException {
 		try {
 			// commons-io...
 			//WriterOutputStream out = new WriterOutputStream(fos);
 			//XXX: set column width?
 			
-			String filename = outFilePattern
+			/*String filename = outFilePattern
 					.replaceAll(DataDump.PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableName) )
 					.replaceAll(DataDump.PATTERN_SYNTAXFILEEXT_FINAL, ODS_FILEEXT);
 			
-			FileOutputStream out = new FileOutputStream(filename);
-			sd.save(out);
-			out.close();
+			FileOutputStream out = new FileOutputStream(filename);*/
+			sd.save(os);
+			//out.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,9 +176,14 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 		return true;
 	}
 	
-	@Override
+	/*@Override
 	public boolean isWriterIndependent() {
 		return true; // SpreadsheetDocument.save() needs outputstream, not writer - dealing with output ourselves
+	}*/
+	
+	@Override
+	public boolean acceptsOutputStream() {
+		return true;
 	}
 	
 	/*@Override
