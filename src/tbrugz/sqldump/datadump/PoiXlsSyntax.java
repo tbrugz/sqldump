@@ -8,8 +8,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -21,11 +19,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import tbrugz.sqldump.util.SQLUtils;
 
 /*
+ * HSSF: Excel XLS -- application/vnd.ms-excel
+ * 
  * https://poi.apache.org/spreadsheet/quick-guide.html
  */
 public class PoiXlsSyntax extends OutputStreamDumper {
 
-	static final Log log = LogFactory.getLog(PoiXlsSyntax.class);
+	//static final Log log = LogFactory.getLog(PoiXlsSyntax.class);
 	
 	public static final String XLS_SYNTAX_ID = "xls";
 	
@@ -57,7 +57,7 @@ public class PoiXlsSyntax extends OutputStreamDumper {
 
 	@Override
 	public void dumpHeader(OutputStream os) throws IOException {
-		wb = new HSSFWorkbook();
+		wb = createWorkbook();
 		sheet = wb.createSheet(tableName);
 		Row row = sheet.createRow(0);
 		for(int i=0;i<numCol;i++) {
@@ -82,6 +82,10 @@ public class PoiXlsSyntax extends OutputStreamDumper {
 			setCellvalue(cell, o);
 		}
 	}
+	
+	Workbook createWorkbook() {
+		return new HSSFWorkbook();
+	}	
 	
 	void setCellvalue(Cell cell, Object o) {
 		if(o == null) {}

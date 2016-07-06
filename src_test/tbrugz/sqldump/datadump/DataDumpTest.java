@@ -457,7 +457,7 @@ public class DataDumpTest {
 	@Test
 	public void testXls() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		dumpWithParams(new String[]{
-				"-Dsqldump.datadump.dumpsyntaxes=xls",
+				"-Dsqldump.datadump.dumpsyntaxes=xls, xlsx",
 				});
 		//XXX: assert...
 	}
