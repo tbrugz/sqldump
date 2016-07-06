@@ -484,7 +484,7 @@ public class Utils {
 	}
 
 	public static Class<?> getClassWithinPackages(String className, String... packages) {
-		Exception ex = null;
+		Throwable ex = null;
 		if(packages==null || packages.length==0) {
 			packages = new String[]{null};
 		}
@@ -496,9 +496,12 @@ public class Utils {
 				return c;
 			} catch (ClassNotFoundException e) {
 				if(ex==null) { ex = e; }
+			} catch (NoClassDefFoundError e) {
+				if(ex==null) { ex = e; }
 			}
 		}
-		log.debug("class not found: "+className+" [ex: "+ex+"]",ex);
+		log.warn("error loading class: "+className+" [ex: "+ex+"]");
+		log.debug("error loading class: "+className+" [ex: "+ex+"]",ex);
 		return null;
 	}
 	
