@@ -13,7 +13,7 @@ import javax.sql.rowset.CachedRowSet;
 
 import com.sun.rowset.CachedRowSetImpl;
 
-public class CacheRowSetSyntax extends WriterIndependentDumpSyntax {
+public class CacheRowSetSyntax extends OutputStreamDumper {
 
 	CachedRowSet crs;
 	

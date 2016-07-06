@@ -24,7 +24,7 @@ import tbrugz.sqldump.util.SQLUtils;
 /*
  * see: http://incubator.apache.org/odftoolkit/simple/document/cookbook/Table.html
  */
-public class SimpleODS extends WriterIndependentDumpSyntax {
+public class SimpleODS extends OutputStreamDumper {
 
 	static final Log log = LogFactory.getLog(SimpleODS.class);
 	
@@ -176,19 +176,9 @@ public class SimpleODS extends WriterIndependentDumpSyntax {
 		return true;
 	}
 	
-	/*@Override
-	public boolean isWriterIndependent() {
-		return true; // SpreadsheetDocument.save() needs outputstream, not writer - dealing with output ourselves
-	}*/
-	
 	@Override
 	public boolean acceptsOutputStream() {
 		return true;
 	}
-	
-	/*@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}*/
 
 }
