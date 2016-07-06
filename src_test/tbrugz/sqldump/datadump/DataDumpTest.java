@@ -453,6 +453,15 @@ public class DataDumpTest {
 
 		rs.close();
 	}
+
+	@Test
+	public void testXls() throws ClassNotFoundException, SQLException, NamingException, IOException {
+		dumpWithParams(new String[]{
+				"-Dsqldump.datadump.dumpsyntaxes=xls",
+				});
+		//XXX: assert...
+	}
+
 	
 	//----------------------------------
 	
