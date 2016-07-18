@@ -21,4 +21,9 @@ public abstract class WriterIndependentDumpSyntax extends AbstractDumpSyntax {
 	public void dumpFooter(long count, Writer fos) throws IOException {
 		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
 	}
+	
+	@Override
+	public boolean isWriterIndependent() {
+		return true;
+	}
 }
