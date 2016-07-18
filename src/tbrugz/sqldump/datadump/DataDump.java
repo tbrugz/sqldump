@@ -468,6 +468,7 @@ public class DataDump extends AbstractSQLProc {
 			ResultSetMetaData md = rs.getMetaData();
 			
 			if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
+				// dump columns
 				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 			}
 

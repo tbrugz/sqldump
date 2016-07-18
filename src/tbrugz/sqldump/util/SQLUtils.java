@@ -84,6 +84,8 @@ public class SQLUtils {
 	}
 
 	static boolean resultSetGetObjectExceptionWarned = false;
+
+	static Set<String> genericObjectsWarned = new HashSet<String>();
 	
 	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol) throws SQLException {
 		return getRowObjectListFromRS(rs, colTypes, numCol, false);
@@ -200,8 +202,12 @@ public class SQLUtils {
 			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
-				//XXX: show log.info on 1st time only?
-				log.info("generic type ["+value.getClass().getSimpleName()+"/"+coltype.getSimpleName()+"] grabbed");
+				//XXXdone: show log.info on 1st time only?
+				String objectClassName = value.getClass().getName();
+				if(!genericObjectsWarned.contains(objectClassName)) {
+					log.warn("generic type ["+objectClassName+"/"+coltype.getName()+"] grabbed");
+					genericObjectsWarned.add(objectClassName);
+				}
 				if(canReturnResultSet && ResultSet.class.isAssignableFrom(value.getClass())) {
 					log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
 					colTypes.set(i-1, ResultSet.class);
@@ -271,30 +277,30 @@ public class SQLUtils {
 			case Types.FLOAT:    //  6
 			case Types.DOUBLE:   //  8
 				return Double.class;
-			case Types.DATE:
+			case Types.DATE:     // 91
 				return Date.class;
-			case Types.TIMESTAMP:
+			case Types.TIMESTAMP:// 93
 			//case Types.TIMESTAMP_WITH_TIMEZONE: //java8
 			case 2014: //TIMESTAMP_WITH_TIMEZONE  //java8 - https://docs.oracle.com/javase/8/docs/api/java/sql/Types.html#TIMESTAMP_WITH_TIMEZONE
 			case -101: //oracle TIMESTAMP WITH TIMEZONE
 			case -102: //oracle TIMESTAMP WITH LOCAL TIMEZONE
 			//pgsql - http://www.postgresql.org/docs/current/static/datatype-datetime.html
 				return Date.class; //return Timestamp.class;
-			case Types.CHAR:
-			case Types.VARCHAR:
+			case Types.CHAR:     //  1
+			case Types.VARCHAR:  // 12
 			//case Types.CLOB:
 				return String.class;
-			case Types.LONGVARBINARY:
-			case Types.BLOB:
+			case Types.LONGVARBINARY: //   -4
+			case Types.BLOB:          // 2004
 				return Blob.class;
-			case Types.ARRAY:
+			case Types.ARRAY:         // 2003
 				//return Array.class;
 			case -10: //XXX: ResultSet/Cursor (Oracle)?
 				return ResultSet.class;
-			case Types.OTHER:
+			case Types.OTHER:         // 1111
 				return Object.class;
 			default:
-				if(clobTypeIsString && type==Types.CLOB) {
+				if(clobTypeIsString && type==Types.CLOB) {  // 2005
 					return String.class;
 				}
 				//convert to Sring? http://www.java2s.com/Code/Java/Database-SQL-JDBC/convertingajavasqlTypesintegervalueintoaprintablename.htm
