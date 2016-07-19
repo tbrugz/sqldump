@@ -34,13 +34,13 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
-import tbrugz.sqldump.sqlrun.def.Executor;
+import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
-public abstract class AbstractImporter extends AbstractFailable implements Executor {
+public abstract class AbstractImporter extends AbstractFailable implements Importer {
 	
 	public static class IOCounter {
 		long input = 0;
@@ -261,7 +261,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Execu
 	//XXX add countsByFailoverId for all files?
 	Map<Integer, IOCounter> aggCountsByFailoverId;
 	
-	//XXX @Override
+	@Override
 	public long importData() throws SQLException, InterruptedException, IOException {
 		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;

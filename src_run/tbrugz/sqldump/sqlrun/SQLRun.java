@@ -25,8 +25,8 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
+import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.def.Util;
-import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
@@ -249,7 +249,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			// .import
 			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
 				String importType = execValue;
-				AbstractImporter importer = getImporter(importType);
+				Importer importer = getImporter(importType);
 				if(importer==null) {
 					log.warn("unknown import type: "+importType);
 					return false;
@@ -461,10 +461,10 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter"
 	};
 	
-	AbstractImporter getImporter(String id) {
+	Importer getImporter(String id) {
 		for(int i=0;i<IMPORTER_IDS.length;i++) {
 			if(IMPORTER_IDS[i].equals(id)) {
-				return (AbstractImporter) Utils.getClassInstance(IMPORTER_CLASSES[i], "tbrugz.sqldump.sqlrun.importers");
+				return (Importer) Utils.getClassInstance(IMPORTER_CLASSES[i], "tbrugz.sqldump.sqlrun.importers");
 			}
 		}
 		return null;
