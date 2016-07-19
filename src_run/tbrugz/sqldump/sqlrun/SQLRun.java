@@ -455,10 +455,10 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	};
 	
 	static final String[] IMPORTER_IDS = {
-		"csv", "csvplain", "ffc", "regex"
+		"csv", "csvplain", "ffc", "regex", "xls"
 	};
 	static final String[] IMPORTER_CLASSES = {
-		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter"
+		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter", "XlsImporter"
 	};
 	
 	Importer getImporter(String id) {
