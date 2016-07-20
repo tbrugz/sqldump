@@ -38,6 +38,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	//long batchUpdateSize = 1000;
 	String insertTable = null;
 	String insertSQL = null;
+	List<String> columnNames;
 	List<String> columnTypes;
 
 	//XXX: different exec suffixes for each importer class?
@@ -95,8 +96,11 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		if(insertSQL!=null) {
 			sql = getInsertSql(insertSQL);
 		}
-		else {
+		else if(columnNames==null) {
 			sql = getInsertSql(insertTable, columnTypes.size());
+		}
+		else {
+			sql = getInsertSql(insertTable, columnNames);
 		}
 		return sql;
 	}
@@ -139,11 +143,25 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return sb.toString();
 	}
 	
-	static void setStmtValue(PreparedStatement stmt, String colType, int index, String value) throws SQLException, ParseException {
-		if(value==null) {
+	static String getInsertSql(String insertTable, List<String> columnNames) throws SQLException {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("insert into " + insertTable + " (");
+		sb.append(Utils.join(columnNames, ", "));
+		sb.append(") values (");
+		for(int i=0;i<columnNames.size();i++) {
+			sb.append((i==0?"":", ")+"?");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+	
+	static void setStmtValue(PreparedStatement stmt, String colType, int index, Object objValue) throws SQLException, ParseException {
+		if(objValue==null) {
 			stmt.setString(index+1, null);
 			return;
 		}
+		String value = String.valueOf(objValue);
 		if(colType!=null) {
 			if(colType.equals("int")) {
 				try {
