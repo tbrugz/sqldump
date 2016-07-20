@@ -31,7 +31,7 @@ public class XlsImporter extends BaseImporter {
 	String importFile;
 	String sheetName;
 	Integer sheetNumber;
-	int linesToSkip = 1;
+	long linesToSkip = 0;
 	boolean use1stLineAsColNames = false;
 	
 	static final String[] XLS_AUX_SUFFIXES = {
@@ -56,6 +56,7 @@ public class XlsImporter extends BaseImporter {
 		if(sheetName==null && sheetNumber==null) {
 			log.info("no sheet number (suffix '"+ SUFFIX_SHEET_NUMBER + "') nor sheet name (suffix '" + SUFFIX_SHEET_NAME + "') defined - will use 1st sheet");
 		}
+		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+AbstractImporter.SUFFIX_SKIP_N, linesToSkip);
 	}
 
 	@Override
@@ -106,7 +107,7 @@ public class XlsImporter extends BaseImporter {
 					parts.add(value);
 				}
 
-				if(is1stLine) {
+				if(is1stLine && !use1stLineAsColNames) {
 					if(columnTypes==null) {
 						columnTypes = new ArrayList<String>();
 						for(int i=0;i<parts.size();i++) {
@@ -115,6 +116,7 @@ public class XlsImporter extends BaseImporter {
 					}
 					stmt = getStatement();
 				}
+				
 				if(is1stLine && use1stLineAsColNames) {
 					// setup statement...
 				}
