@@ -91,6 +91,12 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return conn.prepareStatement(getInsertSql());
 	}
 	
+	void createTable() throws SQLException {
+		String sql = getCreateTableSql();
+		boolean b = conn.createStatement().execute(sql);
+		log.info("create table, return="+b);
+	}
+	
 	String getInsertSql() throws SQLException {
 		String sql = null;
 		if(insertSQL!=null) {
@@ -103,6 +109,10 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 			sql = getInsertSql(insertTable, columnNames);
 		}
 		return sql;
+	}
+	
+	String getCreateTableSql() {
+		return getCreateTableSql(insertTable, columnNames, columnTypes);
 	}
 	
 	static String getInsertSql(String insertSQL) throws SQLException {
@@ -151,6 +161,23 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		sb.append(") values (");
 		for(int i=0;i<columnNames.size();i++) {
 			sb.append((i==0?"":", ")+"?");
+		}
+		sb.append(")");
+		return sb.toString();
+	}
+
+	static String getCreateTableSql(String tableName, List<String> columnNames, List<String> columnTypes) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("create table " + tableName + " (");
+		if(columnNames==null || columnNames.size()>0) {
+			columnNames = new ArrayList<String>();
+			for(int i=0;i<columnTypes.size();i++) {
+				columnNames.add("C"+i);
+			}
+		}
+		for(int i=0;i<columnNames.size();i++) {
+			sb.append((i==0?"":", ") + columnNames.get(i) + " " + getSqlColumnType(columnTypes.get(i)));
 		}
 		sb.append(")");
 		return sb.toString();
@@ -226,6 +253,12 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		//default: set as string
 		//log.debug("stmtSetValue: index [="+(index+1)+"]: "+value);
 		stmt.setString(index+1, value);
+	}
+	
+	static String getSqlColumnType(String type) {
+		if(type.startsWith("double")) { return "double precision"; }
+		if(type.equals("int")) { return "integer"; }
+		return "varchar";
 	}
 
 

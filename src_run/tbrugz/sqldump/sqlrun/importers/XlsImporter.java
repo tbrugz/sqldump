@@ -29,6 +29,7 @@ public class XlsImporter extends BaseImporter {
 	static final String SUFFIX_SHEET_NAME = ".sheet-name";
 	static final String SUFFIX_1ST_LINE_IS_HEADER = ".1st-line-is-header";
 	static final String SUFFIX_1ST_LINE_AS_COLUMN_NAMES = ".1st-line-as-column-names";
+	static final String SUFFIX_DO_CREATE_TABLE = ".do-create-table";
 	
 	String importFile;
 	String sheetName;
@@ -36,6 +37,7 @@ public class XlsImporter extends BaseImporter {
 	long linesToSkip = 0;
 	boolean hasHeaderLine = true;
 	boolean use1stLineAsColNames = false;
+	boolean doCreateTable = false;
 	
 	static final String[] XLS_AUX_SUFFIXES = {
 		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME
@@ -62,6 +64,7 @@ public class XlsImporter extends BaseImporter {
 		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+AbstractImporter.SUFFIX_SKIP_N, linesToSkip);
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
 		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
+		doCreateTable = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_DO_CREATE_TABLE, doCreateTable);
 
 		if(!hasHeaderLine && use1stLineAsColNames) {
 			log.warn("using '"+SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
@@ -89,6 +92,7 @@ public class XlsImporter extends BaseImporter {
 			
 			boolean is1stLine = true;
 			PreparedStatement stmt = null;
+			boolean tableCreated = false;
 			
 			for (Row row : sheet) {
 				counter.input++;
@@ -119,6 +123,11 @@ public class XlsImporter extends BaseImporter {
 							columnTypes.add(getType(parts.get(i)));
 						}
 					}
+					if(doCreateTable && !tableCreated) {
+						log.info("create table: "+getCreateTableSql());
+						createTable();
+						tableCreated = true;
+					}
 					if(stmt==null) {
 						log.info("sql: "+getInsertSql());
 						stmt = getStatement();
@@ -137,6 +146,7 @@ public class XlsImporter extends BaseImporter {
 				}
 				is1stLine = false;
 			}
+			conn.commit();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);

@@ -1,6 +1,5 @@
 package tbrugz.sqldump.sqlrun;
 
-import java.io.FileInputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -16,11 +15,17 @@ public class XlsImportTest {
 	
 	@Test
 	public void doImportXls() throws Exception {
-		String[] params = {"-propfile=test/sqlrun-h2-xls.properties"};
-		SQLRun.main(params);
+		String propsStr = 
+			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
+			"";
+		StringInputStream sis = new StringInputStream(propsStr);
+
+		Properties p = new ParametrizedProperties();
+		p.load(sis);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
 		
-		Properties p = new Properties();
-		p.load(new FileInputStream("test/sqlrun-h2-xls.properties"));
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
 	}
@@ -29,7 +34,8 @@ public class XlsImportTest {
 	public void doImportXlsx() throws Exception {
 		String propsStr = 
 			"@includes=test/sqlrun-h2-xls.properties\n"+
-			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx";
+			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
+			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n";
 		StringInputStream sis = new StringInputStream(propsStr);
 
 		Properties p = new ParametrizedProperties();
@@ -41,4 +47,21 @@ public class XlsImportTest {
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
 	}
 
+	@Test
+	public void doImportXlsWithCreateTable() throws Exception {
+		String propsStr = 
+			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"sqlrun.exec.20.do-create-table=true\n"+
+			"";
+		StringInputStream sis = new StringInputStream(propsStr);
+
+		Properties p = new ParametrizedProperties();
+		p.load(sis);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
+		
+		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+	}
+	
 }
