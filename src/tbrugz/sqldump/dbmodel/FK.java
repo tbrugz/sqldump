@@ -109,8 +109,10 @@ public class FK extends AbstractConstraint implements Serializable {
 
 	public String fkSimpleScript(String whitespace, boolean dumpWithSchemaName) {
 		whitespace = whitespace.replaceAll("[^ \n\t]", " ");
-		return "constraint "+DBObject.getFinalIdentifier(getName())
-			+" foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
+		String fkName = getName();
+		return
+			(fkName!=null ? "constraint "+DBObject.getFinalIdentifier(fkName)+" " : "")
+			+"foreign key ("+Utils.join(fkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+whitespace+"references "
 			+DBObject.getFinalName(pkTableSchemaName, pkTable, dumpWithSchemaName)
 			+" ("+Utils.join(pkColumns, ", ", SQLIdentifierDecorator.getInstance())+")"

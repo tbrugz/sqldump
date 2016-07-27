@@ -48,8 +48,12 @@ public class Index extends DBObject {
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create "+(unique?"unique ":"")+(type!=null?type.toLowerCase()+" ":"")+"index "+getFinalName(dumpSchemaName)
-			+" on "+DBObject.getFinalName(getSchemaName(), tableName, dumpSchemaName)
+		return getDefinition(dumpSchemaName, dumpSchemaName);
+	}
+	
+	public String getDefinition(boolean dumpIndexSchemaName, boolean dumpTableSchemaName) {
+		return "create "+(unique?"unique ":"")+(type!=null?type.toLowerCase()+" ":"")+"index "+getFinalName(dumpIndexSchemaName)
+			+" on "+DBObject.getFinalName(getSchemaName(), tableName, dumpTableSchemaName)
 			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+((local!=null && local)?" local":"")
 			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" /* "+comment+" */":"");
