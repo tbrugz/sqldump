@@ -44,11 +44,7 @@ import tbrugz.sqldump.util.Utils;
  * -- 2nd: test for each 2-col combination that doesn't include known PK/UK
  * -- 3rd+: test for each [2+]-col combination ...
  * 
- * XXXdone: output warn for tables that doesn't have PK
- * 
  * XXX: option to ignore tables by regex pattern
- * 
- * TODOne: use tbrugz.sqldump.util.CategorizedOut
  * 
  * XXX: rename to SchemaHints?
  */
@@ -94,6 +90,10 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 	boolean dumpSimpleFKsOnly = false;
 	boolean dumpFKIndexesOnly = true;
 	CategorizedOut cout;
+	
+	boolean dumpTablesWithSchemaName = true;
+	boolean dumpIndexesWithSchemaName = false; //XXX: add prop for 'dumpIndexesWithSchemaName' -  pgsql does not like indexes with schema
+	boolean dumpFKsWithSchemaName = true;
 
 	@Override
 	public void setProperties(Properties prop) {
@@ -185,6 +185,13 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		
 		Set<Index> indexes = new TreeSet<Index>(); //HashSet doesn't work (uses hashCode()?)
 		
+		Set<String> idxNames = new HashSet<String>();
+
+		// Setup fkNames
+		for(Index idx: schemaModel.getIndexes()) {
+			idxNames.add(idx.getName());
+		}
+		
 		//FKs
 		//int fkIndexCounter = 0;
 		for(FK fk: foreignKeys) {
@@ -229,7 +236,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 				idx.setSchemaName(fk.getPkTableSchemaName());
 				idx.setUnique(false);
 				idx.getColumns().addAll(fk.getPkColumns());
-				idx.setName(fk.getPkTable() + "_" + suggestAcronym(idx.getColumns()) + "_UKI"); //_" + (indexes.size()+1);
+				idx.setName(getUniqueIndexName(idx, "_UKI", idxNames));
 				addIndex(indexes, idx);
 			}
 
@@ -239,7 +246,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 				idx.setSchemaName(fk.getFkTableSchemaName());
 				idx.setUnique(false);
 				idx.getColumns().addAll(fk.getFkColumns());
-				idx.setName(fk.getFkTable() + "_" + suggestAcronym(idx.getColumns()) + "_FKI");
+				idx.setName(getUniqueIndexName(idx, "_FKI", idxNames));
 				//idx.name = fk.fkTable + "_FKI";
 				//idx.name = fk.fkTable + "_FKI_" + idx.hashCode();
 				//idx.name = fk.fkTable + "_FKI_" + (++fkIndexCounter);
@@ -279,8 +286,14 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 
 	Set<FK> dumpCreateFKs(SchemaModel schemaModel) {
 		Set<FK> fks = new TreeSet<FK>();
+		Set<String> fkNames = new HashSet<String>();
+
+		// Setup fkNames
+		for(FK fk: schemaModel.getForeignKeys()) {
+			fkNames.add(fk.getName());
+		}
 		
-		//Tables
+		// Tables
 		for(Table table: schemaModel.getTables()) {
 			//Unique constraints
 			for(Constraint cons: table.getConstraints()) {
@@ -310,7 +323,6 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 						fk.setFkTableSchemaName( otherT.getSchemaName() );
 						fk.getFkColumns().addAll(cons.getUniqueColumns());
 						fk.setFkReferencesPK((cons.getType()==ConstraintType.PK));
-						fk.setName(suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getPkTable()) + "_FK");
 
 						//Test if FK already exists
 						boolean fkAlreadyExists = false;
@@ -319,6 +331,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 						}
 						if(fkAlreadyExists) { continue; }
 						
+						fk.setName(getUniqueFkName(fk, fkNames));
 						fks.add(fk);
 					} 
 				}
@@ -366,7 +379,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		int dumpCounter = 0;
 		for(Index idx: indexes) {
 			if(schemasToAlter==null || schemasToAlter.contains(idx.getSchemaName()) ) {
-				fos.categorizedOut( idx.getDefinition(true)+";\n", idx.getSchemaName(), DBObjectType.INDEX.toString());
+				fos.categorizedOut( idx.getDefinition(dumpIndexesWithSchemaName, dumpTablesWithSchemaName)+";\n", idx.getSchemaName(), DBObjectType.INDEX.toString());
 				dumpCounter++;
 			}
 		}
@@ -377,7 +390,7 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 		int dumpCounter = 0;
 		for(FK fk: fks) {
 			if(schemasToAlter==null || schemasToAlter.contains(fk.getFkTableSchemaName()) ) {
-				fos.categorizedOut(fk.fkScriptWithAlterTable(false, true), fk.getSchemaName(), DBObjectType.FK.toString() );
+				fos.categorizedOut(fk.fkScriptWithAlterTable(false, dumpFKsWithSchemaName), fk.getSchemaName(), DBObjectType.FK.toString() );
 				//fos.write( fk.getDefinition(true)+";\n\n" );
 				dumpCounter++;
 			}
@@ -414,6 +427,27 @@ public class AlterSchemaSuggester extends AbstractFailable implements SchemaMode
 			sb.append(s.length()>0?s.substring(0, 1):"_");
 		}
 		return sb.toString();
+	}
+	
+	static String getUniqueIndexName(Index index, String append, Set<String> names) {
+		//idx.setName(fk.getFkTable() + "_" + suggestAcronym(idx.getColumns()) + "_FKI");
+		String idxName = null;
+		for(int i=0;;i++) {
+			idxName = index.getTableName() + "_" + suggestAcronym(index.getColumns()) + (i>0?"_"+i:"") + append;
+			if(!names.contains(idxName)) { break; } 
+		}
+		names.add(idxName);
+		return idxName;
+	}
+	
+	static String getUniqueFkName(FK fk, Set<String> names) {
+		String fkName = null;
+		for(int i=0;;i++) {
+			fkName = suggestAcronym(fk.getFkTable()) + "_" + suggestAcronym(fk.getPkTable()) + (i>0?"_"+i:"") + "_FK";
+			if(!names.contains(fkName)) { break; } 
+		}
+		names.add(fkName);
+		return fkName;
 	}
 	
 	static void simpleOut(String s, CategorizedOut fos, String schemaName, DBObjectType ot) throws IOException {
