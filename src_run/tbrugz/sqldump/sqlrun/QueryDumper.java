@@ -91,9 +91,8 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
 		SQLUtils.setupForNewQuery(rs.getMetaData().getColumnCount());
-		if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
-			DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
-		}
+		// dump column types (debug)
+		DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		
 		int count = 0;
 		if(dumpSyntax.acceptsOutputStream()) {

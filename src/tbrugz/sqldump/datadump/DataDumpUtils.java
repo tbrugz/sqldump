@@ -335,6 +335,8 @@ public class DataDumpUtils {
 	
 	//XXX: add columnTypeMapper?
 	public static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName, Log log) throws SQLException {
+		if(log.isDebugEnabled()) {
+
 		int numCol = md.getColumnCount();
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
@@ -363,6 +365,8 @@ public class DataDumpUtils {
 			sb.append("\n\t"+colName+" ["+colType+"/t:"+type+"/tn:"+typename+"/p:"+precision+"/s:"+scale+"]; ");
 		}
 		log.debug("dump columns ["+tableName+"]: "+sb);
+
+		}
 	}
 	
 	public static List<String> getColumnNames(ResultSetMetaData md) throws SQLException {

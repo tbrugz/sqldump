@@ -467,10 +467,8 @@ public class DataDump extends AbstractSQLProc {
 			
 			ResultSetMetaData md = rs.getMetaData();
 			
-			if(log.isDebugEnabled()) { //XXX: debug enabled? any better way?
-				// dump columns
-				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
-			}
+			// dump column types (debug)
+			DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 
 			boolean createEmptyDumpFiles = Utils.getPropBool(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
 			
