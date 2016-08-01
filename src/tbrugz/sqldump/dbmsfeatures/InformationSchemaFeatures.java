@@ -112,7 +112,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(count+" views grabbed");
+		log.info("["+schemaPattern+"]: "+count+" views grabbed");
 	}
 
 	/*
@@ -163,7 +163,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(count+" triggers grabbed [rowcount="+rowcount+"]");
+		log.info("["+schemaPattern+"]: "+count+" triggers grabbed [rowcount="+rowcount+"]");
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
@@ -229,7 +229,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(count+" executable objects/routines grabbed");
+		log.info("["+schemaPattern+"]: "+count+" executable objects/routines grabbed");
 	}
 	
 	boolean addExecutableToModel(Collection<ExecutableObject> execs, ExecutableObject eo) {
@@ -280,7 +280,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(count+" sequences grabbed");
+		log.info("["+schemaPattern+"]: "+count+" sequences grabbed");
 	}
 
 	String grabDBCheckConstraintsQuery(String schemaPattern) {
@@ -323,7 +323,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(countConstraints+" check constraints grabbed [rowcount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countConstraints+" check constraints grabbed [rowcount="+count+"]");
 	}
 
 	//order by "column_position"? see grabDBUniqueConstraints()
@@ -378,7 +378,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		
 		rs.close();
 		st.close();
-		log.info(countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
 	}
 	
 }

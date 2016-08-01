@@ -92,7 +92,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 		
 		rs.close();
 		st.close();
-		log.info(count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
+		log.info("["+schemaPattern+"]: "+count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
 	}
 	
 	@Override
