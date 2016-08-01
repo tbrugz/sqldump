@@ -7,6 +7,7 @@ public class Constants {
 	//prefixes
 	public static final String SQLRUN_PROPS_PREFIX = "sqlrun";
 	public static final String PREFIX_EXEC = SQLRUN_PROPS_PREFIX + ".exec.";
+	public static final String PREFIX_ASSERT = SQLRUN_PROPS_PREFIX + ".assert.";
 
 	//suffixes
 	public static final String SUFFIX_IMPORT = ".import";

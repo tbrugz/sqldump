@@ -13,6 +13,7 @@ import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.dbmodel.SchemaModel;
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.IOUtil;
 
@@ -145,6 +146,48 @@ public class SQLRunAndDumpTest {
 		String sqlEmp = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_EMP.sql");
 		expected = "insert into EMP (ID, NAME, SUPERVISOR_ID, DEPARTMENT_ID, SALARY) values (1, 'john', 1, 1, 2000);";
 		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
+	}
+
+	@Test
+	public void doRunAndAssertModelOk() throws Exception {
+		String mydbpath = dbpath+"-import2;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.02.import=csv",
+				"-Dsqlrun.exec.02.inserttable=dept",
+				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.skipnlines=1",
+				"-Dsqlrun.assert.03.sql=select * from dept",
+				"-Dsqlrun.assert.03.row-count=3",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void doRunAndAssertModelError() throws Exception {
+		String mydbpath = dbpath+"-import3;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.assert.03.sql=select * from emp",
+				"-Dsqlrun.assert.03.row-count=1",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
 	}
 	
 }

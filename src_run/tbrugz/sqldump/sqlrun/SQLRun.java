@@ -1,15 +1,20 @@
 package tbrugz.sqldump.sqlrun;
 
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import javax.naming.NamingException;
@@ -31,6 +36,7 @@ import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
@@ -71,6 +77,13 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String SUFFIX_SPLIT = ".split"; //by semicolon - ';'
 	static final String SUFFIX_PARAM = ".param";
 
+	//assert suffixes
+	static final String SUFFIX_ASSERT_SQL = ".sql";
+	static final String SUFFIX_ASSERT_SQLFILE = ".sqlfile";
+	
+	//assert aux suffixes
+	static final String SUFFIX_ASSERT_ROW_COUNT = ".row-count";
+
 	//properties
 	static final String PROP_COMMIT_STATEGY = Constants.SQLRUN_PROPS_PREFIX+".commit.strategy";
 	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
@@ -82,11 +95,16 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 
 	//suffix groups
 	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
+	static final String[] ASSERT_SUFFIXES = { SUFFIX_ASSERT_SQL, SUFFIX_ASSERT_SQLFILE };
 	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, Constants.SUFFIX_BATCH_MODE, Constants.SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
 	
 	//other/reserved props
 	static final String PROP_PROCID = "_procid";
+	
+	public enum ProcType {
+		EXEC, ASSERT;
+	}
 	
 	final Properties papp = new ParametrizedProperties();
 	Connection conn;
@@ -115,12 +133,12 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	void doIt() throws IOException, SQLException {
 		List<String> execkeys = Utils.getKeysStartingWith(papp, Constants.PREFIX_EXEC);
+		List<String> assertkeys = Utils.getKeysStartingWith(papp, Constants.PREFIX_ASSERT);
 		Collections.sort(execkeys);
+		Collections.sort(assertkeys);
 		log.info("init processing...");
 		//Utils.showSysProperties();
 		Utils.logEnvironment();
-		long initTime = System.currentTimeMillis();
-		papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
 
 		Set<String> procIds = new TreeSet<String>();
 		if(filterByIds!=null) {
@@ -132,16 +150,41 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				procIds.add(procId);
 			}
 		}
-		//Collections.sort(procIds);
-		if(procIds.size()==0) {
-			log.warn("no processing ids selected for execution...");
-		}
-		else {
-			log.info("processing ids in exec order: "+Utils.join(procIds, ", ")+" ["+procIds.size()+" ids selected]");
+		Set<String> assertIds = new TreeSet<String>();
+		for(String key: assertkeys) {
+			String assertId = getExecId(key, Constants.PREFIX_ASSERT);
+			if(procIds.contains(assertId)) {
+				throw new ProcessingException("id '"+assertId+"' cannot be both .exec & .assert id");
+			}
+			if(filterByIds==null || filterByIds.contains(assertId)) {
+				assertIds.add(assertId);
+			}
 		}
 		
+		Map<String, ProcType> allIds = new TreeMap<String, ProcType>();
+		for(String s: procIds) {
+			allIds.put(s, ProcType.EXEC);
+		}
+		for(String s: assertIds) {
+			allIds.put(s, ProcType.ASSERT);
+		}
+		
+		//Collections.sort(procIds);
+		if(allIds.size()==0) {
+			log.warn("no processing/assert ids selected for execution...");
+		}
+		else {
+			log.info("processing ids in order: "+Utils.join(allIds.keySet(), ", ")+" ["+allIds.size()+" ids selected]");
+			doRunIds(allIds);
+		}
+	}
+	
+	void doRunIds(Map<String, ProcType> allIds) throws IOException, SQLException {
+		long initTime = System.currentTimeMillis();
+		papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
+		
 		if(jmxCreateMBean) {
-			sqlrmbean = new SQLR(procIds.size(), conn.getMetaData());
+			sqlrmbean = new SQLR(allIds.size(), conn.getMetaData());
 			JMXUtil.registerMBeanSimple(SQLR.MBEAN_NAME, sqlrmbean);
 		}
 		
@@ -154,11 +197,24 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		
 		int sqlrunCounter = 0;
 		
-		//TODO!!: use procIds instead of execkeys (?)
-		for(String key: execkeys) {
-			boolean exec = doExec(key, sqlrunCounter);
-			if(exec) {
-				sqlrunCounter++;
+		//TODOne: use procIds instead of execkeys (?)
+		for(Map.Entry<String, ProcType> e: allIds.entrySet()) {
+			String procId = e.getKey();
+			//log.info("doRunIds: id="+procId);
+			if(e.getValue().equals(ProcType.EXEC)) {
+				boolean exec = doExec(procId, sqlrunCounter);
+				if(exec) {
+					sqlrunCounter++;
+				}
+			}
+			else if(e.getValue().equals(ProcType.ASSERT)) {
+				boolean exec = doAssert(procId, sqlrunCounter);
+				if(exec) {
+					sqlrunCounter++;
+				}
+			}
+			else {
+				log.warn("unknown ProcType: "+e.getValue()+" [key="+procId+"]");
 			}
 		}
 		long totalTime = System.currentTimeMillis() - initTime;
@@ -167,9 +223,16 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
 	}
 	
-	boolean doExec(String key, int sqlrunCounter) throws IOException, SQLException {
+	boolean doExec(String procId, int sqlrunCounter) throws IOException, SQLException {
 			boolean isExecId = false;
-			String procId = getExecId(key, Constants.PREFIX_EXEC);
+			//String procId = getExecId(key, Constants.PREFIX_EXEC);
+			String key = getKeyEndsWithAny(papp, Constants.PREFIX_EXEC+procId, PROC_SUFFIXES);
+			//log.info("procid: "+procId);
+			if(key==null) {
+				//log.warn("no action: "+procId);
+				return false;
+			}
+			//log.info("procid: "+procId+" key: "+key);
 			String action = key.substring((Constants.PREFIX_EXEC+procId).length());
 			if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
 			
@@ -185,6 +248,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				}
 			}
 			else {
+				log.warn("no exec suffix for key '"+key+"' [id="+procId+",action="+action+"]");
 				return false;
 			}
 			papp.setProperty(PROP_PROCID, procId);
@@ -298,6 +362,76 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			return false;
 	}
 	
+	boolean doAssert(String procId, int sqlrunCounter) throws IOException, SQLException {
+		boolean isAssertId = false;
+		String prefix = Constants.PREFIX_ASSERT+procId;
+		String key = getKeyEndsWithAny(papp, prefix, ASSERT_SUFFIXES);
+		
+		//log.info("procid: "+procId+" / "+prefix);
+		if(key==null) {
+			//log.warn("no action: "+procId);
+			return false;
+		}
+		//log.info("procid: "+procId+" key: "+key);
+		String action = key.substring(prefix.length());
+		if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
+		
+		String execValue = papp.getProperty(key);
+		boolean execFailOnError = Utils.getPropBool(papp, prefix + Constants.SUFFIX_FAILONERROR, failonerror);
+		
+		if(endsWithAny(key, ASSERT_SUFFIXES)) {
+			log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; failonerror = "+execFailOnError);
+			isAssertId = true;
+			sqlrunCounter++;
+			if(sqlrmbean!=null) {
+				sqlrmbean.newTaskUpdate(sqlrunCounter, procId, action, execValue);
+			}
+		}
+		else {
+			log.warn("no assert suffix for key '"+key+"' [id="+procId+",action="+action+"]");
+			return false;
+		}
+		papp.setProperty(PROP_PROCID, procId);
+		
+		String sql = null;
+		
+		// .sql
+		if(key.endsWith(SUFFIX_ASSERT_SQL)) {
+			sql = papp.getProperty(key);
+		}
+		// .sqlfile
+		else if(key.endsWith(SUFFIX_ASSERT_SQLFILE)) {
+			String sqlFile = papp.getProperty(key);
+			sql = IOUtil.readFile(new FileReader(sqlFile));
+		}
+		else {
+			throw new ProcessingException("unknown action: "+action+" [key="+key+"]");
+		}
+		
+		Integer assertRowCount = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT);
+		
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		ResultSet rs = stmt.executeQuery();
+		int countRows = 0;
+		while(rs.next()) {
+			countRows++;
+		}
+		
+		if(assertRowCount!=null) {
+			if(countRows!=assertRowCount) {
+				String message = "[assert "+procId+"] " + assertRowCount + " rows expected but "+countRows+" rows found";
+				log.warn(message);
+				//XXX test for failonerror?
+				//XXX throw something like AssertException?
+				throw new ProcessingException(message);
+			}
+		}
+		else {
+			log.warn("no "+SUFFIX_ASSERT_ROW_COUNT+" defined?");
+		}
+		return isAssertId;
+	}
+	
 	/*static String getExecId(String key, String prefix, String suffix) {
 		return key.substring(prefix.length(), key.length()-suffix.length());
 	}*/
@@ -312,6 +446,15 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		if(dir!=null) { return dir; }
 		dir = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+SUFFIX_DIR);
 		return dir;
+	}
+
+	static String getKeyEndsWithAny(Properties prop, String key, String[] suffixes) {
+		for(String suf: suffixes) {
+			String fullKey = key+suf;
+			String val = prop.getProperty(fullKey);
+			if(val!=null) { return fullKey; }
+		}
+		return null;
 	}
 	
 	static boolean endsWithAny(String key, String[] suffixes) {
