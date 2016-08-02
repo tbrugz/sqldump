@@ -1,12 +1,19 @@
 
-sqldump ng
+sqldump 0.9.14
 ----------
 - dbms: added explainPlan()
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
 - datadump: json: added $metadata , added jsonp/callback
 - diff: added parallel grab (ModelGrabber class)
 - diff: added prop 'sqldiff.applydiff.<changetype>' - filter diffs to apply by type
-- dbms: initial Neo4j support
+- dbms: initial Neo4j support (1524)
+- processor: StatsProc: added prop suffix '.stats-by-column'
+- datadump: added WebRowSetSingleSyntax / CacheRowSetSyntax
+- dbmd: DBMSFeatures: added grabDBMaterializedViews() ; added prop suffix '.grabmaterializedviews'
+- resultset2graph: added '.param' & '.nodeparam' properties (1680)
+- datadump: added PoiXlsSyntax (xls) & PoiXlsxSyntax (xlsx) - uses apache poi
+- sqlrun: added XlsImporter
+- sqlrun: added .assert 'processor' (1701)
 
 
 sqldump 0.9.13
