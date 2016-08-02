@@ -83,6 +83,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	//assert aux suffixes
 	static final String SUFFIX_ASSERT_ROW_COUNT = ".row-count";
+	static final String SUFFIX_ASSERT_ROW_COUNT_EQ = SUFFIX_ASSERT_ROW_COUNT+".eq";
+	static final String SUFFIX_ASSERT_ROW_COUNT_GT = SUFFIX_ASSERT_ROW_COUNT+".gt";
+	static final String SUFFIX_ASSERT_ROW_COUNT_LT = SUFFIX_ASSERT_ROW_COUNT+".lt";
 
 	//properties
 	static final String PROP_COMMIT_STATEGY = Constants.SQLRUN_PROPS_PREFIX+".commit.strategy";
@@ -408,7 +411,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			throw new ProcessingException("unknown action: "+action+" [key="+key+"]");
 		}
 		
-		Integer assertRowCount = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT);
+		Integer assertRowCountEquals = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_EQ);
+		Integer assertRowCountGreaterThan = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_GT);
+		Integer assertRowCountLessThan = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_LT);
 		
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery();
@@ -417,19 +422,39 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			countRows++;
 		}
 		
-		if(assertRowCount!=null) {
-			if(countRows!=assertRowCount) {
-				String message = "[assert "+procId+"] " + assertRowCount + " rows expected but "+countRows+" rows found";
-				log.warn(message);
-				//XXX test for failonerror?
-				//XXX throw something like AssertException?
-				throw new ProcessingException(message);
+		if(assertRowCountEquals!=null) {
+			if( countRows!=assertRowCountEquals ) {
+				String message = "[assert "+procId+"] " + assertRowCountEquals + " rows expected but "+countRows+" rows found";
+				reportAssertError(message);
 			}
 		}
+		if(assertRowCountGreaterThan!=null) {
+			if(! (countRows > assertRowCountGreaterThan) ) {
+				String message = "[assert "+procId+"] more than " + assertRowCountGreaterThan + " rows expected but "+countRows+" rows found";
+				reportAssertError(message);
+			}
+		}
+		if(assertRowCountLessThan!=null) {
+			if(! (countRows < assertRowCountLessThan) ) {
+				String message = "[assert "+procId+"] less than " + assertRowCountLessThan + " rows expected but "+countRows+" rows found";
+				reportAssertError(message);
+			}
+		}
+		
+		if(assertRowCountEquals==null && assertRowCountGreaterThan==null && assertRowCountLessThan==null) {
+			log.warn("no "+SUFFIX_ASSERT_ROW_COUNT+".[eq|gt|lt] property defined?");
+		}
 		else {
-			log.warn("no "+SUFFIX_ASSERT_ROW_COUNT+" defined?");
+			log.info("assert: row count = "+countRows);
 		}
 		return isAssertId;
+	}
+	
+	void reportAssertError(String message) {
+		log.warn(message);
+		//XXX test for failonerror?
+		//XXX throw something like AssertException?
+		throw new ProcessingException(message);
 	}
 	
 	/*static String getExecId(String key, String prefix, String suffix) {

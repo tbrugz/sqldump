@@ -149,8 +149,8 @@ public class SQLRunAndDumpTest {
 	}
 
 	@Test
-	public void doRunAndAssertModelOk() throws Exception {
-		String mydbpath = dbpath+"-import2;DB_CLOSE_DELAY=-1";
+	public void doRunAndAssertModelEqOk() throws Exception {
+		String mydbpath = dbpath+"-assert1;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
@@ -159,7 +159,7 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.assert.03.sql=select * from dept",
-				"-Dsqlrun.assert.03.row-count=3",
+				"-Dsqlrun.assert.03.row-count.eq=3",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
 				"-Dsqlrun.user=h",
@@ -172,13 +172,59 @@ public class SQLRunAndDumpTest {
 	}
 
 	@Test(expected = ProcessingException.class)
-	public void doRunAndAssertModelError() throws Exception {
-		String mydbpath = dbpath+"-import3;DB_CLOSE_DELAY=-1";
+	public void doRunAndAssertModelEqError() throws Exception {
+		String mydbpath = dbpath+"-assert2;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
 				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.assert.03.sql=select * from emp",
-				"-Dsqlrun.assert.03.row-count=1",
+				"-Dsqlrun.assert.03.row-count.eq=1",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void doRunAndAssertModelGtError() throws Exception {
+		String mydbpath = dbpath+"-assert3;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.02.import=csv",
+				"-Dsqlrun.exec.02.inserttable=dept",
+				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.skipnlines=1",
+				"-Dsqlrun.assert.03.sql=select * from dept",
+				"-Dsqlrun.assert.03.row-count.gt=3",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p, null);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void doRunAndAssertModelLtError() throws Exception {
+		String mydbpath = dbpath+"-assert4;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.02.import=csv",
+				"-Dsqlrun.exec.02.inserttable=dept",
+				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.skipnlines=1",
+				"-Dsqlrun.assert.03.sql=select * from dept",
+				"-Dsqlrun.assert.03.row-count.lt=3",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
 				"-Dsqlrun.user=h",
