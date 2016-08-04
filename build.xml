@@ -355,21 +355,12 @@
 		</ivy:publish>
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
-	
-	<target name="prepare-publish-sonatype">
-		<condition property="version-snapshot">
-			<matches pattern="SNAPSHOT" string="${version}"/>
-		</condition>
-	</target>
 
-	<target name="publish-sonatype-snapshot" depends="dist,prepare-publish-sonatype">
-		<!-- version must be of SNAPSHOT type -->
-		<fail message="Must be SNAPSHOT version" unless="version-snapshot"/>
+	<target name="publish-sonatype-snapshot" depends="dist">
 		<ant antfile="build-sonatype.xml" target="deploy"/> <!-- deploy snapshots -->
 	</target>
 	
-	<target name="publish-sonatype-release" depends="dist,prepare-publish-sonatype">
-		<fail message="Must NOT be SNAPSHOT version" if="version-snapshot"/>
+	<target name="publish-sonatype-release" depends="dist">
 		<ant antfile="build-sonatype.xml" target="stage"/> <!-- deploy (signed) releases -->
 	</target>
 	

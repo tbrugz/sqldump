@@ -17,7 +17,7 @@ on `$HOME/.gpgcredentials`, put your private key passphrase
 
 3- upload
 
-`ant -buildfile build-sonatype.xml stage`
+`ant publish-sonatype-release`
 
 
 4- release
