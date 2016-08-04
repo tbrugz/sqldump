@@ -130,6 +130,14 @@
 	
 	<!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
 	<target name="stage" depends="info" description="deploy release version to Maven staging repository">
+		
+		<loadfile property="gpg.passphrase" srcFile="${user.home}/.gpgcredentials"/>
+		<!--
+		<property file="${user.home}/.mvncredentials"/>
+		<echo message="sonatype-nexus-staging.username: ${sonatype-nexus-staging.username}"/>
+		<echo message="sonatype-nexus-staging.password: ${sonatype-nexus-staging.password}"/>
+		-->
+		
 		<!-- sign and deploy the main artifact -->
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
@@ -138,6 +146,9 @@
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
 			<arg value="-Pgpg" />
+			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
+			<!--<arg value="-Dsonatype-nexus-staging.username=${sonatype-nexus-staging.username}" />
+			<arg value="-Dsonatype-nexus-staging.password=${sonatype-nexus-staging.password}" />-->
 		</artifact:mvn>
 
 		<!-- sign and deploy the sources artifact -->
@@ -149,6 +160,7 @@
 			<arg value="-Dfile=${maven-sources-jar}" />
 			<arg value="-Dclassifier=sources" />
 			<arg value="-Pgpg" />
+			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
 		</artifact:mvn>
 
 		<!-- sign and deploy the javadoc artifact -->
@@ -160,6 +172,7 @@
 			<arg value="-Dfile=${maven-javadoc-jar}" />
 			<arg value="-Dclassifier=javadoc" />
 			<arg value="-Pgpg" />
+			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
 		</artifact:mvn>
 	</target>
 
