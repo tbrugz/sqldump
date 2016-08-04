@@ -15,6 +15,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * TODO: prop for setting types of object to dump
@@ -27,12 +28,15 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 	
 	static final String PROP_PREFIX = "sqldump.dropscriptdumper";
 	static final String PROP_OUTFILEPATTERN = PROP_PREFIX+".outfilepattern";
+	static final String PROP_USE_IFEXISTS = PROP_PREFIX+".ifexists";
 	
 	String outfilePattern = null;
+	boolean useIfExists = false;
 
 	@Override
 	public void setProperties(Properties prop) {
 		outfilePattern = prop.getProperty(PROP_OUTFILEPATTERN);
+		useIfExists = Utils.getPropBool(prop, PROP_USE_IFEXISTS, useIfExists);
 		if(outfilePattern==null) {
 			log.warn("outfilepattern not defined [prop '"+PROP_OUTFILEPATTERN+"']. can't dump drop script");
 			return;
@@ -57,13 +61,15 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 			//XXX: Matcher.quoteReplacement()? maybe not...
 			CategorizedOut co = new CategorizedOut(finalPattern);
 			
-			dumpDropFKs(schemaModel, co);
-			dumpDropObject(DBObjectType.INDEX.toString(), schemaModel.getIndexes(), co);
-			dumpDropObject(DBObjectType.VIEW.toString(), schemaModel.getViews(), co);
-			dumpDropObject(DBObjectType.SEQUENCE.toString(), schemaModel.getSequences(), co);
+			int dropCount = 0;
+			dropCount += dumpDropFKs(schemaModel, useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.INDEX.toString(), schemaModel.getIndexes(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.VIEW.toString(), schemaModel.getViews(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.SEQUENCE.toString(), schemaModel.getSequences(), useIfExists, co);
 			//XXX: dump drop executables/triggers
 			//XXX: dump truncate tables?
-			dumpDropObject(DBObjectType.TABLE.toString(), schemaModel.getTables(), co);
+			dropCount += dumpDropObject(DBObjectType.TABLE.toString(), schemaModel.getTables(), useIfExists, co);
+			log.info(dropCount + " drop scripts dumped [output pattern: "+finalPattern+"]");
 		}
 		catch (IOException e) {
 			log.error("i/o error dumping drop script: "+e);
@@ -71,19 +77,29 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 		}
 	}
 	
-	public void dumpDropFKs(SchemaModel schemaModel, CategorizedOut co) throws IOException {
+	public int dumpDropFKs(SchemaModel schemaModel, boolean ifExists, CategorizedOut co) throws IOException {
+		int count = 0;
 		String fkcat = DBObjectType.FK.toString();
 		for(FK fk: schemaModel.getForeignKeys()) {
-			String script = "alter table "+fk.getFkTable()+" drop constraint "+fk.getName()+";\n";
+			String script = "alter table "+fk.getFkTable()+" drop constraint "+
+					(ifExists?"if exists ":"")+
+					fk.getName()+";\n";
 			co.categorizedOut(script, fk.getSchemaName(), fkcat);
+			count++;
 		}
+		return count;
 	}
 	
-	public void dumpDropObject(String objectType, Collection<? extends DBObject> objects, CategorizedOut co) throws IOException {
+	public int dumpDropObject(String objectType, Collection<? extends DBObject> objects, boolean ifExists, CategorizedOut co) throws IOException {
+		int count = 0;
 		for(DBObject obj: objects) {
-			String script = "drop "+objectType+" "+obj.getName()+";\n";
+			String script = "drop "+objectType+" "+
+					(ifExists?"if exists ":"")+
+					obj.getName()+";\n";
 			co.categorizedOut(script, obj.getSchemaName(), objectType);
+			count++;
 		}
+		return count;
 	}
 	
 	@Override
