@@ -47,8 +47,11 @@ SQLDump processing consists of:
 - `CascadingDataDump` - Dumps data based on table relationships (FKs), given initial tables/filters
 - `graph.ResultSet2GraphML` - Dumps a graphML diagram based on a SQL-query
 - `SQLDialectTransformer` - Transforms schema models between different sql-dialects
+- `SQLRunProcessor` - Loads properties into SQLRun and execute statements & importers
 - `mondrianschema.Olap4jMDXQueries` - Dumps data from olap4j/mondrian engine
 - `mondrianschema.MondrianSchema2GraphProcessor` - Dumps a graphML diagram based on a Mondrian Schema file
+- `mondrianschema.MondrianSchemaValidator` - Validates a mondrian schema
+- `xtraproc.StatsProc` - Grabs statistics from database
 
 *Dumpers* can be:
 
@@ -58,6 +61,7 @@ SQLDump processing consists of:
 - `graph.Schema2GraphML` - Generates a Entity-Relationship diagram based on schema model
 - `mondrianschema.MondrianSchemaDumper` - Generates a Star/Snowflake [Mondrian Schema](http://mondrian.pentaho.com/) based on schema model
 - `xtradumpers.AlterSchemaSuggester` - Generates suggestions of SQL-scripts for altering the schema model (beta)
+- `xtradumpers.DropScriptDumper` - Generates drop SQL-scripts
 
 All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldump.template.properties)
 for more info.
