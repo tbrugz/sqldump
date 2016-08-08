@@ -136,7 +136,7 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 			//params
 			int paramCount = 1;
-			List<String> params = new ArrayList<String>();
+			List<Object> params = new ArrayList<Object>();
 			while(true) {
 				String paramStr = prop.getProperty("sqldump.query."+qid+".param."+paramCount);
 				if(paramStr==null) { break; }
@@ -240,7 +240,7 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	int addQueryToModelInternal(String qid, String queryName, String defaultSchemaName,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params, String remarks, String roles,
+			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName);
@@ -254,7 +254,7 @@ public class SQLQueries extends AbstractSQLProc {
 	public int addQueryToModel(String qid, String queryName, String schemaName,
 			String colNames, boolean grabInfoFromMetadata, boolean addAlsoAsTable,
 			PreparedStatement stmt, String sql, List<String> keyCols,
-			List<String> params, String remarks, String roles,
+			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
 		if(model==null) {

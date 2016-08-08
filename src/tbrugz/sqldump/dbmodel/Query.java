@@ -7,8 +7,8 @@ public class Query extends View {
 	private static final long serialVersionUID = 1L;
 
 	String id;
-	List<String> parameterValues;
-	
+	List<Object> parameterValues;
+
 	String rsDecoratorFactoryClass;
 	Map<String,String> rsDecoratorArguments;
 	
@@ -20,11 +20,11 @@ public class Query extends View {
 		this.id = id;
 	}
 
-	public List<String> getParameterValues() {
+	public List<Object> getParameterValues() {
 		return parameterValues;
 	}
 
-	public void setParameterValues(List<String> parameterValues) {
+	public void setParameterValues(List<Object> parameterValues) {
 		this.parameterValues = parameterValues;
 	}
 	

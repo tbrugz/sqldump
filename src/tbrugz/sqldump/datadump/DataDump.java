@@ -361,7 +361,7 @@ public class DataDump extends AbstractSQLProc {
 		return sql;
 	} 
 	
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
+	public void runQuery(Connection conn, String sql, List<Object> params, Properties prop,
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String[] partitionByPatterns, List<String> keyColumns
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
@@ -385,16 +385,16 @@ public class DataDump extends AbstractSQLProc {
 				);
 	}
 	
-	public void runQuery(Connection conn, String sql, List<String> params, Properties prop,
+	public long runQuery(Connection conn, String sql, List<Object> params, Properties prop,
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset,
 			long rowlimit, List<DumpSyntax> syntaxList
 			) throws SQLException, IOException {
-		runQuery(conn, sql, params, prop, schemaName, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
+		return runQuery(conn, sql, params, prop, schemaName, tableOrQueryId, tableOrQueryName, charset, rowlimit, syntaxList, null, null, null, null, null);
 	}
 	
 	final Set<String> deprecatedPatternWarnedFiles = new HashSet<String>();
 	
-	void runQuery(Connection conn, String sql, List<String> params, Properties prop, 
+	long runQuery(Connection conn, String sql, List<Object> params, Properties prop, 
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
@@ -406,7 +406,7 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		PreparedStatement st = conn.prepareStatement(sql);
 		try {
-			runQuery(conn, st, params, prop, schemaName, tableOrQueryId,
+			return runQuery(conn, st, params, prop, schemaName, tableOrQueryId,
 					tableOrQueryName, charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory);
 		}
@@ -419,7 +419,7 @@ public class DataDump extends AbstractSQLProc {
 		}
 	}
 		
-	void runQuery(Connection conn, PreparedStatement st, List<String> params, Properties prop, 
+	long runQuery(Connection conn, PreparedStatement st, List<Object> params, Properties prop, 
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
@@ -432,7 +432,16 @@ public class DataDump extends AbstractSQLProc {
 			//st.setFetchSize(20);
 			if(params!=null) {
 				for(int i=0;i<params.size();i++) {
-					st.setString(i+1, params.get(i));
+					Object o = params.get(i);
+					if(o==null) {
+						st.setString(i+1, null);
+					}
+					else if(o instanceof Integer) {
+						st.setInt(i+1, ((Integer)o).intValue());
+					}
+					else {
+						st.setString(i+1, String.valueOf(o));
+					}
 				}
 			}
 			
@@ -444,13 +453,13 @@ public class DataDump extends AbstractSQLProc {
 				rs = rsDecoratorFactory.getDecoratorOf(rs);
 			}
 			
-			dumpResultSet(rs, prop, schemaName, tableOrQueryId, tableOrQueryName,
+			return dumpResultSet(rs, prop, schemaName, tableOrQueryId, tableOrQueryName,
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
 					initTime);
 	}
 
-	public void dumpResultSet(ResultSet rs, Properties prop, 
+	public long dumpResultSet(ResultSet rs, Properties prop, 
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
@@ -492,7 +501,7 @@ public class DataDump extends AbstractSQLProc {
 				if(!hasData) {
 					if(!createEmptyDumpFiles) {
 						log.info("table/query '"+tableOrQueryName+"' returned 0 rows [no output generated]");
-						return;
+						return 0;
 					}
 				}
 			}
@@ -766,6 +775,8 @@ public class DataDump extends AbstractSQLProc {
 				log.warn("SQLException occured [count="+count+"]: "+e);
 				throw e;
 			}
+			
+			return count;
 	}
 	
 	static void closeWriter(Map<String, Outputter> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename) throws IOException {
