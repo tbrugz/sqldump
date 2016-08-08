@@ -38,6 +38,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 	//boolean fallbackToFile = false; //TODOne: remove the fallback...
 	Connection conn = null;
 	PreparedStatement stmt = null;
+	boolean connectionCreated = false;
 	
 	boolean autoCommit = false;
 	boolean batchMode = false;
@@ -72,6 +73,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 		//create connection
 		try {
 			conn = ConnectionUtil.initDBConnection(connPropPrefix, prop, autoCommit);
+			connectionCreated = true;
 		} catch (Exception e) {
 			log.warn("error: "+e);
 			throw new RuntimeException(e);
@@ -178,8 +180,10 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 			if(!autoCommit) {
 				conn.commit();
 			}
-			//close connection
-			conn.close();
+			//close connection if created
+			if(connectionCreated) {
+				conn.close();
+			}
 			
 			log.debug("commit-last? count="+count+" updated="+updated);
 			if(count!=updated) {

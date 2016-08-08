@@ -243,7 +243,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			boolean execFailOnError = Utils.getPropBool(papp, Constants.PREFIX_EXEC+procId+Constants.SUFFIX_FAILONERROR, failonerror);
 			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
-				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; failonerror = "+execFailOnError);
+				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; "+
+						(key.endsWith(Constants.SUFFIX_IMPORT)?"importer = '"+execValue+"' ; ":"")+
+						"failonerror = "+execFailOnError);
 				isExecId = true;
 				sqlrunCounter++;
 				if(sqlrmbean!=null) {
@@ -623,10 +625,10 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	};
 	
 	static final String[] IMPORTER_IDS = {
-		"csv", "csvplain", "ffc", "regex", "xls"
+		"csv", "csvplain", "ffc", "regex", "xls", "sql"
 	};
 	static final String[] IMPORTER_CLASSES = {
-		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter", "XlsImporter"
+		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter", "XlsImporter", "SqlImporter"
 	};
 	
 	Importer getImporter(String id) {

@@ -38,6 +38,7 @@ import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.sqlrun.SQLRunMainTest;
 import tbrugz.sqldump.sqlrun.SQLTokenizersTest;
+import tbrugz.sqldump.sqlrun.SqlImportTest;
 import tbrugz.sqldump.sqlrun.StmtExecTest;
 import tbrugz.sqldump.sqlrun.StmtProcTest;
 import tbrugz.sqldump.sqlrun.XlsImportTest;
@@ -80,6 +81,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//import
 	CSVImportTest.class,
 	XlsImportTest.class,
+	SqlImportTest.class,
 	
 	//dbms features
 	TriggerTest.class,
