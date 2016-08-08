@@ -39,6 +39,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 	Connection conn = null;
 	PreparedStatement stmt = null;
 	boolean connectionCreated = false;
+	String updateSql = null;
 	
 	boolean autoCommit = false;
 	boolean batchMode = false;
@@ -99,18 +100,25 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 		}
 		
 		//create prepared statement
-		List<String> vals = new ArrayList<String>();
-		for(int i=0;i<lsColNames.size();i++) { vals.add("?"); }
-		String sql = "insert into "+tableName+" "+colNames+" values ("+
-				Utils.join(vals, ", ")+
-				")";
-		log.debug("stmt[autocommit="+autoCommit+";batch="+batchMode+"]: "+sql);
-		stmt = conn.prepareStatement(sql);
+		if(updateSql==null) {
+			List<String> vals = new ArrayList<String>();
+			for(int i=0;i<lsColNames.size();i++) { vals.add("?"); }
+			updateSql = "insert into "+tableName+" "+colNames+" values ("+
+					Utils.join(vals, ", ")+
+					")";
+		}
+		log.debug("stmt[autocommit="+autoCommit+";batch="+batchMode+"]: "+updateSql);
+		stmt = conn.prepareStatement(updateSql);
 	}
 	
 	@Override
 	public void setUpdaterConnection(Connection conn) {
 		this.conn = conn;
+	}
+	
+	public void setUpdateSql(String sql) {
+		log.info("setting insert/update sql: "+sql);
+		this.updateSql = sql;
 	}
 	
 	@Override

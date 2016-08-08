@@ -92,6 +92,9 @@ public class SqlImporter extends BaseImporter {
 		iidb.setUpdaterConnection(conn);
 		iidb.procProperties(prop);
 		//iidb.setFeatures(...);
+		if(insertSQL != null) {
+			iidb.setUpdateSql(insertSQL);
+		}
 		return iidb;
 	}
 	
