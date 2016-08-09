@@ -117,7 +117,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 	}
 	
 	public void setUpdateSql(String sql) {
-		log.info("setting insert/update sql: "+sql);
+		//log.info("setting insert/update sql: "+sql);
 		this.updateSql = sql;
 	}
 	

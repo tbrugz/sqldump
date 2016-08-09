@@ -54,8 +54,8 @@ public class SqlImportTest {
 			
 			"sqlrun.exec.050.import=sql\n"+
 			"sqlrun.exec.050.read-connection-prefix=sqlrun\n"+
-			"sqlrun.exec.050.sql=select * from t1\n"+
-			"sqlrun.exec.050.insertsql=insert into t2 values (?, ?)\n"+
+			"sqlrun.exec.050.sql=select id from t1\n"+
+			"sqlrun.exec.050.insertsql=insert into t2 (id) values (?)\n"+
 			"";
 		StringInputStream sis = new StringInputStream(propsStr);
 

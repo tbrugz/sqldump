@@ -93,6 +93,7 @@ public class SqlImporter extends BaseImporter {
 		iidb.procProperties(prop);
 		//iidb.setFeatures(...);
 		if(insertSQL != null) {
+			log.info("setting insert/update sql: "+insertSQL);
 			iidb.setUpdateSql(insertSQL);
 		}
 		return iidb;

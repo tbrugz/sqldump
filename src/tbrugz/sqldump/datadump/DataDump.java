@@ -718,7 +718,8 @@ public class DataDump extends AbstractSQLProc {
 			
 			long elapsedMilis = System.currentTimeMillis()-initTime;
 			
-			log.info("dumped "+count+" rows from table/query: "+tableOrQueryName
+			log.info("dumped "+count+" rows"
+				+ (tableOrQueryName!=null?" from table/query: "+tableOrQueryName:"")
 				+ (rs.next()?" (more rows exists)":"")
 				+ " ["+elapsedMilis+"ms elapsed]"
 				+ (elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
