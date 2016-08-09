@@ -59,3 +59,17 @@ https://oss.sonatype.org/
 -- staging: https://oss.sonatype.org/content/groups/staging/org/bitbucket/tbrugz/sqldump/
 -- releases: https://oss.sonatype.org/content/repositories/releases/org/bitbucket/tbrugz/sqldump/
 
+
+future / ideas
+------
+http://stackoverflow.com/questions/28071697/is-it-possible-to-pass-a-password-in-maven-deploy-in-the-command-line
+
+setup .mvncredentials
+
+on `$HOME/.mvncredentials`, setup the properties:
+
+	sonatype-nexus-snapshots.username=
+	sonatype-nexus-snapshots.password=
+	sonatype-nexus-staging.username=
+	sonatype-nexus-staging.password=
+

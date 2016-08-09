@@ -1,4 +1,10 @@
 
+sqldump-ng
+----------
+- dumper: DropScriptDumper: added prop '.ifexists'
+- sqlrun: added 'sql' importer (1712)
+
+
 sqldump 0.9.14
 ----------
 - dbms: added explainPlan()

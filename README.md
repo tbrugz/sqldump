@@ -124,7 +124,7 @@ Running (with sources)
 Not building? Setup env (without sources)
 -----------------------------------------
 - Download `sqldump.jar` jar from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
-  (e.g.: [sqldump 0.9.9](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.9/sqldump-0.9.9.jar))
+  (e.g.: [sqldump 0.9.14](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.14/sqldump-0.9.14.jar))
 - Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat`
   or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
@@ -146,6 +146,25 @@ Command-line options
 - `-usesysprop=[true|false]`: loads system properties besides the config file properties (default is true)
 - `--help`: show help and exit
 - `--version`: show version and exit
+
+
+Artifact repositories
+---------------------
+
+**Releases:**  
+- [maven central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)
+- [tbrugz/mvn-repo @ bitbucket](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
+
+**Snapshots:**  
+- [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/sqldump/)
+
+**Maven dependency config:**
+
+	<dependency>
+		<groupId>org.bitbucket.tbrugz</groupId>
+		<artifactId>sqldump</artifactId>
+		<version>0.9.14</version>
+	</dependency>
 
 
 Misc/End notes

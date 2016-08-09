@@ -356,11 +356,11 @@
 		<echo message="project ${ant.project.name} released with version ${revision} to ${resolver.publish}"/>
 	</target>
 
-	<target name="publish-sonatype-snapshot" depends="dist">
+	<target name="publish-sonatype-snapshot" depends="dist" description="publish snapshot into sonatype repository">
 		<ant antfile="build-sonatype.xml" target="deploy"/> <!-- deploy snapshots -->
 	</target>
 	
-	<target name="publish-sonatype-release" depends="dist">
+	<target name="publish-sonatype-release" depends="dist" description="publish release into sonatype stage repository">
 		<ant antfile="build-sonatype.xml" target="stage"/> <!-- deploy (signed) releases -->
 	</target>
 	
