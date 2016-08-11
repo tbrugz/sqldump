@@ -81,6 +81,8 @@
 	<target name="deploy" depends="prepare-publish-sonatype" description="deploy snapshot version to Maven snapshot repository">
 		<echo message="artifactId: ${artifactId}"/>
 		<fail message="Must be SNAPSHOT version" unless="version-snapshot"/>
+
+		<!-- deploy the main artifact -->
 		<artifact:mvn>
 			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
 			<arg value="-Durl=${maven-snapshots-repository-url}" />
@@ -89,6 +91,16 @@
 			<arg value="-Dfile=${maven-jar}" />
 			<!--arg value="-X" />
 			<arg value="-e" /-->
+		</artifact:mvn>
+
+		<!-- deploy the sources artifact -->
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="-Durl=${maven-snapshots-repository-url}" />
+			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+			<arg value="-DpomFile=${maven-pom}" />
+			<arg value="-Dfile=${maven-sources-jar}" />
+			<arg value="-Dclassifier=sources" />
 		</artifact:mvn>
 	</target>
 
