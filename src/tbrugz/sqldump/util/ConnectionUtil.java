@@ -48,7 +48,7 @@ public class ConnectionUtil {
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
 		//init database
-		log.debug("initDBConnection...");
+		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [autoCommit="+autoCommit+"]");
 		
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 		String initialContextLookup = papp.getProperty(propsPrefix+SUFFIX_DATASOURCE_CONTEXTLOOKUP, DEFAULT_INITIAL_CONTEXT);

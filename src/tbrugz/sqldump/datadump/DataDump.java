@@ -84,6 +84,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_WRITEAPPEND = "sqldump.datadump.writeappend";
 	static final String PROP_DATADUMP_CREATEEMPTYFILES = "sqldump.datadump.createemptyfiles";
 	static final String PROP_DATADUMP_PARTITIONBY_DATEFORMAT = "sqldump.datadump.partitionby.dateformat";
+	static final String PROP_DATADUMP_FETCHSIZE = DATADUMP_PROP_PREFIX+"fetchsize";
 
 	//defaults
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
@@ -406,6 +407,12 @@ public class DataDump extends AbstractSQLProc {
 			) throws SQLException, IOException {
 		PreparedStatement st = conn.prepareStatement(sql);
 		try {
+			Integer fetchSize = Utils.getPropInt(prop, PROP_DATADUMP_FETCHSIZE);
+			if(fetchSize!=null) {
+				log.debug("[qid="+tableOrQueryId+"] setting fetch size: "+fetchSize);
+				st.setFetchSize(fetchSize);
+			}
+			
 			return runQuery(conn, st, params, prop, schemaName, tableOrQueryId,
 					tableOrQueryName, charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory);
@@ -446,7 +453,8 @@ public class DataDump extends AbstractSQLProc {
 			}
 			
 			long initTime = System.currentTimeMillis();
-			logRow.debug("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
+			log.debug("[qid="+tableOrQueryId+"] running query '"+tableOrQueryName+"'");
+			//XXX: add st.setFetchSize(rows) here?
 			ResultSet rs = st.executeQuery();
 			if(log.isDebugEnabled()) { SQLUtils.logWarnings(rs.getWarnings(), log); }
 			if(rsDecoratorFactory!=null) {
@@ -709,8 +717,11 @@ public class DataDump extends AbstractSQLProc {
 					}
 				}
 				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) { 
+					long eachXRowsElapsedMilis = System.currentTimeMillis()-initTime;
 					logRow.debug("[qid="+tableOrQueryId+"] "+count+" rows dumped"
-							+(logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"") );
+							+ (eachXRowsElapsedMilis>0?" ["+( (count*1000)/eachXRowsElapsedMilis )+" rows/s]":"")
+							+ (logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"")
+							);
 				}
 				if(rowlimit<=count) { break; }
 			}

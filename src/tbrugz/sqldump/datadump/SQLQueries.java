@@ -177,6 +177,13 @@ public class SQLQueries extends AbstractSQLProc {
 				try {
 					log.debug("running query [id="+qid+"; name="+queryName+"]: "+sql);
 					DataDump dd = new DataDump();
+					
+					Integer fetchSize = Utils.getPropInt(prop, DataDump.PROP_DATADUMP_FETCHSIZE);
+					if(fetchSize!=null) {
+						log.debug("[qid="+qid+"] setting fetch size: "+fetchSize);
+						stmt.setFetchSize(fetchSize);
+					}
+					
 					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
 							keyCols, null, null, rsdf);
