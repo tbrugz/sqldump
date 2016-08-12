@@ -481,6 +481,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			if(initTime<=0) { initTime = System.currentTimeMillis(); }
 			long dump1stRowTime = -1;
+			long lastRoundInitTime = initTime;
 			
 			ResultSetMetaData md = rs.getMetaData();
 			
@@ -716,12 +717,16 @@ public class DataDump extends AbstractSQLProc {
 							+ " ["+(dump1stRowTime-initTime)+"ms elapsed]");
 					}
 				}
-				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) { 
-					long eachXRowsElapsedMilis = System.currentTimeMillis()-initTime;
+				if( (logEachXRows>0) && (count>0) &&(count%logEachXRows==0) ) {
+					long currentTime = System.currentTimeMillis();
+					long eachXRowsElapsedMilis = currentTime-initTime;
+					long lastRoundElapsedMilis = currentTime-lastRoundInitTime;
 					logRow.debug("[qid="+tableOrQueryId+"] "+count+" rows dumped"
-							+ (eachXRowsElapsedMilis>0?" ["+( (count*1000)/eachXRowsElapsedMilis )+" rows/s]":"")
+							+ (eachXRowsElapsedMilis>0?" [average rows/s: "+( (count*1000)/eachXRowsElapsedMilis )+"]":"")
+							+ (lastRoundElapsedMilis>0?" [last round rows/s: "+( (logEachXRows*1000)/lastRoundElapsedMilis )+"]":"")
 							+ (logNumberOfOpenedWriters?" ["+writersOpened.size()+" opened writers]":"")
 							);
+					lastRoundInitTime = currentTime;
 				}
 				if(rowlimit<=count) { break; }
 			}
