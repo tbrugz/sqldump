@@ -153,10 +153,13 @@ public class DataDumpUtils {
 			//XXXdone: JSON dateFormatter?
 			return df.format((Date)elem);
 		}
-		else if(Long.class.isAssignableFrom(type)) {
+		else if(Number.class.isAssignableFrom(type)) {
+			return longFormatter.format((Number)elem);
+		}
+		/*else if(Long.class.isAssignableFrom(type)) {
 			//log.warn("long: "+(Long)elem+"; "+longFormatter.format((Long)elem));
 			return longFormatter.format((Long)elem);
-		}
+		}*/
 
 		return getFormattedJSONString(elem);
 	}

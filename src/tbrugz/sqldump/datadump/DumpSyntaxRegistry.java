@@ -37,7 +37,7 @@ public class DumpSyntaxRegistry {
 	static boolean loadClass(String c) {
 		Class<?> cc = Utils.getClassWithinPackages(c, "tbrugz.sqldump.datadump", null);
 		if(cc==null) {
-			log.warn("dump syntax class '"+c+"' was not found");
+			log.warn("dump syntax class '"+c+"' could not be loaded");
 		}
 		else if (DumpSyntax.class.isAssignableFrom(cc)) {
 			if(syntaxes.contains(cc)) {
