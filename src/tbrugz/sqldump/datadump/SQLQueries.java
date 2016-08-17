@@ -120,7 +120,8 @@ public class SQLQueries extends AbstractSQLProc {
 			
 			PreparedStatement stmt = null;
 			try {
-				stmt = conn.prepareStatement(sql);
+				String finalSql = processQuery(sql);
+				stmt = conn.prepareStatement(finalSql);
 			} catch (SQLException e) {
 				String message = "error creating prepared statement [id="+qid+";sql="+sql+"]: "+e.getMessage();
 				log.warn(message);
@@ -328,6 +329,7 @@ public class SQLQueries extends AbstractSQLProc {
 					}
 				} catch (SQLException e) {
 					query.setColumns(new ArrayList<Column>());
+					//query.setColumns(null); //XXX null is better??
 					log.warn("resultset metadata's sqlexception: "+e.toString().trim());
 					log.debug("resultset metadata's sqlexception: "+e.getMessage(), e);
 				}
@@ -375,7 +377,11 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		return added?1:0;
 	}
-
+	
+	protected String processQuery(String sql) {
+		return sql;
+	}
+	
 	@Deprecated
 	protected static void addRolesToQuery(Query query, String rolesFilterStr) {
 		setQueryRoles(query, rolesFilterStr);
