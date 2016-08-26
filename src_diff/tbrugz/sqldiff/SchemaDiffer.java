@@ -143,7 +143,7 @@ public class SchemaDiffer {
 	static final DBObjectType[] diffableTypes = {
 		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.MATERIALIZED_VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE,
 		DBObjectType.SYNONYM, DBObjectType.INDEX, DBObjectType.SEQUENCE,
-		DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY
+		DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE
 	};
 	
 	static final Set<DBObjectType> diffableTypesSet = new HashSet<DBObjectType>();
@@ -199,7 +199,8 @@ public class SchemaDiffer {
 		else {
 			//log.debug("countsByType-orig::\n"+ModelUtils.getExecutableCountsByType(modelOrig.getExecutables()));
 			//log.debug("countsByType-new::\n"+ModelUtils.getExecutableCountsByType(modelNew.getExecutables()));
-			DBObjectType[] types = { DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY };
+			DBObjectType[] types = { DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE };
+			//DBObjectType[] types = DBObjectType.getExecutableTypes();
 			//int count = 0;
 			for(DBObjectType et: types) {
 				//log.debug("diffSchemas: execs["+count+"]: #dbid="+diff.getDbIdDiffs().size()+" #orig="+modelOrig.getExecutables().size()+" #new="+modelNew.getExecutables().size());

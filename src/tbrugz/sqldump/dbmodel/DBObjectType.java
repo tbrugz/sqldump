@@ -60,4 +60,14 @@ public enum DBObjectType {
 		}
 	}
 	
+	/*public static DBObjectType[] getExecutableTypes() {
+		List<DBObjectType> types = new ArrayList<DBObjectType>();
+		for(DBObjectType t: DBObjectType.values()) {
+			if(t.isExecutableType()) {
+				types.add(t);
+			}
+		}
+		return types.toArray(new DBObjectType[]{});
+	}*/
+	
 }
