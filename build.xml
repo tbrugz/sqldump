@@ -363,6 +363,10 @@
 	<target name="publish-sonatype-release" depends="dist" description="publish release into sonatype stage repository">
 		<ant antfile="build-sonatype.xml" target="stage"/> <!-- deploy (signed) releases -->
 	</target>
+
+	<target name="publish-mvn-files" depends="dist" description="publish release into sonatype stage repository">
+		<ant antfile="build-sonatype.xml" target="mvn-install-files"/> <!-- deploy (signed) releases -->
+	</target>
 	
 	<!-- ========= /dependencies tasks ========== -->
 

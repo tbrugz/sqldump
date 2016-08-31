@@ -33,6 +33,7 @@
 		<echo message="java.home: ${java.home}" />
 		<echo message="maven.home: ${maven.home}" />
 		<echo message="env.M2_HOME: ${env.M2_HOME}" />
+		<echo message="artifactId: ${artifactId}" />
 	</target>
 		
 	<target name="prepare-publish-sonatype" depends="info">
