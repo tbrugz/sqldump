@@ -33,7 +33,8 @@ public class ResultSetDiff {
 	
 	int identicalRowsCount, updateCount, dumpCount, deleteCount, sourceRowCount, targetRowCount;
 	
-	//XXX: add property for dumpInserts, dumpUpdates & dumpDeletes
+	//XXXdone: add property for dumpInserts, dumpUpdates & dumpDeletes
+	//XXX add parameters for dumpInserts, dumpUpdates & dumpDeletes?
 	boolean dumpInserts = true,
 		dumpUpdates = true,
 		dumpDeletes = true;
@@ -234,7 +235,7 @@ public class ResultSetDiff {
 			}
 			
 			if(limit>0 && count>=limit) {
-				log.info("limit reached: "+limit+" [table="+fullTableName+"]");
+				log.warn("limit reached: "+limit+" [table="+fullTableName+"]");
 				break;
 			}
 		}
@@ -357,4 +358,29 @@ public class ResultSetDiff {
 		}
 		return ret;
 	}
+	
+	public void setDumpInserts(boolean dumpInserts) {
+		this.dumpInserts = dumpInserts;
+	}
+	
+	public void setDumpUpdates(boolean dumpUpdates) {
+		this.dumpUpdates = dumpUpdates;
+	}
+	
+	public void setDumpDeletes(boolean dumpDeletes) {
+		this.dumpDeletes = dumpDeletes;
+	}
+	
+	public boolean isDumpInserts() {
+		return dumpInserts;
+	}
+	
+	public boolean isDumpUpdates() {
+		return dumpUpdates;
+	}
+	
+	public boolean isDumpDeletes() {
+		return dumpDeletes;
+	}
+	
 }
