@@ -107,7 +107,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 			sql = getInsertSql(insertTable, columnTypes.size());
 		}
 		else {
-			sql = getInsertSql(insertTable, columnNames);
+			sql = getInsertSql(insertTable, columnTypes.size(), columnNames);
 		}
 		return sql;
 	}
@@ -158,12 +158,18 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	}
 	
 	static String getInsertSql(String insertTable, List<String> columnNames) throws SQLException {
+		return getInsertSql(insertTable, columnNames.size(), columnNames);
+	}
+	
+	static String getInsertSql(String insertTable, int colCount, List<String> columnNames) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		
 		sb.append("insert into " + insertTable + " (");
-		sb.append(Utils.join(columnNames, ", "));
+		for(int i=0;i<colCount;i++) {
+			sb.append((i==0?"":", ")+columnNames.get(i));
+		}
 		sb.append(") values (");
-		for(int i=0;i<columnNames.size();i++) {
+		for(int i=0;i<colCount;i++) {
 			sb.append((i==0?"":", ")+"?");
 		}
 		sb.append(")");
@@ -190,7 +196,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 			log.warn("#columnNames ["+columnNames.size()+"] != #columnTypes ["+columnTypes.size()+"]");
 			log.info("columnNames: "+columnNames+" ; columnTypes: "+columnTypes);
 		}
-		for(int i=0;i<columnNames.size();i++) {
+		for(int i=0;i<columnTypes.size();i++) {
 			sb.append((i==0?"":", ") + columnNames.get(i) + " " + getSqlColumnType(columnTypes.get(i)));
 		}
 		sb.append(")");
