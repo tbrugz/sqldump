@@ -94,7 +94,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	void createTable() throws SQLException {
 		String sql = getCreateTableSql();
 		boolean b = conn.createStatement().execute(sql);
-		log.info("create table, return="+b);
+		log.info("create table, return = "+b);
+		//log.info("create table, sql = ["+sql+"] return = "+b);
 	}
 	
 	String getInsertSql() throws SQLException {
@@ -112,6 +113,9 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	}
 	
 	String getCreateTableSql() {
+		if(columnNames==null) {
+			columnNames = new ArrayList<String>();
+		}
 		return getCreateTableSql(insertTable, columnNames, columnTypes);
 	}
 	
@@ -166,15 +170,25 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return sb.toString();
 	}
 
+	/* private */
 	static String getCreateTableSql(String tableName, List<String> columnNames, List<String> columnTypes) {
 		StringBuilder sb = new StringBuilder();
+		//log.info("colnames="+columnNames+"; coltypes="+columnTypes);
 		
 		sb.append("create table " + tableName + " (");
-		if(columnNames==null || columnNames.size()>0) {
-			columnNames = new ArrayList<String>();
+		if(columnNames==null) {
+			log.warn("columnNames must not be null");
+		}
+		if(columnNames.size()==0) {
+			log.info("clear colnames="+columnNames);
+			columnNames.clear();
 			for(int i=0;i<columnTypes.size();i++) {
 				columnNames.add("C"+i);
 			}
+		}
+		if(columnNames.size()!=columnTypes.size()) {
+			log.warn("#columnNames ["+columnNames.size()+"] != #columnTypes ["+columnTypes.size()+"]");
+			log.info("columnNames: "+columnNames+" ; columnTypes: "+columnTypes);
 		}
 		for(int i=0;i<columnNames.size();i++) {
 			sb.append((i==0?"":", ") + columnNames.get(i) + " " + getSqlColumnType(columnTypes.get(i)));

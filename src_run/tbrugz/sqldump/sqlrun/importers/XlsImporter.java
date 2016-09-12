@@ -40,7 +40,7 @@ public class XlsImporter extends BaseImporter {
 	boolean doCreateTable = false;
 	
 	static final String[] XLS_AUX_SUFFIXES = {
-		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME
+		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME, SUFFIX_1ST_LINE_IS_HEADER, SUFFIX_1ST_LINE_AS_COLUMN_NAMES, SUFFIX_DO_CREATE_TABLE
 	};
 	
 	@Override
@@ -103,8 +103,7 @@ public class XlsImporter extends BaseImporter {
 					parts.add(getValue(cell));
 				}
 
-				/*if(is1stLine && !use1stLineAsColNames) {
-				}*/
+				//log.info(is1stLine+";"+hasHeaderLine+";"+use1stLineAsColNames+"\nnames = "+columnNames+"\ntypes = "+columnTypes);
 				
 				if(is1stLine && hasHeaderLine) {
 					if(use1stLineAsColNames) {
@@ -129,7 +128,7 @@ public class XlsImporter extends BaseImporter {
 						tableCreated = true;
 					}
 					if(stmt==null) {
-						log.info("sql: "+getInsertSql());
+						log.info("insert sql: "+getInsertSql());
 						stmt = getStatement();
 					}
 
@@ -144,6 +143,7 @@ public class XlsImporter extends BaseImporter {
 					int updates = stmt.executeUpdate();
 					counter.output += updates;
 				}
+				
 				is1stLine = false;
 			}
 			conn.commit();
