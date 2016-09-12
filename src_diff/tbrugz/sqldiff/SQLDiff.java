@@ -511,6 +511,7 @@ public class SQLDiff implements Executor {
 		return schemaGrabber;
 	}
 	
+	@SuppressWarnings("deprecation")
 	public void procProterties() {
 		failonerror = Utils.getPropBool(prop, PROP_FAILONERROR, failonerror);
 		DBObject.dumpCreateOrReplace = Utils.getPropBool(prop, SchemaModelScriptDumper.PROP_SCHEMADUMP_USECREATEORREPLACE, false);

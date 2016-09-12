@@ -10,7 +10,7 @@ import tbrugz.sqldump.datadump.DumpSyntaxInt;
 //XXX: rename to DataDiffSyntax ?
 public interface DiffSyntax extends DumpSyntaxInt {
 	
-	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource, ResultSet rsTarget, long count, Writer w)
+	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource, ResultSet rsTarget, long count, boolean alsoDumpIfEquals, Writer w)
 			throws IOException, SQLException;
 	
 	public void dumpUpdateRow(ResultSet rsSource, ResultSet rsTarget, long count, Writer w)

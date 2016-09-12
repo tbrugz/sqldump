@@ -26,7 +26,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
-			ResultSet rsTarget, long count, Writer w) throws IOException,
+			ResultSet rsTarget, long count, boolean alsoDumpIfEquals, Writer w) throws IOException,
 			SQLException {
 		List<Object> valsS = SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol, true);
 		List<Object> valsT = SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol, true);
@@ -39,7 +39,10 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 			return true;
 		}
 		else {
-			dumpRow(rsTarget, count, "equal", w);
+			if(alsoDumpIfEquals) {
+				//XXXxxx: really dump? add prop?
+				dumpRow(rsTarget, count, "equal", w);
+			}
 			if(shouldFlush) { flush(w); }
 			return false;
 		}

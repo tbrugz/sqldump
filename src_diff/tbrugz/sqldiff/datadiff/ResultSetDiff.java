@@ -37,7 +37,8 @@ public class ResultSetDiff {
 	//XXX add parameters for dumpInserts, dumpUpdates & dumpDeletes?
 	boolean dumpInserts = true,
 		dumpUpdates = true,
-		dumpDeletes = true;
+		dumpDeletes = true,
+		dumpEquals = true;
 	
 	public void diff(ResultSet source, ResultSet target, String schemaName, String tableName, List<String> keyCols,
 			List<DiffSyntax> dss, String coutPattern) throws SQLException, IOException {
@@ -166,7 +167,7 @@ public class ResultSetDiff {
 					//last 'updated' that counts...
 					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called
 					CategorizedOut cout = dscouts.get(ds);
-					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
+					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, dumpEquals, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				}
@@ -371,6 +372,10 @@ public class ResultSetDiff {
 		this.dumpDeletes = dumpDeletes;
 	}
 	
+	public void setDumpEquals(boolean dumpEquals) {
+		this.dumpEquals = dumpEquals;
+	}
+	
 	public boolean isDumpInserts() {
 		return dumpInserts;
 	}
@@ -381,6 +386,10 @@ public class ResultSetDiff {
 	
 	public boolean isDumpDeletes() {
 		return dumpDeletes;
+	}
+	
+	public boolean isDumpEquals() {
+		return dumpEquals;
 	}
 	
 }

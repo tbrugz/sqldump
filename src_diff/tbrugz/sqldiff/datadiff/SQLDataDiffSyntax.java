@@ -50,7 +50,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	//XXX: rename to something like 'dumpRowWithMatchedKey' ?
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
-			ResultSet rsTarget, long count, Writer w) throws IOException,
+			ResultSet rsTarget, long count, boolean alsoDumpIfEquals, Writer w) throws IOException,
 			SQLException {
 		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
 		List<String> valsT = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol), dateFormatter );
@@ -62,6 +62,7 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 			return true;
 		}
 		else {
+			//XXX: alsoDumpIfEquals??
 			return false;
 		}
 	}
@@ -192,5 +193,10 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 		}
 		return changedColNames;
 	}
+	
+	/*@Override
+	public String getMimeType() {
+		return "text/plain";
+	}*/
 	
 }
