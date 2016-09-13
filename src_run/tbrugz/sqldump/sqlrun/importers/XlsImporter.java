@@ -38,6 +38,7 @@ public class XlsImporter extends BaseImporter {
 	boolean hasHeaderLine = true;
 	boolean use1stLineAsColNames = false;
 	boolean doCreateTable = false;
+	boolean ignoreRowWithWrongNumberOfColumns = true; //XXX: add prop?
 	
 	static final String[] XLS_AUX_SUFFIXES = {
 		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME, SUFFIX_1ST_LINE_IS_HEADER, SUFFIX_1ST_LINE_AS_COLUMN_NAMES, SUFFIX_DO_CREATE_TABLE
@@ -99,6 +100,8 @@ public class XlsImporter extends BaseImporter {
 				if(counter.input<=linesToSkip) { continue; }
 				
 				List<Object> parts = new ArrayList<Object>();
+				try {
+				
 				for (Cell cell : row) {
 					parts.add(getValue(cell));
 				}
@@ -132,19 +135,34 @@ public class XlsImporter extends BaseImporter {
 						stmt = getStatement();
 					}
 
-					for(int i=0;i<parts.size();i++) {
-						Object s = parts.get(i);
-						if(columnTypes.size()<=i) {
-							log.warn("coltypes="+columnTypes+" i:"+i);
-						}
-						setStmtValue(stmt, columnTypes.get(i), i, s);
+					boolean rowError = false;
+					if(parts.size() != columnTypes.size()) {
+						log.warn("row "+counter.input+": #values ["+parts.size()+"] != #columnTypes ["+columnTypes.size()+"]"
+							+ (ignoreRowWithWrongNumberOfColumns?" (row ignored)":"")
+							);
+						rowError = true;
 					}
-					//log.info("coltypes="+columnTypes+" sql="+getInsertSql()+" parts="+parts);
-					int updates = stmt.executeUpdate();
-					counter.output += updates;
+
+					if(!rowError || !ignoreRowWithWrongNumberOfColumns) {
+						for(int i=0;i<parts.size();i++) {
+							Object s = parts.get(i);
+							if(columnTypes.size()<=i) {
+								log.warn("coltypes="+columnTypes+" i:"+i);
+							}
+							setStmtValue(stmt, columnTypes.get(i), i, s);
+						}
+						//log.info("coltypes="+columnTypes+" sql="+getInsertSql()+" parts="+parts);
+						int updates = stmt.executeUpdate();
+						counter.output += updates;
+					}
 				}
 				
 				is1stLine = false;
+				}
+				catch(RuntimeException e) {
+					log.warn("Exception: "+e+" ; parts: "+parts+" ; columnTypes: "+columnTypes);
+					throw e;
+				}
 			}
 			conn.commit();
 		}
