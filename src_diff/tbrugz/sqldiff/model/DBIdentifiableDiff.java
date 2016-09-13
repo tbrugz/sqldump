@@ -21,8 +21,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 	final DBIdentifiable previousIdent;
 	final String ownerTableName;
 	
-	static boolean dumpSchemaName = true;
+	static boolean dumpSchemaName = true; //XXX add property for 'dumpSchemaName'?
 	public static boolean addComments = true;
+	static final boolean doNotDumpDropWhenCreateOrReplaceActive = true; //XXX add prop for 'doNotDumpDropWhenCreateOrReplaceActive'?
 
 	public DBIdentifiableDiff(ChangeType changeType, DBIdentifiable previousIdent, DBIdentifiable ident, String ownerTableName) {
 		this.changeType = changeType;
@@ -49,7 +50,9 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 				//XXX: add DBMSFeatrures.sqlAlterDbIdByDiffing ? create or replace ...
 				//XXX: option to do a line-by-line diff/patch as comment ...
 				List<String> ret = new ArrayList<String>();
-				ret.add( getDropDiffSQL(false) );
+				if(! DBObject.dumpCreateOrReplace && doNotDumpDropWhenCreateOrReplaceActive) {
+					ret.add( getDropDiffSQL(false) );
+				}
 				ret.add( getAddDiffSQL(false) + (addComments?getComment(previousIdent, "replacing: "):"") );
 				return ret;
 			case ALTER:
