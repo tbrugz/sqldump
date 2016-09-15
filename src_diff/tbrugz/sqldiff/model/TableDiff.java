@@ -59,8 +59,6 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 				//throw new IllegalStateException("ALTER table without remarks?");
 			case REPLACE:
 				throw new IllegalStateException("cannot "+diffType.name()+" a table");
-			default:
-				break;
 		}
 		throw new IllegalStateException("unknown changetype: "+diffType);
 	}
@@ -100,7 +98,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 					diffs.add(tcd);
 				}
 				
-				if(!StringUtils.equalsNullsAllowed(cOrig.getRemarks(), cNew.getRemarks())) {
+				if(!StringUtils.equalsNullsAsEmpty(cOrig.getRemarks(), cNew.getRemarks())) {
 					ColumnDiff tcd = new ColumnDiff(ChangeType.REMARKS, newTable, cOrig, cNew);
 					diffs.add(tcd);
 				}
@@ -135,7 +133,7 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		//comments??
 		String otRemarks = origTable.getRemarks();
 		String ntRemarks = newTable.getRemarks();
-		if(!StringUtils.equalsNullsAllowed(otRemarks, ntRemarks)) {
+		if(!StringUtils.equalsNullsAsEmpty(otRemarks, ntRemarks)) {
 			//diffs.add(new RemarksDiff(newTable.getName(), null, ntRemarks));
 			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, otRemarks));
 		}
