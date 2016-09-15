@@ -163,6 +163,10 @@ public class XlsImporter extends BaseImporter {
 					log.warn("Exception: "+e+" ; parts: "+parts+" ; columnTypes: "+columnTypes);
 					throw e;
 				}
+				catch(SQLException e) {
+					log.warn("SQLException: "+e+" ; parts: "+parts+" ; columnTypes: "+columnTypes);
+					throw e;
+				}
 			}
 			conn.commit();
 		}

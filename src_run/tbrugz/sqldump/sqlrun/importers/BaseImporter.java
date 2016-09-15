@@ -205,7 +205,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	
 	static void setStmtValue(PreparedStatement stmt, String colType, int index, Object objValue) throws SQLException, ParseException {
 		if(objValue==null) {
-			stmt.setString(index+1, null);
+			/* if(colType.equals("int") || colType.equals("double") || colType.equals("doublec")) { } */
+			stmt.setObject(index+1, null);
 			return;
 		}
 		String value = String.valueOf(objValue);
