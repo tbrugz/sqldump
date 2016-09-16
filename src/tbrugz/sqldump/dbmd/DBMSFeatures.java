@@ -73,7 +73,8 @@ public interface DBMSFeatures {
 	//String sqlDefaultTimestampFormatPattern();
 	
 	boolean supportsDiffingColumn();
-	String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
+	//String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column);
+	String sqlAlterColumnByDiffing(Column previousColumn, Column column);
 	
 	//boolean supportsRenameConstraint();
 	//boolean supportsRenameIndex();

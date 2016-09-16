@@ -15,6 +15,8 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.DBMSUpdateListener;
+import tbrugz.sqldump.util.StringDecorator;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 //@XmlJavaTypeAdapter(TableColumnDiffAdapter.class)
@@ -137,7 +139,9 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 
 	@Override
 	public List<String> getDiffList() {
-		return getDiff(type, previousColumn, column);
+		List<String> diffs = getDiff(type, previousColumn, column);
+		//log.info("getDiffList: #"+diffs.size());
+		return diffs;
 	}
 	
 	List<String> getDiff(ChangeType changeType, Column previousColumn, Column column) {
@@ -180,7 +184,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			if(! column.getType().equals(previousColumn.getType())) break;
 			//if(! column.type.equals(previousColumn.type)) break;
 		case NEVER:
-			ret.add(getAlterColumnSQL());
+			String alterSql = getAlterColumnSQL();
+			if(alterSql!=null) {
+				ret.add(alterSql);
+			}
 			return ret;
 		}
 		
@@ -204,23 +211,38 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	String getAlterColumnSQL() {
 		String alterSql = null;
 		if(features.supportsDiffingColumn()) {
-			alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
+			//alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
+			alterSql = DiffUtil.createAlterColumn(features, table, column, 
+					features.sqlAlterColumnByDiffing(previousColumn, column)
+					);
 		}
 		else {
 			//XXX: return all diffs in one query? return List<String>?
 			//XXX: add to AbstractDBMSFeatures ??
 			//oracle-like syntax?
-			alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+features.sqlAlterColumnClause()+" "+column.getName();
-			if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {
+			//alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+features.sqlAlterColumnClause()+" "+column.getName();
+			alterSql = "";
+			if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
 				alterSql += " "+column.getTypeDefinition();
 			}
 			else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
-				alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
+				alterSql += column.getFullDefaultSnippet();
+				//alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
 			}
 			else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
-				alterSql += (column.isNullable()?" null":column.getNullableSnippet());
+				alterSql += column.getFullNullableSnippet();
+				//alterSql += (column.isNullable()?" null":column.getNullableSnippet());
+			}
+			
+			if(!alterSql.trim().equals("")) {
+				alterSql = DiffUtil.createAlterColumn(features, table, column, alterSql);
+			}
+			else {
+				alterSql = null;
 			}
 		}
+		
+		if(alterSql==null) { return null; }
 		
 		if(addComments) {
 			alterSql += " /* from: "+previousColumn.getDefinition()+" */";

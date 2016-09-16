@@ -76,6 +76,82 @@ public class ColumnDiffTest {
 		out(diff);
 		Assert.assertEquals("alter table a alter column c1 rename to c2", diff);
 	}
+	
+	@Test
+	public void testAlterH2DataType() {
+		updateDbId("h2");
+		
+		Column c1 = newColumn("cx","varchar",10);
+		Column c2 = newColumn("cx","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		String diff = cd.getDiff();
+		out(diff);
+		Assert.assertEquals("alter table a alter column cx varchar(20)", diff);
+	}
+
+	@Test
+	public void testAlterH2SetNullNotNull() {
+		updateDbId("h2");
+		
+		Column c1 = newColumn("cx","varchar",10, false);
+		Column c2 = newColumn("cx","varchar",10, true);
+		
+		{
+			ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+			String diff = cd.getDiff();
+			out(diff);
+			Assert.assertEquals("alter table a alter column cx set null", diff);
+		}
+		{
+			ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c2, c1);
+			String diff = cd.getDiff();
+			out(diff);
+			Assert.assertEquals("alter table a alter column cx set not null", diff);
+		}
+	}
+	
+	@Test
+	public void testAlterH2SetDefaultNull() {
+		updateDbId("h2");
+		
+		Column c1 = newColumn("cx","varchar",10, true, "Y");
+		Column c2 = newColumn("cx","varchar",10, true, null);
+		
+		{
+			ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+			String diff = cd.getDiff();
+			out(diff);
+			Assert.assertEquals("alter table a alter column cx set default null", diff);
+		}
+	}
+
+	@Test
+	public void testAlterH2SetDefaultY() {
+		updateDbId("h2");
+		
+		Column c1 = newColumn("cx","varchar",10, true, "'Y'");
+		Column c2 = newColumn("cx","varchar",10, true, null);
+		{
+			ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c2, c1);
+			String diff = cd.getDiff();
+			out(diff);
+			Assert.assertEquals("alter table a alter column cx set default 'Y'", diff);
+		}
+		
+	}
+
+	@Test
+	public void testAlterOracleSetDefaultY() {
+		updateDbId("oracle");
+		
+		Column c1 = newColumn("cx","varchar",10, true, "'Y'");
+		Column c2 = newColumn("cx","varchar",10, true, null);
+		
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c2, c1);
+		String diff = cd.getDiff();
+		out(diff);
+		Assert.assertEquals("alter table a modify cx default 'Y'", diff);
+	}
 
 	String alterSimple = "alter table a alter column cx varchar(20)";
 	String[] alterWithTempColList = {
@@ -178,17 +254,34 @@ public class ColumnDiffTest {
 		out(diff);
 		Assert.assertEquals("alter table a alter column cx set not null", diff);
 	}
+
+	@Test
+	public void testAlterPgsqlNotNullable() {
+		updateDbId("pgsql");
+		
+		Column c1 = newColumn("cx","varchar",10, false);
+		Column c2 = newColumn("cx","varchar",10);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		String diff = cd.getDiff();
+		out(diff);
+		Assert.assertEquals("alter table a alter column cx drop not null", diff);
+	}
 	
 	public static Column newColumn(String name, String type, int precision) {
 		return newColumn(name, type, precision, true);
 	}
 	
 	public static Column newColumn(String name, String type, int precision, boolean nullable) {
+		return newColumn(name, type, precision, nullable, null);
+	}
+	
+	public static Column newColumn(String name, String type, int precision, boolean nullable, String defaultValue) {
 		Column c = new Column();
 		c.setName(name);
 		c.setType(type);
 		c.setColumSize(precision);
 		c.setNullable(nullable);
+		c.setDefaultValue(defaultValue);
 		return c;
 	}
 	

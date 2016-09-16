@@ -136,16 +136,20 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return false;
 	}
 	
+	/*@Override
+	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
+		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");
+	}*/
+	
 	@Override
-	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn,
-			Column column) {
+	public String sqlAlterColumnByDiffing(Column previousColumn, Column column) {
 		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");
 	}
 	
-	protected String createAlterColumn(NamedDBObject table, Column column, String xtraSql) {
+	/*protected String createAlterColumn(NamedDBObject table, Column column, String xtraSql) {
 		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getName()
 				+(xtraSql!=null?xtraSql:"");
-	}
+	}*/
 	
 	@Override
 	public String getIdentifierQuoteString() {

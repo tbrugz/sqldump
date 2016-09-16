@@ -7,8 +7,11 @@ import java.util.Properties;
 
 import tbrugz.sqldiff.datadiff.DiffSyntax;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.util.Utils;
 
 public class DiffUtil {
@@ -56,6 +59,11 @@ public class DiffUtil {
 			return ds;
 		}
 		return null;
+	}
+
+	public static String createAlterColumn(DBMSFeatures feat, NamedDBObject table, Column column, String xtraSql) {
+		return "alter table "+DBObject.getFinalName(table, true)+" "+feat.sqlAlterColumnClause()+" "+column.getName()
+				+(xtraSql!=null?xtraSql:"");
 	}
 
 }

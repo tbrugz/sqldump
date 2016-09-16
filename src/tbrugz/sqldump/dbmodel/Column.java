@@ -187,10 +187,18 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public String getDefaultSnippet() {
 		return (defaultValue!=null?" default "+defaultValue:"");
 	}
+
+	public String getFullDefaultSnippet() {
+		return (defaultValue!=null?" default "+defaultValue:" default null");
+	}
 	
 	//XXX: complete syntax parameter? may return 'null'
 	public String getNullableSnippet() {
 		return (!nullable?" not null":"");
+	}
+
+	public String getFullNullableSnippet() {
+		return (!nullable?" not null":" null");
 	}
 	
 	@Override

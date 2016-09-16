@@ -26,6 +26,10 @@ public class StringUtils {
 			(s1==null || s2==null) ? false :
 			s1.equals(s2);
 	}
+
+	public static boolean equalsWithUpperCase(String s1, String s2) {
+		return s1.toUpperCase().equals(s2.toUpperCase());
+	}
 	
 	public static boolean equalsNullsAsEmpty(String s1, String s2) {
 		if(s1==null) { s1 = ""; }

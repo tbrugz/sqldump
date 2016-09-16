@@ -16,6 +16,7 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.util.StringUtils;
 
 /*
  * see: http://www.h2database.com/html/grammar.html#information_schema
@@ -117,26 +118,78 @@ public class H2Features extends InformationSchemaFeatures {
 	public boolean supportsDiffingColumn() {
 		return true;
 	}
-
+	/*
 	@Override
-	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn,
-			Column column) {
+	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
 		//see: http://www.h2database.com/html/grammar.html#alter_table_alter_column
-		if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {
-			return createAlterColumn(table, column,
-					" "+column.getTypeDefinition());
+		if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+			return createAlterColumn(table, column, " "+column.getTypeDefinition());
 			//XXX add default & not null besides type?
 		}
 		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
 			return createAlterColumn(table, column,
-					" set default "+(column.getDefaultSnippet().trim().equals("")?"null":column.getDefaultValue()));
+					" set"+column.getFullDefaultSnippet()
+					//" set default "+
+					//(column.getDefaultSnippet().trim().equals("")?"null":column.getDefaultValue() )
+					);
 		}
 		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
 			return createAlterColumn(table, column,
-					" set "+(column.isNullable()?"null":"not null"));
+					" set"+column.getFullNullableSnippet()
+					//" set "+(column.isNullable()?"null":"not null")
+					);
 		}
 		
-		throw new UnsupportedOperationException("no differences between H2 columns found");
+		log.warn("no differences between H2 columns found");
+		return null;
+		//throw new UnsupportedOperationException("no differences between H2 columns found");
+	}
+	@Override
+	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
+		//see: http://www.h2database.com/html/grammar.html#alter_table_alter_column
+		
+		String alterSql = "";
+		if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+			alterSql += " "+column.getTypeDefinition();
+		}
+		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
+			alterSql += " set"+column.getFullDefaultSnippet();
+		}
+		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
+			alterSql += " set"+column.getFullNullableSnippet();
+		}
+		
+		if(!alterSql.trim().equals("")) {
+			alterSql = DiffUtil.createAlterColumn(this, table, column, alterSql);
+		}
+		else {
+			alterSql = null;
+		}
+		
+		log.warn("no differences between H2 columns found");
+		return alterSql;
+		//throw new UnsupportedOperationException("no differences between H2 columns found");
+	}
+	*/
+	
+	@Override
+	public String sqlAlterColumnByDiffing(Column previousColumn, Column column) {
+		//String alterSql = "";
+		if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+			return " "+column.getTypeDefinition();
+		}
+		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
+			return " set"+column.getFullDefaultSnippet();
+		}
+		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
+			return " set"+column.getFullNullableSnippet();
+		}
+		
+		//if(alterSql.trim().equals("")) {
+		//	alterSql = null;
+		//}
+		//return alterSql;
+		return null;
 	}
 	
 	@Override

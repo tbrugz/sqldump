@@ -5,9 +5,11 @@ import java.util.List;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
-import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.util.StringUtils;
 
 public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatures {
+
+	//private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatutres.class);
 
 	// org.postgresql.jdbc4.Jdbc4DatabaseMetaData.getFunction(String, String, String) not implemented
 	static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.PROCEDURE };
@@ -17,25 +19,48 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 		return true;
 	}
 
+	/*
 	@Override
 	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn,
 			Column column) {
 		//diff type, if no diff: diff default, if no diff: diff nullable
 		//see: http://www.postgresql.org/docs/9.1/static/sql-altertable.html
-		if(!previousColumn.getTypeDefinition().equals(column.getTypeDefinition())) {
-			return createAlterColumn(table, column,
+		if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+			return DiffUtil.createAlterColumn(this, table, column,
 					" set data type "+column.getTypeDefinition());
 		}
 		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
-			return createAlterColumn(table, column,
+			return DiffUtil.createAlterColumn(this, table, column,
 					(column.getDefaultSnippet().trim().equals("")?" drop default":" set"+column.getDefaultSnippet()));
 		}
 		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
-			return createAlterColumn(table, column,
+			return DiffUtil.createAlterColumn(this, table, column,
 					(column.isNullable()?" drop":" set")+" not null");
 		}
-		
-		throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
+
+		log.warn("no differences between PostgreSQL columns found");
+		return null;
+		//throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
+	}
+	*/
+	
+	@Override
+	public String sqlAlterColumnByDiffing(Column previousColumn, Column column) {
+		//diff type, if no diff: diff default, if no diff: diff nullable
+		//see: http://www.postgresql.org/docs/9.1/static/sql-altertable.html
+		if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+			return " set data type "+column.getTypeDefinition();
+		}
+		else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
+			return (column.getDefaultSnippet().trim().equals("")?" drop default":" set"+column.getDefaultSnippet());
+		}
+		else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
+			return (column.isNullable()?" drop":" set")+" not null";
+		}
+
+		//log.warn("no differences between PostgreSQL columns found");
+		return null;
+		//throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
 	}
 	
 	@Override
