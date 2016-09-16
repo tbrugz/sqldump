@@ -89,4 +89,10 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	public String getIdentifierQuoteString() {
 		return "`";
 	}
+	
+	@Override
+	public String sqlAlterColumnClause() {
+		return "modify";
+	}
+	
 }
