@@ -15,7 +15,6 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.DBMSUpdateListener;
-import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -212,9 +211,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		String alterSql = null;
 		if(features.supportsDiffingColumn()) {
 			//alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
-			alterSql = DiffUtil.createAlterColumn(features, table, column, 
-					features.sqlAlterColumnByDiffing(previousColumn, column)
-					);
+			String alterColumn = features.sqlAlterColumnByDiffing(previousColumn, column);
+			if(alterColumn!=null) {
+				alterSql = DiffUtil.createAlterColumn(features, table, column, alterColumn);
+			}
 		}
 		else {
 			//XXX: return all diffs in one query? return List<String>?
