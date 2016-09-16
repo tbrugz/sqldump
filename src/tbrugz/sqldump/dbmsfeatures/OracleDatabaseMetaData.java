@@ -147,7 +147,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"COLUMN_ID as ORDINAL_POSITION, comments as REMARKS, null as IS_AUTOINCREMENT, DATA_DEFAULT "
 				+"from "+(useDbaMetadataObjects?"dba_tab_columns col, dba_col_comments com ":"all_tab_columns col, all_col_comments com ")
 				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
-				+") ";
+				+")\n";
 		if(schemaPattern!=null) {
 			sql += "where TABLE_SCHEM = ? ";
 			params.add(schemaPattern);
@@ -162,7 +162,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			sql += " TABLE_NAME = ? ";
 			params.add(tableNamePattern);
 		}
-		sql += "order by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION ";
+		sql += "\norder by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION ";
 		
 		PreparedStatement st = conn.prepareStatement(sql);
 		for(int i=0;i<params.size();i++) {
