@@ -143,7 +143,7 @@ public class ScriptDumperTest {
 		
 		String sql = IOUtil.readFromFilename(file);
 		String expected = "create table `DEPT` (\n	`ID` INTEGER not null,\n	`NAME` VARCHAR(100),\n	`PARENT_ID` INTEGER,\n	constraint `DEPT_PK` primary key (`ID`)\n);";
-		Assert.assertEquals(expected, sql.substring(0, expected.length()));
+		Assert.assertEquals(expected, sql.substring(0, sql.indexOf(";")+1));
 	}
 	
 }

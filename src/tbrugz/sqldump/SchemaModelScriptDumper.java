@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -658,16 +657,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		// TODO: properties-prefix setting
 	}
 
-	//XXX: move to DBMSResources?
-	static final String DBPROP_COLUMN_USEAUTOINCREMENT = "column.useautoincrement";
-	
 	static void setupScriptDumpSpecificFeatures(String toDbId) {
-		Properties p = DBMSResources.instance().getProperties();
-		if(Utils.getStringListFromProp(p, DBPROP_COLUMN_USEAUTOINCREMENT, ",").contains(toDbId)) {
-			Column.useAutoIncrement = true;
-		}
-		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(toDbId);
-		SQLIdentifierDecorator.dumpIdentifierQuoteString = feat.getIdentifierQuoteString();
+		Column.ColTypeUtil.setDbId(toDbId);
 	}
 	
 	@Override

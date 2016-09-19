@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
@@ -18,8 +20,13 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public static class ColTypeUtil {
 		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
+		public static final String DBPROP_COLUMN_USEAUTOINCREMENT = "column.useautoincrement";
 		
+		// variables based only on "dbms-specific.properties"
 		static final Properties dbmsSpecificProps = new ParametrizedProperties();
+		static final List<String> useAutoIncrement = new ArrayList<String>();
+		
+		// variables also based on app properties 
 		static final Map<String, Boolean> usePrecisionMap = new HashMap<String, Boolean>();
 		
 		static String dbid;
@@ -29,7 +36,8 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			if(prop!=null) {
 					dbmsSpecificProps.clear();
 					dbmsSpecificProps.putAll(prop);
-					setupPrecisionMap(prop);
+					//setupPrecisionMap(prop);
+					setupStaticVars(prop);
 			}
 		}
 		
@@ -64,10 +72,19 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 				}
 			}
 		}
+			
+		static void setupStaticVars(Properties prop) {
+			//auto_increment
+			List<String> autoIncIds = Utils.getStringListFromProp(dbmsSpecificProps, DBPROP_COLUMN_USEAUTOINCREMENT, ",");
+			if(autoIncIds!=null) {
+				useAutoIncrement.addAll( autoIncIds );
+			}
+		}
 
 		public static void setDbId(String dbidParam) {
 			dbid = dbidParam;
 			usePrecisionMap.clear();
+			DBMSResources.instance().updateSpecificFeaturesClass(dbid);
 		}
 		
 		public static boolean usePrecision(String colType) {
@@ -84,6 +101,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 			}
 			return usePrecision==null || usePrecision;
 		}
+
+		public static boolean useAutoIncrement() {
+			return useAutoIncrement.contains(dbid);
+		}
+		
 	}
 	
 	private static final long serialVersionUID = 1L;
@@ -101,7 +123,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	//XXX Boolean updateable; //?? - http://english.stackexchange.com/questions/56431/correct-spelling-updatable-or-updateable
 	int ordinalPosition; //XXXdone add column position in table? nice for column compare...
 
-	public static transient boolean useAutoIncrement = false;
+	//public static transient boolean useAutoIncrement = false;
 	
 	public static String getColumnDescFull(Column c) {
 		return c.getDefinition()+(c.pk?" primary key":"");
@@ -178,7 +200,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	public String getColumnConstraints() {
 		return getDefaultSnippet()
 			+getNullableSnippet()
-			+(useAutoIncrement?
+			+(ColTypeUtil.useAutoIncrement()?
 				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
 			:"");
 	}

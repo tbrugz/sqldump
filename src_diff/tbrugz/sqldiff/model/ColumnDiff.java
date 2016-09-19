@@ -13,8 +13,6 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.DBMSUpdateListener;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -76,7 +74,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 	}
 	
-	static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
+	/*static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
 		public void dbmsUpdated() {
 			//updateFeatures(null);
@@ -86,7 +84,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	static {
 		DBMSResources.instance().addUpdateListener(updateListener);
-	}
+	}*/
 	
 	final ChangeType type; //ADD, ALTER, RENAME, DROP;
 	final String schemaName;
@@ -122,6 +120,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		log.debug("updateFeatures: feat="+feat+" [old-feat="+features+"]");
 		if(feat!=null) {
 			features = feat;
+			
+			Column.ColTypeUtil.setDbId(features.getId());
 		}
 		else {
 			//features = null;

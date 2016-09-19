@@ -21,6 +21,7 @@ import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.datadump.JsonTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
+import tbrugz.sqldump.dbmodel.ColumnTest;
 import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
 import tbrugz.sqldump.dbmodel.GrantTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
@@ -63,6 +64,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	StmtProcTest.class,
 	ScriptDumperTest.class,
 	//model unit tests
+	ColumnTest.class,
 	ColTypeUtilTest.class,
 	DBObjectUtilsTest.class,
 	GrantTest.class,

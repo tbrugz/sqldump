@@ -3,11 +3,8 @@ package tbrugz.sqldump.def;
 import java.io.IOException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -16,7 +13,6 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
-import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 //TODOne: add addUpdateListener() ? so DBMSResources may notify others that need its info
@@ -43,7 +39,7 @@ public final class DBMSResources {
 	//@Deprecated String identifierQuoteString = DEFAULT_QUOTE_STRING;
 	@Deprecated DBMSFeatures features;
 	
-	final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
+	//final Set<DBMSUpdateListener> updateListeners = new HashSet<DBMSUpdateListener>();
 	
 	final List<String> dbIds; // = new ArrayList<String>();
 	
@@ -204,6 +200,7 @@ public final class DBMSResources {
 		//return dbmsSpecificResource.getProperty("dbid."+dbId+".sqlquotestring", DEFAULT_QUOTE_STRING);
 	//}
 	
+	/*
 	@Deprecated
 	protected String dbid() {
 		return dbId;
@@ -217,13 +214,14 @@ public final class DBMSResources {
 		
 		return features;
 	}
+	*/
 	
 	/*@Deprecated
 	synchronized void updateSpecificFeaturesClass() {
 		features = getSpecificFeatures(DBMSResources.instance().dbid());
 	}*/
 	
-	protected synchronized void updateSpecificFeaturesClass(String dbid) {
+	public synchronized void updateSpecificFeaturesClass(String dbid) {
 		features = getSpecificFeatures(dbid);
 		SQLIdentifierDecorator.dumpIdentifierQuoteString = features.getIdentifierQuoteString();
 		/*
@@ -351,6 +349,7 @@ public final class DBMSResources {
 		initDBMSFeatures(features, null);
 	}*/
 	
+	/*
 	public void addUpdateListener(DBMSUpdateListener listener) {
 		updateListeners.add(listener);
 	}
@@ -358,8 +357,9 @@ public final class DBMSResources {
 	public boolean removeUpdateListener(DBMSUpdateListener listener) {
 		return updateListeners.remove(listener);
 	}
+	*/
 	
-	protected void fireUpdateToListeners() {
+	/*protected void fireUpdateToListeners() {
 		for(DBMSUpdateListener listener: updateListeners) {
 			listener.dbmsUpdated();
 		}
@@ -369,6 +369,6 @@ public final class DBMSResources {
 		Map<Class<?>, Class<?>> mapper = DBMSResources.instance().databaseSpecificFeaturesClass().getColumnTypeMapper();
 		SQLUtils.setupColumnTypeMapper(mapper);
 		//ColumnDiff.updateFeatures(DBMSResources.instance().getSpecificFeatures(s));
-	}
+	}*/
 	
 }

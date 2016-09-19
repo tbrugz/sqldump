@@ -19,9 +19,12 @@ public class ColTypeUtilTest {
 				Column.ColTypeUtil.usePrecision(type));
 	}
 	
-	void updateDbId(String id) {
+	public static void updateDbId(String id) {
 		//DBMSResources.instance().updateDbId(id);
 		Column.ColTypeUtil.setDbId(id);
+		//DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(id);
+		//log.info("feat.getIdentifierQuoteString: "+feat.getIdentifierQuoteString()+" / "+SQLIdentifierDecorator.dumpQuoteAll);
+		//SQLIdentifierDecorator.dumpIdentifierQuoteString = features.getIdentifierQuoteString();
 	}
 	
 	@Test
