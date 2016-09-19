@@ -979,17 +979,17 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		c.setOrdinalPosition(cols.getInt("ORDINAL_POSITION"));
 		c.setRemarks(cols.getString("REMARKS"));
-		boolean autoInc = false;
 		if(grabColumnIsAutoincrement) {
+			boolean autoInc = false;
 			try {
-				cols.getBoolean("IS_AUTOINCREMENT");
+				autoInc = "YES".equals( cols.getString("IS_AUTOINCREMENT") );
+				if(autoInc) { c.setAutoIncrement(true); }
 			}
 			catch(Exception e) {
 				grabColumnIsAutoincrement = false;
 				log.warn("DatabaseMetaData.getColumns(): column 'IS_AUTOINCREMENT' not available");
 			}
 		}
-		if(autoInc) { c.setAutoIncrement(true); }
 		Object decimalDigits = cols.getObject("DECIMAL_DIGITS");
 		if(decimalDigits!=null) {
 			int iDecimalDigits = ((Number) decimalDigits).intValue();
