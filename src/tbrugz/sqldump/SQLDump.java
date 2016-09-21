@@ -258,6 +258,8 @@ public class SQLDump implements Executor {
 		
 		for(ProcessComponent pc: processors) {
 			count++;
+			log.debug("processor '"+pc.getClass().getSimpleName()+"' starter ["+count+"/"+numOfComponents+"]");
+			
 			if(sqldmbean!=null) {
 				sqldmbean.newTaskUpdate(count, String.valueOf(count), pc.getClass().getSimpleName(), "");
 			}
