@@ -39,9 +39,16 @@ public class StringDecorator {
 	}
 	
 	public String get(String str) { return str; }
+
+	public String getString(Object o) {
+		if(o==null) { return null; }
+		return get(String.valueOf(o));
+	}
 	
 	static StringDecorator instance = new StringDecorator();
 	public static StringDecorator getInstance() { return instance; }
+	
+	//public static final StringDecorator singleQuoter = new StringDecorator.StringQuoterDecorator("'");
 	
 	//TODO: make StringDecorators(upper/lower) singletons?
 	public static StringDecorator getDecorator(String id) {
