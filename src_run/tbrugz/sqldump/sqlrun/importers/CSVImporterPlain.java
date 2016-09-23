@@ -37,13 +37,14 @@ public class CSVImporterPlain extends AbstractImporter {
 		return ret;
 	}
 
-	// TODO: parse strings inside quotes '"'
+	// TODOne: parse strings inside quotes '"'
 	@Override
 	String[] procLine(String line, long processedLines) throws SQLException {
-		String[] parts = line.split(columnDelimiter);
-		if(setNullWhenEmptyString && parts!=null) {
+		String[] parts = line.split(columnDelimiter, -1);
+		if(parts!=null) {
 			for(int i=0;i<parts.length;i++) {
-				if("".equals(parts[i])) {
+				parts[i] = CSVImporter.stringValue(parts[i]);
+				if(setNullWhenEmptyString && "".equals(parts[i])) {
 					parts[i] = null;
 				}
 			}

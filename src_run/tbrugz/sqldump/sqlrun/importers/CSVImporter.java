@@ -18,6 +18,8 @@ public class CSVImporter extends AbstractImporter {
 	static final String SUFFIX_EMPTY_STRING_AS_NULL = ".emptystringasnull";
 	static final String SUFFIX_NULL_CONSTANT = ".nullconstant";
 	
+	static final String DOUBLEQUOTE = "\"";
+
 	static final String[] EMPTY_STRING_ARRAY = {};
 
 	static final String[] CSV_AUX_SUFFIXES = {
@@ -47,20 +49,20 @@ public class CSVImporter extends AbstractImporter {
 	}
 
 	
-	// TODO: parse strings inside quotes '"'
+	// TODOne: parse strings inside quotes '"'
 	@Override
 	String[] procLine(String line, long processedLines) throws SQLException {
 		lastLine = line;
 		lastLineComplete = null;
 		if(!isLastLineComplete()) { return null; }
 		
-		String[] parts = line.split(columnDelimiter);
+		String[] parts = line.split(columnDelimiter, -1);
 		List<String> pl = new ArrayList<String>();
 		StringBuilder sb = new StringBuilder();
 		for(String s: parts) {
 			sb.append(s);
 			if( countCharacters(sb.toString(), '"')%2==0 ) {
-				pl.add(sb.toString());
+				pl.add(stringValue(sb.toString()));
 				sb = new StringBuilder();
 			}
 			else { 
@@ -84,6 +86,13 @@ public class CSVImporter extends AbstractImporter {
 			}
 		}
 		return parts;
+	}
+	
+	public static String stringValue(String value) {
+		if(value.startsWith(DOUBLEQUOTE) && value.endsWith(DOUBLEQUOTE)) {
+			value = value.substring(1, value.length()-1).replaceAll(DOUBLEQUOTE+DOUBLEQUOTE, DOUBLEQUOTE);
+		}
+		return value;
 	}
 	
 	@Override

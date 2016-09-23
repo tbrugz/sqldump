@@ -93,7 +93,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
 	List<String> columnTypes;
+	Integer columnCount;
 	Integer onErrorIntValue;
+	
+	boolean stmtSetNull4MissingCols = true;
 	
 	boolean logMalformedLine = true;
 	
@@ -228,6 +231,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		insertTable = prop.getProperty(importerPrefix+SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(importerPrefix+SUFFIX_INSERTSQL);
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix+SUFFIX_COLUMN_TYPES, ",");
+		if(columnTypes!=null) {
+			columnCount = columnTypes.size();
+		}
+		//XXX add prop for columnCount?
 		mustSetupSQLStatement = true;
 	}
 	
@@ -294,7 +301,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			else {
 				for(String file: files) {
 					importFile = file;
-					log.debug("importing file: "+importFile+loginfo);
+					log.info("importing file: "+importFile+loginfo);
 					ret += importFile();
 					filesImported++;
 					addMapCount(aggCountsByFailoverId, countsByFailoverId);
@@ -349,7 +356,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		Scanner scan = createScanner();
 		
 		Pattern p = scan.delimiter();
-		log.debug("scan delimiter pattern: "+p);
+		log.debug("scan delimiter pattern: ["+p+"]");
+		log.debug("columnTypes"+(columnCount!=null?"[#"+columnCount+"]":"")+": "+columnTypes);
 		//log.info("input file: "+importFile);
 		
 		if(follow) {
@@ -518,9 +526,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			return true;
 		}
 		
-		//List<String> values = new ArrayList<String>();
+		if(columnCount!=null && parts.length < columnCount) {
+			log.debug("#parts ["+parts.length+"] < #columnTypes/columnCount ["+columnCount+"] - set null for missing cols? "+stmtSetNull4MissingCols);
+		}
 		
 		List<Integer> partsNotFound = new ArrayList<Integer>();
+		int countNFE = 0, countPE = 0;
 		//TODO: what if parts.length for some lines is shorter than others? stmt will keep old value from longer line...
 		for(int i=0;i<parts.length;i++) {
 			int index = i;
@@ -530,9 +541,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
 					index = filecol2tabcolMap.indexOf(i);
+					//log.info("v0: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>i?columnTypes.get(i):"-") );
 					stmtSetValue(index, parts[i], i);
 					//values.add(parts[i]);
-					//log.info("v: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]);
+					//log.info("v1: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>i?columnTypes.get(i):"-") );
 				}
 				else {
 					//do nothing!
@@ -546,9 +558,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			
 			}
 			catch(NumberFormatException nfe) {
+				countNFE++;
+				log.debug("nfe: "+nfe+" i=="+i);
 				stmtSetNull(index);
 			}
-			catch(ParseException nfe) {
+			catch(ParseException pe) {
+				countPE++;
+				log.debug("pe: "+pe+" i=="+i);
 				stmtSetNull(index);
 			}
 			catch(RuntimeException e) {
@@ -559,6 +575,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			}
 			//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
 		}
+		if(stmtSetNull4MissingCols && columnCount!=null && parts.length < columnCount) {
+			for(int i=parts.length;i<columnCount;i++) {
+				//log.debug("setNull "+(i+1));
+				stmtSetNull(i);
+			}
+		}
+		
 		if(partsNotFound.size()>0) {
 			log.debug("filecol2tabcolMap does not contain parts "+partsNotFound);
 		}
@@ -585,6 +608,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				throw e;
 			}
 		}
+		
+		if(countNFE>0 || countPE>0) {
+			log.debug("countNFE = "+countNFE+" ; countPE = "+countPE);
+		}
 
 		if(commitEachXrows>0 && (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0)) {
 			//XXX commit size should be multiple of batch size?
@@ -607,7 +634,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 	void stmtSetValue(int index, String value, int colTypeIndex) throws SQLException, ParseException {
 		if(value==null) {
-			stmt.setString(index+1, null);
+			stmtSetNull(index);
+			return;
+		}
+		if("".equals(value)) {
+			stmtSetNull(index);
 			return;
 		}
 		if(columnTypes!=null) {
@@ -617,6 +648,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				
 				if(colType.equals("int")) {
 					try {
+						//log.info("int:: "+(index+1)+" / "+value);
 						stmt.setInt(index+1, Integer.parseInt(value.trim()));
 					}
 					catch(NumberFormatException e) {
@@ -637,12 +669,20 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				else if(colType.equals("string")) {
 					stmt.setString(index+1, value);
 				}
+				else if(colType.equals("object")) {
+					stmt.setObject(index+1, value);
+				}
+				else if(colType.equals("null")) {
+					//stmt.setObject(index+1, null);
+					stmtSetNull(index);
+				}
 				else if(colType.startsWith("date[")) {
 					//XXX use java.sql.Timestamp?
 					//XXX setup DateFormat only once for each column?
 					String strFormat = colType.substring(5, colType.indexOf(']'));
 					DateFormat df = new SimpleDateFormat(strFormat);
 					stmt.setDate(index+1, new java.sql.Date( df.parse(value).getTime() ));
+					//log.info("date:: "+(index+1)+" / "+value);
 				}
 				else if(colType.equals("blob-location") || colType.equals("text-location")) {
 					File f = new File(value);
@@ -684,7 +724,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 
 	void stmtSetNull(int index) throws SQLException {
-		stmt.setString(index+1, null);
+		stmt.setObject(index+1, null);
 		return;
 	}
 	
