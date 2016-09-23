@@ -341,6 +341,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 	Map<Integer, IOCounter> countsByFailoverId;
 	List<Integer> filecol2tabcolMap = null;
+	boolean colTypesIndexFromTabCol = true;
 	boolean mustSetupSQLStatement = false;
 	int failoverId = 0;
 	
@@ -541,10 +542,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				//log.info("v: "+i);
 				if(filecol2tabcolMap.contains(i)) {
 					index = filecol2tabcolMap.indexOf(i);
-					//log.info("v0: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>i?columnTypes.get(i):"-") );
-					stmtSetValue(index, parts[i], i);
+					int colIndex = colTypesIndexFromTabCol?index:i;
+					//log.debug("v0: "+i+" / "+index+"~"+(index+1)+" / "+parts[i]+" // "+ (columnTypes.size()>colIndex?columnTypes.get(colIndex):"-") );
+					stmtSetValue(index, parts[i], colIndex);
 					//values.add(parts[i]);
-					//log.info("v1: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>i?columnTypes.get(i):"-") );
+					//log.info("v1: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>colIndex?columnTypes.get(colIndex):"-") );
 				}
 				else {
 					//do nothing!
