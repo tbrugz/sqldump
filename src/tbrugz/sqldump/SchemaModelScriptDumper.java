@@ -44,7 +44,6 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
-import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
@@ -242,20 +241,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				log.info("equal origin and target DBMSs: no column type conversion");
 			}
 		}
-		Properties colTypeConversionProp = new ParametrizedProperties();
 		
-		//if(DBMSResources.instance().dbid()!=null) { colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, DBMSResources.instance().dbid()); }
 		if(fromDbId!=null) {
 			if(!DBMSResources.instance().getDbIds().contains(fromDbId)) {
 				throw new ProcessingException("invalid '"+Defs.PROP_FROM_DB_ID+"' prop: "+fromDbId);
 			}
-			colTypeConversionProp.put(Defs.PROP_FROM_DB_ID, fromDbId);
 		}
 		if(toDbId!=null) {
 			if(!DBMSResources.instance().getDbIds().contains(toDbId)) {
 				throw new ProcessingException("invalid '"+Defs.PROP_TO_DB_ID+"' prop: "+toDbId);
 			}
-			colTypeConversionProp.put(Defs.PROP_TO_DB_ID, toDbId);
 		}
 		
 		setupScriptDumpSpecificFeatures(toDbId!=null?toDbId:fromDbId);
@@ -281,7 +276,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			
 			categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE,
 					table.getDefinition(dumpWithSchemaName, doSchemaDumpPKs, dumpFKsInsideTable && dumpFKs, dumpDropStatements, dumpScriptComments,
-							colTypeConversionProp, schemaModel.getForeignKeys())+";\n");
+							schemaModel.getForeignKeys())+";\n");
 			String afterTableScript = table.getAfterCreateTableScript(dumpWithSchemaName, dumpRemarks);
 			if(afterTableScript!=null && !afterTableScript.trim().equals("")) {
 				categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, afterTableScript);

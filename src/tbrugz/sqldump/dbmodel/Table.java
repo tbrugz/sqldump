@@ -2,7 +2,6 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -59,10 +58,11 @@ public class Table extends DBObject implements Relation {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return getDefinition(dumpSchemaName, true, false, false, true, null, null);
+		return getDefinition(dumpSchemaName, true, false, false, true, null);
 	}
 	
-	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, boolean dumpComments, Properties colTypeConversionProp, Set<FK> foreignKeys) {
+	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, boolean dumpComments,
+			Set<FK> foreignKeys) {
 		//List<String> pkCols = new ArrayList<String>();
 		String tableName = getFinalName(dumpWithSchemaName);
 
