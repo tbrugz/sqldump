@@ -303,7 +303,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			return null;
 		}
 		
-		log.info(getIdDesc()+"schema grab... schema(s): '"+schemaPattern+"'");
+		log.info(getIdDesc()+"schema grab... schema(s): '"+schemaPattern+"' [features: "+feats.getClass().getSimpleName()+"]");
 
 		initCounters();
 		
@@ -366,7 +366,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		
 		log.info(getIdDesc()+schemaModel.getTables().size()+" tables grabbed ["+tableStats()+"]");
-		log.info(getIdDesc()+schemaModel.getForeignKeys().size()+" FKs grabbed");
+		if(doSchemaGrabFKs || doSchemaGrabExportedFKs || recursivedump) {
+			log.info(getIdDesc()+schemaModel.getForeignKeys().size()+" FKs grabbed");
+		}
 		if(doSchemaGrabIndexes) {
 			log.info(getIdDesc()+schemaModel.getIndexes().size()+" indexes grabbed");
 		}
@@ -560,7 +562,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	//XXX shoud it be "grabTables"?
 	void grabRelations(SchemaModel schemaModel, DatabaseMetaData dbmd, DBMSFeatures dbmsfeatures, String schemaPattern, String tablePattern, boolean tableOnly) throws SQLException { //, String padding
-		log.debug("grabRelations()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
+		log.debug(getIdDesc()+"grabRelations()... schema: "+schemaPattern+", tablePattern: "+tablePattern);
 		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMAINFO_DOMAINTABLES, ",");
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);

@@ -345,6 +345,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	boolean mustSetupSQLStatement = false;
 	int failoverId = 0;
 	
+	@SuppressWarnings("resource")
 	long importFile() throws SQLException, InterruptedException, IOException {
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
