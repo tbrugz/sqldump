@@ -751,9 +751,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		try {
 			String dataDefault = rs.getString("DATA_DEFAULT");
 			//String comments = rs.getString("REMARKS");
-			if(dataDefault!=null && !dataDefault.equals("NULL")) {
+			if(dataDefault!=null && !dataDefault.trim().equalsIgnoreCase("NULL")) {
 				c.setDefaultValue(dataDefault.trim());
-				//log.info(">> addColumnSpecificFeatures:: "+c+": "+dataDefault);
+				//log.info(">> addColumnSpecificFeatures:: "+c+": ["+dataDefault+"]");
 			}
 			//if(comments!=null) {
 			//	c.setRemarks(comments.trim());
