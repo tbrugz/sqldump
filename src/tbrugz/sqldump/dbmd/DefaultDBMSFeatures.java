@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmd;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -156,8 +157,17 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 	
 	@Override
-	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
 		throw new UnsupportedOperationException("explainPlan not implemented");
+	}
+
+	protected ResultSet bindAndExecuteQuery(String sql, List<Object> params, Connection conn) throws SQLException {
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		for(int i=0;i<params.size();i++) {
+			stmt.setObject(i+1, params.get(i));
+		}
+		
+		return stmt.executeQuery();
 	}
 
 }

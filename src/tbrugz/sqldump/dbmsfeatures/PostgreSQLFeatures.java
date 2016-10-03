@@ -104,8 +104,9 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 	 * http://www.postgresql.org/docs/devel/static/sql-explain.html
 	 */
 	@Override
-	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
-		return conn.createStatement().executeQuery("explain verbose "+sql);
+	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
+		String expsql = "explain verbose "+sql;
+		return bindAndExecuteQuery(expsql, params, conn);
 	}
 	
 	/*

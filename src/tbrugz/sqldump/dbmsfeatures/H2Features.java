@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -201,8 +202,9 @@ public class H2Features extends InformationSchemaFeatures {
 	 * http://www.h2database.com/html/grammar.html#explain
 	 */
 	@Override
-	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
-		return conn.createStatement().executeQuery("explain plan for "+sql);
+	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
+		String expsql = "explain plan for "+sql;
+		return bindAndExecuteQuery(expsql, params, conn);
 	}
 	
 }

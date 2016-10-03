@@ -110,6 +110,8 @@ public interface DBMSFeatures {
 	
 	boolean supportsExplainPlan();
 	
+	//String getExplainPlanForQuery(String sql);
+	
 	/**
 	 * Returns the execution plan for a statement. Returned resultset column names are database-dependent (at least for now)
 	 * 
@@ -118,8 +120,7 @@ public interface DBMSFeatures {
 	 * @return a ResultSet with the plan explained
 	 * @throws SQLException if a database access error occurs
 	 */
-	//getExplainPlanForQuery?
-	ResultSet explainPlan(String sql, Connection conn) throws SQLException;
+	ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException;
 	
 	/*
 	 * http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most

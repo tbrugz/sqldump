@@ -5,6 +5,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -81,8 +82,9 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	 * https://dev.mysql.com/doc/refman/5.0/en/explain-output.html
 	 */
 	@Override
-	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
-		return conn.createStatement().executeQuery("explain "+sql);
+	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
+		String expsql = "explain "+sql;
+		return bindAndExecuteQuery(expsql, params, conn);
 	}
 	
 	@Override

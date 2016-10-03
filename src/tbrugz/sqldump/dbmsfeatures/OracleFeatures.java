@@ -969,7 +969,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				grabXtraFKColumns = false;
 				log.warn("addFKSpecificFeatures: column 'STATUS', 'VALIDATED' or 'RELY' not available [ex: "+e+"]");
 				if(log.isDebugEnabled()) {
-					try { log.debug("rowlist: "+SQLUtils.getColumnNames(rs.getMetaData()));	}
+					try { log.debug("addFKSpecificFeatures: rowlist: "+SQLUtils.getColumnNames(rs.getMetaData()));	}
 					catch(SQLException ee) { ee.printStackTrace(); }
 				}
 			}
@@ -1049,7 +1049,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	 * columns: STATEMENT_ID | PLAN_ID | TIMESTAMP | REMARKS | OPERATION | OPTIONS | OBJECT_NODE | OBJECT_OWNER | OBJECT_NAME | OBJECT_ALIAS | OBJECT_INSTANCE | OBJECT_TYPE | OPTIMIZER | SEARCH_COLUMNS | ID | PARENT_ID | DEPTH | POSITION | COST | CARDINALITY | BYTES | OTHER_TAG | PARTITION_START | PARTITION_STOP | PARTITION_ID | OTHER | OTHER_XML | DISTRIBUTION | CPU_COST | IO_COST | TEMP_SPACE | ACCESS_PREDICATES | FILTER_PREDICATES | PROJECTION | TIME | QBLOCK_NAME
 	 */
 	@Override
-	public ResultSet explainPlan(String sql, Connection conn) throws SQLException {
+	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
 		Date now = new Date();
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 		String id = "sqldump_"+df.format(now); //XXX: add random?
