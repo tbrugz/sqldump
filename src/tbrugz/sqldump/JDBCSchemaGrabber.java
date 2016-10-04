@@ -1172,6 +1172,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				rs.close();
 			}
+		} catch (UnsupportedOperationException e) {
+			log.warn("Error closing resultset or statement: "+e);
+			//log.debug("Error closing resultset or statement: "+e.getMessage(), e);
 		} catch (SQLException e) {
 			log.warn("Error closing resultset or statement: "+e);
 			log.debug("Error closing resultset or statement: "+e.getMessage(), e);
