@@ -13,7 +13,9 @@ public enum TableType {
 	EXTERNAL_TABLE, //oracle
 	BASE_TABLE,     //mysql/mariadb - https://kb.askmonty.org/en/base-table/ ?
 	TYPE,           //XXX 'TYPE' table type? - postgresql
-	FOREIGN_TABLE   //postgresql
+	FOREIGN_TABLE,  //postgresql
+	ALIAS,          //db2
+	// MATERIALIZED QUERY TABLE //db2 ??
 	;
 	
 	//non-tables: INDEX, SEQUENCE, ...
@@ -52,6 +54,9 @@ public enum TableType {
 		else if(tableType.equals("MATERIALIZED VIEW")) {
 			return TableType.MATERIALIZED_VIEW;
 		}
+		else if(tableType.equals("MATERIALIZED QUERY TABLE")) { //db2
+			return TableType.MATERIALIZED_VIEW;
+		}
 		else if(tableType.equals("EXTERNAL TABLE")) {
 			return TableType.EXTERNAL_TABLE;
 		}
@@ -64,6 +69,9 @@ public enum TableType {
 		}
 		else if(tableType.equals("FOREIGN TABLE")) {
 			return TableType.FOREIGN_TABLE;
+		}
+		else if(tableType.equals("ALIAS")) {
+			return TableType.ALIAS;
 		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
