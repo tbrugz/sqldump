@@ -7,10 +7,12 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.dbmodel.Trigger;
 
+/*
+ * SYSIBMADM - similar to oracle metadata tables?
+ * SYSSTAT - statistics?
+ */
 public class Db2Features extends InformationSchemaFeatures {
 	static Log log = LogFactory.getLog(Db2Features.class);
 	
@@ -20,21 +22,28 @@ public class Db2Features extends InformationSchemaFeatures {
 	
 	/*
 	 * select * from syscat.triggers
+	 * 
+	 * select * from sysibm.systriggers - similar to derby?
 	 */
-	@Override
-	public void grabDBTriggers(Collection<Trigger> triggers,
-			String schemaPattern, String tableNamePattern,
-			String triggerNamePattern, Connection conn) throws SQLException {
-		log.warn("grabDBTriggers: not implemented");
+	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		return "select null trigger_catalog, TRIGSCHEMA trigger_schema, TRIGNAME trigger_name, TRIGEVENT event_manipulation, TABSCHEMA event_object_schema, "
+			+"TABNAME event_object_table, TEXT action_statement, GRANULARITY action_orientation, TRIGTIME action_timing, null action_condition "
+			+"\nfrom syscat.triggers "
+			+"\nwhere TRIGSCHEMA = '"+schemaPattern+"' "
+			+(tableNamePattern!=null?"and TABNAME = '"+tableNamePattern+"' ":"")
+			+(triggerNamePattern!=null?"and TRIGNAME = '"+triggerNamePattern+"' ":"")
+			+"order by TRIGSCHEMA, TRIGNAME ";
 	}
 	
 	/*
 	 * select * from syscat.sequences
 	 */
 	@Override
-	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern,
-			String sequenceNamePattern, Connection conn) throws SQLException {
-		log.warn("grabDBSequences: not implemented");
+	String grabDBSequencesQuery(String schemaPattern) {
+		return "select SEQNAME sequence_name, MINVALUE minimum_value, increment, MAXVALUE maximum_value "
+			+"\nfrom syscat.sequences "
+			+"\nwhere SEQSCHEMA = '"+schemaPattern+"' "
+			+"order by SEQSCHEMA, SEQNAME ";
 	}
 	
 	/*
