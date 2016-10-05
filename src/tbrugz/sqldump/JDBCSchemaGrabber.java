@@ -918,12 +918,25 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	}
 
 	void grabFunctionsColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
+		SQLException sqlex = null;
 		while(rs.next()) {
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.setName(rs.getString("COLUMN_NAME"));
+			int type = Integer.MIN_VALUE;
+			try {
+				ep.setName(rs.getString("COLUMN_NAME"));
+				type = rs.getInt("COLUMN_TYPE");
+			}
+			catch(SQLException e) { //db2
+				ep.setName(rs.getString("PARAMETER_NAME"));
+				type = rs.getInt("PARAMETER_TYPE");
+				if(sqlex==null) {
+					log.warn("grabFunctionsColumns: sqlex: "+e);
+					log.info("grabFunctionsColumns: columns: "+SQLUtils.getColumnNames(rs.getMetaData()));
+					sqlex = e;
+				}
+			}
 			ep.setDataType(rs.getString("TYPE_NAME"));
 			
-			int type = rs.getInt("COLUMN_TYPE");
 			switch (type) {
 			case DatabaseMetaData.functionColumnIn:
 				ep.setInout(ExecutableParameter.INOUT.IN);
