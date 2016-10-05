@@ -36,6 +36,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	//boolean dumpSequenceStartWith = true;
 	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");
 	
+	public static final String DEFAULT_SCHEMA = "information_schema";
+	
+	String informationSchema = DEFAULT_SCHEMA;
+	
 	@Override
 	public void procProperties(Properties prop) {
 		super.procProperties(prop);
@@ -69,8 +73,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	
 	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
-			+"from information_schema.views "
-			+"where view_definition is not null "
+			+"\nfrom "+informationSchema+".views "
+			+"\nwhere view_definition is not null "
 			+"and table_schema = '"+schemaPattern+"' "
 			+(viewNamePattern!=null?"and table_name = '"+viewNamePattern+"' ":"")
 			+"order by table_catalog, table_schema, table_name ";
@@ -168,7 +172,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, p.parameter_name, p.data_type, p.ordinal_position "
-				+"\nfrom information_schema.routines r left outer join information_schema.parameters p on r.specific_name = p.specific_name "
+				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
 				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
@@ -379,6 +383,14 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		rs.close();
 		st.close();
 		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
+	}
+	
+	protected String getInformationSchemaName() {
+		return informationSchema;
+	}
+	
+	protected void setInformationSchemaName(String informationSchema) {
+		this.informationSchema = informationSchema;
 	}
 	
 }
