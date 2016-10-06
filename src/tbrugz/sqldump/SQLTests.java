@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import javax.naming.NamingException;
 
@@ -14,6 +15,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.CLIProcessor;
@@ -98,6 +100,8 @@ public class SQLTests extends AbstractSQLProc {
 		//ResultSet rs = st.executeQuery(sql);
 		//SQLUtils.dumpRS(rs);
 		
+		dumpFk();
+		
 		log.info("elapsed: "+(System.currentTimeMillis()-initTime)+"ms");
 		//Thread.sleep(60000);
 	}
@@ -109,7 +113,7 @@ public class SQLTests extends AbstractSQLProc {
 		
 		//conn.createStatement().execute("create table xyz (col1 integer, col2 varchar)");
 		//String sql = "select * from xyz order by col1";
-		ResultSet rs = feats.explainPlan(sql, conn);
+		ResultSet rs = feats.explainPlan(sql, null, conn);
 		//conn.createStatement().execute("drop table xyz");
 		
 		SQLUtils.dumpRS(rs);
@@ -134,7 +138,24 @@ public class SQLTests extends AbstractSQLProc {
 		}
 	}
 	
+	static void dumpFk() {
+		FK fk = new FK();
+		fk.setPkTable("pktable");
+		fk.setFkTable("fktable");
+		fk.setPkColumns(Arrays.asList(new String[]{"p1", "p2"}));
+		fk.setFkColumns(Arrays.asList(new String[]{"f1", "f2"}));
+		//fk.setName("fkname");
+		
+		String s = fk.getDefinition(true);
+		System.out.println("fk: "+s);
+		
+		String alt = fk.fkScriptWithAlterTable(true, true);
+		System.out.println("alt: "+alt);
+	}
+	
 	public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, NamingException {
+		dumpFk();
+		
 		if(args.length!=2) {
 			String message = "should have 2 arguments: properties file & connection properties prefix";
 			log.warn(message);
