@@ -29,6 +29,7 @@ public class CLIProcessor {
 			final String defaultPropFile, final Properties papp) throws IOException {
 		log.info((productName!=null?productName+" ":"")+
 				"init... [version "+Version.getVersion()+"]");
+		log.debug("buildNumber: "+Version.getBuildNumber()+" ; buildTimestamp: "+Version.getBuildTimestamp());
 		boolean useSysPropSetted = false;
 		int loadedCount = 0;
 		if(args!=null) {

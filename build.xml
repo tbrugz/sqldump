@@ -65,7 +65,7 @@
 		<path refid="classpath.run"/>
 		<!--pathelement location="${lib.h2}"/-->
 	</path>
-	
+
 	<path id="classpath.run.diff">
 		<path refid="classpath.run.jaxb"/>
 		<pathelement location="lib/diffutils-1.2.1.jar"/>
@@ -104,7 +104,7 @@
 	<path id="classpath.findbugs">
 		<pathelement path="${ivy.findbugs.classpath}"/>
 	</path>
-	
+
 	<target name="prepare" description="prepares build">
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
@@ -137,7 +137,7 @@
 		<java classpathref="classpath.test" classname="tbrugz.util.XsdGenerator" failonerror="true" fork="true">
 		</java>
 	</target>
-	
+
 	<target name="compile" depends="prepare">
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
@@ -155,7 +155,17 @@
 		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
 			<src path="${src.test.dir}"/>
 		</javac>
-		<copy todir="${bin.dir}" >
+
+		<tstamp>
+			<format property="timestamp" pattern="yyyy-MM-dd hh:mm:ss"/>
+		</tstamp>
+		<exec executable="hg" outputproperty="buildNumber" resultproperty="buildNumber.result" failonerror="false">
+			<arg line="id -i"/>
+		</exec>
+		<echo message="buildNumber: ${buildNumber} ; timestamp: ${timestamp}" />
+		<!-- , ${DSTAMP}, ${TSTAMP}, ${TODAY} -->
+
+		<copy todir="${bin.dir}">
 			<fileset dir="${src.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
@@ -175,7 +185,18 @@
 				<include name="**/antlib.xml"/>
 			</fileset>
 		</copy>
-		<copy todir="${bin.test.dir}" >
+		<copy todir="${bin.dir}" overwrite="true">
+			<fileset dir="${src.dir}">
+				<include name="sqldump-version.properties"/>
+			</fileset>
+			<filterchain>
+				<replacetokens>
+					<token key="build.revisionNumber" value="${buildNumber}" />
+					<token key="build.timestamp" value="${timestamp}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy todir="${bin.test.dir}">
 			<fileset dir="${src.test.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
@@ -183,6 +204,7 @@
 				<include name="**/*.json"/>
 			</fileset>
 		</copy>
+
 	</target>
 
 	<target name="run" depends="compile">
@@ -331,7 +353,7 @@
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
-	
+
 	<target name="make-ivy-pom" depends="config-ivy">
 		<ivy:info/>
 		<property name="revision" value="${version}"/>
@@ -359,7 +381,7 @@
 	<target name="publish-sonatype-snapshot" depends="dist" description="publish snapshot into sonatype repository">
 		<ant antfile="build-sonatype.xml" target="deploy"/> <!-- deploy snapshots -->
 	</target>
-	
+
 	<target name="publish-sonatype-release" depends="dist" description="publish release into sonatype stage repository">
 		<ant antfile="build-sonatype.xml" target="stage"/> <!-- deploy (signed) releases -->
 	</target>
@@ -367,7 +389,7 @@
 	<target name="publish-mvn-files" depends="dist" description="publish release into sonatype stage repository">
 		<ant antfile="build-sonatype.xml" target="mvn-install-files"/> <!-- deploy (signed) releases -->
 	</target>
-	
+
 	<!-- ========= /dependencies tasks ========== -->
 
 	<!-- ========= code analysis tasks ========== -->
