@@ -41,6 +41,7 @@ public class JSONDataDump extends AbstractDumpSyntax {
 	static final String DEFAULT_METADATA_ELEMENT = "$metadata"; // "@metadata"? "$metadata" ?
 	// see http://json-schema.org/example1.html ('$' can be used in js identifier)
 	static final String DEFAULT_DATE_FORMAT = "\"yyyy-MM-dd\"";
+	static final boolean DEFAULT_METADATA_ADD = false;
 	
 	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
 	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
@@ -65,8 +66,8 @@ public class JSONDataDump extends AbstractDumpSyntax {
 			dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 		}
 		dataElement = prop.getProperty(PROP_DATA_ELEMENT);
-		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, addMetadata);
-		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, metadataElement);
+		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, DEFAULT_METADATA_ADD);
+		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, DEFAULT_METADATA_ELEMENT);
 		callback = prop.getProperty(PROP_JSONP_CALLBACK);
 		postProcProperties();
 	}
