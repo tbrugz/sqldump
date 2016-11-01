@@ -14,15 +14,16 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
-enum HeaderFooterDump {
-	ALWAYS, IFHASDATA, NEVER;
-}
 //XXX: option to define per-column 'row' xml-element? cursors already have "table-name"...
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
 //XXX: XMLDataDump to extend AbstractXMLDataDump ? so HTMLDataDump and XMLDataDump would have a common ancestor
 public class XMLDataDump extends AbstractDumpSyntax {
-	
+
+	public enum HeaderFooterDump {
+		ALWAYS, IFHASDATA, NEVER;
+	}
+
 	static final Log log = LogFactory.getLog(XMLDataDump.class);
 	
 	static final String XML_SYNTAX_ID = "xml";
@@ -49,7 +50,7 @@ public class XMLDataDump extends AbstractDumpSyntax {
 		this("", HeaderFooterDump.ALWAYS);
 	}
 
-	public XMLDataDump(String padding, HeaderFooterDump dumpHeaderFooter) {
+	protected XMLDataDump(String padding, HeaderFooterDump dumpHeaderFooter) {
 		this.padding = padding;
 		this.dumpHeaderFooter = dumpHeaderFooter;
 	}
@@ -70,8 +71,8 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	List<String> colsNot2Escape = null;
 
 	//dumper properties
-	String rowElement = defaultRowElement;
-	boolean dumpRowElement = defaultDumpRowElement;
+	protected String rowElement = defaultRowElement;
+	protected boolean dumpRowElement = defaultDumpRowElement;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -174,7 +175,7 @@ public class XMLDataDump extends AbstractDumpSyntax {
 				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
 	}
 	
-	void dumpAndClearBuffer(StringBuilder sb, Writer fos) throws IOException {
+	protected void dumpAndClearBuffer(StringBuilder sb, Writer fos) throws IOException {
 		String sbuff = sb.toString(); sb.setLength(0);
 		if("".equals(sbuff.trim())) {
 			return;

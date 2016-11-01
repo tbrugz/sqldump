@@ -22,13 +22,13 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	
 	public static final String PROP_RDF_BASE = "sqldump.rdf.base";
 
-	Map<String, String> namespaces = new HashMap<String, String>();
+	static Map<String, String> namespaces = new HashMap<String, String>();
 	static DateFormat xsdDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	
 	List<FK> fks = null;
 	List<Constraint> uks = null;
 	
-	{
+	static {
 		//load properties
 		Properties prop = new Properties();
 		try {

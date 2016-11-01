@@ -233,7 +233,7 @@ public class DataDumpUtils {
 		return value;
 	} 
 
-	static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, boolean escape) {
+	public static String getFormattedXMLValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, boolean escape) {
 		if(elem == null) {
 			return null;
 		}
