@@ -9,5 +9,14 @@ public class MathUtil {
 		}
 		return sum;
 	}
+	
+	public static Integer minIgnoreNull(Integer... values) {
+		Integer min = null;
+		for(Integer i: values) {
+			if(min==null) { min = i; continue; }
+			if(min!=null && i!=null) { min = Math.min(min, i); }
+		}
+		return min;
+	}
 
 }
