@@ -65,8 +65,9 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	boolean dumpNullValues = true;
 	HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
 	boolean dumpTableNameAsRowTag = false;
-	protected boolean escape = false;
-	protected boolean escape4table = false;
+	protected boolean escape = true;
+	protected boolean escape4table;
+	protected boolean useUnderscoreRaw2escape = true;
 	List<String> cols2Escape = null;
 	List<String> colsNot2Escape = null;
 
@@ -171,7 +172,7 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	
 	public boolean doEscape(final int i) {
 		return escape4table?
-				(colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))):
+				( (colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))) && (!useUnderscoreRaw2escape || !lsColNames.get(i).endsWith("_RAW") ) ):
 				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
 	}
 	

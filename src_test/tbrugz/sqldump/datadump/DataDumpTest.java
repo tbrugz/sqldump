@@ -104,7 +104,7 @@ public class DataDumpTest {
 				"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv, xml, html, json",
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
 				//"-Dsqldump.datadump.writebom=false",
-				"-Dsqldump.datadump.xml.escape=true",
+				//"-Dsqldump.datadump.xml.escape=true",
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 				"-Dsqldump.user=h",
@@ -216,10 +216,32 @@ public class DataDumpTest {
 				"-Dsqldump.datadump.xml.noescapecols4table@ETC=DESCRIPTION",
 				});
 		File f = new File(DIR_OUT+"/data_ETC.html");
+		parseXML(f);
+	}
+
+	@Test
+	public void testXmlQueryRaw() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dumpWithParams(new String[]{
+				"-Dsqldump.grabclass=EmptyModelGrabber",
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql=select name, '<value>'||salary||'</value>' as salary_value, '<value>'||salary||'</value>' as salary_raw from emp",
+				});
+		File f = new File(DIR_OUT+"/data_q1.xml");
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
+		Assert.assertEquals(5, countElementsOfType(n.getChildNodes(),"row"));
+		NodeList row1 = n.getChildNodes().item(1).getChildNodes();
+		/*log.info("Node.TEXT_NODE: "+Node.TEXT_NODE+" / Node.ELEMENT_NODE: "+Node.ELEMENT_NODE);
+		log.info("text1: "+row1.item(1).getNodeName()+"/"+row1.item(1).getTextContent()+"/"+row1.item(1).getChildNodes().getLength()+" // "+row1.item(1).getChildNodes().item(0).getNodeType());
+		log.info("text2: "+row1.item(2).getNodeName()+"/"+row1.item(2).getTextContent()+"/"+row1.item(2).getChildNodes().getLength()+" // "+row1.item(2).getChildNodes().item(0).getNodeType());
+		log.info("text3: "+row1.item(3).getNodeName()+"/"+row1.item(3).getTextContent()+"/"+row1.item(3).getChildNodes().getLength()+" // "+row1.item(3).getChildNodes().item(0).getNodeType());*/
+		Assert.assertEquals("SALARY_VALUE", row1.item(2).getNodeName());
+		Assert.assertEquals("<value>2000</value>", row1.item(2).getTextContent());
+		Assert.assertEquals(Node.TEXT_NODE, row1.item(2).getChildNodes().item(0).getNodeType());
+		Assert.assertEquals("SALARY_RAW", row1.item(3).getNodeName());
+		Assert.assertEquals(Node.ELEMENT_NODE, row1.item(3).getChildNodes().item(0).getNodeType());
 	}
 	
 	@Test
