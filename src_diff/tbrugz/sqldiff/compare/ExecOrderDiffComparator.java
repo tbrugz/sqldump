@@ -39,8 +39,9 @@ public class ExecOrderDiffComparator implements Comparator<Diff> {
 	
 	public static int compare(NamedDBObject o1, NamedDBObject o2) {
 		int comp = o1.getSchemaName()!=null?
-				o1.getSchemaName().compareTo(o2.getSchemaName()):
-				o2.getSchemaName()!=null?1:0; //XXX: return -1? 1?
+				(o2.getSchemaName()!=null?o1.getSchemaName().compareTo(o2.getSchemaName()):1): //XXX: return -1? 1?
+				(o2.getSchemaName()!=null?-1:0)
+				;
 		if(comp!=0) return comp;
 		return o1.getName().compareTo(o2.getName());
 	}

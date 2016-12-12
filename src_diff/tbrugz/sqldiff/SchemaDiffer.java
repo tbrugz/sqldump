@@ -252,7 +252,9 @@ public class SchemaDiffer {
 		List<DBIdentifiable> ln = new ArrayList<DBIdentifiable>();
 		ln.addAll(listNew);*/
 		
+		//log.info("diffs: "+objType+" / "+origOwnerTableName);
 		for(DBIdentifiable cOrig: listOrig) {
+			//log.info("dbid: "+cOrig);
 			//DBIdentifiable cOrig = (DBIdentifiable) lo.get(i);
 			countSourceInit++;
 			if(filterByType && DBIdentifiable.getType(cOrig)!=objType) { continue; }
