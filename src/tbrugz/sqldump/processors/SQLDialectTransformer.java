@@ -13,6 +13,11 @@ import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.util.Utils;
 
+/*
+ * TODO: option to transform datatypes to ansi-like types but keep compatible with original dialect
+ * ex: postgresql: int2->smallint ; text-(not!)->clob
+ * ? - pgsql->ansi->pgsql ??
+ */
 public class SQLDialectTransformer extends AbstractSchemaProcessor {
 
 	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";

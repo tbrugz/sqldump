@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -272,4 +273,30 @@ public class SchemaDiff implements Diff {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	int compact(Set<? extends Diff> diffs, String type) {
+		int countInit = 0, removed = 0;
+		
+		//Set<? extends Diff> diffs = columnDiffs;
+		Iterator<? extends Diff> it = diffs.iterator();
+		while(it.hasNext()) {
+			//for(Diff d: diffs) {
+			Diff d = it.next();
+			countInit++;
+			if(d.getDiff()==null || "".equals(d.getDiff())) { it.remove(); removed++; }
+		}
+		
+		if(removed>0) {
+			log.info("compacted "+type+" diffs... [init="+countInit+"; removed="+removed+"; end="+(countInit-removed)+"]");
+		}
+		return removed;
+	}
+	
+	public void compact() {
+		compact(tableDiffs, "table");
+		compact(columnDiffs, "column");
+		compact(grantDiffs, "grant");
+		compact(dbidDiffs, "dbid");
+	}
+	
 }
