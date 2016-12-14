@@ -69,6 +69,11 @@ public class DBIdentifiableDiff implements Diff, Comparable<DBIdentifiableDiff> 
 		}
 		throw new IllegalStateException("unknown changetype "+changeType+" on DBIdentifiableDiff.getDiff()");
 	}
+
+	@Override
+	public int getDiffListSize() {
+		return getDiffList().size();
+	}
 	
 	String getAddDiffSQL(boolean dumpComments) {
 		return (ownerTableName!=null?"alter table "+ownerTableName+" add ":"")

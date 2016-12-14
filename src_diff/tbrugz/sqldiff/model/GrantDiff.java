@@ -1,15 +1,12 @@
 package tbrugz.sqldiff.model;
 
-import java.util.List;
-
-import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 
-public class GrantDiff implements Diff, Comparable<GrantDiff> {
+public class GrantDiff extends SingleDiff implements Diff, Comparable<GrantDiff> {
 
 	// grant properties
 	final String schemaName;
@@ -56,10 +53,10 @@ public class GrantDiff implements Diff, Comparable<GrantDiff> {
 			//+";\n\n";
 	}
 
-	@Override
+	/*@Override
 	public List<String> getDiffList() {
 		return DiffUtil.singleElemList( getDiff() );
-	}
+	}*/
 
 	@Override
 	public DBObjectType getObjectType() {

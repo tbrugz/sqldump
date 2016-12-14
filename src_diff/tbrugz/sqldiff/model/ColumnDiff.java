@@ -143,6 +143,11 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		return diffs;
 	}
 	
+	@Override
+	public int getDiffListSize() {
+		return getDiffList().size();
+	}
+	
 	List<String> getDiff(ChangeType changeType, Column previousColumn, Column column) {
 		String colChange = null;
 		switch(changeType) {

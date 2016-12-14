@@ -11,6 +11,7 @@ public interface Diff {
 	public ChangeType getChangeType();
 	public String getDiff();
 	public List<String> getDiffList();
+	public int getDiffListSize();
 	public DBObjectType getObjectType();
 	public NamedDBObject getNamedObject();
 	//XXX add public List<Diff<?>> getChildren()? maybe not (only SchemaDiff would use it)

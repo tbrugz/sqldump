@@ -201,6 +201,11 @@ public class SchemaDiff implements Diff {
 	}
 	
 	@Override
+	public int getDiffListSize() {
+		return tableDiffs.size()+columnDiffs.size()+grantDiffs.size()+dbidDiffs.size();
+	}
+	
+	@Override
 	public String toString() {
 		return "[SchemaDiff: tables: #"+tableDiffs.size()+", cols: #"+columnDiffs.size()+", xtra: #"+dbidDiffs.size()+"]"; //XXX: A(dd), M(modified), R(emoved)
 	}

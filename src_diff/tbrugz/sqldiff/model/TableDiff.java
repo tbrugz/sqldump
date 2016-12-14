@@ -18,7 +18,7 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.StringUtils;
 
 //@XmlJavaTypeAdapter(TableDiffAdapter.class)
-public class TableDiff implements Diff, Comparable<TableDiff> {
+public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff> {
 	static Log log = LogFactory.getLog(TableDiff.class);
 
 	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
@@ -63,12 +63,15 @@ public class TableDiff implements Diff, Comparable<TableDiff> {
 		throw new IllegalStateException("unknown changetype: "+diffType);
 	}
 	
-	@Override
+	/*@Override
 	public List<String> getDiffList() {
-		List<String> dl = new ArrayList<String>();
-		dl.add(getDiff());
-		return dl;
+		return DiffUtil.singleElemList( getDiff() );
 	}
+	
+	@Override
+	public int getDiffListSize() {
+		return 1;
+	}*/
 	
 	//XXX: move to SchemaDiff or other class?
 	public static List<Diff> tableDiffs(Table origTable, Table newTable) {
