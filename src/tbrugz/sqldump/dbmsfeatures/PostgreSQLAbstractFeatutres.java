@@ -3,13 +3,17 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.util.StringUtils;
 
 public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatures {
 
-	//private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatutres.class);
+	@SuppressWarnings("unused")
+	private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatutres.class);
 
 	// org.postgresql.jdbc4.Jdbc4DatabaseMetaData.getFunction(String, String, String) not implemented
 	static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.PROCEDURE };

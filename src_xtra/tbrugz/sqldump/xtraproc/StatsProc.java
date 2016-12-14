@@ -106,6 +106,7 @@ public class StatsProc extends AbstractSQLProc {
 		}
 		catch(SQLException e) {
 			log.warn("doCountsByTable: error counting rows [sql="+sql+"]", e);
+			// if error (permission?), do not use in doStatsByColumn()
 			if(failonerror) {
 				throw new ProcessingException(e);
 			}
@@ -193,6 +194,7 @@ public class StatsProc extends AbstractSQLProc {
 			//System.out.println("<<-- --------------------------------- -->>");
 			//log.info("cout: "+cout.getCategorizedWriter());
 			SQLUtils.dumpRS(rs2, cout.getCategorizedWriter());
+			//XXX: use FFC syntax, format float 'selectivity'
 			cout.getCategorizedWriter().close();
 			//System.out.println("<<-- --------------------------------- -->>");
 			

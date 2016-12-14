@@ -19,6 +19,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+//import mondrian.olap.Mondrian3Def.*;
 import mondrian.olap.MondrianDef.Closure;
 import mondrian.olap.MondrianDef.Cube;
 import mondrian.olap.MondrianDef.CubeDimension;
@@ -28,6 +29,7 @@ import mondrian.olap.MondrianDef.Join;
 import mondrian.olap.MondrianDef.Level;
 import mondrian.olap.MondrianDef.Measure;
 import mondrian.olap.MondrianDef.Schema;
+//import mondrian.olap.MondrianDef.Table;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
