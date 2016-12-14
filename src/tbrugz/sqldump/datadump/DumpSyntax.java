@@ -42,6 +42,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
 		if(dateFormatter==null) {
+			@SuppressWarnings("deprecation")
 			String newDefaultDateFormat = prop.getProperty(DataDump.PROP_DATADUMP_DATEFORMAT);
 			if(newDefaultDateFormat!=null) {
 				log.warn("["+getSyntaxId()+"] (default) date format (deprecated): "+newDefaultDateFormat);

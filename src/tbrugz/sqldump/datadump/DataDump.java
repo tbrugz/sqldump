@@ -75,6 +75,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PROP_DATADUMP_ROWLIMIT = "sqldump.datadump.rowlimit";
 	static final String PROP_DATADUMP_TABLES = "sqldump.datadump.tables";
 	static final String PROP_DATADUMP_IGNORETABLES = "sqldump.datadump.ignoretables";
+	@Deprecated
 	static final String PROP_DATADUMP_DATEFORMAT = "sqldump.datadump.dateformat";
 	static final String PROP_DATADUMP_ORDERBYPK = "sqldump.datadump.orderbypk";
 	static final String PROP_DATADUMP_TABLETYPES = "sqldump.datadump.tabletypes";
