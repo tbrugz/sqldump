@@ -425,12 +425,35 @@ public class SQLUtils {
 	 */
 	public static void logWarnings(SQLWarning warning, Log logger)
 			throws SQLException {
-		while (warning != null) {
+		/*while (warning != null) {
 			logger.debug("SQLWarning: message: " + warning.getMessage()
 					+"; state: " + warning.getSQLState()
 					+"; error code: "+warning.getErrorCode());
 			warning = warning.getNextWarning();
+		}*/
+		List<String> warnings = getLogWarnings(warning);
+		for(String s: warnings) {
+			logger.debug(s);
 		}
+	}
+
+	public static void logWarningsInfo(SQLWarning warning, Log logger)
+			throws SQLException {
+		List<String> warnings = getLogWarnings(warning);
+		for(String s: warnings) {
+			logger.info(s);
+		}
+	}
+	
+	public static List<String> getLogWarnings(SQLWarning warning) throws SQLException {
+		List<String> ret = new ArrayList<String>();
+		while (warning != null) {
+			ret.add("SQLWarning: message: " + warning.getMessage()
+					+"; state: " + warning.getSQLState()
+					+"; error code: "+warning.getErrorCode());
+			warning = warning.getNextWarning();
+		}
+		return ret;
 	}
 	
 	public static void xtraLogSQLException(SQLException se, Log logger) {

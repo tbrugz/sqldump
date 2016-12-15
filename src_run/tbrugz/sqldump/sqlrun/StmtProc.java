@@ -290,6 +290,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				
 				if((batchExecCounter%batchSize)==0) {
 					int[] updateCounts = batchStmt.executeBatch();
+					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(batchStmt.getWarnings(), log); }
 					int updateCount = MathUtil.sumInts(updateCounts);
 					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
 					tbrugz.sqldump.sqlrun.def.Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
@@ -306,11 +307,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 					PreparedStatement stmt = conn.prepareStatement(stmtStr);
 					setParameters(stmt);
 					urows = stmt.executeUpdate();
+					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					stmt.close();
 				}
 				else {
 					Statement stmt = conn.createStatement();
 					urows = stmt.executeUpdate(replaceParameters(stmtStr));
+					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					stmt.close();
 				}
 				
