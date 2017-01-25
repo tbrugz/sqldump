@@ -10,6 +10,9 @@ import tbrugz.sqldump.util.Utils;
 /*
  * see: http://download.oracle.com/docs/cd/B19306_01/server.102/b14200/statements_5010.htm
  * XXX: index type. e.g. bitmap (done for oracle)
+ * 
+ * oracle: https://docs.oracle.com/cd/B28359_01/server.111/b28310/indexes003.htm
+ * postgresql: https://www.postgresql.org/docs/devel/static/sql-createindex.html - uses USING method
  */
 public class Index extends DBObject {
 	private static final long serialVersionUID = 1L;
@@ -45,6 +48,7 @@ public class Index extends DBObject {
 	final List<String> columns = new ArrayList<String>();
 	String comment;
 	Boolean local;
+	//String tableSpace;
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
