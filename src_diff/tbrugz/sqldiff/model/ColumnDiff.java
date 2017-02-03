@@ -152,7 +152,9 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		String colChange = null;
 		switch(changeType) {
 			case ADD:
-				colChange = features.sqlAddColumnClause()+" "+column.getDefinition(); break; //COLUMN "+column.name+" "+column.type;
+				colChange = features.sqlAddColumnClause()+" "+column.getDefinition()+
+					(features.supportsAddColumnAfter() && previousColumn!=null?" after "+previousColumn.getName():"");
+				break; //COLUMN "+column.name+" "+column.type;
 			case ALTER:
 				return getAlterColumn(); //XXX beware of recursion...
 			case RENAME:
@@ -204,7 +206,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		boolean columnNotNull = !column.isNullable();
 		ret.add( getDiff(ChangeType.RENAME, previousColumn, tmpColumn).get(0) );
 		if(columnNotNull) { column.setNullable(true); }
-		ret.add( getDiff(ChangeType.ADD, null, column).get(0) );
+		ret.add( getDiff(ChangeType.ADD, tmpColumn, column).get(0) );
 		ret.add( "update "+DBObject.getFinalName(table, true)+" set "+column.getName()+" = "+tmpColumn.getName() );
 		if(columnNotNull) { column.setNullable(false); ret.add(getAlterColumnSQL()); }
 		ret.add( getDiff(ChangeType.DROP, tmpColumn, null).get(0)+

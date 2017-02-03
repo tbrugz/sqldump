@@ -207,4 +207,9 @@ public class H2Features extends InformationSchemaFeatures {
 		return bindAndExecuteQuery(expsql, params, conn);
 	}
 	
+	@Override
+	public boolean supportsAddColumnAfter() {
+		return true;
+	}
+	
 }

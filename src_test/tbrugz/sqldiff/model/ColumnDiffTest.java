@@ -190,6 +190,27 @@ public class ColumnDiffTest {
 	}
 
 	@Test
+	public void testAlterTempColH2After() {
+		updateDbId("h2");
+		ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.ALWAYS;
+		
+		Column c1 = newColumn("cx","varchar",10);
+		Column c2 = newColumn("cx","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.ALTER, table, c1, c2);
+		String diff = cd.getDiff();
+		
+		out(diff);
+		String[] alterWithTempColList = {
+				"alter table a alter column cx rename to cx_TMP",
+				"alter table a add column cx varchar(20) after cx_TMP",
+				"update a set cx = cx_TMP",
+				"alter table a drop column cx_TMP"
+		};
+		String expected = Utils.join(Arrays.asList(alterWithTempColList), ";\n");
+		Assert.assertEquals(expected, diff);
+	}
+	
+	@Test
 	public void testAlterTempColAlwaysWithList() {
 		ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.ALWAYS;
 		Column c1 = newColumn("cx","varchar",10);

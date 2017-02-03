@@ -66,6 +66,8 @@ public interface DBMSFeatures {
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
+	boolean supportsAddColumnAfter();
+	
 	//String sqlAlterColumnDefinition(NamedDBObject table, Column column); //removed...
 	//String sqlAlterColumnNullableDefinition(NamedDBObject table, Column column);
 	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);

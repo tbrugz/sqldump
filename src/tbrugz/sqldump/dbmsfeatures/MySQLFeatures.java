@@ -97,4 +97,9 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 		return "modify";
 	}
 	
+	@Override
+	public boolean supportsAddColumnAfter() {
+		return true;
+	}
+	
 }
