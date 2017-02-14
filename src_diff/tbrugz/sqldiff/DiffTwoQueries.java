@@ -39,6 +39,7 @@ public class DiffTwoQueries implements Executor {
 	static final String DIFF2Q = "diff2queries";
 	
 	public static final String PROPERTIES_FILENAME = DIFF2Q+".properties";
+	static final String PROPERTIES_DEFAULTS_FILENAME = "/tbrugz/sqldiff/diff2q-defaults.properties";
 
 	public static final String PREFIX = "diff2q";
 	
@@ -65,7 +66,15 @@ public class DiffTwoQueries implements Executor {
 	boolean failonerror = true;
 	
 	@Override
-	public void doMain(String[] args, Properties properties) throws Exception {
+	public void doMain(String[] args, Properties properties) throws IOException, ClassNotFoundException, SQLException, NamingException {
+		try {
+			Properties propDefaults = new Properties();
+			propDefaults.load(DiffTwoQueries.class.getResourceAsStream(PROPERTIES_DEFAULTS_FILENAME));
+			prop.putAll(propDefaults);
+		} catch (IOException e) {
+			log.warn("Error loading properties defaults resource: "+PROPERTIES_DEFAULTS_FILENAME);
+		}
+		
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
@@ -187,9 +196,9 @@ public class DiffTwoQueries implements Executor {
 		this.failonerror = failonerror;
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException {
 		DiffTwoQueries diff2t = new DiffTwoQueries();
-		diff2t.doMain(args, diff2t.prop);
+		diff2t.doMain(args, null);
 	}
 	
 	List<DiffSyntax> getSyntaxes(DBMSFeatures feat) {
