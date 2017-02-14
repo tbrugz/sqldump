@@ -450,7 +450,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				for(View view: schemaModel.getViews()) {
 					//PKs
 					
-					if(doSchemaGrabPKs) {
+					if(doSchemaGrabPKs) { //XXX: add doSchemaGrabViewPKs?
 						view.setConstraints(grabRelationPKs(dbmd, view));
 					}
 

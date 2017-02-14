@@ -102,7 +102,7 @@ public class CSVDataDump extends AbstractDumpSyntax {
 		}
 	}
 	/*
-	void dumpRowsCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, long rowlimit, Writer fos) throws Exception {
+	void dumpRowsCSVSyntax(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, long rowlimit, Writer fos) throws IOException, SQLException {
 		//lines
 		int count = 0;
 		do {
@@ -112,10 +112,10 @@ public class CSVDataDump extends AbstractDumpSyntax {
 		}
 		while(rs.next());
 		log.info("dumped "+count+" rows from table: "+tableName);
-	}*/
+	} */
 
 	//CSV
-	void oldDumpRow(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws Exception {
+	void oldDumpRow(ResultSet rs, String tableName, int numCol, String columnDelimiter, String recordDelimiter, Writer fos) throws IOException, SQLException {
 		out(SQLUtils.getRowFromRS(rs, numCol, tableName, columnDelimiter), fos, recordDelimiter);
 	}
 
