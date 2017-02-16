@@ -454,6 +454,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 						view.setConstraints(grabRelationPKs(dbmd, view));
 					}
 
+					//XXX: grab columns & remarks from dbmd...
 					//Columns & Remarks
 					Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(schemaModel.getTables(), DBObjectType.TABLE, view.getSchemaName(), view.getName());
 					if(t==null) {
@@ -1182,10 +1183,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public static void closeResultSetAndStatement(ResultSet rs) {
 		try {
 			if(rs!=null) {
-				if(rs.getStatement()!=null) {
+				if(rs.getStatement()!=null && !rs.getStatement().isClosed()) {
 					rs.getStatement().close();
 				}
+				if(!rs.isClosed()) {
 				rs.close();
+			}
 			}
 		} catch (UnsupportedOperationException e) {
 			log.warn("Error closing resultset or statement: "+e);
