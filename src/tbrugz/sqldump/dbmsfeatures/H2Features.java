@@ -212,4 +212,9 @@ public class H2Features extends InformationSchemaFeatures {
 		return true;
 	}
 	
+	@Override
+	public boolean supportsCreateIndexWithoutName() {
+		return true;
+	}
+	
 }

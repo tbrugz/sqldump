@@ -71,4 +71,10 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 	public List<DBObjectType> getExecutableObjectTypes() {
 		return Arrays.asList(execTypes);
 	}
+	
+	@Override
+	public boolean supportsCreateIndexWithoutName() {
+		return true;
+	}
+
 }

@@ -141,6 +141,11 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return false;
 	}
 	
+	@Override
+	public boolean supportsCreateIndexWithoutName() {
+		return false;
+	}
+	
 	/*@Override
 	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
 		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");

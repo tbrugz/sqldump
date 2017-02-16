@@ -56,6 +56,7 @@ public class Index extends DBObject {
 	}
 	
 	public String getDefinition(boolean dumpIndexSchemaName, boolean dumpTableSchemaName) {
+		//XXX: add feat.supportsCreateIndexWithoutName() ?
 		return "create "+(unique?"unique ":"")+(type!=null?type.toLowerCase()+" ":"")+"index "+getFinalName(dumpIndexSchemaName)
 			+" on "+DBObject.getFinalName(getSchemaName(), tableName, dumpTableSchemaName)
 			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"

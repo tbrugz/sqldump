@@ -111,6 +111,7 @@ public interface DBMSFeatures {
 	List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException;
 	
 	boolean supportsExplainPlan();
+	boolean supportsCreateIndexWithoutName();
 	
 	//String getExplainPlanForQuery(String sql);
 	
