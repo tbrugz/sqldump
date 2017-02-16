@@ -63,8 +63,12 @@ public class DiffValidator {
 			Table tPrev = DBIdentifiable.getDBIdentifiableBySchemaAndName(model.getTables(), td.getRenameFromSchema(), td.getRenameFromName());
 			if(tPrev==null) throw new IncompatibleChangeException("can't RENAME a table that does not exists ["+td.getTable()+"]");
 			break;
+		case REMARKS:
+			if(tNew==null) throw new IncompatibleChangeException("can't add/change REMARKS on a table that does not exists ["+td.getNamedObject()+"]");
+			break;
 		case ALTER:
 		case REPLACE:
+		default: // so new ChanteTypes should be expected (throws exception if not)
 			throw new IllegalStateException(td.getChangeType()+" change for TableDiff not supported");
 		}
 	}
@@ -97,7 +101,12 @@ public class DiffValidator {
 			Column cNew = table.getColumn(cd.getColumn().getName());
 			if(cNew!=null) throw new IncompatibleChangeException("can't RENAME a column to a name that already exists ["+cd.getColumn()+"]");
 			break; }
+		case REMARKS:
+			Column c = table.getColumn(cd.getColumn().getName());
+			if(c==null) throw new IncompatibleChangeException("can't add/change REMARKS on a column that does not exists ["+cd.getColumn()+"]");
+			break;
 		case REPLACE:
+		default: // so new ChanteTypes should be expected (throws exception if not)
 			throw new IllegalStateException(cd.getChangeType()+" change for ColumnDiff not supported");
 		}
 	}

@@ -72,4 +72,28 @@ public class DiffValidatorTest {
 		ColumnDiff cd = new ColumnDiff(ChangeType.RENAME, table, c2, c2);
 		dv.validateDiff(cd);
 	}
+
+	@Test
+	public void testColumnDiffRemarks() {
+		Column c2 = ColumnDiffTest.newColumn("c","varchar",20);
+		c2.setRemarks("some remark");
+		ColumnDiff cd = new ColumnDiff(ChangeType.REMARKS, table, c, c2);
+		dv.validateDiff(cd);
+	}
+
+	@Test(expected=IncompatibleChangeException.class)
+	public void testColumnDiffRemarksNonExistentColumn() {
+		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
+		c2.setRemarks("some remark");
+		ColumnDiff cd = new ColumnDiff(ChangeType.REMARKS, table, c, c2);
+		dv.validateDiff(cd);
+	}
+
+	@Test(expected=IllegalStateException.class)
+	public void testColumnDiffReplace() {
+		Column c2 = ColumnDiffTest.newColumn("cnew","varchar",20);
+		ColumnDiff cd = new ColumnDiff(ChangeType.REPLACE, table, c, c2);
+		dv.validateDiff(cd);
+	}
+	
 }
