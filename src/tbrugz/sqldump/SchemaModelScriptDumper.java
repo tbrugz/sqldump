@@ -220,6 +220,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		this.prop = prop;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void dumpSchema(SchemaModel schemaModel) {
 		try {
@@ -351,8 +352,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		for(ExecutableObject eo: schemaModel.getExecutables()) {
 			// TODOne categorizedOut(eo.schemaName, eo.name, DBObjectType.EXECUTABLE,
 			if(eo.isDumpable()) {
+				String comment = eo.getType().equals(DBObjectType.JAVA_SOURCE) ? "/* Executable: "+eo.getType()+" "+eo.getName()+" */\n" : "-- Executable: "+eo.getType()+" "+eo.getName()+"\n";
 				categorizedOut(eo.getSchemaName(), eo.getName(), eo.getType(), 
-					"-- Executable: "+eo.getType()+" "+eo.getName()+"\n"
+					comment
 					+eo.getDefinition(dumpWithSchemaName)+"\n");
 			}
 			else {

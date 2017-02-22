@@ -247,7 +247,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
 		return "select name, type, line, text "
 				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
-				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
+				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE','TYPE BODY', 'JAVA SOURCE') "
 				+"and owner = '"+schemaPattern+"' "
 				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
 				+"order by type, name, line";

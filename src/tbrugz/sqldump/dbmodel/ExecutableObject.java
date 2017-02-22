@@ -29,7 +29,11 @@ public class ExecutableObject extends DBObject implements TypedDBObject {
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		//return "create "+type+" "+(dumpSchemaName?schemaName+".":"")+name+" as\n"+body;
-		return (dumpCreateOrReplace?"create or replace ":"create ") 
+		String preamble = "";
+		if(!type.equals(DBObjectType.JAVA_SOURCE)) {
+			preamble = (dumpCreateOrReplace?"create or replace ":"create ");
+		}
+		return preamble
 				+ (body!=null ? body : 
 					(
 						getType()+" "+
