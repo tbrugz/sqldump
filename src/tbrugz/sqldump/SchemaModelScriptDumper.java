@@ -94,6 +94,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	static final String PATTERN_OBJECTTYPE_QUOTED = Pattern.quote(PATTERN_OBJECTTYPE_FINAL);
 	static final String PATTERN_OBJECTNAME_FINAL = Defs.addSquareBraquets(Defs.PATTERN_OBJECTNAME);
 	static final String PATTERN_OBJECTNAME_QUOTED = Pattern.quote(PATTERN_OBJECTNAME_FINAL);
+	static final String PATTERN_SYNTAXFILEEXT_FINAL = Defs.addSquareBraquets(Defs.PATTERN_SYNTAXFILEEXT);
+	static final String PATTERN_SYNTAXFILEEXT_QUOTED = Pattern.quote(PATTERN_SYNTAXFILEEXT_FINAL);
 	
 	@Deprecated //also used by SQLDiff
 	static final String FILENAME_PATTERN_SCHEMA = "${schemaname}";
@@ -503,7 +505,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		outFile = outFile
 			.replaceAll(PATTERN_SCHEMANAME_QUOTED, schemaName)
 			.replaceAll(PATTERN_OBJECTTYPE_QUOTED, objectType.name())
-			.replaceAll(PATTERN_OBJECTNAME_QUOTED, objectName);
+			.replaceAll(PATTERN_OBJECTNAME_QUOTED, objectName)
+			.replaceAll(PATTERN_SYNTAXFILEEXT_QUOTED, objectType.getSyntaxExtension());
 		
 		boolean alreadyOpened = filesOpened.contains(outFile);
 		if(!alreadyOpened) { filesOpened.add(outFile); }

@@ -22,6 +22,7 @@ public class Defs {
 	public static final String PATTERN_OBJECTNAME = "objectname";
 	public static final String PATTERN_TABLENAME = "tablename";
 	public static final String PATTERN_CHANGETYPE = "changetype";
+	public static final String PATTERN_SYNTAXFILEEXT = "syntaxfileext";
 	
 	public static String addSquareBraquets(String patternStr) {
 		return "["+patternStr+"]";
