@@ -509,10 +509,10 @@ public class Utils {
 		log.debug("deleting regular files from dir: "+f.getAbsolutePath());
 		int delCount = deleteDirRegularContents(f, 0);
 		if(delCount==0) {
-			log.debug("no files deteted");
+			log.debug("no files deleted");
 		}
 		else {
-			log.debug(delCount+" files deteted");
+			log.debug(delCount+" files deleted");
 		}
 		return delCount;
 	}

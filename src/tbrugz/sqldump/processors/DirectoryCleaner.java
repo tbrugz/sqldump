@@ -40,10 +40,10 @@ public class DirectoryCleaner extends AbstractProcessor {
 		log.info("deleting regular files from dir: "+dirToDeleteFiles.getAbsolutePath());
 		int delCount = Utils.deleteDirRegularContents(dirToDeleteFiles);
 		if(delCount>0) {
-			log.info(delCount+" files deteted");
+			log.info(delCount+" files deleted");
 		}
 		else {
-			log.info("no files deteted");
+			log.info("no files deleted");
 		}
 	}
 
