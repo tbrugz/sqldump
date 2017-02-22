@@ -9,6 +9,11 @@ public enum DBObjectType {
 	
 	RELATION; //, QUERY; // XXX: add "abstract" object types ?
 	
+	public enum DBSyntax {
+		SQL,
+		JAVA
+	}
+	
 	//XXX: include PROGRAM, SCHEDULE?
 	//XXX: oracle: java_class, java_resource, java_source: http://docs.oracle.com/cd/B28359_01/server.111/b28286/statements_5013.htm
 	//XXX: executables: FUNCTION, JAVA SOURCE, PACKAGE, PACKAGE BODY, PROCEDURE, TRIGGER, TYPE, TYPE BODY - "select distinct type from all_source"
@@ -57,6 +62,24 @@ public enum DBObjectType {
 			return true;
 		default:
 			return false;
+		}
+	}
+	
+	public DBSyntax getSyntax() {
+		switch (this) {
+		case JAVA_SOURCE:
+			return DBSyntax.JAVA;
+		default:
+			return DBSyntax.SQL;
+		}
+	}
+
+	public String getSyntaxExtension() {
+		switch (this) {
+		case JAVA_SOURCE:
+			return "java";
+		default:
+			return "sql";
 		}
 	}
 	
