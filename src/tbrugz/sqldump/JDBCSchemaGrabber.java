@@ -294,9 +294,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 						+(equalsUsername?" (same as username)":"") );
 				papp.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 				if(propOriginal!=null) {
-				propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
+					propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
+				}
 			}
-		}
 		}
 
 		if(schemaPattern==null) {
@@ -1183,12 +1183,28 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public static void closeResultSetAndStatement(ResultSet rs) {
 		try {
 			if(rs!=null) {
-				if(rs.getStatement()!=null && !rs.getStatement().isClosed()) {
-					rs.getStatement().close();
+				/*try {
+					if(rs.getStatement()!=null && !rs.getStatement().isClosed()) {
+						rs.getStatement().close();
+					}
 				}
-				if(!rs.isClosed()) {
+				catch(Throwable e) { // AbstractMethodError?
+					log.debug("Error on closeResultSetAndStatement: "+e, e);
+				}
+				
+				try {
+					if(!rs.isClosed()) {
+						rs.close();
+					}
+				}
+				catch(Throwable e) { // AbstractMethodError?
+					log.debug("Error on closeResultSetAndStatement: "+e, e);
+					rs.close();
+				}*/
+				if(rs.getStatement()!=null) {
+					rs.getStatement().close();
+ 				}
 				rs.close();
-			}
 			}
 		} catch (UnsupportedOperationException e) {
 			log.warn("Error closing resultset or statement: "+e);
