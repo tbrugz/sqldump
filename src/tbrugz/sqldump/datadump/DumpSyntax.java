@@ -33,6 +33,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	//public abstract void procProperties(Properties prop);
 
+	@SuppressWarnings("deprecation")
 	public void procStandardProperties(Properties prop) {
 		String dateProp = "sqldump.datadump."+getSyntaxId()+".dateformat";
 		//log.debug("date prop: '"+dateProp+"'");
@@ -42,15 +43,11 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 			dateFormatter = new SimpleDateFormat(dateFormat);
 		}
 		if(dateFormatter==null) {
-			@SuppressWarnings("deprecation")
 			String newDefaultDateFormat = prop.getProperty(DataDump.PROP_DATADUMP_DATEFORMAT);
 			if(newDefaultDateFormat!=null) {
-				log.warn("["+getSyntaxId()+"] (default) date format (deprecated): "+newDefaultDateFormat);
+				log.warn("["+getSyntaxId()+"] deprecated prop '"+DataDump.PROP_DATADUMP_DATEFORMAT+"' present - use '"+dateProp+"' instead");
 				dateFormatter = new SimpleDateFormat(newDefaultDateFormat);
 			}
-			/*else {
-				dateFormatter = DataDumpUtils.dateFormatter;
-			}*/
 		}
 		
 		String nullValue = prop.getProperty("sqldump.datadump."+getSyntaxId()+".nullvalue");
