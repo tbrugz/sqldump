@@ -127,8 +127,8 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery();		
-		//return executeQuery(conn, sql, params);
+		
+		return executeStatement(st);
 	}
 	
 	@Override
@@ -169,7 +169,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery();
+		return executeStatement(st);
 	}
 	
 	static boolean grabFKFromUK = false;
@@ -244,7 +244,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql:\n"+sql);
-		return st.executeQuery();
+		return executeStatement(st);
 	}
 	
 	@Override
@@ -271,7 +271,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, schema);
 		st.setString(2, table);
-		return st.executeQuery();
+		return executeStatement(st);
 	}
 	
 	/*
@@ -316,7 +316,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql[getTablePrivileges]:\n"+sql+"\nparams="+params);
-		return st.executeQuery();
+		return executeStatement(st);
 		//return executeQuery(conn, sql, params);
 	}
 	
@@ -356,9 +356,10 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			st.setString(i+1, params.get(i));
 		}
 		log.debug("sql[getColumnPrivileges]:\n"+sql+"\nparams="+params);
-		return st.executeQuery();
+		return executeStatement(st);
 	}
 	
+	/*
 	static ResultSet executeQuery(Connection conn, StringBuilder sql, List<String> params) throws SQLException {
 		return executeQuery(conn, sql.toString(), params);
 	}
@@ -377,6 +378,11 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 			log.warn("Exception: sql=\n"+sql);
 			throw e;
 		}
+	}
+	*/
+	
+	ResultSet executeStatement(PreparedStatement st) throws SQLException {
+		return OracleFeatures.executeStatement(st, useDbaMetadataObjects);
 	}
 	
 }

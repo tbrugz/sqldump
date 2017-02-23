@@ -143,8 +143,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing (normal) views");
 		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		while(rs.next()) {
@@ -179,8 +179,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing materialized views");
 		String query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		while(rs.next()) {
@@ -221,8 +221,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing triggers");
 		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		while(rs.next()) {
@@ -263,8 +263,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing executables");
 		String query = grabDBExecutablesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int linecount = 0;
 		int countExecutables = 0;
@@ -358,8 +358,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"   and aa.position is not null "
 				+"\norder by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
 		log.debug("grabbing executables' metadata - sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 
 		ExecutableObject eo = null;
 		//int executablesCount = 0;
@@ -517,8 +517,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing synonyms");
 		String query = grabDBSynonymsQuery(schemaPattern, synonymNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		while(rs.next()) {
@@ -576,8 +576,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		*/
 		String query = grabDBIndexesQuery(schemaPattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int colCount = 0;
 		int idxCount = 0;
@@ -675,8 +675,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.debug("grabbing sequences");
 		String query = grabDBSequencesQuery(schemaPattern, sequenceNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		while(rs.next()) {
@@ -780,9 +780,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+(constraintNamePattern!=null?"and constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'C' "
 				+"order by owner, table_name, constraint_name ";
-		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
 		int countNotAdded = 0;
@@ -831,9 +831,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+(constraintNamePattern!=null?"and al.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'U' "
 				+"order by owner, table_name, constraint_name, position, column_name ";
-		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);  
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 		
 		int colCount = 0;
 		int countNotAdded = 0;
@@ -883,9 +883,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"and name = '"+ot.getName()+"' "
 				+"order by name, column_position ";
 		
-		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 
 		List<String> columns = new ArrayList<String>();
 		while(rs.next()) {
@@ -902,9 +902,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"and table_name = '"+ot.getName()+"' "
 				+"order by table_name, partition_position ";
 		
-		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		ResultSet rs = executeStatement(st);
 
 		List<OracleTablePartition> parts = new ArrayList<OracleTablePartition>();
 		while(rs.next()) {
@@ -1073,4 +1073,22 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return conn.createStatement().executeQuery(planTableSelect);
 	}
 
+	ResultSet executeStatement(PreparedStatement st) throws SQLException {
+		return executeStatement(st, useDbaMetadataObjects);
+	}
+	
+	static ResultSet executeStatement(PreparedStatement st, boolean useDbaMetadataObjects) throws SQLException {
+		try {
+			return st.executeQuery();
+		}
+		catch(SQLException e) {
+			if(useDbaMetadataObjects) {
+				String user = st.getConnection().getMetaData().getUserName();
+				log.warn("Error when querying metadata objects, maybe user '"+user+"' has no permission on 'DBA_*' tables"
+					+ " - if so, set property '"+OracleFeatures.PROP_USE_DBA_METAOBJECTS+"' to 'false'");
+			}
+			throw e;
+		}
+	}
+	
 }
