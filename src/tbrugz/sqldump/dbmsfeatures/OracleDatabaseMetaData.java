@@ -18,10 +18,13 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	
 	static Log log = LogFactory.getLog(OracleDatabaseMetaData.class);
 
-	boolean useDbaMetadataObjects = OracleFeatures.useDbaMetadataObjects;
+	final boolean useDbaMetadataObjects; // = OracleFeatures.useDbaMetadataObjects;
 	
-	public OracleDatabaseMetaData(DatabaseMetaData metadata) {
+	public OracleDatabaseMetaData(DatabaseMetaData metadata, final boolean useDbaMetadataObjects) {
+		//XXX: add DBMSFeatures as parameter?
 		super(metadata);
+		this.useDbaMetadataObjects = useDbaMetadataObjects;
+		log.info("using "+OracleDatabaseMetaData.class.getSimpleName()+" - useDbaMetadataObjects="+useDbaMetadataObjects);
 	}
 
 	/**

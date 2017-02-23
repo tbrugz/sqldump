@@ -65,7 +65,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	//boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
-	static boolean useDbaMetadataObjects = true;
+	boolean useDbaMetadataObjects = true;
 	boolean useDbaTriggers = useDbaMetadataObjects;
 	
 	@Override
@@ -697,7 +697,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
-		return new OracleDatabaseMetaData(metadata);
+		return new OracleDatabaseMetaData(metadata, useDbaMetadataObjects);
 	}
 	
 	@Override
