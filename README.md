@@ -110,7 +110,7 @@ Building from sources (with ant & ivy)
 - (*optional*) Edit `build.properties`
 - Run `ant resolve`
 - (*optional*) `ant test`
-- Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`)
+- Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`) or `ant all`
 
 
 Running (with sources)

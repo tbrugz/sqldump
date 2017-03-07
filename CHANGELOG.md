@@ -1,12 +1,25 @@
 
-sqldump-ng
-----------
+sqldump 0.9.15
+--------------
 - dumper: DropScriptDumper: added prop '.ifexists'
 - sqlrun: added 'sql' importer (1712)
+- datadump: added 'fetchsize' prop suffix
+- diff: ResultSetDiff: added 'dumpEquals'
+- dbmd: DBMSFeatures: simpler sqlAlterColumnByDiffing()
+- processor: added PropertiesLogger
+- sqlrun: importer: misc improvements
+- dbmd: DBMSFeatures: explainPlan: added params
+- dbms: added DB2 support
+- dbms: initial CUBRID support
+- build/util: Version: added 'build.revisionNumber' & 'build.timestamp' (1751)
+- dbmd: DBMSFeatures: added supportsAddColumnAfter() (used by mysql & h2)
+- diff2queries: added 'diff2q-defaults.properties'
+- dbms: oracle: dump java objects (& added [syntaxfileext]) - issue #1
+- dumper: SchemaModelScriptDumper: added [syntaxfileext] pattern
 
 
 sqldump 0.9.14
-----------
+--------------
 - dbms: added explainPlan()
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
 - datadump: json: added $metadata , added jsonp/callback
