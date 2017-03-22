@@ -243,6 +243,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	List<Pattern> excludeTableFilters; //XXX: remove as object property & add as grabRelations() parameter?
 	
+	void initFeatures() throws SQLException {
+		feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+	}
+	
 	@Override
 	public SchemaModel grabSchema() {
 		try {
@@ -260,7 +264,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//DBMSResources.instance().updateMetaData(conn.getMetaData(), true);
 		//feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		//feats.procProperties(papp);
-		feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		initFeatures();
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
 		ConnectionUtil.showDBInfo(conn.getMetaData());
@@ -787,6 +791,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	public List<ExecutableObject> doGrabProcedures(DatabaseMetaData dbmd, String schemaPattern, boolean grabParams) throws SQLException {
 		List<ExecutableObject> eos = null;
+		if(feats==null) { initFeatures(); }
+
 		ResultSet rsProc = dbmd.getProcedures(null, schemaPattern, null);
 		eos = grabProcedures(rsProc);
 		closeResultSetAndStatement(rsProc);
