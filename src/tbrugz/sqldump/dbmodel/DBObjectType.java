@@ -3,7 +3,7 @@ package tbrugz.sqldump.dbmodel;
 public enum DBObjectType {
 	TABLE, FK, VIEW, INDEX, EXECUTABLE, TRIGGER, SEQUENCE, SYNONYM, GRANT, //main types
 	MATERIALIZED_VIEW, //sub-types?
-	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
+	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, SCRIPT, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
 	
 	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
@@ -48,17 +48,21 @@ public enum DBObjectType {
 		case PROCEDURE:
 		case TYPE:
 		case TYPE_BODY:
+		case SCRIPT:
 			return true;
 		default:
 			return false;
 		}
 	}
 	
+	//XXX add isRelationType()?
+	
 	public boolean isAbstractType() {
 		switch (this) {
 		case RELATION:
 		//case QUERY:
 		case EXECUTABLE:
+		case SCRIPT:
 			return true;
 		default:
 			return false;
