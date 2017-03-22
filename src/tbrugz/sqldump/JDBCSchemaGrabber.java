@@ -122,6 +122,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		"Default" // neo4j
 	};
 	
+	static final String DBID_ORACLE = "oracle";
+	
 	Connection conn;
 	
 	//tables OK for data dump
@@ -815,7 +817,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			ExecutableObject eo = new ExecutableObject();
 			eo.setName(rs.getString("PROCEDURE_NAME"));
 			eo.setSchemaName(rs.getString("PROCEDURE_SCHEM"));
-			eo.setPackageName(rs.getString("PROCEDURE_CAT")); //?? Oracle-only?
+			if( DBID_ORACLE.equals(feats.getId()) ) {
+				eo.setPackageName(rs.getString("PROCEDURE_CAT")); //?? Oracle-only? Not good on H2... XXX: Test if DB has packages?
+			}
 			eo.setRemarks(rs.getString("REMARKS"));
 			
 			int type = rs.getInt("PROCEDURE_TYPE");
@@ -875,7 +879,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(eo==null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 				//XXX: oracle driver adds 1 to function parameter positions...
-				if( "oracle".equals(feats.getId()) ) {
+				if( DBID_ORACLE.equals(feats.getId()) ) {
 					ep.setPosition(ep.getPosition()-1);
 				}
 			}
