@@ -41,7 +41,7 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 		return getFinalName(true);
 	}
 	
-	public String getFinalName(boolean dumpSchemaName) {
+	String getFinalName(boolean dumpSchemaName) {
 		return ((dumpSchemaName && schemaName!=null)?
 				sqlIddecorator.get(schemaName)+".":"")+sqlIddecorator.get(name);
 	}

@@ -51,4 +51,8 @@ public interface Relation extends NamedDBObject {
 	
 	public String getRemarksSnippet(boolean dumpSchemaName);
 	
+	public String getQualifiedName();
+	
+	//public String getFinalQualifiedName();
+	
 }
