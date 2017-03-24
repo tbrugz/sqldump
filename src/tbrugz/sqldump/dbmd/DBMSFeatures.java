@@ -60,9 +60,9 @@ public interface DBMSFeatures {
 	//XXX: add Map<Integer, String> getSQLTypeClassMapper() (mainly for unknown types)?
 	//XXX: add String getDefaultSchemaName()?
 	
-	//XXX: should DBMS's Features return getDefaultDateFormat?
-	
 	List<DBObjectType> getExecutableObjectTypes();
+	
+	//DatabaseMetaData: supportsAlterTableWithAddColumn(), supportsAlterTableWithDropColumn()...
 	
 	String sqlAddColumnClause();
 	String sqlAlterColumnClause();
@@ -71,6 +71,7 @@ public interface DBMSFeatures {
 	//String sqlAlterColumnDefinition(NamedDBObject table, Column column); //removed...
 	//String sqlAlterColumnNullableDefinition(NamedDBObject table, Column column);
 	String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName);
+	//XXXxx: should DBMS's Features return getDefaultDateFormat?
 	String sqlDefaultDateFormatPattern();
 	//String sqlDefaultTimestampFormatPattern();
 	
@@ -131,5 +132,7 @@ public interface DBMSFeatures {
 	 */
 	
 	String getIdentifierQuoteString();
-
+	
+	List<DBObjectType> getSupportedObjectTypes();
+	
 }

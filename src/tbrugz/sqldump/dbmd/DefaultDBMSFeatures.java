@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -18,6 +19,8 @@ import tbrugz.sqldump.dbmodel.View;
 
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 
+	static final DBObjectType[] supportedTypes = new DBObjectType[]{ DBObjectType.TABLE, DBObjectType.FK, DBObjectType.INDEX };
+	
 	public DefaultDBMSFeatures() {
 	}
 	
@@ -112,6 +115,11 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	@Override
 	public List<DBObjectType> getExecutableObjectTypes() {
 		return null;
+	}
+	
+	@Override
+	public List<DBObjectType> getSupportedObjectTypes() {
+		return Arrays.asList(supportedTypes);
 	}
 
 	/*

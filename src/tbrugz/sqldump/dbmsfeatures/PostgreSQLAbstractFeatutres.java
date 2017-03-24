@@ -1,6 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -16,7 +16,7 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 	private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatutres.class);
 
 	// org.postgresql.jdbc4.Jdbc4DatabaseMetaData.getFunction(String, String, String) not implemented
-	static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.PROCEDURE };
+	//static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.FUNCTION, DBObjectType.PROCEDURE };
 	
 	@Override
 	public boolean supportsDiffingColumn() {
@@ -67,9 +67,18 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 		//throw new UnsupportedOperationException("no differences between PostgreSQL columns found");
 	}
 	
-	@Override
+	/*@Override
 	public List<DBObjectType> getExecutableObjectTypes() {
 		return Arrays.asList(execTypes);
+	}
+	*/
+	
+	@Override
+	public List<DBObjectType> getSupportedObjectTypes() {
+		List<DBObjectType> ret = new ArrayList<DBObjectType>();
+		ret.addAll(super.getSupportedObjectTypes());
+		ret.add(DBObjectType.MATERIALIZED_VIEW);
+		return ret;
 	}
 	
 	@Override

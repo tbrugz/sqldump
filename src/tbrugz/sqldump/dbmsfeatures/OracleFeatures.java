@@ -58,9 +58,14 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	 */
 	public static final String PROP_USE_DBA_TRIGGERS = PREFIX_DBMS+".oracle.trigger.use-dba-triggers";
 	
-	static final DBObjectType[] execTypes = new DBObjectType[]{
+	static final DBObjectType[] execTypes = {
 		DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
-		//, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
+		, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
+	};
+	
+	static final DBObjectType[] supportedTypes = {
+		DBObjectType.TABLE, DBObjectType.FK, DBObjectType.VIEW, DBObjectType.INDEX, DBObjectType.EXECUTABLE,
+		DBObjectType.TRIGGER, DBObjectType.SEQUENCE, DBObjectType.SYNONYM, DBObjectType.GRANT, DBObjectType.MATERIALIZED_VIEW
 	};
 	
 	//boolean dumpSequenceStartWith = true;
@@ -482,7 +487,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	public List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException {
 		String sql = "select distinct owner, name, type"
 				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
-				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE') "
+				+"where type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','JAVA SOURCE','TYPE','TYPE BODY') "
 				+"and owner = ? "
 				+"order by owner, name, type";
 		PreparedStatement st = conn.prepareStatement(sql);
@@ -997,6 +1002,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public List<DBObjectType> getExecutableObjectTypes() {
 		return Arrays.asList(execTypes);
+	}
+	
+	@Override
+	public List<DBObjectType> getSupportedObjectTypes() {
+		return Arrays.asList(supportedTypes);
 	}
 
 	/*

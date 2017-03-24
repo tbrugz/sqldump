@@ -5,7 +5,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,17 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	public static final String DEFAULT_SCHEMA = "information_schema";
 	
 	String informationSchema = DEFAULT_SCHEMA;
+	
+	
+	static final DBObjectType[] execTypes = {
+		DBObjectType.FUNCTION, DBObjectType.PROCEDURE
+	};
+	
+	static final DBObjectType[] supportedTypes = {
+		DBObjectType.TABLE, DBObjectType.FK, DBObjectType.VIEW, DBObjectType.INDEX, DBObjectType.EXECUTABLE,
+		DBObjectType.TRIGGER, DBObjectType.SEQUENCE,
+		//DBObjectType.SYNONYM, DBObjectType.GRANT, DBObjectType.MATERIALIZED_VIEW
+	};
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -391,6 +404,16 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	
 	protected void setInformationSchemaName(String informationSchema) {
 		this.informationSchema = informationSchema;
+	}
+	
+	@Override
+	public List<DBObjectType> getExecutableObjectTypes() {
+		return Arrays.asList(execTypes);
+	}
+	
+	@Override
+	public List<DBObjectType> getSupportedObjectTypes() {
+		return Arrays.asList(supportedTypes);
 	}
 	
 }
