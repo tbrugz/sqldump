@@ -143,7 +143,8 @@ public class SchemaDiffer {
 	static final DBObjectType[] diffableTypes = {
 		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.MATERIALIZED_VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE,
 		DBObjectType.SYNONYM, DBObjectType.INDEX, DBObjectType.SEQUENCE,
-		DBObjectType.FUNCTION, DBObjectType.PROCEDURE, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE
+		DBObjectType.FUNCTION, DBObjectType.PROCEDURE,
+		DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
 	};
 	
 	static final Set<DBObjectType> diffableTypesSet = new HashSet<DBObjectType>();
