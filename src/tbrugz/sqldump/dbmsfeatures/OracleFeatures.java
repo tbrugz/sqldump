@@ -47,7 +47,9 @@ import tbrugz.sqldump.util.Utils;
 public class OracleFeatures extends AbstractDBMSFeatures {
 	private static Log log = LogFactory.getLog(OracleFeatures.class);
 
+	public static final String PROP_GRAB_EXECUTABLE_PRIVS = PREFIX_DBMS+".oracle.grab-executble-privileges";
 	public static final String PROP_USE_DBA_METAOBJECTS = PREFIX_DBMS+".oracle.use-dba-metaobjects";
+	
 	/*
 	 * https://docs.oracle.com/cd/B28359_01/server.111/b28320/statviews_2108.htm
 	 * 
@@ -69,7 +71,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	};
 	
 	//boolean dumpSequenceStartWith = true;
-	boolean grabExecutablePrivileges = true; //XXX: add prop for 'grabExecutablePrivileges'?
+	boolean grabExecutablePrivileges = true;
 	boolean useDbaMetadataObjects = true;
 	boolean useDbaTriggers = useDbaMetadataObjects;
 	
@@ -84,6 +86,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		OracleTable.dumpPartitionClause = Utils.getPropBool(prop, PROP_DUMP_TABLE_PARTITION, OracleTable.dumpPartitionClause);
 		useDbaMetadataObjects = Utils.getPropBool(prop, PROP_USE_DBA_METAOBJECTS, useDbaMetadataObjects);
 		useDbaTriggers = Utils.getPropBool(prop, PROP_USE_DBA_TRIGGERS, Utils.getPropBool(prop, PROP_USE_DBA_METAOBJECTS, useDbaTriggers));
+		grabExecutablePrivileges = Utils.getPropBool(prop, PROP_GRAB_EXECUTABLE_PRIVS, grabExecutablePrivileges);
 	}
 	
 	/* (non-Javadoc)
@@ -478,6 +481,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			
 			executable.getGrants().add(grant);
 		}
+		
+		rs.close();
+		st.close();
 	}
 	
 	/*
