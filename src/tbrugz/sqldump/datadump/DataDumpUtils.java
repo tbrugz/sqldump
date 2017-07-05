@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.Utils;
 
 public class DataDumpUtils {
 
@@ -339,7 +340,11 @@ public class DataDumpUtils {
 	//XXX: add columnTypeMapper?
 	public static void logResultSetColumnsTypes(ResultSetMetaData md, String tableName, Log log) throws SQLException {
 		if(log.isDebugEnabled()) {
-
+			log.debug("dump columns ["+tableName+"]:\n\t"+Utils.join(getResultSetColumnsTypes(md), ";\n\t"));
+		}
+	}
+	
+	public static List<String> getResultSetColumnsTypes(ResultSetMetaData md) throws SQLException {
 		int numCol = md.getColumnCount();
 		List<String> lsColNames = new ArrayList<String>();
 		List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
@@ -349,7 +354,7 @@ public class DataDumpUtils {
 		for(int i=0;i<numCol;i++) {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
-		StringBuilder sb = new StringBuilder();
+		List<String> strs = new ArrayList<String>();
 		for(int i=0;i<numCol;i++) {
 			String colName = lsColNames.get(i);
 			String colType = lsColTypes.get(i).getSimpleName();
@@ -365,11 +370,9 @@ public class DataDumpUtils {
 			/*if( (type==Types.DECIMAL || type== Types.NUMERIC) && (precision==0 || precision<0 || scale<0)) {
 				log.warn("numeric type with precision 0 or precision/scale<0 [table="+tableName+",col="+colName+",type="+type+",class="+colType+",precision="+precision+",scale="+scale+"]");
 			}*/
-			sb.append("\n\t"+colName+" ["+colType+"/t:"+type+"/tn:"+typename+"/p:"+precision+"/s:"+scale+"]; ");
+			strs.add(colName+" ["+colType+"/t:"+type+"/tn:"+typename+"/p:"+precision+"/s:"+scale+"]");
 		}
-		log.debug("dump columns ["+tableName+"]: "+sb);
-
-		}
+		return strs;
 	}
 	
 	public static List<String> getColumnNames(ResultSetMetaData md) throws SQLException {
