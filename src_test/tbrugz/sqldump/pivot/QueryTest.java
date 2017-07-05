@@ -70,13 +70,13 @@ public class QueryTest {
 		rs.absolute(0);
 		rs.next();
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("B:false"));
-		Assert.assertEquals("true", rs.getString("B:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"true"));
 
 		rs.next();
 		Assert.assertEquals("true", rs.getString("A"));
-		Assert.assertEquals("true", rs.getString("B:false"));
-		Assert.assertEquals(true, rs.getObject("B:true"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals(true, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"true"));
 	}
 
 	@Test
@@ -87,8 +87,8 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("B:false|C:false"));
-		Assert.assertEquals("true", rs.getString("B:false|C:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"+PivotResultSet.COLS_SEP+"C"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"+PivotResultSet.COLS_SEP+"C"+PivotResultSet.COLVAL_SEP+"true"));
 	}
 	
 	@Test
@@ -100,8 +100,8 @@ public class QueryTest {
 		
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
-		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
+		Assert.assertEquals("false", rs.getString("BOOL_AND"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals("true", rs.getString("BOOL_OR"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"true"));
 		
 		String sql2 = sql + " /* pivot B nonpivot A +measures-show-last */";
 		rs = conn.createStatement().executeQuery(sql2);
@@ -110,8 +110,8 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("B:false|BOOL_AND"));
-		Assert.assertEquals("true", rs.getString("B:true|BOOL_OR"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"+PivotResultSet.COLS_SEP+"BOOL_AND"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"true"+PivotResultSet.COLS_SEP+"BOOL_OR"));
 	}
 
 	@Test
@@ -121,13 +121,13 @@ public class QueryTest {
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
 		rs.absolute(1);
-		Assert.assertEquals("true", rs.getString("B:true"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"true"));
 
 		PivotResultSet.aggregator = Aggregator.FIRST;
 		rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
 		rs.absolute(1);
-		Assert.assertEquals("false", rs.getString("B:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"true"));
 	}
 
 	@Test
@@ -138,11 +138,11 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals(2, rs.getObject("B"));
-		Assert.assertEquals(2+1, rs.getObject("A:1"));
+		Assert.assertEquals(2+1, rs.getObject("A"+PivotResultSet.COLVAL_SEP+"1"));
 		
 		rs.next();
 		Assert.assertEquals(4, rs.getObject("B"));
-		Assert.assertEquals(4+2, rs.getInt("A:2"));
+		Assert.assertEquals(4+2, rs.getInt("A"+PivotResultSet.COLVAL_SEP+"2"));
 	}
 
 	@Test
@@ -153,8 +153,8 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals(makeSqlDate(2013, 10, 8), rs.getObject("A"));
-		Assert.assertEquals(1, rs.getObject("B:one"));
-		Assert.assertEquals(2, rs.getObject("B:two"));
+		Assert.assertEquals(1, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"one"));
+		Assert.assertEquals(2, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"two"));
 	}
 
 	@Test
@@ -165,13 +165,13 @@ public class QueryTest {
 
 		rs.absolute(1);
 		Assert.assertEquals("one", rs.getObject("B"));
-		Assert.assertEquals(1, rs.getObject("A:2013-10-08"));
-		Assert.assertEquals(3, rs.getObject("A:2013-10-09"));
+		Assert.assertEquals(1, rs.getObject("A"+PivotResultSet.COLVAL_SEP+"2013-10-08"));
+		Assert.assertEquals(3, rs.getObject("A"+PivotResultSet.COLVAL_SEP+"2013-10-09"));
 
 		rs.next();
 		Assert.assertEquals("two", rs.getObject("B"));
-		Assert.assertEquals(2, rs.getObject("A:2013-10-08"));
-		Assert.assertEquals(4, rs.getObject("A:2013-10-09"));
+		Assert.assertEquals(2, rs.getObject("A"+PivotResultSet.COLVAL_SEP+"2013-10-08"));
+		Assert.assertEquals(4, rs.getObject("A"+PivotResultSet.COLVAL_SEP+"2013-10-09"));
 
 		Assert.assertEquals(false, rs.next());
 	}
@@ -185,8 +185,8 @@ public class QueryTest {
 		
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
-		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
+		Assert.assertEquals("false", rs.getString("BOOL_AND"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals("true", rs.getString("BOOL_OR"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"true"));
 		
 		String sql2 = sql + " /* pivot B nonpivot A +measures-show-inrows */";
 		rs = conn.createStatement().executeQuery(sql2);
@@ -195,14 +195,14 @@ public class QueryTest {
 		rs.absolute(1);
 		Assert.assertEquals("BOOL_AND", rs.getObject("Measure"));
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("B:false"));
-		Assert.assertEquals(false, rs.getObject("B:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals(false, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"true"));
 
 		rs.absolute(3);
 		Assert.assertEquals("BOOL_OR", rs.getString("Measure"));
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("B:false"));
-		Assert.assertEquals(true, rs.getObject("B:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals(true, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"true"));
 	}
 
 	@Test
@@ -214,8 +214,8 @@ public class QueryTest {
 		
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
-		Assert.assertEquals("false", rs.getString("BOOL_AND|B:false"));
-		Assert.assertEquals("true", rs.getString("BOOL_OR|B:true"));
+		Assert.assertEquals("false", rs.getString("BOOL_AND"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals("true", rs.getString("BOOL_OR"+PivotResultSet.COLS_SEP+"B"+PivotResultSet.COLVAL_SEP+"true"));
 		
 		String sql2 = sql + " /* pivot B nonpivot A +measures-show-inrows */";
 		rs = conn.createStatement().executeQuery(sql2);
@@ -224,14 +224,21 @@ public class QueryTest {
 		rs.absolute(1);
 		Assert.assertEquals("false", rs.getString("A"));
 		Assert.assertEquals("BOOL_AND", rs.getObject("Measure"));
-		Assert.assertEquals("false", rs.getString("B:false"));
-		Assert.assertEquals(false, rs.getObject("B:true"));
+		Assert.assertEquals("false", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals(false, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"true"));
 
 		rs.absolute(4);
 		Assert.assertEquals("true", rs.getString("A"));
 		Assert.assertEquals("BOOL_OR", rs.getString("Measure"));
-		Assert.assertEquals("true", rs.getString("B:false"));
-		Assert.assertEquals(true, rs.getObject("B:true"));
+		Assert.assertEquals("true", rs.getString("B"+PivotResultSet.COLVAL_SEP+"false"));
+		Assert.assertEquals(true, rs.getObject("B"+PivotResultSet.COLVAL_SEP+"true"));
+	}
+
+	@Test
+	public void testQ8() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q8");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
 	}
 	
 }

@@ -9,8 +9,8 @@ import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 
 /**
  * Possible sql-pivot syntaxes:
- * <code>select col1, col2, col3, col4 m1, m2 from (...) /-* pivot col3 asc, col4 desc measures m1, m2 *-/</code>
- * <code>select col1, col2, col3, col4 m1, m2 from (...) /-* pivot col3 asc, col4 desc nonpivot col1, col2 *-/</code>
+ * <code>select col1, col2, col3, col4, m1, m2 from (...) /-* pivot col3 asc, col4 desc measures m1, m2 *-/</code>
+ * <code>select col1, col2, col3, col4, m1, m2 from (...) /-* pivot col3 asc, col4 desc nonpivot col1, col2 *-/</code>
  */
 public class PivotStatement<S extends Statement> extends AbstractStatementDecorator<S> {
 	

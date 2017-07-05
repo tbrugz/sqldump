@@ -73,27 +73,28 @@ public class PivotRSTest {
 		
 		int rowCounter = 0;
 		while(prs.next()) {
-			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("description:two"+PivotResultSet.COLS_SEP+"category:c1"));
+			log.info("row:: key="+prs.currentNonPivotKey+" / id="+prs.getString("id")+" / category:c1|description:two="+prs.getString("description"+PivotResultSet.COLVAL_SEP+"two"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c1"));
 			rowCounter++;
 		}
 		log.info("row count: "+rowCounter);
 		
-		log.info("originalRSRowCount: "+prs.originalRSRowCount+" ; new rowCount: "+prs.rowCount);
+		log.info("originalRowCount: "+prs.getOriginalRowCount()+" ; new rowCount: "+prs.rowCount);
 
 		prs.beforeFirst();
 		prs.next();
 		Assert.assertEquals("1", prs.getString("id"));
-		Assert.assertEquals("10", prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c1"));
-		Assert.assertEquals(null, prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c3"));
+		Assert.assertEquals("10", prs.getString("description"+PivotResultSet.COLVAL_SEP+"one"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals(null, prs.getString("description"+PivotResultSet.COLVAL_SEP+"one"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c3"));
 		try {
-			prs.getString("description:one|category:c4");
-			Assert.fail("column 'description:one|category:c4' does not exist");
+			String col = "description"+PivotResultSet.COLVAL_SEP+"one"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c4";
+			prs.getString(col);
+			Assert.fail("column '"+col+"' does not exist");
 		}
 		catch(SQLException e) {}
 		prs.next();
 		Assert.assertEquals("2", prs.getString("id"));
-		Assert.assertEquals(null, prs.getString("description:one"+PivotResultSet.COLS_SEP+"category:c1"));
-		Assert.assertEquals("20", prs.getString("description:two"+PivotResultSet.COLS_SEP+"category:c1"));
+		Assert.assertEquals(null, prs.getString("description"+PivotResultSet.COLVAL_SEP+"one"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals("20", prs.getString("description"+PivotResultSet.COLVAL_SEP+"two"+PivotResultSet.COLS_SEP+"category"+PivotResultSet.COLVAL_SEP+"c1"));
 	}
 
 	@Test
@@ -126,13 +127,13 @@ public class PivotRSTest {
 		
 		prs.next();
 		Assert.assertEquals("1", prs.getString("id"));
-		Assert.assertEquals("10", prs.getString("category:c1"));
-		Assert.assertEquals(null, prs.getString("category:c2"));
+		Assert.assertEquals("10", prs.getString("category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals(null, prs.getString("category"+PivotResultSet.COLVAL_SEP+"c2"));
 		prs.next();
 		prs.next();
 		Assert.assertEquals("3", prs.getString("id"));
-		Assert.assertEquals(null, prs.getString("category:c1"));
-		Assert.assertEquals("30", prs.getString("category:c2"));
+		Assert.assertEquals(null, prs.getString("category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals("30", prs.getString("category"+PivotResultSet.COLVAL_SEP+"c2"));
 	}
 
 	@Test
@@ -153,13 +154,13 @@ public class PivotRSTest {
 
 		prs.next();
 		Assert.assertEquals("1", prs.getString("id"));
-		Assert.assertEquals("10", prs.getString("description:one"));
-		Assert.assertEquals(null, prs.getString("description:three"));
+		Assert.assertEquals("10", prs.getString("description"+PivotResultSet.COLVAL_SEP+"one"));
+		Assert.assertEquals(null, prs.getString("description"+PivotResultSet.COLVAL_SEP+"three"));
 		prs.next();
 		prs.next();
 		Assert.assertEquals("3", prs.getString("id"));
-		Assert.assertEquals(null, prs.getString("description:one"));
-		Assert.assertEquals("30", prs.getString("description:three"));
+		Assert.assertEquals(null, prs.getString("description"+PivotResultSet.COLVAL_SEP+"one"));
+		Assert.assertEquals("30", prs.getString("description"+PivotResultSet.COLVAL_SEP+"three"));
 	}
 
 	@Test
@@ -180,13 +181,13 @@ public class PivotRSTest {
 
 		prs.next();
 		Assert.assertEquals("1", prs.getString("id"));
-		Assert.assertEquals("10", prs.getString("category:c1"));
-		Assert.assertEquals(null, prs.getString("category:c2"));
+		Assert.assertEquals("10", prs.getString("category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals(null, prs.getString("category"+PivotResultSet.COLVAL_SEP+"c2"));
 		prs.next();
 		prs.next();
 		prs.next();
 		Assert.assertEquals("4", prs.getString("id"));
-		Assert.assertEquals(null, prs.getString("category:c1"));
-		Assert.assertEquals("40", prs.getString("category:c3"));
+		Assert.assertEquals(null, prs.getString("category"+PivotResultSet.COLVAL_SEP+"c1"));
+		Assert.assertEquals("40", prs.getString("category"+PivotResultSet.COLVAL_SEP+"c3"));
 	}
 }
