@@ -46,9 +46,9 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 
 	public static final String COLS_SEP = "|||";
-	static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
+	public static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
 	public static final String COLVAL_SEP = ":::";
-	static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
+	public static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
 
 	static final int logEachXRows = 1000;
 
