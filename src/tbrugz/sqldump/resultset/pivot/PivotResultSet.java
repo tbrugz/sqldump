@@ -355,6 +355,10 @@ public class PivotResultSet extends AbstractResultSet {
 			for(int i=0;i<dataColumns.size();i++) {
 				newColTypes.add(measureColsType.get(0));
 			}
+			if(dataColumns.size()==0) {
+				newColNames.add(measureCols.get(0));
+				newColTypes.add(measureColsType.get(0));
+			}
 			if(alwaysShowMeasures && colsToPivotNames.size()>0) {
 				if(showMeasuresFirst) {
 					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
@@ -373,6 +377,7 @@ public class PivotResultSet extends AbstractResultSet {
 			//TODOne: multi-measure
 			List<String> colNames = new ArrayList<String>();
 			colNames.addAll(newColNames);
+			//log.info("processMetadata:: measureCols="+measureCols+" ; dataColumns="+dataColumns);
 			
 			if(showMeasuresFirst) {
 				for(int j=0;j<measureCols.size();j++) {
@@ -382,6 +387,10 @@ public class PivotResultSet extends AbstractResultSet {
 						newColNames.add(measure+COLS_SEP+dataColumns.get(i));
 						newColTypes.add(measureColType);
 					}
+					if(dataColumns.size()==0) {
+						newColNames.add(measure);
+						newColTypes.add(measureColType);
+					}
 				}
 			}
 			else {
@@ -389,6 +398,13 @@ public class PivotResultSet extends AbstractResultSet {
 					for(int j=0;j<measureCols.size();j++) {
 						String measure = measureCols.get(j);
 						newColNames.add(dataColumns.get(i)+COLS_SEP+measure);
+						newColTypes.add(measureColsType.get(j));
+					}
+				}
+				if(dataColumns.size()==0) {
+					for(int j=0;j<measureCols.size();j++) {
+						String measure = measureCols.get(j);
+						newColNames.add(measure);
 						newColTypes.add(measureColsType.get(j));
 					}
 				}
@@ -404,7 +420,7 @@ public class PivotResultSet extends AbstractResultSet {
 		int colsToPivotCount = colsToPivotNames.size();
 		if(colsToPivotCount==0 && colNumber==0) {
 			//log.warn("colNumber="+colNumber+" ; partialColName='"+partialColName+"' ; newColumns="+newColumns+" ; measureCols="+measureCols+" ; keyColValues="+keyColValues);
-			newColumns.addAll(measureCols);
+			//newColumns.addAll(measureCols);
 			return;
 		}
 		//log.info("colNumber="+colNumber+" ; partialColName='"+partialColName+"' ; newColumns="+newColumns+" ; measureCols="+measureCols+" ; keyColValues="+keyColValues);

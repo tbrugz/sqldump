@@ -248,9 +248,10 @@ public class QueryTest {
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		String[] colsNTP = {"A", "B"};
 		String[] colsTP = {};
-		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP)); //, true, 4);
 		QueryDumper.simplerRSDump(rs);
-		// should return only 4 rows (not 5)
+		// should return only 4 rows (not 5) & 3 cols
+		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
 		Assert.assertEquals(true, rs.absolute(4));
 		Assert.assertEquals(false, rs.next());
 	}
@@ -268,6 +269,21 @@ public class QueryTest {
 		Assert.assertEquals(false, rs.next());
 		//should return 16 cols (4 "distinct A values" x 4 "distinct B values")
 		Assert.assertEquals(16, rs.getMetaData().getColumnCount());
+	}
+
+	@Test
+	public void q10() throws SQLException, IOException {
+		String sql = prop.getProperty("q10");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A", "B"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+
+		// should return only 4 rows (not 5) & 4 cols
+		Assert.assertEquals(4, rs.getMetaData().getColumnCount());
+		Assert.assertEquals(true, rs.absolute(4));
+		Assert.assertEquals(false, rs.next());
 	}
 	
 }
