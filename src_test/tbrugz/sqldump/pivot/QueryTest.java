@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -239,6 +240,34 @@ public class QueryTest {
 		String sql = prop.getProperty("q8");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		QueryDumper.simplerRSDump(rs);
+	}
+	
+	@Test
+	public void q9() throws SQLException, IOException {
+		String sql = prop.getProperty("q9");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A", "B"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+		// should return only 4 rows (not 5)
+		Assert.assertEquals(true, rs.absolute(4));
+		Assert.assertEquals(false, rs.next());
+	}
+
+	@Test
+	public void q9b() throws SQLException, IOException {
+		String sql = prop.getProperty("q9");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {};
+		String[] colsTP = {"A", "B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+		// should return only 1 row (not 5)
+		Assert.assertEquals(true, rs.absolute(1));
+		Assert.assertEquals(false, rs.next());
+		//should return 16 cols (4 "distinct A values" x 4 "distinct B values")
+		Assert.assertEquals(16, rs.getMetaData().getColumnCount());
 	}
 	
 }

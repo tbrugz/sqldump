@@ -27,7 +27,7 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
  * TODO: after PivotRS is built, add possibility for change key-col <-> key-row (pivotting) - processMetadata()!
  * TODOne: multiple column type (beside String): Integer, Double, Date
  * XXX: allow null key (pivotted) values (add StringComparatorNullFirst/Last ?)
- * XXX: option to remove cols/rows/both where all measures are null
+ * XXX: option to remove cols/rows/both where all measures are null - MDX: non empty ;)
  * XXXxx: aggregate if duplicated key found? first(), last()?
  * TODOne: option to show measures in columns
  * - MeasureNames is a dimension (key)
@@ -106,11 +106,14 @@ public class PivotResultSet extends AbstractResultSet {
 		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess, 0);
 	}
 	
-	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
-			boolean doProcess) throws SQLException {
-		this(rs, colsNotToPivot, colsToPivot, doProcess, 0);
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, List<String> colsToPivot, boolean doProcess, int flags) throws SQLException {
+		this(rs, colsNotToPivot, list2Map(colsToPivot), doProcess, flags);
 	}
 	
+	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot, boolean doProcess) throws SQLException {
+		this(rs, colsNotToPivot, colsToPivot, doProcess, 0);
+	}
+
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
 			boolean doProcess, int flags) throws SQLException {
 		this.rs = rs;
@@ -124,12 +127,15 @@ public class PivotResultSet extends AbstractResultSet {
 		}
 		
 		colsToPivotNames = new ArrayList<String>();
-		for(String key: colsToPivot.keySet()) {
-			colsToPivotNames.add(key);
+		if(colsToPivot!=null) {
+			for(String key: colsToPivot.keySet()) {
+				colsToPivotNames.add(key);
+			}
 		}
-		if(colsToPivotNames.size()<1) {
+		/*if(colsToPivotNames.size()<1) {
+			//allow no pivot cols: only measures on cols...
 			throw new IllegalArgumentException("no columns selected to pivot");
-		}
+		}*/
 		
 		ResultSetMetaData rsmd = rs.getMetaData();
 		rsColsCount = rsmd.getColumnCount();
@@ -349,7 +355,7 @@ public class PivotResultSet extends AbstractResultSet {
 			for(int i=0;i<dataColumns.size();i++) {
 				newColTypes.add(measureColsType.get(0));
 			}
-			if(alwaysShowMeasures) {
+			if(alwaysShowMeasures && colsToPivotNames.size()>0) {
 				if(showMeasuresFirst) {
 					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
 						newColNames.set(i, measureCols.get(0)+COLS_SEP+newColNames.get(i));
@@ -396,6 +402,13 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
 		int colsToPivotCount = colsToPivotNames.size();
+		if(colsToPivotCount==0 && colNumber==0) {
+			//log.warn("colNumber="+colNumber+" ; partialColName='"+partialColName+"' ; newColumns="+newColumns+" ; measureCols="+measureCols+" ; keyColValues="+keyColValues);
+			newColumns.addAll(measureCols);
+			return;
+		}
+		//log.info("colNumber="+colNumber+" ; partialColName='"+partialColName+"' ; newColumns="+newColumns+" ; measureCols="+measureCols+" ; keyColValues="+keyColValues);
+		
 		String colName = colsToPivotNames.get(colNumber);
 		Set<Object> colVals = keyColValues.get(colName);
 		for(Object v: colVals) {
@@ -459,6 +472,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	//=============== util methods =============
 	static Map<String, Comparable> list2Map(List<String> colsToPivot) {
+		if(colsToPivot==null) { return null; }
 		final Map<String, Comparable> colsToPivotMap = new LinkedHashMap<String, Comparable>();
 		for(String s: colsToPivot) {
 			colsToPivotMap.put(s, null);
@@ -567,7 +581,7 @@ public class PivotResultSet extends AbstractResultSet {
 				return measureCols.get(position%measureCols.size());
 			}
 		}
-			
+		
 		index = newColNames.indexOf(columnLabel);
 		if(index>=0) {
 			//is pivotcol
