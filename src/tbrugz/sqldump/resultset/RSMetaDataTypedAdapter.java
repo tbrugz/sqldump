@@ -23,7 +23,7 @@ public class RSMetaDataTypedAdapter extends RSMetaDataAdapter {
 
 	@Override
 	public String getColumnTypeName(int column) throws SQLException {
-		return getTableName(colTypes.get(column-1));
+		return getTypeName(colTypes.get(column-1));
 	}
 
 	@Override

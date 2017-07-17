@@ -121,9 +121,9 @@ public class HTMLDataDump extends XMLDataDump {
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
 		initOutputCols();
-		if(onRowsColCount+onColsColCount>finalColNames.size()) {
+		/*if(onRowsColCount+onColsColCount>finalColNames.size()) {
 			System.err.println("onRowsColCount+onColsColCount>finalColNames.size(): onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount+" ; finalColNames.size()="+finalColNames.size());
-		}
+		}*/
 	}
 	
 	protected void initOutputCols() {
@@ -155,10 +155,10 @@ public class HTMLDataDump extends XMLDataDump {
 		}
 		//XXX: add thead?
 		
-		System.out.println("[1] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		//System.out.println("[1] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 		if(isPivotResultSet()) {
 			guessPivotCols(); //guess cols/rows, since measures may be present or not...
-			System.out.println("[2] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+			//System.out.println("[2] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 			for(int cc=0;cc<onColsColCount;cc++) {
 				sb.append("\n\t<tr>");
 				for(int i=0;i<finalColNames.size();i++) {
