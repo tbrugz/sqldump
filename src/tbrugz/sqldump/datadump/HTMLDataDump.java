@@ -3,19 +3,23 @@ package tbrugz.sqldump.datadump;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
  * XXX: prop for stylesheet?
+ * TODO: parameter: merge hierarchical headers (PivotRS)
  * 
  * see: https://developer.mozilla.org/en/docs/Web/HTML/Element/table
  */
@@ -32,6 +36,11 @@ public class HTMLDataDump extends XMLDataDump {
 	static final String PROP_HTML_XPEND_INNER_TABLE = "sqldump.datadump.html.xpend-inner-table";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
 	//XXX add props 'sqldump.datadump.html.inner-table.[prepend|append]' ??
+
+	public static final String PROP_PIVOT_ONROWS = "sqldump.datadump.pivot.onrows";
+	public static final String PROP_PIVOT_ONCOLS = "sqldump.datadump.pivot.oncols";
+	public static final String PROP_PIVOT_COLSEP = "sqldump.datadump.pivot.colsep";
+	public static final String PROP_PIVOT_COLVALSEP = "sqldump.datadump.pivot.colvalsep";
 	
 	//protected String tableName;
 	//protected int numCol;
@@ -53,6 +62,16 @@ public class HTMLDataDump extends XMLDataDump {
 	protected boolean dumpStyleNumericAlignRight = false;
 	protected boolean xpendInnerTable = true;
 	
+	protected final List<String> finalColNames = new ArrayList<String>();
+	protected final List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
+	
+	protected int onRowsColCount = 0;
+	protected int onColsColCount = 0;
+	protected String colSep = null;
+	protected String colValSep = null;
+	protected String colSepPattern = null;
+	protected String colValSepPattern = null;
+	
 	public HTMLDataDump() {
 		this(DEFAULT_PADDING, false);
 	}
@@ -72,26 +91,54 @@ public class HTMLDataDump extends XMLDataDump {
 		dumpCaptionElement = Utils.getPropBool(prop, PROP_HTML_ADD_CAPTION, DEFAULT_ADD_CAPTION);
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
+		procPivotProperties(prop);
 	}
 
-	/*@Override
-	public void initDump(String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
-		this.tableName = tableName;
-		numCol = md.getColumnCount();
-		lsColNames.clear();
-		lsColTypes.clear();
-		for(int i=0;i<numCol;i++) {
-			lsColNames.add(md.getColumnName(i+1));
-			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
+	public void procPivotProperties(Properties prop) {
+		onRowsColCount = 0;
+		onColsColCount = 0;
+		String onrows = prop.getProperty(PROP_PIVOT_ONROWS);
+		String oncols = prop.getProperty(PROP_PIVOT_ONCOLS);
+		if(onrows!=null) {
+			onRowsColCount = onrows.split(",").length;
 		}
-	}*/
+		if(oncols!=null) {
+			onColsColCount = oncols.split(",").length;
+		}
+		if(isPivotResultSet()) {
+			colSep = prop.getProperty(PROP_PIVOT_COLSEP, PivotResultSet.COLS_SEP);
+			colValSep = prop.getProperty(PROP_PIVOT_COLVALSEP, PivotResultSet.COLVAL_SEP);
+			colSepPattern = Pattern.quote(colSep);
+			colValSepPattern = Pattern.quote(colValSep);
+		}
+	}
+	
+	public boolean isPivotResultSet() {
+		return onRowsColCount>0 || onColsColCount>0;
+	}
+	
+	@Override
+	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
+		super.initDump(schema, tableName, pkCols, md);
+		initOutputCols();
+		if(onRowsColCount+onColsColCount>finalColNames.size()) {
+			System.err.println("onRowsColCount+onColsColCount>finalColNames.size(): onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount+" ; finalColNames.size()="+finalColNames.size());
+		}
+	}
+	
+	protected void initOutputCols() {
+		finalColNames.clear();
+		finalColNames.addAll(lsColNames);
+		finalColTypes.clear();
+		finalColTypes.addAll(lsColTypes);
+	}
 	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		tablePrepend(fos);
 		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
 		StringBuilder sb = new StringBuilder();
-		sb.append("<table class='"+tableName+"'>");
+		sb.append("<table class=\""+DataDumpUtils.xmlEscapeText(tableName)+"\">");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
 		}
@@ -101,24 +148,100 @@ public class HTMLDataDump extends XMLDataDump {
 		}
 		if(dumpColElement) {
 			sb.append("\n<colgroup>");
-			for(int i=0;i<lsColNames.size();i++) {
-				sb.append("\n\t<col colname=\""+lsColNames.get(i)+"\" type=\""+lsColTypes.get(i).getSimpleName()+"\"/>");
+			for(int i=0;i<finalColNames.size();i++) {
+				sb.append("\n\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\"/>");
 			}
 			sb.append("\n</colgroup>");
 		}
 		//XXX: add thead?
-		sb.append("\n\t<tr>");
-		for(int i=0;i<lsColNames.size();i++) {
-			sb.append("<th>"+lsColNames.get(i)+"</th>");
+		
+		System.out.println("[1] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		if(isPivotResultSet()) {
+			guessPivotCols(); //guess cols/rows, since measures may be present or not...
+			System.out.println("[2] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+			for(int cc=0;cc<onColsColCount;cc++) {
+				sb.append("\n\t<tr>");
+				for(int i=0;i<finalColNames.size();i++) {
+					String[] parts = finalColNames.get(i).split(colSepPattern);
+					
+					if(parts.length>cc) {
+						if(i<onRowsColCount) {
+							sb.append("<th class=\"blank\""+
+									(i<onRowsColCount?" dimoncol=\"true\"":"")+
+									" colname=\""+DataDumpUtils.xmlEscapeText(parts[cc])+"\""+
+									"/>");
+						}
+						else {
+							//split...
+							String[] p2 = parts[cc].split(colValSepPattern);
+							if(p2.length>1) {
+								sb.append("<th colname=\""+DataDumpUtils.xmlEscapeText(p2[0])+"\">"+p2[1]+"</th>");
+							}
+							else {
+								sb.append("<th>"+parts[cc]+"</th>");
+							}
+						}
+					}
+					else if(cc+1==onColsColCount) {
+						if(i<onRowsColCount) {
+							sb.append("<th dimoncol=\"true\">"+finalColNames.get(i)+"</th>");
+						}
+						else {
+							sb.append("<th>"+finalColNames.get(i)+"</th>");
+						}
+					}
+					else {
+						sb.append("<th class=\"blank\""+
+								(i<onRowsColCount?" dimoncol=\"true\"":"")+
+								"/>");
+					}
+				}
+				sb.append("</tr>");
+			}
 		}
-		out(sb.toString()+"</tr>\n", fos);
+		else {
+			sb.append("\n\t<tr>");
+			for(int i=0;i<finalColNames.size();i++) {
+				sb.append("<th>"+finalColNames.get(i)+"</th>");
+			}
+			sb.append("</tr>");
+		}
+		sb.append("\n");
+		
 		//XXX: add tbody?
+		out(sb.toString(), fos);
+	}
+	
+	protected void guessPivotCols() {
+		onColsColCount = 0;
+		onRowsColCount = 0;
+		for(int i=0;i<finalColNames.size();i++) {
+			int l = finalColNames.get(i).split(colSepPattern).length;
+			if(l>1) {
+				if(l>onColsColCount) {
+					onColsColCount = l;
+					onRowsColCount = i;
+					break;
+				}
+			}
+		}
+		
+		if(onColsColCount==0 && onRowsColCount==0) {
+			for(int i=0;i<finalColNames.size();i++) {
+				int l2 = finalColNames.get(i).split(colValSepPattern).length;
+				if(l2>1) {
+					onColsColCount = 1;
+					onRowsColCount = i;
+					break;
+				}
+			}
+		}
 	}
 	
 	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
-		for(int i=0;i<lsColNames.size();i++) {
-			if(lsColTypes.get(i).equals(Integer.class) || lsColTypes.get(i).equals(Double.class)) {
+		for(int i=0;i<finalColNames.size();i++) {
+			if(finalColTypes.get(i).equals(Integer.class) || finalColTypes.get(i).equals(Double.class)) {
 				styleSelector.add("table."+tableName+" td:nth-child("+(i+1)+")");
 			}
 		}
@@ -134,10 +257,10 @@ public class HTMLDataDump extends XMLDataDump {
 	
 	public void dumpRow(ResultSet rs, long count, String clazz, Writer fos) throws IOException, SQLException {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+clazz+"\"":"")+">");
+		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
-		for(int i=0;i<lsColNames.size();i++) {
-			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
+		for(int i=0;i<finalColNames.size();i++) {
+			if(ResultSet.class.isAssignableFrom(finalColTypes.get(i))) {
 				ResultSet rsInt = (ResultSet) vals.get(i);
 				
 				if(rsInt==null) {
@@ -153,16 +276,21 @@ public class HTMLDataDump extends XMLDataDump {
 				//htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
 				htmldd.procProperties(prop);
-				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
+				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, finalColNames.get(i), fos, true);
 				sb.append("\n\t</td>");
 			}
 			else {
 				Object origVal = vals.get(i);
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, lsColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, finalColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
 				//XXX add type attribute?
-				sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
+				//sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
+				sb.append("<td"
+						+(origVal==null?" null=\"true\"":"")
+						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						+">"+ value +"</td>");
+				
 			}
 		}
 		sb.append("</tr>");

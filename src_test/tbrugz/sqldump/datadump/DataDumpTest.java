@@ -487,12 +487,12 @@ public class DataDumpTest {
 	
 	//----------------------------------
 	
-	static Document parseXML(File f) throws ParserConfigurationException, SAXException, IOException {
+	public static Document parseXML(File f) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		return dBuilder.parse(f);
 	}
-	
+
 	/*static int countElements(NodeList nl) {
 		int count = 0;
 		for(int i=0;i<nl.getLength();i++) {
@@ -504,7 +504,7 @@ public class DataDumpTest {
 		return count;
 	}*/
 
-	static int countElementsOfType(NodeList nl, String tag) {
+	public static int countElementsOfType(NodeList nl, String tag) {
 		int count = 0;
 		for(int i=0;i<nl.getLength();i++) {
 			Node n = nl.item(i);

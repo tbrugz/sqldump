@@ -12,8 +12,8 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	protected String schemaName;
 	protected String tableName;
 	protected int numCol;
-	protected List<String> lsColNames = new ArrayList<String>();
-	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected final List<String> lsColNames = new ArrayList<String>();
+	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	//ResultSetMetaData md;
 	protected List<String> pkCols;
 	

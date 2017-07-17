@@ -1,6 +1,9 @@
 package tbrugz.sqldump.pivot;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,13 +17,20 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
+import tbrugz.sqldump.datadump.DataDumpTest;
+import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet.Aggregator;
 import tbrugz.sqldump.sqlrun.QueryDumper;
+import tbrugz.sqldump.util.Utils;
 
 public class QueryTest {
 
+	static String DIR_OUT = "work/output/PivotTest/";
+	
 	String pivotDriverClass = SQLPivotDriver.class.getName();
 	Properties prop = new Properties(); 
 	Connection conn;
@@ -39,6 +49,10 @@ public class QueryTest {
 		
 		String url = "jdbc:sqlpivot:h2:mem:abc";
 		conn = DriverManager.getConnection(url, null);
+		
+		File dir = new File(DIR_OUT);
+		dir.mkdirs();
+		Utils.deleteDirRegularContents(dir);
 	}
 
 	@After
@@ -284,6 +298,38 @@ public class QueryTest {
 		Assert.assertEquals(4, rs.getMetaData().getColumnCount());
 		Assert.assertEquals(true, rs.absolute(4));
 		Assert.assertEquals(false, rs.next());
+	}
+	
+	@Test
+	public void q3html() throws Exception {
+		String sql = prop.getProperty("q3");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		QueryDumper.simplerRSDump(rs);
+		
+		rs.absolute(0);
+		Properties p = new Properties();
+		p.setProperty(HTMLDataDump.PROP_PIVOT_ONROWS, "A");
+		p.setProperty(HTMLDataDump.PROP_PIVOT_ONCOLS, "B,C");
+		StringWriter sw = new StringWriter();
+		HTMLDataDump dd = new HTMLDataDump();
+		dd.procProperties(p);
+		dd.initDump("", "", null, rs.getMetaData());
+		dd.dumpHeader(sw);
+		int i=0;
+		while(rs.next()) {
+			dd.dumpRow(rs, i++, sw);
+		}
+		dd.dumpFooter(i, sw);
+		System.out.println(sw);
+		
+		File file = new File(DIR_OUT+"q3.html");
+		FileWriter fw = new FileWriter(file);
+		fw.write(sw.toString());
+		fw.close();
+		
+		Document doc = DataDumpTest.parseXML(file);
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(2+2, DataDumpTest.countElementsOfType(n.getChildNodes(),"tr"));
 	}
 	
 }
