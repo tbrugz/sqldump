@@ -155,10 +155,18 @@ public class HTMLDataDump extends XMLDataDump {
 		}
 		//XXX: add thead?
 		
-		//System.out.println("[1] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		addTableHeaderRows(sb);
+		
+		//XXX: add tbody?
+		out(sb.toString(), fos);
+	}
+	
+	protected void addTableHeaderRows(StringBuilder sb) {
+		//System.out.println("[1:beforeguess] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		boolean dumpedAsLeast1row = false;
 		if(isPivotResultSet()) {
 			guessPivotCols(); //guess cols/rows, since measures may be present or not...
-			//System.out.println("[2] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 			for(int cc=0;cc<onColsColCount;cc++) {
 				sb.append("\n\t<tr>");
 				for(int i=0;i<finalColNames.size();i++) {
@@ -178,13 +186,13 @@ public class HTMLDataDump extends XMLDataDump {
 								sb.append("<th colname=\""+DataDumpUtils.xmlEscapeText(p2[0])+"\">"+p2[1]+"</th>");
 							}
 							else {
-								sb.append("<th>"+parts[cc]+"</th>");
+								sb.append("<th measure=\"true\">"+parts[cc]+"</th>");
 							}
 						}
 					}
 					else if(cc+1==onColsColCount) {
 						if(i<onRowsColCount) {
-							sb.append("<th dimoncol=\"true\">"+finalColNames.get(i)+"</th>");
+							sb.append("<th dimoncol=\"true\" measure=\"true\">"+finalColNames.get(i)+"</th>");
 						}
 						else {
 							sb.append("<th>"+finalColNames.get(i)+"</th>");
@@ -197,9 +205,10 @@ public class HTMLDataDump extends XMLDataDump {
 					}
 				}
 				sb.append("</tr>");
+				dumpedAsLeast1row = true;
 			}
 		}
-		else {
+		if(!dumpedAsLeast1row) {
 			sb.append("\n\t<tr>");
 			for(int i=0;i<finalColNames.size();i++) {
 				sb.append("<th>"+finalColNames.get(i)+"</th>");
@@ -207,12 +216,12 @@ public class HTMLDataDump extends XMLDataDump {
 			sb.append("</tr>");
 		}
 		sb.append("\n");
-		
-		//XXX: add tbody?
-		out(sb.toString(), fos);
 	}
 	
 	protected void guessPivotCols() {
+		//int prevCC = onColsColCount;
+		int prevRC = onRowsColCount;
+		
 		onColsColCount = 0;
 		onRowsColCount = 0;
 		for(int i=0;i<finalColNames.size();i++) {
@@ -235,6 +244,11 @@ public class HTMLDataDump extends XMLDataDump {
 					break;
 				}
 			}
+		}
+		
+		if(onColsColCount==0 && onRowsColCount==0) { //onRowsColCount+1==prevRC) {
+			// when onColsColCount==0, "guess" is not effective
+			onRowsColCount = prevRC;
 		}
 	}
 	
