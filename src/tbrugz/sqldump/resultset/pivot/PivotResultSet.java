@@ -379,12 +379,12 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 			if(alwaysShowMeasures && colsToPivotNames.size()>0) {
 				if(showMeasuresFirst) {
-					for(int i=colsNotToPivot.size()+1;i<newColNames.size();i++) {
+					for(int i=colsNotToPivot.size()+(showMeasuresInColumns?0:1);i<newColNames.size();i++) {
 						newColNames.set(i, measureCols.get(0)+COLS_SEP+newColNames.get(i));
 					}
 				}
 				else {
-					for(int i=colsNotToPivot.size()+1;i<newColNames.size();i++) {
+					for(int i=colsNotToPivot.size()+(showMeasuresInColumns?0:1);i<newColNames.size();i++) {
 						newColNames.set(i, newColNames.get(i)+COLS_SEP+measureCols.get(0));
 					}
 				}
