@@ -91,7 +91,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	// pivot ResultSet properties
 	int position = -1;
-	int rowCount = 0;
+	//int rowCount = 0;
 	Key currentNonPivotKey = null;
 	boolean showMeasuresInColumns = true;
 	boolean showMeasuresFirst = true;
@@ -251,7 +251,7 @@ public class PivotResultSet extends AbstractResultSet {
 				//log.info("new row? "+keyNotToPivotArr);
 				if(!colsNotToPivotKeySet.contains(keyNotToPivotArr)) {
 					//new row!
-					rowCount++;
+					//rowCount++;
 					nonPivotKeyValues.add(keyNotToPivotArr);
 					colsNotToPivotKeySet.add(keyNotToPivotArr);
 				}
@@ -263,12 +263,12 @@ public class PivotResultSet extends AbstractResultSet {
 					keyVals[0] = measureCols.get(0); //just put first measure (for now)
 				}
 				else {
-					keyVals[keyVals.length-1] = measureCols.get((rowCount+1)%measureCols.size()); 
+					keyVals[keyVals.length-1] = measureCols.get((getRowCount()+1)%measureCols.size()); 
 				}
 				Key keyNotToPicotArr = new Key(keyVals);
 				if(!colsNotToPivotKeySet.contains(keyNotToPicotArr)) {
 					//new row!
-					rowCount++;
+					//rowCount++;
 					nonPivotKeyValues.add(keyNotToPicotArr);
 					colsNotToPivotKeySet.add(keyNotToPicotArr);
 				}
@@ -302,7 +302,7 @@ public class PivotResultSet extends AbstractResultSet {
 						Object[] values = Arrays.copyOf(key.values, key.values.length);
 						values[0] = measureCols.get(j);
 						nonPivotKeyValues.add(new Key(values));
-						rowCount++;
+						//rowCount++;
 					}
 				}
 			}
@@ -321,7 +321,7 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 				nonPivotKeyValues.clear();
 				nonPivotKeyValues.addAll(newNonPivotKeyValues);
-				rowCount = newNonPivotKeyValues.size();
+				//rowCount = newNonPivotKeyValues.size();
 			}
 			//log.info("2 [showMeasuresInColumns="+showMeasuresInColumns+";showMeasuresFirst="+showMeasuresFirst+"] nonPivotKeyValues[#"+nonPivotKeyValues.size()+"]="+nonPivotKeyValues);
 		}
@@ -538,7 +538,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	@Override
 	public boolean absolute(int row) throws SQLException {
-		if(rowCount>=row) {
+		if(getRowCount()>=row) {
 			position = row-1;
 			updateCurrentElement();
 			return true;
@@ -555,7 +555,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 	@Override
 	public boolean next() throws SQLException {
-		if(rowCount-1 > position) {
+		if(getRowCount()-1 > position) {
 			position++;
 			updateCurrentElement();
 			return true;
@@ -821,12 +821,12 @@ public class PivotResultSet extends AbstractResultSet {
 	}
 	
 	public int getRowCount() {
-		return rowCount;
+		return nonPivotKeyValues.size(); //rowCount;
 	}
 	
-	public int getNonPivotKeysCount() {
+	/*public int getNonPivotKeysCount() {
 		return nonPivotKeyValues.size();
-	}
+	}*/
 	
 	public int getOriginalRowCount() {
 		return originalRSRowCount;

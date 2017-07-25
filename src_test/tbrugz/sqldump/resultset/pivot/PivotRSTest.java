@@ -78,7 +78,7 @@ public class PivotRSTest {
 		}
 		log.info("row count: "+rowCounter);
 		
-		log.info("originalRowCount: "+prs.getOriginalRowCount()+" ; new rowCount: "+prs.rowCount);
+		log.info("originalRowCount: "+prs.getOriginalRowCount()+" ; new rowCount: "+prs.getRowCount());
 
 		prs.beforeFirst();
 		prs.next();
