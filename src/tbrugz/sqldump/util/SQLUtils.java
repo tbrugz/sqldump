@@ -93,6 +93,7 @@ public class SQLUtils {
 	
 	//static String errorGettingValueValue = "###";
 	static final String errorGettingValueValue = null;
+	static final String errorGettingValueStringValue = null; //"\ufffd";
 	static int errorGettingValueWarnCount = 0;
 	static final int errorGettingValueWarnMaxCount = 10;
 	
@@ -225,8 +226,16 @@ public class SQLUtils {
 			}
 			
 			}
+			catch(ArrayIndexOutOfBoundsException e) {
+				value = coltype.equals(String.class)?errorGettingValueStringValue:errorGettingValueValue;
+				errorGettingValueWarnCount++;
+				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {
+					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()+"; numCol="+numCol+"; rs.columnCount="+rs.getMetaData().getColumnCount()+"]: "+e);
+				}
+				//throw e;
+			}
 			catch(SQLException e) {
-				value = errorGettingValueValue;
+				value = coltype.equals(String.class)?errorGettingValueStringValue:errorGettingValueValue;
 				errorGettingValueWarnCount++;
 				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {  //|| is1stRow
 					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()

@@ -32,6 +32,7 @@ import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
  * TODOne: option to show measures in columns
  * - MeasureNames is a dimension (key)
  * XXX: implement olap4j's CellSet? maybe subclass should...
+ * XXX: how to order rows? & cols?
  */
 @SuppressWarnings("rawtypes")
 public class PivotResultSet extends AbstractResultSet {
@@ -193,6 +194,7 @@ public class PivotResultSet extends AbstractResultSet {
 		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
 		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
 		showMeasuresInColumns = (flags & SHOW_MEASURES_IN_ROWS) == 0;
+		//log.info("alwaysShowMeasures="+alwaysShowMeasures+"; showMeasuresFirst="+showMeasuresFirst+"; showMeasuresInColumns="+showMeasuresInColumns+"; flags: "+flags);
 	}
 	
 	//XXX: addObservers, ...
@@ -290,6 +292,7 @@ public class PivotResultSet extends AbstractResultSet {
 		//log.info("before[mic="+showMeasuresInColumns+";smf="+showMeasuresFirst+"]: "+nonPivotKeyValues);
 
 		if(!showMeasuresInColumns) {
+			//log.info("1 [showMeasuresInColumns="+showMeasuresInColumns+";showMeasuresFirst="+showMeasuresFirst+"] nonPivotKeyValues[#"+nonPivotKeyValues.size()+"]="+nonPivotKeyValues);
 			//populate measures in column
 			if(showMeasuresFirst) {
 				int origKeysLen = nonPivotKeyValues.size();
@@ -304,8 +307,23 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 			}
 			else {
-				//XXX populate nonPivotKeyValues when showMeasuresFirst is false. really?
+				//FIXedME populate nonPivotKeyValues when showMeasuresFirst is false. really?
+				List<Key> newNonPivotKeyValues = new ArrayList<Key>();
+				int origKeysLen = nonPivotKeyValues.size();
+				for(int i=0;i<origKeysLen;i++) {
+					for(int j=0;j<measureCols.size();j++) {
+						Key key = nonPivotKeyValues.get(i);
+						Object[] values = Arrays.copyOf(key.values, key.values.length);
+						values[values.length-1] = measureCols.get(j);
+						newNonPivotKeyValues.add(new Key(values));
+						//rowCount++;
+					}
+				}
+				nonPivotKeyValues.clear();
+				nonPivotKeyValues.addAll(newNonPivotKeyValues);
+				rowCount = newNonPivotKeyValues.size();
 			}
+			//log.info("2 [showMeasuresInColumns="+showMeasuresInColumns+";showMeasuresFirst="+showMeasuresFirst+"] nonPivotKeyValues[#"+nonPivotKeyValues.size()+"]="+nonPivotKeyValues);
 		}
 
 		//log.info("after: "+nonPivotKeyValues);
@@ -361,12 +379,12 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 			if(alwaysShowMeasures && colsToPivotNames.size()>0) {
 				if(showMeasuresFirst) {
-					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+					for(int i=colsNotToPivot.size()+1;i<newColNames.size();i++) {
 						newColNames.set(i, measureCols.get(0)+COLS_SEP+newColNames.get(i));
 					}
 				}
 				else {
-					for(int i=colsNotToPivot.size();i<newColNames.size();i++) {
+					for(int i=colsNotToPivot.size()+1;i<newColNames.size();i++) {
 						newColNames.set(i, newColNames.get(i)+COLS_SEP+measureCols.get(0));
 					}
 				}
@@ -375,8 +393,8 @@ public class PivotResultSet extends AbstractResultSet {
 		//multi-measure
 		else {
 			//TODOne: multi-measure
-			List<String> colNames = new ArrayList<String>();
-			colNames.addAll(newColNames);
+			//List<String> colNames = new ArrayList<String>();
+			//colNames.addAll(newColNames);
 			//log.info("processMetadata:: measureCols="+measureCols+" ; dataColumns="+dataColumns);
 			
 			if(showMeasuresFirst) {
@@ -431,11 +449,11 @@ public class PivotResultSet extends AbstractResultSet {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotCount) {
 				//add col name
-				//log.debug("genNewCols: col-full-name: "+colFullName);
+				//log.info("genNewCols: col-full-name: "+colFullName);
 				newColumns.add(colFullName);
 			}
 			else {
-				//log.debug("col-partial-name: "+colFullName);
+				//log.info("col-partial-name: "+colFullName);
 				genNewCols(colNumber+1, colFullName, newColumns);
 			}
 		}
@@ -591,7 +609,7 @@ public class PivotResultSet extends AbstractResultSet {
 		// measures column?
 		if((!showMeasuresInColumns) && MEASURES_COLNAME.equals(columnLabel)) {
 			if(showMeasuresFirst) {
-				return measureCols.get(position/measureCols.size());
+				return measureCols.get(position/(nonPivotKeyValues.size()/measureCols.size()) );
 			}
 			else {
 				return measureCols.get(position%measureCols.size());
@@ -650,7 +668,7 @@ public class PivotResultSet extends AbstractResultSet {
 				//measure name in its own column
 				if((!showMeasuresInColumns)) {
 					if(showMeasuresFirst) {
-						measureIndex = position/measureCols.size();
+						measureIndex = position/(nonPivotKeyValues.size()/measureCols.size());
 					}
 					else {
 						measureIndex = position%measureCols.size();
@@ -670,7 +688,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 	@Override
 	public Object getObject(int columnIndex) throws SQLException {
-		//log.debug("getObject[by-index]: "+columnIndex+" // "+colsNotToPivot+":"+newColNames);
+		//log.info("getObject[by-index]: idx="+columnIndex+" // colsNotToPivot="+colsNotToPivot+" ; newColNames="+newColNames+" ; showMeasuresInColumns="+showMeasuresInColumns+" ; showMeasuresFirst="+showMeasuresFirst);
 		if((!showMeasuresInColumns)) {
 			if(showMeasuresFirst && columnIndex==1) {
 				return getObject(MEASURES_COLNAME);
@@ -804,6 +822,10 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	public int getRowCount() {
 		return rowCount;
+	}
+	
+	public int getNonPivotKeysCount() {
+		return nonPivotKeyValues.size();
 	}
 	
 	public int getOriginalRowCount() {
