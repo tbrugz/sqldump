@@ -168,42 +168,46 @@ public class HTMLDataDump extends XMLDataDump {
 			guessPivotCols(); //guess cols/rows, since measures may be present or not...
 			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 			for(int cc=0;cc<onColsColCount;cc++) {
-				sb.append("\n\t<tr>");
+				StringBuilder sbrow = new StringBuilder();
+				String colname = null;
 				for(int i=0;i<finalColNames.size();i++) {
 					String[] parts = finalColNames.get(i).split(colSepPattern);
 					
 					if(parts.length>cc) {
 						if(i<onRowsColCount) {
-							sb.append("<th class=\"blank\""+
+							sbrow.append("<th class=\"blank\""+
 									(i<onRowsColCount?" dimoncol=\"true\"":"")+
-									" colname=\""+DataDumpUtils.xmlEscapeText(parts[cc])+"\""+
 									"/>");
+							//colname = DataDumpUtils.xmlEscapeText(parts[cc]);
 						}
 						else {
 							//split...
 							String[] p2 = parts[cc].split(colValSepPattern);
 							if(p2.length>1) {
-								sb.append("<th colname=\""+DataDumpUtils.xmlEscapeText(p2[0])+"\">"+p2[1]+"</th>");
+								sbrow.append("<th>"+p2[1]+"</th>");
+								colname = DataDumpUtils.xmlEscapeText(p2[0]);
 							}
 							else {
-								sb.append("<th measure=\"true\">"+parts[cc]+"</th>");
+								sbrow.append("<th measure=\"true\">"+parts[cc]+"</th>");
 							}
 						}
 					}
 					else if(cc+1==onColsColCount) {
 						if(i<onRowsColCount) {
-							sb.append("<th dimoncol=\"true\" measure=\"true\">"+finalColNames.get(i)+"</th>");
+							sbrow.append("<th dimoncol=\"true\" measure=\"true\">"+finalColNames.get(i)+"</th>");
 						}
 						else {
-							sb.append("<th>"+finalColNames.get(i)+"</th>");
+							sbrow.append("<th>"+finalColNames.get(i)+"</th>");
 						}
 					}
 					else {
-						sb.append("<th class=\"blank\""+
+						sbrow.append("<th class=\"blank\""+
 								(i<onRowsColCount?" dimoncol=\"true\"":"")+
 								"/>");
 					}
 				}
+				sb.append("\n\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+">");
+				sb.append(sbrow);
 				sb.append("</tr>");
 				dumpedAsLeast1row = true;
 			}
