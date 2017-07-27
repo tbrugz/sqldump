@@ -170,6 +170,7 @@ public class HTMLDataDump extends XMLDataDump {
 			for(int cc=0;cc<onColsColCount;cc++) {
 				StringBuilder sbrow = new StringBuilder();
 				String colname = null;
+				boolean measuresRow = false;
 				for(int i=0;i<finalColNames.size();i++) {
 					String[] parts = finalColNames.get(i).split(colSepPattern);
 					
@@ -178,6 +179,7 @@ public class HTMLDataDump extends XMLDataDump {
 							sbrow.append("<th class=\"blank\""+
 									(i<onRowsColCount?" dimoncol=\"true\"":"")+
 									"/>");
+							measuresRow = true;
 							//colname = DataDumpUtils.xmlEscapeText(parts[cc]);
 						}
 						else {
@@ -206,7 +208,7 @@ public class HTMLDataDump extends XMLDataDump {
 								"/>");
 					}
 				}
-				sb.append("\n\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+">");
+				sb.append("\n\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+(measuresRow?" measuresrow=\"true\"":"")+">");
 				sb.append(sbrow);
 				sb.append("</tr>");
 				dumpedAsLeast1row = true;

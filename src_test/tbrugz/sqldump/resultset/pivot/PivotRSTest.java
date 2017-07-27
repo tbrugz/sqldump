@@ -190,4 +190,13 @@ public class PivotRSTest {
 		Assert.assertEquals(null, prs.getString("category"+PivotResultSet.COLVAL_SEP+"c1"));
 		Assert.assertEquals("40", prs.getString("category"+PivotResultSet.COLVAL_SEP+"c3"));
 	}
+	
+	@Test
+	public void testIsArrayTail() {
+		Assert.assertTrue( PivotResultSet.isArrayTail(new String[]{"one", "1"}, new String[]{"one", "1"}) );
+		Assert.assertTrue( PivotResultSet.isArrayTail(new String[]{"one", "1"}, new String[]{"1"}) );
+		Assert.assertFalse( PivotResultSet.isArrayTail(new String[]{"one", "1"}, new String[]{"0", "one", "1"}) );
+		Assert.assertFalse( PivotResultSet.isArrayTail(new String[]{"one", "1"}, new String[]{"on", "1"}) );
+	}
+	
 }

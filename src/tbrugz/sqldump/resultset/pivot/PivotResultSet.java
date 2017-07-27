@@ -60,6 +60,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final int SHOW_MEASURES_IN_ROWS = 0x01;
 	public static final int SHOW_MEASURES_LAST = 0x02;
 	public static final int SHOW_MEASURES_ALLWAYS = 0x04;
+	public static final int SHOW_EMPTY_COLS = 0x08;
 	
 	// original ResultSet properties
 	final ResultSet rs;
@@ -96,6 +97,8 @@ public class PivotResultSet extends AbstractResultSet {
 	boolean showMeasuresInColumns = true;
 	boolean showMeasuresFirst = true;
 	boolean alwaysShowMeasures = false;
+	boolean ignoreNullValues = true; // true: may use less memory...
+	boolean noColsWithNullValues = false; // non empty (mdx)?
 
 	// colsNotToPivot+colsToPivot - key cols ?
 	
@@ -191,10 +194,11 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void setFlags(int flags) {
 		//log.debug("flags: "+flags);
-		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
-		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
 		showMeasuresInColumns = (flags & SHOW_MEASURES_IN_ROWS) == 0;
-		//log.info("alwaysShowMeasures="+alwaysShowMeasures+"; showMeasuresFirst="+showMeasuresFirst+"; showMeasuresInColumns="+showMeasuresInColumns+"; flags: "+flags);
+		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
+		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
+		noColsWithNullValues = (flags & SHOW_EMPTY_COLS) != 0;
+		//log.info("alwaysShowMeasures="+alwaysShowMeasures+"; showMeasuresFirst="+showMeasuresFirst+"; showMeasuresInColumns="+showMeasuresInColumns+"; noColsWithNullValues="+noColsWithNullValues+"; flags: "+flags);
 	}
 	
 	//XXX: addObservers, ...
@@ -214,9 +218,10 @@ public class PivotResultSet extends AbstractResultSet {
 			Key key = new Key(keyArr);
 			for(int i=0;i<measureCols.size();i++) {
 				String measureCol = measureCols.get(i);
-				Map<Key, Object> values = valuesForEachMeasure.get(i);
 				Object value = rs.getObject(measureCol);
-				
+				if(ignoreNullValues && value==null) { continue; }
+
+				Map<Key, Object> values = valuesForEachMeasure.get(i);
 				Object prevValue = values.get(key);
 				if(prevValue==null) {
 					values.put(key, value);
@@ -429,6 +434,10 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 		}
 		
+		if(noColsWithNullValues) {
+			removeColumnsWithNoValues();
+		}
+		
 		resetPosition();
 
 		log.debug("processMetadata: columns="+newColNames+" types="+newColTypes);
@@ -449,8 +458,15 @@ public class PivotResultSet extends AbstractResultSet {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
 			if(colNumber+1==colsToPivotCount) {
 				//add col name
-				//log.info("genNewCols: col-full-name: "+colFullName);
+				//XXX test for noColsWithNullValues?
 				newColumns.add(colFullName);
+				/*if(!noColsWithNullValues || columnContainsValues(colFullName, colsNotToPivot.size()+colNumber)) {
+					newColumns.add(colFullName);
+				//log.info("genNewCols: col-full-name: "+colFullName);
+				}
+				else {
+					log.info("genNewCols: no values! [col-full-name: "+colFullName+"]");
+				}*/
 			}
 			else {
 				//log.info("col-partial-name: "+colFullName);
@@ -458,6 +474,150 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 		}
 	}
+	
+	/*boolean columnContainsValues(String fullCollName, int pivotColIdx) {
+		for(int i=0;i<measureCols.size();i++) {
+			//String measureCol = measureCols.get(i);
+			Map<Key, Object> values = valuesForEachMeasure.get(i);
+			for(Map.Entry<Key, Object> e: values.entrySet()) {
+				// key values order: colsNotToPivot, colsToPivotNames
+				Object v = e.getKey().values[pivotColIdx];
+				if(v!=null) {
+					log.info("fullCN: "+fullCollName+"/"+pivotColIdx+" ; e.getKey(): "+e.getKey());
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}*/
+
+	void removeColumnsWithNoValues() {
+		int cntpl = colsNotToPivot.size();
+		//boolean[] colsToKeep = new boolean[newColNames.size()];
+		//log.info("colsNotToPivot: "+colsNotToPivot+" ; colsToPivotNames: "+colsToPivotNames+" ; newColNames: "+newColNames);
+		for(int i=newColNames.size()-1;i>=cntpl+(showMeasuresInColumns?0:1);i--) {
+			String col = newColNames.get(i);
+			String[] parts = col.split(COLS_SEP_PATTERN);
+			String[] vals = new String[colsToPivotNames.size()];
+			//String measure = null;
+			int vidx = 0;
+			for(int j=0;j<parts.length;j++) {
+				String[] cv = parts[j].split(COLVAL_SEP_PATTERN);
+				if(cv.length==2) {
+					vals[vidx++] = cv[1];
+				}
+				/*else if(cv.length==1) {
+					measure = cv[0];
+				}*/
+			}
+			//log.info("col: "+col+" ; vals: "+Arrays.asList(vals));
+			
+			boolean match = false;
+			for(int j=0;j<measureCols.size();j++) {
+				//String measureCol = measureCols.get(i);
+				Map<Key, Object> values = valuesForEachMeasure.get(j);
+				for(Map.Entry<Key, Object> e: values.entrySet()) {
+					//log.info("e.getKey(): "+e.getKey()+" ; cntpl: "+cntpl);
+					//if( arrayPartialEquals(vals, 0, e.getKey().values, cntpl) ) {
+					if( isArrayTail(toStringArray(e.getKey().values), vals) ) {
+						match = true;
+						//log.info("match: "+Arrays.asList(vals)+" // "+Arrays.asList(e.getKey().values));
+					}
+				}
+			}
+			if(!match) {
+				newColNames.remove(i);
+				newColTypes.remove(i);
+			}
+		}
+		
+		if(newColNames.size()==0) {
+			log.warn("newColNames is empty [colsNotToPivot="+colsNotToPivot+"][colsToPivotNames="+colsToPivotNames+"]");
+		}
+		
+		/*
+		for(int i=0;i<colsToPivotNames.size();i++) {
+			String pcol = colsToPivotNames.get(i);
+			Set<Object> vs = keyColValues.get(pcol);
+			for(int j=0;j<measureCols.size();j++) {
+				//String measureCol = measureCols.get(i);
+				Map<Key, Object> values = valuesForEachMeasure.get(j);
+				for(Map.Entry<Key, Object> e: values.entrySet()) {
+					log.info("e.getKey(): "+e.getKey()+" ; cntpl+i: "+(cntpl+i));
+					if(vs.contains(e.getValue())) {
+						
+					}
+				}
+			}
+		}
+		*/
+		
+		
+		/*
+		cols_label:
+		for(int i=0;i<colsToKeep.length;i++) {
+			for(int j=0;j<measureCols.size();j++) {
+				//String measureCol = measureCols.get(i);
+				Map<Key, Object> values = valuesForEachMeasure.get(j);
+				for(Map.Entry<Key, Object> e: values.entrySet()) {
+					log.info("e.getKey(): "+e.getKey()+" ; cntpl+i: "+(cntpl+i));
+					if(e.getKey().values[cntpl+i]!=null) {
+						colsToKeep[i] = true;
+						continue cols_label;
+					}
+					// key values order: colsNotToPivot, colsToPivotNames
+					//Object v = e.getKey().values[pivotColIdx];
+					//if(v!=null) {
+					//	log.info("fullCN: "+fullCollName+"/"+pivotColIdx+" ; e.getKey(): "+e.getKey());
+					//}
+				}
+			}
+		}
+		*/
+		/*for(int i=colsToKeep.length-1;i>=0;i--) {
+			if(! colsToKeep[i]) {
+				log.info("removing column ["+i+"]: "+newColNames.get(i));
+			}
+		}*/
+	}
+	
+	static String[] toStringArray(Object[] arr) {
+		String[] ret = new String[arr.length];
+		for(int i=0;i<ret.length;i++) {
+			ret[i] = arr[i].toString();
+		}
+		return ret;
+	}
+	
+	static boolean isArrayTail(String[] bigger, String[] tail) {
+		//log.info("bigger: "+Arrays.asList(bigger)+" ; tail: "+Arrays.asList(tail));
+		int tlen = tail.length;
+		int bdiff = bigger.length-tlen;
+		if(bdiff<0) { return false; }
+		for(int i=tlen-1; i>=0; i--) {
+			Object a1e = tail[i];
+			Object a2e = bigger[i+bdiff];
+			if( a1e==null && a2e==null ) { continue; }
+			if( a1e==null || !a1e.equals(a2e)) {
+				return false;
+			}
+		}
+		//log.info(">> isTail!");
+		return true;
+	}
+	
+	/*static boolean arrayPartialEquals(Object[] a1, int a1idx, Object[] a2, int a2idx) {
+		for(int i=a1idx;i<a1.length; i++) {
+			Object a1e = a1[i];
+			Object a2e = a2[i-a1idx+a2idx];
+			if( a1e==null && a2e==null ) { continue; }
+			if( a1e==null || !a1e.equals(a2e)) {
+				return false;
+			}
+		}
+		return true;
+	}*/	
 	
 	Object[] getKeyArray(ResultSet rs) throws SQLException {
 		Object[] ret = new Object[colsNotToPivot.size()+colsToPivotNames.size()];
