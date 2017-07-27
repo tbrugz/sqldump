@@ -2,7 +2,7 @@ package tbrugz.sqldump.resultset.pivot;
 
 import java.util.Arrays;
 
-public class Key {
+public class Key implements Comparable<Key> {
 	final Object[] values;
 	
 	public Key(Object[] values) {
@@ -37,6 +37,49 @@ public class Key {
 	@Override
 	public String toString() {
 		return "Key["+Arrays.toString(values)+"]";
+	}
+
+	// Compares this object with the specified object for order.
+	// Returns a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
+	@SuppressWarnings({"unchecked","rawtypes"})
+	@Override
+	public int compareTo(Key o) {
+		//int ret = (values.length < o.values.length)?-1:
+		//			(values.length > o.values.length)?1:0;
+		//if(ret!=0) { return ret; }
+		int len = Math.min(values.length, o.values.length);
+		
+		for(int i=0;i<len;i++) {
+			Object v = values[i];
+			Object ov = o.values[i];
+			//System.out.println("v: "+v+" ["+v.getClass()+"] / ov: "+ov+" ["+ov.getClass()+"]");
+			if(!v.equals(ov)) {
+				
+				if(v instanceof Comparable) {
+					Comparable c = (Comparable) v;
+					Comparable oc = (Comparable) ov;
+					return c.compareTo(oc);
+				}
+				if(v instanceof Number) {
+					Number n = (Number) v;
+					Number on = (Number) ov;
+					return on.intValue()-n.intValue();
+				}
+				/*if(v instanceof String) {
+					return values[i].toString().compareTo(o.values[i].toString());
+				}
+				if(v instanceof Date) {
+					Date d = (Date) v;
+					Date od = (Date) ov;
+					return d.compareTo(od);
+				}*/
+				return String.valueOf(v).compareTo(String.valueOf(ov));
+				//throw new IllegalArgumentException("v: "+v+" ["+v.getClass()+"]");
+			}
+		}
+		if((values.length < o.values.length)) { return -1; }
+		if((values.length > o.values.length)) { return 1; }
+		return 0;
 	}
 
 }

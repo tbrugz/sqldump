@@ -31,6 +31,7 @@ import tbrugz.sqldump.def.DBMSResourcesTest;
 import tbrugz.sqldump.graph.R2GTest;
 import tbrugz.sqldump.mondrianschema.MondrianTests;
 import tbrugz.sqldump.pivot.DriverTest;
+import tbrugz.sqldump.pivot.KeyTest;
 import tbrugz.sqldump.pivot.QueryTest;
 import tbrugz.sqldump.processors.CascadingDataDumpTest;
 import tbrugz.sqldump.processors.SQLRunProcessorTest;
@@ -103,6 +104,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//pivot
 	DriverTest.class,
 	QueryTest.class,
+	KeyTest.class,
 
 	//diff + database
 	SQLDiffTest.class,
