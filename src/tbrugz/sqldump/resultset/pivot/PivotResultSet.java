@@ -61,6 +61,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final int SHOW_MEASURES_LAST = 0x02;
 	public static final int SHOW_MEASURES_ALLWAYS = 0x04;
 	public static final int SHOW_EMPTY_COLS = 0x08;
+	public static final int FLAG_SORT_NONPIVOT_KEYS = 0x16;
 	
 	// original ResultSet properties
 	final ResultSet rs;
@@ -99,6 +100,7 @@ public class PivotResultSet extends AbstractResultSet {
 	boolean alwaysShowMeasures = false;
 	boolean ignoreNullValues = true; // true: may use less memory...
 	boolean noColsWithNullValues = false; // non empty (mdx)?
+	boolean sortNonPivotKeyValues = true;
 
 	// colsNotToPivot+colsToPivot - key cols ?
 	
@@ -198,6 +200,7 @@ public class PivotResultSet extends AbstractResultSet {
 		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
 		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
 		noColsWithNullValues = (flags & SHOW_EMPTY_COLS) != 0;
+		sortNonPivotKeyValues = (flags & FLAG_SORT_NONPIVOT_KEYS) != 0;
 		//log.info("alwaysShowMeasures="+alwaysShowMeasures+"; showMeasuresFirst="+showMeasuresFirst+"; showMeasuresInColumns="+showMeasuresInColumns+"; noColsWithNullValues="+noColsWithNullValues+"; flags: "+flags);
 	}
 	
@@ -331,6 +334,10 @@ public class PivotResultSet extends AbstractResultSet {
 			//log.info("2 [showMeasuresInColumns="+showMeasuresInColumns+";showMeasuresFirst="+showMeasuresFirst+"] nonPivotKeyValues[#"+nonPivotKeyValues.size()+"]="+nonPivotKeyValues);
 		}
 
+		//log.info("nonPivotKeyValues: "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
+		if(sortNonPivotKeyValues) {
+			nonPivotKeyValues.sort(null);
+		}
 		//log.info("after: "+nonPivotKeyValues);
 		
 		originalRSRowCount = count;

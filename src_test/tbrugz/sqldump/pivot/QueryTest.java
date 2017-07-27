@@ -190,6 +190,27 @@ public class QueryTest {
 
 		Assert.assertEquals(false, rs.next());
 	}
+
+	@Test
+	public void q7DateSorted() throws SQLException, ClassNotFoundException, IOException {
+		String sql = prop.getProperty("q7many");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A"};
+		String[] colsTP = {"B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.FLAG_SORT_NONPIVOT_KEYS);
+		QueryDumper.simplerRSDump(rs);
+
+		rs.absolute(1);
+		Assert.assertEquals(java.sql.Date.valueOf("2013-10-08"), rs.getObject("A"));
+		rs.next();
+		Assert.assertEquals(java.sql.Date.valueOf("2013-10-09"), rs.getObject("A"));
+		rs.next();
+		Assert.assertEquals(java.sql.Date.valueOf("2013-10-10"), rs.getObject("A"));
+		rs.next();
+		Assert.assertEquals(java.sql.Date.valueOf("2013-10-12"), rs.getObject("A"));
+		rs.next();
+		Assert.assertEquals(java.sql.Date.valueOf("2013-10-20"), rs.getObject("A"));
+	}
 	
 	@Test
 	public void testQ4MeasuresInColumnsFirst() throws SQLException, ClassNotFoundException, IOException {
