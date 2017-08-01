@@ -20,6 +20,8 @@ public class PivotQueryParser {
 	static final String MEASURES_SHOW_LAST = "+measures-show-last";
 	static final String MEASURES_SHOW_INROWS = "+measures-show-inrows";
 	static final String MEASURES_SHOW_ALLWAYS = "+measures-show-allways";
+	static final String FLAG_NON_EMPTY_COLS = "+non-empty-cols";
+	static final String FLAG_SORT_NONPIVOT_KEYS = "+sort-nonpivot-keys";
 
 	@SuppressWarnings("rawtypes")
 	final Map<String, Comparable> colsToPivot;
@@ -60,6 +62,12 @@ public class PivotQueryParser {
 				}
 				else if(MEASURES_SHOW_ALLWAYS.equals(s)) {
 					flags |= PivotResultSet.SHOW_MEASURES_ALLWAYS;
+				}
+				else if(FLAG_NON_EMPTY_COLS.equals(s)) {
+					flags |= PivotResultSet.FLAG_NON_EMPTY_COLS;
+				}
+				else if(FLAG_SORT_NONPIVOT_KEYS.equals(s)) {
+					flags |= PivotResultSet.FLAG_SORT_NONPIVOT_KEYS;
 				}
 				else {
 					throw new IllegalArgumentException("unknown control argument: "+s);

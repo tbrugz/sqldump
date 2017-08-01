@@ -312,7 +312,7 @@ public class QueryTest {
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		String[] colsNTP = {};
 		String[] colsTP = {"A", "B"};
-		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.SHOW_EMPTY_COLS);
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.FLAG_NON_EMPTY_COLS);
 		QueryDumper.simplerRSDump(rs);
 		// should return only 1 row (not 5)
 		Assert.assertEquals(true, rs.absolute(1));

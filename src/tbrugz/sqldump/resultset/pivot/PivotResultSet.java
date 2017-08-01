@@ -60,7 +60,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final int SHOW_MEASURES_IN_ROWS = 0x01;
 	public static final int SHOW_MEASURES_LAST = 0x02;
 	public static final int SHOW_MEASURES_ALLWAYS = 0x04;
-	public static final int SHOW_EMPTY_COLS = 0x08;
+	public static final int FLAG_NON_EMPTY_COLS = 0x08;
 	public static final int FLAG_SORT_NONPIVOT_KEYS = 0x16;
 	
 	// original ResultSet properties
@@ -199,7 +199,7 @@ public class PivotResultSet extends AbstractResultSet {
 		showMeasuresInColumns = (flags & SHOW_MEASURES_IN_ROWS) == 0;
 		showMeasuresFirst = (flags & SHOW_MEASURES_LAST) == 0;
 		alwaysShowMeasures = (flags & SHOW_MEASURES_ALLWAYS) != 0;
-		noColsWithNullValues = (flags & SHOW_EMPTY_COLS) != 0;
+		noColsWithNullValues = (flags & FLAG_NON_EMPTY_COLS) != 0;
 		sortNonPivotKeyValues = (flags & FLAG_SORT_NONPIVOT_KEYS) != 0;
 		//log.info("alwaysShowMeasures="+alwaysShowMeasures+"; showMeasuresFirst="+showMeasuresFirst+"; showMeasuresInColumns="+showMeasuresInColumns+"; noColsWithNullValues="+noColsWithNullValues+"; flags: "+flags);
 	}
