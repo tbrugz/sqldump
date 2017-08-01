@@ -86,7 +86,18 @@ public class SQLQueries extends AbstractSQLProc {
 			qid = qid.trim();
 			
 			String queryName = prop.getProperty("sqldump.query."+qid+".name");
-			DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
+			DBMSFeatures feat = null;
+			if(model!=null) {
+				feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
+			}
+			else {
+				try {
+					feat = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+				}
+				catch(SQLException e) {
+					throw new ProcessingException("Error on getSpecificFeatures()", e);
+				}
+			}
 			List<DumpSyntax> syntaxList = getQuerySyntaxes(qid, feat);
 			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
