@@ -469,7 +469,7 @@ public class PivotResultSet extends AbstractResultSet {
 				newColumns.add(colFullName);
 				/*if(!noColsWithNullValues || columnContainsValues(colFullName, colsNotToPivot.size()+colNumber)) {
 					newColumns.add(colFullName);
-				//log.info("genNewCols: col-full-name: "+colFullName);
+					//log.info("genNewCols: col-full-name: "+colFullName);
 				}
 				else {
 					log.info("genNewCols: no values! [col-full-name: "+colFullName+"]");
@@ -521,6 +521,7 @@ public class PivotResultSet extends AbstractResultSet {
 			//log.info("col: "+col+" ; vals: "+Arrays.asList(vals));
 			
 			boolean match = false;
+			measurecols:
 			for(int j=0;j<measureCols.size();j++) {
 				//String measureCol = measureCols.get(i);
 				Map<Key, Object> values = valuesForEachMeasure.get(j);
@@ -530,6 +531,7 @@ public class PivotResultSet extends AbstractResultSet {
 					if( isArrayTail(toStringArray(e.getKey().values), vals) ) {
 						match = true;
 						//log.info("match: "+Arrays.asList(vals)+" // "+Arrays.asList(e.getKey().values));
+						break measurecols;
 					}
 				}
 			}
