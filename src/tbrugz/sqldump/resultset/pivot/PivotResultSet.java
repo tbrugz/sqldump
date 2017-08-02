@@ -84,7 +84,8 @@ public class PivotResultSet extends AbstractResultSet {
 
 	// data properties - set in process()
 	final List<Key> nonPivotKeyValues = new ArrayList<Key>();
-	final List<Map<Key, Object>> valuesForEachMeasure = new ArrayList<Map<Key, Object>>(); //new HashMap<String, String>();
+	//final List<Map<Key, Object>> valuesForEachMeasure = new ArrayList<Map<Key, Object>>();
+	final Map<Key, Object> valuesByKey = new HashMap<Key, Object>();
 	
 	// pivot metadata properties
 	final List<String> newColNames = new ArrayList<String>();
@@ -174,7 +175,7 @@ public class PivotResultSet extends AbstractResultSet {
 			//if(!colsNotToPivot.contains(colName) && !colsToPivotNames.contains(colName)) {
 				measureCols.add(colName);
 				measureColsType.add(rsmd.getColumnType(i));
-				valuesForEachMeasure.add(new HashMap<Key, Object>());
+				//valuesForEachMeasure.add(new HashMap<Key, Object>());
 			}
 			//log.debug("orig colName ["+i+"/"+rsColsCount+"]: "+colName);
 		}
@@ -188,8 +189,10 @@ public class PivotResultSet extends AbstractResultSet {
 		
 		metadata = new RSMetaDataTypedAdapter(null, null, newColNames, newColTypes);
 		
-		log.debug("rsColNames="+rsColNames);
-		log.debug("colsNotToPivot: names="+this.colsNotToPivot+" ; types="+colsNotToPivotType);
+		//log.debug("rsColNames="+rsColNames);
+		//log.debug("colsNotToPivot: names="+this.colsNotToPivot+" ; types="+colsNotToPivotType);
+		//log.debug("colsToPivotNames: names="+this.colsToPivotNames);
+		//log.debug("measureCols="+this.measureCols);
 		
 		if(doProcess) { process(); }
 	}
@@ -217,17 +220,23 @@ public class PivotResultSet extends AbstractResultSet {
 		int countErrPrevValue = 0, countErrPrevValueEquals = 0;
 		
 		while(rs.next()) {
-			Object[] keyArr = getKeyArray(rs);
-			Key key = new Key(keyArr);
+			Object[] keyArr = getKeyArray(rs, 1);
 			for(int i=0;i<measureCols.size();i++) {
 				String measureCol = measureCols.get(i);
 				Object value = rs.getObject(measureCol);
 				if(ignoreNullValues && value==null) { continue; }
+				//log.info("process: "+key+" add[0]: "+measureCol);
+				Object[] karr = new Object[keyArr.length];
+				System.arraycopy(keyArr, 0, karr, 0, keyArr.length);
+				
+				karr[0] = measureCol;
+				Key key = new Key(karr);
 
-				Map<Key, Object> values = valuesForEachMeasure.get(i);
-				Object prevValue = values.get(key);
+				//Map<Key, Object> values = valuesForEachMeasure.get(i);
+				Object prevValue = valuesByKey.get(key);
+				//log.info("process: "+key+" ; value: "+value+" ; prevValue: "+prevValue);
 				if(prevValue==null) {
-					values.put(key, value);
+					valuesByKey.put(key, value);
 				}
 				else {
 					if(prevValue.equals(value)) {
@@ -244,7 +253,7 @@ public class PivotResultSet extends AbstractResultSet {
 						//do nothing
 						break;
 					case LAST:
-						values.put(key, value);
+						valuesByKey.put(key, value);
 						break;
 					default:
 						throw new IllegalStateException("unknown aggregator: "+aggregator);
@@ -255,18 +264,21 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 			
 			if(showMeasuresInColumns) {
-				Key keyNotToPivotArr = new Key(Arrays.copyOf(keyArr, colsNotToPivot.size())); 
+				Object[] knpt = new Object[colsNotToPivot.size()];
+				System.arraycopy(keyArr, 1, knpt, 0, colsNotToPivot.size());
+				Key keyNotToPivotArr = new Key(knpt);
 				//log.info("new row? "+keyNotToPivotArr);
 				if(!colsNotToPivotKeySet.contains(keyNotToPivotArr)) {
 					//new row!
 					//rowCount++;
+					//log.debug("[incol] nonPivotKeyValues.add: "+keyNotToPivotArr+" / "+Arrays.asList(keyArr));
 					nonPivotKeyValues.add(keyNotToPivotArr);
 					colsNotToPivotKeySet.add(keyNotToPivotArr);
 				}
 			}
 			else {
 				Object[] keyVals = new Object[colsNotToPivot.size()+1];
-				System.arraycopy(keyArr, 0, keyVals, 0+(showMeasuresFirst?1:0), colsNotToPivot.size());
+				System.arraycopy(keyArr, 1, keyVals, 0+(showMeasuresFirst?1:0), colsNotToPivot.size());
 				if(showMeasuresFirst) {
 					keyVals[0] = measureCols.get(0); //just put first measure (for now)
 				}
@@ -277,6 +289,7 @@ public class PivotResultSet extends AbstractResultSet {
 				if(!colsNotToPivotKeySet.contains(keyNotToPicotArr)) {
 					//new row!
 					//rowCount++;
+					//log.debug("[inrow] nonPivotKeyValues.add: "+keyNotToPicotArr);
 					nonPivotKeyValues.add(keyNotToPicotArr);
 					colsNotToPivotKeySet.add(keyNotToPicotArr);
 				}
@@ -309,6 +322,7 @@ public class PivotResultSet extends AbstractResultSet {
 						Key key = nonPivotKeyValues.get(i);
 						Object[] values = Arrays.copyOf(key.values, key.values.length);
 						values[0] = measureCols.get(j);
+						//log.debug("[!showMeasuresInColumns && showMeasuresFirst] nonPivotKeyValues.add: "+Arrays.asList(values));
 						nonPivotKeyValues.add(new Key(values));
 						//rowCount++;
 					}
@@ -318,12 +332,14 @@ public class PivotResultSet extends AbstractResultSet {
 				//FIXedME populate nonPivotKeyValues when showMeasuresFirst is false. really?
 				List<Key> newNonPivotKeyValues = new ArrayList<Key>();
 				int origKeysLen = nonPivotKeyValues.size();
+				//log.debug("[!showMeasuresInColumns && !showMeasuresFirst] nonPivotKeyValues.removeAll()");
 				for(int i=0;i<origKeysLen;i++) {
 					for(int j=0;j<measureCols.size();j++) {
 						Key key = nonPivotKeyValues.get(i);
 						Object[] values = Arrays.copyOf(key.values, key.values.length);
 						values[values.length-1] = measureCols.get(j);
 						newNonPivotKeyValues.add(new Key(values));
+						//log.debug("[!showMeasuresInColumns && !showMeasuresFirst] nonPivotKeyValues.add: "+Arrays.asList(values));
 						//rowCount++;
 					}
 				}
@@ -343,6 +359,9 @@ public class PivotResultSet extends AbstractResultSet {
 		originalRSRowCount = count;
 		processed = true;
 		
+		//log.info(">> valuesByKeys.keys: "+valuesByKey.keySet());
+		//log.info(">> valuesByKeys: "+valuesByKey);
+		//log.info(">> nonPivotKeyValues: "+nonPivotKeyValues);
 		//log.info("valuesForEachMeasure: "+valuesForEachMeasure);
 		
 		processMetadata();
@@ -353,7 +372,7 @@ public class PivotResultSet extends AbstractResultSet {
 		newColNames.clear();
 		newColTypes.clear();
 		
-		log.debug("processMetadata: measures="+measureCols);
+		//log.debug("processMetadata: measures="+measureCols);
 		
 		//measures in columns first
 		if((!showMeasuresInColumns) && showMeasuresFirst) {
@@ -447,7 +466,7 @@ public class PivotResultSet extends AbstractResultSet {
 		
 		resetPosition();
 
-		log.debug("processMetadata: columns="+newColNames+" types="+newColTypes);
+		//log.debug("processMetadata: columns="+newColNames+" types="+newColTypes);
 	}
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
@@ -521,20 +540,20 @@ public class PivotResultSet extends AbstractResultSet {
 			//log.info("col: "+col+" ; vals: "+Arrays.asList(vals));
 			
 			boolean match = false;
-			measurecols:
-			for(int j=0;j<measureCols.size();j++) {
+			//measurecols:
+			//for(int j=0;j<measureCols.size();j++) {
 				//String measureCol = measureCols.get(i);
-				Map<Key, Object> values = valuesForEachMeasure.get(j);
-				for(Map.Entry<Key, Object> e: values.entrySet()) {
+				//Map<Key, Object> values = valuesForEachMeasure.get(j);
+				for(Map.Entry<Key, Object> e: valuesByKey.entrySet()) {
 					//log.info("e.getKey(): "+e.getKey()+" ; cntpl: "+cntpl);
 					//if( arrayPartialEquals(vals, 0, e.getKey().values, cntpl) ) {
 					if( isArrayTail(toStringArray(e.getKey().values), vals) ) {
 						match = true;
 						//log.info("match: "+Arrays.asList(vals)+" // "+Arrays.asList(e.getKey().values));
-						break measurecols;
+						break;
 					}
 				}
-			}
+			//}
 			if(!match) {
 				newColNames.remove(i);
 				newColTypes.remove(i);
@@ -628,21 +647,21 @@ public class PivotResultSet extends AbstractResultSet {
 		return true;
 	}*/	
 	
-	Object[] getKeyArray(ResultSet rs) throws SQLException {
-		Object[] ret = new Object[colsNotToPivot.size()+colsToPivotNames.size()];
+	Object[] getKeyArray(ResultSet rs, int prepend) throws SQLException {
+		Object[] ret = new Object[colsNotToPivot.size()+colsToPivotNames.size()+prepend];
 		for(int i=0;i<colsNotToPivot.size();i++) {
 			String col = colsNotToPivot.get(i);
 			Object val = rs.getObject(col);
 			validateKeyValue(col, val);
 			addValueToSet(col, val);
-			ret[i] = val;
+			ret[i+prepend] = val;
 		}
 		for(int i=0;i<colsToPivotNames.size();i++) {
 			String col = colsToPivotNames.get(i);
 			Object val = rs.getObject(col);
 			validateKeyValue(col, val);
 			addValueToSet(col, val);
-			ret[colsNotToPivot.size()+i] = val;
+			ret[colsNotToPivot.size()+i+prepend] = val;
 		}
 		return ret;
 	}
@@ -767,11 +786,12 @@ public class PivotResultSet extends AbstractResultSet {
 			//is nonpivotcol
 			
 			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] :"+colsNotToPivot+":cnpk="+currentNonPivotKey+":"+java.util.Arrays.asList(currentNonPivotKey.split("\\|")));
-			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] : "+currentNonPivotKey.values[index]);
 			//XXXdone: return non-string values for non-pivot columns?
 			if(!showMeasuresInColumns && showMeasuresFirst) {
+				//log.debug("getObject[non-pivot1]: "+columnLabel+" [nonPivotKey:"+index+"] : "+Arrays.asList( currentNonPivotKey.values )+ " ::: "+currentNonPivotKey.values[index+1]);
 				return currentNonPivotKey.values[index+1];
 			}
+			//log.debug("getObject[non-pivot]: "+columnLabel+" [nonPivotKey:"+index+"] : "+currentNonPivotKey.values[index]+" / "+Arrays.asList( currentNonPivotKey.values )+ " ::: "+currentNonPivotKey.values[index]);
 			return currentNonPivotKey.values[index];
 		}
 		
@@ -808,12 +828,13 @@ public class PivotResultSet extends AbstractResultSet {
 					sb.add(value);
 				}
 			}
-			Object[] keyArr = new Object[currentNonPivotKey.values.length+sb.size()];
+			//log.debug("getObject: sb: "+sb);
+			Object[] keyArr = new Object[currentNonPivotKey.values.length+sb.size()+1];
 			for(int i=0;i<currentNonPivotKey.values.length;i++) {
-				keyArr[i] = currentNonPivotKey.values[i];
+				keyArr[i+1] = currentNonPivotKey.values[i];
 			}
 			for(int i=0;i<sb.size();i++) {
-				keyArr[i+currentNonPivotKey.values.length] = sb.get(i);
+				keyArr[i+currentNonPivotKey.values.length+1] = sb.get(i);
 			}
 			if(!showMeasuresInColumns) {
 				//remove measure name from key
@@ -830,9 +851,6 @@ public class PivotResultSet extends AbstractResultSet {
 					keyArr = newKeyArr;
 				}
 			}
-			Key key = new Key(keyArr);
-			//log.debug("pivotCol: key:: "+key);
-			
 			if(measureIndex==-1) {
 				//measure name in its own column
 				if((!showMeasuresInColumns)) {
@@ -848,9 +866,17 @@ public class PivotResultSet extends AbstractResultSet {
 					measureIndex = 0;
 				}
 			}
-			Map<Key, Object> measureMap = valuesForEachMeasure.get(measureIndex);
+			//log.debug("pivotCol0: keyArr:: "+Arrays.asList(keyArr));
+			keyArr[0] = measureCols.get(measureIndex);
+			Key key = new Key(keyArr);
+			Object value = valuesByKey.get(key);
+			//log.debug("pivotCol: key:: "+key+" / value: "+value+" / currentNonPivotKey: "+currentNonPivotKey);
+
+			return value;
+			
+			//Map<Key, Object> measureMap = valuesForEachMeasure.get(measureIndex);
 			//log.debug("getObject[pivot] value [key="+key+",measureIndex="+measureIndex+"]: "+measureMap.get(key));
-			return measureMap.get(key);
+			//return measureMap.get(key);
 		}
 		throw new SQLException("unknown column: '"+columnLabel+"'");
 	}
