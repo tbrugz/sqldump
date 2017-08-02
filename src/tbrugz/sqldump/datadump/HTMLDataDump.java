@@ -191,12 +191,14 @@ public class HTMLDataDump extends XMLDataDump {
 							}
 							else {
 								sbrow.append("<th measure=\"true\">"+parts[cc]+"</th>");
+								measuresRow = true;
 							}
 						}
 					}
 					else if(cc+1==onColsColCount) {
 						if(i<onRowsColCount) {
 							sbrow.append("<th dimoncol=\"true\" measure=\"true\">"+finalColNames.get(i)+"</th>");
+							measuresRow = true;
 						}
 						else {
 							sbrow.append("<th>"+finalColNames.get(i)+"</th>");
