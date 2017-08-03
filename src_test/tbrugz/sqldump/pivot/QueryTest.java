@@ -342,6 +342,20 @@ public class QueryTest {
 	}
 
 	@Test
+	public void q9c() throws SQLException, IOException {
+		String sql = prop.getProperty("q9");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.SHOW_MEASURES_LAST);
+		QueryDumper.simplerRSDump(rs);
+		// should return only 4 rows (not 5) & 3 cols
+		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
+		Assert.assertEquals(true, rs.absolute(4));
+		Assert.assertEquals(false, rs.next());
+	}
+	
+	@Test
 	public void q9nonEmptyCols() throws SQLException, IOException {
 		String sql = prop.getProperty("q9");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
