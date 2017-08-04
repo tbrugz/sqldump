@@ -194,7 +194,7 @@ public class ConnectionUtil {
 		}
 		catch(SQLException e) {
 			log.warn("error creating connection: '"+user+"@"+dbUrl+"'"
-					+((password==null)?" [null password]":"")
+					+((password==null)?" [null password]":" [with password]")
 					);
 			throw e;
 		}

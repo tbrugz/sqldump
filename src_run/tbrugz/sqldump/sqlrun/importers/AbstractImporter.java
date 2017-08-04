@@ -512,7 +512,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		
 		if(log.isDebugEnabled()) {
-			log.debug("parts[count="+counter.input+"; parts="+parts.length+"]: "+Arrays.asList(parts));
+			log.debug("parts[count="+counter.input+"; parts="+parts.length+"]: "+Arrays.asList(parts)+" ; columnTypes="+columnTypes);
 		}
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
@@ -684,8 +684,15 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 					//XXX setup DateFormat only once for each column?
 					String strFormat = colType.substring(5, colType.indexOf(']'));
 					DateFormat df = new SimpleDateFormat(strFormat);
-					stmt.setDate(index+1, new java.sql.Date( df.parse(value).getTime() ));
-					//log.info("date:: "+(index+1)+" / "+value);
+					try {
+						java.sql.Date date = new java.sql.Date( df.parse(value).getTime() );
+						stmt.setDate(index+1, date);
+						//log.info("date:: "+(index+1)+" / "+value+" / "+date);
+					}
+					catch(ParseException e) {
+						log.warn("parse exception:: idx="+(index+1)+" ; value="+value+" ; format="+strFormat);
+						throw e;
+					}
 				}
 				else if(colType.equals("blob-location") || colType.equals("text-location")) {
 					File f = new File(value);
