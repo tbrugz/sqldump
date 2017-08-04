@@ -99,6 +99,8 @@ public class SQLDiff implements Executor {
 	static final String PROP_APPLYDIFF_VALIDATE = PROP_PREFIX+".applydiff.validate";
 	static final String PROP_APPLYDIFF_SCHEMADIFF = PROP_PREFIX+".doapplyschemadiff";
 	static final String PROP_APPLYDIFF_DATADIFF = PROP_PREFIX+".doapplydatadiff";
+	static final String PROP_APPLYDIFF_OBJECTTYPES = PROP_PREFIX+".applydiff.objecttypes";
+	static final String PROP_APPLYDIFF_CHANGETYPES = PROP_PREFIX+".applydiff.changetypes";
 	
 	public static final boolean DEFAULT_DO_RENAME_DETECTION = false; //XXX: should be true?
 	
@@ -126,6 +128,8 @@ public class SQLDiff implements Executor {
 	String jsonoutfile = null;
 
 	String patchfilePattern = null;
+	
+	boolean doApplyDiff = false;
 	
 	// writers
 	CategorizedOut categOut = null; 
@@ -294,7 +298,6 @@ public class SQLDiff implements Executor {
 		}
 
 		boolean doDataDiff = Utils.getPropBool(prop, PROP_DO_DATADIFF, false);
-		boolean doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, false);
 		boolean doApplySchemaDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_SCHEMADIFF, false);
 		boolean doApplyDataDiff = doApplyDiff && Utils.getPropBool(prop, PROP_APPLYDIFF_DATADIFF, false);
 		boolean doApplyValidate = Utils.getPropBool(prop, PROP_APPLYDIFF_VALIDATE, true);
@@ -492,10 +495,10 @@ public class SQLDiff implements Executor {
 		}
 		
 		log.info(grabberLabel+" model ["+grabberId+"] init");
-		//String connPropPrefix = "sqldiff."+grabberId;
-		String connPropPrefix = prop.getProperty("sqldiff."+grabberId+".connpropprefix", "sqldiff."+grabberId);
+		String grabberPrefix = "sqldiff."+grabberId;
+		String connPropPrefix = prop.getProperty(grabberPrefix+".connpropprefix", grabberPrefix);
 		
-		String grabClassName = prop.getProperty(connPropPrefix+".grabclass");
+		String grabClassName = prop.getProperty(grabberPrefix+".grabclass", prop.getProperty(connPropPrefix+".grabclass"));
 		if(grabClassName==null) {
 			throw new ProcessingException("'"+grabberLabel+"' grabber class not defined [id="+grabberId+" ; prefix="+connPropPrefix+"]");
 		}
@@ -523,6 +526,7 @@ public class SQLDiff implements Executor {
 		jsoninfile = prop.getProperty(PROP_JSONINFILE);
 		jsonoutfile = prop.getProperty(PROP_JSONOUTFILE);
 		patchfilePattern = prop.getProperty(PROP_PATCHFILEPATTERN);
+		doApplyDiff = Utils.getPropBool(prop, PROP_DO_APPLYDIFF, doApplyDiff);
 		
 		String colDiffTempStrategy = prop.getProperty(PROP_COLUMNDIFF_TEMPCOLSTRATEGY);
 		if(colDiffTempStrategy!=null) {
@@ -588,8 +592,23 @@ public class SQLDiff implements Executor {
 		int skipCount = 0;
 		
 		SQLException lastEx = null;
+		List<String> allowedObjectTypes = Utils.getStringListFromProp(prop, PROP_APPLYDIFF_OBJECTTYPES, ",");
+		List<String> allowedChangeTypes = Utils.getStringListFromProp(prop, PROP_APPLYDIFF_CHANGETYPES, ",");
+		
 		for(Diff d: diffs) {
 			diffCount++;
+			if(allowedObjectTypes!=null && !allowedObjectTypes.contains(d.getObjectType().toString())) {
+				log.info("diff #"+diffCount+": '"+d.getNamedObject()+"'s objectType ["+d.getObjectType()+"] not in '"+allowedObjectTypes+"'");
+				skipCount++;
+				continue;
+			}
+
+			if(allowedChangeTypes!=null && !allowedChangeTypes.contains(d.getChangeType().toString())) {
+				log.info("diff #"+diffCount+": '"+d.getNamedObject()+"'s changeType ["+d.getChangeType()+"] not in '"+allowedChangeTypes+"'");
+				skipCount++;
+				continue;
+			}
+			
 			//sqldiff.applydiff.DROP=COLUMN, TABLE, ...
 			List<String> types = Utils.getStringListFromProp(prop, "sqldiff.applydiff."+d.getChangeType(), ",");
 			if(types!=null && !types.contains(d.getObjectType().toString())) {
@@ -649,8 +668,11 @@ public class SQLDiff implements Executor {
 		
 		procProterties();
 
-		if(outfilePattern==null && xmloutfile==null) {
-			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"'] nor xmloutfile [prop '"+PROP_XMLOUTFILE+"'] nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"'] defined. can't dump diff script";
+		if(outfilePattern==null && xmloutfile==null && jsonoutfile==null && !doApplyDiff) {
+			String message = "outfilepattern [prop '"+PROP_OUTFILEPATTERN+"']"+
+					" nor xmloutfile [prop '"+PROP_XMLOUTFILE+"']"+
+					" nor jsonoutfile [prop '"+PROP_JSONOUTFILE+"']"+
+					" nor doapplydiff [prop '"+PROP_DO_APPLYDIFF+"'] defined. can't proceed";
 			log.error(message);
 			if(failonerror) { throw new ProcessingException(message); }
 			return;

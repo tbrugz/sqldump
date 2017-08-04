@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.model.DBIdentifiableDiff;
 import tbrugz.sqldiff.model.Diff;
+import tbrugz.sqldiff.model.GrantDiff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.TableDiff;
 import tbrugz.sqldump.dbmodel.Column;
@@ -39,6 +40,10 @@ public class DiffValidator {
 		else if(diff instanceof DBIdentifiableDiff) {
 			//TODO validate other dbobjects (dbidentifiables)?
 			log.debug("no validation applied to dbIdDiff '"+diff+"'");
+		}
+		else if(diff instanceof GrantDiff) {
+			//XX validate grant diffs?
+			log.debug("no validation applied to grantDiff '"+diff+"'");
 		}
 		else {
 			//error
