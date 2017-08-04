@@ -34,8 +34,17 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(getType(d)) 
 					&& (d.getSchemaName()!=null?d.getSchemaName().equals(schemaName):true) 
-					//XXX: better? //&& (schemaName!=null?d.getSchemaName().equals(schemaName):true) 
 					&& d.getName().equals(name)) { return (T) d; }
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableByTypeSchemaAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, DBObjectType type, String schemaName, String name) {
+		for(DBIdentifiable d: dbids) {
+			if(type.equals(getType(d)) 
+					&& (d.getSchemaName()!=null?d.getSchemaName().equalsIgnoreCase(schemaName):true) 
+					&& d.getName().equalsIgnoreCase(name)) { return (T) d; }
 		}
 		return null;
 	}
@@ -64,6 +73,16 @@ public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIden
 			if(obj!=null
 					&& ( (schemaName==null && obj.schemaName==null) || (schemaName!=null && schemaName.equals(obj.schemaName)) ) 
 					&& name.equals(obj.name) ) { return (T) obj; }
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends DBIdentifiable> T getDBIdentifiableBySchemaAndNameIgnoreCase(Collection<? extends DBIdentifiable> dbids, String schemaName, String name) {
+		for(DBIdentifiable obj: dbids) {
+			if(obj!=null
+					&& ( (schemaName==null && obj.schemaName==null) || (schemaName!=null && schemaName.equalsIgnoreCase(obj.schemaName)) ) 
+					&& name.equalsIgnoreCase(obj.name) ) { return (T) obj; }
 		}
 		return null;
 	}

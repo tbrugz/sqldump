@@ -398,10 +398,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn("abstract method error: "+e);
 			}
 			catch(RuntimeException e) {
-				log.warn("runtime exception grabbing functions: "+e);
+				log.warn(getIdDesc()+"runtime exception grabbing procedures: "+e);
 			}
 			catch(SQLException e) {
-				log.warn("sql exception grabbing procedures: "+e);
+				log.warn(getIdDesc()+"sql exception grabbing procedures: "+e);
 			}
 			log.info(getIdDesc()+countproc+" procedures grabbed ["+executableStats()+"]");
 			
@@ -419,10 +419,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn("abstract method error: "+e);
 			}
 			catch(RuntimeException e) {
-				log.warn("runtime exception grabbing functions: "+e);
+				log.warn(getIdDesc()+"runtime exception grabbing functions: "+e);
 			}
 			catch(SQLException e) {
-				log.warn("sql exception grabbing functions: "+e);
+				log.warn(getIdDesc()+"sql exception grabbing functions: "+e);
 			}
 			//XXX: add ["+executableStats()+"]?
 			log.info(getIdDesc()+countfunc+" functions grabbed");
