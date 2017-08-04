@@ -41,7 +41,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class CSVDataDump extends AbstractDumpSyntax {
 	
-	static Log log = LogFactory.getLog(CSVDataDump.class);
+	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";

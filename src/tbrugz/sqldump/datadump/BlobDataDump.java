@@ -25,7 +25,7 @@ import tbrugz.sqldump.util.Utils;
  */
 public class BlobDataDump extends WriterIndependentDumpSyntax {
 
-	static Log log = LogFactory.getLog(BlobDataDump.class);
+	static final Log log = LogFactory.getLog(BlobDataDump.class);
 	
 	static final String BLOB_SYNTAX_ID = "blob";
 	static final String PROP_BLOB_OUTFILEPATTERN = "sqldump.datadump.blob.outfilepattern";

@@ -17,7 +17,7 @@ public class DeleteByPK extends UpdateByPKDataDump {
 	static final String DELETEBYPK_SYNTAX_ID = "deletebypk";
 	static final String DELETEBYPK_EXT = "dbpk.sql";
 	
-	static Log log = LogFactory.getLog(DeleteByPK.class);
+	static final Log log = LogFactory.getLog(DeleteByPK.class);
 	
 	@Override
 	public String getSyntaxId() {

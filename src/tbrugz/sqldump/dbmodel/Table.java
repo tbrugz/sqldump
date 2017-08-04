@@ -19,7 +19,7 @@ public class Table extends DBObject implements Relation {
 	String remarks; //e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	Boolean domainTable;
 	
-	static Log log = LogFactory.getLog(Table.class);
+	static final Log log = LogFactory.getLog(Table.class);
 	
 	public Column getColumn(String name) {
 		if(name==null) { return null; }

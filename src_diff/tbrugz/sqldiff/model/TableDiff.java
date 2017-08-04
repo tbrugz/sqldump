@@ -19,7 +19,7 @@ import tbrugz.sqldump.util.StringUtils;
 
 //@XmlJavaTypeAdapter(TableDiffAdapter.class)
 public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff> {
-	static Log log = LogFactory.getLog(TableDiff.class);
+	static final Log log = LogFactory.getLog(TableDiff.class);
 
 	final ChangeType diffType; //ADD, ALTER, RENAME, DROP;
 	final String renameFromSchema;

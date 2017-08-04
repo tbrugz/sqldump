@@ -48,7 +48,7 @@ class RegularFileFilter implements FileFilter {
 class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 	private static final long serialVersionUID = 1L;
 
-	static Log log = LogFactory.getLog(BaseInputGUI.class);
+	static final Log log = LogFactory.getLog(BaseInputGUI.class);
 
 	static int width = 500;
 	static int height = 80;

@@ -22,7 +22,7 @@ import tbrugz.sqldump.def.SchemaModelGrabber;
 
 public class SchemaSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
-	static Log log = LogFactory.getLog(SchemaSerializer.class);
+	static final Log log = LogFactory.getLog(SchemaSerializer.class);
 	
 	public static final String SERIALIZATION_DEFAULT_PREFIX = "sqldump.serialization";
 	public static final String PROP_SERIALIZATION_OUTFILE = SERIALIZATION_DEFAULT_PREFIX + ".outfile";

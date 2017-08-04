@@ -23,7 +23,7 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
 	static final String PROP_TRANSFORM_TO_DBID = "sqldump.schematransform.todbid";
 	
-	static Log log = LogFactory.getLog(SQLDialectTransformer.class);
+	static final Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
 	//String fromDialectId;
 	boolean toANSI = false;

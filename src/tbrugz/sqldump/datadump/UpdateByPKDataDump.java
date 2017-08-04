@@ -21,7 +21,7 @@ public class UpdateByPKDataDump extends InsertIntoDataDump {
 	static final String UPDATEBYPK_SYNTAX_ID = "updatebypk";
 	static final String UPDATEBYPK_EXT = "ubpk.sql";
 	
-	static Log log = LogFactory.getLog(UpdateByPKDataDump.class);
+	static final Log log = LogFactory.getLog(UpdateByPKDataDump.class);
 	
 	@Override
 	public String getSyntaxId() {

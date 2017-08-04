@@ -109,7 +109,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	}
 	
 	private static final long serialVersionUID = 1L;
-	static Log log = LogFactory.getLog(Column.class);
+	static final Log log = LogFactory.getLog(Column.class);
 	
 	String type;
 	Integer columnSize;
@@ -198,6 +198,9 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 	}
 	
 	public String getColumnConstraints() {
+		/*if((autoIncrement!=null && autoIncrement)) {
+			log.info("auto-increment["+name+"]: useAutoIncrement? "+ColTypeUtil.useAutoIncrement()+" [dbid="+ColTypeUtil.dbid+"]");
+		}*/
 		return getDefaultSnippet()
 			+getNullableSnippet()
 			+(ColTypeUtil.useAutoIncrement()?
