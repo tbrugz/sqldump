@@ -1011,7 +1011,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			boolean autoInc = false;
 			try {
 				autoInc = "YES".equals( cols.getString("IS_AUTOINCREMENT") );
-				if(autoInc) { c.setAutoIncrement(true); }
+				if(autoInc) {
+					//log.info("autoIncrement...["+c.getName()+"]: "+cols.getString("IS_AUTOINCREMENT"));
+					c.setAutoIncrement(true);
+				}
 			}
 			catch(Exception e) {
 				grabColumnIsAutoincrement = false;

@@ -410,11 +410,11 @@ public class SQLDiff implements Executor {
 	
 	SchemaDiff doDiffSchemas(SchemaModel fromSM, SchemaModel toSM) {
 		//XXX: option to set dialect from properties?
-		String dialect = toSM.getSqlDialect();
+		String dialect = fromSM.getSqlDialect();
 		setupFeatures(dialect);
 		
 		//do diff
-		log.info("diffing...");
+		log.info("diffing... [dialect="+dialect+"]");
 		SchemaDiffer differ = new SchemaDiffer();
 		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
 		return differ.diffSchemas(fromSM, toSM);
@@ -620,6 +620,10 @@ public class SQLDiff implements Executor {
 			try {
 				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
 				List<String> sqls = d.getDiffList();
+				if(sqls.size()==0) {
+					log.info("diff #"+diffCount+": no SQL diff avaiable for "+d.getChangeType()+" on '"+d.getNamedObject()+"': "+d);
+				}
+				else {
 				for(int i=0;i<sqls.size();i++) {
 					String sql = sqls.get(i);
 					log.info("executing diff #"+diffCount
@@ -628,6 +632,7 @@ public class SQLDiff implements Executor {
 						+sql);
 					execCount++;
 					updateCount += conn.createStatement().executeUpdate(sql);
+				}
 				}
 			} catch (SQLException e) {
 				errorCount++;

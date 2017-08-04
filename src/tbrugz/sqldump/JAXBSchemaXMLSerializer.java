@@ -152,7 +152,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			}
 		}
 		else {
-			String message = "props '"+PROP_XMLSERIALIZATION_JAXB_INFILE+"' nor '"+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"' defined";
+			String message = "props '"+PROP_XMLSERIALIZATION_JAXB_INFILE+"' nor '"+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"' defined [prefix="+propertiesPrefix+"]";
 			log.warn(message);
 			if(failonerror) { throw new ProcessingException(message); }
 		}
