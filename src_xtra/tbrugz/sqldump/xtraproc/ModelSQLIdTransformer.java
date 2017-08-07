@@ -16,7 +16,7 @@ import tbrugz.sqldump.util.StringDecorator;
 
 public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 
-	static Log log = LogFactory.getLog(ModelSQLIdTransformer.class);
+	static final Log log = LogFactory.getLog(ModelSQLIdTransformer.class);
 
 	StringDecorator identifierDecorator;
 	StringDecorator colTypeDecorator;
@@ -39,8 +39,17 @@ public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 	
 	@Override
 	public void process() {
+		String decorated = null;
 		for(Table table: model.getTables()) {
-			table.setName( identifierDecorator.get(table.getName()) );
+			if( (decorated = shouldDecorate(identifierDecorator, table.getSchemaName())) !=null) {
+				log.debug("[schemaName] transform id: '"+table.getSchemaName()+"' -> '"+decorated+"'");
+				table.setSchemaName( decorated );
+			}
+			if( (decorated = shouldDecorate(identifierDecorator, table.getName())) !=null) {
+				log.debug("[tableName] transform id: '"+table.getName()+"' -> '"+decorated+"'");
+				table.setName( decorated );
+			}
+			
 			for(Column col: table.getColumns()) {
 				col.setName( identifierDecorator.get(col.getName()) );
 				col.setType( colTypeDecorator.get(col.getType()) );
@@ -62,7 +71,15 @@ public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 			i.setTableName(identifierDecorator.get( i.getTableName() ));
 			procList(i.getColumns(), identifierDecorator);
 		}
-		log.info("model transformer end: ok");
+		log.info("model transformer ended ok");
+	}
+	
+	String shouldDecorate(StringDecorator d, String s) {
+		String decorated = d.get(s);
+		if( (s==null && decorated!=null) || (s!=null && !s.equals(decorated)) ) {
+			return decorated;
+		}
+		return null;
 	}
 	
 	void procList(List<String> list, StringDecorator decorator) {
