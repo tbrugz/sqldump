@@ -146,6 +146,21 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return false;
 	}
 	
+	@Override
+	public boolean alterColumnDefaultRequireFullDefinition() {
+		return alterColumnTypeRequireFullDefinition();
+	}
+	
+	@Override
+	public boolean alterColumnNullableRequireFullDefinition() {
+		return alterColumnTypeRequireFullDefinition();
+	}
+	
+	@Override
+	public boolean alterColumnTypeRequireFullDefinition() {
+		return false;
+	}
+	
 	/*@Override
 	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
 		throw new UnsupportedOperationException("can't sqlAlterColumnByDiffing()");

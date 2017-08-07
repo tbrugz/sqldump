@@ -135,4 +135,8 @@ public interface DBMSFeatures {
 	
 	List<DBObjectType> getSupportedObjectTypes();
 	
+	boolean alterColumnTypeRequireFullDefinition();
+	boolean alterColumnDefaultRequireFullDefinition();
+	boolean alterColumnNullableRequireFullDefinition();
+
 }

@@ -27,6 +27,7 @@ import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldiff.model.ColumnDiff;
 import tbrugz.sqldiff.validate.DiffValidator;
+import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.DBObject;
@@ -35,9 +36,12 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.Executor;
+import tbrugz.sqldump.def.ProcessComponent;
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.processors.DirectoryCleaner;
+import tbrugz.sqldump.processors.SQLDialectTransformer;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -81,6 +85,11 @@ public class SQLDiff implements Executor {
 	public static final String PROP_FAILONERROR = PROP_PREFIX+".failonerror";
 	public static final String PROP_DELETEREGULARFILESDIR = PROP_PREFIX+".deleteregularfilesfromdir";
 	public static final String PROP_ADD_COMMENTS = PROP_PREFIX+".addcomments";
+	
+	//schemadiff
+	public static final String PROP_SCHEMADIFF_TARGET_DIALECT_TO_SOURCE = PROP_PREFIX+".schemadiff.transform-target-dialect-to-source";
+	public static final String PROP_SCHEMADIFF_SOURCE_PROCESSORS = PROP_PREFIX+".schemadiff.source.processors";
+	public static final String PROP_SCHEMADIFF_TARGET_PROCESSORS = PROP_PREFIX+".schemadiff.target.processors";
 	
 	//type-dependent props
 	public static final String PROP_COLUMNDIFF_TEMPCOLSTRATEGY = PROP_PREFIX+".columndiff.tempcolstrategy";
@@ -408,16 +417,61 @@ public class SQLDiff implements Executor {
 		ColumnDiff.updateFeatures(feat);
 	}
 	
-	SchemaDiff doDiffSchemas(SchemaModel fromSM, SchemaModel toSM) {
+	SchemaDiff doDiffSchemas(SchemaModel fromSM, SchemaModel toSM) throws ClassNotFoundException, SQLException, NamingException {
 		//XXX: option to set dialect from properties?
 		String dialect = fromSM.getSqlDialect();
 		setupFeatures(dialect);
+		
+		// sql dialect transformer
+		boolean doTransformTargetDialectToSource = Utils.getPropBool(prop, PROP_SCHEMADIFF_TARGET_DIALECT_TO_SOURCE, false);
+		if(doTransformTargetDialectToSource) {
+			Processor sdt = new SQLDialectTransformer();
+			Properties p = new Properties();
+			p.setProperty(SQLDialectTransformer.PROP_TRANSFORM_TO_DBID, dialect);
+			sdt.setProperties(p);
+			sdt.setSchemaModel(toSM);
+			sdt.process();
+		}
+		
+		// source/target processors
+		String sourceProcs = prop.getProperty(PROP_SCHEMADIFF_SOURCE_PROCESSORS);
+		if(sourceProcs!=null) {
+			processProcessors(sourceProcs, fromSM, "souce");
+		}
+		String targetProcs = prop.getProperty(PROP_SCHEMADIFF_TARGET_PROCESSORS);
+		if(targetProcs!=null) {
+			processProcessors(targetProcs, toSM, "target");
+		}
 		
 		//do diff
 		log.info("diffing... [dialect="+dialect+"]");
 		SchemaDiffer differ = new SchemaDiffer();
 		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
 		return differ.diffSchemas(fromSM, toSM);
+	}
+	
+	void processProcessors(String processorClassesStr, SchemaModel sm, String modelId) throws ClassNotFoundException, SQLException, NamingException {
+		List<ProcessComponent> pcs = SQLDump.getProcessComponentClasses(processorClassesStr, failonerror);
+		for(ProcessComponent pc: pcs) {
+			if(pc instanceof Processor) {
+				Processor proc = (Processor) pc;
+				pc.setProperties(prop);
+				if(proc.needsConnection()) {
+					log.warn(modelId+": processor '"+pc+"' needs connection?");
+				}
+				if(proc.needsSchemaModel()) {
+					proc.setSchemaModel(sm);
+				}
+				proc.setFailOnError(failonerror);
+				if(proc.acceptsOutputWriter()) {
+					log.warn(modelId+"processor '"+pc+"'needs writer?");
+				}
+				proc.process();
+			}
+			else {
+				log.warn(pc+": unknown processor type");
+			}
+		}
 	}
 	
 	void doDetectRenames(SchemaDiff diff) {
@@ -632,12 +686,13 @@ public class SQLDiff implements Executor {
 						+sql);
 					execCount++;
 					updateCount += conn.createStatement().executeUpdate(sql);
+					//log.debug("- previous="+d.getPreviousDefinition()+"\n- new="+d.getDefinition());
 				}
 				}
 			} catch (SQLException e) {
 				errorCount++;
 				lastEx = e;
-				log.warn("error executing diff: "+e);
+				log.warn("error executing diff: "+e+"\n- previous="+d.getPreviousDefinition()+"\n- new="+d.getDefinition());
 				if(failonerror) { break; }
 			}
 		}

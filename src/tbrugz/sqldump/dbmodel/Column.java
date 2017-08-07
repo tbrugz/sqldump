@@ -207,6 +207,14 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
 			:"");
 	}
+
+	public String getFullColumnConstraints() {
+		return getDefaultSnippet()
+			+getFullNullableSnippet()
+			+(ColTypeUtil.useAutoIncrement()?
+				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
+			:"");
+	}
 	
 	//XXX: complete syntax parameter? may return 'default null'
 	public String getDefaultSnippet() {

@@ -228,16 +228,37 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			//XXX: add to AbstractDBMSFeatures ??
 			//oracle-like syntax?
 			//alterSql = "alter table "+DBObject.getFinalName(table, true)+" "+features.sqlAlterColumnClause()+" "+column.getName();
+			boolean alterTypeRequireFullDefinition = features.alterColumnTypeRequireFullDefinition();
+			boolean alterDefaultRequireFullDefinition = features.alterColumnDefaultRequireFullDefinition();
+			boolean alterNullableRequireFullDefinition = features.alterColumnNullableRequireFullDefinition();
+			
 			alterSql = "";
 			if(! StringUtils.equalsWithUpperCase(previousColumn.getTypeDefinition(), column.getTypeDefinition())) {
+				if(alterTypeRequireFullDefinition) {
+					alterSql += " "+column.getTypeDefinition()+column.getFullColumnConstraints();
+				}
+				else {
 				alterSql += " "+column.getTypeDefinition();
 			}
+			}
 			else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
-				alterSql += column.getFullDefaultSnippet();
+				if(alterDefaultRequireFullDefinition) {
+					alterSql += " "+column.getTypeDefinition()+column.getFullColumnConstraints();
+					//alterSql += " "+column.getTypeDefinition();
+				}
+				else {
+					alterSql += " "+column.getFullDefaultSnippet();
+				}
 				//alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
 			}
 			else if(!previousColumn.getNullableSnippet().equals(column.getNullableSnippet())) {
-				alterSql += column.getFullNullableSnippet();
+				if(alterNullableRequireFullDefinition) {
+					alterSql += " "+column.getTypeDefinition()+column.getFullColumnConstraints();
+					//alterSql += " "+column.getTypeDefinition();
+				}
+				else {
+					alterSql += " "+column.getFullNullableSnippet();
+				}
 				//alterSql += (column.isNullable()?" null":column.getNullableSnippet());
 			}
 			
