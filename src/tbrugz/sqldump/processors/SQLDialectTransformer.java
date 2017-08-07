@@ -20,8 +20,8 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SQLDialectTransformer extends AbstractSchemaProcessor {
 
-	static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
-	static final String PROP_TRANSFORM_TO_DBID = "sqldump.schematransform.todbid";
+	public static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
+	public static final String PROP_TRANSFORM_TO_DBID = "sqldump.schematransform.todbid";
 	
 	static final Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
@@ -55,20 +55,22 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 				if(ansiColType!=null) {
 					ansiColType = ansiColType.toUpperCase();
 					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, ansiColType);
-					log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+					//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 					//newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDialectId+"."+ansiColType);
 				}
 				else {
 					// ansi type is null, use original type
 					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, colType.toUpperCase());
-					log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+					//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 				}
 				
 				if(newColType!=null && !newColType.equalsIgnoreCase(colType)) {
 					col.setType(newColType);
+					log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 				}
 				else if(ansiColType!=null) {
 					col.setType(ansiColType);
+					log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
 				}
 				/*else {
 					//log.debug("old col type: "+colType);

@@ -72,6 +72,8 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		if(doRemoveSchemaName) {
 			removeSchemaname();
 		}
+		
+		log.info("model transformer ended ok");
 	}
 
 	//moved from SchemaModelTransformer.dumpSchema()
