@@ -15,7 +15,7 @@ public class Defs {
 	
 	static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	
-	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors", "tbrugz", "" }; 
+	public static final String[] DEFAULT_CLASSLOADING_PACKAGES = { "tbrugz.sqldump", "tbrugz.sqldump.datadump", "tbrugz.sqldump.processors", "tbrugz", "" };
 
 	public static final String PATTERN_SCHEMANAME = "schemaname";
 	public static final String PATTERN_OBJECTTYPE = "objecttype";
