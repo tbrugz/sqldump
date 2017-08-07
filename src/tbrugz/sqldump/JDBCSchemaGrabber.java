@@ -122,6 +122,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		"Default" // neo4j
 	};
 	
+	//XXX: schema names to ignore by default... information_schema, pg_catalog, ...
+	
 	static final String DBID_ORACLE = "oracle";
 	
 	Connection conn;
@@ -266,7 +268,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//feats.procProperties(papp);
 		initFeatures(conn);
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
-		log.debug("feats/metadata: "+feats+" / "+dbmd);
+		log.info("feats/metadata: "+feats+" / "+dbmd);
 		ConnectionUtil.showDBInfo(conn.getMetaData());
 		if(log.isInfoEnabled()) {
 			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
@@ -333,6 +335,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		//schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 		schemaModel.setSqlDialect(feats.getId());
+		log.info("feats/metadata: "+feats+" / "+dbmd+ " / "+feats.getId());
 
 		if(doSchemaGrabTables) {
 			List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMAGRAB_TABLEFILTER, ","); 
@@ -348,7 +351,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 		
-		//TODO: option to grab all FKs from schema...
+		//TODO!!: option to grab all FKs from schema...
 		
 		if(doSchemaGrabTables) {
 			if(recursivedump) {
@@ -422,13 +425,20 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn(getIdDesc()+"runtime exception grabbing functions: "+e);
 			}
 			catch(SQLException e) {
-				log.warn(getIdDesc()+"sql exception grabbing functions: "+e);
+				// h2 & postgresql can't grab functions
+				String warn = getIdDesc()+"sql exception grabbing functions: "+e;
+				if(feats.getId().equals("h2") || feats.getId().equals("pgsql")) {
+					log.debug(warn);
+				}
+				else {
+					log.warn(warn);
+				}
 			}
 			//XXX: add ["+executableStats()+"]?
 			log.info(getIdDesc()+countfunc+" functions grabbed");
 		}
 		
-		//XXX schema GRANTs ? how/where to add in schemaModel?
+		//XXX!!! schema GRANTs ? how/where to add in schemaModel?
 		if(doGrabAllSchemaGrants) {
 			for(String schemaName: schemasList) {
 				log.info(getIdDesc()+"getting grants from schema "+schemaName);
@@ -973,7 +983,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				log.warn("unknown column name for function parameter ordinal position: "+e);
 			}
 			
-			String pName = rs.getString("FUNCTION_NAME");
+			String pName = rs.getString("FUNCTION_NAME"); //XXX: postgresql error?
 			String pSchem = rs.getString("FUNCTION_SCHEM");
 			ExecutableObject eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 			if(eo==null) {

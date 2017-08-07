@@ -102,4 +102,9 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 		return true;
 	}
 	
+	@Override
+	public boolean alterColumnTypeRequireFullDefinition() {
+		return true;
+	}
+	
 }
