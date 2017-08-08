@@ -285,6 +285,51 @@ public class DataDumpUtils {
 		}
 		return sb.toString();
 	}
+
+	public static String xmlEscapeTextFull(String t) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < t.length(); i++) {
+			char c = t.charAt(i);
+			switch (c) {
+			case '<':
+				sb.append("&lt;");
+				break;
+			case '>':
+				sb.append("&gt;");
+				break;
+			case '\"':
+				sb.append("&quot;");
+				break;
+			case '&':
+				sb.append("&amp;");
+				break;
+			case '\'':
+				sb.append("&apos;");
+				break;
+			default:
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
+	
+	/*public static String xmlEscapeAttributeValue(String t) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < t.length(); i++) {
+			char c = t.charAt(i);
+			switch (c) {
+			case '\"':
+				sb.append("&quot;");
+				break;
+			case '\'':
+				sb.append("&apos;");
+				break;
+			default:
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}*/
 	
 	public static Collection<String> values4sql(Collection<?> s, DateFormat df) {
 		Iterator<?> iter = s.iterator();
