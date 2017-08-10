@@ -189,9 +189,17 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition()+getColumnConstraints();
 	}
 	
+	public String getDefinition4Diff() {
+		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition(true)+getColumnConstraints();
+	}
+	
 	public String getTypeDefinition() {
+		return getTypeDefinition(false);
+	}
+	
+	String getTypeDefinition(boolean upper) {
 		if(type==null) { return null; }
-		String colType = type.trim();
+		String colType = upper?type.trim().toUpperCase():type.trim();
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 		return colType
 			+((usePrecision && columnSize!=null)?"("+columnSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");

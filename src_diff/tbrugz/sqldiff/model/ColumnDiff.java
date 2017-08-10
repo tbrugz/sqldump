@@ -342,10 +342,9 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	
 	@Override
 	public String toString() {
-		return "[ColDiff:"+DBObject.getFinalName(table, true)+","+type+","
-				+(type==ChangeType.RENAME?previousColumn+"->"+column:
-					type==ChangeType.DROP?previousColumn:
-						column)
+		return "[ColDiff:"+DBObject.getFinalName(table, true)+","+type+"," +
+				((type==ChangeType.RENAME||type==ChangeType.ALTER)?previousColumn+"->"+column:
+				(type==ChangeType.DROP)?previousColumn:column)
 				+"]";
 	}
 
