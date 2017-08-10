@@ -20,8 +20,10 @@ import tbrugz.sqldump.util.Utils;
  */
 public class SQLDialectTransformer extends AbstractSchemaProcessor {
 
-	public static final String PROP_TRANSFORM_TO_ANSI = "sqldump.schematransform.toansi";
-	public static final String PROP_TRANSFORM_TO_DBID = "sqldump.schematransform.todbid";
+	public static final String PROP_PREFIX = "sqldump.schematransform";
+	
+	public static final String PROP_TRANSFORM_TO_ANSI = PROP_PREFIX+".toansi";
+	public static final String PROP_TRANSFORM_TO_DBID = PROP_PREFIX+".todbid";
 	
 	static final Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
@@ -34,7 +36,7 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 		if(toDialectId==null && !toANSI) {
 			log.warn("undefined toDialectId or '.toansi' property");
 			if(failonerror) {
-				throw new ProcessingException("SQLDialectTransformer: undefined toDialectId or '.toansi' property");
+				throw new ProcessingException("SQLDialectTransformer: undefined toDialectId or '.toansi' property [prefix="+PROP_PREFIX+"]");
 			}
 			return;
 		}
