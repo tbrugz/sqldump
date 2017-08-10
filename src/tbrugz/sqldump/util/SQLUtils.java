@@ -299,6 +299,8 @@ public class SQLUtils {
 			case Types.VARCHAR:  // 12
 			//case Types.CLOB:
 				return String.class;
+			case Types.BINARY:        //   -2  // postgresql BYTEA
+			case Types.VARBINARY:     //   -3  // mysql BLOB
 			case Types.LONGVARBINARY: //   -4
 			case Types.BLOB:          // 2004
 				return Blob.class;

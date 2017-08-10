@@ -193,7 +193,8 @@ public class ConnectionUtil {
 			return DriverManager.getConnection(dbUrl, p);
 		}
 		catch(SQLException e) {
-			log.warn("error creating connection: '"+user+"@"+dbUrl+"'"
+			log.warn("error creating connection: '"+(user==null?"":user+"@")+dbUrl+"'"
+					+((user==null)?" [null user]":"")
 					+((password==null)?" [null password]":" [with password]")
 					);
 			throw e;
