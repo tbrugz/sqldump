@@ -247,7 +247,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 					//alterSql += " "+column.getTypeDefinition();
 				}
 				else {
-					alterSql += " "+column.getFullDefaultSnippet();
+					alterSql += column.getFullDefaultSnippet();
 				}
 				//alterSql += (column.getDefaultSnippet().trim().equals("")?" default null":column.getDefaultSnippet());
 			}
@@ -257,7 +257,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 					//alterSql += " "+column.getTypeDefinition();
 				}
 				else {
-					alterSql += " "+column.getFullNullableSnippet();
+					alterSql += column.getFullNullableSnippet();
 				}
 				//alterSql += (column.isNullable()?" null":column.getNullableSnippet());
 			}
