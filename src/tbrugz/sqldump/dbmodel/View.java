@@ -126,7 +126,7 @@ public class View extends DBObject implements Relation {
 	
 	@Override
 	public String toString() {
-		return "View["+getName()+"]";
+		return "View["+getQualifiedName()+"]";
 	}
 	
 	@Override

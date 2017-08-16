@@ -686,7 +686,10 @@ public class SQLDiff implements Executor {
 						+sql);
 					execCount++;
 					updateCount += conn.createStatement().executeUpdate(sql);
-					//log.debug("- previous="+d.getPreviousDefinition()+"\n- new="+d.getDefinition());
+					String previousDef = d.getPreviousDefinition();
+					if(previousDef!=null && !previousDef.isEmpty() && log.isDebugEnabled()) {
+						log.debug("diff #"+diffCount+":\n- previous= "+d.getPreviousDefinition()+"\n- new     = "+d.getDefinition());
+					}
 				}
 				}
 			} catch (SQLException e) {
