@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -356,7 +357,8 @@ public class PivotResultSet extends AbstractResultSet {
 
 		//log.info("nonPivotKeyValues: "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
 		if(sortNonPivotKeyValues) {
-			nonPivotKeyValues.sort(null);
+			//nonPivotKeyValues.sort(null); //java 8
+			Collections.sort(nonPivotKeyValues);
 		}
 		//log.info("after: "+nonPivotKeyValues);
 		
