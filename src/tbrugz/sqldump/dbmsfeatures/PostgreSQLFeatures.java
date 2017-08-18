@@ -2,12 +2,15 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Array;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +18,8 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Table;
+import tbrugz.sqldump.dbmodel.TableType;
 
 /*
  * TODO: add grab materialized views...
@@ -110,30 +115,80 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
 	}
 	
 	/*
-	 * TODO: add support for foreign tables..
+	 * TODOne: add support for foreign tables..
 	 * 
 	 * create FOREIGN table (...)
 	 * 
 	 * footer:
 	 * SERVER servername
 	 * OPTIONS (schema 'SCHEMA', table 'TABLE');
-	 * 
-	 * select * from information_schema._pg_foreign_tables
 	 */
+	
 	/*
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
 		return new PostgreSqlDatabaseMetaData(metadata);
-	}
+	}*/
 	
 	@Override
 	public Table getTableObject() {
 		return new PostgreSqlTable();
 	}
-	
+
+	/*
 	@Override
 	public void addTableSpecificFeatures(Table t, ResultSet rs) {
 	}
 	*/
+	
+	@Override
+	public void addTableSpecificFeatures(Table t, Connection conn) throws SQLException {
+		if(t.getType().equals(TableType.FOREIGN_TABLE)) {
+			PostgreSqlTable pt = (PostgreSqlTable) t;
+			
+			String server = getForeignTableServer(conn, pt.getSchemaName(), pt.getName());
+			Map<String,String> options = getForeignTableOptions(conn, pt.getSchemaName(), pt.getName());
+			pt.setForeignTableServer(server);
+			pt.setForeignTableOptions(options);
+		}
+	}
+	
+	String getForeignTableServer(Connection conn, String schema, String name) throws SQLException {
+		String ret = null;
+		
+		String sql = "select foreign_table_schema, foreign_table_name, foreign_server_name\n" +
+				"from information_schema.foreign_tables\n" +
+				"where foreign_table_schema = ?\n" +
+				"and foreign_table_name = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, schema);
+		ps.setString(2, name);
+		ResultSet rs = ps.executeQuery();
+		if(rs.next()) {
+			ret = rs.getString(3);
+		}
+		
+		return ret;
+	}
 
+	Map<String,String> getForeignTableOptions(Connection conn, String schema, String name) throws SQLException {
+		Map<String,String> ret = new LinkedHashMap<String, String>();
+		
+		String sql = "select foreign_table_schema, foreign_table_name, option_name, option_value\n" + 
+				"from information_schema.foreign_table_options\n" + 
+				"where foreign_table_schema = ?\n" + 
+				"and foreign_table_name = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, schema);
+		ps.setString(2, name);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			String key = rs.getString(3);
+			String value = rs.getString(4);
+			ret.put(key, value);
+		}
+	
+		return ret;
+	}
+	
 }

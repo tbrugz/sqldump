@@ -74,7 +74,7 @@ public class Table extends DBObject implements Relation {
 		sb.append("create ");
 		String type4sql = getTableType4sql();
 		sb.append(type4sql);
-		if(!type4sql.isEmpty()) { sb.append(" "); }
+		if(type4sql==null || !type4sql.isEmpty()) { sb.append(" "); }
 		sb.append("table "+tableName+" ("
 				+(dumpComments?" -- type="+type:"") );
 

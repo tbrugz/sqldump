@@ -4,3 +4,4 @@ InformationSchemaTrigger
 OracleTable
 OracleTablePartition
 OracleFK
+PostgreSqlTable
