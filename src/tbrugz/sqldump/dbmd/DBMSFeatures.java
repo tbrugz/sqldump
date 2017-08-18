@@ -51,6 +51,7 @@ public interface DBMSFeatures {
 	*/
 	
 	void addTableSpecificFeatures(Table t, ResultSet rs);
+	void addTableSpecificFeatures(Table t, Connection conn) throws SQLException;
 	void addColumnSpecificFeatures(Column c, ResultSet rs);
 	void addFKSpecificFeatures(FK fk, ResultSet rs);
 	

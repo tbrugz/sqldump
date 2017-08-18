@@ -98,6 +98,10 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 
 	@Override
+	public void addTableSpecificFeatures(Table t, Connection conn) throws SQLException {
+	}
+
+	@Override
 	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
 	}
 

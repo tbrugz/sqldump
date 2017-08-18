@@ -38,7 +38,7 @@ public class OracleTable extends Table {
 	
 	@Override
 	public String getTableType4sql() {
-		return temporary?"global temporary ":"";
+		return temporary?"global temporary":"";
 	}
 	
 	@Override

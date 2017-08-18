@@ -72,7 +72,9 @@ public class Table extends DBObject implements Relation {
 			sb.append("drop table "+tableName+";\n\n");
 		}
 		sb.append("create ");
-		sb.append(getTableType4sql());
+		String type4sql = getTableType4sql();
+		sb.append(type4sql);
+		if(!type4sql.isEmpty()) { sb.append(" "); }
 		sb.append("table "+tableName+" ("
 				+(dumpComments?" -- type="+type:"") );
 

@@ -625,6 +625,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				table.setDomainTable(true);
 			}
 			dbmsfeatures.addTableSpecificFeatures(table, rs);
+			dbmsfeatures.addTableSpecificFeatures(table, conn);
 			
 			try {
 				String fullTablename = table.getQualifiedName();
