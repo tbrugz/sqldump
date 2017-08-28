@@ -38,18 +38,22 @@ public class JSONDataDump extends AbstractDumpSyntax {
 	static final String JSON_SYNTAX_ID = "json";
 	static final String PREFIX_JSON = "sqldump.datadump."+JSON_SYNTAX_ID;
 
+	static final String DEFAULT_DATA_ELEMENT = "data";
 	static final String DEFAULT_METADATA_ELEMENT = "$metadata"; // "@metadata"? "$metadata" ?
 	// see http://json-schema.org/example1.html ('$' can be used in js identifier)
 	static final String DEFAULT_DATE_FORMAT = "\"yyyy-MM-dd\"";
 	static final boolean DEFAULT_METADATA_ADD = false;
+	static final boolean DEFAULT_TABLE_AS_DATA_ELEMENT = true;
 	
 	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
 	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
 	static final String PROP_METADATA_ELEMENT = PREFIX_JSON+".metadata-element";
 	static final String PROP_JSONP_CALLBACK = PREFIX_JSON+".callback";
+	static final String PROP_TABLE_AS_DATA_ELEMENT = PREFIX_JSON+".table-as-data-element";
 	
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
 	
+	boolean tableNameAsDataElement = DEFAULT_TABLE_AS_DATA_ELEMENT;
 	String dataElement = null; //XXX "data" as default dataElement? "rows"?
 	boolean addMetadata = false;
 	String metadataElement = DEFAULT_METADATA_ELEMENT;
@@ -66,6 +70,13 @@ public class JSONDataDump extends AbstractDumpSyntax {
 			dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 		}
 		dataElement = prop.getProperty(PROP_DATA_ELEMENT);
+		if(dataElement!=null) {
+			tableNameAsDataElement = false;
+		}
+		else {
+			dataElement = DEFAULT_DATA_ELEMENT;
+		}
+		tableNameAsDataElement = Utils.getPropBool(prop, PROP_TABLE_AS_DATA_ELEMENT, tableNameAsDataElement);
 		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, DEFAULT_METADATA_ADD);
 		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, DEFAULT_METADATA_ELEMENT);
 		callback = prop.getProperty(PROP_JSONP_CALLBACK);
@@ -83,7 +94,8 @@ public class JSONDataDump extends AbstractDumpSyntax {
 	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		String dtElem = dataElement!=null?dataElement:tableName;
+		String dtElem = tableNameAsDataElement ? tableName : dataElement;
+		//String dtElem = (dataElement!=null && !dataElement.isEmpty()) ? dataElement : tableName;
 		
 		if(callback!=null) {
 			out(callback+"(", fos);
@@ -91,14 +103,15 @@ public class JSONDataDump extends AbstractDumpSyntax {
 		
 		if(dtElem!=null) {
 			out("{", fos);
-			//TODOne: add metadata
 			if(addMetadata) {
 				StringBuilder sb = new StringBuilder();
-				//sb.append("\n\t\"schema\": \""+schema+"\"");
+				if(schemaName!=null) {
+					sb.append("\n\t\"schema\": \""+schemaName+"\",");
+				}
 				sb.append("\n"+padding+"\t\t\"name\": \""+tableName+"\",");
 				sb.append("\n"+padding+"\t\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
-				sb.append("\n"+padding+"\t\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"]");
-				//sb.append("\n\t\"dataElement\": \""+dataElement+"\"");
+				sb.append("\n"+padding+"\t\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"],");
+				sb.append("\n"+padding+"\t\t\"dataElement\": \""+dtElem+"\"");
 				
 				out("\n\t\""+metadataElement+"\": "
 						+"{"
