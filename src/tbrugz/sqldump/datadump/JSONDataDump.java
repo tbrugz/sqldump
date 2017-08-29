@@ -52,6 +52,7 @@ public class JSONDataDump extends AbstractDumpSyntax {
 	static final String PROP_TABLE_AS_DATA_ELEMENT = PREFIX_JSON+".table-as-data-element";
 	
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
+	static final boolean fullInnerTable = false;
 	
 	boolean tableNameAsDataElement = DEFAULT_TABLE_AS_DATA_ELEMENT;
 	String dataElement = null; //XXX "data" as default dataElement? "rows"?
@@ -92,11 +93,15 @@ public class JSONDataDump extends AbstractDumpSyntax {
 		//if(pkCols==null) { usePK = false; } else { usePK = true; }
 	}
 	
+	protected String getDataElement() {
+		return tableNameAsDataElement ? tableName : dataElement;
+	}
+	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
-		String dtElem = tableNameAsDataElement ? tableName : dataElement;
+		String dtElem = getDataElement();
 		//String dtElem = (dataElement!=null && !dataElement.isEmpty()) ? dataElement : tableName;
-		
+		//log.debug("json: dump header: "+dtElem+" / "+tableName+" / "+addMetadata);
 		if(callback!=null) {
 			out(callback+"(", fos);
 		}
@@ -106,7 +111,7 @@ public class JSONDataDump extends AbstractDumpSyntax {
 			if(addMetadata) {
 				StringBuilder sb = new StringBuilder();
 				if(schemaName!=null) {
-					sb.append("\n\t\"schema\": \""+schemaName+"\",");
+					sb.append("\n"+padding+"\t\t\"schema\": \""+schemaName+"\",");
 				}
 				sb.append("\n"+padding+"\t\t\"name\": \""+tableName+"\",");
 				sb.append("\n"+padding+"\t\t\"columns\": ["+Utils.join(lsColNames, ", ", doubleQuoter)+"],");
@@ -150,20 +155,23 @@ public class JSONDataDump extends AbstractDumpSyntax {
 				if(rsInt==null) {
 					continue;
 				}
+				String innerTableName = lsColNames.get(i);
 				
-				out(sb.toString()+",\n",fos);
-				out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
-				sb = new StringBuilder();
+				sb.append(",\n");
+				sb.append("\t\t\t"+"\""+innerTableName+"\": ");
+				out(sb.toString(), fos);
+				//out(sb.toString()+",\n",fos);
+				//out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
+				sb.setLength(0);
+				//sb = new StringBuilder();
 				
-				JSONDataDump jsondd = new JSONDataDump();
+				JSONDataDump jsondd = clone();
 				jsondd.padding = this.padding+"\t\t";
-				jsondd.dateFormatter = this.dateFormatter;
-				jsondd.floatFormatter = this.floatFormatter;
-				jsondd.nullValueStr = this.nullValueStr;
-				//jsondd.addMetadata = this.addMetadata; ?
+				jsondd.callback = null;
+				//jsondd.tableNameAsDataElement = true;
 				//jsondd's 'dtElem' should be null... jsondd should dump array... (?) 
 				// 'callback' should not be set on inner 'jsondd'
-				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, null, fos, true);
+				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fullInnerTable?innerTableName:null, fos, true);
 				sb.append("\n\t\t"+padding);
 			}
 			else {
@@ -179,13 +187,14 @@ public class JSONDataDump extends AbstractDumpSyntax {
 
 			}
 		}
-		sb.append("}");
-		out(sb.toString()+"\n", fos);
+		sb.append("}\n");
+		out(sb.toString(), fos);
 	}
 
 	@Override
 	public void dumpFooter(long count, Writer fos) throws IOException {
-		String dtElem = dataElement!=null?dataElement:tableName;
+		//String dtElem = dataElement!=null?dataElement:tableName;
+		String dtElem = getDataElement();
 		
 		if(dtElem!=null) {
 			out((usePK?"\t}":"\t]")+"\n"+padding+"}",fos);
@@ -238,4 +247,22 @@ public class JSONDataDump extends AbstractDumpSyntax {
 		}
 		return ret;
 	}
+
+	public JSONDataDump clone() {
+		JSONDataDump jsondd = new JSONDataDump();
+		// from DumpSyntax
+		jsondd.dateFormatter = this.dateFormatter;
+		jsondd.floatFormatter = this.floatFormatter;
+		jsondd.nullValueStr = this.nullValueStr;
+		// from JSON
+		jsondd.addMetadata = this.addMetadata;
+		jsondd.callback = this.callback;
+		jsondd.dataElement = this.dataElement;
+		jsondd.metadataElement = this.metadataElement;
+		jsondd.padding = this.padding;
+		jsondd.tableNameAsDataElement = this.tableNameAsDataElement;
+		
+		return jsondd;
+	}
+
 }
