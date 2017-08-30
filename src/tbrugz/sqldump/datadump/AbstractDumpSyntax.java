@@ -32,5 +32,20 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
 		}
 	}
+
+	public AbstractDumpSyntax build(String schemaName, String tableName,
+			List<String> pkCols, ResultSetMetaData md) {
+		try {
+			AbstractDumpSyntax dd = (AbstractDumpSyntax) clone();
+			dd.initDump(schemaName, tableName, pkCols, md);
+			return dd;
+		}
+		catch(CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+		catch(SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 }

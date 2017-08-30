@@ -133,10 +133,12 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	}
 	
 	@Override
-	public Object clone() throws CloneNotSupportedException {
+	public DumpSyntax clone() throws CloneNotSupportedException {
 		//throw CloneNotSupportedException?
 		//try {
-		return super.clone();
+		DumpSyntax dd = (DumpSyntax) super.clone();
+		updateProperties(dd);
+		return dd;
 		/*} catch (CloneNotSupportedException e) {
 			//e.printStackTrace();
 			throw new RuntimeException(e);
@@ -221,4 +223,11 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	@Override
 	public void setFeatures(DBMSFeatures features) {
 	}
+	
+	public void updateProperties(DumpSyntax ds) {
+		ds.dateFormatter = this.dateFormatter;
+		ds.floatFormatter = this.floatFormatter;
+		ds.nullValueStr = this.nullValueStr;
+	}
+
 }

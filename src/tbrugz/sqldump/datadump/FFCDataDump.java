@@ -338,7 +338,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable {
 		return "ffc.txt";
 	}
 	
-	@Override
+	/*@Override
 	public Object clone() throws CloneNotSupportedException {
 		return super.clone();
 		/*FFCDataDump newffc = new FFCDataDump();
@@ -357,8 +357,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable {
 		//setup
 		newffc.clearBuffer();
 		
-		return newffc;*/
-	}
+		return newffc;* /
+	}*/
 
 	@Override
 	public String getMimeType() {
