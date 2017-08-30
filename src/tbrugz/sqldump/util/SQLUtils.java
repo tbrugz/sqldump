@@ -41,6 +41,7 @@ public class SQLUtils {
 	static boolean strangePrecisionNumericAsInt = true;
 	static boolean defaultTypeIsString = true;
 	static boolean clobTypeIsString = true;
+	public static boolean failOnError = false;
 	
 	public static void setProperties(Properties prop) {
 		if(prop==null) { return; }
@@ -232,7 +233,7 @@ public class SQLUtils {
 				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {
 					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()+"; numCol="+numCol+"; rs.columnCount="+rs.getMetaData().getColumnCount()+"]: "+e);
 				}
-				//throw e;
+				if(failOnError) { throw e; }
 			}
 			catch(SQLException e) {
 				value = coltype.equals(String.class)?errorGettingValueStringValue:errorGettingValueValue;
@@ -244,6 +245,7 @@ public class SQLUtils {
 							+"]: "+e);
 					log.debug("error getting value [col="+i+"]", e);
 				}
+				if(failOnError) { throw e; }
 			}
 			
 			ls.add(value);

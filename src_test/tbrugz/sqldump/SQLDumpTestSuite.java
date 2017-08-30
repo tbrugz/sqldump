@@ -19,6 +19,7 @@ import tbrugz.sqldiff.util.RenameDetectorTest;
 import tbrugz.sqldiff.util.SimilarityCalculatorTest;
 import tbrugz.sqldiff.validate.DiffValidatorTest;
 import tbrugz.sqldump.ant.AntTasksTest;
+import tbrugz.sqldump.datadump.ConcurrentDumpTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.datadump.JsonTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
@@ -115,6 +116,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//datadump
 	DataDumpTest.class,
 	CascadingDataDumpTest.class,
+	ConcurrentDumpTest.class,
 	SQLRunProcessorTest.class,
 	
 	//graph

@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: http://dataprotocols.org/json-table-schema/
  */
-public class JSONDataDump extends AbstractDumpSyntax {
+public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
 
 	static final Log log = LogFactory.getLog(JSONDataDump.class);
 
@@ -248,12 +248,16 @@ public class JSONDataDump extends AbstractDumpSyntax {
 		return ret;
 	}
 
+	@Override
 	public JSONDataDump clone() {
 		JSONDataDump jsondd = new JSONDataDump();
+		
 		// from DumpSyntax
-		jsondd.dateFormatter = this.dateFormatter;
+		/*jsondd.dateFormatter = this.dateFormatter;
 		jsondd.floatFormatter = this.floatFormatter;
-		jsondd.nullValueStr = this.nullValueStr;
+		jsondd.nullValueStr = this.nullValueStr;*/
+		updateProperties(jsondd);
+		
 		// from JSON
 		jsondd.addMetadata = this.addMetadata;
 		jsondd.callback = this.callback;
@@ -264,5 +268,13 @@ public class JSONDataDump extends AbstractDumpSyntax {
 		
 		return jsondd;
 	}
+
+	/*@Override
+	public JSONDataDump build(String schemaName, String tableName,
+			List<String> pkCols, ResultSetMetaData md) throws SQLException {
+		JSONDataDump jsondd = clone();
+		jsondd.initDump(schemaName, tableName, pkCols, md);
+		return jsondd;
+	}*/
 
 }

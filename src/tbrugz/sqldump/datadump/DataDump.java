@@ -555,7 +555,7 @@ public class DataDump extends AbstractSQLProc {
 				
 				if(ds.usesAllUKs()) {
 					ds.setAllUKs(uniqueKeys);
-				} 
+				}
 				
 				if(ds.isWriterIndependent()) { 
 					doSyntaxDumpList.set(i, true);

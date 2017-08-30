@@ -39,7 +39,7 @@ import tbrugz.sqldump.util.Utils;
    http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
    http://www.iana.org/assignments/media-types/text/csv-schema
  */
-public class CSVDataDump extends AbstractDumpSyntax {
+public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, Cloneable {
 	
 	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
@@ -57,7 +57,7 @@ public class CSVDataDump extends AbstractDumpSyntax {
 	
 	static final String CSV_SYNTAX_ID = "csv";
 	
-	ResultSetMetaData md;
+	//ResultSetMetaData md;
 	
 	boolean doTableNameHeaderDump = false;
 	boolean doColumnNamesHeaderDump = DEFAULT_COLUMNNAMESHEADER;
@@ -79,7 +79,7 @@ public class CSVDataDump extends AbstractDumpSyntax {
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
-		this.md = md;
+		//this.md = md;
 
 		//doTableNameHeaderDump = (Boolean) os[5];
 		//doColumnNamesHeaderDump = (Boolean) os[6];
@@ -171,6 +171,19 @@ public class CSVDataDump extends AbstractDumpSyntax {
 	@Override
 	public String getMimeType() {
 		return "text/csv";
+	}
+
+	@Override
+	public CSVDataDump clone() throws CloneNotSupportedException {
+		CSVDataDump dd = (CSVDataDump) super.clone();
+		
+		dd.columnDelimiter = this.columnDelimiter;
+		dd.doTableNameHeaderDump = this.doTableNameHeaderDump;
+		dd.doColumnNamesHeaderDump = this.doColumnNamesHeaderDump;
+		dd.enclosing = this.enclosing;
+		dd.recordDelimiter = this.columnDelimiter;
+		
+		return dd;
 	}
 	
 }
