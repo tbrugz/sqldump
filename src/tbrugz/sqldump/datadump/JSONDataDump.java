@@ -253,9 +253,6 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		JSONDataDump jsondd = new JSONDataDump();
 		
 		// from DumpSyntax
-		/*jsondd.dateFormatter = this.dateFormatter;
-		jsondd.floatFormatter = this.floatFormatter;
-		jsondd.nullValueStr = this.nullValueStr;*/
 		updateProperties(jsondd);
 		
 		// from JSON

@@ -23,7 +23,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: https://developer.mozilla.org/en/docs/Web/HTML/Element/table
  */
-public class HTMLDataDump extends XMLDataDump {
+public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder {
 
 	static final Log log = LogFactory.getLog(HTMLDataDump.class);
 
@@ -50,8 +50,8 @@ public class HTMLDataDump extends XMLDataDump {
 	protected static final String DEFAULT_PADDING = "";
 	protected static final boolean DEFAULT_ADD_CAPTION = false;
 
-	protected final String padding;
-	protected final boolean innerTable;
+	protected String padding;
+	protected boolean innerTable;
 	
 	protected String prepend = null;
 	protected String append = null;
@@ -73,13 +73,15 @@ public class HTMLDataDump extends XMLDataDump {
 	protected String colValSepPattern = null;
 	
 	public HTMLDataDump() {
-		this(DEFAULT_PADDING, false);
+		//this(DEFAULT_PADDING, false);
+		this.padding = DEFAULT_PADDING;
+		this.innerTable = false;
 	}
 	
-	public HTMLDataDump(String padding, boolean innerTable) {
+	/*public HTMLDataDump(String padding, boolean innerTable) {
 		this.padding = padding;
 		this.innerTable = innerTable;
-	}
+	}*/
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -294,10 +296,11 @@ public class HTMLDataDump extends XMLDataDump {
 				out(sb.toString()+"<td>\n", fos);
 				sb = new StringBuilder();
 				
-				HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t", true);
+				HTMLDataDump htmldd = innerClone();
+				//HTMLDataDump htmldd = new HTMLDataDump(this.padding+"\t\t", true);
 				//htmldd.padding = this.padding+"\t\t";
 				//log.info(":: "+rsInt+" / "+lsColNames);
-				htmldd.procProperties(prop);
+				//htmldd.procProperties(prop);
 				DataDumpUtils.dumpRS(htmldd, rsInt.getMetaData(), rsInt, null, finalColNames.get(i), fos, true);
 				sb.append("\n\t</td>");
 			}
@@ -348,4 +351,42 @@ public class HTMLDataDump extends XMLDataDump {
 	public String getMimeType() {
 		return "text/html";
 	}
+	
+	@Override
+	public void updateProperties(DumpSyntax ds) {
+		if(! (ds instanceof HTMLDataDump)) {
+			throw new RuntimeException(ds.getClass()+" must be instance of "+this.getClass());
+		}
+		HTMLDataDump dd = (HTMLDataDump) ds;
+		super.updateProperties(dd);
+		
+		dd.append = this.append;
+		dd.colSep = this.colSep;
+		dd.colSepPattern = this.colSepPattern;
+		dd.colValSep = this.colValSepPattern;
+		dd.dumpCaptionElement = this.dumpCaptionElement;
+		dd.dumpColElement = this.dumpColElement;
+		dd.dumpStyleNumericAlignRight = this.dumpStyleNumericAlignRight;
+		dd.innerTable = this.innerTable;
+		dd.onColsColCount = this.onColsColCount;
+		dd.onRowsColCount = this.onRowsColCount;
+		dd.padding = this.padding;
+		dd.prepend = this.prepend;
+		dd.xpendInnerTable = this.xpendInnerTable;
+	}
+	
+	@Override
+	public HTMLDataDump clone() {
+		HTMLDataDump dd = new HTMLDataDump();
+		updateProperties(dd);
+		return dd;
+	}
+	
+	HTMLDataDump innerClone() {
+		HTMLDataDump dd = clone();
+		dd.padding += "\t\t";
+		dd.innerTable = true;
+		return dd;
+	}
+
 }

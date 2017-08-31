@@ -34,16 +34,13 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	}
 
 	public AbstractDumpSyntax build(String schemaName, String tableName,
-			List<String> pkCols, ResultSetMetaData md) {
+			List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		try {
 			AbstractDumpSyntax dd = (AbstractDumpSyntax) clone();
 			dd.initDump(schemaName, tableName, pkCols, md);
 			return dd;
 		}
 		catch(CloneNotSupportedException e) {
-			throw new RuntimeException(e);
-		}
-		catch(SQLException e) {
 			throw new RuntimeException(e);
 		}
 	}

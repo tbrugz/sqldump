@@ -18,7 +18,7 @@ import tbrugz.sqldump.util.Utils;
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
 //XXX: XMLDataDump to extend AbstractXMLDataDump ? so HTMLDataDump and XMLDataDump would have a common ancestor
-public class XMLDataDump extends AbstractDumpSyntax {
+public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
 
 	public enum HeaderFooterDump {
 		ALWAYS, IFHASDATA, NEVER;
@@ -47,16 +47,18 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	//static final String PREFIX_DUMPROWELEMENT4COLUMN = "sqldump.datadump.xml.dumprowelement4column@";
 
 	public XMLDataDump() {
-		this("", HeaderFooterDump.ALWAYS);
+		//this("", HeaderFooterDump.ALWAYS);
+		this.padding = "";
+		this.dumpHeaderFooter = HeaderFooterDump.ALWAYS;
 	}
 
-	protected XMLDataDump(String padding, HeaderFooterDump dumpHeaderFooter) {
+	/*private XMLDataDump(String padding, HeaderFooterDump dumpHeaderFooter) {
 		this.padding = padding;
 		this.dumpHeaderFooter = dumpHeaderFooter;
-	}
+	}*/
 	
-	final String padding;
-	final HeaderFooterDump dumpHeaderFooter;
+	String padding;
+	HeaderFooterDump dumpHeaderFooter;
 	
 	//definitions from properties
 	protected Properties prop = null;
@@ -89,6 +91,7 @@ public class XMLDataDump extends AbstractDumpSyntax {
 		}
 		dumpTableNameAsRowTag = Utils.getPropBool(prop, PROP_DUMPTABLENAMEASROWTAG, dumpTableNameAsRowTag);
 		escape = Utils.getPropBool(prop, PROP_XML_ESCAPE, escape);
+		
 		this.prop = prop;
 		postProcProperties();
 	}
@@ -96,7 +99,8 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
-		
+
+		//XXX: properties that depend on tableName
 		rowElement = prop.getProperty(PREFIX_ROWELEMENT4TABLE+tableName, dumpTableNameAsRowTag?tableName:defaultRowElement);
 		dumpRowElement = Utils.getPropBool(prop, PREFIX_DUMPROWELEMENT4TABLE+tableName, defaultDumpRowElement);
 		escape4table = Utils.getPropBool(prop, PREFIX_ESCAPE4TABLE+tableName, escape);
@@ -136,8 +140,10 @@ public class XMLDataDump extends AbstractDumpSyntax {
 				dumpAndClearBuffer(sb, fos);
 				
 				//XXX: one dumper for each column (not each column/row)?
-				XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t", dumpHeader4InnerTables);
-				xmldd.procProperties(prop);
+				//XMLDataDump xmldd = new XMLDataDump(this.padding+"\t\t", dumpHeader4InnerTables);
+				//xmldd.procProperties(prop);
+				XMLDataDump xmldd = innerClone();
+				
 				/*String rowElement4column = prop.getProperty(PREFIX_ROWELEMENT4COLUMN+lsColNames.get(i));
 				if(rowElement4column!=null) {
 					Properties propInt = new Properties();
@@ -206,4 +212,45 @@ public class XMLDataDump extends AbstractDumpSyntax {
 	public String getMimeType() {
 		return "application/xml";
 	}
+	
+	@Override
+	public void updateProperties(DumpSyntax ds) {
+		if(! (ds instanceof XMLDataDump)) {
+			throw new RuntimeException(ds.getClass()+" must be instance of "+this.getClass());
+		}
+		XMLDataDump dd = (XMLDataDump) ds;
+		super.updateProperties(dd);
+		
+		dd.cols2Escape = this.cols2Escape;
+		dd.colsNot2Escape = this.colsNot2Escape;
+		dd.defaultDumpRowElement = this.defaultDumpRowElement;
+		dd.defaultRowElement = this.defaultRowElement;
+		dd.dumpHeader4InnerTables = this.dumpHeader4InnerTables;
+		dd.dumpHeaderFooter = this.dumpHeaderFooter;
+		dd.dumpNullValues = this.dumpNullValues;
+		dd.dumpRowElement = this.dumpRowElement;
+		dd.dumpTableNameAsRowTag = this.dumpTableNameAsRowTag;
+		dd.escape = this.escape;
+		dd.escape4table = this.escape4table;
+		dd.padding = this.padding;
+		dd.prop = this.prop;
+		dd.rowElement = this.rowElement;
+		dd.useUnderscoreRaw2escape = this.useUnderscoreRaw2escape;
+	}
+	
+	@Override
+	public XMLDataDump clone() {
+		XMLDataDump dd = new XMLDataDump();
+		updateProperties(dd);
+		return dd;
+	}
+	
+	XMLDataDump innerClone() {
+		XMLDataDump xmldd = null;
+		xmldd = clone();
+		xmldd.padding += "\t\t";
+		xmldd.dumpHeaderFooter =  dumpHeader4InnerTables;
+		return xmldd;
+	}
+	
 }
