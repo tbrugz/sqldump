@@ -18,7 +18,7 @@ import tbrugz.sqldump.util.Utils;
 //XXX: option to dump columns as XML atributes. maybe for columns with name like '@<xxx>'?
 //XXX: 'alwaysDumpHeaderAndFooter': prop for setting for main dumper & inner (ResultSet) dumpers (using prop per table name?)
 //XXX: XMLDataDump to extend AbstractXMLDataDump ? so HTMLDataDump and XMLDataDump would have a common ancestor
-public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
+public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, HierarchicalDumpSyntax {
 
 	public enum HeaderFooterDump {
 		ALWAYS, IFHASDATA, NEVER;
@@ -245,7 +245,8 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		return dd;
 	}
 	
-	XMLDataDump innerClone() {
+	@Override
+	public XMLDataDump innerClone() {
 		XMLDataDump xmldd = null;
 		xmldd = clone();
 		xmldd.padding += "\t\t";

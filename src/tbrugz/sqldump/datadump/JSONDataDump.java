@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: http://dataprotocols.org/json-table-schema/
  */
-public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
+public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, HierarchicalDumpSyntax {
 
 	static final Log log = LogFactory.getLog(JSONDataDump.class);
 
@@ -165,9 +165,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				sb.setLength(0);
 				//sb = new StringBuilder();
 				
-				JSONDataDump jsondd = clone();
-				jsondd.padding = this.padding+"\t\t";
-				jsondd.callback = null;
+				JSONDataDump jsondd = innerClone();
+				//jsondd.padding = this.padding+"\t\t";
+				//jsondd.callback = null;
 				//jsondd.tableNameAsDataElement = true;
 				//jsondd's 'dtElem' should be null... jsondd should dump array... (?) 
 				// 'callback' should not be set on inner 'jsondd'
@@ -273,5 +273,13 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		jsondd.initDump(schemaName, tableName, pkCols, md);
 		return jsondd;
 	}*/
+	
+	@Override
+	public JSONDataDump innerClone() {
+		JSONDataDump jsondd = clone();
+		jsondd.padding = this.padding+"\t\t";
+		jsondd.callback = null;
+		return jsondd;
+	}
 
 }

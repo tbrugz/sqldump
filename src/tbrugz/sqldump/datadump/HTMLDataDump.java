@@ -382,7 +382,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder {
 		return dd;
 	}
 	
-	HTMLDataDump innerClone() {
+	@Override
+	public HTMLDataDump innerClone() {
 		HTMLDataDump dd = clone();
 		dd.padding += "\t\t";
 		dd.innerTable = true;
