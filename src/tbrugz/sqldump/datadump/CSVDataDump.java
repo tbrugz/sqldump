@@ -39,7 +39,7 @@ import tbrugz.sqldump.util.Utils;
    http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
    http://www.iana.org/assignments/media-types/text/csv-schema
  */
-public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, Cloneable {
+public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
 	
 	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
@@ -172,17 +172,23 @@ public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 	public String getMimeType() {
 		return "text/csv";
 	}
-
+	
 	@Override
-	public CSVDataDump clone() throws CloneNotSupportedException {
-		CSVDataDump dd = (CSVDataDump) super.clone();
+	public void updateProperties(DumpSyntax ds) {
+		CSVDataDump dd = (CSVDataDump) ds;
+		super.updateProperties(dd);
 		
 		dd.columnDelimiter = this.columnDelimiter;
 		dd.doTableNameHeaderDump = this.doTableNameHeaderDump;
 		dd.doColumnNamesHeaderDump = this.doColumnNamesHeaderDump;
 		dd.enclosing = this.enclosing;
-		dd.recordDelimiter = this.columnDelimiter;
-		
+		dd.recordDelimiter = this.recordDelimiter;
+	}
+
+	@Override
+	public CSVDataDump clone() throws CloneNotSupportedException {
+		CSVDataDump dd = new CSVDataDump();
+		updateProperties(dd);
 		return dd;
 	}
 	
