@@ -143,4 +143,30 @@ public class ConcurrentDumpTest {
 		doDumpSyntaxBuilder(XMLDataDump.class.getCanonicalName());
 	}
 	
+	@Test
+	public void testBuilderFFC() throws Exception {
+		doDumpSyntaxBuilder(FFCDataDump.class.getCanonicalName());
+	}
+	
+	@Test
+	public void testBuilderInsertInto() throws Exception {
+		doDumpSyntaxBuilder(InsertIntoDataDump.class.getCanonicalName());
+	}
+	
+	/*
+		TODO: test builder with:
+		CacheRowSetSyntax
+		CSVWithRowNumber
+		DeleteByPK
+		DocbookTable
+		InsertIntoDatabase
+		JOpenDocODS
+		PoiXlsSyntax
+		PoiXlsxSyntax
+		SimpleODS
+		Turtle
+		UpdateByPKDataDump
+		WebRowSetSingleSyntax
+	*/
+	
 }

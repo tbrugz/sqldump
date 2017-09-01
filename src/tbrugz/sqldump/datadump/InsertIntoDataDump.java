@@ -22,7 +22,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class InsertIntoDataDump extends AbstractDumpSyntax {
+public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
 
 	private static final Log log = LogFactory.getLog(InsertIntoDataDump.class);
 	

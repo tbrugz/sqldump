@@ -45,7 +45,7 @@ import tbrugz.sqldump.util.Utils;
  * https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.fwf.html
  * https://www.treasury.gov/resource-center/sanctions/SDN-List/Documents/dat_spec.txt
  */
-public class FFCDataDump extends AbstractDumpSyntax implements Cloneable {
+public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
 	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
@@ -339,8 +339,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable {
 	}
 	
 	/*@Override
-	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
+	public FFCDataDump clone() throws CloneNotSupportedException {
+		return (FFCDataDump) super.clone();
 		/*FFCDataDump newffc = new FFCDataDump();
 		super.copyPropsTo(newffc);
 		

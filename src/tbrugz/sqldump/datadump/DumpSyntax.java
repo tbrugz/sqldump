@@ -137,7 +137,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		//throw CloneNotSupportedException?
 		//try {
 		DumpSyntax dd = (DumpSyntax) super.clone();
-		updateProperties(dd);
+		//updateProperties(dd);
 		return dd;
 		/*} catch (CloneNotSupportedException e) {
 			//e.printStackTrace();
