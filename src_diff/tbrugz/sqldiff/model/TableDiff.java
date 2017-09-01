@@ -154,14 +154,14 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 		for(Grant og: origGrants) {
 			if(!Grant.containsGrant(newGrants, og)) {
 				//log.debug("revoke: "+og);
-				diffs.add(new GrantDiff(og, origTable.getSchemaName(), true));
+				diffs.add(new GrantDiff(og, origTable.getSchemaName(), origTable.getName(), true));
 			}
 		}
 
 		for(Grant ng: newGrants) {
 			if(!Grant.containsGrant(origGrants, ng)) {
 				//log.debug("grant: "+ng);
-				diffs.add(new GrantDiff(ng, newTable.getSchemaName(), false));
+				diffs.add(new GrantDiff(ng, newTable.getSchemaName(), origTable.getName(), false));
 			}
 		}
 	}

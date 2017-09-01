@@ -31,9 +31,13 @@ public class GrantDiff extends SingleDiff implements Diff, Comparable<GrantDiff>
 		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);
 	}
 	
+	public GrantDiff(Grant grant, String schemaName, String tableName, boolean isRevoke) {
+		this(schemaName, tableName, grant.getPrivilege(), grant.getGrantee(), grant.isWithGrantOption(), isRevoke);
+	}
+	
 	//TODO: add column
 	public GrantDiff(Grant grant, String schemaName, boolean isRevoke) {
-		this(schemaName, grant.getTable(), grant.getPrivilege(), grant.getGrantee(), grant.isWithGrantOption(), isRevoke);
+		this(grant, schemaName, grant.getTable(), isRevoke);
 	}
 
 	@Override
