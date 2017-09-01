@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: http://dataprotocols.org/json-table-schema/
  */
-public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, HierarchicalDumpSyntax {
+public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder, HierarchicalDumpSyntax, Cloneable {
 
 	static final Log log = LogFactory.getLog(JSONDataDump.class);
 
@@ -54,11 +54,11 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
 	static final boolean fullInnerTable = false;
 	
-	boolean tableNameAsDataElement = DEFAULT_TABLE_AS_DATA_ELEMENT;
-	String dataElement = null; //XXX "data" as default dataElement? "rows"?
-	boolean addMetadata = false;
-	String metadataElement = DEFAULT_METADATA_ELEMENT;
-	String callback = null;
+	protected boolean tableNameAsDataElement = DEFAULT_TABLE_AS_DATA_ELEMENT;
+	protected String dataElement = null; //XXX "data" as default dataElement? "rows"?
+	protected boolean addMetadata = false;
+	protected String metadataElement = DEFAULT_METADATA_ELEMENT;
+	protected String callback = null;
 	
 	String padding = "";
 	
@@ -124,14 +124,19 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 						+"\n"+padding+"\t},"
 						, fos);
 			}
+			dumpXtraHeader(fos);
 			outNoPadding("\n"+padding+"\t\""+dtElem+"\": "
 				+(usePK?"{":"[")
 				+"\n", fos);
 		}
 		else {
+			dumpXtraHeader(fos);
 			outNoPadding((usePK?"{":"[")
 				+"\n", fos);
 		}
+	}
+	
+	protected void dumpXtraHeader(Writer fos) throws IOException {
 	}
 
 	@Override
@@ -208,7 +213,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		}
 	}
 
-	void out(String s, Writer pw) throws IOException {
+	protected void out(String s, Writer pw) throws IOException {
 		pw.write(padding+s);
 	}
 
@@ -249,8 +254,8 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	}
 
 	@Override
-	public JSONDataDump clone() {
-		JSONDataDump jsondd = new JSONDataDump();
+	public JSONDataDump clone() throws CloneNotSupportedException {
+		JSONDataDump jsondd = (JSONDataDump) super.clone();
 		
 		// from DumpSyntax
 		updateProperties(jsondd);
@@ -276,10 +281,14 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	
 	@Override
 	public JSONDataDump innerClone() {
-		JSONDataDump jsondd = clone();
-		jsondd.padding = this.padding+"\t\t";
-		jsondd.callback = null;
-		return jsondd;
+		try {
+			JSONDataDump jsondd = clone();
+			jsondd.padding = this.padding+"\t\t";
+			jsondd.callback = null;
+			return jsondd;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
