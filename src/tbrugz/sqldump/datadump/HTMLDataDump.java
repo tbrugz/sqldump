@@ -23,7 +23,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: https://developer.mozilla.org/en/docs/Web/HTML/Element/table
  */
-public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder {
+public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Cloneable {
 
 	static final Log log = LogFactory.getLog(HTMLDataDump.class);
 
@@ -375,19 +375,24 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder {
 		dd.xpendInnerTable = this.xpendInnerTable;
 	}
 	
-	@Override
+	/*@Override
 	public HTMLDataDump clone() {
 		HTMLDataDump dd = new HTMLDataDump();
 		updateProperties(dd);
 		return dd;
-	}
+	}*/
 	
 	@Override
 	public HTMLDataDump innerClone() {
-		HTMLDataDump dd = clone();
-		dd.padding += "\t\t";
-		dd.innerTable = true;
-		return dd;
+		try {
+			HTMLDataDump dd = (HTMLDataDump) clone();
+			dd.padding += "\t\t";
+			dd.innerTable = true;
+			return dd;
+		}
+		catch(CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }
