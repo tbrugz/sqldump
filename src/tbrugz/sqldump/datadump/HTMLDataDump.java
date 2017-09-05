@@ -62,8 +62,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 	protected boolean dumpStyleNumericAlignRight = false;
 	protected boolean xpendInnerTable = true;
 	
-	protected final List<String> finalColNames = new ArrayList<String>();
-	protected final List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
+	protected List<String> finalColNames = new ArrayList<String>();
+	protected List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
 	
 	protected int onRowsColCount = 0;
 	protected int onColsColCount = 0;
@@ -375,12 +375,14 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		dd.xpendInnerTable = this.xpendInnerTable;
 	}
 	
-	/*@Override
-	public HTMLDataDump clone() {
-		HTMLDataDump dd = new HTMLDataDump();
-		updateProperties(dd);
+	@Override
+	public HTMLDataDump clone() throws CloneNotSupportedException {
+		HTMLDataDump dd = (HTMLDataDump) super.clone();
+		//updateProperties(dd);
+		dd.finalColNames = new ArrayList<String>();
+		dd.finalColTypes = new ArrayList<Class<?>>();
 		return dd;
-	}*/
+	}
 	
 	@Override
 	public HTMLDataDump innerClone() {

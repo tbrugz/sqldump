@@ -12,8 +12,8 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	protected String schemaName;
 	protected String tableName;
 	protected int numCol;
-	protected final List<String> lsColNames = new ArrayList<String>();
-	protected final List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
+	protected List<String> lsColNames = new ArrayList<String>();
+	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
 	//ResultSetMetaData md;
 	protected List<String> pkCols;
 	
@@ -43,6 +43,14 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 		catch(CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public AbstractDumpSyntax clone() throws CloneNotSupportedException {
+		AbstractDumpSyntax ds = (AbstractDumpSyntax) super.clone();
+		ds.lsColNames = new ArrayList<String>();
+		ds.lsColTypes = new ArrayList<Class<?>>();
+		return ds;
 	}
 	
 }
