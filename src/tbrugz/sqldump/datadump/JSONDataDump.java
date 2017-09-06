@@ -157,6 +157,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
+			Object origVal = vals.get(i);
 			Class<?> ctype = lsColTypes.get(i);
 			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
 			boolean isArray = Array.class.isAssignableFrom(ctype);
@@ -164,11 +165,11 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				String innerTableName = lsColNames.get(i);
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) vals.get(i);
+					Object[] objArr = (Object[]) origVal;
 					rsInt = new ResultSetArrayAdapter(objArr, false, innerTableName);
 				}
 				else {
-					rsInt = (ResultSet) vals.get(i);
+					rsInt = (ResultSet) origVal;
 				}
 				if(rsInt==null) {
 					continue;
@@ -194,7 +195,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			else {
 				
 			try {
-				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( vals.get(i), ctype, dateFormatter ));
+				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
 			}
 			catch(Exception e) {
 				log.warn("dumpRow: "+lsColNames+" / "+vals+" / ex: "+e);

@@ -286,17 +286,18 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<finalColNames.size();i++) {
+			Object origVal = vals.get(i);
 			Class<?> ctype = finalColTypes.get(i);
 			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
 			boolean isArray = Array.class.isAssignableFrom(ctype);
 			if(isResultSet || isArray) {
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) vals.get(i);
+					Object[] objArr = (Object[]) origVal;
 					rsInt = new ResultSetArrayAdapter(objArr, false, finalColNames.get(i));
 				}
 				else {
-					rsInt = (ResultSet) vals.get(i);
+					rsInt = (ResultSet) origVal;
 				}
 				
 				if(rsInt==null) {
@@ -317,7 +318,6 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 				sb.append("\n\t</td>");
 			}
 			else {
-				Object origVal = vals.get(i);
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );

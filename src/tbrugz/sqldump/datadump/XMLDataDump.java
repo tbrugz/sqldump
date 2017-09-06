@@ -133,17 +133,18 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
+			Object origVal = vals.get(i);
 			Class<?> ctype = lsColTypes.get(i);
 			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
 			boolean isArray = Array.class.isAssignableFrom(ctype);
 			if(isResultSet || isArray) {
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) vals.get(i);
+					Object[] objArr = (Object[]) origVal;
 					rsInt = new ResultSetArrayAdapter(objArr, false, lsColNames.get(i));
 				}
 				else {
-					rsInt = (ResultSet) vals.get(i);
+					rsInt = (ResultSet) origVal;
 				}
 				
 				if(rsInt==null) {
@@ -171,7 +172,7 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 				//sb.append("\t");
 			}
 			else {
-				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), ctype, floatFormatter, dateFormatter, doEscape(i));
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, doEscape(i));
 				if(value==null) {
 					if(dumpNullValues) {
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
