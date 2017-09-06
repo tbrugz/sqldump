@@ -42,6 +42,7 @@ public class SQLUtils {
 	static boolean defaultTypeIsString = true;
 	static boolean clobTypeIsString = true;
 	public static boolean failOnError = false;
+	static boolean arrayTypeIsArray = true;
 	
 	public static void setProperties(Properties prop) {
 		if(prop==null) { return; }
@@ -297,9 +298,9 @@ public class SQLUtils {
 			case -102: //oracle TIMESTAMP WITH LOCAL TIMEZONE
 			//pgsql - http://www.postgresql.org/docs/current/static/datatype-datetime.html
 				return Date.class; //return Timestamp.class;
-			case Types.CHAR:     //  1
-			case Types.VARCHAR:  // 12
-			//case Types.CLOB:
+			case Types.CHAR:     //    1
+			case Types.VARCHAR:  //   12
+			//case Types.CLOB:   // 2005
 				return String.class;
 			case Types.BINARY:        //   -2  // postgresql BYTEA
 			case Types.VARBINARY:     //   -3  // mysql BLOB
@@ -307,7 +308,10 @@ public class SQLUtils {
 			case Types.BLOB:          // 2004
 				return Blob.class;
 			case Types.ARRAY:         // 2003
-				//return Array.class;
+				if(arrayTypeIsArray) {
+					return Array.class;
+				}
+			//case Types.REF_CURSOR:    // 2012
 			case -10: //XXX: ResultSet/Cursor (Oracle)?
 				return ResultSet.class;
 			case Types.OTHER:         // 1111

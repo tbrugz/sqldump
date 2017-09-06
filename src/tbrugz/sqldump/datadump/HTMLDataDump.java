@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -284,8 +286,18 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<finalColNames.size();i++) {
-			if(ResultSet.class.isAssignableFrom(finalColTypes.get(i))) {
-				ResultSet rsInt = (ResultSet) vals.get(i);
+			Class<?> ctype = finalColTypes.get(i);
+			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
+			boolean isArray = Array.class.isAssignableFrom(ctype);
+			if(isResultSet || isArray) {
+				ResultSet rsInt = null;
+				if(isArray) {
+					Object[] objArr = (Object[]) vals.get(i);
+					rsInt = new ResultSetArrayAdapter(objArr, false, finalColNames.get(i));
+				}
+				else {
+					rsInt = (ResultSet) vals.get(i);
+				}
 				
 				if(rsInt==null) {
 					//log.warn("ResultSet is null");
@@ -306,7 +318,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 			}
 			else {
 				Object origVal = vals.get(i);
-				String value = DataDumpUtils.getFormattedXMLValue(origVal, finalColTypes.get(i), floatFormatter, dateFormatter, nullValueStr,
+				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
 				//XXX add type attribute?

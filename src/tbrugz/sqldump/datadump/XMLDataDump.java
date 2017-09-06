@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -11,6 +12,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -131,8 +133,19 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
-			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
-				ResultSet rsInt = (ResultSet) vals.get(i);
+			Class<?> ctype = lsColTypes.get(i);
+			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
+			boolean isArray = Array.class.isAssignableFrom(ctype);
+			if(isResultSet || isArray) {
+				ResultSet rsInt = null;
+				if(isArray) {
+					Object[] objArr = (Object[]) vals.get(i);
+					rsInt = new ResultSetArrayAdapter(objArr, false, lsColNames.get(i));
+				}
+				else {
+					rsInt = (ResultSet) vals.get(i);
+				}
+				
 				if(rsInt==null) {
 					continue;
 				}
@@ -158,7 +171,7 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 				//sb.append("\t");
 			}
 			else {
-				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), lsColTypes.get(i), floatFormatter, dateFormatter, doEscape(i));
+				String value = DataDumpUtils.getFormattedXMLValue(vals.get(i), ctype, floatFormatter, dateFormatter, doEscape(i));
 				if(value==null) {
 					if(dumpNullValues) {
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );

@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -15,6 +16,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -118,7 +120,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				sb.append("\n"+padding+"\t\t\"columnTypes\": ["+Utils.join(getClassesSimpleName(lsColTypes), ", ", doubleQuoter)+"],");
 				sb.append("\n"+padding+"\t\t\"dataElement\": \""+dtElem+"\"");
 				
-				out("\n\t\""+metadataElement+"\": "
+				out("\n\t"+padding+"\""+metadataElement+"\": "
 						+"{"
 						+sb.toString()
 						+"\n"+padding+"\t},"
@@ -155,12 +157,22 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
-			if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
-				ResultSet rsInt = (ResultSet) vals.get(i);
+			Class<?> ctype = lsColTypes.get(i);
+			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
+			boolean isArray = Array.class.isAssignableFrom(ctype);
+			if(isResultSet || isArray) {
+				String innerTableName = lsColNames.get(i);
+				ResultSet rsInt = null;
+				if(isArray) {
+					Object[] objArr = (Object[]) vals.get(i);
+					rsInt = new ResultSetArrayAdapter(objArr, false, innerTableName);
+				}
+				else {
+					rsInt = (ResultSet) vals.get(i);
+				}
 				if(rsInt==null) {
 					continue;
 				}
-				String innerTableName = lsColNames.get(i);
 				
 				sb.append(",\n");
 				sb.append("\t\t\t"+"\""+innerTableName+"\": ");
@@ -182,7 +194,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			else {
 				
 			try {
-				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( vals.get(i), lsColTypes.get(i), dateFormatter ));
+				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( vals.get(i), ctype, dateFormatter ));
 			}
 			catch(Exception e) {
 				log.warn("dumpRow: "+lsColNames+" / "+vals+" / ex: "+e);
