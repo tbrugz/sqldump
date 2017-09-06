@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -95,6 +96,20 @@ public class DataDumpTest {
 	
 	void dump1() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		dumpWithParams(null);
+	}
+
+	void dumpWithParamsAndSyntax(String[] xtraparams, String syntax) throws ClassNotFoundException, SQLException, NamingException, IOException {
+		String[] vmparamsDump = {
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.processingclasses=DataDump",
+				"-Dsqldump.datadump.dumpsyntaxes="+syntax,
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		dump1(vmparamsDump, xtraparams);
 	}
 	
 	void dumpWithParams(String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
@@ -483,7 +498,44 @@ public class DataDumpTest {
 				});
 		//XXX: assert...
 	}
+	
+	@Test
+	public void testHtmlWithArray() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3) as b", "html");
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(2, countElementsOfType(n.getChildNodes(),"tr")); // 2 rows
+		
+		Element e = (Element) n;
+		NodeList nl = e.getElementsByTagName("tr");
+		Assert.assertEquals(6, nl.getLength()); // 6 total rows
+		
+		nl = e.getElementsByTagName("td");
+		Assert.assertEquals(5, nl.getLength()); // 5 total 'td's
 
+		nl = e.getElementsByTagName("th");
+		Assert.assertEquals(3, nl.getLength()); // 5 total 'th's
+	}
+
+	@Test
+	public void testXmlWithArray() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3) as b", "xml");
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(1, countElementsOfType(n.getChildNodes(),"row")); // 1 row
+		
+		Element e = (Element) n;
+		NodeList nl = e.getElementsByTagName("row");
+		Assert.assertEquals(4, nl.getLength()); // 4 total rows
+		
+		nl = e.getElementsByTagName("A");
+		Assert.assertEquals(1, nl.getLength()); // 1 "A" element
+
+		nl = e.getElementsByTagName("B");
+		Assert.assertEquals(4, nl.getLength()); // 4 "B" elements
+	}
 	
 	//----------------------------------
 	
@@ -515,4 +567,14 @@ public class DataDumpTest {
 		return count;
 	}
 	
+	public File dumpSelect(String sql, String syntax) throws Exception {
+		dumpWithParamsAndSyntax(new String[]{
+				"-Dsqldump.grabclass=EmptyModelGrabber",
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql="+sql,
+				}, syntax);
+		return new File(DIR_OUT+"/data_q1."+syntax);
+	}
+
 }
