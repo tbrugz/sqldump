@@ -536,6 +536,66 @@ public class DataDumpTest {
 		nl = e.getElementsByTagName("B");
 		Assert.assertEquals(4, nl.getLength()); // 4 "B" elements
 	}
+
+	@Test
+	public void testXmlWithArray2() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "xml");
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(2, countElementsOfType(n.getChildNodes(),"row")); // 1 row
+		
+		Element e = (Element) n;
+		NodeList nl = e.getElementsByTagName("row");
+		Assert.assertEquals(10, nl.getLength()); // 10 total rows
+		
+		nl = e.getElementsByTagName("A");
+		Assert.assertEquals(2, nl.getLength()); // 2 "A" element
+
+		nl = e.getElementsByTagName("B");
+		Assert.assertEquals(10, nl.getLength()); // 10 "B" elements
+	}
+
+	@Test
+	public void testJsonWithArray2() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json");
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+		
+		JSONObject jobj = (JSONObject) obj;
+		obj = jobj.get("q1");
+		Assert.assertTrue("Should be a JSONArray", obj instanceof JSONArray);
+
+		JSONArray jarr = (JSONArray) obj;
+		Assert.assertEquals(2, jarr.size());
+		
+		jobj = (JSONObject) jarr.get(1); // 2nd row
+		jarr = (JSONArray) jobj.get("B");
+		Assert.assertEquals(4, jarr.size());
+		
+		jobj = (JSONObject) jarr.get(3);
+		//System.out.println(jobj);
+		Assert.assertEquals("8", jobj.get("B"));
+
+		/*
+		Document doc = parseXML(f);
+		
+		Node n = doc.getChildNodes().item(0);
+		Assert.assertEquals(2, countElementsOfType(n.getChildNodes(),"row")); // 1 row
+		
+		Element e = (Element) n;
+		NodeList nl = e.getElementsByTagName("row");
+		Assert.assertEquals(6, nl.getLength()); // 6 total rows
+		
+		nl = e.getElementsByTagName("A");
+		Assert.assertEquals(2, nl.getLength()); // 2 "A" element
+
+		nl = e.getElementsByTagName("B");
+		Assert.assertEquals(6, nl.getLength()); // 6 "B" elements*/
+	}
 	
 	//----------------------------------
 	
