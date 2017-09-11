@@ -36,6 +36,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 	static final String PROP_HTML_ADD_CAPTION = "sqldump.datadump.html.add-caption";
 	static final String PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT = "sqldump.datadump.html.style.numeric-align-right";
 	static final String PROP_HTML_XPEND_INNER_TABLE = "sqldump.datadump.html.xpend-inner-table";
+	static final String PROP_HTML_INNER_ARRAY_HEADER = "sqldump.datadump.html.inner-array-dump-header";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
 	//XXX add props 'sqldump.datadump.html.inner-table.[prepend|append]' ??
 
@@ -63,6 +64,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
 	protected boolean xpendInnerTable = true;
+	protected boolean innerArrayDumpHeader = true;
 	
 	protected List<String> finalColNames = new ArrayList<String>();
 	protected List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
@@ -95,6 +97,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		dumpCaptionElement = Utils.getPropBool(prop, PROP_HTML_ADD_CAPTION, DEFAULT_ADD_CAPTION);
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
+		innerArrayDumpHeader = Utils.getPropBool(prop, PROP_HTML_INNER_ARRAY_HEADER, innerArrayDumpHeader);
 		procPivotProperties(prop);
 	}
 
@@ -220,7 +223,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 				dumpedAsLeast1row = true;
 			}
 		}
-		if(!dumpedAsLeast1row) {
+		boolean condition = !dumpedAsLeast1row && (!innerTable || (innerArrayDumpHeader && finalColNames.size()==1) );
+		if(condition) {
 			sb.append("\n\t<tr>");
 			for(int i=0;i<finalColNames.size();i++) {
 				sb.append("<th>"+finalColNames.get(i)+"</th>");
