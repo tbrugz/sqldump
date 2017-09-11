@@ -62,9 +62,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	protected String metadataElement = DEFAULT_METADATA_ELEMENT;
 	protected String callback = null;
 	
-	String padding = "";
+	protected String padding = "";
 	
-	boolean usePK = false; //XXX: option to set prop usePK
+	protected boolean usePK = false; //XXX: option to set prop usePK
 	
 	@Override
 	public void procProperties(Properties prop) {
