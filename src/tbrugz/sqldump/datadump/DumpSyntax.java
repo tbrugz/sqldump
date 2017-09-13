@@ -90,6 +90,8 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	
 	public void setAllUKs(List<Constraint> uks) {}
 	
+	public void setUniqueRow(boolean unique) {}
+	
 	/*
 	public abstract void dumpHeader(Writer fos) throws IOException;
 

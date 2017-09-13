@@ -65,6 +65,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	protected String padding = "";
 	
 	protected boolean usePK = false; //XXX: option to set prop usePK
+	protected boolean encloseRowWithCurlyBraquets = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -153,7 +154,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			}
 			sb.append("\": ");
 		}
-		sb.append("{");
+		if(encloseRowWithCurlyBraquets) {
+			sb.append("{");
+		}
 		
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
 		for(int i=0;i<lsColNames.size();i++) {
@@ -205,7 +208,10 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 
 			}
 		}
-		sb.append("}\n");
+		if(encloseRowWithCurlyBraquets) {
+			sb.append("}");
+		}
+		sb.append("\n");
 		out(sb.toString(), fos);
 	}
 
@@ -230,7 +236,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		pw.write(padding+s);
 	}
 
-	void outNoPadding(String s, Writer pw) throws IOException {
+	protected void outNoPadding(String s, Writer pw) throws IOException {
 		pw.write(s);
 	}
 	

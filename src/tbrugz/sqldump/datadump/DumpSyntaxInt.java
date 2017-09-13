@@ -32,6 +32,8 @@ public interface DumpSyntaxInt {
 	
 	public void setAllUKs(List<Constraint> uks);
 	
+	public void setUniqueRow(boolean unique);
+	
 	public void dumpHeader(Writer fos) throws IOException;
 
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
