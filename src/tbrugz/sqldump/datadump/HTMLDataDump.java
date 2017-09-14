@@ -223,8 +223,9 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 				dumpedAsLeast1row = true;
 			}
 		}
-		boolean condition = !dumpedAsLeast1row && (!innerTable || (innerArrayDumpHeader && finalColNames.size()==1) );
-		if(condition) {
+		boolean dumpHeaderRow = !dumpedAsLeast1row && (!innerTable || innerArrayDumpHeader || finalColNames.size()!=1);
+		//log.info("dumpHeaderRow=="+dumpHeaderRow+" ;; dumpedAsLeast1row="+dumpedAsLeast1row+" ; innerTable="+innerTable+" ; innerArrayDumpHeader="+innerArrayDumpHeader+" ; finalColNames.size()="+finalColNames.size());
+		if(dumpHeaderRow) {
 			sb.append("\n\t<tr>");
 			for(int i=0;i<finalColNames.size();i++) {
 				sb.append("<th>"+finalColNames.get(i)+"</th>");
@@ -272,7 +273,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<finalColNames.size();i++) {
 			if(finalColTypes.get(i).equals(Integer.class) || finalColTypes.get(i).equals(Double.class)) {
-				styleSelector.add("table."+tableName+" td:nth-child("+(i+1)+")");
+				styleSelector.add("table."+tableName+" > tbody > tr > td:nth-child("+(i+1)+")");
 			}
 		}
 		if(styleSelector.size()>0) {
