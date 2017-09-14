@@ -84,8 +84,8 @@ public class SQLDataDiffToDBSyntax extends SQLDataDiffSyntax implements DbUpdate
 	}
 	
 	@Override
-	public void dumpFooter(long count) throws IOException {
-		super.dumpFooter(count, (Writer) null);
+	public void dumpFooter(long count, boolean hasMoreRows) throws IOException {
+		super.dumpFooter(count, hasMoreRows, (Writer) null);
 		try {
 			conn.commit();
 		} catch (SQLException e) {

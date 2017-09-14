@@ -153,7 +153,7 @@ public class SimpleODS extends OutputStreamDumper {
 	}
 
 	@Override
-	public void dumpFooter(long count, OutputStream os) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException {
 		try {
 			// commons-io...
 			//WriterOutputStream out = new WriterOutputStream(fos);

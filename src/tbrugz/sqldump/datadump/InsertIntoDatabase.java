@@ -176,7 +176,7 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 	}
 	
 	@Override
-	public void dumpFooter(long count) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows) throws IOException {
 		try {
 			//dumpFooterInternal(count);
 			
@@ -290,8 +290,8 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
-		dumpFooter(count);
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
+		dumpFooter(count, hasMoreRows);
 	}
 
 	static String getSQLType(Class<?> type) {

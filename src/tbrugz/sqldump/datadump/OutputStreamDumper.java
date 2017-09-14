@@ -18,7 +18,7 @@ public abstract class OutputStreamDumper extends AbstractDumpSyntax {
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
 	}
 	

@@ -404,7 +404,7 @@ public class QueryTest {
 		while(rs.next()) {
 			dd.dumpRow(rs, i++, sw);
 		}
-		dd.dumpFooter(i, sw);
+		dd.dumpFooter(i, false, sw);
 		System.out.println(sw);
 		
 		File file = new File(DIR_OUT+"q3.html");

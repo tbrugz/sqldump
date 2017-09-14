@@ -65,7 +65,7 @@ public class WebRowSetSingleSyntax extends DumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		try {
 			// dumps all ResultSet
 			wrs.writeXml(fos);

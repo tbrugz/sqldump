@@ -733,11 +733,12 @@ public class DataDump extends AbstractSQLProc {
 			}
 			while(rs.next());
 			
+			boolean hasMoreRows = rs.next();
 			long elapsedMilis = System.currentTimeMillis()-initTime;
 			
 			log.info("dumped "+count+" rows"
 				+ (tableOrQueryName!=null?" from table/query: "+tableOrQueryName:"")
-				+ (rs.next()?" (more rows exists)":"")
+				+ (hasMoreRows?" (more rows exists)":"")
 				+ " ["+elapsedMilis+"ms elapsed]"
 				+ (elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
 				);
@@ -748,7 +749,7 @@ public class DataDump extends AbstractSQLProc {
 			for(String filename: filenames) {
 				//for(String partitionByPattern: partitionByPatterns) {
 				//FIXedME: should be count for this file/partition, not resultset. Last countInPartition would work for last partition only
-				closeWriter(writersOpened, writersSyntaxes, filename, countByPatternFinalFilename);
+				closeWriter(writersOpened, writersSyntaxes, filename, countByPatternFinalFilename, hasMoreRows);
 				footerCount++;
 			}
 			writersOpened.clear();
@@ -760,14 +761,14 @@ public class DataDump extends AbstractSQLProc {
 				if(doSyntaxDumpList.get(i)) {
 					//writer-independent footers
 					if(ds.isWriterIndependent()) {
-						ds.dumpFooter(count);
+						ds.dumpFooter(count, hasMoreRows);
 						wiFooterCount++;
 					}
 					else {
 						//static writers footers
 						Writer w = CategorizedOut.getStaticWriter(filenameList.get(i));
 						if(w!=null) {
-							ds.dumpFooter(count, w);
+							ds.dumpFooter(count, hasMoreRows, w);
 							swFooterCount++;
 						}
 					}
@@ -797,7 +798,7 @@ public class DataDump extends AbstractSQLProc {
 			return count;
 	}
 	
-	static void closeWriter(Map<String, Outputter> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename) throws IOException {
+	static void closeWriter(Map<String, Outputter> writersOpened, Map<String, DumpSyntax> writersSyntaxes, String key, Map<String, Long> countByPatternFinalFilename, boolean hasMoreRows) throws IOException {
 		Outputter out = writersOpened.get(key);
 		String filename = getFilenameFromWriterMapKey(key);
 		//String key = getWriterMapKey(filename, partitionByPattern);
@@ -806,11 +807,11 @@ public class DataDump extends AbstractSQLProc {
 		DumpSyntax ds = writersSyntaxes.get(filename);
 		try {
 			if(ds.acceptsOutputStream()) {
-				ds.dumpFooter(rowsDumped, out.os);
+				ds.dumpFooter(rowsDumped, hasMoreRows, out.os);
 				out.os.close();
 			}
 			else {
-				ds.dumpFooter(rowsDumped, out.w);
+				ds.dumpFooter(rowsDumped, hasMoreRows, out.w);
 				out.w.close();
 			}
 			//log.info("closed stream; filename: "+filename);

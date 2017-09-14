@@ -188,7 +188,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	}
 	
 	@Override
-	public void dumpFooter(long count) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows) throws IOException {
 		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not implements this method");
 	}
 	
@@ -213,7 +213,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	}
 	
 	@Override
-	public void dumpFooter(long count, OutputStream os) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException {
 		throw new IllegalStateException("class "+this.getClass().getSimpleName()+" does not accept OutputStream");
 	}
 	

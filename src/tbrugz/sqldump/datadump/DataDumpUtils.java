@@ -371,7 +371,7 @@ public class DataDumpUtils {
 			ds.dumpRow(rs, count, writer);
 			count++;
 		}
-		ds.dumpFooter(count, writer);
+		ds.dumpFooter(count, false, writer);
 		if(resetRS) {
 			try {
 				rs.first();

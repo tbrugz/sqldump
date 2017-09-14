@@ -216,7 +216,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		//String dtElem = dataElement!=null?dataElement:tableName;
 		String dtElem = getDataElement();
 		

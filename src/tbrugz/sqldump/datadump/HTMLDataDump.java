@@ -339,7 +339,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		//XXX: add /tbody?
 		out("</table>", fos);
 		//if(append!=null && (!innerTable || xpendInnerTable)) { out(append, fos); }

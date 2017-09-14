@@ -117,6 +117,7 @@ public class ResultSetDiff {
 				ds.dumpHeader();
 			}
 		}
+		boolean hasMoreRows = false;
 		while(true) {
 			if(readSource) {
 				hasNextSource = source.next();
@@ -237,6 +238,7 @@ public class ResultSetDiff {
 			
 			if(limit>0 && count>=limit) {
 				log.warn("limit reached: "+limit+" [table="+fullTableName+"]");
+				hasMoreRows = true;
 				break;
 			}
 		}
@@ -248,7 +250,7 @@ public class ResultSetDiff {
 		//XXX: what about stateful syntaxes?
 		for(DiffSyntax ds: dss) {
 			if(ds.isWriterIndependent()) {
-				ds.dumpFooter(sourceRowCount); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
+				ds.dumpFooter(sourceRowCount, hasMoreRows); //XXX: sourceRowCount is the best for ds.dumpFooter(<count>, writer)?
 			}
 			else {
 				CategorizedOut cout = dscouts.get(ds);
@@ -256,7 +258,7 @@ public class ResultSetDiff {
 				while(it.hasNext()) {
 					Writer w = it.next();
 					ds.dumpStats(dumpCount, updateCount, deleteCount, identicalRowsCount, sourceRowCount, targetRowCount, w);
-					ds.dumpFooter(sourceRowCount, w);
+					ds.dumpFooter(sourceRowCount, hasMoreRows, w);
 					w.close();
 				}
 			}

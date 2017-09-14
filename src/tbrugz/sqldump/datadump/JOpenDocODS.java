@@ -87,7 +87,7 @@ public class JOpenDocODS extends WriterIndependentDumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows) throws IOException {
 		try {
 			TableModel model = new DefaultTableModel(values, new Vector<String>(lsColNames));
 			

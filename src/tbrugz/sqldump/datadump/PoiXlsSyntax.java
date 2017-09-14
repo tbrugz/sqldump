@@ -111,7 +111,7 @@ public class PoiXlsSyntax extends OutputStreamDumper {
 	}
 	
 	@Override
-	public void dumpFooter(long count, OutputStream os) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException {
 		wb.write(os);
 		wb.close();
 	}

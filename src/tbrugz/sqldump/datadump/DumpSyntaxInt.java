@@ -38,7 +38,7 @@ public interface DumpSyntaxInt {
 
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException;
 
-	public void dumpFooter(long count, Writer fos) throws IOException; //long count or boolean hasDumpedData?
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException; //long count or boolean hasDumpedData?
 	
 	//XXX dumpBreak() - intermetiate "header" dump? endDump()?
 
@@ -102,7 +102,7 @@ public interface DumpSyntaxInt {
 	public void dumpRow(ResultSet rs, long count) throws IOException, SQLException;
 
 	/** Dumps footer for Writer-independent syntaxes */
-	public void dumpFooter(long count) throws IOException;
+	public void dumpFooter(long count, boolean hasMoreRows) throws IOException;
 	
 	public boolean acceptsOutputWriter();
 	
@@ -112,7 +112,7 @@ public interface DumpSyntaxInt {
 
 	public void dumpRow(ResultSet rs, long count, OutputStream os) throws IOException, SQLException;
 
-	public void dumpFooter(long count, OutputStream os) throws IOException;
+	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException;
 	
 	public boolean needsDBMSFeatures();
 	

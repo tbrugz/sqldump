@@ -155,7 +155,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 	}
 
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		//do nothing
 	}
 	

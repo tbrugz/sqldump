@@ -158,7 +158,7 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	}
 
 	@Override
-	public void dumpFooter(long count) {
+	public void dumpFooter(long count, boolean hasMoreRows) {
 	}
 	
 	@Override

@@ -41,7 +41,7 @@ public class CSVWithRowNumber extends CSVDataDump {
 	
 	//XXX: option to define footer/tralier pattern
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		out(String.valueOf(count), fos, recordDelimiter);
 	}
 	

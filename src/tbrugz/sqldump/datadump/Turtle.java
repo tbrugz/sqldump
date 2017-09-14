@@ -83,7 +83,7 @@ public class Turtle extends RDFAbstractSyntax {
 	}
 	
 	@Override
-	public void dumpFooter(long count, Writer fos) throws IOException {
+	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 	}
 
 	@Override
