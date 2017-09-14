@@ -161,10 +161,10 @@ public class BlobDataDump extends WriterIndependentDumpSyntax {
 	public void dumpFooter(long count, boolean hasMoreRows) {
 	}
 	
-	@Override
+	/*@Override
 	public boolean isWriterIndependent() {
 		return true;
-	}
+	}*/
 
 	// http://en.wikipedia.org/wiki/Internet_media_type / http://stackoverflow.com/questions/6783921/which-mime-type-to-use-for-a-binary-file-thats-specific-to-my-program
 	@Override

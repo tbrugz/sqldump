@@ -108,9 +108,9 @@ public class JOpenDocODS extends WriterIndependentDumpSyntax {
 		return true;
 	}
 	
-	@Override
+	/*@Override
 	public boolean isWriterIndependent() {
 		return true; // SpreadSheet.createEmpty().saveAs() accepts only File() - dealing with output ourselves
-	}
+	}*/
 
 }
