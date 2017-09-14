@@ -122,7 +122,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("unknown check option: "+checkOption+" [view '"+v.getName()+"']");
 				}
 			}
-			v.setWithReadOnly( !"YES".equalsIgnoreCase(rs.getString(6)) );
+			if(!"YES".equalsIgnoreCase(rs.getString(6))) {
+				v.setWithReadOnly(true);
+			}
 			views.add(v);
 			count++;
 		}

@@ -32,7 +32,7 @@ public class View extends DBObject implements Relation {
 	String query;
 	
 	CheckOptionType checkOption;
-	boolean withReadOnly;
+	Boolean withReadOnly;
 	List<Column> columns = null;
 	List<Constraint> constraints = null;
 	String remarks;
@@ -97,7 +97,7 @@ public class View extends DBObject implements Relation {
 	}
 	
 	protected String getCheckOptionAndReadOnlySnippet() {
-		return (withReadOnly?"\nwith read only":
+		return ((withReadOnly!=null && withReadOnly)?"\nwith read only":
 					(checkOption!=null && !checkOption.equals(CheckOptionType.NONE)?
 						"\nwith "+(checkOption.equals(CheckOptionType.TRUE)?"":checkOption+" ")+"check option":""
 					)
@@ -204,11 +204,11 @@ public class View extends DBObject implements Relation {
 		this.checkOption = checkOption;
 	}
 
-	public boolean isWithReadOnly() {
+	public Boolean isWithReadOnly() {
 		return withReadOnly;
 	}
 
-	public void setWithReadOnly(boolean withReadOnly) {
+	public void setWithReadOnly(Boolean withReadOnly) {
 		this.withReadOnly = withReadOnly;
 	}
 
