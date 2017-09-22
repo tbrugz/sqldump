@@ -20,6 +20,8 @@ public interface DumpSyntaxInt {
 	public String getSyntaxId();
 
 	public String getMimeType();
+
+	public String getFullMimeType();
 	
 	public String getDefaultFileExtension();
 

@@ -79,6 +79,11 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 	//public abstract String getSyntaxId();
 
 	//public abstract String getMimeType();
+
+	@Override
+	public String getFullMimeType() {
+		return getMimeType();
+	}
 	
 	public String getDefaultFileExtension() {
 		return getSyntaxId();
