@@ -209,7 +209,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			}
 		}
 		if(encloseRowWithCurlyBraquets) {
-			sb.append("}");
+			sb.append(" }");
 		}
 		sb.append("\n");
 		out(sb.toString(), fos);
