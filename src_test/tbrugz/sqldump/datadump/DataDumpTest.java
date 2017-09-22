@@ -7,7 +7,10 @@ import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -103,7 +106,7 @@ public class DataDumpTest {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
 				"-Dsqldump.processingclasses=DataDump",
 				"-Dsqldump.datadump.dumpsyntaxes="+syntax,
-				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename]."+syntax,
 				"-Dsqldump.driverclass=org.h2.Driver",
 				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 				"-Dsqldump.user=h",
@@ -596,6 +599,36 @@ public class DataDumpTest {
 		nl = e.getElementsByTagName("B");
 		Assert.assertEquals(6, nl.getLength()); // 6 "B" elements*/
 	}
+
+	@Test
+	public void testInsertIntoWithoutArray2() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "insertinto");
+		String str = IOUtil.readFromFilename(f.getAbsolutePath());
+		String LF = "\n";
+		Assert.assertEquals("insert into q1 (A, B, C) values (1, null, 3);" + LF + 
+				"insert into q1 (A, B, C) values (4, null, 9);" + LF 
+				, str);
+	}
+	
+	@Test
+	public void testInsertIntoWithArray2() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "insertinto",
+				new String[] {"-Dsqldump.datadump.insertinto.dumpcursors=true"});
+		String str = IOUtil.readFromFilename(f.getAbsolutePath());
+		String LF = "\n";
+		//System.out.println(str);
+		Assert.assertEquals("insert into q1 (A, B, C) values (1, null, 3);" + LF + 
+				"insert into B (B) values ('1');" + LF +
+				"insert into B (B) values ('2');" + LF +
+				"insert into B (B) values ('3');" + LF +
+				"insert into B (B) values ('4');" + LF +
+				"insert into q1 (A, B, C) values (4, null, 9);" + LF + 
+				"insert into B (B) values ('5');" + LF +
+				"insert into B (B) values ('6');" + LF +
+				"insert into B (B) values ('7');" + LF +
+				"insert into B (B) values ('8');" + LF
+				, str);
+	}
 	
 	//----------------------------------
 	
@@ -628,12 +661,23 @@ public class DataDumpTest {
 	}
 	
 	public File dumpSelect(String sql, String syntax) throws Exception {
-		dumpWithParamsAndSyntax(new String[]{
+		return dumpSelect(sql, syntax, null);
+	}
+	
+	public File dumpSelect(String sql, String syntax, String[] xtrapar) throws Exception {
+		String[] pars = new String[]{
 				"-Dsqldump.grabclass=EmptyModelGrabber",
 				"-Dsqldump.processingclasses=SQLQueries",
 				"-Dsqldump.queries=q1",
 				"-Dsqldump.query.q1.sql="+sql,
-				}, syntax);
+				};
+		if(xtrapar!=null) {
+			List<String> l = new ArrayList<String>();
+			l.addAll(Arrays.asList(pars));
+			l.addAll(Arrays.asList(xtrapar));
+			pars = l.toArray(new String[]{});
+		}
+		dumpWithParamsAndSyntax(pars, syntax);
 		return new File(DIR_OUT+"/data_q1."+syntax);
 	}
 

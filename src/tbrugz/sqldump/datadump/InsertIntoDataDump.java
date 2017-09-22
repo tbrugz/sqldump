@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -18,11 +19,12 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.def.Defs;
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
 
-public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
+public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder, HierarchicalDumpSyntax {
 
 	private static final Log log = LogFactory.getLog(InsertIntoDataDump.class);
 	
@@ -135,13 +137,26 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 		
 		if(doDumpCursors) {
 			for(int i=0;i<lsColNames.size();i++) {
-				if(ResultSet.class.isAssignableFrom(lsColTypes.get(i))) {
-					ResultSet rsInt = (ResultSet) vals.get(i);
+				Class<?> ctype = lsColTypes.get(i);
+				boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
+				boolean isArray = Array.class.isAssignableFrom(ctype);
+				if(isResultSet || isArray) {
+					log.info("dump inner table/cursor...");
+					Object origVal = vals.get(i);
+					String innerTableName = lsColNames.get(i);
+					//ResultSet rsInt = (ResultSet) vals.get(i);
+					ResultSet rsInt = null;
+					if(isArray) {
+						Object[] objArr = (Object[]) origVal;
+						rsInt = new ResultSetArrayAdapter(objArr, false, innerTableName);
+					}
+					else {
+						rsInt = (ResultSet) origVal;
+					}
+					
 					if(rsInt==null) { continue; }
-					InsertIntoDataDump iidd = new InsertIntoDataDump();
-					iidd.procProperties(prop);
-					iidd.setFeatures(this.feat);
-					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
+					InsertIntoDataDump iidd = innerClone();
+					DataDumpUtils.dumpRS(iidd, rsInt.getMetaData(), rsInt, null, innerTableName, fos, true);
 				}
 			}
 		}
@@ -208,5 +223,16 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 	@Override
 	public void setFeatures(DBMSFeatures features) {
 		this.feat = features;
+	}
+
+	@Override
+	public InsertIntoDataDump innerClone() {
+		try {
+			InsertIntoDataDump dd = (InsertIntoDataDump) clone();
+			//dd.setFeatures(this.feat);
+			return dd;
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

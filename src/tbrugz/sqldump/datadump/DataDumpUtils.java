@@ -208,6 +208,9 @@ public class DataDumpUtils {
 			}
 			return null;
 		}
+		else if(elem instanceof Object[]) {
+			return null;
+		}
 		/*else if(elem instanceof Integer) {
 			return String.valueOf(elem);
 		}*/
