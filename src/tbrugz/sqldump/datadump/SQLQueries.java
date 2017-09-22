@@ -214,13 +214,13 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		
 		if(runQueries) {
-			log.info(i+" queries runned");
+			log.info(i+" queries run");
 		}
 		if(addQueriesToModel) {
 			log.info(queriesGrabbed+" queries grabbed from properties");
 		}
 		if(!runQueries && !addQueriesToModel) {
-			log.warn("no queries runned or grabbed");
+			log.warn("no queries run or grabbed");
 		}
 	}
 	

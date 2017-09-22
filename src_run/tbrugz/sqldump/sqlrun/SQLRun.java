@@ -221,7 +221,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			}
 		}
 		long totalTime = System.currentTimeMillis() - initTime;
-		log.info("...end processing ["+sqlrunCounter+" ids runned], total time = "+totalTime+"ms");
+		log.info("...end processing ["+sqlrunCounter+" ids run], total time = "+totalTime+"ms");
 		
 		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
 	}
