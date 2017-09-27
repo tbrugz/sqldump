@@ -89,7 +89,7 @@ public class DataDumpUtils {
 		else if(Double.class.isAssignableFrom(type)) {
 			return floatFormatter.format(elem);
 		}
-		else if(Date.class.isAssignableFrom(type)) {
+		else if(Date.class.isAssignableFrom(type) && elem instanceof Date) {
 			return df.format((Date)elem);
 		}
 		else if(ResultSet.class.isAssignableFrom(type)) {

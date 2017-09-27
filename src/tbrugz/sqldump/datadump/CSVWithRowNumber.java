@@ -10,7 +10,7 @@ import java.util.List;
 
 import tbrugz.sqldump.util.SQLUtils;
 
-public class CSVWithRowNumber extends CSVDataDump {
+public class CSVWithRowNumber extends CSVDataDump implements Cloneable {
 
 	//XXX: option to define line number column label
 	static final String LINE_NUMBER_COL_LABEL = "LineNumber";
@@ -35,14 +35,14 @@ public class CSVWithRowNumber extends CSVDataDump {
 	public void dumpRow(ResultSet rs, long count, Writer fos)
 			throws IOException, SQLException {
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes4ResultSet, numCol4RS);
-		vals.add(0, Long.valueOf(count));
+		vals.add(0, Long.valueOf(count+1));
 		dumpValues(vals, count, fos);
 	}
 	
 	//XXX: option to define footer/tralier pattern
 	@Override
 	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
-		out(String.valueOf(count), fos, recordDelimiter);
+		//out(String.valueOf(count+1), fos, recordDelimiter);
 	}
 	
 	@Override

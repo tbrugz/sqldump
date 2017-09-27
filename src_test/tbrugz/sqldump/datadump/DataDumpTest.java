@@ -418,7 +418,13 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1.rn.csv");
-		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,1,john,1,1,2000\r\n"+"1,2,mary,2,2,2000\r\n"+"2,3,jane,2,2,1000\r\n"+"3,4,lucas,2,2,1200\r\n"+"4,5,wilson,1,1,1000\r\n"+"5\r\n";
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
+				"1,1,john,1,1,2000\r\n"+
+				"2,2,mary,2,2,2000\r\n"+
+				"3,3,jane,2,2,1000\r\n"+
+				"4,4,lucas,2,2,1200\r\n"+
+				"5,5,wilson,1,1,1000\r\n";
+				//"5\r\n";
 		Assert.assertEquals(expected, csvEmpAll);
 	}
 	
@@ -444,11 +450,16 @@ public class DataDumpTest {
 		new SQLDump().doMain(params, p, null);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.rn.csv");
-		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,1,john,1,1,2000\r\n"+"1,5,wilson,1,1,1000\r\n"+"2\r\n";
+		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
+				"1,1,john,1,1,2000\r\n"+
+				"2,5,wilson,1,1,1000\r\n";//"2\r\n";
 		Assert.assertEquals(expected, csvEmpS1);
 		
 		String csvEmpS2 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_2.rn.csv");
-		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+"0,2,mary,2,2,2000\r\n"+"1,3,jane,2,2,1000\r\n"+"2,4,lucas,2,2,1200\r\n"+"3\r\n";
+		expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
+				"1,2,mary,2,2,2000\r\n"+
+				"2,3,jane,2,2,1000\r\n"+
+				"3,4,lucas,2,2,1200\r\n";//+"3\r\n";
 		Assert.assertEquals(expected, csvEmpS2);
 	}
 	
@@ -628,6 +639,20 @@ public class DataDumpTest {
 				"insert into B (B) values ('7');" + LF +
 				"insert into B (B) values ('8');" + LF
 				, str);
+	}
+
+	@Test
+	public void testCsvRn() throws Exception {
+		String LF = "\r\n";
+		dumpWithParamsAndSyntax(null, "rncsv");
+		String csvDept = IOUtil.readFromFilename(DIR_OUT+"/data_DEPT.rncsv");
+		//System.out.println(csvDept);
+		Assert.assertEquals(
+				"LineNumber,ID,NAME,PARENT_ID" + LF +
+				"1,0,CEO,0" + LF +
+				"2,1,HR,0" + LF + 
+				"3,2,Engineering,0" + LF,
+				csvDept);
 	}
 	
 	//----------------------------------

@@ -39,7 +39,7 @@ import tbrugz.sqldump.util.Utils;
    http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
    http://www.iana.org/assignments/media-types/text/csv-schema
  */
-public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder {
+public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
 	
 	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
@@ -187,7 +187,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 
 	@Override
 	public CSVDataDump clone() throws CloneNotSupportedException {
-		CSVDataDump dd = new CSVDataDump();
+		CSVDataDump dd = (CSVDataDump) super.clone();
 		updateProperties(dd);
 		return dd;
 	}
