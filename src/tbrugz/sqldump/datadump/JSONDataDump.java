@@ -202,13 +202,8 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 					continue;
 				}
 				
-				//sb.append(",\n"); sb.append("\t\t\t"+"\""+innerTableName+"\": ");
-				//sb.append(", \""+innerTableName+"\": ");
 				out(sb.toString(), fos);
-				//out(sb.toString()+",\n",fos);
-				//out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
 				sb.setLength(0);
-				//sb = new StringBuilder();
 				
 				JSONDataDump jsondd = innerClone();
 				//jsondd.padding = this.padding+"\t\t";
@@ -220,22 +215,21 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				sb.append("\n\t\t"+padding);
 			}
 			else {
-				
-			try {
-				//sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
-				sb.append(DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
-			}
-			catch(Exception e) {
-				log.warn("dumpRow: "+lsColNames+" / "+vals+" / ex: "+e);
-				//sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + nullValueStr);
-				sb.append(nullValueStr);
-				//e.printStackTrace();
-			}
-
+				try {
+					sb.append(DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
+				}
+				catch(Exception e) {
+					log.warn("dumpRow: "+lsColNames+" / "+vals+" / ex: "+e);
+					sb.append(nullValueStr);
+					//e.printStackTrace();
+				}
+				if(i==lsColNames.size()-1) {
+					sb.append(" ");
+				}
 			}
 		}
 		if(encloseRowWithCurlyBraquets && !dumpInnerAsArray) {
-			sb.append(" }");
+			sb.append("}");
 		}
 		sb.append("\n");
 		out(sb.toString(), fos);
