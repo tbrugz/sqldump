@@ -52,9 +52,11 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	static final String PROP_METADATA_ELEMENT = PREFIX_JSON+".metadata-element";
 	static final String PROP_JSONP_CALLBACK = PREFIX_JSON+".callback";
 	static final String PROP_TABLE_AS_DATA_ELEMENT = PREFIX_JSON+".table-as-data-element";
+
+	static final String PROP_INNER_TABLE_ADD_DATA_ELEMENT = PREFIX_JSON+".inner-table.add-data-element";
+	static final String PROP_INNER_TABLE_ADD_METADATA = PREFIX_JSON+".inner-table.add-metadata";
 	
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
-	static final boolean fullInnerTable = false;
 	
 	protected boolean tableNameAsDataElement = DEFAULT_TABLE_AS_DATA_ELEMENT;
 	protected String dataElement = null; //XXX "data" as default dataElement? "rows"?
@@ -62,6 +64,10 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	protected String metadataElement = DEFAULT_METADATA_ELEMENT;
 	protected String callback = null;
 	
+	protected boolean innerTableAddDataElement = false;
+	protected boolean innerTableAddMetadata = addMetadata;
+	
+	protected boolean innerTable = false;
 	protected String padding = "";
 	
 	protected boolean usePK = false; //XXX: option to set prop usePK
@@ -84,6 +90,12 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, DEFAULT_METADATA_ADD);
 		metadataElement = prop.getProperty(PROP_METADATA_ELEMENT, DEFAULT_METADATA_ELEMENT);
 		callback = prop.getProperty(PROP_JSONP_CALLBACK);
+		innerTableAddDataElement = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_DATA_ELEMENT, innerTableAddDataElement);
+		innerTableAddMetadata = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_METADATA, innerTableAddMetadata);
+		if(innerTableAddMetadata && !innerTableAddDataElement) {
+			log.warn("[innerTableAddMetadata=="+innerTableAddMetadata+"] but [innerTableAddDataElement=="+innerTableAddDataElement+"]...");
+			innerTableAddMetadata = false;
+		}
 		postProcProperties();
 	}
 
@@ -104,14 +116,15 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	public void dumpHeader(Writer fos) throws IOException {
 		String dtElem = getDataElement();
 		//String dtElem = (dataElement!=null && !dataElement.isEmpty()) ? dataElement : tableName;
-		//log.debug("json: dump header: "+dtElem+" / "+tableName+" / "+addMetadata);
+		//log.debug("json: dump header: "+dtElem+" / "+tableName+" / inner="+innerTable+" / "+addMetadata+" / "+innerTableAddDataElement+" / "+innerTableAddMetadata);
 		if(callback!=null) {
 			out(callback+"(", fos);
 		}
 		
-		if(dtElem!=null) {
+		if((!innerTable && dtElem!=null) || (innerTable && innerTableAddDataElement)) {
+			outNoPadding("\n", fos);
 			out("{", fos);
-			if(addMetadata) {
+			if((!innerTable && addMetadata) || (innerTable && innerTableAddMetadata)) {
 				StringBuilder sb = new StringBuilder();
 				if(schemaName!=null) {
 					sb.append("\n"+padding+"\t\t\"schema\": \""+schemaName+"\",");
@@ -178,8 +191,8 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 					continue;
 				}
 				
-				sb.append(",\n");
-				sb.append("\t\t\t"+"\""+innerTableName+"\": ");
+				//sb.append(",\n"); sb.append("\t\t\t"+"\""+innerTableName+"\": ");
+				sb.append(", \""+innerTableName+"\": ");
 				out(sb.toString(), fos);
 				//out(sb.toString()+",\n",fos);
 				//out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
@@ -192,7 +205,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				//jsondd.tableNameAsDataElement = true;
 				//jsondd's 'dtElem' should be null... jsondd should dump array... (?) 
 				// 'callback' should not be set on inner 'jsondd'
-				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, fullInnerTable?innerTableName:null, fos, true);
+				DataDumpUtils.dumpRS(jsondd, rsInt.getMetaData(), rsInt, null, innerTableName, fos, true);
 				sb.append("\n\t\t"+padding);
 			}
 			else {
@@ -220,7 +233,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		//String dtElem = dataElement!=null?dataElement:tableName;
 		String dtElem = getDataElement();
 		
-		if(dtElem!=null) {
+		if((!innerTable && dtElem!=null) || (innerTable && innerTableAddDataElement)) {
 			out((usePK?"\t}":"\t]")+"\n"+padding+"}",fos);
 		}
 		else {
@@ -304,6 +317,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			JSONDataDump jsondd = clone();
 			jsondd.padding = this.padding+"\t\t";
 			jsondd.callback = null;
+			jsondd.innerTable = true;
 			return jsondd;
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);

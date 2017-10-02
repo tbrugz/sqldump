@@ -593,24 +593,92 @@ public class DataDumpTest {
 		jobj = (JSONObject) jarr.get(3);
 		//System.out.println(jobj);
 		Assert.assertEquals("8", jobj.get("B"));
-
-		/*
-		Document doc = parseXML(f);
-		
-		Node n = doc.getChildNodes().item(0);
-		Assert.assertEquals(2, countElementsOfType(n.getChildNodes(),"row")); // 1 row
-		
-		Element e = (Element) n;
-		NodeList nl = e.getElementsByTagName("row");
-		Assert.assertEquals(6, nl.getLength()); // 6 total rows
-		
-		nl = e.getElementsByTagName("A");
-		Assert.assertEquals(2, nl.getLength()); // 2 "A" element
-
-		nl = e.getElementsByTagName("B");
-		Assert.assertEquals(6, nl.getLength()); // 6 "B" elements*/
 	}
 
+	@Test
+	public void testJsonWithArrayMetadata() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
+				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_DATA_ELEMENT+"=true",
+				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_METADATA+"=true",
+				});
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+
+		JSONObject jobj = (JSONObject) obj;
+		Assert.assertTrue("$metadata should be a JSONObject", jobj.get("$metadata") instanceof JSONObject);
+		Assert.assertTrue("q1 should be a JSONArray", jobj.get("q1") instanceof JSONArray);
+		JSONArray jarr = (JSONArray) jobj.get("q1");
+		Assert.assertEquals(2, jarr.size());
+		
+		JSONObject row1 = (JSONObject) jarr.get(0);
+		System.out.println("row1:\n"+row1);
+		Assert.assertEquals(1L, row1.get("A"));
+		
+		Assert.assertTrue("B should be a JSONObject", row1.get("B") instanceof JSONObject);
+		JSONObject innerB = (JSONObject) row1.get("B");
+		Assert.assertTrue("innerB's $metadata should be a JSONObject", innerB.get("$metadata") instanceof JSONObject);
+	}
+	
+	@Test
+	public void testJsonWithArrayMetadataParentOnly() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
+				});
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+
+		JSONObject jobj = (JSONObject) obj;
+		Assert.assertTrue("$metadata should be a JSONObject", jobj.get("$metadata") instanceof JSONObject);
+		Assert.assertTrue("q1 should be a JSONArray", jobj.get("q1") instanceof JSONArray);
+		JSONArray jarr = (JSONArray) jobj.get("q1");
+		Assert.assertEquals(2, jarr.size());
+		
+		JSONObject row1 = (JSONObject) jarr.get(0);
+		System.out.println("row1:\n"+row1);
+		Assert.assertEquals(1L, row1.get("A"));
+		
+		Assert.assertTrue("B should be a JSONArray", row1.get("B") instanceof JSONArray);
+		JSONArray innerB = (JSONArray) row1.get("B");
+		Assert.assertEquals(4, innerB.size());
+	}
+	
+	
+	@Test
+	public void testJsonWithArrayWithData() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
+				"-D"+JSONDataDump.PROP_TABLE_AS_DATA_ELEMENT+"=false",
+				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_DATA_ELEMENT+"=true",
+				});
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+
+		JSONObject jobj = (JSONObject) obj;
+		Assert.assertTrue("$metadata should be a JSONObject", jobj.get("$metadata") instanceof JSONObject);
+		Assert.assertTrue("q1's 'data' should be a JSONArray", jobj.get("data") instanceof JSONArray);
+		JSONArray jarr = (JSONArray) jobj.get("data");
+		Assert.assertEquals(2, jarr.size());
+		
+		JSONObject row1 = (JSONObject) jarr.get(0);
+		System.out.println("row1:\n"+row1);
+		Assert.assertEquals(1L, row1.get("A"));
+		
+		Assert.assertTrue("B should be a JSONObject", row1.get("B") instanceof JSONObject);
+		Object innerBdata = ((JSONObject) row1.get("B")).get("data");
+		Assert.assertTrue("B's 'data' should be a JSONArray", innerBdata instanceof JSONArray);
+		Assert.assertEquals(4, ((JSONArray)innerBdata).size());
+	}
+	
 	@Test
 	public void testInsertIntoWithoutArray2() throws Exception {
 		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "insertinto");
