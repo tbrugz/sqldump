@@ -55,6 +55,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 
 	static final String PROP_INNER_TABLE_ADD_DATA_ELEMENT = PREFIX_JSON+".inner-table.add-data-element";
 	static final String PROP_INNER_TABLE_ADD_METADATA = PREFIX_JSON+".inner-table.add-metadata";
+	static final String PROP_INNER_ARRAY_DUMP_AS_ARRAY = PREFIX_JSON+".inner-array-dump-as-array";
 	
 	static final StringDecorator doubleQuoter = new StringDecorator.StringQuoterDecorator("\"");
 	
@@ -66,6 +67,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	
 	protected boolean innerTableAddDataElement = false;
 	protected boolean innerTableAddMetadata = addMetadata;
+	protected boolean innerArrayDumpAsArray = false;
 	
 	protected boolean innerTable = false;
 	protected String padding = "";
@@ -92,6 +94,8 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		callback = prop.getProperty(PROP_JSONP_CALLBACK);
 		innerTableAddDataElement = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_DATA_ELEMENT, innerTableAddDataElement);
 		innerTableAddMetadata = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_METADATA, innerTableAddMetadata);
+		innerArrayDumpAsArray = Utils.getPropBool(prop, PROP_INNER_ARRAY_DUMP_AS_ARRAY, innerArrayDumpAsArray);
+		
 		if(innerTableAddMetadata && !innerTableAddDataElement) {
 			log.warn("[innerTableAddMetadata=="+innerTableAddMetadata+"] but [innerTableAddDataElement=="+innerTableAddDataElement+"]...");
 			innerTableAddMetadata = false;
@@ -167,7 +171,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			}
 			sb.append("\": ");
 		}
-		if(encloseRowWithCurlyBraquets) {
+		
+		boolean dumpInnerAsArray = dumpInnerAsArray();
+		if(encloseRowWithCurlyBraquets && !dumpInnerAsArray) {
 			sb.append("{");
 		}
 		
@@ -177,6 +183,11 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			Class<?> ctype = lsColTypes.get(i);
 			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
 			boolean isArray = Array.class.isAssignableFrom(ctype);
+			sb.append((i==0?"":", "));
+			if(!dumpInnerAsArray) {
+				sb.append("\"" + lsColNames.get(i) + "\"" + ": ");
+			}
+			
 			if(isResultSet || isArray) {
 				String innerTableName = lsColNames.get(i);
 				ResultSet rsInt = null;
@@ -192,7 +203,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				}
 				
 				//sb.append(",\n"); sb.append("\t\t\t"+"\""+innerTableName+"\": ");
-				sb.append(", \""+innerTableName+"\": ");
+				//sb.append(", \""+innerTableName+"\": ");
 				out(sb.toString(), fos);
 				//out(sb.toString()+",\n",fos);
 				//out("\t\t\t"+"\""+lsColNames.get(i)+"\": ", fos);
@@ -211,17 +222,19 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			else {
 				
 			try {
-				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
+				//sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
+				sb.append(DataDumpUtils.getFormattedJSONValue( origVal, ctype, dateFormatter ));
 			}
 			catch(Exception e) {
 				log.warn("dumpRow: "+lsColNames+" / "+vals+" / ex: "+e);
-				sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + nullValueStr);
+				//sb.append((i==0?"":",") + " \"" + lsColNames.get(i) + "\"" + ": " + nullValueStr);
+				sb.append(nullValueStr);
 				//e.printStackTrace();
 			}
 
 			}
 		}
-		if(encloseRowWithCurlyBraquets) {
+		if(encloseRowWithCurlyBraquets && !dumpInnerAsArray) {
 			sb.append(" }");
 		}
 		sb.append("\n");
@@ -322,6 +335,10 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		} catch (CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	boolean dumpInnerAsArray() {
+		return innerTable  && innerArrayDumpAsArray && lsColNames.size()==1;
 	}
 
 }

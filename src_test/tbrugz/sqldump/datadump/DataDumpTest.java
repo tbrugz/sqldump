@@ -603,7 +603,7 @@ public class DataDumpTest {
 				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_METADATA+"=true",
 				});
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
@@ -615,7 +615,7 @@ public class DataDumpTest {
 		Assert.assertEquals(2, jarr.size());
 		
 		JSONObject row1 = (JSONObject) jarr.get(0);
-		System.out.println("row1:\n"+row1);
+		//System.out.println("row1:\n"+row1);
 		Assert.assertEquals(1L, row1.get("A"));
 		
 		Assert.assertTrue("B should be a JSONObject", row1.get("B") instanceof JSONObject);
@@ -629,7 +629,7 @@ public class DataDumpTest {
 				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
 				});
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
@@ -641,7 +641,7 @@ public class DataDumpTest {
 		Assert.assertEquals(2, jarr.size());
 		
 		JSONObject row1 = (JSONObject) jarr.get(0);
-		System.out.println("row1:\n"+row1);
+		//System.out.println("row1:\n"+row1);
 		Assert.assertEquals(1L, row1.get("A"));
 		
 		Assert.assertTrue("B should be a JSONArray", row1.get("B") instanceof JSONArray);
@@ -658,7 +658,7 @@ public class DataDumpTest {
 				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_DATA_ELEMENT+"=true",
 				});
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 
 		Object obj = JSONValue.parse(jsonStr);
 		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
@@ -670,13 +670,37 @@ public class DataDumpTest {
 		Assert.assertEquals(2, jarr.size());
 		
 		JSONObject row1 = (JSONObject) jarr.get(0);
-		System.out.println("row1:\n"+row1);
+		//System.out.println("row1:\n"+row1);
 		Assert.assertEquals(1L, row1.get("A"));
 		
 		Assert.assertTrue("B should be a JSONObject", row1.get("B") instanceof JSONObject);
 		Object innerBdata = ((JSONObject) row1.get("B")).get("data");
 		Assert.assertTrue("B's 'data' should be a JSONArray", innerBdata instanceof JSONArray);
 		Assert.assertEquals(4, ((JSONArray)innerBdata).size());
+	}
+
+	@Test
+	public void testJsonWithInnerArrayAsArray() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+				"-D"+JSONDataDump.PROP_TABLE_AS_DATA_ELEMENT+"=false",
+				"-D"+JSONDataDump.PROP_INNER_ARRAY_DUMP_AS_ARRAY+"=true",
+				});
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(jsonStr);
+
+		Object obj = JSONValue.parse(jsonStr);
+		Assert.assertTrue("Should be a JSONObject", obj instanceof JSONObject);
+
+		JSONObject jobj = (JSONObject) obj;
+		Assert.assertTrue("q1's 'data' should be a JSONArray", jobj.get("data") instanceof JSONArray);
+		JSONArray jarr = (JSONArray) jobj.get("data");
+		Assert.assertEquals(2, jarr.size());
+		
+		JSONObject row1 = (JSONObject) jarr.get(0);
+		Assert.assertEquals(1L, row1.get("A"));
+		
+		Assert.assertTrue("B should be a JSONArray", row1.get("B") instanceof JSONArray);
+		Assert.assertEquals(4, ((JSONArray) row1.get("B")).size());
 	}
 	
 	@Test
