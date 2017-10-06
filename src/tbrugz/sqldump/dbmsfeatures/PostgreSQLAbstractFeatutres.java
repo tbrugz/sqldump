@@ -85,5 +85,13 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 	public boolean supportsCreateIndexWithoutName() {
 		return true;
 	}
+	
+	/*
+	 * see: https://dba.stackexchange.com/questions/27963/postgres-requires-commit-or-rollback-after-exception
+	 */
+	@Override
+	public boolean sqlExceptionRequiresRollback() {
+		return true;
+	}
 
 }

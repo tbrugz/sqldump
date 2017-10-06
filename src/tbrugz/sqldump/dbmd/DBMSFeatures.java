@@ -140,4 +140,6 @@ public interface DBMSFeatures {
 	boolean alterColumnDefaultRequireFullDefinition();
 	boolean alterColumnNullableRequireFullDefinition();
 
+	boolean sqlExceptionRequiresRollback();
+	
 }

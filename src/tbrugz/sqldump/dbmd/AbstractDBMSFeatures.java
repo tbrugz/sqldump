@@ -191,5 +191,10 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		grabDBExecutables(execs, schema, executableNamePattern, conn);
 		return execs;
 	}
+	
+	@Override
+	public boolean sqlExceptionRequiresRollback() {
+		return false;
+	}
 
 }
