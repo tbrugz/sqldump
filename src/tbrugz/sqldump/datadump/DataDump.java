@@ -227,7 +227,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 		}
 		
-		int queriesRun = 0;
+		int queriesRan = 0;
 		int ignoredTables = 0;
 		
 		Collection<Table> tablesForDataDumpLoop = null;
@@ -306,7 +306,7 @@ public class DataDump extends AbstractSQLProc {
 						uniqueKeys,
 						null //decoratorFactory
 						);
-				queriesRun++;
+				queriesRan++;
 			}
 			catch(Exception e) {
 				log.warn("error dumping data from table: "+tableFullName+"\n\tsql: "+sql+"\n\texception: "+e);
@@ -324,7 +324,7 @@ public class DataDump extends AbstractSQLProc {
 			if(tables4dump!=null && tables4dump.size()>0) {
 				log.warn("tables selected for dump but not found: "+Utils.join(tables4dump, ", "));
 			}
-			log.info("..."+queriesRun+" queries dumped"
+			log.info("..."+queriesRan+" queries dumped"
 					+(ignoredTables>0?" ["+ignoredTables+" tables ignored]":"") );
 		}
 	}
