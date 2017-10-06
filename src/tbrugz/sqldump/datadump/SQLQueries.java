@@ -339,6 +339,11 @@ public class SQLQueries extends AbstractSQLProc {
 						log.warn("getMetaData() returned null: empty query? sql:\n"+sql);
 					}
 				} catch (SQLException e) {
+					try {
+						stmt.getConnection().rollback();
+					} catch (SQLException e1) {
+						log.warn("Error rolling back: "+e);
+					}
 					query.setColumns(new ArrayList<Column>());
 					//query.setColumns(null); //XXX null is better??
 					log.warn("resultset metadata's sqlexception: "+e.toString().trim());
@@ -353,6 +358,11 @@ public class SQLQueries extends AbstractSQLProc {
 					}
 					//XXX set parameter type names??
 				} catch (SQLException e) {
+					try {
+						stmt.getConnection().rollback();
+					} catch (SQLException e1) {
+						log.warn("Error rolling back: "+e);
+					}
 					query.setParameterCount(null);
 					log.warn("parameter metadata's sqlexception: "+e.toString().trim());
 					log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
