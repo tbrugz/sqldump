@@ -49,4 +49,9 @@ public class Query extends View {
 		this.rsDecoratorArguments = rsDecoratorArguments;
 	}
 	
+	@Override
+	public String toString() {
+		return "Query["+getQualifiedName()+"]";
+	}
+	
 }

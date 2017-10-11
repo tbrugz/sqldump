@@ -328,7 +328,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		else {
 			//getting columns from prepared statement metadata
-			if(grabInfoFromMetadata) {
+			if(grabInfoFromMetadata && stmt!=null) {
 				log.debug("grabbing colums name & type from prepared statement's metadata [id="+qid+"; name="+queryName+"]");
 				try {
 					ResultSetMetaData rsmd = stmt.getMetaData();
@@ -367,6 +367,9 @@ public class SQLQueries extends AbstractSQLProc {
 					log.warn("parameter metadata's sqlexception: "+e.toString().trim());
 					log.debug("parameter metadata's sqlexception: "+e.getMessage(), e);
 				}
+			}
+			if(grabInfoFromMetadata && stmt==null) {
+				log.warn("statement is null: can't grab metadata [id="+qid+"; name="+queryName+"]");
 			}
 		}
 		
