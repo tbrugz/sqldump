@@ -39,6 +39,7 @@ public class ConnectionUtil {
 	public static final String SUFFIX_ASKFORUSERNAME_GUI = ".askforusernamegui";
 	public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
 	public static final String SUFFIX_INITSQL = ".initsql";
+	public static final String SUFFIX_INITSQL_COMMIT = ".initsql.commit";
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException, NamingException {
 		// AutoCommit==false: needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
@@ -91,8 +92,13 @@ public class ConnectionUtil {
 		//XXX: initsql: option to execute multiple statements?
 		String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
 		if(dbInitSql!=null) {
+			boolean dbInitSqlCommit = Utils.getPropBool(papp, propsPrefix+SUFFIX_INITSQL_COMMIT, false);
 			try {
 				int count = conn.createStatement().executeUpdate(dbInitSql);
+				// commit?
+				// postgresql: The effects of SET or SET LOCAL are also canceled by rolling back to a savepoint that is earlier than the command.
+				// https://www.postgresql.org/docs/10/static/sql-set.html
+				if(dbInitSqlCommit) { conn.commit(); }
 				log.info("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
 			}
 			catch(SQLException e) {
