@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,8 +21,18 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	
 	boolean shouldFlush = false;
 	
+	static final String PROP_HTML_DIFF_PREPEND = "sqldump.datadump.html.diff.prepend";
+	static final String PROP_HTML_DIFF_APPEND = "sqldump.datadump.html.diff.append";
+	
 	public HTMLDiff() {
 		this.nullValueStr = "&#9216;"; // NULL unicode char in HTML - unicode U+2400
+	}
+	
+	@Override
+	public void procProperties(Properties prop) {
+		super.procProperties(prop);
+		prepend = prop.getProperty(PROP_HTML_DIFF_PREPEND, prepend);
+		append = prop.getProperty(PROP_HTML_DIFF_APPEND, append);
 	}
 	
 	@Override
