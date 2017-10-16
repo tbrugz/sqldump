@@ -361,6 +361,11 @@ public class Utils {
 		return getStringList(strings, delimiter, allowedValues);
 	}
 	
+	public static List<String> getStringListIgnoreEmpty(String strings, String delimiter) {
+		if(strings==null || strings.trim().equals("")) { return null; }
+		return getStringList(strings, delimiter);
+	}
+	
 	public static List<String> getStringList(String strings, String delimiter) {
 		if(strings!=null) {
 			List<String> ret = new ArrayList<String>();
