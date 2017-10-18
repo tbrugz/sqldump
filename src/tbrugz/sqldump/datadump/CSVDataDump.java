@@ -49,6 +49,10 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.csv.tablenameheader";
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
 	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
+	
+	//static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.csv.charset";
+	//static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.csv."+DataDump.SUFFIX_DATADUMP_WRITEBOM;
+	static final String PROP_DATADUMP_WRITEBOM_UTF8 = "sqldump.datadump.csv.x-writebom-utf8";
 
 	public static final String DELIM_RECORD_DEFAULT = "\r\n"; // RFC: record delimiter is \r\n
 	public static final String DELIM_COLUMN_DEFAULT = ",";
@@ -64,6 +68,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	String columnDelimiter;
 	String recordDelimiter;
 	String enclosing;
+	boolean writeUft8Bom = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -73,6 +78,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		enclosing = prop.getProperty(PROP_DATADUMP_ENCLOSING, ENCLOSING_DEFAULT);
 		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
 		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
+		writeUft8Bom = Utils.getPropBool(prop, PROP_DATADUMP_WRITEBOM_UTF8, writeUft8Bom);
 		postProcProperties();
 	}
 	
@@ -90,6 +96,9 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		//headers
+		if(writeUft8Bom) {
+			fos.write(DataDump.UTF8_BOM);
+		}
 		if(doTableNameHeaderDump) {
 			out("[table "+tableName+"]", fos, recordDelimiter);
 		}

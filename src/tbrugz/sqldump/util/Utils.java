@@ -618,7 +618,7 @@ public class Utils {
 		DecimalFormat df = (DecimalFormat) floatFormatter;
 		df.setGroupingUsed(false);
 		if(floatFormat==null) {
-			floatFormat = "###0.000"; 
+			floatFormat = "###0.00#";
 		}
 		df.applyPattern(floatFormat);
 		return floatFormatter;

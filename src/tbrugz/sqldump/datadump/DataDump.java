@@ -90,6 +90,7 @@ public class DataDump extends AbstractSQLProc {
 	//defaults
 	static final String CHARSET_DEFAULT = DataDumpUtils.CHARSET_UTF8;
 	static final long LOG_EACH_X_ROWS_DEFAULT = 50000;
+	static final char UTF8_BOM = '\ufeff';
 	
 	static final String PATTERN_TABLE_QUERY_ID = "id";
 	static final String PATTERN_PARTITIONBY = "partitionby";
@@ -920,7 +921,7 @@ public class DataDump extends AbstractSQLProc {
 		try {
 			if(DataDumpUtils.CHARSET_UTF8.equalsIgnoreCase(charset)) {
 				if(doWrite!=null && doWrite) {
-					w.write('\ufeff');
+					w.write(UTF8_BOM);
 				}
 			}
 			/*else if("ISO-8859-1".equalsIgnoreCase(charset)) {
