@@ -2,6 +2,7 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -475,6 +476,15 @@ public class DataDumpUtils {
 	 */
 	static String getString(Object s) {
 		return (s==null)?"null":patternCointrolChars.matcher(s.toString()).replaceAll(STR_CONTROL_CHARS_REPLACEMENT);
+	}
+	
+	public static boolean isArray(Class<?> c, Object val) {
+		return Array.class.isAssignableFrom(c) && (val instanceof Object[]);
+	}
+
+	public static boolean isResultSet(Class<?> c, Object val) {
+		//return ResultSet.class.isAssignableFrom(c) || (val instanceof ResultSet);
+		return val instanceof ResultSet;
 	}
 	
 	//see: Table.getColumnNames

@@ -2,7 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -138,11 +137,11 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 		if(doDumpCursors) {
 			for(int i=0;i<lsColNames.size();i++) {
 				Class<?> ctype = lsColTypes.get(i);
-				boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
-				boolean isArray = Array.class.isAssignableFrom(ctype);
+				Object origVal = vals.get(i);
+				boolean isResultSet = DataDumpUtils.isResultSet(ctype, origVal);
+				boolean isArray = DataDumpUtils.isArray(ctype, origVal);
 				if(isResultSet || isArray) {
 					log.info("dump inner table/cursor...");
-					Object origVal = vals.get(i);
 					String innerTableName = lsColNames.get(i);
 					//ResultSet rsInt = (ResultSet) vals.get(i);
 					ResultSet rsInt = null;

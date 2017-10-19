@@ -2,7 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -181,9 +180,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		for(int i=0;i<lsColNames.size();i++) {
 			Object origVal = vals.get(i);
 			Class<?> ctype = lsColTypes.get(i);
-			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
-			boolean isArray = Array.class.isAssignableFrom(ctype);
-			sb.append((i==0?"":", "));
+			boolean isResultSet = DataDumpUtils.isResultSet(ctype, origVal);
+			boolean isArray = DataDumpUtils.isArray(ctype, origVal);
+			sb.append((i==0?" ":", "));
 			if(!dumpInnerAsArray) {
 				sb.append("\"" + lsColNames.get(i) + "\"" + ": ");
 			}

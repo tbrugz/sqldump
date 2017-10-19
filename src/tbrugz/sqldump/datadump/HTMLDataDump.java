@@ -2,7 +2,6 @@ package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -25,7 +24,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * see: https://developer.mozilla.org/en/docs/Web/HTML/Element/table
  */
-public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Cloneable {
+public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, HierarchicalDumpSyntax, Cloneable {
 
 	static final Log log = LogFactory.getLog(HTMLDataDump.class);
 
@@ -293,8 +292,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Clon
 		for(int i=0;i<finalColNames.size();i++) {
 			Object origVal = vals.get(i);
 			Class<?> ctype = finalColTypes.get(i);
-			boolean isResultSet = ResultSet.class.isAssignableFrom(ctype);
-			boolean isArray = Array.class.isAssignableFrom(ctype);
+			boolean isResultSet = DataDumpUtils.isResultSet(ctype, origVal);
+			boolean isArray = DataDumpUtils.isArray(ctype, origVal);
 			if(isResultSet || isArray) {
 				ResultSet rsInt = null;
 				if(isArray) {
