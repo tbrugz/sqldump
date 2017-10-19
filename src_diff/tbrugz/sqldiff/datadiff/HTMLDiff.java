@@ -20,6 +20,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	static final Log log = LogFactory.getLog(HTMLDiff.class);
 	
 	boolean shouldFlush = false;
+	boolean cellDiffAddFirst = false;
 	
 	static final String PROP_HTML_DIFF_PREPEND = "sqldump.datadump.html.diff.prepend";
 	static final String PROP_HTML_DIFF_APPEND = "sqldump.datadump.html.diff.append";
@@ -93,7 +94,14 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 				sb.append( "<td>"+ valueS +"</td>" );
 			}
 			else {
-				sb.append( "<td><span class=\"add\">"+ valueT +"</span><span class=\"remove\">"+ valueS +"</span></td>" );
+				sb.append("<td>");
+				if(cellDiffAddFirst) {
+					sb.append( "<span class=\"add\">"+ valueT +"</span><br><span class=\"remove\">"+ valueS +"</span>" );
+				}
+				else {
+					sb.append( "<span class=\"remove\">"+ valueS +"</span><br><span class=\"add\">"+ valueT +"</span>" );
+				}
+				sb.append("</td>");
 			}
 		}
 		sb.append("</tr>");
