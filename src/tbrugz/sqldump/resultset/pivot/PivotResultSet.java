@@ -631,7 +631,9 @@ public class PivotResultSet extends AbstractResultSet {
 	static String[] toStringArray(Object[] arr) {
 		String[] ret = new String[arr.length];
 		for(int i=0;i<ret.length;i++) {
-			ret[i] = arr[i].toString();
+			if(arr[i]!=null) {
+				ret[i] = arr[i].toString();
+			}
 		}
 		return ret;
 	}
@@ -793,7 +795,7 @@ public class PivotResultSet extends AbstractResultSet {
 			return null;
 		}
 		for(Object o: colVals) {
-			if(value.equals(o.toString())) {
+			if(o!=null && value.equals(o.toString())) {
 				return o;
 			}
 		}

@@ -53,6 +53,12 @@ public class Key implements Comparable<Key> {
 			Object v = values[i];
 			Object ov = o.values[i];
 			//System.out.println("v: "+v+" ["+v.getClass()+"] / ov: "+ov+" ["+ov.getClass()+"]");
+			
+			// nulls last ;)
+			if(v!=null && ov==null) { return 1; }
+			if(v==null && ov!=null) { return -1; }
+			if(v==null && ov==null) { return 0; }
+			
 			if(!v.equals(ov)) {
 				
 				if(v instanceof Comparable) {
