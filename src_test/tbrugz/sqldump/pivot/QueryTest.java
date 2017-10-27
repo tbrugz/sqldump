@@ -416,5 +416,37 @@ public class QueryTest {
 		Node n = doc.getChildNodes().item(0);
 		Assert.assertEquals(2+2, DataDumpTest.countElementsOfType(n.getChildNodes(),"tr"));
 	}
-	
+
+	@Test
+	public void q11() throws SQLException, IOException {
+		String sql = prop.getProperty("q11");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A", "B"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+
+		Assert.assertEquals(4, rs.getMetaData().getColumnCount());
+		Assert.assertEquals(true, rs.absolute(6));
+		Assert.assertEquals(false, rs.next());
+	}
+
+	@Test
+	public void q11b() throws SQLException, IOException {
+		String sql = prop.getProperty("q11");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A"};
+		String[] colsTP = {"B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+
+		// should return only 4 rows (not 5) & 4 cols
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(9, colcount);
+		// null last
+		Assert.assertEquals("SUM|||B:::null", rs.getMetaData().getColumnName(5));
+		Assert.assertEquals(true, rs.absolute(5));
+		Assert.assertEquals(false, rs.next());
+	}
+
 }

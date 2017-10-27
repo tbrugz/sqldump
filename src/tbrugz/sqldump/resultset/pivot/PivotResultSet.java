@@ -51,12 +51,24 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	static class NullOkComparator implements Comparator<Object> {
 
+		final int returnLastIsNull;
+		final int returnFistIsNull;
+		
+		public NullOkComparator() {
+			this(false);
+		}
+
+		public NullOkComparator(boolean nullsFirst) {
+			returnLastIsNull = nullsFirst ?  1 : -1;
+			returnFistIsNull = nullsFirst ? -1 :  1;
+		}
+		
 		@SuppressWarnings("unchecked")
 		@Override
 		public int compare(Object o1, Object o2) {
-			// nulls last ;)
-			if(o1!=null && o2==null) { return 1; }
-			if(o1==null && o2!=null) { return -1; }
+			// nulls last?
+			if(o1!=null && o2==null) { return returnLastIsNull; }
+			if(o1==null && o2!=null) { return returnFistIsNull; }
 			if(o1==null && o2==null) { return 0; }
 			
 			if(o1 instanceof Comparable && o2 instanceof Comparable) {
@@ -104,7 +116,7 @@ public class PivotResultSet extends AbstractResultSet {
 	//final List<Integer> colsNotToPivotIndex = new ArrayList<Integer>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
 	final transient List<String> colsToPivotNames; // derived from colsToPivot
-	static final NullOkComparator objectComparator = new NullOkComparator();
+	static final NullOkComparator nullOkComparator = new NullOkComparator();
 	
 	// data properties - set in processMetadata()?
 	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();
@@ -736,7 +748,8 @@ public class PivotResultSet extends AbstractResultSet {
 		if(vals==null) {
 			//XXX: order of elements inside set: use Comparator/Comparable
 			//vals = new HashSet<Object>();
-			vals = new TreeSet<Object>(objectComparator);
+			//vals = new TreeSet<Object>();
+			vals = new TreeSet<Object>(nullOkComparator);
 			keyColValues.put(col, vals);
 		}
 		vals.add(val);
