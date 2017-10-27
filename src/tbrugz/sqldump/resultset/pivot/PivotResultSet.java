@@ -8,6 +8,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +48,29 @@ public class PivotResultSet extends AbstractResultSet {
 		//COUNT? DISTINCT-COUNT?
 		//numeric: AVG, MAX, MIN, SUM, ...
 	}
+	
+	static class NullOkComparator implements Comparator<Object> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public int compare(Object o1, Object o2) {
+			// nulls last ;)
+			if(o1!=null && o2==null) { return 1; }
+			if(o1==null && o2!=null) { return -1; }
+			if(o1==null && o2==null) { return 0; }
+			
+			if(o1 instanceof Comparable && o2 instanceof Comparable) {
+				return ((Comparable)o1).compareTo(((Comparable)o2));
+			}
+			if(o1 instanceof Number) {
+				Number n = (Number) o1;
+				Number on = (Number) o2;
+				return on.intValue()-n.intValue();
+			}
+			return String.valueOf(o1).compareTo(String.valueOf(o2));
+		}
+		
+	}
 
 	public static final String COLS_SEP = "|||";
 	public static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
@@ -80,6 +104,7 @@ public class PivotResultSet extends AbstractResultSet {
 	//final List<Integer> colsNotToPivotIndex = new ArrayList<Integer>();
 	final List<Integer> measureColsType = new ArrayList<Integer>();
 	final transient List<String> colsToPivotNames; // derived from colsToPivot
+	static final NullOkComparator objectComparator = new NullOkComparator();
 	
 	// data properties - set in processMetadata()?
 	final Map<String, Set<Object>> keyColValues = new HashMap<String, Set<Object>>();
@@ -710,7 +735,8 @@ public class PivotResultSet extends AbstractResultSet {
 		Set<Object> vals = keyColValues.get(col);
 		if(vals==null) {
 			//XXX: order of elements inside set: use Comparator/Comparable
-			vals = new TreeSet<Object>();
+			//vals = new HashSet<Object>();
+			vals = new TreeSet<Object>(objectComparator);
 			keyColValues.put(col, vals);
 		}
 		vals.add(val);
