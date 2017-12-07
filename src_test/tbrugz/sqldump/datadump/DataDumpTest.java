@@ -335,6 +335,79 @@ public class DataDumpTest {
 	}
 	
 	@Test
+	public void testJsonNullDataElement() throws Exception {
+		File f = dumpSelect("select 1 as a, 3 as c", "json",
+				new String[] {"-Dsqldump.datadump.json.null-data-element=true"});
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
+		JSONArray jarr = (JSONArray) obj;
+		JSONObject jobj = (JSONObject) jarr.get(0);
+		Assert.assertEquals(1L, jobj.get("A"));
+		Assert.assertEquals(3L, jobj.get("C"));
+	}
+	
+	@Test
+	public void testJsonNullDataElementUniqueRow() throws Exception {
+		File f = dumpSelect("select 1 as a, 3 as c", "json",
+				new String[] {"-Dsqldump.datadump.json.null-data-element=true",
+						"-Dsqldump.datadump.json.force-unique-row=true",
+						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
+		);
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
+		JSONObject jobj = (JSONObject) obj;
+		Assert.assertEquals(1L, jobj.get("A"));
+		Assert.assertEquals(3L, jobj.get("C"));
+	}
+
+	@Test
+	public void testJsonUniqueRow() throws Exception {
+		File f = dumpSelect("select 1 as a, 3 as c", "json"
+				,new String[] {"-Dsqldump.datadump.json.force-unique-row=true"}
+		);
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
+		JSONObject jobj = (JSONObject) obj;
+		JSONArray jarr = (JSONArray) jobj.get("q1");
+		jobj = (JSONObject) jarr.get(0);
+		Assert.assertEquals(1L, jobj.get("A"));
+		Assert.assertEquals(3L, jobj.get("C"));
+	}
+
+	@Test
+	public void testJsonUniqueRowNoArray() throws Exception {
+		File f = dumpSelect("select 1 as a, 3 as c", "json"
+				,new String[] {"-Dsqldump.datadump.json.force-unique-row=true",
+						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
+		);
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
+		JSONObject jobj = (JSONObject) obj;
+		jobj = (JSONObject) jobj.get("q1");
+		Assert.assertEquals(1L, jobj.get("A"));
+		Assert.assertEquals(3L, jobj.get("C"));
+	}
+
+	@Test
+	public void testJsonUniqueRowNoArray_With2Rows() throws Exception {
+		File f = dumpSelect("select 1 as a, 3 as c union all select 2, 2", "json"
+				,new String[] {"-Dsqldump.datadump.json.force-unique-row=true",
+						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
+		);
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		Object obj = JSONValue.parse(jsonStr);
+		JSONObject jobj = (JSONObject) obj;
+		jobj = (JSONObject) jobj.get("q1");
+		System.out.println("size: "+jobj.size());
+		Assert.assertEquals(2, jobj.size());
+	}
+	
+	@Test
 	public void dumpPartitioned() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		String[] vmparamsDump = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",

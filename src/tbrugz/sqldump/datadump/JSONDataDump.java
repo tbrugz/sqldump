@@ -47,6 +47,9 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	static final boolean DEFAULT_TABLE_AS_DATA_ELEMENT = true;
 	
 	static final String PROP_DATA_ELEMENT = PREFIX_JSON+".data-element";
+	static final String PROP_NULL_DATA_ELEMENT = PREFIX_JSON+".null-data-element";
+	static final String PROP_NO_ARRAY_ON_UNIQUE_ROW = PREFIX_JSON+".no-array-on-unique-row";
+	static final String PROP_FORCE_UNIQUE_ROW = PREFIX_JSON+".force-unique-row";
 	static final String PROP_ADD_METADATA = PREFIX_JSON+".add-metadata";
 	static final String PROP_METADATA_ELEMENT = PREFIX_JSON+".metadata-element";
 	static final String PROP_JSONP_CALLBACK = PREFIX_JSON+".callback";
@@ -73,6 +76,8 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	
 	protected boolean usePK = false; //XXX: option to set prop usePK
 	protected boolean encloseRowWithCurlyBraquets = true;
+	protected boolean uniqueRow = false;
+	protected boolean noArrayOnUniqueRow = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -80,12 +85,23 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		if(dateFormatter==null) {
 			dateFormatter = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 		}
+		boolean nullDataElement = Utils.getPropBool(prop, PROP_NULL_DATA_ELEMENT);
 		dataElement = prop.getProperty(PROP_DATA_ELEMENT);
+		
 		if(dataElement!=null) {
 			tableNameAsDataElement = false;
+			if(nullDataElement) {
+				log.warn("prop '"+PROP_NULL_DATA_ELEMENT+"' ignored");
+			}
 		}
 		else {
-			dataElement = DEFAULT_DATA_ELEMENT;
+			if(nullDataElement) {
+				//dataElement = null;
+				tableNameAsDataElement = false;
+			}
+			else {
+				dataElement = DEFAULT_DATA_ELEMENT;
+			}
 		}
 		tableNameAsDataElement = Utils.getPropBool(prop, PROP_TABLE_AS_DATA_ELEMENT, tableNameAsDataElement);
 		addMetadata = Utils.getPropBool(prop, PROP_ADD_METADATA, DEFAULT_METADATA_ADD);
@@ -94,6 +110,10 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		innerTableAddDataElement = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_DATA_ELEMENT, innerTableAddDataElement);
 		innerTableAddMetadata = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_METADATA, innerTableAddMetadata);
 		innerArrayDumpAsArray = Utils.getPropBool(prop, PROP_INNER_ARRAY_DUMP_AS_ARRAY, innerArrayDumpAsArray);
+		noArrayOnUniqueRow = Utils.getPropBool(prop, PROP_NO_ARRAY_ON_UNIQUE_ROW, noArrayOnUniqueRow);
+		if(Utils.getPropBool(prop, PROP_FORCE_UNIQUE_ROW)) {
+			setUniqueRow(true);
+		}
 		
 		if(innerTableAddMetadata && !innerTableAddDataElement) {
 			log.warn("[innerTableAddMetadata=="+innerTableAddMetadata+"] but [innerTableAddDataElement=="+innerTableAddDataElement+"]...");
@@ -108,11 +128,28 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		if(lsColNames.size()!=lsColTypes.size()) {
 			log.warn("diff lsColNames/lsColTypes sizes: "+lsColNames.size()+" ; "+lsColTypes.size());
 		}
+		beforeDumpHeader();
 		//if(pkCols==null) { usePK = false; } else { usePK = true; }
 	}
 	
 	protected String getDataElement() {
 		return tableNameAsDataElement ? tableName : dataElement;
+	}
+	
+	@Override
+	public void setUniqueRow(boolean unique) {
+		this.uniqueRow = unique;
+		beforeDumpHeader();
+	}
+	
+	protected void beforeDumpHeader() {
+		if(uniqueRow && noArrayOnUniqueRow) {
+			encloseRowWithCurlyBraquets = false;
+		}
+	}
+	
+	protected boolean useOuterCurlyBraquets() {
+		return usePK || (uniqueRow && noArrayOnUniqueRow);
 	}
 	
 	@Override
@@ -145,12 +182,12 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 			}
 			dumpXtraHeader(fos);
 			outNoPadding("\n"+padding+"\t\""+dtElem+"\": "
-				+(usePK?"{":"[")
+				+(useOuterCurlyBraquets()?"{":"[")
 				+"\n", fos);
 		}
 		else {
 			dumpXtraHeader(fos);
-			outNoPadding((usePK?"{":"[")
+			outNoPadding((useOuterCurlyBraquets()?"{":"[")
 				+"\n", fos);
 		}
 	}
@@ -160,6 +197,13 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
+		if(count==1 && uniqueRow) {
+			String message = "resultset should contain only 1 row [rowcount="+(count+1)+"+;uniqueRow="+uniqueRow+"]";
+			//System.out.println("JSONDataDump: "+message);
+			log.warn(message);
+			//throw new RuntimeException(message);
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t"+(count==0?"":","));
 		if(usePK) {
@@ -240,10 +284,10 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		String dtElem = getDataElement();
 		
 		if((!innerTable && dtElem!=null) || (innerTable && innerTableAddDataElement)) {
-			out((usePK?"\t}":"\t]")+"\n"+padding+"}",fos);
+			out((useOuterCurlyBraquets()?"\t}":"\t]")+"\n"+padding+"}",fos);
 		}
 		else {
-			out((usePK?"\t}":"\t]"),fos);
+			out((useOuterCurlyBraquets()?"\t}":"\t]"),fos);
 		}
 		
 		if(callback!=null) {
