@@ -141,9 +141,14 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	}
 	
 	protected void beforeDumpHeader() {
-		if(uniqueRow && noArrayOnUniqueRow) {
+		encloseRowWithCurlyBraquets = !uniqueRow || !noArrayOnUniqueRow;
+		//encloseRowWithCurlyBraquets = !(uniqueRow && noArrayOnUniqueRow);
+		/*if(uniqueRow && noArrayOnUniqueRow) {
 			encloseRowWithCurlyBraquets = false;
 		}
+		else {
+			encloseRowWithCurlyBraquets = true;
+		}*/
 	}
 	
 	protected boolean useOuterCurlyBraquets() {
