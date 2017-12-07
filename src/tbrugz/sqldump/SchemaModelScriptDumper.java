@@ -511,6 +511,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		boolean alreadyOpened = filesOpened.contains(outFile);
 		if(!alreadyOpened) { filesOpened.add(outFile); }
 		
+		//log.debug("writing to '"+outFile+"' "+objectType+" '"+schemaName+"."+objectName+"'" + (alreadyOpened?" [alreadyOpened]":"") );
+		
 		File f = new File(outFile);
 		//String dirStr = f.getParent();
 		File dir = f.getParentFile();

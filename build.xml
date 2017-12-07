@@ -159,7 +159,7 @@
 		<tstamp>
 			<format property="timestamp" pattern="yyyy-MM-dd hh:mm:ss"/>
 		</tstamp>
-		<exec executable="hg" outputproperty="buildNumber" resultproperty="buildNumber.result" failonerror="false">
+		<exec executable="hg" outputproperty="buildNumber" resultproperty="buildNumber.result" failonerror="false" failifexecutionfails="false">
 			<arg line="id -i"/>
 		</exec>
 		<echo message="buildNumber: ${buildNumber} ; timestamp: ${timestamp}" />

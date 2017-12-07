@@ -116,6 +116,9 @@ public class SQLUtils {
 	}
 	
 	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol, boolean canReturnResultSet) throws SQLException {
+		if(rs.getMetaData().getColumnCount()!=numCol) {
+			log.debug("getMetaData().getColumnCount() ["+rs.getMetaData().getColumnCount()+"] != numCol ["+numCol+"]");
+		}
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;

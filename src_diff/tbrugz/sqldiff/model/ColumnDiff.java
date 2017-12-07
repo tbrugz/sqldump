@@ -238,8 +238,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 					alterSql += " "+column.getTypeDefinition()+column.getFullColumnConstraints();
 				}
 				else {
-				alterSql += " "+column.getTypeDefinition();
-			}
+					alterSql += " "+column.getTypeDefinition();
+				}
 			}
 			else if(!previousColumn.getDefaultSnippet().equals(column.getDefaultSnippet())) {
 				if(alterDefaultRequireFullDefinition) {
