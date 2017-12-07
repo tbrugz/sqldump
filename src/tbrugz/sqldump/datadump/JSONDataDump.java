@@ -111,9 +111,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		innerTableAddMetadata = Utils.getPropBool(prop, PROP_INNER_TABLE_ADD_METADATA, innerTableAddMetadata);
 		innerArrayDumpAsArray = Utils.getPropBool(prop, PROP_INNER_ARRAY_DUMP_AS_ARRAY, innerArrayDumpAsArray);
 		noArrayOnUniqueRow = Utils.getPropBool(prop, PROP_NO_ARRAY_ON_UNIQUE_ROW, noArrayOnUniqueRow);
-		if(Utils.getPropBool(prop, PROP_FORCE_UNIQUE_ROW)) {
-			setUniqueRow(true);
-		}
+		setUniqueRow(Utils.getPropBool(prop, PROP_FORCE_UNIQUE_ROW));
 		
 		if(innerTableAddMetadata && !innerTableAddDataElement) {
 			log.warn("[innerTableAddMetadata=="+innerTableAddMetadata+"] but [innerTableAddDataElement=="+innerTableAddDataElement+"]...");
