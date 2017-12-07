@@ -149,7 +149,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	}
 	
 	protected boolean useOuterCurlyBraquets() {
-		return usePK || (uniqueRow && noArrayOnUniqueRow);
+		return usePK || (uniqueRow && !innerTable && noArrayOnUniqueRow);
 	}
 	
 	@Override
@@ -197,7 +197,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 
 	@Override
 	public void dumpRow(ResultSet rs, long count, Writer fos) throws IOException, SQLException {
-		if(count==1 && uniqueRow) {
+		if(count==1 && uniqueRow && !innerTable) {
 			String message = "resultset should contain only 1 row [rowcount="+(count+1)+"+;uniqueRow="+uniqueRow+"]";
 			//System.out.println("JSONDataDump: "+message);
 			log.warn(message);
@@ -216,7 +216,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 		}
 		
 		boolean dumpInnerAsArray = dumpInnerAsArray();
-		if(encloseRowWithCurlyBraquets && !dumpInnerAsArray) {
+		if((encloseRowWithCurlyBraquets || innerTable) && !dumpInnerAsArray) {
 			sb.append("{");
 		}
 		
@@ -271,7 +271,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				}
 			}
 		}
-		if(encloseRowWithCurlyBraquets && !dumpInnerAsArray) {
+		if((encloseRowWithCurlyBraquets || innerTable) && !dumpInnerAsArray) {
 			sb.append("}");
 		}
 		sb.append("\n");
@@ -375,7 +375,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	}
 	
 	boolean dumpInnerAsArray() {
-		return innerTable  && innerArrayDumpAsArray && lsColNames.size()==1;
+		return innerTable && innerArrayDumpAsArray && lsColNames.size()==1;
 	}
 
 }

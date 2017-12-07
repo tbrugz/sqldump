@@ -406,6 +406,27 @@ public class DataDumpTest {
 		System.out.println("size: "+jobj.size());
 		Assert.assertEquals(2, jobj.size());
 	}
+
+	@Test
+	public void testJsonUniqueRowNoArrayWithInnerArray() throws Exception {
+		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c", "json"
+				,new String[] {
+						//"-Dsqldump.datadump.json.null-data-element=true",
+						"-Dsqldump.datadump.json.no-array-on-unique-row=true",
+						"-Dsqldump.datadump.json.force-unique-row=true"
+						}
+		);
+		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
+		System.out.println(jsonStr);
+		
+		Object obj = JSONValue.parse(jsonStr);
+		JSONObject jobj = (JSONObject) obj;
+		//System.out.println("obj:: "+obj+"\njobj:: "+jobj);
+		jobj = (JSONObject) jobj.get("q1");
+		Assert.assertEquals(3, jobj.size());
+		JSONArray jarr  = (JSONArray) jobj.get("B");
+		Assert.assertEquals(4, jarr.size());
+	}
 	
 	@Test
 	public void dumpPartitioned() throws IOException, ClassNotFoundException, SQLException, NamingException {
