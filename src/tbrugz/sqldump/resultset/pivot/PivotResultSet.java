@@ -392,12 +392,13 @@ public class PivotResultSet extends AbstractResultSet {
 			//log.info("2 [showMeasuresInColumns="+showMeasuresInColumns+";showMeasuresFirst="+showMeasuresFirst+"] nonPivotKeyValues[#"+nonPivotKeyValues.size()+"]="+nonPivotKeyValues);
 		}
 
-		//log.info("nonPivotKeyValues: "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
+		//log.info("nonPivotKeyValues (before): "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
 		if(sortNonPivotKeyValues) {
 			//nonPivotKeyValues.sort(null); //java 8
 			Collections.sort(nonPivotKeyValues);
 		}
-		//log.info("after: "+nonPivotKeyValues);
+		//log.info("nonPivotKeyValues: "+nonPivotKeyValues);
+		//log.info("valuesByKey: "+valuesByKey);
 		
 		originalRSRowCount = count;
 		processed = true;
@@ -439,9 +440,11 @@ public class PivotResultSet extends AbstractResultSet {
 		List<String> dataColumns = new ArrayList<String>();
 		//foreach pivoted column
 		genNewCols(0, "", dataColumns);
+		//log.debug("dataColumns[#"+dataColumns.size()+"] = "+dataColumns);
 		
 		//single-measure
 		if(measureCols.size()==1 || !showMeasuresInColumns) {
+			//log.info("single-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns);
 			newColNames.addAll(dataColumns);
 			for(int i=0;i<dataColumns.size();i++) {
 				newColTypes.add(measureColsType.get(0));
@@ -463,8 +466,9 @@ public class PivotResultSet extends AbstractResultSet {
 				}
 			}
 		}
-		//multi-measure
+		//multi-measure (or zero-measure)
 		else {
+			//log.info("multi-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns+" ; showMeasuresFirst="+showMeasuresFirst);
 			//TODOne: multi-measure
 			//List<String> colNames = new ArrayList<String>();
 			//colNames.addAll(newColNames);
@@ -483,6 +487,12 @@ public class PivotResultSet extends AbstractResultSet {
 						newColTypes.add(measureColType);
 					}
 				}
+				if(measureCols.size()==0) {
+					for(int i=0;i<dataColumns.size();i++) {
+						newColNames.add(dataColumns.get(i));
+						newColTypes.add(Types.VARCHAR); // probably doesn't matter
+					}
+				}
 			}
 			else {
 				for(int i=0;i<dataColumns.size();i++) {
@@ -497,6 +507,12 @@ public class PivotResultSet extends AbstractResultSet {
 						String measure = measureCols.get(j);
 						newColNames.add(measure);
 						newColTypes.add(measureColsType.get(j));
+					}
+				}
+				if(measureCols.size()==0) {
+					for(int i=0;i<dataColumns.size();i++) {
+						newColNames.add(dataColumns.get(i));
+						newColTypes.add(Types.VARCHAR); // probably doesn't matter
 					}
 				}
 			}
@@ -521,7 +537,7 @@ public class PivotResultSet extends AbstractResultSet {
 		resetPosition();
 
 		//log.debug("keysForDataColumns: "+Arrays.asList(keysForDataColumns));
-		//log.debug("processMetadata: columns="+newColNames+" types="+newColTypes);
+		//log.debug("processMetadata: columns(newColNames)="+newColNames+" types="+newColTypes);
 	}
 	
 	void genNewCols(int colNumber, String partialColName, List<String> newColumns) {
@@ -709,6 +725,7 @@ public class PivotResultSet extends AbstractResultSet {
 		int ctpl = colsToPivotNames.size();
 		
 		Object[] ret = new Object[cntpl+ctpl+prepend];
+		//log.info("not to pivot: "+colsNotToPivot);
 		for(int i=0;i<cntpl;i++) {
 			String col = colsNotToPivot.get(i);
 			Object val = rs.getObject(col);
@@ -717,6 +734,7 @@ public class PivotResultSet extends AbstractResultSet {
 			ret[i+prepend] = val;
 		}
 		int toAdd = cntpl+prepend;
+		//log.info("to pivot: "+colsToPivotNames);
 		for(int i=0;i<ctpl;i++) {
 			String col = colsToPivotNames.get(i);
 			Object val = rs.getObject(col);
@@ -918,7 +936,12 @@ public class PivotResultSet extends AbstractResultSet {
 				//}
 			}
 			//log.debug("pivotCol0: keyArr:: "+Arrays.asList(keyArr)+" measureIndex="+measureIndex);
-			keyArr[0] = measureCols.get(measureIndex);
+			if(measureCols.size()>measureIndex) {
+				keyArr[0] = measureCols.get(measureIndex);
+			}
+			else {
+				//log.debug("no measures? measureCols="+measureCols);
+			}
 		}
 		key = new Key(keyArr);
 		return key;

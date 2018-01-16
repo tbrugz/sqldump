@@ -16,6 +16,7 @@ import java.util.Properties;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+//import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -447,6 +448,47 @@ public class QueryTest {
 		Assert.assertEquals("SUM|||B:::null", rs.getMetaData().getColumnName(5));
 		Assert.assertEquals(true, rs.absolute(5));
 		Assert.assertEquals(false, rs.next());
+	}
+
+	@Test
+	public void q12() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A","B"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(2, colcount);
+		Assert.assertEquals(true, rs.absolute(6));
+		Assert.assertEquals(false, rs.next());
+	}
+
+	@Test
+	public void q12b() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A"};
+		String[] colsTP = {"B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(5, colcount);
+	}
+	
+	@Test
+	public void q12c() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {};
+		String[] colsTP = {"A","B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP));
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(20, colcount);
 	}
 
 }
