@@ -320,7 +320,7 @@ public class PivotResultSet extends AbstractResultSet {
 				Object[] keyVals = new Object[colsNotToPivot.size()+1];
 				System.arraycopy(keyArr, 1, keyVals, 0+(showMeasuresFirst?1:0), colsNotToPivot.size());
 				if(showMeasuresFirst) {
-					keyVals[0] = measureCols.get(0); //just put first measure (for now)
+					keyVals[0] = measureCols.size()>0?measureCols.get(0):null; //just put first measure (for now)
 				}
 				else {
 					keyVals[keyVals.length-1] = measureCols.get((getRowCount()+1)%measureCols.size()); 
@@ -446,12 +446,23 @@ public class PivotResultSet extends AbstractResultSet {
 		if(measureCols.size()==1 || !showMeasuresInColumns) {
 			//log.info("single-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns);
 			newColNames.addAll(dataColumns);
-			for(int i=0;i<dataColumns.size();i++) {
-				newColTypes.add(measureColsType.get(0));
+			if(measureCols.size()>=1) {
+				for(int i=0;i<dataColumns.size();i++) {
+					newColTypes.add(measureColsType.get(0));
+				}
+				if(dataColumns.size()==0) {
+					newColNames.add(measureCols.get(0));
+					newColTypes.add(measureColsType.get(0));
+				}
 			}
-			if(dataColumns.size()==0) {
-				newColNames.add(measureCols.get(0));
-				newColTypes.add(measureColsType.get(0));
+			else {
+				for(int i=0;i<dataColumns.size();i++) {
+					newColTypes.add(Types.VARCHAR);
+				}
+				if(dataColumns.size()==0) {
+					newColNames.add(null);
+					newColTypes.add(Types.VARCHAR);
+				}
 			}
 			if(alwaysShowMeasures && colsToPivotNames.size()>0) {
 				if(showMeasuresFirst) {
@@ -984,6 +995,7 @@ public class PivotResultSet extends AbstractResultSet {
 		// measures column?
 		if((!showMeasuresInColumns) && MEASURES_COLNAME.equals(columnLabel)) {
 			if(showMeasuresFirst) {
+				if(measureCols.size()==0) { return null; }
 				return measureCols.get(position/(nonPivotKeyValues.size()/measureCols.size()) );
 			}
 			else {

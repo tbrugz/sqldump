@@ -491,4 +491,17 @@ public class QueryTest {
 		Assert.assertEquals(20, colcount);
 	}
 
+	@Test
+	public void q12d() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {};
+		String[] colsTP = {"A","B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.SHOW_MEASURES_IN_ROWS);
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(21, colcount);
+	}
+	
 }
