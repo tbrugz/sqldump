@@ -139,12 +139,16 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		finalColTypes.addAll(lsColTypes);
 	}
 	
+	protected String getTableStyleClass() {
+		return (tableName!=null && !tableName.equals(""))?DataDumpUtils.xmlEscapeText(tableName):"datadump";
+	}
+	
 	@Override
 	public void dumpHeader(Writer fos) throws IOException {
 		tablePrepend(fos);
 		//if(prepend!=null && (!innerTable || xpendInnerTable)) { out(prepend, fos); }
 		StringBuilder sb = new StringBuilder();
-		sb.append("<table class=\""+DataDumpUtils.xmlEscapeText(tableName)+"\">");
+		sb.append("<table class=\""+getTableStyleClass()+"\">");
 		if(dumpStyleNumericAlignRight) {
 			appendStyleNumericAlignRight(sb);
 		}
@@ -272,7 +276,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<finalColNames.size();i++) {
 			if(finalColTypes.get(i).equals(Integer.class) || finalColTypes.get(i).equals(Double.class)) {
-				styleSelector.add("table."+tableName+" > tbody > tr > td:nth-child("+(i+1)+")");
+				styleSelector.add("table."+getTableStyleClass()+" > tbody > tr > td:nth-child("+(i+1)+")");
 			}
 		}
 		if(styleSelector.size()>0) {
