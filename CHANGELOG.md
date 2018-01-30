@@ -1,4 +1,17 @@
 
+sqldump 0.9.16 [2018-01]
+--------------
+- dbms: oracle: added prop suffix '.oracle.grab-executble-privileges'
+- resultset-pivot: allow "no pivot cols"
+- datadump: html: added pivot-awareness
+- diff: apply: added '.objecttypes' & '.changetypes' properties (1814)
+- dbms: postgresql: added foreign tables support
+- datadump: added DumpSyntaxBuilder / HierarchicalDumpSyntax
+- datadump: syntax: added 'hasMoreRows' param
+- datadump: json: add suffixes '.inner-table.add-data-element', '.inner-table.add-metadata' & '.inner-array-dump-as-array'
+- datadump: json: add suffixes '.null-data-element', '.no-array-on-unique-row', '.force-unique-row' (1877)
+
+
 sqldump 0.9.15
 --------------
 - dumper: DropScriptDumper: added prop '.ifexists'
