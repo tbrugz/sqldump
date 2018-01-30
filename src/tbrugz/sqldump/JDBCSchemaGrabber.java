@@ -809,7 +809,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		closeResultSetAndStatement(rsProc);
 		if(grabParams) {
 			ResultSet rsProcCols = dbmd.getProcedureColumns(null, schemaPattern, null, null);
-			grabProceduresColumns(eos, rsProcCols);
+			grabProceduresColumns(eos, rsProcCols, feats.getId());
 			closeResultSetAndStatement(rsProcCols);
 		}
 		return eos;
@@ -822,7 +822,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		closeResultSetAndStatement(rsFunc);
 		if(grabParams) {
 			ResultSet rsFuncCols = dbmd.getFunctionColumns(null, schemaPattern, null, null);
-			grabFunctionsColumns(eos, rsFuncCols);
+			grabFunctionsColumns(eos, rsFuncCols, feats.getId());
 			closeResultSetAndStatement(rsFuncCols);
 		}
 		return eos;
@@ -856,7 +856,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return eos;
 	}
 
-	void grabProceduresColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
+	public static void grabProceduresColumns(List<ExecutableObject> eos, ResultSet rs, String dbid) throws SQLException {
 		while(rs.next()) {
 			ExecutableParameter ep = new ExecutableParameter();
 			ep.setName(rs.getString("COLUMN_NAME"));
@@ -896,7 +896,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(eo==null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(eos, DBObjectType.FUNCTION, pSchem, pName);
 				//XXX: oracle driver adds 1 to function parameter positions...
-				if( DBID_ORACLE.equals(feats.getId()) ) {
+				if( DBID_ORACLE.equals(dbid) ) {
 					ep.setPosition(ep.getPosition()-1);
 				}
 			}
@@ -941,7 +941,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		return eos;
 	}
 
-	void grabFunctionsColumns(List<ExecutableObject> eos, ResultSet rs) throws SQLException {
+	public static void grabFunctionsColumns(List<ExecutableObject> eos, ResultSet rs, String dbid) throws SQLException {
 		SQLException sqlex = null;
 		while(rs.next()) {
 			ExecutableParameter ep = new ExecutableParameter();
