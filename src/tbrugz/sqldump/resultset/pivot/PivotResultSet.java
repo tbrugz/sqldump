@@ -88,6 +88,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
 	public static final String COLVAL_SEP = ":::";
 	public static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
+	public static final String NULL_PLACEHOLDER = "null";
 
 	static final int logEachXRows = 1000;
 
@@ -613,7 +614,9 @@ public class PivotResultSet extends AbstractResultSet {
 			for(int j=0;j<parts.length;j++) {
 				String[] cv = parts[j].split(COLVAL_SEP_PATTERN);
 				if(cv.length==2) {
-					vals[vidx++] = cv[1];
+					String val = cv[1];
+					if(NULL_PLACEHOLDER.equals(val)) { val = null; }
+					vals[vidx++] = val;
 				}
 				/*else if(cv.length==1) {
 					measure = cv[0];
@@ -758,7 +761,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void validateKeyValue(String col, Object val) {
 		if(val==null) {
-			log.warn("value for key col is null [col = "+col+"]");
+			log.debug("value for key col is null [col = "+col+"]");
 		}
 		else {
 			if(val.toString().contains(COLS_SEP)) {

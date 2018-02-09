@@ -503,5 +503,25 @@ public class QueryTest {
 		int colcount = rs.getMetaData().getColumnCount();
 		Assert.assertEquals(21, colcount);
 	}
+
+	@Test
+	public void q12dNonEmpty() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {};
+		String[] colsTP = {"B"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.SHOW_MEASURES_IN_ROWS | PivotResultSet.FLAG_NON_EMPTY_COLS);
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(4, colcount);
+		rs.beforeFirst();
+		Assert.assertTrue(rs.next());
+		Assert.assertEquals("A", rs.getString("Measure"));
+		Assert.assertEquals(1, rs.getInt("B:::2"));
+		Assert.assertEquals(2, rs.getInt("B"+PivotResultSet.COLVAL_SEP+"4"));
+		Assert.assertEquals(8, rs.getInt("B:::null"));
+		Assert.assertFalse(rs.next());
+	}
 	
 }
