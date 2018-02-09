@@ -505,8 +505,8 @@ public class QueryTest {
 	}
 
 	@Test
-	public void q12dPivotNonEmpty() throws SQLException, IOException {
-		String sql = prop.getProperty("q12");
+	public void q13dPivotNonEmpty() throws SQLException, IOException {
+		String sql = prop.getProperty("q13");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		String[] colsNTP = {};
 		String[] colsTP = {"B"};
@@ -518,7 +518,7 @@ public class QueryTest {
 		rs.beforeFirst();
 		Assert.assertTrue(rs.next());
 		Assert.assertEquals("A", rs.getString("Measure"));
-		Assert.assertEquals(1, rs.getInt("B:::2"));
+		Assert.assertEquals(1, rs.getInt("B"+PivotResultSet.COLVAL_SEP+"2"));
 		Assert.assertEquals(2, rs.getInt("B"+PivotResultSet.COLVAL_SEP+"4"));
 		Assert.assertEquals(8, rs.getInt("B:::"+PivotResultSet.NULL_PLACEHOLDER));
 		Assert.assertFalse(rs.next());
