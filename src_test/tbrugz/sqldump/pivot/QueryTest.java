@@ -445,7 +445,7 @@ public class QueryTest {
 		int colcount = rs.getMetaData().getColumnCount();
 		Assert.assertEquals(9, colcount);
 		// null last
-		Assert.assertEquals("SUM|||B:::null", rs.getMetaData().getColumnName(5));
+		Assert.assertEquals("SUM|||B:::"+PivotResultSet.NULL_PLACEHOLDER, rs.getMetaData().getColumnName(5));
 		Assert.assertEquals(true, rs.absolute(5));
 		Assert.assertEquals(false, rs.next());
 	}
@@ -505,7 +505,7 @@ public class QueryTest {
 	}
 
 	@Test
-	public void q12dNonEmpty() throws SQLException, IOException {
+	public void q12dPivotNonEmpty() throws SQLException, IOException {
 		String sql = prop.getProperty("q12");
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		String[] colsNTP = {};
@@ -520,8 +520,21 @@ public class QueryTest {
 		Assert.assertEquals("A", rs.getString("Measure"));
 		Assert.assertEquals(1, rs.getInt("B:::2"));
 		Assert.assertEquals(2, rs.getInt("B"+PivotResultSet.COLVAL_SEP+"4"));
-		Assert.assertEquals(8, rs.getInt("B:::null"));
+		Assert.assertEquals(8, rs.getInt("B:::"+PivotResultSet.NULL_PLACEHOLDER));
 		Assert.assertFalse(rs.next());
+	}
+
+	@Test
+	public void q12dNonEmpty() throws SQLException, IOException {
+		String sql = prop.getProperty("q12");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"B"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true, PivotResultSet.SHOW_MEASURES_IN_ROWS | PivotResultSet.FLAG_NON_EMPTY_COLS);
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(3, colcount);
 	}
 	
 }

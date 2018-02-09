@@ -88,7 +88,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
 	public static final String COLVAL_SEP = ":::";
 	public static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
-	public static final String NULL_PLACEHOLDER = "null";
+	public static final String NULL_PLACEHOLDER = "null"; // "null"; html: &#9216;
 
 	static final int logEachXRows = 1000;
 
@@ -164,6 +164,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 	public PivotResultSet(ResultSet rs, List<String> colsNotToPivot, Map<String, Comparable> colsToPivot,
 			boolean doProcess, int flags) throws SQLException {
+		//XXX: add parameter: nullPlaceholder
 		this.rs = rs;
 		this.colsNotToPivot = colsNotToPivot;
 		this.colsToPivot = colsToPivot;
@@ -564,7 +565,7 @@ public class PivotResultSet extends AbstractResultSet {
 		String colName = colsToPivotNames.get(colNumber);
 		Set<Object> colVals = keyColValues.get(colName);
 		for(Object v: colVals) {
-			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+v;
+			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+valueToString(v);
 			if(colNumber+1==colsToPivotCount) {
 				//add col name
 				//XXX test for noColsWithNullValues?
@@ -582,6 +583,10 @@ public class PivotResultSet extends AbstractResultSet {
 				genNewCols(colNumber+1, colFullName, newColumns);
 			}
 		}
+	}
+	
+	String valueToString(Object o) {
+		return o!=null ? String.valueOf(o) : NULL_PLACEHOLDER;
 	}
 	
 	/*boolean columnContainsValues(String fullCollName, int pivotColIdx) {
