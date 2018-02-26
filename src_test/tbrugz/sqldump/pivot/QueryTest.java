@@ -536,5 +536,18 @@ public class QueryTest {
 		int colcount = rs.getMetaData().getColumnCount();
 		Assert.assertEquals(3, colcount);
 	}
+
+	@Test
+	public void q14repeatedCol() throws SQLException, IOException {
+		String sql = prop.getProperty("q14");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {"A", "A"};
+		String[] colsTP = {};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true);
+		QueryDumper.simplerRSDump(rs);
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(2, colcount);
+	}
 	
 }

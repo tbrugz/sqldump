@@ -199,12 +199,11 @@ public class PivotResultSet extends AbstractResultSet {
 			String colName = rsmd.getColumnLabel(i);
 			rsColNames.add(colName);
 
-			int index = colsNotToPivot.indexOf(colName);
-			if(index>=0) {
-				//colsNotToPivotType.set(index, Types.VARCHAR); //XXXxx set non-pivot column type
-				int type = rsmd.getColumnType(i);
-				colsNotToPivotType.set(index, type);
-				//colsNotToPivotIndex.set(index, i);
+			for(int j=0;j<colsNotToPivot.size();j++) {
+				if(colsNotToPivot.get(j).equals(colName)) {
+					int type = rsmd.getColumnType(i);
+					colsNotToPivotType.set(j, type);
+				}
 			}
 			
 			if(colsToPivotNotFound.contains(colName)) {
