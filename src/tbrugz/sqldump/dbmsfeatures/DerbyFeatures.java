@@ -11,11 +11,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
+/*
+ * see: https://db.apache.org/derby/docs/10.14/tools/ctoolsdblook.html
+ */
 public class DerbyFeatures extends DefaultDBMSFeatures {
 	static Log log = LogFactory.getLog(DerbyFeatures.class);
 
@@ -38,7 +43,12 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			log.debug("nested exception: "+e);
 		}
 		
-		//XXX: derby: add procedures/functions? synonyms? check/unique constraints?
+		if(grabExecutables) {
+			grabDBExecutables(model.getExecutables(), schemaPattern, null, conn);
+		}
+		
+		//XXX: derby: add synonyms?
+		//XXX: derby: add check/unique constraints?
 	}
 
 	@Override
@@ -142,6 +152,57 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		rs.close();
 		st.close();
 		log.info(count+" sequences grabbed");
+	}
+	
+	/**
+	 * see: [SYS.SYSALIASES system table](https://db.apache.org/derby/docs/10.14/ref/rrefsistabs28114.html)
+	 */
+	@Override
+	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
+		log.debug("grabbing executables");
+		String query = "select s.schemaname, a.alias, a.aliastype, a.javaclassname, a.aliasinfo\n" + 
+				"from sys.sysaliases a\n" + 
+				"inner join sys.sysschemas s on a.schemaid = s.schemaid\n" + 
+				"where not a.systemalias\n" +
+				"  and a.aliastype in ('F', 'P', 'G')" +
+				(schemaPattern!=null?"\nand s.schemaname like '"+schemaPattern+"'":"");
+		//log.debug("sql: "+query);
+		Statement st = conn.createStatement();
+		ResultSet rs = st.executeQuery(query);
+		
+		int count = 0;
+		while(rs.next()) {
+			ExecutableObject eo = new ExecutableObject();
+			eo.setSchemaName(rs.getString(1));
+			eo.setName(rs.getString(2));
+			
+			String aliasType = rs.getString(3);
+			eo.setType(aliasType.equals("P")?DBObjectType.PROCEDURE:DBObjectType.FUNCTION);
+			
+			String javaClass = rs.getString(4);
+			String aliasInfo = rs.getString(5);
+			int idx1 = aliasInfo.indexOf("(");
+			int idx2 = aliasInfo.lastIndexOf("RETURNS");
+			if(idx2==-1) {
+				idx2 = aliasInfo.lastIndexOf(")");
+			}
+			else {
+				idx2 = aliasInfo.lastIndexOf(")", idx2);
+			}
+			String methodName = aliasInfo.substring(0, idx1).trim();
+			String parameters = aliasInfo.substring(idx1+1, idx2).trim();
+			String xtraInfo = aliasInfo.substring(idx2+1).trim();
+			String body = eo.getType()+" "+eo.getName()+" ("+parameters+") "+
+					xtraInfo+
+					"\n\texternal name '"+javaClass+"."+methodName+"'";
+			eo.setBody(body);
+			execs.add(eo);
+			count++;
+		}
+		
+		rs.close();
+		st.close();
+		log.info(count+" executables grabbed");
 	}
 	
 	/*
