@@ -124,7 +124,7 @@ Running (with sources)
 Not building? Setup env (without sources)
 -----------------------------------------
 - Download `sqldump.jar` jar from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
-  (e.g.: [sqldump 0.9.14](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.14/sqldump-0.9.14.jar))
+  (e.g.: [sqldump 0.9.16](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.16/sqldump-0.9.16.jar))
 - Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
 - (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat`
   or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
@@ -164,7 +164,7 @@ Artifact repositories
 	<dependency>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>sqldump</artifactId>
-		<version>0.9.14</version>
+		<version>0.9.16</version>
 	</dependency>
 
 
