@@ -181,20 +181,33 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			
 			String javaClass = rs.getString(4);
 			String aliasInfo = rs.getString(5);
-			int idx1 = aliasInfo.indexOf("(");
-			int idx2 = aliasInfo.lastIndexOf("RETURNS");
-			if(idx2==-1) {
-				idx2 = aliasInfo.lastIndexOf(")");
+			
+			//log.info("aliasType '"+aliasType+"; 'aliasInfo: "+aliasInfo);
+			String body = null;
+			
+			if(!aliasType.equals("G")) {
+				// functions & procedures
+				int idx1 = aliasInfo.indexOf("(");
+				int idx2 = aliasInfo.lastIndexOf("RETURNS");
+				if(idx2==-1) {
+					idx2 = aliasInfo.lastIndexOf(")");
+				}
+				else {
+					idx2 = aliasInfo.lastIndexOf(")", idx2);
+				}
+				String methodName = aliasInfo.substring(0, idx1).trim();
+				String parameters = aliasInfo.substring(idx1+1, idx2).trim();
+				String xtraInfo = aliasInfo.substring(idx2+1).trim();
+				body = eo.getType()+" "+eo.getName()+" ("+parameters+") "+
+						xtraInfo+
+						"\n\texternal name '"+javaClass+"."+methodName+"'";
 			}
 			else {
-				idx2 = aliasInfo.lastIndexOf(")", idx2);
+				// derby aggregates
+				body = "derby aggregate "+eo.getName()+" "+
+						aliasInfo+
+						"\n\texternal name '"+javaClass+"'";
 			}
-			String methodName = aliasInfo.substring(0, idx1).trim();
-			String parameters = aliasInfo.substring(idx1+1, idx2).trim();
-			String xtraInfo = aliasInfo.substring(idx2+1).trim();
-			String body = eo.getType()+" "+eo.getName()+" ("+parameters+") "+
-					xtraInfo+
-					"\n\texternal name '"+javaClass+"."+methodName+"'";
 			eo.setBody(body);
 			execs.add(eo);
 			count++;
