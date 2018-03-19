@@ -4,6 +4,7 @@ public enum DBObjectType {
 	TABLE, FK, VIEW, INDEX, EXECUTABLE, TRIGGER, SEQUENCE, SYNONYM, GRANT, //main types
 	MATERIALIZED_VIEW, //sub-types?
 	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, SCRIPT, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
+	AGGREGATE, // derby, h2 & postgresql, at least
 	
 	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
@@ -49,6 +50,7 @@ public enum DBObjectType {
 		case TYPE:
 		case TYPE_BODY:
 		case SCRIPT:
+		case AGGREGATE:
 			return true;
 		default:
 			return false;

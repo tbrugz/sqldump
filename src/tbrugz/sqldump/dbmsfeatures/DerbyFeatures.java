@@ -177,7 +177,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			eo.setName(rs.getString(2));
 			
 			String aliasType = rs.getString(3);
-			eo.setType(aliasType.equals("P")?DBObjectType.PROCEDURE:DBObjectType.FUNCTION);
+			eo.setType(getExecutableType(aliasType));
 			
 			String javaClass = rs.getString(4);
 			String aliasInfo = rs.getString(5);
@@ -185,7 +185,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			//log.info("aliasType '"+aliasType+"; 'aliasInfo: "+aliasInfo);
 			String body = null;
 			
-			if(!aliasType.equals("G")) {
+			if(!eo.getType().equals(DBObjectType.AGGREGATE)) {
 				// functions & procedures
 				int idx1 = aliasInfo.indexOf("(");
 				int idx2 = aliasInfo.lastIndexOf("RETURNS");
@@ -220,6 +220,20 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		if(countRows!=countAdded) {
 			log.warn(countRows+" executables found but "+countAdded+" grabbed (were already added to model)");
 		}
+	}
+	
+	DBObjectType getExecutableType(String aliasType) {
+		if(aliasType.equals("F")) {
+			return DBObjectType.FUNCTION;
+		}
+		if(aliasType.equals("P")) {
+			return DBObjectType.PROCEDURE;
+		}
+		if(aliasType.equals("G")) {
+			return DBObjectType.AGGREGATE;
+		}
+		log.warn("unknown executable type: "+aliasType);
+		return DBObjectType.EXECUTABLE;
 	}
 	
 	/*
