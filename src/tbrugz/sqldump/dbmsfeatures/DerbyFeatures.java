@@ -170,7 +170,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
-		int count = 0;
+		int countRows = 0, countAdded = 0;
 		while(rs.next()) {
 			ExecutableObject eo = new ExecutableObject();
 			eo.setSchemaName(rs.getString(1));
@@ -209,13 +209,17 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 						"\n\texternal name '"+javaClass+"'";
 			}
 			eo.setBody(body);
-			execs.add(eo);
-			count++;
+			boolean added = execs.add(eo);
+			if(added) { countAdded++; }
+			countRows++;
 		}
 		
 		rs.close();
 		st.close();
-		log.info(count+" executables grabbed");
+		log.info(countAdded+" executables grabbed");
+		if(countRows!=countAdded) {
+			log.warn(countRows+" executables found but "+countAdded+" grabbed (were already added to model)");
+		}
 	}
 	
 	/*

@@ -145,7 +145,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabTableGrants = false,
 			doGrabAllSchemaGrants = false, 
 			doSchemaGrabIndexes = false,
-			doSchemaGrabProceduresAndFunctions = true,
+			doSchemaGrabProceduresAndFunctions = false,
 			doSchemaGrabDbSpecific = false,
 			doSetConnectionReadOnly = false,
 			doGrabMetadata = false;
@@ -406,7 +406,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			catch(SQLException e) {
 				log.warn(getIdDesc()+"sql exception grabbing procedures: "+e);
 			}
-			log.info(getIdDesc()+countproc+" procedures grabbed ["+executableStats()+"]");
+			String execStats = executableStats();
+			log.info(getIdDesc()+countproc+" procedures grabbed"+(!"".equals(execStats)?" ["+execStats+"]":""));
 			
 			try {
 				for(String schemaName: schemasList) {
