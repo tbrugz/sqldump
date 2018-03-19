@@ -315,7 +315,7 @@ public class SQLUtils {
 					return Array.class;
 				}
 			//case Types.REF_CURSOR:    // 2012
-			case -10: //XXX: ResultSet/Cursor (Oracle)?
+			case -10: //XXX: ResultSet/Cursor/Refcursor (Oracle)?
 				return ResultSet.class;
 			case Types.OTHER:         // 1111
 				return Object.class;

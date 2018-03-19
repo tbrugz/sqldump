@@ -147,7 +147,7 @@ public class ConnectionUtil {
 				log.debug("jdbc driver: "+driver+"; version: "+driver.getMajorVersion()+"."+driver.getMinorVersion()+"; jdbc-compliant: "+driver.jdbcCompliant());
 			}
 			else {
-				log.warn("jdbc driver not found [url: "+dbUrl+"]?");
+				log.warn("jdbc driver not found / null [url: '"+dbUrl+"']?");
 			}
 		}
 		catch(SQLException e) {
