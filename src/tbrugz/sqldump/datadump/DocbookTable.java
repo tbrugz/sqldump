@@ -12,6 +12,7 @@ import tbrugz.sqldump.util.SQLUtils;
  * CALS Table spec? https://www.oasis-open.org/specs/tm9502.html
  * 
  * XXX: (option to) dump each element/cell in a line?
+ * TODO: nested table: entrytbl - http://tdg.docbook.org/tdg/5.0/entrytbl.html
  */
 public class DocbookTable extends XMLDataDump {
 	

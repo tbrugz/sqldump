@@ -20,6 +20,9 @@ import com.sun.rowset.WebRowSetImpl;
  * 
  * column BLOB, CLOB, Array, Ref: wsrxmlwriter.notproper - http://j7a.ru/_web_row_set_xml_writer_8java_source.html
  */
+/*
+ * java9: https://docs.oracle.com/javase/9/docs/api/javax/sql/rowset
+ */
 public class WebRowSetSingleSyntax extends DumpSyntax {
 
 	WebRowSet wrs;

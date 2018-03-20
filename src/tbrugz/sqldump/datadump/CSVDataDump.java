@@ -38,6 +38,9 @@ import tbrugz.sqldump.util.Utils;
    https://github.com/clarkparsia/csv2rdf
    http://w3c.github.io/csvw/csv2rdf/ - http://www.w3.org/TR/csv2rdf/
    http://www.iana.org/assignments/media-types/text/csv-schema
+   
+   sep=<x>? (for excel)
+   https://stackoverflow.com/questions/20395699/sep-statement-breaks-utf8-bom-in-csv-file-which-is-generated-by-xsl
  */
 public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
 	
