@@ -208,7 +208,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 						aliasInfo+
 						"\n\texternal name '"+javaClass+"'";
 			}
-			eo.setBody(body);
+			eo.setBody(body+";");
 			boolean added = execs.add(eo);
 			if(added) { countAdded++; }
 			countRows++;
