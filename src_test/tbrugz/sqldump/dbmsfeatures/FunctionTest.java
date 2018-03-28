@@ -55,7 +55,7 @@ public class FunctionTest {
 	public void testQuery() throws Exception {
 		String[] params = {
 				"-Dsqldump.grabclass=JDBCSchemaGrabber",
-				"-Dsqldump.processingclasses=SQLQueries, JAXBSchemaXMLSerializer",
+				"-Dsqldump.processingclasses=SQLQueries, JAXBSchemaXMLSerializer, SchemaModelScriptDumper",
 				"-Dsqldump.schemagrab.db-specific-features=true",
 				"-Dsqldump.queries=q1, q2, q3, c1, sq1, sq2",
 				"-Dsqldump.query.q1.sql=select count(c1), simple_count(c1) from (select 1 as c1 union all select 1 as c1) a",
@@ -67,7 +67,8 @@ public class FunctionTest {
 				"-Dsqldump.datadump.dumpsyntaxes=csv, ffc",
 				"-Dsqldump.datadump.ffc.nullvalue=<null>", 
 				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
-				"-Dsqldump.xmlserialization.jaxb.outfile="+DIR_OUT+"/FunctionTestModel.jaxb.xml"
+				"-Dsqldump.xmlserialization.jaxb.outfile="+DIR_OUT+"/FunctionTestModel.jaxb.xml",
+				"-Dsqldump.schemadump.outputfilepattern="+DIR_OUT+"/FunctionTestModel.sql",
 				};
 		TestUtil.setProperties(prop, params);
 		SQLDump sqld = new SQLDump();

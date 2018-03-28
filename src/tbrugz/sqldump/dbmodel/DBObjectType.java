@@ -5,6 +5,7 @@ public enum DBObjectType {
 	MATERIALIZED_VIEW, //sub-types?
 	FUNCTION, JAVA_SOURCE, PACKAGE, PACKAGE_BODY, PROCEDURE, SCRIPT, /*TRIGGER,*/ TYPE, TYPE_BODY, //executable types
 	AGGREGATE, // derby, h2 & postgresql, at least
+	//ALIAS, // XXX h2 'executable'
 	
 	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
@@ -53,6 +54,7 @@ public enum DBObjectType {
 		case TYPE_BODY:
 		case SCRIPT:
 		case AGGREGATE:
+		//case ALIAS:
 			return true;
 		default:
 			return false;

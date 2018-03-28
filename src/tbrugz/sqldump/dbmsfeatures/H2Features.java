@@ -49,9 +49,9 @@ public class H2Features extends InformationSchemaFeatures {
 				//"null as routine_type, "+
 				"  case "+
 				// create alias as
-				"    when r.source is not null and r.source != '' then 'EXECUTABLE' "+
+				"    when r.source is not null and r.source != '' then 'EXECUTABLE' "+ //XXX: ALIAS?
 				// create alias for
-				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'EXECUTABLE' "+
+				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'EXECUTABLE' "+ //XXX: ALIAS?
 				// create aggregate
 				"    when r.java_class is not null and (r.java_method is null or r.java_method = '') then 'AGGREGATE' "+
 				// else...
@@ -60,11 +60,11 @@ public class H2Features extends InformationSchemaFeatures {
 				//" r.java_class||'#'||r.java_method as routine_definition, "+
 				"  case "+
 				// create alias as
-				"    when r.source is not null and r.source != '' then 'create alias '||r.alias_name||' as $$'||r.source||'$$' "+
+				"    when r.source is not null and r.source != '' then 'create alias '||r.alias_name||' as $$'||r.source||'$$;' "+
 				// create alias for
-				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'create alias '||r.alias_name||' for \"'||r.java_class||'.'||r.java_method||'\"' "+
+				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'create alias '||r.alias_name||' for \"'||r.java_class||'.'||r.java_method||'\";' "+
 				// create aggregate
-				"    when r.java_class is not null and (r.java_method is null or r.java_method = '') then 'create aggregate '||r.alias_name||' for \"'||r.java_class||'\"' "+
+				"    when r.java_class is not null and (r.java_method is null or r.java_method = '') then 'create aggregate '||r.alias_name||' for \"'||r.java_class||'\";' "+
 				// else...
 				"    else r.java_class||'#'||r.java_method||'#'||r.source "+ //???
 				"  end as routine_definition, "+
