@@ -62,7 +62,7 @@ public class SQLDiffTest {
 				"-Dsqldump.dburl="+dbURL,
 				"-Dsqldump.user="+dbUser,
 				"-Dsqldump.password="+dbPassword,
-				"-Dsqldump.usedbspecificfeatures=true",
+				"-Dsqldump.schemagrab.db-specific-features=true",
 		};
 		TestUtil.setProperties(jdbcPropNew, jdbcGrabParams);
 		schemaJdbcGrabber.setProperties(jdbcPropNew);

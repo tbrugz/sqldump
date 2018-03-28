@@ -76,7 +76,7 @@ public class TriggerTest {
 	@Test
 	public void testGetSchema() throws ClassNotFoundException, SQLException, NamingException {
 		String[] params = {
-				"-Dsqldump.usedbspecificfeatures=true",
+				"-Dsqldump.schemagrab.db-specific-features=true",
 				};
 		TestUtil.setProperties(prop, params);
 
