@@ -221,11 +221,14 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.setName( routineName );
 				try {
 					String stype = rs.getString(2);
-					DBObjectType type = stype==null ? DBObjectType.EXECUTABLE : DBObjectType.parse(stype);
-					eo.setType( type );
+					eo.setType( DBObjectType.parse(stype) );
 				}
 				catch(IllegalArgumentException iae) {
-					log.warn("unknown object type: "+rs.getString(2));
+					log.warn("grabDBExecutables: unknown object type: "+rs.getString(2));
+					eo.setType( DBObjectType.EXECUTABLE );
+				}
+				catch(NullPointerException e) {
+					log.warn("grabDBExecutables: null object type");
 					eo.setType( DBObjectType.EXECUTABLE );
 				}
 				ExecutableParameter ep = new ExecutableParameter();

@@ -38,14 +38,25 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 
 	/*
-	 * create alias? http://www.h2database.com/html/grammar.html#create_alias
-	 * create aggregate? http://www.h2database.com/html/grammar.html#create_aggregate
+	 * create alias: http://www.h2database.com/html/grammar.html#create_alias
+	 * create aggregate: http://www.h2database.com/html/grammar.html#create_aggregate
 	 * 
 	 * INFORMATION_SCHEMA: FUNCTION_ALIASES, FUNCTION_COLUMNS
 	 */
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select r.alias_name as routine_name, null as routine_type, r.type_name as data_type, null as external_language,"+
+		return "select r.alias_name as routine_name, "+
+				//"null as routine_type, "+
+				"  case "+
+				// create alias as
+				"    when r.source is not null and r.source != '' then 'EXECUTABLE' "+
+				// create alias for
+				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'EXECUTABLE' "+
+				// create aggregate
+				"    when r.java_class is not null and (r.java_method is null or r.java_method = '') then 'AGGREGATE' "+
+				// else...
+				"  end as routine_type, "+
+				"r.type_name as data_type, null as external_language,"+
 				//" r.java_class||'#'||r.java_method as routine_definition, "+
 				"  case "+
 				// create alias as
@@ -131,8 +142,7 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public String sqlRenameColumnDefinition(NamedDBObject table, Column column,
-			String newName) {
+	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
 		return "alter table "+DBObject.getFinalName(table, true)+" alter column "+DBObject.getFinalIdentifier(column.getName())
 				+" rename to "+DBObject.getFinalIdentifier(newName);
 	}
