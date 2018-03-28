@@ -220,7 +220,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.setSchemaName( schemaPattern );
 				eo.setName( routineName );
 				try {
-					eo.setType( DBObjectType.parse(rs.getString(2)) );
+					String stype = rs.getString(2);
+					DBObjectType type = stype==null ? DBObjectType.EXECUTABLE : DBObjectType.parse(stype);
+					eo.setType( type );
 				}
 				catch(IllegalArgumentException iae) {
 					log.warn("unknown object type: "+rs.getString(2));
@@ -238,7 +240,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			ep.setName(rs.getString(6));
 			ep.setDataType(rs.getString(7));
 			ep.setPosition(rs.getInt(8));
-			eo.getParams().add(ep);
+			
+			// routine may have no parameters
+			if(ep.getName()!=null || ep.getDataType()!=null) {
+				eo.getParams().add(ep);
+			}
 		}
 		if(eo!=null) {
 			if(addExecutableToModel(execs, eo)) {

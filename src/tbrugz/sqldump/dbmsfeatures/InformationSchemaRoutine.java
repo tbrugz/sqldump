@@ -10,10 +10,11 @@ public class InformationSchemaRoutine extends ExecutableObject {
 	public String externalLanguage;
 
 	static final Pattern PATTERN_CREATE_EXECUTABLE = Pattern.compile("\\s*create\\s+", Pattern.CASE_INSENSITIVE);
+	static final String BODY_SEP = "$BODY$";
 	
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		if(PATTERN_CREATE_EXECUTABLE.matcher(getBody()).find()) {
+		if(getBody()!=null && PATTERN_CREATE_EXECUTABLE.matcher(getBody()).find()) {
 			return getBody();
 		}
 		
@@ -33,9 +34,10 @@ public class InformationSchemaRoutine extends ExecutableObject {
 				//+")\n  returns "+returnType+" as \n$BODY$"
 				+")"
 				+(returnParam!=null?"\n  returns "+returnParam.getDataType():"")
-				+" as \n$BODY$"
-				+getBody()+"$BODY$"
-				+"\n  language "+externalLanguage+";";
+				+" as \n"+BODY_SEP
+				+getBody()+BODY_SEP
+				+(externalLanguage!=null?"\n  language "+externalLanguage:"")
+				+";";
 	}
 
 	@Override

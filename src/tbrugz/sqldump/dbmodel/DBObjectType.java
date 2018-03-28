@@ -35,7 +35,9 @@ public enum DBObjectType {
 	}
 	
 	public static DBObjectType parse(String s) {
-		s = s.replace(' ', '_').toUpperCase();
+		if(s!=null) {
+			s = s.replace(' ', '_').toUpperCase();
+		}
 		return DBObjectType.valueOf(s);
 	}
 	

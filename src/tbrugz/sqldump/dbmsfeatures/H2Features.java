@@ -14,7 +14,6 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
-import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.StringUtils;
@@ -37,12 +36,35 @@ public class H2Features extends InformationSchemaFeatures {
 				+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
 				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
 	}
-	
+
+	/*
+	 * create alias? http://www.h2database.com/html/grammar.html#create_alias
+	 * create aggregate? http://www.h2database.com/html/grammar.html#create_aggregate
+	 * 
+	 * INFORMATION_SCHEMA: FUNCTION_ALIASES, FUNCTION_COLUMNS
+	 */
 	@Override
-	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
-		log.debug("grab routines: not supported"); //warn level?
+	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		return "select r.alias_name as routine_name, null as routine_type, r.type_name as data_type, null as external_language,"+
+				//" r.java_class||'#'||r.java_method as routine_definition, "+
+				"  case "+
+				// create alias as
+				"    when r.source is not null and r.source != '' then 'create alias '||r.alias_name||' as $$'||r.source||'$$' "+
+				// create alias for
+				"    when r.java_class is not null and r.java_class != '' and r.java_method is not null and r.java_method != '' then 'create alias '||r.alias_name||' for \"'||r.java_class||'.'||r.java_method||'\"' "+
+				// create aggregate
+				"    when r.java_class is not null and (r.java_method is null or r.java_method = '') then 'create aggregate '||r.alias_name||' for \"'||r.java_class||'\"' "+
+				// else...
+				"    else r.java_class||'#'||r.java_method||'#'||r.source "+ //???
+				"  end as routine_definition, "+
+				" p.column_name as parameter_name, p.type_name as data_type, p.pos as ordinal_position "+
+				"\nfrom "+informationSchema+".function_aliases r left outer join "+informationSchema+".function_columns p on r.alias_name = p.alias_name "+
+				"\nwhere 1=1 "+
+				" and r.alias_schema = '"+schemaPattern+"' "+
+				(execNamePattern!=null?"and r.alias_name = '"+execNamePattern+"' ":"")+
+				"\norder by r.alias_catalog, r.alias_schema, r.alias_name, p.pos ";
 	}
-	
+
 	@Override
 	String grabDBSequencesQuery(String schemaPattern) {
 		return "select sequence_name, null as minimum_value, increment, null as maximum_value "
