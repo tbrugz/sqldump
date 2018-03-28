@@ -26,6 +26,7 @@ import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.dbmodel.ColumnTest;
 import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
 import tbrugz.sqldump.dbmodel.GrantTest;
+import tbrugz.sqldump.dbmsfeatures.FunctionTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
 //import tbrugz.sqldump.dbmsfeatures.oracle.OracleTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
@@ -91,6 +92,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	
 	//dbms features
 	TriggerTest.class,
+	FunctionTest.class,
 	
 	//run
 	FailoverTest.class,
