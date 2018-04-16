@@ -53,6 +53,9 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 
 	static final String FFC_SYNTAX_ID = "ffc";
+	
+	static final String PLAINTEXT_MIMETYPE = "text/plain";
+	
 	//static final String DEFAULT_NULL_VALUE = "";
 	static final Log log = LogFactory.getLog(FFCDataDump.class);
 	
@@ -60,8 +63,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	
 	static final String recordDemimiter = "\n";
 	
-	boolean showColNames = true, showColNamesLines = true,
-			show1stColSeparator = true, mergeBlocksSeparatorLines = true,
+	boolean showColNames = true, showColNamesUpperLine = true, showColNamesLowerLine = true,
+			show1stColSeparator = true, mergeBlocksSeparatorLines = true, repeatHeader = true,
 			showTrailerLine = true, showTrailerLineAllBlocks = false;
 	
 	@Override
@@ -80,7 +83,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 			nullValue = propNullValue;
 		}*/
 		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
-		showColNamesLines = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		showColNamesUpperLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 		postProcProperties();
 	}
 
@@ -107,6 +111,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	int lineGroupSize = (int) DEFAULT_LINEGROUPSIZE;
 
 	String separator = "|";
+	String firstPositionSeparator = separator;
 	String firstColSep = "+";
 	String colNamesLineCrossSep = "+";
 	String colNamesLineSep = "-";
@@ -118,6 +123,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	List<List<String>> valuesBuffer = new ArrayList<List<String>>();
 	int lastBlockLineSize = 0;
 	boolean shouldClearBuffer = false;
+	boolean firstHeaderDumped = false;
 	//end stateful props
 	
 	@Override
@@ -201,13 +207,17 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	void dumpBuffer(Writer fos) throws IOException {
 		if(valuesBuffer.size()<=0) { return; } //should it be here? XXX: dump header only when rowCount = 0? 
 		
-		dumpColumnNames(fos);
+		// repeat header?
+		if(repeatHeader || !firstHeaderDumped) {
+			dumpColumnNames(fos);
+			firstHeaderDumped = true;
+		}
 		
 		//print buffer
 		StringBuilder sb = new StringBuilder();
 
 		for(int i=0;i<valuesBuffer.size();i++) {
-			if(show1stColSeparator) { sb.append(separator); }
+			if(show1stColSeparator) { sb.append(firstPositionSeparator); }
 			List<String> vals = valuesBuffer.get(i);
 			for(int j=0;j<lsColNames.size();j++) {
 				appendString(sb, colsMaxLenght.get(j), vals.get(j), j );
@@ -234,25 +244,29 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	void dumpColumnNames(Writer fos) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		if(showColNames) {
-			if(showColNamesLines) {
+			if(showColNamesUpperLine) {
 				//upper line
 				appendLine(sb, mergeBlocksSeparatorLines);
 			}
 	
 			//col names
-			if(show1stColSeparator) { sb.append(separator); }
+			if(show1stColSeparator) { sb.append(firstPositionSeparator); }
 			for(int j=0;j<lsColNames.size();j++) {
 				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
 				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
 			}
 			sb.append(recordDemimiter);
 	
-			if(showColNamesLines) {
+			if(showColNamesLowerLine) {
 				//lower line
-				appendLine(sb, false);
+				appendColNamesLowerLine(sb, false);
 			}
 		}
 		out(sb.toString(), fos); //+"\n"
+	}
+	
+	void appendColNamesLowerLine(StringBuilder sb, boolean isBlock1stLine) {
+		appendLine(sb, isBlock1stLine);
 	}
 	
 	void appendLine(StringBuilder sb, boolean isBlock1stLine) {
@@ -362,6 +376,6 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 
 	@Override
 	public String getMimeType() {
-		return "text/plain"; //XXX add ";Format=Fixed" ?
+		return PLAINTEXT_MIMETYPE; //XXX add ";Format=Fixed" ?
 	}
 }
