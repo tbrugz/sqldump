@@ -88,6 +88,36 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		showColNamesUpperLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 		postProcProperties();
+		validateProperties();
+	}
+	
+	boolean areOfSameLength(String s1, String s2) {
+		if(s1==null || s2==null) {
+			return false;
+		}
+		if(s1.length()!=s2.length()) {
+			return false;
+		}
+		return true;
+	}
+
+	boolean isOfLength(String s, int length) {
+		return s!=null && s.length()==length;
+	}
+	
+	void validateProperties() {
+		if(!areOfSameLength(colNamesLineLastCrossSep, lastPositionSeparator)) {
+			log.warn("lastColSeparators differ in length");
+		}
+		if(!areOfSameLength(firstColSep, firstPositionSeparator)) {
+			log.warn("firstColSeparators differ in length");
+		}
+		if(!areOfSameLength(separator, colNamesLineCrossSep)) {
+			log.warn("middleColSeparators differ in length");
+		}
+		if(!isOfLength(colNamesLineSep, 1)) {
+			log.warn("colNamesLineSep must have length == 1");
+		}
 	}
 
 	@Override

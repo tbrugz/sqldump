@@ -43,12 +43,19 @@ public class MarkdownSyntax extends FFCDataDump {
 		repeatHeader = false;
 		showColNamesUpperLine = false;
 		showTrailerLine = false;
+		
 		separator = " | ";
+		colNamesLineCrossSep = " | ";
+
 		firstColSep = "| ";
 		firstPositionSeparator = "| ";
+
 		lastPositionSeparator = " |";
-		colNamesLineCrossSep = " | ";
 		colNamesLineLastCrossSep = " |";
+		
+		//colNamesLineSep = "─";
+		
+		validateProperties();
 	}
 	
 	void appendColNamesLowerLine(StringBuilder sb, boolean isBlock1stLine) {
