@@ -46,20 +46,22 @@ public class MarkdownSyntax extends FFCDataDump {
 		separator = " | ";
 		firstColSep = "| ";
 		firstPositionSeparator = "| ";
+		lastPositionSeparator = " |";
 		colNamesLineCrossSep = " | ";
-		//XXX add lastColSep, lastPositionSeparator...
+		colNamesLineLastCrossSep = " |";
 	}
 	
 	void appendColNamesLowerLine(StringBuilder sb, boolean isBlock1stLine) {
 		if(show1stColSeparator) { sb.append(firstColSep); }
 		
-		for(int j=0;j<lsColNames.size();j++) {
+		for(int j=0;j<numCol;j++) {
+			String sep = j + 1 < numCol ? colNamesLineCrossSep : colNamesLineLastCrossSep;
 			if(leftAlignField.get(j)) {
 				sb.append(":");
-				appendPattern(sb, colsMaxLenght.get(j)-1, colNamesLineSep, colNamesLineCrossSep);
+				appendPattern(sb, colsMaxLenght.get(j)-1, colNamesLineSep, sep);
 			}
 			else {
-				appendPattern(sb, colsMaxLenght.get(j)-1, colNamesLineSep, ":" + colNamesLineCrossSep);
+				appendPattern(sb, colsMaxLenght.get(j)-1, colNamesLineSep, ":" + sep);
 			}
 		}
 		sb.append(recordDemimiter);

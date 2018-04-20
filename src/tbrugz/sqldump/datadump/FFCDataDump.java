@@ -77,6 +77,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		String propColDelim = prop.getProperty(PROP_DATADUMP_FFC_COLUMNDELIMITER);
 		if(propColDelim!=null) {
 			separator = propColDelim;
+			firstPositionSeparator = separator;
+			lastPositionSeparator = separator;
 		}
 		/*String propNullValue = prop.getProperty(PROP_DATADUMP_FFC_NULLVALUE);
 		if(propNullValue!=null) {
@@ -112,9 +114,11 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 
 	String separator = "|";
 	String firstPositionSeparator = separator;
+	String lastPositionSeparator = separator;
 	String firstColSep = "+";
 	String colNamesLineCrossSep = "+";
 	String colNamesLineSep = "-";
+	String colNamesLineLastCrossSep = "+";
 	
 	List<Boolean> leftAlignField = new ArrayList<Boolean>();
 	
@@ -273,14 +277,15 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		if(show1stColSeparator) { sb.append(firstColSep); }
 		//lower line
 		int colsSize = 0;
-		for(int j=0;j<lsColNames.size();j++) {
+		for(int j=0;j<numCol;j++) {
 			//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-			appendPattern(sb, colsMaxLenght.get(j), colNamesLineSep, colNamesLineCrossSep);
+			String sep = j + 1 < numCol ? colNamesLineCrossSep : colNamesLineLastCrossSep;
+			appendPattern(sb, colsMaxLenght.get(j), colNamesLineSep, sep);
 			colsSize += colsMaxLenght.get(j);
 		}
 		if(isBlock1stLine) {
 			if(colsSize<lastBlockLineSize) {
-				appendPattern(sb, lastBlockLineSize-colsSize-1, colNamesLineSep, colNamesLineCrossSep);
+				appendPattern(sb, lastBlockLineSize-colsSize-1, colNamesLineSep, colNamesLineLastCrossSep);
 			}
 		}
 		sb.append(recordDemimiter);
@@ -290,11 +295,12 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		if(len==0) {
 			log.warn("FFCSyntax error: len="+len+"; value: "+value+"; bufsize="+valuesBuffer.size());
 		}
+		String sep = colIndex + 1 < numCol ? separator : lastPositionSeparator;
 		if(leftAlignField.get(colIndex)) {
-			sb.append( String.format("%-"+len+"s"+separator, value) );
+			sb.append( String.format("%-"+len+"s"+sep, value) );
 		}
 		else {
-			sb.append( String.format("%"+len+"s"+separator, value) );
+			sb.append( String.format("%"+len+"s"+sep, value) );
 		}
 	}
 
