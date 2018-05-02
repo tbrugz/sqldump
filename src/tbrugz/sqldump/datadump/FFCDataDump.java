@@ -63,7 +63,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	
 	static final String recordDemimiter = "\n";
 	
-	boolean showColNames = true, showColNamesUpperLine = true, showColNamesLowerLine = true,
+	boolean showColNames = true, showColNamesUpperLine = true, show1stColNamesUpperLine = true, showColNamesLowerLine = true,
 			show1stColSeparator = true, mergeBlocksSeparatorLines = true, repeatHeader = true,
 			showTrailerLine = true, showTrailerLineAllBlocks = false;
 	
@@ -86,6 +86,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		}*/
 		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
 		showColNamesUpperLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		show1stColNamesUpperLine = showColNamesUpperLine;
 		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 		postProcProperties();
 		validateProperties();
@@ -115,6 +116,29 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		if(!areOfSameLength(separator, colNamesLineCrossSep)) {
 			log.warn("middleColSeparators differ in length");
 		}
+		
+		// header
+		if(!areOfSameLength(headerLine1stSep, firstColSep)) {
+			log.warn("headerLine1stSep & firstColSeparator differ in length");
+		}
+		if(!areOfSameLength(headerLineMiddleSep, separator)) {
+			log.warn("headerLineMiddleSep & separator differ in length");
+		}
+		if(!areOfSameLength(headerLineLastSep, lastPositionSeparator)) {
+			log.warn("headerLineLastSep & lastColSeparator differ in length");
+		}
+		
+		// footer
+		if(!areOfSameLength(footerLine1stSep, firstColSep)) {
+			log.warn("footerLine1stSep & firstColSeparator differ in length");
+		}
+		if(!areOfSameLength(footerLineMiddleSep, separator)) {
+			log.warn("footerLineLastSep & separator differ in length");
+		}
+		if(!areOfSameLength(footerLineLastSep, lastPositionSeparator)) {
+			log.warn("footerLineMiddleSep & lastColSeparator differ in length");
+		}
+
 		if(!isOfLength(colNamesLineSep, 1)) {
 			log.warn("colNamesLineSep must have length == 1");
 		}
@@ -150,6 +174,13 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	String colNamesLineSep = "-";
 	String colNamesLineLastCrossSep = "+";
 	
+	String headerLine1stSep = "+";
+	String headerLineLastSep = "+";
+	String headerLineMiddleSep = "+";
+	String footerLine1stSep = "+";
+	String footerLineLastSep = "+";
+	String footerLineMiddleSep = "+";
+	
 	List<Boolean> leftAlignField = new ArrayList<Boolean>();
 	
 	//"stateful" props
@@ -158,6 +189,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	int lastBlockLineSize = 0;
 	boolean shouldClearBuffer = false;
 	boolean firstHeaderDumped = false;
+	boolean lastLineDumped = false;
 	//end stateful props
 	
 	@Override
@@ -278,7 +310,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	void dumpColumnNames(Writer fos) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		if(showColNames) {
-			if(showColNamesUpperLine) {
+			if( (showColNamesUpperLine && firstHeaderDumped) || (show1stColNamesUpperLine && !firstHeaderDumped) ) {
 				//upper line
 				appendLine(sb, mergeBlocksSeparatorLines);
 			}
@@ -304,18 +336,20 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	}
 	
 	void appendLine(StringBuilder sb, boolean isBlock1stLine) {
-		if(show1stColSeparator) { sb.append(firstColSep); }
+		if(show1stColSeparator) { sb.append(firstHeaderDumped ? (lastLineDumped ? footerLine1stSep : firstColSep) : headerLine1stSep); }
 		//lower line
 		int colsSize = 0;
 		for(int j=0;j<numCol;j++) {
 			//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-			String sep = j + 1 < numCol ? colNamesLineCrossSep : colNamesLineLastCrossSep;
+			String sep = j + 1 < numCol ?
+					(firstHeaderDumped ? (lastLineDumped ? footerLineMiddleSep : colNamesLineCrossSep) : headerLineMiddleSep) :
+					(firstHeaderDumped ? (lastLineDumped ? footerLineLastSep : colNamesLineLastCrossSep) : headerLineLastSep);
 			appendPattern(sb, colsMaxLenght.get(j), colNamesLineSep, sep);
 			colsSize += colsMaxLenght.get(j);
 		}
 		if(isBlock1stLine) {
-			if(colsSize<lastBlockLineSize) {
-				appendPattern(sb, lastBlockLineSize-colsSize-1, colNamesLineSep, colNamesLineLastCrossSep);
+			if(colsSize<lastBlockLineSize-colNamesLineLastCrossSep.length()) {
+				appendPattern(sb, lastBlockLineSize-colNamesLineLastCrossSep.length()-colsSize, colNamesLineSep, colNamesLineLastCrossSep);
 			}
 		}
 		sb.append(recordDemimiter);
@@ -351,6 +385,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
 		dumpBuffer(fos);
+		lastLineDumped = true;
+		//XXX lastLineDumped:: what if count==0, buffer empty on dumpFooter(), showTrailerLine && !showTrailerLineAllBlocks ...
 		if(count==0) {
 			dumpColumnNames(fos);
 		}

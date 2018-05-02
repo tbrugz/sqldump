@@ -43,6 +43,7 @@ public class MarkdownSyntax extends FFCDataDump {
 		repeatHeader = false;
 		showColNamesUpperLine = false;
 		showTrailerLine = false;
+		show1stColNamesUpperLine = showColNamesUpperLine;
 		
 		separator = " | ";
 		colNamesLineCrossSep = " | ";
@@ -52,8 +53,53 @@ public class MarkdownSyntax extends FFCDataDump {
 
 		lastPositionSeparator = " |";
 		colNamesLineLastCrossSep = " |";
+
+		headerLine1stSep = firstColSep;
+		headerLineMiddleSep = separator;
+		headerLineLastSep = lastPositionSeparator;
+		
+		footerLine1stSep = firstColSep;
+		footerLineMiddleSep = separator;
+		footerLineLastSep = lastPositionSeparator;
 		
 		//colNamesLineSep = "─";
+		
+		/*
+		// box example:
+		// ─ │ ┌ ┐ └ ┘ ├ ┤ ┬ ┴ ┼
+		
+		repeatHeader = true;
+		showColNamesUpperLine = true;
+		showTrailerLine = true;
+		
+		colNamesLineSep = "─";
+		
+		separator = "│";
+		colNamesLineCrossSep = "│";
+
+		firstColSep = "│";
+		firstPositionSeparator = "│";
+
+		lastPositionSeparator = "│";
+		colNamesLineLastCrossSep = "│";
+		
+		headerLine1stSep = "┌";
+		headerLineMiddleSep = "┬";
+		headerLineLastSep = "┐";
+
+		firstColSep = "├";
+		colNamesLineCrossSep = "┼";
+		colNamesLineLastCrossSep = "┤";
+		
+		footerLine1stSep = "└";
+		footerLineMiddleSep = "┴";
+		footerLineLastSep = "┘";
+
+		//firstColSep = "┌";
+		//colNamesLineCrossSep = "┬";
+		//colNamesLineLastCrossSep = "┐";
+		
+		*/
 		
 		validateProperties();
 	}
