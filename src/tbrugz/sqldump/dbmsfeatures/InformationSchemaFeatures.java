@@ -42,7 +42,6 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	
 	String informationSchema = DEFAULT_SCHEMA;
 	
-	
 	static final DBObjectType[] execTypes = {
 		DBObjectType.FUNCTION, DBObjectType.PROCEDURE
 	};
