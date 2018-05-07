@@ -48,6 +48,9 @@ public enum TableType {
 		else if(tableType.equals("SYSTEM TABLE")) {
 			return TableType.SYSTEM_TABLE;
 		}
+		else if(tableType.equals("SYSTEM_TABLE")) {
+			return TableType.SYSTEM_TABLE;
+		}
 		else if(tableType.equals("SYSTEM VIEW")) {
 			return TableType.SYSTEM_VIEW;
 		}

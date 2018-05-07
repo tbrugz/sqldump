@@ -40,11 +40,14 @@ public class ConnectionUtil {
 	public static final String SUFFIX_ASKFORPASSWD_GUI = ".askforpasswordgui";
 	public static final String SUFFIX_INITSQL = ".initsql";
 	public static final String SUFFIX_INITSQL_COMMIT = ".initsql.commit";
+	public static final String SUFFIX_AUTOCOMMIT = ".autocommit";
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException, NamingException {
 		// AutoCommit==false: needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
 		// anyway, i think 'false' should be default
-		return initDBConnection(propsPrefix, papp, false);
+		Boolean autocommit = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_AUTOCOMMIT, false);
+		
+		return initDBConnection(propsPrefix, papp, autocommit);
 	}
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
@@ -221,11 +224,13 @@ public class ConnectionUtil {
 		if(conn!=null) {
 			log.debug("closing connection: "+conn);
 			try {
-				try {
-					conn.rollback();
-				}
-				catch(Exception e) {
-					log.warn("error trying to 'rollback': "+e);
+				if(! conn.getAutoCommit()) {
+					try {
+						conn.rollback();
+					}
+					catch(Exception e) {
+						log.warn("error trying to 'rollback': "+e);
+					}
 				}
 				conn.close();
 			} catch (SQLException e) {
