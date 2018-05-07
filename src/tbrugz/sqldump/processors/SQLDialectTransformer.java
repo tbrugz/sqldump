@@ -34,9 +34,9 @@ public class SQLDialectTransformer extends AbstractSchemaProcessor {
 	@Override
 	public void process() {
 		if(toDialectId==null && !toANSI) {
-			log.warn("undefined toDialectId or '.toansi' property");
+			log.warn("undefined '.todbid' or '.toansi' property");
 			if(failonerror) {
-				throw new ProcessingException("SQLDialectTransformer: undefined toDialectId or '.toansi' property [prefix="+PROP_PREFIX+"]");
+				throw new ProcessingException("SQLDialectTransformer: undefined '.todbid' or '.toansi' property [prefix="+PROP_PREFIX+"]");
 			}
 			return;
 		}

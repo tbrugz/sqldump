@@ -268,7 +268,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		//feats.procProperties(papp);
 		initFeatures(conn);
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
-		log.info("feats/metadata: "+feats+" / "+dbmd);
+		log.debug("feats/metadata: "+feats+" / "+dbmd);
 		ConnectionUtil.showDBInfo(conn.getMetaData());
 		if(log.isInfoEnabled()) {
 			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
@@ -308,8 +308,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 
 		if(schemaPattern==null) {
-			log.error("schema name undefined & no suggestion available, aborting...");
-			if(failonerror) { throw new ProcessingException("schema name undefined & no suggestion available, aborting..."); }
+			log.error("schema name undefined (prop '"+Defs.PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting...");
+			if(failonerror) { throw new ProcessingException("schema name undefined (prop '"+Defs.PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting..."); }
 			return null;
 		}
 		
@@ -335,7 +335,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		//schemaModel.setSqlDialect(DBMSResources.instance().dbid());
 		schemaModel.setSqlDialect(feats.getId());
-		log.info("feats/metadata: "+feats+" / "+dbmd+ " / "+feats.getId());
+		log.debug("feats/metadata: "+feats+" / "+dbmd+ " / "+feats.getId());
 
 		if(doSchemaGrabTables) {
 			List<String> tablePatterns = Utils.getStringListFromProp(papp, PROP_SCHEMAGRAB_TABLEFILTER, ","); 

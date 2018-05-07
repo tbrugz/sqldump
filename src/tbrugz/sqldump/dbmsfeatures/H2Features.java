@@ -22,6 +22,7 @@ import tbrugz.sqldump.util.StringUtils;
  * see: http://www.h2database.com/html/grammar.html#information_schema
  */
 public class H2Features extends InformationSchemaFeatures {
+
 	static Log log = LogFactory.getLog(H2Features.class);
 
 	@Override
