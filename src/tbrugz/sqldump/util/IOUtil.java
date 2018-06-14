@@ -76,4 +76,13 @@ public class IOUtil {
 			os.write(buffer, 0, len);
 		}
 	}
+
+	public static void pipeCharacterStreams(Reader r, Writer w) throws IOException {
+		char[] buffer = new char[BUFFER_SIZE];
+		int len;
+		while ((len = r.read(buffer)) != -1) {
+			w.write(buffer, 0, len);
+		}
+	}
+
 }

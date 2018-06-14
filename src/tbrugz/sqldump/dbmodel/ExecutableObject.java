@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.StringUtils;
 
 /* implements Comparable<ExecutableObject>: not allowed?!
  * 
@@ -142,7 +143,7 @@ public class ExecutableObject extends DBObject implements TypedDBObject {
 		if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!DBObjectUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
 		//} else if (!body.equals(other.body))
 			return false;
 		if (packageName == null) {

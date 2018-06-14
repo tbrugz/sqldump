@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 public class StringUtils {
 
 	// see: http://stackoverflow.com/questions/15567010/what-is-a-good-alternative-of-ltrim-and-rtrim-in-java
+	static final String NL = "\n";
 	private final static Pattern RTRIM = Pattern.compile("\\s+$");
 
 	public static boolean equalsWithTrim(String s1, String s2) {
@@ -62,5 +63,31 @@ public class StringUtils {
 		}
 		return out.toString();
 	}
+	
+	public static boolean equalsIgnoreWhitespacesEachLine(String s1, String s2) {
+		if(s1==null && s2==null) { return true; }
+		if(s1==null || s2==null) { return false; }
+		
+		String[] s1a = s1.split(NL);
+		String[] s2a = s2.split(NL);
+		
+		if(s1a.length!=s2a.length) { return false; }
+		
+		for(int i=0;i<s1a.length;i++) {
+			//if(!StringUtils.equalsWithTrim(s1a[i], s2a[i])) { return false; }
+			if(!StringUtils.equalsWithRightTrim(s1a[i], s2a[i])) { return false; }
+		}
+		return true;
+	}
+	
+	// http://stackoverflow.com/a/1102916/616413
+	/* public static boolean isNumeric(String str) {
+		try {
+			Double.parseDouble(str);
+		} catch (NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	} */
 
 }

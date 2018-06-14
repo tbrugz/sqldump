@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -144,7 +145,7 @@ public class View extends DBObject implements Relation {
 		if(obj instanceof View) {
 			View v = (View) obj;
 			//return name.equals(v.name) && query.equals(v.query);
-			return name.equals(v.name) && DBObjectUtils.equalsIgnoreWhitespacesEachLine(query, v.query);
+			return name.equals(v.name) && StringUtils.equalsIgnoreWhitespacesEachLine(query, v.query);
 		}
 		return false;
 	}

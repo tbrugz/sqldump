@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldump.util.StringUtils;
+
 public class Trigger extends DBObject {
 	private static final long serialVersionUID = 1L;
 
@@ -81,7 +83,7 @@ public class Trigger extends DBObject {
 		if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!DBObjectUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
 		//} else if (!body.equals(other.body))
 			return false;
 		if (description == null) {
