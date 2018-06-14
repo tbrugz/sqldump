@@ -17,9 +17,10 @@ public class ExecutableParameter implements Serializable {
 	}
 	
 	String name;
-	int position;
+	Integer position; // Integer? so it can be null...
 	String dataType;
 	INOUT inout;
+	//String remarks; //XXX add remarks?
 	
 	@Override
 	public String toString() {
@@ -72,11 +73,11 @@ public class ExecutableParameter implements Serializable {
 		this.name = name;
 	}
 
-	public int getPosition() {
+	public Integer getPosition() {
 		return position;
 	}
 
-	public void setPosition(int position) {
+	public void setPosition(Integer position) {
 		this.position = position;
 	}
 
