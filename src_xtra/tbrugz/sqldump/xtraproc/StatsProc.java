@@ -187,6 +187,11 @@ public class StatsProc extends AbstractSQLProc {
 				System.out.println("<<-- --------------------------------- -->>"); */
 			}
 			
+			if(cols.size()==0) {
+				log.warn("no columns to grab stats...");
+				return;
+			}
+			
 			//String sql = "select "+Utils.join(cols, ", ")+" from "+table.getFinalQualifiedName();
 			String sql = Utils.join(cols, "\nunion all\n")+"\norder by table_name, column_name";
 			//log.info("sql: "+sql);
