@@ -90,7 +90,7 @@ public class QueryDumper extends AbstractFailable implements Executor {
 		
 		PreparedStatement st = conn.prepareStatement(sql);
 		ResultSet rs = st.executeQuery();
-		SQLUtils.setupForNewQuery(rs.getMetaData().getColumnCount());
+		SQLUtils.setupForNewQuery();
 		// dump column types (debug)
 		DataDumpUtils.logResultSetColumnsTypes(rs.getMetaData(), queryName, log);
 		

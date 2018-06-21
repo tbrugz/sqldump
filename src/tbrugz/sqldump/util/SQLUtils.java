@@ -102,7 +102,7 @@ public class SQLUtils {
 	static boolean is1stRow = true;
 	static Map<Class<?>, Class<?>> colTypeMapper = null;
 	
-	public static void setupForNewQuery(int numCol) {
+	public static void setupForNewQuery() {
 		/*if(numCol>0) {
 			errorGettingValueWarnMaxCount = numCol;
 			log.info("setupForNewQuery: numCol = "+numCol);

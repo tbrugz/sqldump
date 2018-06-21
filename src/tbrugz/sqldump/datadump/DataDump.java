@@ -518,7 +518,7 @@ public class DataDump extends AbstractSQLProc {
 			}
 			//XXX else { //warn if multiple syntaxes? }
 			
-			SQLUtils.setupForNewQuery(md.getColumnCount());
+			SQLUtils.setupForNewQuery();
 			
 			Map<String, Outputter> writersOpened = new HashMap<String, Outputter>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
