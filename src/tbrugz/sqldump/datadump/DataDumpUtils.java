@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -489,5 +490,43 @@ public class DataDumpUtils {
 	
 	//see: Table.getColumnNames
 	//public static List<String> getColumnNames(List<Column> columns) //?
+	
+	/*
+	 * XXX move to tbrugz.sqldump.resultset.ResultSetUtils?
+	 * XXX create ResultSetMetaDataDecorator?
+	 */
+	public static ResultSetMetaData filterResultSetMetaData(ResultSetMetaData rsmd, List<String> colNamesToDump) throws SQLException {
+		//Integer[] ctArr = new Integer[colNamesToDump.size()];
+		int colCount = rsmd.getColumnCount();
+		List<String> finalColNamesToDump = new ArrayList<String>();
+		List<Integer> finalColTypesToDump = new ArrayList<Integer>();
+		for(int i=1;i<=colCount;i++) {
+			String colName = rsmd.getColumnName(i);
+			int colType = rsmd.getColumnType(i);
+			int idx = colNamesToDump.indexOf(colName);
+			if(idx==-1) {
+				log.debug("colName '"+colName+"' not found in "+colNamesToDump);
+				String colLabel = rsmd.getColumnLabel(i);
+				idx = colNamesToDump.indexOf(colLabel);
+				if(idx==-1) {
+					log.debug("colLabel '"+colLabel+"' not found in "+colNamesToDump);
+					continue;
+				}
+				colName = colLabel;
+			}
+			finalColNamesToDump.add(colName);
+			finalColTypesToDump.add(colType);
+			//if(idx==-1) { continue; }
+			//ctArr[idx] = colType;
+		}
+		//List<Integer> colTypes = Arrays.asList(ctArr);
+		if(finalColNamesToDump.size() != colNamesToDump.size()) {
+			log.info("filtering ResultSet by (updated) columns: "+finalColNamesToDump);
+		}
+		
+		RSMetaDataTypedAdapter ret = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), finalColNamesToDump, finalColTypesToDump);
+		//RSMetaDataTypedAdapter ret = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), colNamesToDump, colTypes);
+		return ret;
+	}
 	
 }

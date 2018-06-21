@@ -224,7 +224,7 @@ public class Olap4jMDXQueries extends AbstractSQLProc {
 		List<DumpSyntax> ds = DataDump.getSyntaxList(prop, feat, syntaxes.toArray(new String[]{}));
 		dd.dumpResultSet(csrsad, prop, null, id, /*tableOrQueryName*/ qname, /*charset*/ null,
 				/*rowlimit*/ ROW_LIMIT, /*syntaxList*/ ds, /*partitionByPatterns*/ null, /*keyColumns*/ null, /*importedFKs*/ null,
-				/*uniqueKeys*/ null, /*rsDecoratorFactory*/ null, initTime);
+				/*uniqueKeys*/ null, /*rsDecoratorFactory*/ null, /*colNamesToDump*/ null, initTime);
 		log.info("query '"+id+"' dumped [ResultSetAdapter/DataDump;elapsed="+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	

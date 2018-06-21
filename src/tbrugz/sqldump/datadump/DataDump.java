@@ -417,7 +417,7 @@ public class DataDump extends AbstractSQLProc {
 			
 			return runQuery(conn, st, params, prop, schemaName, tableOrQueryId,
 					tableOrQueryName, charset, rowlimit, syntaxList, partitionByPatterns,
-					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory);
+					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory, null);
 		}
 		catch(SQLException e) {
 			log.warn("error in sql: "+sql);
@@ -436,7 +436,8 @@ public class DataDump extends AbstractSQLProc {
 			List<String> keyColumns,
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys,
-			ResultSetDecoratorFactory rsDecoratorFactory
+			ResultSetDecoratorFactory rsDecoratorFactory,
+			List<String> colNamesToDump
 			) throws SQLException, IOException {
 			//st.setFetchSize(20);
 			if(params!=null) {
@@ -466,7 +467,7 @@ public class DataDump extends AbstractSQLProc {
 			return dumpResultSet(rs, prop, schemaName, tableOrQueryId, tableOrQueryName,
 					charset, rowlimit, syntaxList, partitionByPatterns,
 					keyColumns, importedFKs, uniqueKeys, rsDecoratorFactory,
-					initTime);
+					colNamesToDump, initTime);
 	}
 
 	public long dumpResultSet(ResultSet rs, Properties prop, 
@@ -478,6 +479,7 @@ public class DataDump extends AbstractSQLProc {
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys,
 			ResultSetDecoratorFactory rsDecoratorFactory,
+			List<String> colNamesToDump,
 			long initTime
 			) throws SQLException, IOException {
 			
@@ -490,6 +492,12 @@ public class DataDump extends AbstractSQLProc {
 			// dump column types (debug)
 			DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 
+			if(colNamesToDump!=null) {
+				log.info("filtering ResultSet by columns: "+colNamesToDump);
+				md = DataDumpUtils.filterResultSetMetaData(md, colNamesToDump);
+				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
+			}
+			
 			boolean createEmptyDumpFiles = Utils.getPropBool(prop, PROP_DATADUMP_CREATEEMPTYFILES, false);
 			
 			String partitionByDF = prop.getProperty(PROP_DATADUMP_PARTITIONBY_DATEFORMAT);

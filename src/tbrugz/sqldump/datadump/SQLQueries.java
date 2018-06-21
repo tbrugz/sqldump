@@ -180,6 +180,8 @@ public class SQLQueries extends AbstractSQLProc {
 				}
 			}
 
+			List<String> colNamesToDump = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".dump-cols", ",");
+			
 			// adding query to model
 			if(addQueriesToModel) {
 				String remarks = prop.getProperty(PREFIX_QUERY+qid+".remarks");
@@ -200,7 +202,7 @@ public class SQLQueries extends AbstractSQLProc {
 					
 					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList, 
 							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
-							keyCols, null, null, rsdf);
+							keyCols, null, null, rsdf, colNamesToDump);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.debug("error on query "+qid+" [class="+e.getClass().getName()+"]: "+e.getMessage(), e);
