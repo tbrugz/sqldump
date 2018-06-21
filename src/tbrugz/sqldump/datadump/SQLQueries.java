@@ -48,6 +48,8 @@ public class SQLQueries extends AbstractSQLProc {
 	protected static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
 	protected static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
 	protected static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
+	
+	protected static final String PREFIX_QUERY = "sqldump.query.";
 
 	protected static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
 	
@@ -85,7 +87,7 @@ public class SQLQueries extends AbstractSQLProc {
 		for(String qid: queriesArr) {
 			qid = qid.trim();
 			
-			String queryName = prop.getProperty("sqldump.query."+qid+".name");
+			String queryName = prop.getProperty(PREFIX_QUERY+qid+".name");
 			DBMSFeatures feat = null;
 			if(model!=null) {
 				feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
@@ -107,17 +109,17 @@ public class SQLQueries extends AbstractSQLProc {
 			int replaceCount = 1;
 			//List<String> replacers = new ArrayList<String>();
 			while(true) {
-				String paramStr = prop.getProperty("sqldump.query."+qid+".replace."+replaceCount);
+				String paramStr = prop.getProperty(PREFIX_QUERY+qid+".replace."+replaceCount);
 				if(paramStr==null) { break; }
 				prop.setProperty("sqldump.query.replace."+replaceCount, paramStr);
 				//replacers.add(paramStr);
 				replaceCount++;
 			}
 			//sql string
-			String sql = prop.getProperty("sqldump.query."+qid+".sql");
+			String sql = prop.getProperty(PREFIX_QUERY+qid+".sql");
 			if(sql==null) {
 				//load from file
-				String sqlfile = prop.getProperty("sqldump.query."+qid+".sqlfile");
+				String sqlfile = prop.getProperty(PREFIX_QUERY+qid+".sqlfile");
 				if(sqlfile!=null) {
 					sql = IOUtil.readFromFilename(sqlfile);
 				}
@@ -125,7 +127,7 @@ public class SQLQueries extends AbstractSQLProc {
 				sql = ParametrizedProperties.replaceProps(sql, prop);
 			}
 			if(sql==null) {
-				log.warn("no SQL defined for query [id="+qid+";propkey='"+"sqldump.query."+qid+".sql(file)"+"']");
+				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
 				continue;
 			}
 			
@@ -150,26 +152,26 @@ public class SQLQueries extends AbstractSQLProc {
 			int paramCount = 1;
 			List<Object> params = new ArrayList<Object>();
 			while(true) {
-				String paramStr = prop.getProperty("sqldump.query."+qid+".param."+paramCount);
+				String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param."+paramCount);
 				if(paramStr==null) { break; }
 				params.add(paramStr);
 				log.debug("added bind param #"+paramCount+": "+paramStr);
 				paramCount++;
 			}
 
-			Long tablerowlimit = Utils.getPropLong(prop, "sqldump.query."+qid+".rowlimit");
+			Long tablerowlimit = Utils.getPropLong(prop, PREFIX_QUERY+qid+".rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
-			List<String> partitionsBy = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".partitionby", "\\|");
+			List<String> partitionsBy = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".partitionby", "\\|");
 			if(partitionsBy!=null) {
 				log.info("partitionby-patterns[id="+qid+"]: "+partitionsBy); //XXX: move log into DataDump?
 			}
 
-			List<String> keyCols = Utils.getStringListFromProp(prop, "sqldump.query."+qid+".keycols", ",");
+			List<String> keyCols = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".keycols", ",");
 			
 			ResultSetDecoratorFactory rsdf = null;
-			String rsDecoratorFactory = prop.getProperty("sqldump.query."+qid+".rsdecoratorfactory");
-			String rsArgPrepend = "sqldump.query."+qid+".rsdecorator.";
+			String rsDecoratorFactory = prop.getProperty(PREFIX_QUERY+qid+".rsdecoratorfactory");
+			String rsArgPrepend = PREFIX_QUERY+qid+".rsdecorator.";
 			List<String> rsFactoryArgs = Utils.getKeysStartingWith(prop, rsArgPrepend);
 			if(rsDecoratorFactory!=null) {
 				rsdf = (ResultSetDecoratorFactory) Utils.getClassInstance(rsDecoratorFactory, "tbrugz.sqldump.resultset", null);
@@ -180,8 +182,8 @@ public class SQLQueries extends AbstractSQLProc {
 
 			// adding query to model
 			if(addQueriesToModel) {
-				String remarks = prop.getProperty("sqldump.query."+qid+".remarks");
-				String roles = prop.getProperty("sqldump.query."+qid+".roles");
+				String remarks = prop.getProperty(PREFIX_QUERY+qid+".remarks");
+				String roles = prop.getProperty(PREFIX_QUERY+qid+".roles");
 				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
@@ -225,7 +227,7 @@ public class SQLQueries extends AbstractSQLProc {
 	}
 	
 	List<DumpSyntax> getQuerySyntaxes(String qid, DBMSFeatures feat) {
-		String syntaxes = prop.getProperty("sqldump.query."+qid+".dumpsyntaxes");
+		String syntaxes = prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes");
 		if(syntaxes==null) {
 			syntaxes = prop.getProperty(DataDump.PROP_DATADUMP_SYNTAXES);
 		}
@@ -262,8 +264,8 @@ public class SQLQueries extends AbstractSQLProc {
 			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
-		String schemaName = prop.getProperty("sqldump.query."+qid+".schemaname", defaultSchemaName);
-		String colNames = prop.getProperty("sqldump.query."+qid+".cols");
+		String schemaName = prop.getProperty(PREFIX_QUERY+qid+".schemaname", defaultSchemaName);
+		String colNames = prop.getProperty(PREFIX_QUERY+qid+".cols");
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
 		//XXX: add prop for 'addAlsoAsTable'? default is false
