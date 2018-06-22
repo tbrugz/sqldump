@@ -37,6 +37,7 @@ import tbrugz.sqldump.pivot.KeyTest;
 import tbrugz.sqldump.pivot.QueryTest;
 import tbrugz.sqldump.processors.CascadingDataDumpTest;
 import tbrugz.sqldump.processors.SQLRunProcessorTest;
+import tbrugz.sqldump.resultset.RsProjectionAdapterTest;
 import tbrugz.sqldump.resultset.pivot.PivotRSTest;
 import tbrugz.sqldump.sqlrun.CSVImportTest;
 import tbrugz.sqldump.sqlrun.FailoverTest;
@@ -74,6 +75,8 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	GrantTest.class,
 	//datadump unit tests
 	JsonTest.class,
+	//resultset unit tests
+	RsProjectionAdapterTest.class,
 
 	//diff "unit" tests
 	ColumnDiffTest.class,

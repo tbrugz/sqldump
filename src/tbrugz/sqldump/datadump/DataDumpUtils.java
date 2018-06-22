@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
+import tbrugz.sqldump.resultset.ResultSetProjectionDecorator;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -495,7 +496,12 @@ public class DataDumpUtils {
 	 * XXX move to tbrugz.sqldump.resultset.ResultSetUtils?
 	 * XXX create ResultSetMetaDataDecorator?
 	 */
-	public static ResultSetMetaData filterResultSetMetaData(ResultSetMetaData rsmd, List<String> colNamesToDump) throws SQLException {
+	public static ResultSet projectResultSetByCols(ResultSet rs, List<String> colNamesToDump) throws SQLException {
+		return new ResultSetProjectionDecorator(rs, colNamesToDump);
+	}
+	
+	@Deprecated
+	static ResultSetMetaData filterResultSetMetaData(ResultSetMetaData rsmd, List<String> colNamesToDump) throws SQLException {
 		//Integer[] ctArr = new Integer[colNamesToDump.size()];
 		int colCount = rsmd.getColumnCount();
 		List<String> finalColNamesToDump = new ArrayList<String>();

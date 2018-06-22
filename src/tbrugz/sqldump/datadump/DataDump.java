@@ -488,13 +488,15 @@ public class DataDump extends AbstractSQLProc {
 			long lastRoundInitTime = initTime;
 			
 			ResultSetMetaData md = rs.getMetaData();
+			ResultSet rs4dump = rs;
 			
 			// dump column types (debug)
 			DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 
 			if(colNamesToDump!=null) {
 				log.info("filtering ResultSet by columns: "+colNamesToDump);
-				md = DataDumpUtils.filterResultSetMetaData(md, colNamesToDump);
+				rs4dump = DataDumpUtils.projectResultSetByCols(rs4dump, colNamesToDump);
+				md = rs4dump.getMetaData();
 				DataDumpUtils.logResultSetColumnsTypes(md, tableOrQueryName, log);
 			}
 			
@@ -623,7 +625,7 @@ public class DataDump extends AbstractSQLProc {
 						DumpSyntax ds = syntaxList.get(i);
 						if(doSyntaxDumpList.get(i)) {
 							if(ds.isWriterIndependent()) {
-								ds.dumpRow(rs, count); //writer indepentend syntax should not care abount 'countInPartition' line number, right?
+								ds.dumpRow(rs4dump, count); //writer indepentend syntax should not care abount 'countInPartition' line number, right?
 								continue;
 							}
 							
@@ -692,10 +694,10 @@ public class DataDump extends AbstractSQLProc {
 							try {
 								if(hasData) {
 									if(ds.acceptsOutputStream()) {
-										ds.dumpRow(rs, countInFilename, out.os);
+										ds.dumpRow(rs4dump, countInFilename, out.os);
 									}
 									else {
-										ds.dumpRow(rs, countInFilename, out.w);
+										ds.dumpRow(rs4dump, countInFilename, out.w);
 									}
 									
 									countByPatternFinalFilename.put(finalFilename, ++countInFilename);
