@@ -892,4 +892,22 @@ public class DataDumpTest {
 		return new File(DIR_OUT+"/data_q1."+syntax);
 	}
 
+	@Test
+	public void testRsProjection() throws Exception {
+		File f = dumpSelect(
+				"select 1 as a, 2 as b, 3 as c union all select 4, 5, 6", "csv",
+				new String[] {"-Dsqldump.query.q1.dump-cols=C, B"}
+				);
+		String csv = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(csv);
+		
+		String LF = "\r\n";
+		Assert.assertEquals(
+				"C,B" + LF +
+				"3,2" + LF +
+				"6,5" + LF,
+				csv);
+		
+	}
+	
 }
