@@ -25,7 +25,7 @@ import java.util.Map;
 @SuppressWarnings("deprecation")
 public abstract class AbstractResultSetDecorator /*extends AbstractResultSet*/ implements ResultSet {
 	
-	ResultSet rs;
+	protected ResultSet rs;
 
 	public AbstractResultSetDecorator(ResultSet rs) {
 		this.rs = rs;
