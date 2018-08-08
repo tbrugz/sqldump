@@ -15,7 +15,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -238,8 +237,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 				String innerTableName = lsColNames.get(i);
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) origVal;
-					rsInt = new ResultSetArrayAdapter(objArr, false, innerTableName);
+					rsInt = DataDumpUtils.getResultSetFromArray(origVal, false, innerTableName);
 				}
 				else {
 					rsInt = (ResultSet) origVal;

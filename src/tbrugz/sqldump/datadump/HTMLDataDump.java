@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -301,8 +300,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 			if(isResultSet || isArray) {
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) origVal;
-					rsInt = new ResultSetArrayAdapter(objArr, false, finalColNames.get(i));
+					rsInt = DataDumpUtils.getResultSetFromArray(origVal, false, finalColNames.get(i));
 				}
 				else {
 					rsInt = (ResultSet) origVal;

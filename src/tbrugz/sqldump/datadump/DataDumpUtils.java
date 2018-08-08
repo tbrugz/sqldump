@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
+import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.resultset.ResultSetProjectionDecorator;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
@@ -481,7 +482,10 @@ public class DataDumpUtils {
 	}
 	
 	public static boolean isArray(Class<?> c, Object val) {
-		return Array.class.isAssignableFrom(c) && (val instanceof Object[]);
+		return (Array.class.isAssignableFrom(c)) // || c.isArray()
+			&&
+			(val instanceof Object[] || (val instanceof Collection) );
+			//(val instanceof Object[] || (val!=null && Collection.class.isAssignableFrom(val.getClass())) );
 	}
 
 	public static boolean isResultSet(Class<?> c, Object val) {
@@ -533,6 +537,23 @@ public class DataDumpUtils {
 		RSMetaDataTypedAdapter ret = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), finalColNamesToDump, finalColTypesToDump);
 		//RSMetaDataTypedAdapter ret = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), colNamesToDump, colTypes);
 		return ret;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public static ResultSet getResultSetFromArray(Object obj, boolean withIndexColumn, String columnName) {
+		if(obj==null) { return null; }
+		
+		Object[] arr = null;
+		if(obj instanceof Collection) {
+			arr = ((Collection) obj).toArray();
+		}
+		else if(obj instanceof Object[]) {
+			arr = (Object[]) obj;
+		}
+		else {
+			throw new IllegalArgumentException("object '"+obj+"' is not array nor collection ["+obj.getClass().getName()+"]");
+		}
+		return new ResultSetArrayAdapter(arr, withIndexColumn, columnName);
 	}
 	
 }

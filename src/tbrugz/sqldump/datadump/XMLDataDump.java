@@ -11,7 +11,6 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -139,8 +138,7 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 			if(isResultSet || isArray) {
 				ResultSet rsInt = null;
 				if(isArray) {
-					Object[] objArr = (Object[]) origVal;
-					rsInt = new ResultSetArrayAdapter(objArr, false, lsColNames.get(i));
+					rsInt = DataDumpUtils.getResultSetFromArray(origVal, false, lsColNames.get(i));
 				}
 				else {
 					rsInt = (ResultSet) origVal;

@@ -18,7 +18,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
 import tbrugz.sqldump.def.Defs;
-import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -143,11 +142,9 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 				if(isResultSet || isArray) {
 					log.info("dump inner table/cursor...");
 					String innerTableName = lsColNames.get(i);
-					//ResultSet rsInt = (ResultSet) vals.get(i);
 					ResultSet rsInt = null;
 					if(isArray) {
-						Object[] objArr = (Object[]) origVal;
-						rsInt = new ResultSetArrayAdapter(objArr, false, innerTableName);
+						rsInt = DataDumpUtils.getResultSetFromArray(origVal, false, innerTableName);
 					}
 					else {
 						rsInt = (ResultSet) origVal;
