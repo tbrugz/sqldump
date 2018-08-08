@@ -68,7 +68,7 @@ public class JSONDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilde
 	
 	protected boolean innerTableAddDataElement = false;
 	protected boolean innerTableAddMetadata = addMetadata;
-	protected boolean innerArrayDumpAsArray = false;
+	protected boolean innerArrayDumpAsArray = true;
 	
 	protected boolean innerTable = false;
 	protected String padding = "";
