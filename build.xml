@@ -91,8 +91,9 @@
 	</path>
 
 	<path id="classpath.cobertura">
-		<pathelement location="lib/cobertura-2.0.3.jar"/>
-		<pathelement location="lib/log4j-1.2.16.jar"/>
+		<pathelement location="lib/cobertura-2.1.1.jar"/>
+		<pathelement location="lib/log4j-1.2.17.jar"/>
+		<!--<pathelement location="lib/slf4j-api-1.7.25.jar"/>-->
 		<pathelement location="lib/asm-4.1.jar"/>
 		<pathelement location="lib/asm-util-4.1.jar"/>
 		<pathelement location="lib/asm-tree-4.1.jar"/>
@@ -222,7 +223,7 @@
 		<echo message="run finished" />
 	</target>
 
-	<target name="test" depends="compile, cobertura-instrument" description="run junit tests">
+	<target name="test" depends="compile" description="run junit tests"> <!-- XXX cobertura-instrument? -->
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false">
 			<sysproperty key="net.sourceforge.cobertura.datafile" file="${basedir}/cobertura.ser" />
 			<classpath location="${bin.cobertura.dir}" />
@@ -481,17 +482,11 @@
 		<delete file="${basedir}/cobertura.ser" />
 
 		<cobertura-instrument todir="${bin.cobertura.dir}" ignoreTrivial="true">
-			<!--includeClasses regex=".*.class" />
-			<excludeClasses regex=".*\.Test.*" /-->
 			<fileset dir="${bin.dir}">
 				<include name="**/*.class" />
 				<exclude name="**/*Test.class" />
 			</fileset>
 
-			<!--instrumentationClasspath>
-				<pathelement location="${bin.dir}" />
-			</instrumentationClasspath-->
-			<!-- needs cobertura 2.0.3+ -->
 			<auxClasspath refid="classpath.compile" />
 		</cobertura-instrument>
 	</target>
