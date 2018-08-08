@@ -11,8 +11,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -501,6 +503,36 @@ public class SQLUtils {
 			}
 		}
 		return null;
+	}
+	
+	public static int getSqlTypeFromClass(Class<?> clazz) {
+		if(clazz==null) { return Types.VARCHAR; }
+		
+		if(clazz.equals(String.class)) {
+			return Types.VARCHAR;
+		}
+		if(clazz.equals(Integer.class) ||
+			clazz.equals(Integer.TYPE) ||
+			clazz.equals(Long.class) ||
+			clazz.equals(Long.TYPE)) {
+			return Types.INTEGER;
+		}
+		if(clazz.equals(Double.class) ||
+			clazz.equals(Float.class) ||
+			clazz.equals(Double.TYPE) ||
+			clazz.equals(Float.TYPE)) {
+			return Types.DOUBLE;
+		}
+		if(clazz.equals(Date.class) ||
+			clazz.equals(Timestamp.class)) {
+			return Types.TIMESTAMP;
+		}
+		if(clazz.isArray() || Collection.class.isAssignableFrom(clazz)) {
+			return Types.ARRAY;
+		}
+		
+		log.warn("unknown class: "+clazz+" [defaulting to VARCHAR]");
+		return Types.VARCHAR;
 	}
 
 }

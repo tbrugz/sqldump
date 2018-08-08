@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractResultSet {
@@ -25,6 +26,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	
 	final String name;
 	final List<String> columnNames;
+	final List<Integer> columnTypes; // not (yet) used
 	final ResultSetMetaData metadata;
 	final List<Method> methods = new ArrayList<Method>();
 
@@ -42,7 +44,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		this.name = name;
 		
 		columnNames = new ArrayList<String>();
-		metadata = new RSMetaDataAdapter(null, name, columnNames);
+		columnTypes = new ArrayList<Integer>();
 		
 		//Class<E> clazz = (Class<E>) value.getClass();
 		
@@ -50,7 +52,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 		if(uniqueCols!=null) {
 			for(String col: uniqueCols) {
-				addMatchProperties(clazz, propertyDescriptors, col, columnNames);
+				addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes);
 			}
 		}
 		if(!onlyUniqueCols) {
@@ -65,12 +67,12 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				
 				for(String col: allCols) {
-					addMatchProperties(clazz, propertyDescriptors, col, columnNames);
+					addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes);
 				}
 			}
 			else {
 				// add all!
-				addMatchProperties(clazz, propertyDescriptors, null, columnNames);
+				addMatchProperties(clazz, propertyDescriptors, null, columnNames, columnTypes);
 			}
 		}
 		else {
@@ -78,10 +80,13 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				log.warn("onlyUniqueCols is true but allCols not null: "+allCols);
 			}
 		}
-		log.debug("resultset:cols: "+columnNames);
+		
+		metadata = new RSMetaDataTypedAdapter(null, name, columnNames, columnTypes);
+		
+		log.info("resultset: cols: "+columnNames+" ; types: "+columnTypes);
 	}
 	
-	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames) {
+	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames, List<Integer> columnTypes) {
 		int matched = 0;
 		for (PropertyDescriptor prop : propertyDescriptors) {
 			if(matchCol==null || matchCol.equals(prop.getName())) {
@@ -95,7 +100,9 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 					log.warn("null get method? prop: "+pname+" class: "+clazz.getSimpleName());
 					continue;
 				}
+				int ptype = SQLUtils.getSqlTypeFromClass(m.getReturnType());
 				columnNames.add(pname);
+				columnTypes.add(ptype);
 				methods.add(m);
 				if(matchCol!=null) { return 1; }
 				matched++;
@@ -107,9 +114,23 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		return matched;
 	}
 
+	static String objectToString(Object obj) {
+		if(obj==null) { return null; }
+		if(collectionValuesJoiner!=null && obj instanceof Collection) {
+			return Utils.join((Collection<?>) obj, collectionValuesJoiner);
+		}
+		else {
+			return String.valueOf(obj);
+		}
+	}
+	
+	public static void setCollectionValuesJoiner(String collectionValuesJoiner) {
+		BaseResultSetCollectionAdapter.collectionValuesJoiner = collectionValuesJoiner;
+	}
+	
 	@Override
-	public String getString(int columnIndex) throws SQLException {
-		String ret = null;
+	public Object getObject(int columnIndex) throws SQLException {
+		Object ret = null;
 		Method m = null;
 		try {
 			if(methods.size()>=columnIndex) {
@@ -121,14 +142,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				throw new IndexOutOfBoundsException("method index "+columnIndex+" not found");
 				//return null;
 			}
-			Object oret = m.invoke(currentElement, (Object[]) null);
-			if(oret==null) { return null; }
-			if(collectionValuesJoiner!=null && oret instanceof Collection) {
-				ret = Utils.join((Collection<?>) oret, collectionValuesJoiner);
-			}
-			else {
-				ret = String.valueOf(oret);
-			}
+			return m.invoke(currentElement, (Object[]) null);
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
@@ -143,11 +157,11 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	}
 	
 	@Override
-	public String getString(String columnLabel) throws SQLException {
+	public Object getObject(String columnLabel) throws SQLException {
 		int index = columnNames.indexOf(columnLabel) + 1;
 		//log.info("colnames: "+columnNames+" / label: "+columnLabel+" / index: "+index);
 		if(index==0) { return null; }
-		return getString(index);
+		return getObject(index);
 	}
 
 	@Override
@@ -156,16 +170,86 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	}
 
 	@Override
-	public Object getObject(int columnIndex) throws SQLException {
-		return getString(columnIndex);
+	public String getString(int columnIndex) throws SQLException {
+		return objectToString(getObject(columnIndex));
 	}
 
 	@Override
-	public Object getObject(String columnLabel) throws SQLException {
-		return getString(columnLabel);
+	public String getString(String columnLabel) throws SQLException {
+		return objectToString(getObject(columnLabel));
 	}
 	
-	public static void setCollectionValuesJoiner(String collectionValuesJoiner) {
-		BaseResultSetCollectionAdapter.collectionValuesJoiner = collectionValuesJoiner;
+	@Override
+	public int getInt(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		if(o instanceof Number) {
+			return ((Number) o).intValue();
+		}
+		return super.getInt(columnIndex);
 	}
+
+	@Override
+	public int getInt(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		if(o instanceof Number) {
+			return ((Number) o).intValue();
+		}
+		return super.getInt(columnLabel);
+	}
+
+	@Override
+	public long getLong(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		if(o instanceof Number) {
+			return ((Number) o).longValue();
+		}
+		return super.getLong(columnIndex);
+	}
+
+	@Override
+	public long getLong(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		if(o instanceof Number) {
+			return ((Number) o).longValue();
+		}
+		return super.getLong(columnLabel);
+	}
+	
+	@Override
+	public float getFloat(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		if(o instanceof Number) {
+			return ((Number) o).floatValue();
+		}
+		return super.getFloat(columnIndex);
+	}
+	
+	@Override
+	public float getFloat(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		if(o instanceof Number) {
+			return ((Number) o).floatValue();
+		}
+		return super.getFloat(columnLabel);
+	}
+
+	
+	@Override
+	public double getDouble(int columnIndex) throws SQLException {
+		Object o = getObject(columnIndex);
+		if(o instanceof Number) {
+			return ((Number) o).doubleValue();
+		}
+		return super.getDouble(columnIndex);
+	}
+	
+	@Override
+	public double getDouble(String columnLabel) throws SQLException {
+		Object o = getObject(columnLabel);
+		if(o instanceof Number) {
+			return ((Number) o).doubleValue();
+		}
+		return super.getDouble(columnLabel);
+	}
+	
 }
