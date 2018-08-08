@@ -684,9 +684,10 @@ public class DataDumpTest {
 		jarr = (JSONArray) jobj.get("B");
 		Assert.assertEquals(4, jarr.size());
 		
-		jobj = (JSONObject) jarr.get(3);
+		//System.out.println("jarr: "+jarr+" / "+jarr.get(3));
+		Object i3 = jarr.get(3);
 		//System.out.println(jobj);
-		Assert.assertEquals("8", jobj.get("B"));
+		Assert.assertEquals("8", i3);
 	}
 
 	@Test
