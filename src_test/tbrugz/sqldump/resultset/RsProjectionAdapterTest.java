@@ -65,6 +65,8 @@ public class RsProjectionAdapterTest {
 		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
 		System.err.println(sw);*/
 		
+		rspd.beforeFirst();
+		
 		ResultSetMetaData rsmd = rspd.getMetaData();
 		Assert.assertEquals(2, rsmd.getColumnCount());
 		Assert.assertEquals("description", rsmd.getColumnName(1));
@@ -73,6 +75,7 @@ public class RsProjectionAdapterTest {
 		Assert.assertEquals("one", rspd.getString(1));
 		Assert.assertTrue(rspd.next());
 		Assert.assertEquals("c1", rspd.getString(2));
+		Assert.assertEquals("c1", rspd.getString("category"));
 		Assert.assertFalse(rspd.next());
 		
 		rspd.close();
@@ -119,11 +122,12 @@ public class RsProjectionAdapterTest {
 		Assert.assertEquals(4, rsmd.getColumnCount());
 		Assert.assertEquals("category", rsmd.getColumnName(3));
 		
+		rspd.beforeFirst();
 		Assert.assertTrue(rspd.next());
 		Assert.assertEquals("one", rspd.getString(1));
 		Assert.assertTrue(rspd.next());
 		Assert.assertEquals("c1", rspd.getString(3));
-		//Assert.assertEquals("c1", rspd.getString("category")); //XXX
+		Assert.assertEquals("c1", rspd.getString("category"));
 		Assert.assertFalse(rspd.next());
 		
 		rspd.close();

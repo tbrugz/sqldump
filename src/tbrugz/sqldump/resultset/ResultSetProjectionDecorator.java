@@ -74,7 +74,7 @@ public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 				}
 				
 				col2colMap.put(i+1, idx+1);
-				name2colMap.put(colName, idx);
+				name2colMap.put(colName, idx+1);
 				namesMap.put(i, colName);
 				typesMap.put(i, colType);
 			}
