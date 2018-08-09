@@ -1,6 +1,8 @@
 package tbrugz.sqldump.resultset;
 
 import java.beans.IntrospectionException;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -11,6 +13,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.datadump.FFCDataDump;
 
 public class RsProjectionAdapterTest {
 	
@@ -48,13 +53,17 @@ public class RsProjectionAdapterTest {
 	}
 	
 	@Test
-	public void testProjection() throws IntrospectionException, SQLException {
+	public void testProjection() throws IntrospectionException, SQLException, IOException {
 		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("rsla1", 
 				TestBean.getUniqueCols(), TestBean.getAllCols(), 
 				l1, TestBean.class);
 		String[] projectedCols = {"description", "category"};
 		
 		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols));
+		
+		/*StringWriter sw = new StringWriter();
+		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
+		System.err.println(sw);*/
 		
 		ResultSetMetaData rsmd = rspd.getMetaData();
 		Assert.assertEquals(2, rsmd.getColumnCount());
@@ -70,7 +79,7 @@ public class RsProjectionAdapterTest {
 	}
 
 	@Test
-	public void testProjectionAlteredOrder() throws IntrospectionException, SQLException {
+	public void testProjectionAlteredOrder() throws IntrospectionException, SQLException, IOException {
 		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("rsla1", 
 				TestBean.getUniqueCols(), TestBean.getAllCols(), 
 				l1, TestBean.class);
@@ -79,6 +88,7 @@ public class RsProjectionAdapterTest {
 		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols));
 		
 		ResultSetMetaData rsmd = rspd.getMetaData();
+		
 		Assert.assertEquals(2, rsmd.getColumnCount());
 		Assert.assertEquals("category", rsmd.getColumnName(1));
 		
@@ -90,4 +100,60 @@ public class RsProjectionAdapterTest {
 		
 		rspd.close();
 	}
+	
+	@Test
+	public void testProjectionIgnoreInvalidColumns() throws IntrospectionException, SQLException, IOException {
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("rsla1", 
+				TestBean.getUniqueCols(), TestBean.getAllCols(), 
+				l1, TestBean.class);
+		String[] projectedCols = {"description", "id", "category", "etc"};
+		//String[] projectedCols = {"id", "etc2", "etc", "category"};
+		
+		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), true);
+		
+		/*StringWriter sw = new StringWriter();
+		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
+		System.err.println(sw);*/
+		
+		ResultSetMetaData rsmd = rspd.getMetaData();
+		Assert.assertEquals(4, rsmd.getColumnCount());
+		Assert.assertEquals("category", rsmd.getColumnName(3));
+		
+		Assert.assertTrue(rspd.next());
+		Assert.assertEquals("one", rspd.getString(1));
+		Assert.assertTrue(rspd.next());
+		Assert.assertEquals("c1", rspd.getString(3));
+		//Assert.assertEquals("c1", rspd.getString("category")); //XXX
+		Assert.assertFalse(rspd.next());
+		
+		rspd.close();
+	}
+	
+	@Test
+	public void testProjectionIgnoreInvalidColumns2() throws IntrospectionException, SQLException, IOException {
+		ResultSetListAdapter<TestBean> rs = new ResultSetListAdapter<TestBean>("rsla1", 
+				TestBean.getUniqueCols(), TestBean.getAllCols(), 
+				l1, TestBean.class);
+		String[] projectedCols = {"id", "etc2", "etc", "category"};
+		
+		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), true);
+		
+		StringWriter sw = new StringWriter();
+		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
+		System.err.println(sw);
+		
+		ResultSetMetaData rsmd = rspd.getMetaData();
+		Assert.assertEquals(4, rsmd.getColumnCount());
+		Assert.assertEquals("etc", rsmd.getColumnName(3));
+		
+		rspd.beforeFirst();
+		Assert.assertTrue(rspd.next());
+		Assert.assertEquals(1, rspd.getInt(1));
+		Assert.assertTrue(rspd.next());
+		Assert.assertEquals("c1", rspd.getString(4));
+		Assert.assertFalse(rspd.next());
+		
+		rspd.close();
+	}
+
 }

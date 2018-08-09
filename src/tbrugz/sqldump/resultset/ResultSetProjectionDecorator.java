@@ -3,67 +3,109 @@ package tbrugz.sqldump.resultset;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import tbrugz.sqldump.util.SQLUtils;
+
 public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 
-	//private static final Log log = LogFactory.getLog(ResultSetProjectionDecorator.class);
+	private static final Log log = LogFactory.getLog(ResultSetProjectionDecorator.class);
 
-	final RSMetaDataTypedAdapter metadata;
-	final Map<Integer, Integer> col2colMap = new HashMap<Integer, Integer>();
-	final Map<String, Integer> name2colMap = new HashMap<String, Integer>();
+	protected final RSMetaDataTypedAdapter metadata;
+	protected final Map<Integer, Integer> col2colMap = new LinkedHashMap<Integer, Integer>();
+	protected final Map<String, Integer> name2colMap = new LinkedHashMap<String, Integer>();
 	
 	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns) throws SQLException {
+		this(rs, columns, false);
+	}
+	
+	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns, boolean ignoreInvalidColumns) throws SQLException {
 		super(rs);
 		
 		ResultSetMetaData rsmd = super.getMetaData();
 		
-		int colCount = rsmd.getColumnCount();
-		//List<String> finalColNamesToDump = new ArrayList<String>();
-		//List<Integer> finalColTypesToDump = new ArrayList<Integer>();
 		Map<Integer, String> namesMap = new TreeMap<Integer, String>();
 		Map<Integer, Integer> typesMap = new TreeMap<Integer, Integer>();
-		for(int i=1;i<=colCount;i++) {
-			String colName = rsmd.getColumnName(i);
-			int idx = columns.indexOf(colName);
-			if(idx==-1) {
-				//log.debug("colName '"+colName+"' not found in "+columns);
-				String colLabel = rsmd.getColumnLabel(i);
-				idx = columns.indexOf(colLabel);
+		List<String> colsNotFound = new ArrayList<String>();
+		if(!ignoreInvalidColumns) {
+			int colCount = rsmd.getColumnCount();
+			for(int i=1;i<=colCount;i++) {
+				String colName = rsmd.getColumnName(i);
+				int idx = columns.indexOf(colName);
 				if(idx==-1) {
-					//log.debug("colLabel '"+colLabel+"' not found in "+columns);
-					continue;
+					//log.debug("colName '"+colName+"' not found in "+columns);
+					String colLabel = rsmd.getColumnLabel(i);
+					idx = columns.indexOf(colLabel);
+					if(idx==-1) {
+						//log.debug("colLabel '"+colLabel+"' not found in "+columns);
+						colsNotFound.add(colLabel);
+						continue;
+					}
+					colName = colLabel;
 				}
-				colName = colLabel;
+				namesMap.put(idx, colName);
+				col2colMap.put(idx+1, i);
+				name2colMap.put(colName, i);
+				
+				int colType = rsmd.getColumnType(i);
+				typesMap.put(idx, colType);
 			}
-			namesMap.put(idx, colName);
-			col2colMap.put(idx+1, i);
-			name2colMap.put(colName, i);
-			
-			int colType = rsmd.getColumnType(i);
-			typesMap.put(idx, colType);
-			
-			//finalColNamesToDump.add(colName);
-			//finalColTypesToDump.add(colType);
-			//if(idx==-1) { continue; }
-			//ctArr[idx] = colType;
 		}
+		else {
+			List<String> rsColNames = SQLUtils.getColumnNamesAsList(rsmd);
+			for(int i=0;i<columns.size();i++) {
+				String colName = columns.get(i);
+				int idx = rsColNames.indexOf(colName);
+				int colType = Types.VARCHAR;
+				if(idx==-1) {
+					colsNotFound.add(colName);
+					//continue;
+				}
+				else {
+					colType = rsmd.getColumnType(idx+1);
+				}
+				
+				col2colMap.put(i+1, idx+1);
+				name2colMap.put(colName, idx);
+				namesMap.put(i, colName);
+				typesMap.put(i, colType);
+			}
+		}
+		
+		if(colsNotFound.size()>0) {
+			log.info("colsNotFound: "+colsNotFound+" ; namesMap.size()="+namesMap.size()+" ; colsNotFound.size()="+colsNotFound.size());
+		}
+		/*for(int i=namesMap.size();i<colsNotFound.size();i++) {
+			String colName = colsNotFound.get(i);
+			
+			namesMap.put(i, colName);
+			col2colMap.put(i+1, i);
+			name2colMap.put(colName, i);
+			//int colType = rsmd.getColumnType(i);
+			typesMap.put(i, null);
+		}*/
 		//List<Integer> colTypes = Arrays.asList(ctArr);
 		/*if(finalColNamesToDump.size() != columns.size()) {
 			log.info("filtering ResultSet by (updated) columns: "+finalColNamesToDump+" -- original cols: "+columns);
 		}*/
 		
-		for(int i=0;i<columns.size();i++) {
-			String col = namesMap.get(i);
-			if(col==null) {
-				throw new IllegalArgumentException("column #"+i+" not found: "+columns.get(i));
+		if(!ignoreInvalidColumns) {
+			for(int i=0;i<columns.size();i++) {
+				String col = namesMap.get(i);
+				if(col==null) {
+					throw new IllegalArgumentException("column #"+i+" not found: "+columns.get(i));
+				}
 			}
 		}
-		//log.info(">> filtering ResultSet by columns: "+namesMap);
+		//log.info("> namesMap: "+namesMap+" / typesMap: "+typesMap);
 		//log.info(">> col2colMap: "+col2colMap+" / name2colMap: "+name2colMap);
 		
 		List<String> colNames = new ArrayList<String>();
@@ -82,11 +124,13 @@ public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 	}
 	
 	int colIndex2Col(int columnIndex) {
-		return col2colMap.get(columnIndex);
+		Integer ret = col2colMap.get(columnIndex);
+		return ret==null?0:ret; 
 	}
 
 	int colLabel2Col(String colName) {
-		return name2colMap.get(colName);
+		Integer ret = name2colMap.get(colName);
+		return ret==null?0:ret; 
 	}
 	
 	// ----------------------------------------- //
