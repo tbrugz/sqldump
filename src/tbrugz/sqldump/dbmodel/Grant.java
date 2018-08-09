@@ -35,7 +35,7 @@ public class Grant implements Serializable {
 	
 	@Override
 	public String toString() {
-		return "["+table+";priv="+privilege+";to:"+grantee
+		return "["+table+";priv="+privilege+";to="+grantee
 				+";"+(column!=null?"col="+column:"")
 				+";"+(withGrantOption?"GO!":"")+"]";
 	}

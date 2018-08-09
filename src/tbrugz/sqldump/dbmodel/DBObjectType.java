@@ -9,7 +9,7 @@ public enum DBObjectType {
 	
 	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
-	RELATION; //, QUERY; // XXX: add "abstract" object types ?
+	RELATION, QUERY; // XXX: add "abstract" object types ?
 	
 	public enum DBSyntax {
 		SQL,
