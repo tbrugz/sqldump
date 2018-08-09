@@ -238,6 +238,7 @@ public class SQLUtils {
 				errorGettingValueWarnCount++;
 				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {
 					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()+"; numCol="+numCol+"; rs.columnCount="+rs.getMetaData().getColumnCount()+"]: "+e);
+					//log.info("error getting value...", e);
 				}
 				if(failOnError) { throw e; }
 			}
@@ -265,7 +266,7 @@ public class SQLUtils {
 	//XXX: add BigDecimal (for NUMERIC & DECIMAL), TIMESTAMP (for TIMESTAMP)
 	// see: http://docs.oracle.com/javase/8/docs/api/constant-values.html#java.sql.Types.ARRAY
 	public static Class<?> getClassFromSqlType(int type, int precision, int scale) {
-		//log.debug("type: "+type);
+		//log.info("type: "+type);
 		switch(type) {
 			case Types.TINYINT:  // -6
 			case Types.SMALLINT: //  5
@@ -320,6 +321,7 @@ public class SQLUtils {
 			case -10: //XXX: ResultSet/Cursor/Refcursor (Oracle)?
 				return ResultSet.class;
 			case Types.OTHER:         // 1111
+				// postgresql: row, refcursor
 				return Object.class;
 			default:
 				if(clobTypeIsString && type==Types.CLOB) {  // 2005
@@ -381,6 +383,10 @@ public class SQLUtils {
 	}
 	
 	public static String getColumnNames(ResultSetMetaData md) throws SQLException {
+		return Utils.join(getColumnNamesAsList(md), ", ");
+	}
+	
+	public static List<String> getColumnNamesAsList(ResultSetMetaData md) throws SQLException {
 		int numCol = md.getColumnCount();
 		List<String> lsColNames = new ArrayList<String>();
 		//List<Class> lsColTypes = new ArrayList<Class>();
@@ -390,7 +396,7 @@ public class SQLUtils {
 		//for(int i=0;i<numCol;i++) {
 		//	lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1)));
 		//}
-		return Utils.join(lsColNames, ", ");
+		return lsColNames;
 	}
 	
 	static List<String> getColumnValues(ResultSet rs, String colName) throws SQLException {

@@ -83,7 +83,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		
 		metadata = new RSMetaDataTypedAdapter(null, name, columnNames, columnTypes);
 		
-		log.info("resultset: cols: "+columnNames+" ; types: "+columnTypes);
+		log.debug("resultset: cols: "+columnNames+" ; types: "+columnTypes); //+" ; methods: "+methods);
 	}
 	
 	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames, List<Integer> columnTypes) {
@@ -136,7 +136,9 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			if(methods.size()>=columnIndex) {
 				m = methods.get(columnIndex-1);
 			}
-			//else {throw new IndexOutOfBoundsException} ?
+			else {
+				throw new IndexOutOfBoundsException("index ["+columnIndex+"]> methods.size() ["+methods.size()+"]");
+			}
 			if(m==null) {
 				log.warn("method is null ["+(columnIndex-1)+"/"+methods.size()+"]");
 				throw new IndexOutOfBoundsException("method index "+columnIndex+" not found");
@@ -146,13 +148,15 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		} catch (IllegalArgumentException e) {
-			log.warn("method: "+m+" ; elem: "+currentElement+" ; ex: "+e); 
-			e.printStackTrace();
+			log.warn("getObject[IllegalArgumentException]: method: "+m+" ; elem: "+currentElement+" ; ex: "+e); 
+			//e.printStackTrace();
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
-		} /*catch (IndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}*/
+		} catch (IndexOutOfBoundsException e) {
+			//log.warn("getObject[IndexOutOfBoundsException]: "+(columnIndex-1)+" / size=="+methods.size());
+			//e.printStackTrace();
+			//throw e;
+		}
 		return ret;
 	}
 	

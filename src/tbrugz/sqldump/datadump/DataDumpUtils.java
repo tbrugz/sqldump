@@ -364,9 +364,13 @@ public class DataDumpUtils {
 		return buffer.toString();
 	}
 
-	@Deprecated
+	/*@Deprecated
 	public static void dumpRS(DumpSyntaxInt ds, ResultSetMetaData rsmd, ResultSet rs, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
 		dumpRS(ds, rsmd, rs, null, tableName, writer, resetRS);
+	}*/
+	
+	public static void dumpRS(DumpSyntaxInt ds, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
+		dumpRS(ds, rs.getMetaData(), rs, schema, tableName, writer, resetRS);
 	}
 	
 	public static void dumpRS(DumpSyntaxInt ds, ResultSetMetaData rsmd, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
