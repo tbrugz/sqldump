@@ -8,6 +8,7 @@ public class Query extends View {
 
 	String id;
 	List<Object> parameterValues;
+	List<String> namedParameterNames;
 
 	String rsDecoratorFactoryClass;
 	Map<String,String> rsDecoratorArguments;
@@ -52,6 +53,17 @@ public class Query extends View {
 	@Override
 	public String toString() {
 		return "Query["+getQualifiedName()+"]";
+	}
+	
+	/**
+	 * getNamedParameterNames - should be null or length == getParameterCount() (even if names are repeated)
+	 */
+	public List<String> getNamedParameterNames() {
+		return namedParameterNames;
+	}
+	
+	public void setNamedParameterNames(List<String> namedParameterNames) {
+		this.namedParameterNames = namedParameterNames;
 	}
 	
 }

@@ -136,10 +136,6 @@ public class Grant implements Serializable {
 	}
 
 	public static Grant parseGrant(final String grantStrPar) {
-		/*if(grantStr==null || grantStr.length()<2) {
-			log.warn("parseGrant error ["+grantStr+"]");
-			return null;
-		}*/
 		try {
 			String grantStr = grantStrPar.substring(1, grantStrPar.length()-1);
 			String[] parts = grantStr.split(";", -1);
@@ -155,7 +151,7 @@ public class Grant implements Serializable {
 		}
 		catch(Exception e) {
 			log.warn("parseGrant error ["+grantStrPar+"]");
-			//log.debug("parseGrant error ["+grantStr+"]", e);
+			//log.debug("parseGrant error ["+grantStrPar+"]", e);
 			return null;
 		}
 	}
