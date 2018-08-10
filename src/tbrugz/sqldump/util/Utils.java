@@ -647,6 +647,20 @@ public class Utils {
 		}
 		return ret;
 	}
+
+	public static <T> List<T> newList(T... elements) {
+		List<T> ret = new ArrayList<T>();
+		for(T t: elements) {
+			ret.add(t);
+		}
+		return ret;
+	}
+
+	public static <T> List<T> newList(Collection<T> elements) {
+		List<T> ret = new ArrayList<T>();
+		ret.addAll(elements);
+		return ret;
+	}
 	
 	static boolean equalsConsiderNull(String s1, String s2) {
 		if(s1==null) {
