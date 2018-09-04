@@ -1,6 +1,7 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,17 +12,20 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.Utils;
 
 public class DumpSyntaxRegistry {
+	
 	static final Log log = LogFactory.getLog(DumpSyntaxRegistry.class);
 	
 	static final String SYNTAXES_PROPERTIES = "/dumpsyntaxes.properties";
 	static final String PROP_CLASSES = "dumpsyntax.classes";
+	
+	static String syntaxesProperties = SYNTAXES_PROPERTIES;
 
 	static final List<Class<DumpSyntax>> syntaxes = new ArrayList<Class<DumpSyntax>>();
 	static boolean initted = false;
 	
 	static void init() throws IOException {
 		Properties prop = new Properties();
-		prop.load(DumpSyntaxRegistry.class.getResourceAsStream(SYNTAXES_PROPERTIES));
+		prop.load(DumpSyntaxRegistry.class.getResourceAsStream(syntaxesProperties));
 		List<String> classes = Utils.getStringListFromProp(prop, PROP_CLASSES, ",");
 		loadClasses(classes);
 		initted = true;
@@ -83,6 +87,25 @@ public class DumpSyntaxRegistry {
 		return syntaxes;
 	}
 	
-	//XXX: add clearSyntaxes() ?
+	public static void setSyntaxesResource(String syntaxesResource) throws IOException {
+		URL u = DumpSyntaxRegistry.class.getResource(syntaxesResource);
+		if(u!=null) {
+			syntaxesProperties = syntaxesResource;
+			clearSyntaxes();
+			log.debug("syntaxes resource set to '"+syntaxesResource+"'");
+		}
+		else {
+			log.warn("syntaxes resource '"+syntaxesResource+"' not found");
+		}
+	}
+	
+	public static void setDefultSyntaxesResource() throws IOException {
+		setSyntaxesResource(SYNTAXES_PROPERTIES);
+	}
+	
+	static void clearSyntaxes() {
+		syntaxes.clear();
+		initted = false;
+	}
 
 }
