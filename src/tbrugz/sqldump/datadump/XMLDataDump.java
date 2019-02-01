@@ -26,7 +26,7 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 
 	static final Log log = LogFactory.getLog(XMLDataDump.class);
 	
-	static final String XML_SYNTAX_ID = "xml";
+	public static final String XML_SYNTAX_ID = "xml";
 	static final String DEFAULT_ROW_ELEMENT = "row";
 	
 	static final String PROP_ROWELEMENT = "sqldump.datadump.xml.rowelement";
@@ -57,16 +57,16 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		this.dumpHeaderFooter = dumpHeaderFooter;
 	}*/
 	
-	String padding;
-	HeaderFooterDump dumpHeaderFooter;
+	protected String padding;
+	protected HeaderFooterDump dumpHeaderFooter;
 	
 	//definitions from properties
 	protected Properties prop = null;
 	String defaultRowElement = DEFAULT_ROW_ELEMENT;
 	boolean defaultDumpRowElement = true;
-	boolean dumpNullValues = true;
-	HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
-	boolean dumpTableNameAsRowTag = false;
+	protected boolean dumpNullValues = true;
+	protected HeaderFooterDump dumpHeader4InnerTables = HeaderFooterDump.ALWAYS;
+	protected boolean dumpTableNameAsRowTag = false;
 	protected boolean escape = true;
 	protected boolean escape4table;
 	protected boolean useUnderscoreRaw2escape = true;
