@@ -163,7 +163,6 @@ public class ConcurrentDumpTest {
 		JOpenDocODS
 		PoiXlsSyntax
 		PoiXlsxSyntax
-		SimpleODS
 		Turtle
 		UpdateByPKDataDump
 		WebRowSetSingleSyntax
