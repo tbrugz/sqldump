@@ -365,7 +365,7 @@ public class DataDump extends AbstractSQLProc {
 	} 
 	
 	public void runQuery(Connection conn, String sql, List<Object> params, Properties prop,
-			String schemaName, String tableOrQueryId, String tableOrQueryName, String[] partitionByPatterns, List<String> keyColumns
+			String schemaName, String tableOrQueryId, String tableOrQueryName, List<String> partitionByPatterns, List<String> keyColumns
 			) throws SQLException, IOException {
 		String charset = prop.getProperty(PROP_DATADUMP_CHARSET, CHARSET_DEFAULT);
 		long rowlimit = getTableRowLimit(prop, tableOrQueryName);
@@ -401,7 +401,7 @@ public class DataDump extends AbstractSQLProc {
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
-			String[] partitionByPatterns,
+			List<String> partitionByPatterns,
 			List<String> keyColumns,
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys,
@@ -432,7 +432,7 @@ public class DataDump extends AbstractSQLProc {
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
-			String[] partitionByPatterns,
+			List<String> partitionByPatterns,
 			List<String> keyColumns,
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys,
@@ -474,7 +474,7 @@ public class DataDump extends AbstractSQLProc {
 			String schemaName, String tableOrQueryId, String tableOrQueryName, String charset, 
 			long rowlimit,
 			List<DumpSyntax> syntaxList,
-			String[] partitionByPatterns,
+			List<String> partitionByPatterns,
 			List<String> keyColumns,
 			List<FK> importedFKs,
 			List<Constraint> uniqueKeys,
@@ -533,7 +533,12 @@ public class DataDump extends AbstractSQLProc {
 			Map<String, Outputter> writersOpened = new HashMap<String, Outputter>();
 			Map<String, DumpSyntax> writersSyntaxes = new HashMap<String, DumpSyntax>();
 			
-			if(partitionByPatterns==null) { partitionByPatterns = new String[]{ "" }; }
+			if(partitionByPatterns!=null) {
+				log.info("partitionby-patterns[id="+tableOrQueryId+"]: "+partitionByPatterns);
+			}
+			else {
+				partitionByPatterns = new ArrayList<String>();
+			}
 			
 			List<String> filenameList = new ArrayList<String>();
 			List<Boolean> doSyntaxDumpList = new ArrayList<Boolean>();
@@ -612,8 +617,8 @@ public class DataDump extends AbstractSQLProc {
 			
 			//rows
 			do {
-				for(int partIndex = 0; partIndex<partitionByPatterns.length; partIndex++) {
-					String partitionByPattern = partitionByPatterns[partIndex];
+				for(int partIndex = 0; partIndex<partitionByPatterns.size(); partIndex++) {
+					String partitionByPattern = partitionByPatterns.get(partIndex);
 					//log.info("row:: partitionby:: "+partitionByPattern);
 					List<String> partitionByCols = getPartitionCols(partitionByPattern);
 					

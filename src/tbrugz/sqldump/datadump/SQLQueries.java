@@ -36,8 +36,8 @@ import tbrugz.sqldump.util.Utils;
 //XXXdone: partition over (columnX) - different outputfiles for different values of columnX
 //XXXdone: add prop: sqldump.query.<x>.file=/home/homer/query1.sql
 //XXXxxx: add prop: sqldump.query.<x>.params=1,23,111 ; sqldump.query.<x>.param.pid_xx=1
-//XXX: option to define bind parameters, eg., 'sqldump.query.<xxx>.bind.<yyy>=<zzz>'
-//XXX?: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ...
+//XXXdone: option to define bind parameters, eg., 'sqldump.query.<xxx>.bind.<yyy>=<zzz>' - see '.param'
+//XXXdone: add optional prop: sqldump.query.<x>.coltypes=Double, Integer, String, Double, ... - see '.cols'
 //XXXdone: add prop: sqldump.queries=q1,2,3,xxx (ids)
 //XXXdone: option to log each 'n' rows dumped
 //XXXdone: option to grab/dump schema corresponding to queries data -> dbmodel.Query
@@ -100,7 +100,8 @@ public class SQLQueries extends AbstractSQLProc {
 					throw new ProcessingException("Error on getSpecificFeatures()", e);
 				}
 			}
-			List<DumpSyntax> syntaxList = getQuerySyntaxes(qid, feat);
+			String syntaxes = prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes");
+			List<DumpSyntax> syntaxList = getQuerySyntaxes(syntaxes, feat);
 			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
@@ -148,7 +149,7 @@ public class SQLQueries extends AbstractSQLProc {
 				log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
 				queryName = qid;
 			}
-			//params
+			//bind params
 			int paramCount = 1;
 			List<Object> params = new ArrayList<Object>();
 			while(true) {
@@ -163,9 +164,6 @@ public class SQLQueries extends AbstractSQLProc {
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
 			List<String> partitionsBy = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".partitionby", "\\|");
-			if(partitionsBy!=null) {
-				log.info("partitionby-patterns[id="+qid+"]: "+partitionsBy); //XXX: move log into DataDump?
-			}
 
 			List<String> keyCols = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".keycols", ",");
 			
@@ -201,7 +199,7 @@ public class SQLQueries extends AbstractSQLProc {
 					}
 					
 					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList, 
-							partitionsBy!=null ? partitionsBy.toArray(new String[]{}) : null, 
+							partitionsBy,
 							keyCols, null, null, rsdf, colNamesToDump);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
@@ -228,8 +226,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 	}
 	
-	List<DumpSyntax> getQuerySyntaxes(String qid, DBMSFeatures feat) {
-		String syntaxes = prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes");
+	List<DumpSyntax> getQuerySyntaxes(String syntaxes, DBMSFeatures feat) {
 		if(syntaxes==null) {
 			syntaxes = prop.getProperty(DataDump.PROP_DATADUMP_SYNTAXES);
 		}
