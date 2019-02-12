@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -58,6 +61,16 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	static final Log log = LogFactory.getLog(SQLQueries.class);
 	
+	public static class PropertiesWithoutNPE extends Properties {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public synchronized Object put(Object key, Object value) {
+			if(value==null) { return null; };
+			return super.put(key, value);
+		}
+	}
+	
 	@Override
 	public void process() {
 		boolean runQueries = true;
@@ -72,22 +85,24 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		String defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, DEFAULT_QUERIES_SCHEMA);
 		
-		String queriesStr = prop.getProperty(PROP_QUERIES);
-		if(queriesStr==null) {
-			log.error("prop '"+PROP_QUERIES+"' not defined");
-			if(failonerror) {
-				throw new ProcessingException("SQLQueries: prop '"+PROP_QUERIES+"' not defined");
-			}
-			return;
-		}
-		String[] queriesArr = queriesStr.split(",");
 		int i=0;
 		int queriesGrabbed=0;
+		
+		Map<String, Properties> qmap = getQueryPropMap();
+		
 		//List<Query> queries = new ArrayList<Query>(); 
-		for(String qid: queriesArr) {
-			qid = qid.trim();
+		//for(String qid: queriesArr) {
+		for(Map.Entry<String, Properties> qentry: qmap.entrySet()) {
+			String qid = qentry.getKey();
+			Properties qp = qentry.getValue();
+			log.debug("query "+qid+" props: "+qp);
 			
-			String queryName = prop.getProperty(PREFIX_QUERY+qid+".name");
+			if(qp==null) {
+				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
+				continue;
+			}
+			
+			String queryName = qp.getProperty("name");
 			DBMSFeatures feat = null;
 			if(model!=null) {
 				feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
@@ -100,37 +115,30 @@ public class SQLQueries extends AbstractSQLProc {
 					throw new ProcessingException("Error on getSpecificFeatures()", e);
 				}
 			}
-			String syntaxes = prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes");
+			String syntaxes = qp.getProperty("dumpsyntaxes");
 			List<DumpSyntax> syntaxList = getQuerySyntaxes(syntaxes, feat);
 			if(runQueries && syntaxList==null) {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
 			}
+			/*
 			//replace strings
 			int replaceCount = 1;
 			//List<String> replacers = new ArrayList<String>();
 			while(true) {
-				String paramStr = prop.getProperty(PREFIX_QUERY+qid+".replace."+replaceCount);
+				String paramStr = qp.getProperty("replace."+replaceCount);
 				if(paramStr==null) { break; }
 				prop.setProperty("sqldump.query.replace."+replaceCount, paramStr);
 				//replacers.add(paramStr);
 				replaceCount++;
 			}
+			*/
 			//sql string
-			String sql = prop.getProperty(PREFIX_QUERY+qid+".sql");
-			if(sql==null) {
-				//load from file
-				String sqlfile = prop.getProperty(PREFIX_QUERY+qid+".sqlfile");
-				if(sqlfile!=null) {
-					sql = IOUtil.readFromFilename(sqlfile);
-				}
-				//replace props! XXX: replaceProps(): should be activated by a prop?
-				sql = ParametrizedProperties.replaceProps(sql, prop);
-			}
-			if(sql==null) {
+			String sql = qp.getProperty("sql");
+			/*if(sql==null) {
 				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
 				continue;
-			}
+			}*/
 			
 			PreparedStatement stmt = null;
 			try {
@@ -145,45 +153,41 @@ public class SQLQueries extends AbstractSQLProc {
 				//continue; //?
 			}
 			
-			if(queryName==null) {
-				log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
-				queryName = qid;
-			}
 			//bind params
 			int paramCount = 1;
 			List<Object> params = new ArrayList<Object>();
 			while(true) {
-				String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param."+paramCount);
+				String paramStr = qp.getProperty("param."+paramCount);
 				if(paramStr==null) { break; }
 				params.add(paramStr);
 				log.debug("added bind param #"+paramCount+": "+paramStr);
 				paramCount++;
 			}
 
-			Long tablerowlimit = Utils.getPropLong(prop, PREFIX_QUERY+qid+".rowlimit");
+			Long tablerowlimit = Utils.getPropLong(qp, "rowlimit");
 			long rowlimit = tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;
 			
-			List<String> partitionsBy = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".partitionby", "\\|");
+			List<String> partitionsBy = Utils.getStringListFromProp(qp, "partitionby", "\\|");
 
-			List<String> keyCols = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".keycols", ",");
+			List<String> keyCols = Utils.getStringListFromProp(qp, "keycols", ",");
 			
 			ResultSetDecoratorFactory rsdf = null;
-			String rsDecoratorFactory = prop.getProperty(PREFIX_QUERY+qid+".rsdecoratorfactory");
-			String rsArgPrepend = PREFIX_QUERY+qid+".rsdecorator.";
-			List<String> rsFactoryArgs = Utils.getKeysStartingWith(prop, rsArgPrepend);
+			String rsDecoratorFactory = qp.getProperty("rsdecoratorfactory");
+			String rsArgPrepend = "rsdecorator.";
+			List<String> rsFactoryArgs = Utils.getKeysStartingWith(qp, rsArgPrepend);
 			if(rsDecoratorFactory!=null) {
 				rsdf = (ResultSetDecoratorFactory) Utils.getClassInstance(rsDecoratorFactory, "tbrugz.sqldump.resultset", null);
 				for(String arg: rsFactoryArgs) {
-					rsdf.set(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+					rsdf.set(arg.substring(rsArgPrepend.length()), qp.getProperty(arg));
 				}
 			}
 
-			List<String> colNamesToDump = Utils.getStringListFromProp(prop, PREFIX_QUERY+qid+".dump-cols", ",");
+			List<String> colNamesToDump = Utils.getStringListFromProp(qp, "dump-cols", ",");
 			
 			// adding query to model
 			if(addQueriesToModel) {
-				String remarks = prop.getProperty(PREFIX_QUERY+qid+".remarks");
-				String roles = prop.getProperty(PREFIX_QUERY+qid+".roles");
+				String remarks = qp.getProperty("remarks");
+				String roles = qp.getProperty("roles");
 				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
@@ -198,9 +202,8 @@ public class SQLQueries extends AbstractSQLProc {
 						stmt.setFetchSize(fetchSize);
 					}
 					
-					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList, 
-							partitionsBy,
-							keyCols, null, null, rsdf, colNamesToDump);
+					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList,
+						partitionsBy, keyCols, null, null, rsdf, colNamesToDump);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
 					log.debug("error on query "+qid+" [class="+e.getClass().getName()+"]: "+e.getMessage(), e);
@@ -224,6 +227,113 @@ public class SQLQueries extends AbstractSQLProc {
 		if(!runQueries && !addQueriesToModel) {
 			log.warn("no queries ran or grabbed");
 		}
+	}
+	
+	Map<String, Properties> getQueryPropMap() {
+		Map<String, Properties> ret = new LinkedHashMap<String, Properties>();
+		
+		String queriesStr = prop.getProperty(PROP_QUERIES);
+		if(queriesStr!=null) {
+			String[] queriesArr = queriesStr.split(",");
+			for(String qid: queriesArr) {
+				qid = qid.trim();
+				
+				Properties qp = getQueryProperties(qid);
+				ret.put(qid, qp);
+			}
+		}
+		
+		if(queriesStr==null) {
+			log.error("prop '"+PROP_QUERIES+"' not defined");
+			if(failonerror) {
+				throw new ProcessingException("SQLQueries: prop '"+PROP_QUERIES+"' not defined");
+			}
+			return null;
+		}
+		return ret;
+	}
+	
+	Properties getQueryProperties(String qid) {
+		Properties ret = new PropertiesWithoutNPE();
+
+		//sql string
+		String sql = prop.getProperty(PREFIX_QUERY+qid+".sql");
+		if(sql==null) {
+			//load from file
+			String sqlfile = prop.getProperty(PREFIX_QUERY+qid+".sqlfile");
+			if(sqlfile!=null) {
+				sql = IOUtil.readFromFilename(sqlfile);
+			}
+			//replace props! XXX: replaceProps(): should be activated by a prop?
+			sql = ParametrizedProperties.replaceProps(sql, prop);
+		}
+		if(sql==null) {
+			log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
+			return null;
+		}
+		
+		//query properties
+		String queryName = prop.getProperty(PREFIX_QUERY+qid+".name");
+		if(queryName==null) {
+			log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
+			queryName = qid;
+		}
+		ret.setProperty("name", queryName);
+		
+		//String syntaxes = prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes");
+		ret.setProperty("dumpsyntaxes", prop.getProperty(PREFIX_QUERY+qid+".dumpsyntaxes"));
+		//replace strings
+		int replaceCount = 1;
+		//List<String> replacers = new ArrayList<String>();
+		//XXX deprecate '.replace'?
+		while(true) {
+			String paramStr = prop.getProperty(PREFIX_QUERY+qid+".replace."+replaceCount);
+			if(paramStr==null) { break; }
+			log.info("replace:: "+replaceCount+" / "+paramStr);
+			ret.setProperty("sqldump.query.replace."+replaceCount, paramStr);
+			//replacers.add(paramStr);
+			replaceCount++;
+		}
+		replaceCount--;
+		if(replaceCount>0) {
+			sql = ParametrizedProperties.replaceProps(sql, ret);
+			log.info("replacing with 'sqldump.query.replace.<1-n>' [replaceCount="+replaceCount+"]");
+		}
+		ret.setProperty("sql", sql);
+		
+		//bind params
+		int paramCount = 1;
+		//List<Object> params = new ArrayList<Object>();
+		while(true) {
+			String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param."+paramCount);
+			if(paramStr==null) { break; }
+			//params.add(paramStr);
+			ret.setProperty("param."+paramCount, paramStr);
+			log.debug("added bind param #"+paramCount+": "+paramStr);
+			paramCount++;
+		}
+
+		ret.setProperty("rowlimit", prop.getProperty(PREFIX_QUERY+qid+".rowlimit"));
+		ret.setProperty("partitionby", prop.getProperty(PREFIX_QUERY+qid+".partitionby"));
+		ret.setProperty("keycols", prop.getProperty(PREFIX_QUERY+qid+".keycols"));
+
+		{
+			String rsDecoratorFactory = prop.getProperty(PREFIX_QUERY+qid+".rsdecoratorfactory");
+			ret.setProperty("rsdecoratorfactory", rsDecoratorFactory);
+			String rsArgPrepend = PREFIX_QUERY+qid+".rsdecorator.";
+			List<String> rsFactoryArgs = Utils.getKeysStartingWith(prop, rsArgPrepend);
+			if(rsDecoratorFactory!=null) {
+				for(String arg: rsFactoryArgs) {
+					ret.setProperty(arg.substring(rsArgPrepend.length()), prop.getProperty(arg));
+				}
+			}
+		}
+
+		ret.setProperty("dump-cols", prop.getProperty(PREFIX_QUERY+qid+".dump-cols"));
+		ret.setProperty("remarks", prop.getProperty(PREFIX_QUERY+qid+".remarks"));
+		ret.setProperty("roles", prop.getProperty(PREFIX_QUERY+qid+".roles"));
+		
+		return ret;
 	}
 	
 	List<DumpSyntax> getQuerySyntaxes(String syntaxes, DBMSFeatures feat) {
