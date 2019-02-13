@@ -123,6 +123,7 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 			
 			String queryName = qp.getProperty("name");
+			String schemaName = qp.getProperty("schemaname", defaultSchemaName);
 			DBMSFeatures feat = null;
 			if(model!=null) {
 				feat = DBMSResources.instance().getSpecificFeatures(model.getSqlDialect());
@@ -208,7 +209,8 @@ public class SQLQueries extends AbstractSQLProc {
 			if(addQueriesToModel) {
 				String remarks = qp.getProperty("remarks");
 				String roles = qp.getProperty("roles");
-				queriesGrabbed += addQueryToModelInternal(qid, queryName, defaultSchemaName, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+				String cols = qp.getProperty("cols");
+				queriesGrabbed += addQueryToModelInternal(qid, queryName, schemaName, stmt, sql, keyCols, cols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
 			if(runQueries && stmt!=null) {
@@ -222,7 +224,7 @@ public class SQLQueries extends AbstractSQLProc {
 						stmt.setFetchSize(fetchSize);
 					}
 					
-					dd.runQuery(conn, stmt, params, prop, defaultSchemaName, qid, queryName, charset, rowlimit, syntaxList,
+					dd.runQuery(conn, stmt, params, prop, schemaName, qid, queryName, charset, rowlimit, syntaxList,
 						partitionsBy, keyCols, null, null, rsdf, colNamesToDump);
 				} catch (Exception e) {
 					log.warn("error on query '"+qid+"'\n... sql: "+sql+"\n... exception: "+String.valueOf(e).trim());
@@ -417,6 +419,8 @@ public class SQLQueries extends AbstractSQLProc {
 		ret.setProperty("rowlimit", prop.getProperty(PREFIX_QUERY+qid+".rowlimit"));
 		ret.setProperty("partitionby", prop.getProperty(PREFIX_QUERY+qid+".partitionby"));
 		ret.setProperty("keycols", prop.getProperty(PREFIX_QUERY+qid+".keycols"));
+		ret.setProperty("schemaname", prop.getProperty(PREFIX_QUERY+qid+".schemaname"));
+		ret.setProperty("cols", prop.getProperty(PREFIX_QUERY+qid+".cols"));
 
 		{
 			String rsDecoratorFactory = prop.getProperty(PREFIX_QUERY+qid+".rsdecoratorfactory");
@@ -469,13 +473,13 @@ public class SQLQueries extends AbstractSQLProc {
 		return syntaxList;
 	}
 	
-	int addQueryToModelInternal(String qid, String queryName, String defaultSchemaName,
-			PreparedStatement stmt, String sql, List<String> keyCols,
+	int addQueryToModelInternal(String qid, String queryName, String schemaName,
+			PreparedStatement stmt, String sql, List<String> keyCols, String colNames,
 			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
-		String schemaName = prop.getProperty(PREFIX_QUERY+qid+".schemaname", defaultSchemaName);
-		String colNames = prop.getProperty(PREFIX_QUERY+qid+".cols");
+		//String schemaName = prop.getProperty(PREFIX_QUERY+qid+".schemaname", defaultSchemaName);
+		//String colNames = prop.getProperty(PREFIX_QUERY+qid+".cols");
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
 		//XXX: add prop for 'addAlsoAsTable'? default is false
