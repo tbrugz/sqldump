@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -122,6 +123,14 @@ public class DataDump extends AbstractSQLProc {
 	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
 	final Set<String> bomWarned = new HashSet<String>();
+
+	static final List<String> NO_PARTITIONS_LIST;
+	
+	static {
+		List<String> noPartitions = new ArrayList<String>();
+		noPartitions.add("");
+		NO_PARTITIONS_LIST = Collections.unmodifiableList(noPartitions);
+	}
 	
 	/*
 	 * charset: http://download.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html
@@ -537,7 +546,7 @@ public class DataDump extends AbstractSQLProc {
 				log.info("partitionby-patterns[id="+tableOrQueryId+"]: "+partitionByPatterns);
 			}
 			else {
-				partitionByPatterns = new ArrayList<String>();
+				partitionByPatterns = NO_PARTITIONS_LIST;
 			}
 			
 			List<String> filenameList = new ArrayList<String>();
@@ -757,6 +766,7 @@ public class DataDump extends AbstractSQLProc {
 				+ (hasMoreRows?" (more rows exists)":"")
 				+ " ["+elapsedMilis+"ms elapsed]"
 				+ (elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
+				+ ((logNumberOfOpenedWriters && writersOpened.size()>0)?" ["+writersOpened.size()+" total opened writers]":"")
 				);
 
 			//footers
