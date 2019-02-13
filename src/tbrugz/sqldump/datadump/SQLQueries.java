@@ -95,7 +95,6 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
-		//boolean dumpInsertInfoSyntax = false, dumpCSVSyntax = false, dumpXMLSyntax = false, dumpJSONSyntax = false;
 		
 		String defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, DEFAULT_QUERIES_SCHEMA);
 		
@@ -104,8 +103,6 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		Map<String, Properties> qmap = getQueryPropMap();
 		
-		//List<Query> queries = new ArrayList<Query>(); 
-		//for(String qid: queriesArr) {
 		String queriesStr = prop.getProperty(PROP_QUERIES);
 		if(queriesStr!=null) {
 			log.debug("prop '"+PROP_QUERIES+"': "+queriesStr);
@@ -142,24 +139,8 @@ public class SQLQueries extends AbstractSQLProc {
 				log.warn("no dump syntax defined for query "+queryName+" [id="+qid+"]");
 				continue;
 			}
-			/*
-			//replace strings
-			int replaceCount = 1;
-			//List<String> replacers = new ArrayList<String>();
-			while(true) {
-				String paramStr = qp.getProperty("replace."+replaceCount);
-				if(paramStr==null) { break; }
-				prop.setProperty("sqldump.query.replace."+replaceCount, paramStr);
-				//replacers.add(paramStr);
-				replaceCount++;
-			}
-			*/
-			//sql string
+
 			String sql = qp.getProperty("sql");
-			/*if(sql==null) {
-				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
-				continue;
-			}*/
 			
 			PreparedStatement stmt = null;
 			try {
@@ -210,6 +191,8 @@ public class SQLQueries extends AbstractSQLProc {
 				String remarks = qp.getProperty("remarks");
 				String roles = qp.getProperty("roles");
 				String cols = qp.getProperty("cols");
+				//boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
+				//queriesGrabbed += addQueryToModel(qid, queryName, schemaName, cols, grabInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 				queriesGrabbed += addQueryToModelInternal(qid, queryName, schemaName, stmt, sql, keyCols, cols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 			}
 			
@@ -264,9 +247,6 @@ public class SQLQueries extends AbstractSQLProc {
 			for(String qid: queriesArr) {
 				qid = qid.trim();
 				qids.add(qid);
-				
-				//Properties qp = getQueryProperties(qid);
-				//ret.put(qid, qp);
 			}
 		}
 		
@@ -295,10 +275,6 @@ public class SQLQueries extends AbstractSQLProc {
 							log.debug("file '"+f.getAbsolutePath()+"' [qid="+qid+"]  not in filenames: "+baseNames);
 						}
 					}
-					//List<String> qidsXtra = new ArrayList<String>();
-					//qidsXtra.addAll(qids);
-					//qidsXtra.removeAll(fids);
-					//if(qidsXtra.size()>0) {
 					qids.removeAll(fids);
 					if(qids.size()>0) {
 						log.debug("query ids not found in dir '"+dir.getPath()+"': "+qids);
@@ -478,8 +454,6 @@ public class SQLQueries extends AbstractSQLProc {
 			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
-		//String schemaName = prop.getProperty(PREFIX_QUERY+qid+".schemaname", defaultSchemaName);
-		//String colNames = prop.getProperty(PREFIX_QUERY+qid+".cols");
 		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
 		//XXX: add prop for 'addAlsoAsTable'? default is false
@@ -500,7 +474,6 @@ public class SQLQueries extends AbstractSQLProc {
 		Query query = new Query();
 		query.setId(qid);
 		query.setName(queryName);
-		//add schemaName
 		query.setSchemaName(schemaName);
 		
 		query.setQuery(sql);
