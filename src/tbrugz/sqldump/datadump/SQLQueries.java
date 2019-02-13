@@ -106,12 +106,16 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		//List<Query> queries = new ArrayList<Query>(); 
 		//for(String qid: queriesArr) {
+		String queriesStr = prop.getProperty(PROP_QUERIES);
+		if(queriesStr!=null) {
+			log.debug("prop '"+PROP_QUERIES+"': "+queriesStr);
+		}
 		log.debug("query ids: "+qmap.keySet());
 		
 		for(Map.Entry<String, Properties> qentry: qmap.entrySet()) {
 			String qid = qentry.getKey();
 			Properties qp = qentry.getValue();
-			log.debug("query '"+qid+"' props: "+qp);
+			//log.debug("query '"+qid+"' props: "+qp);
 			
 			if(qp==null) {
 				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
@@ -272,31 +276,36 @@ public class SQLQueries extends AbstractSQLProc {
 			File dir = new File(queriesDir);
 			if(dir.exists()) {
 				File[] filesz = dir.listFiles(new SqlFilenameFilter());
+				List<String> baseNames = new ArrayList<String>();
 				for(File f: filesz) {
 					String fn = f.getName();
 					String baseName = fn.substring(0, fn.length() - SqlFilenameFilter.SQL_EXT.length());
-					if(qids!=null) {
-						if(qids.contains(baseName)) {
-							files.add(f);
-							fids.add(baseName);
-						}
-						else {
-							log.debug("file '"+f.getAbsolutePath()+"' [baseName="+baseName+"]  not in ids: "+qids);
-						}
-					}
-					else {
-						files.add(f);
-						fids.add(baseName);
-					}
+					baseNames.add(baseName);
 				}
 				if(qids!=null) {
+					for(String qid: qids) {
+						File f = new File(dir, qid+SqlFilenameFilter.SQL_EXT);
+						if(baseNames.contains(qid)) {
+							files.add(f);
+							fids.add(qid);
+						}
+						else {
+							log.debug("file '"+f.getAbsolutePath()+"' [qid="+qid+"]  not in filenames: "+baseNames);
+						}
+					}
 					//List<String> qidsXtra = new ArrayList<String>();
 					//qidsXtra.addAll(qids);
 					//qidsXtra.removeAll(fids);
 					//if(qidsXtra.size()>0) {
 					qids.removeAll(fids);
 					if(qids.size()>0) {
-						log.warn("query ids not found in dir '"+dir.getPath()+"': "+qids);
+						log.debug("query ids not found in dir '"+dir.getPath()+"': "+qids);
+					}
+				}
+				else {
+					for(String baseName: baseNames) {
+						files.add(new File(dir, baseName+SqlFilenameFilter.SQL_EXT));
+						fids.add(baseName);
 					}
 				}
 			}
@@ -325,12 +334,17 @@ public class SQLQueries extends AbstractSQLProc {
 		if(qids!=null) {
 			for(String qid: qids) {
 				Properties qp = getQueryProperties(qid);
-				ret.put(qid, qp);
+				if(qp==null) {
+					log.warn("query '"+qid+"': no properties found");
+				}
+				else {
+					ret.put(qid, qp);
+				}
 			}
 		}
 		
-		if(qids==null && fids==null) {
-			String message = "prop '"+PROP_QUERIES+"' not defined [qids="+qids+";fids="+fids+"]";
+		if(ret.size()==0 || (qids==null && fids==null)) {
+			String message = "no queries defined [prop '"+PROP_QUERIES+"'="+queriesStr+";qids="+qids+";fids="+fids+"]";
 			log.error(message);
 			if(failonerror) {
 				throw new ProcessingException("SQLQueries: "+message);
