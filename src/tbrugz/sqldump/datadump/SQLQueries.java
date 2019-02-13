@@ -58,7 +58,7 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	protected static final String PREFIX_QUERY = "sqldump.query.";
 
-	protected static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping?
+	protected static final String DEFAULT_QUERIES_SCHEMA = "SQLQUERY"; //XXX: default schema to be current schema for dumping? null?
 	
 	protected static final String ROLES_DELIMITER_STR = "|";
 	protected static final String ROLES_DELIMITER = Pattern.quote(ROLES_DELIMITER_STR);
@@ -115,7 +115,7 @@ public class SQLQueries extends AbstractSQLProc {
 			//log.debug("query '"+qid+"' props: "+qp);
 			
 			if(qp==null) {
-				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
+				log.warn("no SQL defined for query [id="+qid+"; propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
 				continue;
 			}
 			
@@ -147,7 +147,7 @@ public class SQLQueries extends AbstractSQLProc {
 				String finalSql = processQuery(sql);
 				stmt = conn.prepareStatement(finalSql);
 			} catch (SQLException e) {
-				String message = "error creating prepared statement [id="+qid+";sql="+sql+"]: "+e.getMessage();
+				String message = "error creating prepared statement [id="+qid+"; sql="+sql+"]: "+e.getMessage();
 				log.warn(message);
 				if(failonerror) {
 					throw new ProcessingException(message, e);
@@ -272,7 +272,7 @@ public class SQLQueries extends AbstractSQLProc {
 							fids.add(qid);
 						}
 						else {
-							log.debug("file '"+f.getAbsolutePath()+"' [qid="+qid+"]  not in filenames: "+baseNames);
+							log.debug("file '"+f.getAbsolutePath()+"' [qid="+qid+"] not in filenames: "+baseNames);
 						}
 					}
 					qids.removeAll(fids);
@@ -296,13 +296,24 @@ public class SQLQueries extends AbstractSQLProc {
 			for(int i=0;i<fids.size();i++) {
 				String fid = fids.get(i);
 				Properties qp = getQueryProperties(fid);
+				/*if(qp==null) {
+					qp = new Properties();
+					qp.put("name", fid);
+				}*/
 				
 				String sql = IOUtil.readFromFilename(files.get(i).getAbsolutePath());
+				if(sql==null) {
+					log.warn("Error reading file '"+files.get(i).getAbsolutePath()+"' [id="+fid+"']");
+					continue;
+				}
 				sql = ParametrizedProperties.replaceProps(sql, prop);
 				if(qp.getProperty("sql")!=null) {
+					//XXX property or file priority?
 					log.warn("property 'sql' from query '"+fid+"' will be ignored; file '"+files.get(i).getAbsolutePath()+"' will be used");
 				}
 				qp.put("sql", sql);
+				setNameAndSchemaFromId(fid, qp);
+				
 				//XXX add <path>/<qid>.properties
 				
 				ret.put(fid, qp);
@@ -314,15 +325,18 @@ public class SQLQueries extends AbstractSQLProc {
 				Properties qp = getQueryProperties(qid);
 				if(qp==null) {
 					log.warn("query '"+qid+"': no properties found");
+					continue;
 				}
-				else {
-					ret.put(qid, qp);
+				if(qp.getProperty("sql")==null) {
+					log.warn("no SQL property defined for query [id="+qid+"; propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
+					continue;
 				}
+				ret.put(qid, qp);
 			}
 		}
 		
 		if(ret.size()==0 || (qids==null && fids==null)) {
-			String message = "no queries defined [prop '"+PROP_QUERIES+"'="+queriesStr+";qids="+qids+";fids="+fids+"]";
+			String message = "no queries defined [prop '"+PROP_QUERIES+"'="+queriesStr+"; qids="+qids+"; fids="+fids+"]";
 			log.error(message);
 			if(failonerror) {
 				throw new ProcessingException("SQLQueries: "+message);
@@ -346,15 +360,11 @@ public class SQLQueries extends AbstractSQLProc {
 			//replace props! XXX: replaceProps(): should be activated by a prop?
 			sql = ParametrizedProperties.replaceProps(sql, prop);
 		}
-		if(sql==null) {
-			log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
-			return null;
-		}
 		
 		//query properties
 		String queryName = prop.getProperty(PREFIX_QUERY+qid+".name");
 		if(queryName==null) {
-			log.info("no name defined for query [id="+qid+"] (query name will be equal to id)");
+			log.debug("no name defined for query [id="+qid+"] (query name will be equal to id)");
 			queryName = qid;
 		}
 		ret.setProperty("name", queryName);
@@ -368,7 +378,7 @@ public class SQLQueries extends AbstractSQLProc {
 		while(true) {
 			String paramStr = prop.getProperty(PREFIX_QUERY+qid+".replace."+replaceCount);
 			if(paramStr==null) { break; }
-			log.info("replace:: "+replaceCount+" / "+paramStr);
+			//log.debug("replace:: "+replaceCount+" / "+paramStr);
 			ret.setProperty("sqldump.query.replace."+replaceCount, paramStr);
 			//replacers.add(paramStr);
 			replaceCount++;
@@ -376,7 +386,7 @@ public class SQLQueries extends AbstractSQLProc {
 		replaceCount--;
 		if(replaceCount>0) {
 			sql = ParametrizedProperties.replaceProps(sql, ret);
-			log.info("replacing with 'sqldump.query.replace.<1-n>' [replaceCount="+replaceCount+"]");
+			//log.debug("replacing with 'sqldump.query.replace.<1-n>' [replaceCount="+replaceCount+"]");
 		}
 		ret.setProperty("sql", sql);
 		
@@ -415,6 +425,23 @@ public class SQLQueries extends AbstractSQLProc {
 		ret.setProperty("roles", prop.getProperty(PREFIX_QUERY+qid+".roles"));
 		
 		return ret;
+	}
+	
+	void setNameAndSchemaFromId(String id, Properties p) {
+		String[] fparts = id.split("\\.");
+		if(fparts.length>1 && p.getProperty("schemaname")==null) {
+			//List<String> prts = Arrays.asList(fparts);
+			String schema = fparts[0];
+			List<String> sl = new ArrayList<String>();
+			for(int i=1;i<fparts.length;i++) {
+				sl.add(fparts[i]);
+			}
+			String name = Utils.join(sl, ".");
+			//if(p.getProperty("schemaname")==null) {
+			p.setProperty("schemaname", schema);
+			p.setProperty("name", name);
+			//}
+		}
 	}
 	
 	List<DumpSyntax> getQuerySyntaxes(String syntaxes, DBMSFeatures feat) {
