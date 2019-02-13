@@ -1,5 +1,7 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
@@ -51,6 +53,8 @@ public class SQLQueries extends AbstractSQLProc {
 	protected static final String PROP_QUERIES_ADD_TO_MODEL = PROP_QUERIES+".addtomodel";
 	protected static final String PROP_QUERIES_SCHEMA = PROP_QUERIES+".schemaname";
 	protected static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
+
+	protected static final String PROP_QUERIES_FROM_DIR = PROP_QUERIES+".from-dir";
 	
 	protected static final String PREFIX_QUERY = "sqldump.query.";
 
@@ -68,6 +72,16 @@ public class SQLQueries extends AbstractSQLProc {
 		public synchronized Object put(Object key, Object value) {
 			if(value==null) { return null; };
 			return super.put(key, value);
+		}
+	}
+	
+	public static class SqlFilenameFilter implements FilenameFilter {
+
+		static final String SQL_EXT = ".sql";
+		
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.endsWith(SQL_EXT);
 		}
 	}
 	
@@ -92,10 +106,12 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		//List<Query> queries = new ArrayList<Query>(); 
 		//for(String qid: queriesArr) {
+		log.debug("query ids: "+qmap.keySet());
+		
 		for(Map.Entry<String, Properties> qentry: qmap.entrySet()) {
 			String qid = qentry.getKey();
 			Properties qp = qentry.getValue();
-			log.debug("query "+qid+" props: "+qp);
+			log.debug("query '"+qid+"' props: "+qp);
 			
 			if(qp==null) {
 				log.warn("no SQL defined for query [id="+qid+";propkey='"+PREFIX_QUERY+qid+".sql(file)"+"']");
@@ -233,20 +249,91 @@ public class SQLQueries extends AbstractSQLProc {
 		Map<String, Properties> ret = new LinkedHashMap<String, Properties>();
 		
 		String queriesStr = prop.getProperty(PROP_QUERIES);
+		String queriesDir = prop.getProperty(PROP_QUERIES_FROM_DIR);
+		
+		List<String> qids = null;
 		if(queriesStr!=null) {
+			qids = new ArrayList<String>();
 			String[] queriesArr = queriesStr.split(",");
 			for(String qid: queriesArr) {
 				qid = qid.trim();
+				qids.add(qid);
 				
+				//Properties qp = getQueryProperties(qid);
+				//ret.put(qid, qp);
+			}
+		}
+		
+		List<String> fids = null;
+		List<File> files = new ArrayList<File>();
+		
+		if(queriesDir!=null) {
+			fids = new ArrayList<String>();
+			File dir = new File(queriesDir);
+			if(dir.exists()) {
+				File[] filesz = dir.listFiles(new SqlFilenameFilter());
+				for(File f: filesz) {
+					String fn = f.getName();
+					String baseName = fn.substring(0, fn.length() - SqlFilenameFilter.SQL_EXT.length());
+					if(qids!=null) {
+						if(qids.contains(baseName)) {
+							files.add(f);
+							fids.add(baseName);
+						}
+						else {
+							log.debug("file '"+f.getAbsolutePath()+"' [baseName="+baseName+"]  not in ids: "+qids);
+						}
+					}
+					else {
+						files.add(f);
+						fids.add(baseName);
+					}
+				}
+				if(qids!=null) {
+					//List<String> qidsXtra = new ArrayList<String>();
+					//qidsXtra.addAll(qids);
+					//qidsXtra.removeAll(fids);
+					//if(qidsXtra.size()>0) {
+					qids.removeAll(fids);
+					if(qids.size()>0) {
+						log.warn("query ids not found in dir '"+dir.getPath()+"': "+qids);
+					}
+				}
+			}
+			else {
+				log.warn("dir not found: "+dir.getPath());
+			}
+		}
+
+		if(fids!=null) {
+			for(int i=0;i<fids.size();i++) {
+				String fid = fids.get(i);
+				Properties qp = getQueryProperties(fid);
+				
+				String sql = IOUtil.readFromFilename(files.get(i).getAbsolutePath());
+				sql = ParametrizedProperties.replaceProps(sql, prop);
+				if(qp.getProperty("sql")!=null) {
+					log.warn("property 'sql' from query '"+fid+"' will be ignored; file '"+files.get(i).getAbsolutePath()+"' will be used");
+				}
+				qp.put("sql", sql);
+				//XXX add <path>/<qid>.properties
+				
+				ret.put(fid, qp);
+			}
+		}
+		//else {
+		if(qids!=null) {
+			for(String qid: qids) {
 				Properties qp = getQueryProperties(qid);
 				ret.put(qid, qp);
 			}
 		}
 		
-		if(queriesStr==null) {
-			log.error("prop '"+PROP_QUERIES+"' not defined");
+		if(qids==null && fids==null) {
+			String message = "prop '"+PROP_QUERIES+"' not defined [qids="+qids+";fids="+fids+"]";
+			log.error(message);
 			if(failonerror) {
-				throw new ProcessingException("SQLQueries: prop '"+PROP_QUERIES+"' not defined");
+				throw new ProcessingException("SQLQueries: "+message);
 			}
 			return null;
 		}
