@@ -336,7 +336,10 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		
 		if(ret.size()==0 || (qids==null && fids==null)) {
-			String message = "no queries defined [prop '"+PROP_QUERIES+"'="+queriesStr+"; qids="+qids+"; fids="+fids+"]";
+			String message = "no queries defined ["
+					+ (queriesStr!=null?"prop '"+PROP_QUERIES+"'="+queriesStr+"; ":"")
+					+ (queriesDir!=null?"prop '"+PROP_QUERIES_FROM_DIR+"'="+queriesDir+"; ":"")
+					+"qids="+qids+"; fids="+fids+"]";
 			log.error(message);
 			if(failonerror) {
 				throw new ProcessingException("SQLQueries: "+message);

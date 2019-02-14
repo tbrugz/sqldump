@@ -766,7 +766,7 @@ public class DataDump extends AbstractSQLProc {
 				+ (hasMoreRows?" (more rows exists)":"")
 				+ " ["+elapsedMilis+"ms elapsed]"
 				+ (elapsedMilis>0?" ["+( (count*1000)/elapsedMilis )+" rows/s]":"")
-				+ ((logNumberOfOpenedWriters && writersOpened.size()>0)?" ["+writersOpened.size()+" total opened writers]":"")
+				+ ((logNumberOfOpenedWriters && writersOpened.size()>1)?" ["+writersOpened.size()+" total opened writers]":"")
 				);
 
 			//footers
