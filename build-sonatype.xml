@@ -44,7 +44,7 @@
 		</condition>
 	</target>
 	
-	<target name="mvn-install-files" depends="info, mvn-install-file-jar, mvn-install-file-pom" description="install files">
+	<target name="mvn-install-files" depends="info, mvn-install-file-jar, mvn-install-file-sources-jar, mvn-install-file-pom" description="install files">
 	</target>
 	
 	<target name="mvn-install-file-jar" description="install jar file">
@@ -52,6 +52,18 @@
 			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
+			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
+			<!--arg value="-X" />
+			<arg value="-e" /-->
+		</artifact:mvn>
+	</target>
+
+	<target name="mvn-install-file-sources-jar" description="install sources jar file">
+		<artifact:mvn>
+			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
+			<arg value="-DpomFile=${maven-pom}" />
+			<arg value="-Dfile=${maven-sources-jar}" />
+			<arg value="-Dclassifier=sources" />
 			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
