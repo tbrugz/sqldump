@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -24,6 +25,10 @@ public class IOUtil {
 	}
 
 	public static String readFile(Reader reader) throws IOException {
+		return readFromReader(reader);
+	}
+	
+	public static String readFromReader(Reader reader) throws IOException {
 		StringWriter sw = new StringWriter();
 		
 		char[] cbuf = new char[BUFFER_SIZE];
@@ -57,14 +62,18 @@ public class IOUtil {
 		return bb;
 	}
 	
+	/*public static String readFromFilename(File fileName) {
+		return readFromFilename(fileName.getAbsolutePath());
+	}*/
+	
 	public static String readFromFilename(String fileName) {
 		try {
 			Reader reader = new FileReader(fileName);
-			String ret = IOUtil.readFile(reader);
+			String ret = IOUtil.readFromReader(reader);
 			reader.close();
 			return ret;
 		} catch (IOException e) {
-			log.warn("error reading file "+fileName+": "+e.getMessage());
+			log.warn("error reading file "+fileName+": "+e);
 		}
 		return null;
 	}
@@ -83,6 +92,32 @@ public class IOUtil {
 		while ((len = r.read(buffer)) != -1) {
 			w.write(buffer, 0, len);
 		}
+	}
+	
+	public static String readFromResource(String resourcePath) {
+		return readFromResource(resourcePath, Thread.currentThread().getContextClassLoader());
+	}
+	
+	public static String readFromResource(String resourcePath, ClassLoader classloader) {
+		InputStream is = classloader.getResourceAsStream(resourcePath);
+		return readFromInputStream(is, resourcePath);
+	}
+	
+	public static String readFromInputStream(InputStream is, String resourcePath) {
+		if(is==null) {
+			log.warn("can't read resource: "+resourcePath);
+			return null;
+		}
+		
+		try {
+			String ret = IOUtil.readFromReader(new InputStreamReader(is));
+			is.close();
+			return ret;
+		} catch (IOException e) {
+			log.warn("error reading resource "+resourcePath+": "+e);
+		}
+		
+		return null;
 	}
 
 }

@@ -2,11 +2,14 @@ package tbrugz.sqldump.datadump;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +58,7 @@ public class SQLQueries extends AbstractSQLProc {
 	protected static final String PROP_QUERIES_GRABCOLSINFOFROMMETADATA = PROP_QUERIES+".grabcolsinfofrommetadata";
 
 	protected static final String PROP_QUERIES_FROM_DIR = PROP_QUERIES+".from-dir";
+	protected static final String PROP_QUERIES_FROM_RESOURCE_PATH = PROP_QUERIES+".from-resource-path";
 	
 	protected static final String PREFIX_QUERY = "sqldump.query.";
 
@@ -227,7 +231,7 @@ public class SQLQueries extends AbstractSQLProc {
 			log.info(i+" queries ran");
 		}
 		if(addQueriesToModel) {
-			log.info(queriesGrabbed+" queries grabbed from properties");
+			log.info(queriesGrabbed+" queries grabbed");
 		}
 		if(!runQueries && !addQueriesToModel) {
 			log.warn("no queries ran or grabbed");
@@ -239,6 +243,7 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		String queriesStr = prop.getProperty(PROP_QUERIES);
 		String queriesDir = prop.getProperty(PROP_QUERIES_FROM_DIR);
+		String queriesResourcePath = prop.getProperty(PROP_QUERIES_FROM_RESOURCE_PATH);
 		
 		List<String> qids = null;
 		if(queriesStr!=null) {
@@ -292,6 +297,71 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 
+		List<String> rids = null;
+		List<String> rpaths = new ArrayList<String>();
+		
+		if(queriesResourcePath!=null) {
+			rids = new ArrayList<String>();
+			try {
+				Collection<String> res = listResourcesFromPath(queriesResourcePath);
+				//String pathContents = IOUtil.readFromResource(queriesResourcePath);
+				if(res==null) {
+					log.warn("path '"+queriesResourcePath+"' can't be listed");
+				}
+				else {
+					//log.info("pathContents: "+pathContents);
+					//List<String> res = Arrays.asList(pathContents.split("\n"));
+					//log.info("resources: "+res);
+					List<String> baseNames = new ArrayList<String>();
+					for(String r: res) {
+						if(r.endsWith(SqlFilenameFilter.SQL_EXT)) {
+							int idx = 0;
+							if(r.startsWith(queriesResourcePath)) {
+								idx = queriesResourcePath.length()+1;
+							}
+							String bn = r.substring(idx, r.length()-SqlFilenameFilter.SQL_EXT.length());
+							if(bn.startsWith("/")) {
+								bn.substring(1);
+							}
+							baseNames.add(bn);
+						}
+					}
+					if(baseNames.size()>0) {
+						log.info("sql resources found: "+baseNames);
+					}
+					else {
+						log.info("no sql resources found");
+					}
+					
+					if(qids!=null) {
+						for(String qid: qids) {
+							String r = queriesResourcePath+"/"+qid+SqlFilenameFilter.SQL_EXT;
+							if(baseNames.contains(qid)) {
+								rpaths.add(r);
+								rids.add(qid);
+							}
+							else {
+								log.debug("resource '"+r+"' [qid="+qid+"] not in filenames: "+baseNames);
+							}
+						}
+						qids.removeAll(rids);
+						if(qids.size()>0) {
+							log.debug("query ids not found in resource path '"+queriesResourcePath+"': "+qids);
+						}
+					}
+					else {
+						for(String baseName: baseNames) {
+							rpaths.add(queriesResourcePath+"/"+baseName+SqlFilenameFilter.SQL_EXT);
+							rids.add(baseName);
+						}
+					}
+					
+				}
+			} catch (RuntimeException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(fids!=null) {
 			for(int i=0;i<fids.size();i++) {
 				String fid = fids.get(i);
@@ -303,7 +373,7 @@ public class SQLQueries extends AbstractSQLProc {
 				
 				String sql = IOUtil.readFromFilename(files.get(i).getAbsolutePath());
 				if(sql==null) {
-					log.warn("Error reading file '"+files.get(i).getAbsolutePath()+"' [id="+fid+"']");
+					log.warn("Error reading file '"+files.get(i).getAbsolutePath()+"' [id="+fid+"]");
 					continue;
 				}
 				sql = ParametrizedProperties.replaceProps(sql, prop);
@@ -319,6 +389,33 @@ public class SQLQueries extends AbstractSQLProc {
 				ret.put(fid, qp);
 			}
 		}
+
+		if(rids!=null) {
+			for(int i=0;i<rids.size();i++) {
+				String rid = rids.get(i);
+				String rpath = rpaths.get(i);
+				Properties qp = getQueryProperties(rid);
+				
+				InputStream is = getResourceAsStream(rpath);
+				String sql = IOUtil.readFromInputStream(is, rpath);
+				if(sql==null) {
+					log.warn("Error reading resource '"+rpath+"' [id="+rid+"]");
+					continue;
+				}
+				sql = ParametrizedProperties.replaceProps(sql, prop);
+				if(qp.getProperty("sql")!=null) {
+					//XXX property or resource priority?
+					log.warn("property 'sql' from query '"+rid+"' will be ignored; resource '"+rpath+"' will be used");
+				}
+				qp.put("sql", sql);
+				setNameAndSchemaFromId(rid, qp);
+				
+				//XXX add <path>/<qid>.properties
+				
+				ret.put(rid, qp);
+			}
+		}
+		
 		//else {
 		if(qids!=null) {
 			for(String qid: qids) {
@@ -335,18 +432,36 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 		
-		if(ret.size()==0 || (qids==null && fids==null)) {
+		if(ret.size()==0) {
 			String message = "no queries defined ["
 					+ (queriesStr!=null?"prop '"+PROP_QUERIES+"'="+queriesStr+"; ":"")
 					+ (queriesDir!=null?"prop '"+PROP_QUERIES_FROM_DIR+"'="+queriesDir+"; ":"")
-					+"qids="+qids+"; fids="+fids+"]";
+					+ (queriesResourcePath!=null?"prop '"+PROP_QUERIES_FROM_RESOURCE_PATH+"'="+queriesResourcePath+"; ":"")
+					+"qids="+qids+"; fids="+fids+"; rids="+rids+"]";
 			log.error(message);
 			if(failonerror) {
 				throw new ProcessingException("SQLQueries: "+message);
 			}
 			return null;
 		}
+		
 		return ret;
+	}
+	
+	protected Collection<String> listResourcesFromPath(String path) {
+		// in servlet context: javax/servlet/ServletContext.html#getResourcePaths(java.lang.String)
+		String pathContents = IOUtil.readFromResource(path);
+		if(pathContents!=null) {
+			return Arrays.asList(pathContents.split("\n"));
+		}
+		log.warn("listResourcesFromPath: path '"+path+"' can't be listed / pathContents = "+pathContents);
+		return null;
+	}
+	
+	protected InputStream getResourceAsStream(String path) {
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream(path);
+		return is;
 	}
 	
 	Properties getQueryProperties(String qid) {
