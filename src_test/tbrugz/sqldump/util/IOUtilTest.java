@@ -30,7 +30,7 @@ public class IOUtilTest {
 		IOUtil.writeFile("abc123", w);
 		w.close();
 		Reader r = new FileReader(file);
-		String sread = IOUtil.readFile(r);
+		String sread = IOUtil.readFromReader(r);
 		r.close();
 		Assert.assertEquals("abc123", sread);
 	}

@@ -407,7 +407,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		// .sqlfile
 		else if(key.endsWith(SUFFIX_ASSERT_SQLFILE)) {
 			String sqlFile = papp.getProperty(key);
-			sql = IOUtil.readFile(new FileReader(sqlFile));
+			sql = IOUtil.readFromReader(new FileReader(sqlFile));
 		}
 		else {
 			throw new ProcessingException("unknown action: "+action+" [key="+key+"]");

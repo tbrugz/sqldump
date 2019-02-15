@@ -52,7 +52,7 @@ public class SqlImporter extends BaseImporter {
 			String sqlFile = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SQLFILE);
 			if(sqlFile!=null) {
 				try {
-					sql = IOUtil.readFile(new FileReader(sqlFile));
+					sql = IOUtil.readFromReader(new FileReader(sqlFile));
 				} catch (IOException e) {
 					log.warn("Exception: "+e);
 				}

@@ -24,6 +24,7 @@ public class IOUtil {
 		writer.write(contents);
 	}
 
+	@Deprecated
 	public static String readFile(Reader reader) throws IOException {
 		return readFromReader(reader);
 	}

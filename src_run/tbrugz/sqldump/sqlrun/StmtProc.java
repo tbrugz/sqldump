@@ -128,7 +128,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 			break;
 		default:
 			FileReader reader = new FileReader(file);
-			String fileStr = IOUtil.readFile(reader);
+			String fileStr = IOUtil.readFromReader(reader);
 			switch (tokenizerStrategy) {
 			case STMT_TOKENIZER:
 				stmtTokenizer = new SQLStmtTokenizer(fileStr);

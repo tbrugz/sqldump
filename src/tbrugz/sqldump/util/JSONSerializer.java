@@ -83,7 +83,7 @@ public class JSONSerializer extends XMLSerializer {
 		// json-specific
 		Configuration config = new Configuration();
 		MappedNamespaceConvention con = new MappedNamespaceConvention(config);
-		JSONObject obj = new JSONObject(IOUtil.readFile(reader));
+		JSONObject obj = new JSONObject(IOUtil.readFromReader(reader));
 		XMLStreamReader xmlStreamReader = new MappedXMLStreamReader(obj, con);
 		// /json
 		
