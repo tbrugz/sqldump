@@ -318,11 +318,11 @@ public class SQLQueries extends AbstractSQLProc {
 						if(r.endsWith(SqlFilenameFilter.SQL_EXT)) {
 							int idx = 0;
 							if(r.startsWith(queriesResourcePath)) {
-								idx = queriesResourcePath.length()+1;
+								idx = queriesResourcePath.length();
 							}
 							String bn = r.substring(idx, r.length()-SqlFilenameFilter.SQL_EXT.length());
 							if(bn.startsWith("/")) {
-								bn.substring(1);
+								bn = bn.substring(1);
 							}
 							baseNames.add(bn);
 						}
@@ -449,9 +449,10 @@ public class SQLQueries extends AbstractSQLProc {
 		// in servlet context: javax/servlet/ServletContext.html#getResourcePaths(java.lang.String)
 		String pathContents = IOUtil.readFromResource(path);
 		if(pathContents!=null) {
+			log.debug("listResourcesFromPath: read path '"+path+"'");
 			return Arrays.asList(pathContents.split("\n"));
 		}
-		log.warn("listResourcesFromPath: path '"+path+"' can't be listed / pathContents = "+pathContents);
+		log.warn("listResourcesFromPath: path '"+path+"' can't be listed"); // pathContents = "+pathContents);
 		return null;
 	}
 	
