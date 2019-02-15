@@ -69,6 +69,10 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	static final Log log = LogFactory.getLog(SQLQueries.class);
 	
+	protected boolean runQueries = true;
+	protected boolean addQueriesToModel = false;
+	protected String defaultSchemaName = DEFAULT_QUERIES_SCHEMA;
+	
 	public static class PropertiesWithoutNPE extends Properties {
 		private static final long serialVersionUID = 1L;
 
@@ -91,16 +95,13 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	@Override
 	public void process() {
-		boolean runQueries = true;
-		boolean addQueriesToModel = false;
 		
 		runQueries = Utils.getPropBool(prop, PROP_QUERIES_RUN, runQueries);
 		addQueriesToModel = Utils.getPropBool(prop, PROP_QUERIES_ADD_TO_MODEL, addQueriesToModel);
+		defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, defaultSchemaName);
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
-		
-		String defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, DEFAULT_QUERIES_SCHEMA);
 		
 		int i=0;
 		int queriesGrabbed=0;
@@ -366,10 +367,6 @@ public class SQLQueries extends AbstractSQLProc {
 			for(int i=0;i<fids.size();i++) {
 				String fid = fids.get(i);
 				Properties qp = getQueryProperties(fid);
-				/*if(qp==null) {
-					qp = new Properties();
-					qp.put("name", fid);
-				}*/
 				
 				String sql = IOUtil.readFromFilename(files.get(i).getAbsolutePath());
 				if(sql==null) {
@@ -482,7 +479,7 @@ public class SQLQueries extends AbstractSQLProc {
 		//query properties
 		String queryName = prop.getProperty(PREFIX_QUERY+qid+".name");
 		if(queryName==null) {
-			log.debug("no name defined for query [id="+qid+"] (query name will be equal to id)");
+			//log.debug("no name defined for query [id="+qid+"] (query name will be equal to id)");
 			queryName = qid;
 		}
 		ret.setProperty("name", queryName);
