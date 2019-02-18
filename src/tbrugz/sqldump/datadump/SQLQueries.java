@@ -71,6 +71,7 @@ public class SQLQueries extends AbstractSQLProc {
 	
 	protected boolean runQueries = true;
 	protected boolean addQueriesToModel = false;
+	protected boolean grabColsInfoFromMetadata = false;
 	protected String defaultSchemaName = DEFAULT_QUERIES_SCHEMA;
 	
 	public static class PropertiesWithoutNPE extends Properties {
@@ -99,6 +100,7 @@ public class SQLQueries extends AbstractSQLProc {
 		runQueries = Utils.getPropBool(prop, PROP_QUERIES_RUN, runQueries);
 		addQueriesToModel = Utils.getPropBool(prop, PROP_QUERIES_ADD_TO_MODEL, addQueriesToModel);
 		defaultSchemaName = prop.getProperty(PROP_QUERIES_SCHEMA, defaultSchemaName);
+		grabColsInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, grabColsInfoFromMetadata);
 		
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		String charset = prop.getProperty(DataDump.PROP_DATADUMP_CHARSET, DataDump.CHARSET_DEFAULT);
@@ -597,10 +599,10 @@ public class SQLQueries extends AbstractSQLProc {
 			List<Object> params, String remarks, String roles,
 			String rsDecoratorFactory, List<String> rsFactoryArgs, String rsArgPrepend) {
 		
-		boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
+		//boolean grabInfoFromMetadata = Utils.getPropBool(prop, PROP_QUERIES_GRABCOLSINFOFROMMETADATA, false);
 		
 		//XXX: add prop for 'addAlsoAsTable'? default is false
-		return addQueryToModel(qid, queryName, schemaName, colNames, grabInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
+		return addQueryToModel(qid, queryName, schemaName, colNames, grabColsInfoFromMetadata, /*addAlsoAsTable*/ false, stmt, sql, keyCols, params, remarks, roles, rsDecoratorFactory, rsFactoryArgs, rsArgPrepend);
 	}
 	
 	public int addQueryToModel(String qid, String queryName, String schemaName,
