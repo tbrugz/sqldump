@@ -222,17 +222,20 @@ public class ConnectionUtil {
 	
 	public static void closeConnection(Connection conn) {
 		if(conn!=null) {
-			log.debug("closing connection: "+conn);
 			try {
-				if(! conn.getAutoCommit()) {
-					try {
-						conn.rollback();
+				boolean closed = conn.isClosed();
+				log.debug("closing connection: "+conn+" [isClosed="+closed+"]");
+				if(!closed) {
+					if(! conn.getAutoCommit()) {
+						try {
+							conn.rollback();
+						}
+						catch(Exception e) {
+							log.warn("error trying to 'rollback': "+e);
+						}
 					}
-					catch(Exception e) {
-						log.warn("error trying to 'rollback': "+e);
-					}
+					conn.close();
 				}
-				conn.close();
 			} catch (SQLException e) {
 				log.warn("error trying to close connection: "+e);
 				log.debug("error trying to close connection [conn="+conn+"]", e);
