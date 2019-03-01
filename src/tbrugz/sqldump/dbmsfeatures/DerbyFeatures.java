@@ -266,7 +266,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA('"+planSchema+"')").execute();
 
 		//ResultSet rs =
-		bindAndExecuteQuery(sql, params, conn);
+		bindAndExecuteQuery(getExplainPlanQuery(sql), params, conn);
 		
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)").execute();
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0)").execute();
@@ -285,6 +285,11 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		List<Object> planQueryParams = Arrays.asList((Object)sql);
 
 		return bindAndExecuteQuery(planQuery, planQueryParams, conn);
+	}
+	
+	@Override
+	public String getExplainPlanQuery(String sql) {
+		return sql;
 	}
 	
 }

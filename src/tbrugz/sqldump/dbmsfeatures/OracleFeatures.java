@@ -45,7 +45,7 @@ import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class OracleFeatures extends AbstractDBMSFeatures {
-	private static Log log = LogFactory.getLog(OracleFeatures.class);
+	private static final Log log = LogFactory.getLog(OracleFeatures.class);
 
 	public static final String PROP_GRAB_EXECUTABLE_PRIVS = PREFIX_DBMS+".oracle.grab-executble-privileges";
 	public static final String PROP_USE_DBA_METAOBJECTS = PREFIX_DBMS+".oracle.use-dba-metaobjects";
@@ -1087,6 +1087,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"\norder by id ";
 		//log.debug("plan_table sql:\n"+explainSql);
 		return conn.createStatement().executeQuery(planTableSelect);
+	}
+	
+	@Override
+	public String getExplainPlanQuery(String sql) {
+		// XXX 'id' & 'planTable' would be needed
+		return null;
 	}
 
 	ResultSet executeStatement(PreparedStatement st) throws SQLException {

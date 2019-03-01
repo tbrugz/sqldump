@@ -168,6 +168,11 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
 		throw new UnsupportedOperationException("explainPlan not implemented");
 	}
+	
+	@Override
+	public String getExplainPlanQuery(String sql) {
+		return null;
+	}
 
 	protected ResultSet bindAndExecuteQuery(String sql, List<Object> params, Connection conn) throws SQLException {
 		PreparedStatement stmt = conn.prepareStatement(sql);

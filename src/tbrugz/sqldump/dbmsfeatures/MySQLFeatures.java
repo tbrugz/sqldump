@@ -83,8 +83,13 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	 */
 	@Override
 	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
-		String expsql = "explain "+sql;
+		String expsql = getExplainPlanQuery(sql);
 		return bindAndExecuteQuery(expsql, params, conn);
+	}
+	
+	@Override
+	public String getExplainPlanQuery(String sql) {
+		return "explain "+sql;
 	}
 	
 	@Override
