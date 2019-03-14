@@ -33,6 +33,7 @@ import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
@@ -42,6 +43,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static final Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
 	static final Log logUpdates = LogFactory.getLog(StmtProc.class.getName()+"-updates");
+	static final Log logInner = LogFactory.getLog(StmtProc.class.getName()+"-inner");
 	
 	//properties
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
@@ -176,9 +178,9 @@ public class StmtProc extends AbstractFailable implements Executor {
 					logerror.write(stmtStr+";\n");
 				}
 				countError++;
-				logStmt.warn("error executing updates [#ok = "+countOk+",#error = "+countError+"][stmt = "+stmtStr+"]: "+e);
+				logStmt.warn("error executing updates [#ok = "+countOk+",#error = "+countError+"][stmt = "+stmtStr+"]: "+StringUtils.exceptionTrimmed(e));
 				logStmt.debug("error executing updates", e);
-				SQLUtils.xtraLogSQLException(e, log);
+				SQLUtils.xtraLogSQLException(e, logInner);
 				if(failonerror) { throw new ProcessingException(e); }
 			}
 			countExec++;
@@ -268,7 +270,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		catch(SQLException e) {
 			log.warn("error executing statement [stmt = "+stmtStr+"]: "+e);
 			log.debug("error executing statement", e);
-			SQLUtils.xtraLogSQLException(e, log);
+			SQLUtils.xtraLogSQLException(e, logInner);
 			if(failonerror) { throw new ProcessingException(e); }
 			return 0;
 		}
@@ -305,16 +307,24 @@ public class StmtProc extends AbstractFailable implements Executor {
 				int urows = -1;
 				if(usePreparedStatement){
 					PreparedStatement stmt = conn.prepareStatement(stmtStr);
-					setParameters(stmt);
-					urows = stmt.executeUpdate();
-					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
-					stmt.close();
+					try {
+						setParameters(stmt);
+						urows = stmt.executeUpdate();
+						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
+					}
+					finally {
+						stmt.close();
+					}
 				}
 				else {
 					Statement stmt = conn.createStatement();
-					urows = stmt.executeUpdate(replaceParameters(stmtStr));
-					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
-					stmt.close();
+					try {
+						urows = stmt.executeUpdate(replaceParameters(stmtStr));
+						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
+					}
+					finally {
+						stmt.close();
+					}
 				}
 				
 				if(logStmt.isDebugEnabled()) {

@@ -89,5 +89,12 @@ public class StringUtils {
 		}
 		return true;
 	} */
+	
+	public static String exceptionTrimmed(Throwable t) {
+		if(t==null) return "";
+		String str = t.toString();
+		if(str==null) return "";
+		return str.trim();
+	}
 
 }

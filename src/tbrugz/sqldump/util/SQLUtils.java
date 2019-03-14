@@ -490,7 +490,7 @@ public class SQLUtils {
 			Iterator<Throwable> it = se.iterator();
 			while(it.hasNext()) {
 				Throwable t = it.next();
-				logger.info("inner SQLException: "+t);
+				logger.info("inner SQLException: "+StringUtils.exceptionTrimmed(t));
 			}
 		}
 		se = se.getNextException();
