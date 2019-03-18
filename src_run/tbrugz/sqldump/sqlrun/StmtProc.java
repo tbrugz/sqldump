@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
+import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
@@ -54,6 +56,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 	boolean usePreparedStatement = true;
 	boolean escapeBackslashedApos = false;
 	boolean replacePropsOnFileContents = true; //XXX: add prop for 'replacePropsOnFileContents'
+	boolean rollbackOnError = true;
+	
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
@@ -281,6 +285,11 @@ public class StmtProc extends AbstractFailable implements Executor {
 		stmtStr = stmtStr.trim();
 		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
 		
+		Savepoint sp = null;
+		if(rollbackOnError) {
+			sp = conn.setSavepoint();
+		}
+		
 		logStmt.debug("executing sql: "+stmtStr);
 		try {
 			if(useBatchUpdate) {
@@ -295,7 +304,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(batchStmt.getWarnings(), log); }
 					int updateCount = MathUtil.sumInts(updateCounts);
 					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
-					tbrugz.sqldump.sqlrun.def.Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
+					Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
 					return updateCount;
 				}
 				else {
@@ -339,11 +348,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 		catch(SQLException e) {
 			//log.warn("error in stmt: "+stmtStr);
-			try {
-				conn.rollback();
-			}
-			catch(SQLException e2) {
-				log.warn("error in rollback: "+e2);
+			if(rollbackOnError) {
+				Util.doRollback(conn, sp);
 			}
 			throw e;
 		}

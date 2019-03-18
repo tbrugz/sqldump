@@ -220,10 +220,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				log.warn("unknown ProcType: "+e.getValue()+" [key="+procId+"]");
 			}
 		}
+		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
 		long totalTime = System.currentTimeMillis() - initTime;
 		log.info("...end processing ["+sqlrunCounter+" ids ran], total time = "+totalTime+"ms");
-		
-		if(commitStrategy==CommitStrategy.RUN) { doCommit(); }
 	}
 	
 	boolean doExec(String procId, int sqlrunCounter) throws IOException, SQLException {
