@@ -3,6 +3,7 @@ package tbrugz.sqldump.sqlrun.def;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,21 @@ public class Util {
 		} catch (SQLException e) {
 			logRollback.warn("error rollbacking with savepoint: "+e);
 		}
+	}
+	
+	public static boolean releaseSavepoint(Connection conn, Savepoint sp) {
+		try {
+			if(sp!=null) {
+				conn.releaseSavepoint(sp);
+			}
+		} catch (SQLFeatureNotSupportedException e) {
+			log.debug("Error releasing savepoint: "+e);
+		} catch (SQLException e) {
+			log.warn("Error releasing savepoint: "+e);
+			log.debug("Error releasing savepoint: "+e.getMessage(), e);
+			return false;
+		}
+		return true;
 	}
 	
 	public static List<String> getFiles(String dir, String fileRegex) {

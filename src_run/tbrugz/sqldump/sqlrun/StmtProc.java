@@ -287,11 +287,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 		
 		Savepoint sp = null;
 		if(rollbackOnError) {
+			// XXX see conn.getMetaData().supportsSavepoints()
 			sp = conn.setSavepoint();
 		}
 		
 		logStmt.debug("executing sql: "+stmtStr);
 		try {
+			int updateCount = 0;
 			if(useBatchUpdate) {
 				if(batchStmt==null) {
 					batchStmt = conn.createStatement();
@@ -302,23 +304,21 @@ public class StmtProc extends AbstractFailable implements Executor {
 				if((batchExecCounter%batchSize)==0) {
 					int[] updateCounts = batchStmt.executeBatch();
 					//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(batchStmt.getWarnings(), log); }
-					int updateCount = MathUtil.sumInts(updateCounts);
+					updateCount = MathUtil.sumInts(updateCounts);
 					logStmt.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"]");
 					Util.logBatch.debug("executeBatch(): "+updateCount+" rows updated [count="+batchExecCounter+"; batchSize="+batchSize+"]");
-					return updateCount;
 				}
 				else {
 					logStmt.debug("addBatch() executed [count="+batchExecCounter+"]");
-					return 0;
 				}
 			}
 			else {
-				int urows = -1;
+				//int urows = -1;
 				if(usePreparedStatement){
 					PreparedStatement stmt = conn.prepareStatement(stmtStr);
 					try {
 						setParameters(stmt);
-						urows = stmt.executeUpdate();
+						updateCount = stmt.executeUpdate();
 						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					}
 					finally {
@@ -328,7 +328,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				else {
 					Statement stmt = conn.createStatement();
 					try {
-						urows = stmt.executeUpdate(replaceParameters(stmtStr));
+						updateCount = stmt.executeUpdate(replaceParameters(stmtStr));
 						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					}
 					finally {
@@ -337,14 +337,14 @@ public class StmtProc extends AbstractFailable implements Executor {
 				}
 				
 				if(logStmt.isDebugEnabled()) {
-					logStmt.debug("updated "+urows+" rows");
+					logStmt.debug("updated "+updateCount+" rows");
 				}
-				else if(logUpdates.isDebugEnabled() && urows>0) {
-					logUpdates.debug("updated "+urows+" rows");
+				else if(logUpdates.isDebugEnabled() && updateCount>0) {
+					logUpdates.debug("updated "+updateCount+" rows");
 				}
-				
-				return urows;
 			}
+			Util.releaseSavepoint(conn, sp);
+			return updateCount;
 		}
 		catch(SQLException e) {
 			//log.warn("error in stmt: "+stmtStr);

@@ -286,6 +286,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 						srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
 						fileCount++;
 					}
+					log.info(fileCount + " files processed");
 					}
 					else {
 						log.warn("no files selected in dir '"+dir+"'");
