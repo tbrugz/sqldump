@@ -6,6 +6,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.sql.Savepoint;
 import java.util.Properties;
 
 import javax.naming.Context;
@@ -255,4 +257,53 @@ public class ConnectionUtil {
 			log.warn("error grabbing database/jdbc driver info: "+e);
 		}
 	}
+	
+	public static void doCommit(Connection conn) {
+		try {
+			conn.commit();
+			log.debug("committed!");
+		} catch (SQLException e) {
+			log.warn("error commiting: "+e);
+		}
+	}
+	
+	public static void doRollback(Connection conn) {
+		try {
+			conn.rollback();
+			log.debug("rolled back!");
+		} catch (SQLException e) {
+			log.warn("error rollbacking: "+e);
+		}
+	}
+
+	public static void doRollback(Connection conn, Savepoint savepoint) {
+		try {
+			if(savepoint!=null) {
+				conn.rollback(savepoint);
+				log.debug("rolled back with savepoint! [id="+savepoint.getSavepointId()+"]");
+			}
+			else {
+				conn.rollback();
+				log.debug("rolled back with null savepoint!");
+			}
+		} catch (SQLException e) {
+			log.warn("error rollbacking with savepoint: "+e);
+		}
+	}
+	
+	public static boolean releaseSavepoint(Connection conn, Savepoint savepoint) {
+		try {
+			if(savepoint!=null) {
+				conn.releaseSavepoint(savepoint);
+			}
+		} catch (SQLFeatureNotSupportedException e) {
+			log.debug("Error releasing savepoint: "+e);
+		} catch (SQLException e) {
+			log.warn("Error releasing savepoint: "+e);
+			log.debug("Error releasing savepoint: "+e.getMessage(), e);
+			return false;
+		}
+		return true;
+	}
+	
 }

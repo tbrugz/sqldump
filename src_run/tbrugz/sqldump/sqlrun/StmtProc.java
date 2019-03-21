@@ -31,6 +31,7 @@ import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.StringSpliter;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -343,13 +344,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 					logUpdates.debug("updated "+updateCount+" rows");
 				}
 			}
-			Util.releaseSavepoint(conn, sp);
+			ConnectionUtil.releaseSavepoint(conn, sp);
 			return updateCount;
 		}
 		catch(SQLException e) {
 			//log.warn("error in stmt: "+stmtStr);
 			if(rollbackOnError) {
-				Util.doRollback(conn, sp);
+				ConnectionUtil.doRollback(conn, sp);
 			}
 			throw e;
 		}
