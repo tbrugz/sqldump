@@ -106,7 +106,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	
 	Connection conn;
 	Properties papp;
-	//CommitStrategy commitStrategy;
+	CommitStrategy commitStrategy;
 	
 	static final String[] EXEC_SUFFIXES = {
 		SQLRun.SUFFIX_FILE,
@@ -287,7 +287,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
 		
 		Savepoint sp = null;
-		if(rollbackOnError) {
+		if(rollbackOnError && !commitStrategy.equals(CommitStrategy.AUTO_COMMIT)) {
 			// XXX see conn.getMetaData().supportsSavepoints()
 			sp = conn.setSavepoint();
 		}
@@ -349,7 +349,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 		catch(SQLException e) {
 			//log.warn("error in stmt: "+stmtStr);
-			if(rollbackOnError) {
+			if(rollbackOnError && !commitStrategy.equals(CommitStrategy.AUTO_COMMIT)) {
 				ConnectionUtil.doRollback(conn, sp);
 			}
 			throw e;
@@ -431,7 +431,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	
 	@Override
 	public void setCommitStrategy(CommitStrategy commitStrategy) {
-		//XXX this.commitStrategy = commitStrategy;
+		this.commitStrategy = commitStrategy;
 	}
 
 	@Override

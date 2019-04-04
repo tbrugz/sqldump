@@ -299,8 +299,9 @@ public class ConnectionUtil {
 		} catch (SQLFeatureNotSupportedException e) {
 			log.debug("Error releasing savepoint: "+e);
 		} catch (SQLException e) {
-			log.warn("Error releasing savepoint: "+e);
-			log.debug("Error releasing savepoint: "+e.getMessage(), e);
+			log.debug("Error releasing savepoint: "+e);
+			//log.warn("Error releasing savepoint: "+e);
+			//log.debug("Error releasing savepoint: "+e.getMessage(), e);
 			return false;
 		}
 		return true;
