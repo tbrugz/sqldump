@@ -61,6 +61,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	//TODO: prop for 'dumpColElement'
 	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
+	protected boolean dumpColType = false; //XXX add prop for 'dumpColType'
 	protected boolean xpendInnerTable = true;
 	protected boolean innerArrayDumpHeader = true;
 	
@@ -327,11 +328,11 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, nullValueStr,
 						doEscape(i));
 				//Object value = getValueNotNull( vals.get(i) );
-				//XXX add type attribute?
 				//sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
 				sb.append("<td"
 						+(origVal==null?" null=\"true\"":"")
 						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
 						+">"+ value +"</td>");
 				
 			}
