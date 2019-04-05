@@ -62,6 +62,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected boolean dumpColElement = false;
 	protected boolean dumpStyleNumericAlignRight = false;
 	protected boolean dumpColType = false; //XXX add prop for 'dumpColType'
+	protected boolean dumpIsNumeric = false; //XXX add prop for 'dumpIsNumeric'
 	protected boolean xpendInnerTable = true;
 	protected boolean innerArrayDumpHeader = true;
 	
@@ -275,7 +276,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
 		for(int i=0;i<finalColNames.size();i++) {
-			if(finalColTypes.get(i).equals(Integer.class) || finalColTypes.get(i).equals(Double.class)) {
+			if(DataDumpUtils.isNumericType(finalColTypes.get(i))) {
 				styleSelector.add("table."+getTableStyleClass()+" > tbody > tr > td:nth-child("+(i+1)+")");
 			}
 		}
@@ -333,6 +334,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 						+(origVal==null?" null=\"true\"":"")
 						+(i<onRowsColCount?" dimoncol=\"true\"":"")
 						+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
+						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
 				
 			}

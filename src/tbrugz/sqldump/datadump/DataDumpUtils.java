@@ -560,4 +560,11 @@ public class DataDumpUtils {
 		return new ResultSetArrayAdapter(arr, withIndexColumn, columnName);
 	}
 	
+	public static boolean isNumericType(Class<?> clazz) {
+		if(clazz.equals(Integer.class) || clazz.equals(Double.class)) {
+			return true;
+		}
+		return false; 
+	}
+	
 }
