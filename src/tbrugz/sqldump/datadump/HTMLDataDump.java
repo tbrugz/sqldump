@@ -29,6 +29,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 
 	static final String HTML_SYNTAX_ID = "html";
 	
+	public static final String UNICODE_NULL = "&#9216"; // NULL unicode char in HTML - unicode U+2400
+	
 	static final String PROP_HTML_PREPEND = "sqldump.datadump.html.prepend";
 	static final String PROP_HTML_APPEND = "sqldump.datadump.html.append";
 	static final String PROP_HTML_ADD_CAPTION = "sqldump.datadump.html.add-caption";
@@ -75,6 +77,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected String colValSep = null;
 	protected String colSepPattern = null;
 	protected String colValSepPattern = null;
+	protected static final String nullPlaceholder = PivotResultSet.NULL_PLACEHOLDER;
+	protected static final String nullPlaceholderReplacer = UNICODE_NULL;
 	
 	public HTMLDataDump() {
 		//this(DEFAULT_PADDING, false);
@@ -197,7 +201,13 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 							//split...
 							String[] p2 = parts[cc].split(colValSepPattern);
 							if(p2.length>1) {
-								sbrow.append("<th>"+p2[1]+"</th>");
+								String thValue = p2[1];
+								String nullAttrib = "";
+								if(nullPlaceholder.equals(thValue)) {
+									thValue = nullPlaceholderReplacer;
+									nullAttrib = " null=\"true\"";
+								}
+								sbrow.append("<th"+nullAttrib+">"+thValue+"</th>");
 								colname = DataDumpUtils.xmlEscapeText(p2[0]);
 							}
 							else {

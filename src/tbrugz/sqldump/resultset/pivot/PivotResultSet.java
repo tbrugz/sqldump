@@ -88,7 +88,7 @@ public class PivotResultSet extends AbstractResultSet {
 	public static final String COLS_SEP_PATTERN = Pattern.quote(COLS_SEP);
 	public static final String COLVAL_SEP = ":::";
 	public static final String COLVAL_SEP_PATTERN = Pattern.quote(COLVAL_SEP);
-	public static final String NULL_PLACEHOLDER = "null"; // "null"; html: &#9216;
+	public static final String NULL_PLACEHOLDER = "-N-U-L-L-"; // "null"; html: &#9216;
 
 	static final int logEachXRows = 1000;
 

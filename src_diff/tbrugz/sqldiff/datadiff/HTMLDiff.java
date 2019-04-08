@@ -26,7 +26,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 	static final String PROP_HTML_DIFF_APPEND = "sqldump.datadump.html.diff.append";
 	
 	public HTMLDiff() {
-		this.nullValueStr = "&#9216;"; // NULL unicode char in HTML - unicode U+2400
+		this.nullValueStr = UNICODE_NULL;
 	}
 	
 	@Override
