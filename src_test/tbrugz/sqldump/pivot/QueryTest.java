@@ -549,5 +549,20 @@ public class QueryTest {
 		int colcount = rs.getMetaData().getColumnCount();
 		Assert.assertEquals(2, colcount);
 	}
+
+	@Test
+	public void q15noRows() throws SQLException, IOException {
+		String sql = prop.getProperty("q15");
+		ResultSet rs = conn.createStatement().executeQuery(sql);
+		String[] colsNTP = {};
+		String[] colsTP = {"A"};
+		rs = new PivotResultSet(rs, Arrays.asList(colsNTP), Arrays.asList(colsTP), true);
+		QueryDumper.simplerRSDump(rs);
+		rs.beforeFirst();
+		
+		int colcount = rs.getMetaData().getColumnCount();
+		Assert.assertEquals(4, colcount);
+		Assert.assertFalse(rs.next());
+	}
 	
 }

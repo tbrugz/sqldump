@@ -305,16 +305,18 @@ public class PivotResultSet extends AbstractResultSet {
 			}
 			
 			if(showMeasuresInColumns) {
-				Object[] knpt = new Object[colsNotToPivot.size()];
-				System.arraycopy(keyArr, 1, knpt, 0, colsNotToPivot.size());
-				Key keyNotToPivotArr = new Key(knpt);
-				//log.info("new row? "+keyNotToPivotArr);
-				if(!colsNotToPivotKeySet.contains(keyNotToPivotArr)) {
-					//new row!
-					//rowCount++;
-					//log.debug("[incol] nonPivotKeyValues.add: "+keyNotToPivotArr+" / "+Arrays.asList(keyArr));
-					nonPivotKeyValues.add(keyNotToPivotArr);
-					colsNotToPivotKeySet.add(keyNotToPivotArr);
+				if(colsNotToPivot.size()>0 || measureCols.size()>0) {
+					Object[] knpt = new Object[colsNotToPivot.size()];
+					System.arraycopy(keyArr, 1, knpt, 0, colsNotToPivot.size());
+					Key keyNotToPivotArr = new Key(knpt);
+					//log.info("new row? "+keyNotToPivotArr+" / "+colsNotToPivotKeySet);
+					if(!colsNotToPivotKeySet.contains(keyNotToPivotArr)) {
+						//new row!
+						//rowCount++;
+						//log.debug("[incol] nonPivotKeyValues.add: "+keyNotToPivotArr+" / keyArr = "+Arrays.asList(keyArr)+" / values = "+Arrays.asList(keyNotToPivotArr.values));
+						nonPivotKeyValues.add(keyNotToPivotArr);
+						colsNotToPivotKeySet.add(keyNotToPivotArr);
+					}
 				}
 			}
 			else {
