@@ -112,6 +112,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMAGRAB_DBSPECIFIC = PREFIX+".db-specific-features";
 	@Deprecated
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
+	
+	public static final String VALUE_YES = "YES";
+	public static final String VALUE_NO = "NO";
 
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
@@ -1011,7 +1014,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
 		c.setType(cols.getString("TYPE_NAME"));
-		c.setNullable("YES".equals(cols.getString("IS_NULLABLE")));
+		boolean nonNullable = VALUE_NO.equals(cols.getString("IS_NULLABLE"));
+		if(nonNullable) {
+			c.setNullable(false);
+		}
 		Object columnSize = cols.getObject("COLUMN_SIZE");
 		if(columnSize!=null) {
 			int icolumnSize = ((Number) columnSize).intValue();
@@ -1022,7 +1028,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(grabColumnIsAutoincrement) {
 			boolean autoInc = false;
 			try {
-				autoInc = "YES".equals( cols.getString("IS_AUTOINCREMENT") );
+				autoInc = VALUE_YES.equals( cols.getString("IS_AUTOINCREMENT") );
 				if(autoInc) {
 					//log.info("autoIncrement...["+c.getName()+"]: "+cols.getString("IS_AUTOINCREMENT"));
 					c.setAutoIncrement(true);
@@ -1064,7 +1070,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				if(grabColumn) {
 					grant.setColumn(grantrs.getString("COLUMN_NAME"));
 				}
-				grant.setWithGrantOption("YES".equals(grantrs.getString("IS_GRANTABLE")));
+				grant.setWithGrantOption(VALUE_YES.equals(grantrs.getString("IS_GRANTABLE")));
 				grantsList.add(grant);
 			}
 			catch(IllegalArgumentException iae) {
@@ -1232,10 +1238,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				rs.close();
 			}
 		} catch (UnsupportedOperationException e) {
-			log.warn("Error closing resultset or statement: "+e);
+			log.warn("Error closing resultset or statement [UnsupportedOperationException]: "+e);
 			//log.debug("Error closing resultset or statement: "+e.getMessage(), e);
 		} catch (SQLException e) {
-			log.warn("Error closing resultset or statement: "+e);
+			log.warn("Error closing resultset or statement [SQLException]: "+e);
 			log.debug("Error closing resultset or statement: "+e.getMessage(), e);
 		}
 	}
