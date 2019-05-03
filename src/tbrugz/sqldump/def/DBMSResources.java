@@ -301,7 +301,7 @@ public final class DBMSResources {
 			log.warn("unknown dbid: "+dbid);
 			throw new RuntimeException("unknown dbid: "+dbid);
 			//feats = new DefaultDBMSFeatures(dbid);
-			//log.warn("no specific DBMS features defined. using "+feats.getClass().getSimpleName());
+			//log.warn("no specific DBMS features defined for '"+dbid+"'. using "+feats.getClass().getSimpleName());
 		}
 		initDBMSFeatures(feats, papp);
 		return feats;

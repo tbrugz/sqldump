@@ -361,7 +361,8 @@ public class SQLQueries extends AbstractSQLProc {
 					
 				}
 			} catch (RuntimeException e) {
-				e.printStackTrace();
+				log.warn("getQueryPropMap: Exception: "+e);
+				log.debug("getQueryPropMap: Exception: "+e.getMessage(), e);
 			}
 		}
 		
