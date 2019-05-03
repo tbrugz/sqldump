@@ -43,18 +43,25 @@ public class ConnectionUtil {
 	public static final String SUFFIX_INITSQL = ".initsql";
 	public static final String SUFFIX_INITSQL_COMMIT = ".initsql.commit";
 	public static final String SUFFIX_AUTOCOMMIT = ".autocommit";
+	public static final String SUFFIX_READONLY = ".readonly";
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException, NamingException {
 		// AutoCommit==false: needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
 		// anyway, i think 'false' should be default
 		Boolean autocommit = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_AUTOCOMMIT);
-		
-		return initDBConnection(propsPrefix, papp, autocommit);
+		Boolean readonly = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_READONLY);
+
+		return initDBConnection(propsPrefix, papp, autocommit, readonly);
 	}
 
 	public static Connection initDBConnection(String propsPrefix, Properties papp, Boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
+		Boolean readonly = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_READONLY);
+		return initDBConnection(propsPrefix, papp, autoCommit, readonly);
+	}
+	
+	static Connection initDBConnection(String propsPrefix, Properties papp, Boolean autoCommit, Boolean readOnly) throws ClassNotFoundException, SQLException, NamingException {
 		//init database
-		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [autoCommit="+autoCommit+"]");
+		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [readOnly="+readOnly+"] [autoCommit="+autoCommit+"]");
 		
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 		String initialContextLookup = papp.getProperty(propsPrefix+SUFFIX_DATASOURCE_CONTEXTLOOKUP, DEFAULT_INITIAL_CONTEXT);
@@ -94,6 +101,10 @@ public class ConnectionUtil {
 			catch(LinkageError e) {
 				log.warn("error on Connection.getClientInfo: "+e);
 			}
+		}
+		
+		if(readOnly!=null) {
+			conn.setReadOnly(readOnly);
 		}
 		
 		if(autoCommit!=null) {
