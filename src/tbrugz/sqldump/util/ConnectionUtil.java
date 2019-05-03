@@ -47,12 +47,12 @@ public class ConnectionUtil {
 	public static Connection initDBConnection(String propsPrefix, Properties papp) throws ClassNotFoundException, SQLException, NamingException {
 		// AutoCommit==false: needed for postgresql for refcursor dumping. see: http://archives.postgresql.org/pgsql-sql/2005-06/msg00176.php
 		// anyway, i think 'false' should be default
-		Boolean autocommit = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_AUTOCOMMIT, false);
+		Boolean autocommit = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_AUTOCOMMIT);
 		
 		return initDBConnection(propsPrefix, papp, autocommit);
 	}
 
-	public static Connection initDBConnection(String propsPrefix, Properties papp, boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
+	public static Connection initDBConnection(String propsPrefix, Properties papp, Boolean autoCommit) throws ClassNotFoundException, SQLException, NamingException {
 		//init database
 		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [autoCommit="+autoCommit+"]");
 		
@@ -74,12 +74,17 @@ public class ConnectionUtil {
 		if(log.isDebugEnabled()) {
 			try {
 				Properties pclient = conn.getClientInfo();
-				if(pclient.size()==0) {
-					log.debug("no Connection.getClientInfo() info available");
+				if(pclient==null) {
+					log.debug("no Connection.getClientInfo() info available [is null]");
 				}
 				else {
-					for(Object key: pclient.keySet()) {
-						log.debug("client-info: "+key+" = "+pclient.getProperty((String)key));
+					if(pclient.size()==0) {
+						log.debug("no Connection.getClientInfo() info available");
+					}
+					else {
+						for(Object key: pclient.keySet()) {
+							log.debug("client-info: "+key+" = "+pclient.getProperty((String)key));
+						}
 					}
 				}
 			}
@@ -91,7 +96,9 @@ public class ConnectionUtil {
 			}
 		}
 		
-		conn.setAutoCommit(autoCommit);
+		if(autoCommit!=null) {
+			conn.setAutoCommit(autoCommit);
+		}
 		
 		//XXX: initsql: log only 1st execution?
 		//XXX: initsql: option to execute multiple statements?
