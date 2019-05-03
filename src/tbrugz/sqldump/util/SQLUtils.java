@@ -206,7 +206,10 @@ public class SQLUtils {
 			}
 			else if(coltype.equals(Date.class)) {
 				value = rs.getTimestamp(i);
-				//XXX value = rs.getDate(i) ?
+				//XXX value = rs.getDate(i) //?
+			}
+			else if(coltype.equals(Boolean.class)) {
+				value = rs.getBoolean(i);
 			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
@@ -308,6 +311,8 @@ public class SQLUtils {
 			case Types.VARCHAR:  //   12
 			//case Types.CLOB:   // 2005
 				return String.class;
+			case Types.BOOLEAN:
+				return Boolean.class;
 			case Types.BINARY:        //   -2  // postgresql BYTEA
 			case Types.VARBINARY:     //   -3  // mysql BLOB
 			case Types.LONGVARBINARY: //   -4
