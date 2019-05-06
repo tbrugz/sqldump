@@ -288,8 +288,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		
 		Savepoint sp = null;
 		if(rollbackOnError && !commitStrategy.equals(CommitStrategy.AUTO_COMMIT)) {
-			// XXX see conn.getMetaData().supportsSavepoints()
-			sp = conn.setSavepoint();
+			sp = ConnectionUtil.setSavepoint(conn);
 		}
 		
 		logStmt.debug("executing sql: "+stmtStr);

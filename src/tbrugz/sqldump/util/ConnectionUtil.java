@@ -308,6 +308,19 @@ public class ConnectionUtil {
 			log.warn("error rollbacking with savepoint: "+e);
 		}
 	}
+
+	public static Savepoint setSavepoint(Connection conn) throws SQLException {
+		try {
+			return conn.setSavepoint();
+		}
+		catch(SQLException e) {
+			log.warn("Exception setting savepoint: "+e+
+					" [supportsSavepoints() = "+conn.getMetaData().supportsSavepoints()+
+					" ; supportsTransactions() = "+conn.getMetaData().supportsTransactions()+"]");
+			log.debug("Exception setting savepoint: "+e.getMessage(), e);
+			return null;
+		}
+	}
 	
 	public static boolean releaseSavepoint(Connection conn, Savepoint savepoint) {
 		try {
