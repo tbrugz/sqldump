@@ -410,11 +410,22 @@ public class SQLDiff implements Executor {
 		return diff.getDiffList().size();
 	}
 
-	void setupFeatures(String dialect) {
+	/*static void setupFeaturesDefault() {
+		setupFeatures(DBMSResources.DEFAULT_DBID);
+	}*/
+	
+	static void setupFeatures(String dialect) {
 		log.debug("diff dialect set to: "+dialect);
 		//DBMSResources.instance().updateDbId(dialect);
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
 		ColumnDiff.updateFeatures(feat);
+	}
+
+	static void setupFeaturesIfNull(String dialect) {
+		if(ColumnDiff.isFeaturesNull()) {
+			log.debug("setupFeaturesIfNull: diff dialect will be set to: "+dialect);
+			setupFeatures(dialect);
+		}
 	}
 	
 	SchemaDiff doDiffSchemas(SchemaModel fromSM, SchemaModel toSM) throws ClassNotFoundException, SQLException, NamingException {

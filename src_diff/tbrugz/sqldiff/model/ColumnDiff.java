@@ -131,6 +131,10 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		}
 	}
 	
+	public static boolean isFeaturesNull() {
+		return features==null;
+	}
+	
 	@Override
 	public String getDiff() {
 		return Utils.join(getDiffList(), ";\n");

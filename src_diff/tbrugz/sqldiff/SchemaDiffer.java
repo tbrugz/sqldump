@@ -171,6 +171,9 @@ public class SchemaDiffer {
 			}
 		}
 		
+		String dialect = modelOrig.getSqlDialect();
+		SQLDiff.setupFeaturesIfNull(dialect);
+		
 		//Tables
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.TABLE)) {
 			//TODO: diff or not COLUMN, GRANT & CONSTRAINT types
@@ -237,7 +240,7 @@ public class SchemaDiffer {
 		return diff;
 	}
 	
-	public void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
+	void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew) {
 		diffs(objType, diffs, listOrig, listNew, null, null);
 	}
 
@@ -245,7 +248,7 @@ public class SchemaDiffer {
 		diffs(objType, diffs, listOrig, listNew, origOwnerTableName, newOwnerTableName, false);
 	}
 	
-	public void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName, boolean filterByType) {
+	void diffs(DBObjectType objType, Collection<DBIdentifiableDiff> diffs, Collection<? extends DBIdentifiable> listOrig, Collection<? extends DBIdentifiable> listNew, String origOwnerTableName, String newOwnerTableName, boolean filterByType) {
 		Set<DBIdentifiable> newDBObjectsThatExistsInOrigModel = new HashSet<DBIdentifiable>();
 		int countAdd = 0, countReplace = 0, countDrop = 0, countSource = 0, countTarget = 0, countSourceInit=0, countTargetInit=0;
 		/*List<DBIdentifiable> lo = new ArrayList<DBIdentifiable>();
