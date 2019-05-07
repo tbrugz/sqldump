@@ -24,7 +24,7 @@ public class CascadingDataDumpTest {
 		Properties p = new ParametrizedProperties();
 		p.load(CascadingDataDump.class.getResourceAsStream("setupdb.properties"));
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ public class CascadingDataDumpTest {
 		p.load(CascadingDataDump.class.getResourceAsStream("cdd1.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
 		//added "2" to linecount: header line + last linefeed
 		
@@ -50,7 +50,7 @@ public class CascadingDataDumpTest {
 		p.load(CascadingDataDump.class.getResourceAsStream("cdd2.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
 		int countE = TestUtil.countLines(OUTDIR+"/t2/data_EMP.csv");
 		Assert.assertEquals(2+2, countE); //2 EMPs
@@ -65,7 +65,7 @@ public class CascadingDataDumpTest {
 		p.load(CascadingDataDump.class.getResourceAsStream("cdd3.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
 		int countE = TestUtil.countLines(OUTDIR+"/t3/data_DEPT.csv");
 		Assert.assertEquals(2+2, countE); //2 DEPTs

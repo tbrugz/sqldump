@@ -34,7 +34,7 @@ public class SqlImportTest {
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(2, CSVImportTest.get1stValue(conn, "select count(*) from t1"));
@@ -62,7 +62,7 @@ public class SqlImportTest {
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(2, CSVImportTest.get1stValue(conn, "select count(*) from t1"));

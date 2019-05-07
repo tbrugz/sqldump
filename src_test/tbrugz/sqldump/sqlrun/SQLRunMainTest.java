@@ -12,6 +12,6 @@ public class SQLRunMainTest {
 	public void testArguments() throws Exception {
 		Properties p = new ParametrizedProperties();
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(new String[]{"aa","ab"}, p, null);
+		sqlr.doMain(new String[]{"aa","ab"}, p);
 	}
 }

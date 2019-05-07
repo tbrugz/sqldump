@@ -24,7 +24,7 @@ public class DiffApplyTest {
 		p.load(DiffApplyTest.class.getResourceAsStream("db1.properties"));
 		p.setProperty("sqlrun.connpropprefix","sqlrun.db1");
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 
 		//db2
 		p = new ParametrizedProperties();
@@ -32,7 +32,7 @@ public class DiffApplyTest {
 		p.load(DiffApplyTest.class.getResourceAsStream("db2.properties"));
 		p.setProperty("sqlrun.connpropprefix","sqlrun.db2");
 		sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 	
 	@Test

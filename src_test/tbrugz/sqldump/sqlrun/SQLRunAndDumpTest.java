@@ -116,7 +116,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparams);
 		//setSystemProperties(vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		String[] vmparamsDump = {
 					"-Dsqldump.grabclass=JDBCSchemaGrabber",
@@ -137,7 +137,7 @@ public class SQLRunAndDumpTest {
 		p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
 		//setSystemProperties(vmparamsDump);
-		sqld.doMain(null, p, null);
+		sqld.doMain(null, p);
 		
 		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_DEPT.csv");
 		String expected = "ID,NAME,PARENT_ID\r\n0,CEO,0\r\n1,HR,0\r\n2,Engineering,0\r\n";
@@ -168,7 +168,7 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 	}
 
 	@Test(expected = ProcessingException.class)
@@ -187,7 +187,7 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 	}
 
 	@Test(expected = ProcessingException.class)
@@ -210,7 +210,7 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 	}
 
 	@Test(expected = ProcessingException.class)
@@ -233,7 +233,7 @@ public class SQLRunAndDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 	}
 	
 }

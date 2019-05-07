@@ -43,7 +43,7 @@ public class FunctionTest {
 				};
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 
 	@Before
@@ -72,7 +72,7 @@ public class FunctionTest {
 				};
 		TestUtil.setProperties(prop, params);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, prop, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, prop);
 	}
 	
 	@Test

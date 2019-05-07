@@ -14,7 +14,7 @@ public class SQLRunProcessorTest {
 		Properties p = new ParametrizedProperties();
 		p.load(CascadingDataDump.class.getResourceAsStream("sqlrun-processor.properties"));
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(null, p, null);
+		sqld.doMain(null, p);
 	}
 
 }

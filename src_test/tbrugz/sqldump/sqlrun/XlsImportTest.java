@@ -24,7 +24,7 @@ public class XlsImportTest {
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
@@ -41,7 +41,7 @@ public class XlsImportTest {
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
@@ -58,7 +58,7 @@ public class XlsImportTest {
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(null, p, null);
+		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));

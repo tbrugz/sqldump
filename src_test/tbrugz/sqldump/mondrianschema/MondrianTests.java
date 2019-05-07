@@ -24,7 +24,7 @@ public class MondrianTests {
 		Properties p = new ParametrizedProperties();
 		p.load(CascadingDataDump.class.getResourceAsStream("setupdb.properties"));
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ public class MondrianTests {
 		p.load(MondrianTests.class.getResourceAsStream("mondrian1.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, p);
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class MondrianTests {
 		p.load(MondrianTests.class.getResourceAsStream("mondrian2.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqld.doMain(TestUtil.NULL_PARAMS, p);
 	}
 	
 }

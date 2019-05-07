@@ -89,7 +89,7 @@ public class DataDumpTest {
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(params, p, null);
+		sqlr.doMain(params, p);
 	}
 	
 	@Before
@@ -138,7 +138,7 @@ public class DataDumpTest {
 		if(xtraparams!=null) {
 			TestUtil.setProperties(p, xtraparams);
 		}
-		sqld.doMain(params, p, null);
+		sqld.doMain(params, p);
 	}
 	
 	@Test
@@ -447,7 +447,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p, null);
+		new SQLDump().doMain(params, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1_1.csv");
 		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
@@ -477,7 +477,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p, null);
+		new SQLDump().doMain(params, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.csv");
 		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
@@ -509,7 +509,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p, null);
+		new SQLDump().doMain(params, p);
 		
 		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1.rn.csv");
 		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
@@ -541,7 +541,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p, null);
+		new SQLDump().doMain(params, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.rn.csv");
 		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+

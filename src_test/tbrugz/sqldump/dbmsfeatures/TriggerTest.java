@@ -40,7 +40,7 @@ public class TriggerTest {
 				};
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 
 	@Before
@@ -55,7 +55,7 @@ public class TriggerTest {
 				};
 		TestUtil.setProperties(prop, params);
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, prop, null);
+		sqlr.doMain(TestUtil.NULL_PARAMS, prop);
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class TriggerTest {
 		TestUtil.setProperties(prop, params);
 		SQLRun sqlr = new SQLRun();
 		try {
-			sqlr.doMain(TestUtil.NULL_PARAMS, prop, null);
+			sqlr.doMain(TestUtil.NULL_PARAMS, prop);
 		}
 		catch(ProcessingException pe) {
 			Assert.assertTrue("pe.getCause() should be instance of SQLException", pe.getCause() instanceof SQLException);
