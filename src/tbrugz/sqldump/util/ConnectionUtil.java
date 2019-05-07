@@ -311,13 +311,20 @@ public class ConnectionUtil {
 
 	public static Savepoint setSavepoint(Connection conn) throws SQLException {
 		try {
+			/*
+			log.debug("setSavepoint..."+
+					" [supportsSavepoints() = "+conn.getMetaData().supportsSavepoints()+
+					" ; supportsTransactions() = "+conn.getMetaData().supportsTransactions()+
+					" ; getAutoCommit() = "+conn.getAutoCommit()+"]");
+			*/
 			return conn.setSavepoint();
 		}
 		catch(SQLException e) {
-			log.warn("Exception setting savepoint: "+e+
+			log.warn("Error setting savepoint: "+e+
 					" [supportsSavepoints() = "+conn.getMetaData().supportsSavepoints()+
-					" ; supportsTransactions() = "+conn.getMetaData().supportsTransactions()+"]");
-			log.debug("Exception setting savepoint: "+e.getMessage(), e);
+					" ; supportsTransactions() = "+conn.getMetaData().supportsTransactions()+
+					" ; getAutoCommit() = "+conn.getAutoCommit()+"]");
+			log.debug("Error setting savepoint: "+e.getMessage(), e);
 			return null;
 		}
 	}

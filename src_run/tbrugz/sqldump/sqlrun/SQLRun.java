@@ -543,15 +543,20 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		filterByIds = Utils.getStringListFromProp(papp, PROP_FILTERBYIDS, ",");
 		
 		commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
+		boolean commitStrategyIsAutocommit = commitStrategy==CommitStrategy.AUTO_COMMIT;
 		if(c!=null) {
 			conn = c;
+			boolean isAutocommit = c.getAutoCommit();
+			if(isAutocommit != commitStrategyIsAutocommit) {
+				c.setAutoCommit(commitStrategyIsAutocommit);
+			}
 		}
 		else {
 			String connPrefix = papp.getProperty(PROP_CONNPROPPREFIX);
 			if(connPrefix==null) {
 				connPrefix = CONN_PROPS_PREFIX;
 			}
-			conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategy==CommitStrategy.AUTO_COMMIT);
+			conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategyIsAutocommit);
 			if(conn==null) {
 				throw new ProcessingException("null connection [prop prefix: '"+connPrefix+"']");
 			}
