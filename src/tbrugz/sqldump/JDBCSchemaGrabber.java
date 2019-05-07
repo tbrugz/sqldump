@@ -196,7 +196,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		maxLevel = Utils.getPropLongWithDeprecated(papp, PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL, PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL, maxLevel);
 		
 		doSetConnectionReadOnly = Utils.getPropBool(papp, PROP_SCHEMAGRAB_SETCONNREADONLY, doSetConnectionReadOnly);
-		doGrabMetadata = Utils.getPropBool(papp, PROP_SCHEMAGRAB_METADATA, doSetConnectionReadOnly);
+		doGrabMetadata = Utils.getPropBool(papp, PROP_SCHEMAGRAB_METADATA, doGrabMetadata);
 		
 		List<String> tableTypesToGrabStr = Utils.getStringListFromProp(prop, PROP_SCHEMAGRAB_TABLETYPES, ",");
 		if(tableTypesToGrabStr!=null) {

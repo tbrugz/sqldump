@@ -230,7 +230,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		fromDbId = schemaModel.getSqlDialect();
 		
 		if(outputConnPropPrefix!=null) {
-			outputConn = ConnectionUtil.initDBConnection(outputConnPropPrefix, prop, false);
+			outputConn = ConnectionUtil.initDBConnection(outputConnPropPrefix, prop);
 		}
 		
 		log.info("dumping schema..."
