@@ -116,18 +116,27 @@ public class ConnectionUtil {
 		String dbInitSql = papp.getProperty(propsPrefix+SUFFIX_INITSQL);
 		if(dbInitSql!=null) {
 			boolean dbInitSqlCommit = Utils.getPropBool(papp, propsPrefix+SUFFIX_INITSQL_COMMIT, false);
+			if(dbInitSqlCommit && autoCommit!=null && autoCommit) {
+				log.warn("both '"+SUFFIX_INITSQL_COMMIT+"' & autoCommit are true");
+			}
 			try {
 				int count = conn.createStatement().executeUpdate(dbInitSql);
 				// commit?
 				// postgresql: The effects of SET or SET LOCAL are also canceled by rolling back to a savepoint that is earlier than the command.
 				// https://www.postgresql.org/docs/10/static/sql-set.html
-				if(dbInitSqlCommit) { conn.commit(); }
-				log.info("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
+				if(dbInitSqlCommit) {
+					if(!conn.getAutoCommit()) {
+						conn.commit();
+					}
+					else {
+						log.warn("suffix '"+SUFFIX_INITSQL_COMMIT+"' setted but connection is in autocommit mode");
+					}
+				}
+				log.debug("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
 			}
 			catch(SQLException e) {
 				log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
-				try { conn.rollback(); }
-				catch(SQLException ee) { log.warn("error in rollback(): "+ee.getMessage()); }
+				doRollbackIfNotAutocommit(conn);
 			}
 		}
 		return conn;
@@ -294,6 +303,17 @@ public class ConnectionUtil {
 		}
 	}
 
+	public static void doRollbackIfNotAutocommit(Connection conn) {
+		try {
+			if(conn.getAutoCommit()) { return; }
+			
+			conn.rollback();
+			log.debug("rolled back!");
+		} catch (SQLException e) {
+			log.warn("error rollbacking: "+e);
+		}
+	}
+	
 	public static void doRollback(Connection conn, Savepoint savepoint) {
 		try {
 			if(savepoint!=null) {
@@ -327,6 +347,11 @@ public class ConnectionUtil {
 			log.debug("Error setting savepoint: "+e.getMessage(), e);
 			return null;
 		}
+	}
+
+	public static Savepoint setSavepointIfNotAutocommit(Connection conn) throws SQLException {
+		if(conn.getAutoCommit()) { return null; }
+		return setSavepoint(conn);
 	}
 	
 	public static boolean releaseSavepoint(Connection conn, Savepoint savepoint) {
