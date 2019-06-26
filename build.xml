@@ -112,13 +112,6 @@
 		<mkdir dir="${lib.dir}"/>
 		<mkdir dir="${dist.dir}"/>
 		<mkdir dir="${javadoc.dir}"/>
-		<!--if>
-			<available file="sqldump.properties"/>
-			<then></then>
-			<else>
-				<copy file="sqldump.properties.template" tofile="sqldump.properties" verbose="on"/>
-			</else>
-		</if-->
 		<copy todir="." verbose="true">
 			<fileset dir="templates">
 				<include name="**/*.properties"/>
