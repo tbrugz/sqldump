@@ -52,6 +52,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMES = "sqldump.datadump.ffc.showcolnames";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 	static final String PROP_DATADUMP_FFC_SPACES_FOR_EACH_TAB = "sqldump.datadump.ffc.spaces-for-each-tab";
+	static final String PROP_DATADUMP_FFC_ALIGNED_TAB_REPLACING = "sqldump.datadump.ffc.aligned-tab-replacing";
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	
@@ -69,7 +70,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 			showTrailerLine = true, showTrailerLineAllBlocks = false;
 	
 	Integer spacesForEachTab = null;
-	transient String spacesBuffer = null;
+	boolean alignedTabReplacing = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -93,6 +94,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		show1stColNamesUpperLine = showColNamesUpperLine;
 		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
 		spacesForEachTab = Utils.getPropInt(prop, PROP_DATADUMP_FFC_SPACES_FOR_EACH_TAB);
+		alignedTabReplacing = Utils.getPropBool(prop, PROP_DATADUMP_FFC_ALIGNED_TAB_REPLACING, alignedTabReplacing);
 		postProcProperties();
 		validateProperties();
 	}
@@ -167,16 +169,6 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		//}
 		clearBuffer();
 		//colsMaxLenght.addAll(headersColsMaxLenght);
-		if(spacesForEachTab!=null) {
-			StringBuilder sb = new StringBuilder();
-			for(int i=0;i<spacesForEachTab;i++) {
-				sb.append(" ");
-			}
-			spacesBuffer = sb.toString();
-		}
-		else {
-			spacesBuffer = null;
-		}
 	}
 	
 	int lineGroupSize = (int) DEFAULT_LINEGROUPSIZE;
@@ -395,11 +387,11 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		//if(o==null) return nullValue;
 		String value = DataDumpUtils.getFormattedCSVValue(o, c, floatFormatter, dateFormatter, null, recordDemimiter, null, nullValueStr);
 		if(spacesForEachTab!=null) {
-			value = value.replaceAll("\t", spacesBuffer);
+			return replaceTabs(value);
 		}
 		return value;
 	}
-
+	
 	@Override
 	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
 		//setColMaxLenghtForColNames();
@@ -426,6 +418,51 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 
 	void out(String s, Writer pw) throws IOException {
 		pw.write(s);
+	}
+	
+	String replaceTabs(String value) {
+		if(alignedTabReplacing) {
+			return replaceTabsVariableLength(value);
+		}
+		else {
+			return replaceTabsFixedLength(value);
+		}
+	}
+
+	String replaceTabsVariableLength(String value) {
+		//System.out.println("replaceTabsVariableLength: ["+value+"]");
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<value.length();i++) {
+			char c = value.charAt(i);
+			if(c=='\t') {
+				int rem = sb.length() % spacesForEachTab;
+				//System.out.println("reminder["+i+"]: "+rem);
+				for(int j=0;j<spacesForEachTab-rem;j++) {
+					sb.append(" ");
+				}
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		//System.out.println("replaceTabsVariableLength:END: ["+sb.toString()+"]");
+		return sb.toString();
+	}
+
+	String replaceTabsFixedLength(String value) {
+		StringBuilder sb = new StringBuilder();
+		for(int i=0;i<value.length();i++) {
+			char c = value.charAt(i);
+			if(c=='\t') {
+				for(int j=0;j<spacesForEachTab;j++) {
+					sb.append(" ");
+				}
+			}
+			else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
 	}
 	
 	@Override
