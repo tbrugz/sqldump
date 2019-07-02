@@ -22,6 +22,7 @@ import tbrugz.sqldump.ant.AntTasksTest;
 import tbrugz.sqldump.datadump.ConcurrentDumpTest;
 import tbrugz.sqldump.datadump.DataDumpTest;
 import tbrugz.sqldump.datadump.DumpSyntaxRegistryTest;
+import tbrugz.sqldump.datadump.FFCTest;
 import tbrugz.sqldump.datadump.JsonTest;
 import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.dbmodel.ColumnTest;
@@ -78,6 +79,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//datadump unit tests
 	JsonTest.class,
 	DumpSyntaxRegistryTest.class,
+	FFCTest.class,
 	//resultset unit tests
 	RsListAdapterModelTest.class,
 	RsProjectionAdapterTest.class,

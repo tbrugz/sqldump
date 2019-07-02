@@ -89,10 +89,10 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		if(propNullValue!=null) {
 			nullValue = propNullValue;
 		}*/
-		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, true);
-		showColNamesUpperLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		showColNames = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMES, showColNames);
+		showColNamesUpperLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, showColNamesUpperLine);
 		show1stColNamesUpperLine = showColNamesUpperLine;
-		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, true);
+		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, showColNamesLowerLine);
 		spacesForEachTab = Utils.getPropInt(prop, PROP_DATADUMP_FFC_SPACES_FOR_EACH_TAB);
 		alignedTabReplacing = Utils.getPropBool(prop, PROP_DATADUMP_FFC_ALIGNED_TAB_REPLACING, alignedTabReplacing);
 		postProcProperties();
