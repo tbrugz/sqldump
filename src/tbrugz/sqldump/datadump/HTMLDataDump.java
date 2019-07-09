@@ -39,6 +39,9 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	static final String PROP_HTML_INNER_ARRAY_HEADER = "sqldump.datadump.html.inner-array-dump-header";
 	//static final String PROP_HTML_NULLVALUE_CLASS = "sqldump.datadump.html.nullvalue-class";
 	//XXX add props 'sqldump.datadump.html.inner-table.[prepend|append]' ??
+	static final String PROP_HTML_BREAK_COLUMNS = "sqldump.datadump.html.break-columns";
+	static final String PROP_HTML_BREAKS_ADD_COL_HEADER_BEFORE = "sqldump.datadump.html.breaks.add-col-header-before";
+	static final String PROP_HTML_BREAKS_ADD_COL_HEADER_AFTER = "sqldump.datadump.html.breaks.add-col-header-after";
 
 	public static final String PROP_PIVOT_ONROWS = "sqldump.datadump.pivot.onrows";
 	public static final String PROP_PIVOT_ONCOLS = "sqldump.datadump.pivot.oncols";
@@ -79,6 +82,17 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected String colValSepPattern = null;
 	protected static final String nullPlaceholder = PivotResultSet.NULL_PLACEHOLDER;
 	protected static final String nullPlaceholderReplacer = UNICODE_NULL;
+
+	// break properties
+	protected List<String> breakColNamesProperty = new ArrayList<String>();
+	protected boolean breakColsAddColumnHeaderBeforeProperty = false;
+	protected boolean breakColsAddColumnHeaderAfterProperty = false;
+	
+	// break state
+	protected final List<Integer> breakColIndexes = new ArrayList<Integer>();
+	protected final List<Object> breakColValues = new ArrayList<Object>();
+	protected boolean breakColsAddColumnHeaderBefore = false;
+	protected boolean breakColsAddColumnHeaderAfter = false;
 	
 	public HTMLDataDump() {
 		//this(DEFAULT_PADDING, false);
@@ -102,6 +116,18 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		dumpStyleNumericAlignRight = Utils.getPropBool(prop, PROP_HTML_STYTE_NUMERIC_ALIGN_RIGHT, dumpStyleNumericAlignRight);
 		xpendInnerTable = Utils.getPropBool(prop, PROP_HTML_XPEND_INNER_TABLE, xpendInnerTable);
 		innerArrayDumpHeader = Utils.getPropBool(prop, PROP_HTML_INNER_ARRAY_HEADER, innerArrayDumpHeader);
+		breakColNamesProperty = Utils.getStringListFromProp(prop, PROP_HTML_BREAK_COLUMNS, ",");
+		//log.info("breakColNamesProperty = "+breakColNamesProperty);
+		if(breakColNamesProperty!=null) {
+			//XXX: breaks: [boolean properties] add column names on each break? add them before or after the break?
+			breakColsAddColumnHeaderBeforeProperty = Utils.getPropBool(prop, PROP_HTML_BREAKS_ADD_COL_HEADER_BEFORE, breakColsAddColumnHeaderBeforeProperty);
+			breakColsAddColumnHeaderAfterProperty = Utils.getPropBool(prop, PROP_HTML_BREAKS_ADD_COL_HEADER_AFTER, breakColsAddColumnHeaderAfterProperty);
+			if(breakColsAddColumnHeaderBeforeProperty && breakColsAddColumnHeaderAfterProperty) {
+				breakColsAddColumnHeaderBeforeProperty = false;
+				log.warn("'"+PROP_HTML_BREAKS_ADD_COL_HEADER_BEFORE+"' and '"+PROP_HTML_BREAKS_ADD_COL_HEADER_AFTER+
+						"' cant' both be true. Only 'after' will be setted");
+			}
+		}
 		procPivotProperties(prop);
 	}
 
@@ -142,6 +168,37 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		finalColNames.addAll(lsColNames);
 		finalColTypes.clear();
 		finalColTypes.addAll(lsColTypes);
+		breakColIndexes.clear();
+		if(breakColNamesProperty!=null) {
+			for(int i=0;i<breakColNamesProperty.size();i++) {
+				String breakColName = breakColNamesProperty.get(i);
+				int idx = lsColNames.indexOf(breakColName);
+				if(idx>=0) {
+					breakColIndexes.add(idx);
+					int finalIdx = finalColNames.indexOf(breakColName);
+					if(finalIdx>=0) {
+						String removedColName = finalColNames.remove(finalIdx);
+						Class<?> removedColClazz = finalColTypes.remove(finalIdx);
+						if(removedColName==null) {
+							log.warn("column not found in 'finalColNames': "+breakColName+" [removedColClazz="+removedColClazz+"]");
+						}
+					}
+				}
+			}
+			log.debug("breakColIndexes = "+breakColIndexes);
+			if(breakColIndexes.size()>0) {
+				breakColsAddColumnHeaderBefore = breakColsAddColumnHeaderBeforeProperty;
+				breakColsAddColumnHeaderAfter = breakColsAddColumnHeaderAfterProperty;
+				// breakColsAddColumnHeaderBefore & breakColsAddColumnHeaderAfter can't both be true
+			}
+			else {
+				breakColsAddColumnHeaderBefore = false;
+				breakColsAddColumnHeaderAfter = false;
+			}
+		}
+		//breakColIndexes.addAll(lsColNames);
+		//breakColIndexes.retainAll(breakColNamesProperty);
+		breakColValues.clear();
 	}
 	
 	protected String getTableStyleClass() {
@@ -168,6 +225,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 			}
 			sb.append("\n</colgroup>");
 		}
+		sb.append("\n");
 		//XXX: add thead?
 		
 		addTableHeaderRows(sb);
@@ -237,16 +295,22 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 				dumpedAsLeast1row = true;
 			}
 		}
-		boolean dumpHeaderRow = !dumpedAsLeast1row && (!innerTable || innerArrayDumpHeader || finalColNames.size()!=1);
+		boolean dumpHeaderRow = !dumpedAsLeast1row &&
+				(!innerTable || innerArrayDumpHeader || finalColNames.size()!=1) &&
+				!breakColsAddColumnHeaderBefore && !breakColsAddColumnHeaderAfter;
 		//log.info("dumpHeaderRow=="+dumpHeaderRow+" ;; dumpedAsLeast1row="+dumpedAsLeast1row+" ; innerTable="+innerTable+" ; innerArrayDumpHeader="+innerArrayDumpHeader+" ; finalColNames.size()="+finalColNames.size());
 		if(dumpHeaderRow) {
-			sb.append("\n\t<tr>");
-			for(int i=0;i<finalColNames.size();i++) {
-				sb.append("<th>"+finalColNames.get(i)+"</th>");
-			}
-			sb.append("</tr>");
+			appendTableHeaderRow(sb);
 		}
-		sb.append("\n");
+		//sb.append("\n");
+	}
+	
+	protected void appendTableHeaderRow(StringBuilder sb) {
+		sb.append("\t<tr>");
+		for(int i=0;i<finalColNames.size();i++) {
+			sb.append("<th>"+finalColNames.get(i)+"</th>");
+		}
+		sb.append("</tr>\n");
 	}
 	
 	protected void guessPivotCols() {
@@ -302,8 +366,9 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	
 	public void dumpRow(ResultSet rs, long count, String clazz, Writer fos) throws IOException, SQLException {
 		StringBuilder sb = new StringBuilder();
-		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		appendBreaksIfNeeded(vals, clazz, sb);
+		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
 		for(int i=0;i<finalColNames.size();i++) {
 			Object origVal = vals.get(i);
 			Class<?> ctype = finalColTypes.get(i);
@@ -352,6 +417,30 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		sb.append("</tr>");
 		out(sb.toString()+"\n", fos);
 	}
+	
+	protected void appendBreaksIfNeeded(List<Object> vals, String clazz, StringBuilder sb) {
+		List<Object> breakRowValues = getIndexedValues(vals, breakColIndexes);
+		if(breakRowValues!=null && !breakRowValues.equals(breakColValues)) {
+			//log.debug("breaking table: breakRowValues = "+breakRowValues);
+			breakColValues.clear();
+			breakColValues.addAll(breakRowValues);
+			if(breakColsAddColumnHeaderBefore) {
+				appendTableHeaderRow(sb);
+			}
+			appendBreakRow(breakRowValues, clazz, sb);
+			if(breakColsAddColumnHeaderAfter) {
+				appendTableHeaderRow(sb);
+			}
+		}
+	}
+	
+	protected void appendBreakRow(List<Object> breakRowValues, String clazz, StringBuilder sb) {
+		sb.append("\t"+"<tr"+(clazz!=null?" class=\""+DataDumpUtils.xmlEscapeText(clazz)+"\"":"")+">");
+		//sb.append("<td colspan=\""+finalColNames.size()+"\">"+breakRowValues+"</td>");
+		//XXX: use 'th' or 'td'? 
+		sb.append("<th colspan=\""+finalColNames.size()+"\">"+getBreakValuesRow(breakRowValues)+"</th>");
+		sb.append("</tr>\n");
+	}
 
 	@Override
 	public void dumpFooter(long count, boolean hasMoreRows, Writer fos) throws IOException {
@@ -359,6 +448,29 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		out("</table>", fos);
 		//if(append!=null && (!innerTable || xpendInnerTable)) { out(append, fos); }
 		tableAppend(fos);
+	}
+	
+	protected <T> List<T> getIndexedValues(List<T> vals, List<Integer> idxs) {
+		if(idxs==null || idxs.size()==0) { return null; }
+		List<T> ret = new ArrayList<T>();
+		for(Integer i: idxs) {
+			ret.add(vals.get(i));
+		}
+		return ret;
+	}
+	
+	protected String getBreakValuesRow(List<Object> breakRowValues) {
+		StringBuilder sb = new StringBuilder();
+		List<String> breakColNames = getIndexedValues(lsColNames, breakColIndexes);
+		for(int i=0;i<breakColIndexes.size();i++) {
+			if(i>0) {
+				sb.append(", ");
+			}
+			Object value = breakRowValues.get(i);
+			if(value==null) { value = nullPlaceholderReplacer; } // UNICODE_NULL
+			sb.append(breakColNames.get(i)+": "+value);
+		}
+		return sb.toString();
 	}
 
 	protected void tablePrepend(Writer fos) throws IOException {

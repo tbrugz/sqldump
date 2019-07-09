@@ -47,9 +47,9 @@ public class DataDumpTest {
 
 	static Log log = LogFactory.getLog(DataDumpTest.class);
 
-	static String DIR_OUT = "work/output/DataDumpTest/";
-	static String dbpath = "mem:DataDumpTest;DB_CLOSE_DELAY=-1";
-	static String[] params = {};
+	static final String DIR_OUT = "work/output/DataDumpTest/";
+	static final String dbpath = "mem:DataDumpTest;DB_CLOSE_DELAY=-1";
+	static final String[] emptyArgs = {};
 	
 	@Test
 	public void testEncoding() throws IOException {
@@ -138,7 +138,7 @@ public class DataDumpTest {
 		if(xtraparams!=null) {
 			TestUtil.setProperties(p, xtraparams);
 		}
-		sqld.doMain(params, p);
+		sqld.doMain(emptyArgs, p);
 	}
 	
 	@Test
@@ -237,6 +237,90 @@ public class DataDumpTest {
 		parseXML(f);
 	}
 
+	@Test
+	public void testHTMLbreaksNoXtraColHeader() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dumpWithParams(new String[]{
+				//"-Dsqldump.grabclass=",
+				//"-Dsqldump.grabclass=EmptyModelGrabber",
+				"-Dsqldump.datadump.dumpsyntaxes=html",
+				"-Dsqldump.datadump.html.break-columns=SUPERVISOR_ID",
+				});
+
+		// ETC: no breaks
+		{
+			File f = new File(DIR_OUT+"/data_ETC.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+
+		// EMP: has breaks
+		{
+			File f = new File(DIR_OUT+"/data_EMP.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(9, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+	}
+
+	@Test
+	public void testHTMLbreaksAddColHeaderBefore() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dumpWithParams(new String[]{
+				"-Dsqldump.datadump.dumpsyntaxes=html",
+				"-Dsqldump.datadump.html.break-columns=SUPERVISOR_ID",
+				"-D"+HTMLDataDump.PROP_HTML_BREAKS_ADD_COL_HEADER_BEFORE+"=true",
+				//"-D"+HTMLDataDump.PROP_HTML_BREAKS_ADD_COL_HEADER_AFTER+"=true"
+				});
+
+		// ETC: no breaks
+		{
+			File f = new File(DIR_OUT+"/data_ETC.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+		
+		// EMP: has breaks
+		{
+			File f = new File(DIR_OUT+"/data_EMP.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(11, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+	}
+
+	@Test
+	public void testHTMLbreaksAddColHeaderAfter() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
+		dumpWithParams(new String[]{
+				"-Dsqldump.datadump.dumpsyntaxes=html",
+				"-Dsqldump.datadump.html.break-columns=SUPERVISOR_ID",
+				//"-D"+HTMLDataDump.PROP_HTML_BREAKS_ADD_COL_HEADER_BEFORE+"=true",
+				"-D"+HTMLDataDump.PROP_HTML_BREAKS_ADD_COL_HEADER_AFTER+"=true"
+				});
+
+		// ETC: no breaks
+		{
+			File f = new File(DIR_OUT+"/data_ETC.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(7, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+		
+		// EMP: has breaks
+		{
+			File f = new File(DIR_OUT+"/data_EMP.html");
+			Document doc = parseXML(f);
+			
+			Node n = doc.getChildNodes().item(0);
+			Assert.assertEquals(11, countElementsOfType(n.getChildNodes(),"tr"));
+		}
+	}
+	
 	@Test
 	public void testXmlQueryRaw() throws ParserConfigurationException, SAXException, IOException, ClassNotFoundException, SQLException, NamingException {
 		dumpWithParams(new String[]{
@@ -447,7 +531,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p);
+		new SQLDump().doMain(emptyArgs, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1_1.csv");
 		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
@@ -477,7 +561,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p);
+		new SQLDump().doMain(emptyArgs, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.csv");
 		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n5,wilson,1,1,1000\r\n";
@@ -509,7 +593,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p);
+		new SQLDump().doMain(emptyArgs, p);
 		
 		String csvEmpAll = IOUtil.readFromFilename(DIR_OUT+"/data_q1.rn.csv");
 		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
@@ -541,7 +625,7 @@ public class DataDumpTest {
 				};
 		Properties p = new Properties();
 		TestUtil.setProperties(p, vmparamsDump);
-		new SQLDump().doMain(params, p);
+		new SQLDump().doMain(emptyArgs, p);
 		
 		String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1p2_1.rn.csv");
 		String expected = "LineNumber,ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n"+
