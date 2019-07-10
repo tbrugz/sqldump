@@ -9,7 +9,12 @@ public enum DBObjectType {
 	
 	CONSTRAINT, COLUMN, //REMARKS, //non '1st class' objects
 	
-	RELATION, QUERY; // XXX: add "abstract" object types ?
+	RELATION, QUERY, // "abstract" object types
+	
+	/** Abstract type for <em>any</em> database object */
+	ANY,
+	
+	;
 	
 	public enum DBSyntax {
 		SQL,
@@ -69,6 +74,7 @@ public enum DBObjectType {
 		//case QUERY:
 		case EXECUTABLE:
 		case SCRIPT:
+		case ANY:
 			return true;
 		default:
 			return false;
