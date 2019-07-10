@@ -12,7 +12,7 @@ import tbrugz.sqldump.util.StringUtils;
  * 
  * see: https://en.wikipedia.org/wiki/SQL/JRT
  */
-public class ExecutableObject extends DBObject implements TypedDBObject, ParametrizedDBObject {
+public class ExecutableObject extends DBObject implements TypedDBObject, ParametrizedDBObject, RemarkableDBObject {
 	private static final long serialVersionUID = 1L;
 
 	static transient SQLIdentifierDecorator sqlId = new SQLIdentifierDecorator();
@@ -179,10 +179,12 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		this.type = type;
 	}
 	
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}
 
+	@Override
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}

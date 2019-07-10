@@ -2,7 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.List;
 
-public interface Relation extends NamedDBObject {
+public interface Relation extends NamedDBObject, RemarkableDBObject {
 	
 	/*
 	 * redeclaring NamedDBObject' getters so that introspection may work
@@ -35,8 +35,10 @@ public interface Relation extends NamedDBObject {
 
 	public List<Constraint> getConstraints();
 	
+	@Override
 	public String getRemarks();
 	
+	@Override
 	public void setRemarks(String remarks);
 	
 	public String getRelationType();

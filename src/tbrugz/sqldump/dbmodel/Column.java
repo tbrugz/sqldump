@@ -14,7 +14,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.Utils;
 
-public class Column extends DBIdentifiable implements Serializable, Cloneable {
+public class Column extends DBIdentifiable implements Serializable, Cloneable, RemarkableDBObject {
 	
 	//XXXxx: refactoring: move to its own class & another package? no, Column is the only 'user' of this
 	public static class ColTypeUtil {
@@ -166,10 +166,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable {
 		this.defaultValue = defaultValue;
 	}
 	
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}
 
+	@Override
 	public void setRemarks(String comment) {
 		this.remarks = comment;
 	}

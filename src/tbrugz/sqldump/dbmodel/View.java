@@ -21,6 +21,7 @@ import tbrugz.sqldump.util.Utils;
  * http://dev.mysql.com/doc/refman/5.0/en/create-view.html
  */
 public class View extends DBObject implements Relation, ParametrizedDBObject {
+	
 	private static final long serialVersionUID = 1L;
 
 	//private static final Log log = LogFactory.getLog(View.class);

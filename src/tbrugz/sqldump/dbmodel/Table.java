@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
 
 public class Table extends DBObject implements Relation {
+	
 	private static final long serialVersionUID = 1L;
 
 	TableType type = TableType.TABLE;
