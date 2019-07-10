@@ -20,7 +20,7 @@ import tbrugz.sqldump.util.Utils;
  * http://www.postgresql.org/docs/9.2/static/sql-createview.html
  * http://dev.mysql.com/doc/refman/5.0/en/create-view.html
  */
-public class View extends DBObject implements Relation {
+public class View extends DBObject implements Relation, ParametrizedDBObject {
 	private static final long serialVersionUID = 1L;
 
 	//private static final Log log = LogFactory.getLog(View.class);
