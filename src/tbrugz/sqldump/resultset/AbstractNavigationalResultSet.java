@@ -33,7 +33,8 @@ public abstract class AbstractNavigationalResultSet extends AbstractResultSet {
 	
 	@Override
 	public boolean first() throws SQLException {
-		resetPosition();
+		//resetPosition();
+		beforeFirst();
 		return next();
 	}
 	

@@ -52,7 +52,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 		if(uniqueCols!=null) {
 			for(String col: uniqueCols) {
-				addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes);
+				addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes, true);
 			}
 		}
 		if(!onlyUniqueCols) {
@@ -67,12 +67,12 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				
 				for(String col: allCols) {
-					addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes);
+					addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes, true);
 				}
 			}
 			else {
 				// add all!
-				addMatchProperties(clazz, propertyDescriptors, null, columnNames, columnTypes);
+				addMatchProperties(clazz, propertyDescriptors, null, columnNames, columnTypes, false);
 			}
 		}
 		else {
@@ -86,12 +86,12 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		log.debug("resultset: cols: "+columnNames+" ; types: "+columnTypes); //+" ; methods: "+methods);
 	}
 	
-	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames, List<Integer> columnTypes) {
+	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames, List<Integer> columnTypes, boolean allowClassProperty) {
 		int matched = 0;
 		for (PropertyDescriptor prop : propertyDescriptors) {
-			if(matchCol==null || matchCol.equals(prop.getName())) {
-				String pname = prop.getName();
-				if("class".equals(pname)) { continue; }
+			String pname = prop.getName();
+			if(matchCol==null || matchCol.equals(pname)) {
+				if(!allowClassProperty && "class".equals(pname)) { continue; }
 				if(columnNames.contains(pname)) { continue; }
 				//XXX: continue on transient, ... ??
 				

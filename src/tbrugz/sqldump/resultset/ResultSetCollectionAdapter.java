@@ -28,12 +28,6 @@ public class ResultSetCollectionAdapter<E extends Object> extends BaseResultSetC
 	
 	//XXX: absolute, relative? List needed...
 	
-	/*@Override
-	public boolean first() throws SQLException {
-		iterator = list.iterator();
-		return true;
-	}*/
-
 	@Override
 	public boolean next() throws SQLException {
 		if(iterator.hasNext()) {
