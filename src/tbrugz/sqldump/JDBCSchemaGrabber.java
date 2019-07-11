@@ -115,6 +115,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	public static final String VALUE_YES = "YES";
 	public static final String VALUE_NO = "NO";
+	public static final String VALUE_UNKNOWN_COLUMN_TYPE = "UNKNOWN";
 
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
@@ -1013,15 +1014,28 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public static Column retrieveColumn(ResultSet cols) throws SQLException {
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
-		c.setType(cols.getString("TYPE_NAME"));
+		try {
+			c.setType(cols.getString("TYPE_NAME"));
+		}
+		catch(RuntimeException e) {
+			log.warn("Exception [TYPE_NAME]: "+e);
+			log.debug("Exception [TYPE_NAME]: "+e.getMessage(), e);
+			c.setType(VALUE_UNKNOWN_COLUMN_TYPE);
+		}
+		try {
+			Object columnSize = cols.getObject("COLUMN_SIZE");
+			if(columnSize!=null) {
+				int icolumnSize = ((Number) columnSize).intValue();
+				c.setColumSize(icolumnSize);
+			}
+		}
+		catch(RuntimeException e) {
+			log.warn("Exception [COLUMN_SIZE]: "+e);
+			log.debug("Exception [COLUMN_SIZE]: "+e.getMessage(), e);
+		}
 		boolean nonNullable = VALUE_NO.equals(cols.getString("IS_NULLABLE"));
 		if(nonNullable) {
 			c.setNullable(false);
-		}
-		Object columnSize = cols.getObject("COLUMN_SIZE");
-		if(columnSize!=null) {
-			int icolumnSize = ((Number) columnSize).intValue();
-			c.setColumSize(icolumnSize);
 		}
 		c.setOrdinalPosition(cols.getInt("ORDINAL_POSITION"));
 		c.setRemarks(cols.getString("REMARKS"));

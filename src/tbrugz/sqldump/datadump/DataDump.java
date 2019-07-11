@@ -183,10 +183,17 @@ public class DataDump extends AbstractSQLProc {
 	
 	@Override
 	public void process() {
-		try {
-			dumpData(conn, model.getTables(), prop);
-		} catch (SQLException e) {
-			throw new ProcessingException(e);
+		if(model==null) {
+			String message = "null model, can't dump";
+			log.warn(message);
+			throw new ProcessingException(message);
+		}
+		else {
+			try {
+				dumpData(conn, model.getTables(), prop);
+			} catch (SQLException e) {
+				throw new ProcessingException(e);
+			}
 		}
 	}
 
