@@ -66,4 +66,9 @@ public class Query extends View {
 		this.namedParameterNames = namedParameterNames;
 	}
 	
+	@Override
+	public DBObjectType getDbObjectType() {
+		return DBObjectType.QUERY;
+	}
+	
 }

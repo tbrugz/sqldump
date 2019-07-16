@@ -2,7 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.List;
 
-public interface ParametrizedDBObject {
+public interface ParametrizedDBObject extends NamedDBObject {
 
 	public Integer getParameterCount();
 	

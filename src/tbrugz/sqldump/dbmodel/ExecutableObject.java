@@ -167,8 +167,13 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 	}
 	
 	@Override
-	public DBObjectType getDBObjectType() {
+	public DBObjectType getDbObjectType() {
 		return type;
+	}
+	
+	@Override
+	public DBObjectType getDBObjectType() {
+		return getDbObjectType();
 	}
 	
 	public DBObjectType getType() {

@@ -2,7 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.List;
 
-public interface Relation extends NamedDBObject, RemarkableDBObject {
+public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObject {
 	
 	/*
 	 * redeclaring NamedDBObject' getters so that introspection may work

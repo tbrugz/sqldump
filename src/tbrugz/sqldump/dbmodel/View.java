@@ -280,6 +280,16 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 		this.parameterTypes = parameterTypes;
 	}
 	
+	@Override
+	public DBObjectType getDbObjectType() {
+		return DBObjectType.VIEW;
+	}
+	
+	@Override
+	public DBObjectType getDBObjectType() {
+		return getDbObjectType();
+	}
+	
 	/*@Override
 	public String getAfterCreateScript() {
 		return null;

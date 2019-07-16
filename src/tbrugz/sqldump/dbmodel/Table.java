@@ -380,4 +380,14 @@ public class Table extends DBObject implements Relation {
 		return null;
 	}
 	
+	@Override
+	public DBObjectType getDbObjectType() {
+		return DBObjectType.TABLE;
+	}
+
+	@Override
+	public DBObjectType getDBObjectType() {
+		return getDbObjectType();
+	}
+	
 }
