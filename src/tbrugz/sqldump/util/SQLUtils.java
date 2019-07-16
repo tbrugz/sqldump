@@ -541,8 +541,16 @@ public class SQLUtils {
 		if(clazz.isArray() || Collection.class.isAssignableFrom(clazz)) {
 			return Types.ARRAY;
 		}
+		if(clazz.isEnum()) {
+			//log.info("enum type: "+clazz.getName());
+			return Types.VARCHAR;
+		}
+		/*if(clazz.equals(Class.class)) {
+			log.info("class type: "+clazz.getName());
+			return Types.VARCHAR;
+		}*/
 		
-		log.warn("unknown class: "+clazz+" [defaulting to VARCHAR]");
+		log.warn("unknown class: "+clazz.getName()+" [defaulting to VARCHAR]");
 		return Types.VARCHAR;
 	}
 
