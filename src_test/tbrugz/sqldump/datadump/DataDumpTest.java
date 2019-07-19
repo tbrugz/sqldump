@@ -898,17 +898,17 @@ public class DataDumpTest {
 				new String[] {"-Dsqldump.datadump.insertinto.dumpcursors=true"});
 		String str = IOUtil.readFromFilename(f.getAbsolutePath());
 		String LF = "\n";
-		//System.out.println(str);
+		System.out.println(str);
 		Assert.assertEquals("insert into q1 (A, B, C) values (1, null, 3);" + LF + 
-				"insert into B (B) values ('1');" + LF +
-				"insert into B (B) values ('2');" + LF +
-				"insert into B (B) values ('3');" + LF +
-				"insert into B (B) values ('4');" + LF +
+				"insert into B (B) values (1);" + LF +
+				"insert into B (B) values (2);" + LF +
+				"insert into B (B) values (3);" + LF +
+				"insert into B (B) values (4);" + LF +
 				"insert into q1 (A, B, C) values (4, null, 9);" + LF + 
-				"insert into B (B) values ('5');" + LF +
-				"insert into B (B) values ('6');" + LF +
-				"insert into B (B) values ('7');" + LF +
-				"insert into B (B) values ('8');" + LF
+				"insert into B (B) values (5);" + LF +
+				"insert into B (B) values (6);" + LF +
+				"insert into B (B) values (7);" + LF +
+				"insert into B (B) values (8);" + LF
 				, str);
 	}
 

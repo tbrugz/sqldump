@@ -213,15 +213,17 @@ public class SQLUtils {
 			}
 			else if(coltype.equals(Object.class)) {
 				value = rs.getObject(i);
-				//XXXdone: show log.info on 1st time only?
-				String objectClassName = value.getClass().getName();
-				if(!genericObjectsWarned.contains(objectClassName)) {
-					log.warn("generic type ["+objectClassName+"/"+coltype.getName()+"] grabbed");
-					genericObjectsWarned.add(objectClassName);
-				}
-				if(canReturnResultSet && ResultSet.class.isAssignableFrom(value.getClass())) {
-					log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
-					colTypes.set(i-1, ResultSet.class);
+				if(value!=null) {
+					Class<?> clazz = value.getClass();
+					String objectClassName = clazz.getName();
+					if(!genericObjectsWarned.contains(objectClassName)) {
+						log.warn("generic type ["+objectClassName+"/"+coltype.getName()+"] grabbed");
+						genericObjectsWarned.add(objectClassName);
+					}
+					if(canReturnResultSet && ResultSet.class.isAssignableFrom(clazz)) {
+						log.warn("setting column type ["+coltype.getSimpleName()+"] as ResultSet type - you may not use multiple dumpers for this");
+						colTypes.set(i-1, ResultSet.class);
+					}
 				}
 			}
 			else {
@@ -325,6 +327,8 @@ public class SQLUtils {
 			//case Types.REF_CURSOR:    // 2012
 			case -10: //XXX: ResultSet/Cursor/Refcursor (Oracle)?
 				return ResultSet.class;
+			case Types.JAVA_OBJECT:   // 2000
+				return Object.class;
 			case Types.OTHER:         // 1111
 				// postgresql: row, refcursor
 				return Object.class;
@@ -537,6 +541,10 @@ public class SQLUtils {
 		if(clazz.equals(Date.class) ||
 			clazz.equals(Timestamp.class)) {
 			return Types.TIMESTAMP;
+		}
+		if(clazz.equals(Boolean.class) ||
+			clazz.equals(Boolean.TYPE)) {
+			return Types.BOOLEAN;
 		}
 		if(clazz.isArray() || Collection.class.isAssignableFrom(clazz)) {
 			return Types.ARRAY;

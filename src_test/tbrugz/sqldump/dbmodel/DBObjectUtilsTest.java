@@ -11,14 +11,14 @@ public class DBObjectUtilsTest {
 	public void testEqualsEachLineOk() {
 		String s1 = "ab \nz ";
 		String s2 = "ab\nz";
-		Assert.assertTrue(DBObjectUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
+		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
 	}
 
 	@Test
 	public void testEqualsEachLineError() {
 		String s1 = " ab \n z";
 		String s2 = "ab\nzb";
-		Assert.assertFalse(DBObjectUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
+		Assert.assertFalse(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
 	}
 
 	@Test
