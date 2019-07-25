@@ -4,8 +4,8 @@
 	<info organisation="org.bitbucket.tbrugz" module="sqldump"/>
 	<configurations>
 		<conf name="default"/>
-		<conf name="test" extends="default" visibility="private"/>
-		<conf name="optional" visibility="private"/>
+		<conf name="optional" extends="default" visibility="private"/>
+		<conf name="test" extends="optional" visibility="private"/>
 		<conf name="findbugs" visibility="private"/>
 	</configurations>
 	<publications>

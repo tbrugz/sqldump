@@ -328,17 +328,22 @@
 
 	<target name="resolve-ivy-classpath">
 		<ivy:cachepath pathid="classpath.compile.ivy" conf="default" keep="true" transitive="true" type="jar,bundle" log="download-only" />
+		<ivy:cachepath pathid="classpath.optional.ivy" conf="optional" keep="true" transitive="true" type="jar,bundle" log="download-only" />
 		<ivy:cachepath pathid="classpath.compiletest.ivy" conf="test" keep="true" transitive="true" type="jar,bundle" log="download-only" />
 		<ivy:cachepath pathid="classpath.findbugs.ivy" conf="findbugs" type="jar,bundle" log="download-only" />
+		
 		<property name="new-ivy.compile.classpath" refid="classpath.compile.ivy"/>
 		<property name="new-ivy.test.classpath" refid="classpath.compiletest.ivy"/>
+		<property name="new-ivy.optional.classpath" refid="classpath.optional.ivy"/>
 		<property name="new-ivy.findbugs.classpath" refid="classpath.findbugs.ivy"/>
+		
 		<!--echo message="ivy.compile.classpath: ${new-ivy.compile.classpath}"/>
 		<echo message="ivy.test.classpath: ${new-ivy.test.classpath}"/-->
 		<!--delete file="ivy.classpath.properties"/-->
 		<propertyfile file="ivy.classpath.properties">
 			<entry key="ivy.compile.classpath" value="${new-ivy.compile.classpath}"/>
 			<entry key="ivy.test.classpath" value="${new-ivy.test.classpath}"/>
+			<entry key="ivy.optional.classpath" value="${new-ivy.optional.classpath}"/>
 			<entry key="ivy.findbugs.classpath" value="${new-ivy.findbugs.classpath}"/>
 		</propertyfile>
 	</target>
