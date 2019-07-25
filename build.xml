@@ -323,7 +323,6 @@
 	<target name="resolve" depends="config-ivy" description="retrieve dependencies with ivy">
 		<ivy:retrieve haltonfailure="false"/>
 		<echo message="ivy.retrieve.pattern: ${ivy.retrieve.pattern}"/>
-		<!--<ivy:dependencytree/>-->
 		<antcall target="resolve-ivy-classpath"/>
 	</target>
 
@@ -344,11 +343,16 @@
 		</propertyfile>
 	</target>
 
-	<target name="report-ivy" depends="resolve">
+	<target name="report-ivy" depends="resolve" description="create ivy dependency graph">
 		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
 		<ivy:report todir="bin/report-ivy"/>
 	</target>
 
+	<target name="report-ivy-dependencytree" depends="resolve" description="show ivy dependency tree">
+		<echo message="ivy.settings.dir = ${ivy.settings.dir}" />
+		<ivy:dependencytree/>
+	</target>
+	
 	<target name="make-ivy-pom" depends="config-ivy">
 		<ivy:info/>
 		<property name="revision" value="${version}"/>

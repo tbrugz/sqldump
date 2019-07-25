@@ -1,16 +1,18 @@
 glob:bin/*
 glob:build/*
+glob:conf/*
 glob:dist/*
 glob:lib/*
+glob:lib-jdbc/*
 glob:log/*
 glob:output/*
+glob:test/old/*
 glob:tmp/*
-glob:work/db/*
+glob:work/*
 glob:zzz/*
 glob:.settings/*
 glob:*~
 glob:*.orig
 glob:derby.log
+glob:ivy.classpath.properties
 glob:sqldump.properties
-syntax: glob
-ivy.classpath.properties
