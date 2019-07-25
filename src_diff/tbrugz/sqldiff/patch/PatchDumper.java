@@ -82,11 +82,11 @@ public class PatchDumper implements DiffDumper {
 		try {
 		List<String> original = bigStringToLines(diff.getPreviousDefinition());
 		List<String> revised = bigStringToLines(diff.getDefinition());
-		Patch patch = DiffUtils.diff(original, revised);
+		Patch<String> patch = DiffUtils.diff(original, revised);
 		
 		//writer.write("### "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
 		writeHeader(writer, diff);
-		for (Delta delta : patch.getDeltas()) {
+		for (Delta<String> delta : patch.getDeltas()) {
 			//writer.write(delta.toString()+"\n");
 			//System.out.println(delta);
 			int beforeDeltaContextSize = (delta.getOriginal().getPosition())>context?context:delta.getOriginal().getPosition();
