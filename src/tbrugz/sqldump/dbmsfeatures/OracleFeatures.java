@@ -1113,4 +1113,14 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 	}
 	
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return "length("+columnName+")";
+	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return "case when "+columnName+" is null then 't' else 'f' end";
+	}
+
 }

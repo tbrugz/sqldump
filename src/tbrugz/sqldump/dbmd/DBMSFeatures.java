@@ -144,4 +144,7 @@ public interface DBMSFeatures {
 
 	boolean sqlExceptionRequiresRollback();
 	
+	String sqlLengthFunctionByType(String columnName, String columnType);
+	String sqlIsNullFunction(String columnName);
+	
 }

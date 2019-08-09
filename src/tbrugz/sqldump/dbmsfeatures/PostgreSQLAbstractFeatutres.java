@@ -93,5 +93,10 @@ public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatu
 	public boolean sqlExceptionRequiresRollback() {
 		return true;
 	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return columnName+" is null";
+	}
 
 }

@@ -182,5 +182,15 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		
 		return stmt.executeQuery();
 	}
+	
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return null;
+	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return null;
+	}
 
 }

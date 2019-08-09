@@ -255,4 +255,14 @@ public class H2Features extends InformationSchemaFeatures {
 		return true;
 	}
 	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return columnName+" is null";
+	}
+
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return "length("+columnName+")";
+	}
+	
 }
