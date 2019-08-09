@@ -236,12 +236,12 @@ public class H2Features extends InformationSchemaFeatures {
 	 */
 	@Override
 	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
-		String expsql = getExplainPlanQuery(sql);
+		String expsql = sqlExplainPlanQuery(sql);
 		return bindAndExecuteQuery(expsql, params, conn);
 	}
 	
 	@Override
-	public String getExplainPlanQuery(String sql) {
+	public String sqlExplainPlanQuery(String sql) {
 		return "explain plan for "+sql;
 	}
 	

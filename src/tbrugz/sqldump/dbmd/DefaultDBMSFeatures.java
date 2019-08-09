@@ -170,7 +170,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 	
 	@Override
-	public String getExplainPlanQuery(String sql) {
+	public String sqlExplainPlanQuery(String sql) {
 		return null;
 	}
 

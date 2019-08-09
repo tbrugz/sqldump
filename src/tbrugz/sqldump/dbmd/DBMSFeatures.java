@@ -127,7 +127,10 @@ public interface DBMSFeatures {
 	 */
 	ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException;
 	
-	String getExplainPlanQuery(String sql);
+	@Deprecated
+	String getExplainPlanQuery(String sql); // renamed to sqlExplainPlanQuery
+	
+	String sqlExplainPlanQuery(String sql);
 	
 	/*
 	 * http://stackoverflow.com/questions/3668506/efficient-sql-test-query-or-validation-query-that-will-work-across-all-or-most

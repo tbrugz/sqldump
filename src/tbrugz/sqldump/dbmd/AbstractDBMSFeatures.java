@@ -196,5 +196,10 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	public boolean sqlExceptionRequiresRollback() {
 		return false;
 	}
+	
+	@Override
+	public String getExplainPlanQuery(String sql) {
+		return sqlExplainPlanQuery(sql);
+	}
 
 }
