@@ -99,4 +99,19 @@ public abstract class PostgreSQLAbstractFeatures extends InformationSchemaFeatur
 		return columnName+" is null";
 	}
 
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		//String atype = DBMSResources.instance().toANSIType(getId(), columnType);
+		//if(atype==null) { return null; }
+		//atype = atype.toUpperCase();
+		//log.info("sqlLengthFunctionByType: columnType = "+columnType);
+		if(Column.ColTypeUtil.isCharacter(columnType) || Column.ColTypeUtil.isBinary(columnType)) {
+			return "length("+columnName+")";
+		}
+		if(Column.ColTypeUtil.isNumeric(columnType)) {
+			return "length("+columnName+"::text)";
+		}
+		return null;
+	}
+	
 }

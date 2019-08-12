@@ -112,4 +112,14 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 		return true;
 	}
 	
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return "length("+columnName+")";
+	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return columnName+" is null";
+	}
+
 }

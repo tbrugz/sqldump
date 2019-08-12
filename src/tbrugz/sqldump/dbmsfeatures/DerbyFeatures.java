@@ -292,4 +292,15 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		return sql;
 	}
 	
+	// see: https://db.apache.org/derby/docs/10.13/ref/rrefsqlj16762.html
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return "length("+columnName+")";
+	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return columnName+" is null";
+	}
+	
 }
