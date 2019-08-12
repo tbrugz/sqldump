@@ -1,6 +1,6 @@
 package tbrugz.sqldump.dbmsfeatures;
 
-public class PostgreSQL90Features extends PostgreSQLAbstractFeatutres {
+public class PostgreSQL90Features extends PostgreSQLAbstractFeatures {
 
 	/*
 	 * see: http://www.postgresql.org/docs/8.1/static/infoschema-triggers.html

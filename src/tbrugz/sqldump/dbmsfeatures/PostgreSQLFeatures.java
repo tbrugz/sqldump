@@ -24,7 +24,7 @@ import tbrugz.sqldump.dbmodel.TableType;
 /*
  * TODO: add grab materialized views...
  */
-public class PostgreSQLFeatures extends PostgreSQLAbstractFeatutres {
+public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 
 	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
 	

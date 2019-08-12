@@ -10,10 +10,10 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.util.StringUtils;
 
-public abstract class PostgreSQLAbstractFeatutres extends InformationSchemaFeatures {
+public abstract class PostgreSQLAbstractFeatures extends InformationSchemaFeatures {
 
 	@SuppressWarnings("unused")
-	private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatutres.class);
+	private static final Log log = LogFactory.getLog(PostgreSQLAbstractFeatures.class);
 
 	// org.postgresql.jdbc4.Jdbc4DatabaseMetaData.getFunction(String, String, String) not implemented
 	//static final DBObjectType[] execTypes = new DBObjectType[]{ DBObjectType.FUNCTION, DBObjectType.PROCEDURE };
