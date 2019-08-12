@@ -97,6 +97,20 @@ public class ColTypeUtilTest {
 		assertIt("varchar2", false);
 	}
 	
+	@Test
+	public void testStandardTypes() {
+		updateDbId(null);
+		Assert.assertTrue(Column.ColTypeUtil.isBinary("BLOB"));
+		Assert.assertTrue(Column.ColTypeUtil.isBoolean("boolean"));
+		Assert.assertTrue(Column.ColTypeUtil.isCharacter("varchar2"));
+		Assert.assertTrue(Column.ColTypeUtil.isDatetime("TIMESTAMP"));
+		Assert.assertTrue(Column.ColTypeUtil.isInteger("integer"));
+		Assert.assertTrue(Column.ColTypeUtil.isNumeric("float"));
+		Assert.assertTrue(Column.ColTypeUtil.isNumeric("int4"));
+		
+		Assert.assertFalse(Column.ColTypeUtil.isBoolean("boole"));
+	}
+	
 	@AfterClass
 	public static void tearDown() {
 		log.info("tearDown");

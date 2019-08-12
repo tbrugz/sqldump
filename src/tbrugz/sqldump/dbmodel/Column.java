@@ -106,6 +106,35 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 			return useAutoIncrement.contains(dbid);
 		}
 		
+		static String upper(String s) {
+			if(s==null) return null;
+			return s.toUpperCase();
+		}
+		
+		public static boolean isInteger(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.integer", ",").contains(upper(type));
+		}
+
+		public static boolean isNumeric(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.numeric", ",").contains(upper(type));
+		}
+
+		public static boolean isCharacter(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.character", ",").contains(upper(type));
+		}
+		
+		public static boolean isDatetime(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.datetime", ",").contains(upper(type));
+		}
+		
+		public static boolean isBinary(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.binary", ",").contains(upper(type));
+		}
+		
+		public static boolean isBoolean(String type) {
+			return Utils.getStringListFromProp(dbmsSpecificProps, "types.boolean", ",").contains(upper(type));
+		}
+		
 	}
 	
 	private static final long serialVersionUID = 1L;
