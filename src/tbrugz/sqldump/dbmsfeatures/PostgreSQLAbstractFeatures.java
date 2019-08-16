@@ -108,7 +108,7 @@ public abstract class PostgreSQLAbstractFeatures extends InformationSchemaFeatur
 		if(Column.ColTypeUtil.isCharacter(columnType) || Column.ColTypeUtil.isBinary(columnType)) {
 			return "length("+columnName+")";
 		}
-		if(Column.ColTypeUtil.isNumeric(columnType)) {
+		if(Column.ColTypeUtil.isNumeric(columnType) || Column.ColTypeUtil.isDatetime(columnType) || Column.ColTypeUtil.isBoolean(columnType)) {
 			return "length("+columnName+"::text)";
 		}
 		return null;

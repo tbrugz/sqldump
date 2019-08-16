@@ -57,4 +57,15 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 	
+	// see: https://www.sqlite.org/lang_corefunc.html#length
+	@Override
+	public String sqlLengthFunctionByType(String columnName, String columnType) {
+		return "length("+columnName+")";
+	}
+	
+	@Override
+	public String sqlIsNullFunction(String columnName) {
+		return columnName+" is null";
+	}
+	
 }
