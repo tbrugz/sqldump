@@ -117,13 +117,19 @@ public class CLIProcessor {
 		p.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
 		
 		try {
-			log.info("loading "+(defaultFile?"default ":"")+"properties file: "+propFile);
 			InputStream propIS = new FileInputStream(propFile);
 			p.load(propIS);
 			propIS.close();
+			log.info("loaded "+(defaultFile?"default ":"")+"properties file: "+propFile);
 		}
 		catch(FileNotFoundException e) {
-			log.warn((defaultFile?"default ":"")+"properties file '"+propFile+"' not found: "+e.getMessage());
+			String message = (defaultFile?"default ":"")+"properties file '"+propFile+"' not found: "+e.getMessage();
+			if(defaultFile) {
+				log.info(message);
+			}
+			else {
+				log.warn(message);
+			}
 		}
 		catch(IOException e) {
 			log.warn("error loading "+(defaultFile?"default ":"")+"file '"+propFile+"': "+e);
