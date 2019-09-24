@@ -172,3 +172,4 @@ Misc/End notes
 --------------
 To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/jenkins-config.md)
 
+To use with Eclipse, [IvyDE](https://ant.apache.org/ivy/ivyde/download.html) is recommended
