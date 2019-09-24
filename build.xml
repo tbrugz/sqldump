@@ -137,6 +137,7 @@
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
 		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
+			<!-- <compilerarg value="-Xlint:deprecation"/> -->
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
