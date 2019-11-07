@@ -101,13 +101,13 @@ Building from sources (with ant & ivy)
 --------------------------------------
 - Run `hg clone https://bitbucket.org/tbrugz/sqldump <project-dir>` (if not done already)
 - Run `ant prepare`
-- Install Ivy (`mkdirs -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.4.0.jar http://www.apache.org/dist/ant/ivy/2.4.0/maven2/2.4.0/ivy-2.4.0.jar`)
+- Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
   or `ant ivy-install` (if not done already)
-- (*obsolete*) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
+- (*obsolete* - see `ivy-install`) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
   (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
-- (*optional/eclipse*) Use [IvyDE](https://ant.apache.org/ivy/ivyde/), import project, right click + `Ivy > Resolve`
-- (*obsolete*) Copy `templates/build.properties` to `build.properties`
+- (*obsolete* - see `ivy-install`) Copy `templates/build.properties` to `build.properties`
 - (*optional*) Edit `build.properties`
+- (*optional/eclipse*) Use [IvyDE](https://ant.apache.org/ivy/ivyde/), import project, right click + `Ivy > Resolve`
 - Run `ant resolve`
 - (*optional*) `ant test`
 - Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`) or `ant all`
