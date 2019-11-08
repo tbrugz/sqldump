@@ -110,6 +110,10 @@ public class ConnectionUtil {
 		if(autoCommit!=null) {
 			conn.setAutoCommit(autoCommit);
 		}
+
+		if(log.isDebugEnabled()) {
+			log.debug("conn info: readOnly="+conn.isReadOnly()+" ; autoCommit="+conn.getAutoCommit());
+		}
 		
 		//XXX: initsql: log only 1st execution?
 		//XXX: initsql: option to execute multiple statements?
