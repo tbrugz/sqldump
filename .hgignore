@@ -13,6 +13,10 @@ glob:zzz/*
 glob:.settings/*
 glob:*~
 glob:*.orig
-glob:derby.log
-glob:ivy.classpath.properties
-glob:sqldump.properties
+
+build.properties
+derby.log
+ivy.classpath.properties
+ivysettings.properties
+ivysettings.xml
+sqldump.properties
