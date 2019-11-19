@@ -147,7 +147,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	boolean nullable = true;
 	String defaultValue;
 	String remarks;
-	Boolean autoIncrement;
+	Boolean autoIncrement; // GENERATED { ALWAYS | BY DEFAULT } AS IDENTITY ; start-with, increment - see: https://blog.jooq.org/2012/02/19/subtle-sql-differences-identity-columns/ 
 	//XXX add transient String tableName; //??
 	//XXX Boolean updateable; //?? - http://english.stackexchange.com/questions/56431/correct-spelling-updatable-or-updateable
 	int ordinalPosition; //XXXdone add column position in table? nice for column compare...
@@ -233,7 +233,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		String colType = upper?type.trim().toUpperCase():type.trim();
 		boolean usePrecision = ColTypeUtil.usePrecision(colType);
 		return colType
-			+((usePrecision && columnSize!=null)?"("+columnSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");
+			+((usePrecision && columnSize!=null && columnSize>0)?"("+columnSize+(decimalDigits!=null?","+decimalDigits:"")+")":"");
 	}
 	
 	public String getColumnConstraints() {
