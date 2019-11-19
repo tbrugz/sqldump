@@ -22,6 +22,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.Utils;
 import tbrugz.sqldump.util.XMLSerializer;
 
 public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
@@ -50,7 +51,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			xmlser = new XMLSerializer(JAXB_SCHEMA_PACKAGES);
 		} catch (JAXBException e) {
 			log.error(getIdDesc()+"impossible to create JAXBContext: "+e);
-			log.info("impossible to create JAXBContext", e);
+			log.debug("impossible to create JAXBContext", e);
 			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
@@ -60,13 +61,16 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
 		try {
 			if(fileOutput!=null) {
-				outputWriter = new FileWriter(fileOutput);
+				File fout = new File(fileOutput);
+				Utils.prepareDir(fout);
+				outputWriter = new FileWriter(fout);
 			}
 			/*else {
 				log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
 			}*/
 		} catch (IOException e) {
 			log.warn(e);
+			log.debug(e, e);
 		}
 		filenameIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
 		resourceIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);

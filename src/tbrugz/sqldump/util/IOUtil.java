@@ -120,5 +120,17 @@ public class IOUtil {
 		
 		return null;
 	}
+	
+	/*
+	// see: Utils.prepareDir()
+	public static boolean createDirIfNotExists(File dir) {
+		if(!dir.exists()) {
+			boolean created = dir.mkdirs();
+			log.debug("creating dir: "+dir+" ["+created+"]");
+			return created;
+		}
+		return false;
+	}
+	*/
 
 }
