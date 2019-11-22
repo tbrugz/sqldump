@@ -120,10 +120,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final Log log = LogFactory.getLog(JDBCSchemaGrabber.class);
 	
 	static final String[] DEFAULT_SCHEMA_NAMES = {
-		"public", // postgresql, h2, hsqldb
-		"APP",    // derby
-		"",       // 'schema-less' databases
-		"Default" // neo4j
+		"public",  // postgresql, h2, hsqldb
+		"APP",     // derby
+		"Default", // neo4j
+		"",        // XXX 'schema-less' databases - which ones?
 	};
 	
 	//XXX: schema names to ignore by default... information_schema, pg_catalog, ...
@@ -287,18 +287,24 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		@SuppressWarnings("deprecation")
 		String schemaPattern = Utils.getPropWithDeprecated(papp, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
-		if(schemaPattern==null) {
+		if(Utils.isNullOrEmpty(schemaPattern)) {
 			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
 			log.info(getIdDesc()+"schemaPattern not defined. schemas available: "+schemas);
 			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
 			if(schemaPattern!=null) { equalsUsername = true; }
 			
+			/*
 			int counter = 0;
 			while(schemaPattern==null && DEFAULT_SCHEMA_NAMES.length>counter) {
 				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[counter]);
 				if(schemaPattern!=null) { break; }
 				counter++;
+			}
+			*/
+			
+			for(int i=0;Utils.isNullOrEmpty(schemaPattern) && i<DEFAULT_SCHEMA_NAMES.length;i++) {
+				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[i]);
 			}
 			
 			if(schemaPattern!=null) {
@@ -308,6 +314,12 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				if(propOriginal!=null) {
 					propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 				}
+			}
+		}
+		else {
+			if(log.isDebugEnabled()) {
+				List<String> schemas = SQLUtils.getSchemaNames(dbmd);
+				log.debug(getIdDesc()+"schemas: "+schemas);
 			}
 		}
 

@@ -162,12 +162,18 @@ public class ConnectionUtil {
 	}
 	
 	static Connection creteNewConnection(String propsPrefix, Properties papp, String driverClass, String dbUrl) throws ClassNotFoundException, SQLException {
-		if(driverClass==null) {
+		if(Utils.isNullOrEmpty(driverClass)) {
 			String message = "driver class property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined (using JDBC 4+ ?)";
 			log.debug(message);
 		}
 		else {
-			Class.forName(driverClass);
+			try {
+				Class.forName(driverClass);
+			}
+			catch(ClassNotFoundException e) {
+				log.warn("class not found: "+driverClass+" [exception: "+e+"]");
+				throw e;
+			}
 		}
 
 		if(dbUrl==null) {
@@ -188,7 +194,7 @@ public class ConnectionUtil {
 		}
 		catch(SQLException e) {
 			log.warn("jdbc driver not found [url: '"+dbUrl+"'"
-				+(driverClass==null?" ; property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined":"")
+				+(Utils.isNullOrEmpty(driverClass)?" ; property '"+propsPrefix+SUFFIX_DRIVERCLASS+"' undefined":"")
 				+"]");
 			throw e;
 		}
