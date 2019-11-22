@@ -636,11 +636,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 
 	void stmtSetValue(int index, String value, int colTypeIndex) throws SQLException, ParseException {
-		if(value==null) {
-			stmtSetNull(index);
-			return;
-		}
-		if("".equals(value)) {
+		if(Utils.isNullOrEmpty(value)) {
 			stmtSetNull(index);
 			return;
 		}

@@ -753,7 +753,7 @@ public class SQLQueries extends AbstractSQLProc {
 		}
 		List<Grant> grants = new ArrayList<Grant>();
 		for(String role: rolesFilter) {
-			if(role!=null && !role.trim().equals("")) {
+			if(!Utils.isNullOrBlank(role)) {
 				grants.add(new Grant(query.getName(), PrivilegeType.SELECT, role));
 			}
 		}

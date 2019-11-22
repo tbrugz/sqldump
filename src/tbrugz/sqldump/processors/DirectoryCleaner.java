@@ -20,7 +20,7 @@ public class DirectoryCleaner extends AbstractProcessor {
 	@Override
 	public void setProperties(Properties prop) {
 		String dir = prop.getProperty(SQLDump.PROP_DO_DELETEREGULARFILESDIR);
-		if( dir!=null && !"".equals(dir) ) {
+		if( !Utils.isNullOrEmpty(dir) ) { 
 			dirToDeleteFiles = new File(dir);
 		}
 	}

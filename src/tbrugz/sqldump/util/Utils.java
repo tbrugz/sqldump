@@ -362,7 +362,7 @@ public class Utils {
 	}
 	
 	public static List<String> getStringListIgnoreEmpty(String strings, String delimiter) {
-		if(strings==null || strings.trim().equals("")) { return null; }
+		if(isNullOrBlank(strings)) { return null; }
 		return getStringList(strings, delimiter);
 	}
 	
@@ -755,6 +755,14 @@ public class Utils {
 		}
 		ret = Utils.getPropLong(p, key, ret);
 		return ret;
+	}
+	
+	public static boolean isNullOrEmpty(String s) {
+		return s==null || s.isEmpty();
+	}
+	
+	public static boolean isNullOrBlank(String s) {
+		return s==null || s.trim().isEmpty();
 	}
 	
 }

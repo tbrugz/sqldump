@@ -555,7 +555,7 @@ public class SQLDiff implements Executor {
 	}
 	
 	static SchemaModelGrabber initGrabber(String grabberLabel, String grabberId, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
-		if(grabberId==null || "".equals(grabberId)) {
+		if(Utils.isNullOrEmpty(grabberId)) { 
 			throw new ProcessingException("'"+grabberLabel+"' grabber id not defined");
 		}
 		
@@ -698,15 +698,15 @@ public class SQLDiff implements Executor {
 					execCount++;
 					updateCount += conn.createStatement().executeUpdate(sql);
 					String previousDef = d.getPreviousDefinition();
-					if(previousDef!=null && !previousDef.isEmpty() && log.isDebugEnabled()) {
-						log.debug("diff #"+diffCount+":\n- previous= "+d.getPreviousDefinition()+"\n- new     = "+d.getDefinition());
+					if(!Utils.isNullOrEmpty(previousDef) && log.isDebugEnabled()) {
+						log.debug("diff #"+diffCount+":\n- previous= "+previousDef+"\n- new     = "+d.getDefinition());
 					}
 				}
 				}
 			} catch (SQLException e) {
 				errorCount++;
 				lastEx = e;
-				log.warn("error executing diff: "+e+"\n- previous="+d.getPreviousDefinition()+"\n- new="+d.getDefinition());
+				log.warn("error executing diff: "+e+"\n- previous= "+d.getPreviousDefinition()+"\n- new     = "+d.getDefinition());
 				if(failonerror) { break; }
 			}
 		}

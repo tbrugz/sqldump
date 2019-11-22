@@ -22,6 +22,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.util.CategorizedOut;
+import tbrugz.sqldump.util.Utils;
 
 //XXX: should SchemaDiff implement Diff?
 //XXX: what about renames?
@@ -288,7 +289,7 @@ public class SchemaDiff implements Diff {
 			//for(Diff d: diffs) {
 			Diff d = it.next();
 			countInit++;
-			if(d.getDiff()==null || "".equals(d.getDiff())) { it.remove(); removed++; }
+			if(Utils.isNullOrEmpty(d.getDiff())) { it.remove(); removed++; }
 		}
 		
 		if(removed>0) {
