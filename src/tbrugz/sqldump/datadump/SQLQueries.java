@@ -590,7 +590,7 @@ public class SQLQueries extends AbstractSQLProc {
 			}
 		}
 		if(!allSyntaxesAdded) {
-			log.info("not all syntaxes added... syntaxes avaiable: " + StringUtils.getClassSimpleNameList(DumpSyntaxRegistry.getSyntaxes()) );
+			log.info("not all syntaxes added... syntaxes avaiable: " + StringUtils.getClassSimpleNameListT( DumpSyntaxRegistry.getSyntaxes()) );
 		}
 		return syntaxList;
 	}

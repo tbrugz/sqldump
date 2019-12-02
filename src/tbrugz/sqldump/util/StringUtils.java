@@ -42,12 +42,39 @@ public class StringUtils {
 		return RTRIM.matcher(s).replaceFirst("");
 	}
 	
-	public static <T> List<String> getClassSimpleNameList(List<Class<T>> classes) {
-		List<String> ret = new ArrayList<String>();
-		for(Class<T> c: classes) {
-			ret.add(c.getSimpleName());
+	public static List<Class<?>> getClassListFromObjectList(List<?> objects) {
+		List<Class<?>> ret = new ArrayList<Class<?>>();
+		if(objects != null) {
+			for(Object o: objects) {
+				ret.add(o!=null?o.getClass():null);
+			}
 		}
 		return ret;
+	}
+	
+	public static List<String> getClassSimpleNameList(List<Class<?>> classes) {
+		List<String> ret = new ArrayList<String>();
+		if(classes != null) {
+			for(Class<?> c: classes) {
+				ret.add(c!=null?c.getSimpleName():null);
+			}
+		}
+		return ret;
+	}
+
+	public static <T> List<String> getClassSimpleNameListT(List<Class<T>> classes) {
+		List<String> ret = new ArrayList<String>();
+		if(classes != null) {
+			for(Class<T> c: classes) {
+				ret.add(c.getSimpleName());
+			}
+		}
+		return ret;
+	}
+	
+	public static List<String> getClassSimpleNameListFromObjectList(List<?> objects) {
+		List<Class<?>> classes = getClassListFromObjectList(objects);
+		return getClassSimpleNameList(classes);
 	}
 	
 	// http://stackoverflow.com/a/309718/616413
