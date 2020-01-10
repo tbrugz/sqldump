@@ -22,6 +22,7 @@ public class DiffUtil {
 		for(DBIdentifiable d: dbids) {
 			if(type.equals(DBIdentifiable.getType(d)) 
 					&& (d.getSchemaName()!=null?d.getSchemaName().equalsIgnoreCase(schemaName):true) 
+					&& d.getName()!=null
 					&& d.getName().equalsIgnoreCase(name)
 					&& d.isDumpable())
 				return (T) d;
