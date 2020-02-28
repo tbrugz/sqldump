@@ -24,9 +24,11 @@ public enum TokenizerStrategy {
 	public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
 	public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
 	
+	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_SCANNER;
+	
 	public static TokenizerStrategy getTokenizerStrategy(String tokenizer) {
 		if(tokenizer == null) {
-			return TokenizerStrategy.STMT_SCANNER;
+			return TokenizerStrategy.DEFAULT_STRATEGY;
 		}
 		tokenizer = tokenizer.trim();
 
@@ -77,6 +79,10 @@ public enum TokenizerStrategy {
 				if(reader!=null) { reader.close(); }
 			}
 		}
+	}
+
+	public static Tokenizer getDefaultTokenizer(File file, String inputEncoding) throws IOException {
+		return getTokenizer(DEFAULT_STRATEGY, file, inputEncoding, false, true);
 	}
 	
 }

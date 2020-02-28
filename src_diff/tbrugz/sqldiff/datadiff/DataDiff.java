@@ -1,7 +1,6 @@
 package tbrugz.sqldiff.datadiff;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,7 +38,8 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetColumnMetaData;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
+import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
@@ -65,7 +65,7 @@ public class DataDiff extends AbstractFailable {
 		}
 		
 		@Override
-		public ResultSet call() throws SQLException, FileNotFoundException {
+		public ResultSet call() throws SQLException, IOException {
 			if(mustImport) {
 				importData(table, conn, id);
 			}
@@ -506,7 +506,7 @@ public class DataDiff extends AbstractFailable {
 	static final String SCHEMANAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME));
 	static final String TABLENAME_PATTERN = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	
-	void importData(Table table, Connection conn, String grabberId) throws SQLException, FileNotFoundException {
+	void importData(Table table, Connection conn, String grabberId) throws SQLException, IOException {
 		Statement st = conn.createStatement();
 		
 		//create schema
@@ -526,7 +526,8 @@ public class DataDiff extends AbstractFailable {
 				.replaceAll(TABLENAME_PATTERN, Matcher.quoteReplacement(table.getName()) );
 		File file = new File(fileName);
 		log.debug("importing data from file: "+file);
-		SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset, false);
+		//SQLStmtScanner scanner = new SQLStmtScanner(file, importCharset, false);
+		Tokenizer scanner = TokenizerStrategy.getDefaultTokenizer(file, importCharset);
 		long updateCount = 0;
 		for(String sql: scanner) {
 			updateCount += st.executeUpdate(sql);
