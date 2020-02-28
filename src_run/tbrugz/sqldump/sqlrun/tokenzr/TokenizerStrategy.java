@@ -24,7 +24,7 @@ public enum TokenizerStrategy {
 	public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
 	public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
 	
-	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_SCANNER;
+	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_TOKENIZER;
 	
 	public static TokenizerStrategy getTokenizerStrategy(String tokenizer) {
 		if(tokenizer == null) {

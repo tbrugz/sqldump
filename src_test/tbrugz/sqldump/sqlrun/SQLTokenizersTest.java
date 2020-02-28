@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,10 +24,11 @@ public class SQLTokenizersTest {
 		list.add(SQLStmtScanner.class); list.add(SQLStmtTokenizer.class);
 		return list;
 	}*/
-
+	
 	@Parameters
 	public static Collection<Object[]> data() {
 		Collection<Object[]> list = new ArrayList<Object[]>();
+		//list.add(new Object[]{StringSpliter.class, null});
 		//list.add(new Object[]{SQLStmtScanner.class, null});
 		list.add(new Object[]{SQLStmtTokenizer.class, null});
 		list.add(new Object[]{SQLStmtNgScanner.class, null});
@@ -49,6 +51,9 @@ public class SQLTokenizersTest {
 		if(clazz.equals(SQLStmtNgScanner.class)) {
 			return new SQLStmtNgScanner(str);
 		}
+		/*if(clazz.equals(StringSpliter.class)) {
+			return new StringSpliter(str);
+		}*/
 		throw new RuntimeException("unknown tokenizer: "+clazz);
 	}
 	
@@ -148,4 +153,14 @@ public class SQLTokenizersTest {
 		Assert.assertEquals("eee--zzx;ab", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
+	
+	@Test
+	@Ignore("does not work with SQLStmtNgScanner")
+	public void testTokenApos() {
+		Tokenizer p = createTokenizer(clazz, "'wil'';son'");
+		
+		Assert.assertEquals("'wil'';son'", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+
 }
