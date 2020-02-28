@@ -2,7 +2,6 @@ package tbrugz.sqldump.sqlrun;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
@@ -27,13 +26,8 @@ import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Util;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
-import tbrugz.sqldump.sqlrun.tokenzr.StringSpliter;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
 import tbrugz.sqldump.util.ConnectionUtil;
-import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
@@ -41,7 +35,6 @@ import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
-@SuppressWarnings("deprecation")
 public class StmtProc extends AbstractFailable implements Executor {
 	static final Log log = LogFactory.getLog(StmtProc.class);
 	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
@@ -85,31 +78,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		File file = new File(filePath);
 		//FIXedME: SQLStmtTokenizer not working (on big files?)
-		Iterable<String> stmtTokenizer = null;
-		switch(tokenizerStrategy) {
-		case STMT_SCANNER_NG:
-			//XXX option to define charset
-			stmtTokenizer = new SQLStmtNgScanner(file, inputEncoding);
-			break;
-		case STMT_SCANNER:
-			//XXX option to define charset
-			stmtTokenizer = new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
-			break;
-		default:
-			FileReader reader = new FileReader(file);
-			String fileStr = IOUtil.readFromReader(reader);
-			switch (tokenizerStrategy) {
-			case STMT_TOKENIZER:
-				stmtTokenizer = new SQLStmtTokenizer(fileStr);
-				break;
-			case STRING_SPLITTER:
-				stmtTokenizer = new StringSpliter(fileStr, split);
-				break;
-			default:
-				throw new IllegalStateException("unknown TokenizerStrategy: "+tokenizerStrategy);
-			}
-			reader.close();
-		}
+		Iterable<String> stmtTokenizer = TokenizerStrategy.getTokenizer(tokenizerStrategy, file, inputEncoding, escapeBackslashedApos, split);
 
 		Writer logerror = null;
 		
@@ -381,7 +350,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	@Override
 	public void setProperties(Properties papp) {
 		String tokenizer = papp.getProperty(StmtProc.PROP_SQLTOKENIZERCLASS);
-		tokenizerStrategy = TokenizerStrategy.getTokenizer(tokenizer);
+		tokenizerStrategy = TokenizerStrategy.getTokenizerStrategy(tokenizer);
 		usePreparedStatement = Utils.getPropBool(papp, PROP_USE_PREPARED_STATEMENT, usePreparedStatement);
 		if(!usePreparedStatement) {
 			log.info("not using prepared statements [prop '"+PROP_USE_PREPARED_STATEMENT+"']");

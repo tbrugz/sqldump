@@ -1,7 +1,13 @@
 package tbrugz.sqldump.sqlrun.tokenzr;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import tbrugz.sqldump.util.IOUtil;
 
 public enum TokenizerStrategy {
 	
@@ -18,7 +24,7 @@ public enum TokenizerStrategy {
 	public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
 	public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
 	
-	public static TokenizerStrategy getTokenizer(String tokenizer) {
+	public static TokenizerStrategy getTokenizerStrategy(String tokenizer) {
 		if(tokenizer == null) {
 			return TokenizerStrategy.STMT_SCANNER;
 		}
@@ -44,4 +50,33 @@ public enum TokenizerStrategy {
 			throw new IllegalArgumentException("unknown string tokenizer class: "+tokenizer);
 		}
 	}
+	
+	public static Tokenizer getTokenizer(TokenizerStrategy tokenizerStrategy, File file, String inputEncoding, boolean escapeBackslashedApos, boolean split) throws IOException {
+		switch(tokenizerStrategy) {
+		case STMT_SCANNER_NG:
+			//XXX option to define charset
+			return new SQLStmtNgScanner(file, inputEncoding);
+		case STMT_SCANNER:
+			//XXX option to define charset
+			return new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
+		default:
+			FileReader reader = null;
+			try {
+				reader = new FileReader(file);
+				String fileStr = IOUtil.readFromReader(reader);
+				switch (tokenizerStrategy) {
+				case STMT_TOKENIZER:
+					return new SQLStmtTokenizer(fileStr);
+				case STRING_SPLITTER:
+					return new StringSpliter(fileStr, split);
+				default:
+					throw new IllegalStateException("unknown TokenizerStrategy: "+tokenizerStrategy);
+				}
+			}
+			finally {
+				if(reader!=null) { reader.close(); }
+			}
+		}
+	}
+	
 }
