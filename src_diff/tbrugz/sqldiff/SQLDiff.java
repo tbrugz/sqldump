@@ -721,8 +721,13 @@ public class SQLDiff implements Executor {
 		ColumnDiff.addComments = savedAddComments;
 		
 		if(execCount>0 && errorCount==0) {
-			log.info("committing "+execCount+" changes...");
-			conn.commit();
+			if(conn.getAutoCommit()) {
+				log.info("committed "+execCount+" changes... [autocommit enabled]");
+			}
+			else {
+				log.info("committing "+execCount+" changes...");
+				conn.commit();
+			}
 		}
 		
 		if(failonerror && errorCount>0) {

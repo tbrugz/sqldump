@@ -304,6 +304,12 @@ public class ConnectionUtil {
 		}
 	}
 	
+	public static void doCommitIfNotAutocommit(Connection conn) throws SQLException {
+		if(!conn.getAutoCommit()) {
+			doCommit(conn);
+		}
+	}
+	
 	public static void doRollback(Connection conn) {
 		try {
 			conn.rollback();
