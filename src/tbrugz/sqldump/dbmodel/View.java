@@ -47,6 +47,8 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 	Integer parameterCount; //XXXdone add parameterCount to View?
 	List<String> parameterTypes;
 	
+	public static transient boolean dumpColumnNames = false;
+	
 	//public String checkOptionConstraintName;
 	
 	static final Pattern PATTERN_CREATE_VIEW = Pattern.compile("\\s*create\\s+", Pattern.CASE_INSENSITIVE);
@@ -69,26 +71,28 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 		
 		return (dumpCreateOrReplace?"create or replace ":"create ") + (viewType!=null?viewType+" ":"") + "view "
 				+ getFinalName(dumpSchemaName)
-				+ getConstraintsSnippet()
+				+ getColumnsAndConstraintsSnippet()
 				+ getExtraConstraintsSnippet()
 				+ " as\n" + query
 				+ getCheckOptionAndReadOnlySnippet()
 				+ getRemarksSnippet(dumpSchemaName);
 	}
 	
-	protected String getConstraintsSnippet() {
-		StringBuilder sbConstraints = new StringBuilder();
+	protected String getColumnsAndConstraintsSnippet() {
+		boolean hasColNames = getColumnNames()!=null && getColumnNames().size()>0;
+		
+		final StringBuilder sbConstraints = new StringBuilder();
 		if(constraints!=null) {
 			for(int i=0;i<constraints.size();i++) {
 				Constraint cons = constraints.get(i);
-				sbConstraints.append((i==0?"":",\n\t")+cons.getDefinition(false));
+				sbConstraints.append( ((i==0 && !hasColNames) ? "" : ",\n\t") + cons.getDefinition(false));
 			}
 		}
 		
-		if(sbConstraints.length()>0) {
+		if((dumpColumnNames && hasColNames) || sbConstraints.length()>0) {
 			return " (\n\t"
-						+ ((columns!=null&&columns.size()>0)?Utils.join(getColumnNames(), ", ")+",\n\t":"")
-						+ sbConstraints.toString()+"\n)";			
+						+ (hasColNames?Utils.join(getColumnNames(), ", "):"")
+						+ sbConstraints.toString()+"\n)";
 		}
 		
 		return "";
