@@ -62,6 +62,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	boolean dumpSynonymAsTable = false;
 	boolean dumpViewAsTable = false;
 	boolean dumpMaterializedViewAsTable = false;
+	boolean dumpViewColumnNames = false;
 	
 	boolean dumpGrantsWithReferencingTable = false;
 	boolean dumpIndexesWithReferencingTable = false;
@@ -119,6 +120,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 
 	static final String PROP_SCHEMADUMP_SYNONYM_AS_TABLE = PREFIX+".dumpsynonymastable";
 	static final String PROP_SCHEMADUMP_VIEW_AS_TABLE = PREFIX+".dumpviewastable";
+	static final String PROP_SCHEMADUMP_VIEW_COLUMN_NAMES = PREFIX+".view.dumpcolumnnames";
 	static final String PROP_SCHEMADUMP_MATERIALIZEDVIEW_AS_TABLE = PREFIX+".dumpmaterializedviewastable";
 
 	@Deprecated static final String PROP_DUMP_SYNONYM_AS_TABLE = "sqldump.dumpsynonymastable";
@@ -169,9 +171,11 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		String dumpIndexOrderBy = prop.getProperty(PROP_SCHEMADUMP_INDEXORDERBY);
 		dumpIndexesSortedByTableName = "tablename".equalsIgnoreCase(dumpIndexOrderBy);
 		dumpFKs = Utils.getPropBool(prop, PROP_SCHEMADUMP_FKs, dumpFKs);
+		dumpViewColumnNames = Utils.getPropBool(prop, PROP_SCHEMADUMP_VIEW_COLUMN_NAMES, dumpViewColumnNames);
 		
 		//dumpWriteAppend = Utils.getPropBool(prop, PROP_SCHEMADUMP_WRITEAPPEND, dumpWriteAppend);
 		DBObject.dumpCreateOrReplace = dumpWithCreateOrReplace;
+		View.dumpColumnNames = dumpViewColumnNames;
 		SQLIdentifierDecorator.dumpQuoteAll = Utils.getPropBool(prop, PROP_SCHEMADUMP_QUOTEALLSQLIDENTIFIERS, SQLIdentifierDecorator.dumpQuoteAll);
 
 		//fromDbId = DBMSResources.instance().dbid();
