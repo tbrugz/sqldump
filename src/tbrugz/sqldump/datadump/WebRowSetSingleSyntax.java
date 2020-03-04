@@ -23,7 +23,7 @@ import com.sun.rowset.WebRowSetImpl;
 /*
  * java9: https://docs.oracle.com/javase/9/docs/api/javax/sql/rowset
  */
-public class WebRowSetSingleSyntax extends DumpSyntax {
+public class WebRowSetSingleSyntax extends AbstractDumpSyntax implements DumpSyntaxBuilder, Cloneable {
 
 	WebRowSet wrs;
 	

@@ -684,6 +684,31 @@ public class DataDumpTest {
 	}
 
 	@Test
+	public void testWebRowSetSyntax() throws Exception {
+		String[] vmparamsDump = {
+				"-Dsqldump.grabclass=JDBCSchemaGrabber",
+				"-Dsqldump.processingclasses=DataDump",
+				"-Dsqldump.datadump.dumpsyntaxes=webrowset-single",
+				"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.driverclass=org.h2.Driver",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		dump1(vmparamsDump, null);
+
+		Document doc = parseXML(new File(DIR_OUT+"/data_EMP."+(new WebRowSetSingleSyntax()).getDefaultFileExtension()));
+		
+		Element el = doc.getDocumentElement();
+		Assert.assertEquals(1, countElementsOfType(el.getChildNodes(), "properties"));
+		Assert.assertEquals(1, countElementsOfType(el.getChildNodes(), "metadata"));
+		Assert.assertEquals(1, countElementsOfType(el.getChildNodes(), "data"));
+		
+		Element data = (Element) el.getElementsByTagName("data").item(0);
+		Assert.assertEquals(5, countElementsOfType(data.getChildNodes(), "currentRow"));
+	}
+	
+	@Test
 	public void testXls() throws ClassNotFoundException, SQLException, NamingException, IOException {
 		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.dumpsyntaxes=xls, xlsx",

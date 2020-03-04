@@ -27,7 +27,7 @@ import tbrugz.sqldump.util.Utils;
  * TODO add 'turtle.html' syntax?
  * http://answers.semanticweb.com/questions/356/seealso-or-sameas
  */
-public class Turtle extends RDFAbstractSyntax {
+public class Turtle extends RDFAbstractSyntax implements DumpSyntaxBuilder, Cloneable {
 
 	static final String[] NAMESPACE_PREFIXES = { "rdf", "xsd" };
 	public static final String PROP_KEY_COLSEPARATOR = "sqldump.datadump.turtle.keycolseparator";

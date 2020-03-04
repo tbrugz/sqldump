@@ -23,7 +23,7 @@ import tbrugz.sqldump.util.SQLUtils;
  * 
  * https://poi.apache.org/spreadsheet/quick-guide.html
  */
-public class PoiXlsSyntax extends OutputStreamDumper {
+public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilder, Cloneable {
 
 	//static final Log log = LogFactory.getLog(PoiXlsSyntax.class);
 	

@@ -16,7 +16,7 @@ import com.sun.rowset.CachedRowSetImpl;
 /*
  * java9: https://docs.oracle.com/javase/9/docs/api/javax/sql/rowset
  */
-public class CacheRowSetSyntax extends OutputStreamDumper {
+public class CacheRowSetSyntax extends OutputStreamDumper implements DumpSyntaxBuilder, Cloneable {
 
 	CachedRowSet crs;
 	
