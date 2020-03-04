@@ -576,8 +576,11 @@ public class DataDump extends AbstractSQLProc {
 
 			//headers
 			for(int i=0;i<syntaxList.size();i++) {
-				DumpSyntax ds = syntaxList.get(i);
-				ds.initDump(schemaName, tableOrQueryName, keyColumns, md);
+				DumpSyntaxInt dsz = syntaxList.get(i);
+				//ds.initDump(schemaName, tableOrQueryName, keyColumns, md);
+				DumpSyntaxInt ds = DataDumpUtils.buildDumpSyntax(dsz, schemaName, tableOrQueryName, keyColumns, md);
+				syntaxList.set(i, (DumpSyntax) ds);
+
 				doSyntaxDumpList.add(false);
 				filenameList.add(null);
 				

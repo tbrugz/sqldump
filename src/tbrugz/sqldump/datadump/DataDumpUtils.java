@@ -543,6 +543,17 @@ public class DataDumpUtils {
 		return ret;
 	}
 	
+	public static DumpSyntaxInt buildDumpSyntax(final DumpSyntaxInt ds, String schemaName, String tableOrQueryName, List<String> keyColumns, ResultSetMetaData md) throws SQLException {
+		if(ds instanceof DumpSyntaxBuilder) {
+			//log.info("syntax '"+ds.getSyntaxId()+"' is a DumpSyntaxBuilder :)");
+			DumpSyntaxInt ret = ((DumpSyntaxBuilder) ds).build(schemaName, tableOrQueryName, keyColumns, md);
+			return ret;
+		}
+		log.warn("syntax '"+ds.getSyntaxId()+"' isn't a DumpSyntaxBuilder");
+		ds.initDump(schemaName, tableOrQueryName, keyColumns, md);
+		return ds;
+	}
+	
 	@SuppressWarnings("rawtypes")
 	public static ResultSet getResultSetFromArray(Object obj, boolean withIndexColumn, String columnName) {
 		if(obj==null) { return null; }
