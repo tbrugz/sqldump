@@ -15,7 +15,7 @@ public class MarkdownSyntax extends FFCDataDump {
 	static final String MARKDOWN_SYNTAX_ID = "markdown";
 	static final String MARKDOWN_MIMETYPE = "text/markdown";
 	
-	boolean useTextPlainMimeType = false;
+	boolean useTextPlainMimeType = true; //XXX: add prop?
 	
 	@Override
 	public String getSyntaxId() { 
