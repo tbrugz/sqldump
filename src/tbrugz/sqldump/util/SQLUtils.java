@@ -42,7 +42,7 @@ public class SQLUtils {
 	
 	static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
 	
-	static boolean strangePrecisionNumericAsInt = true;
+	static boolean strangePrecisionNumericAsInt = false;
 	static boolean defaultTypeIsString = true;
 	static boolean clobTypeIsString = true;
 	public static boolean failOnError = false;
@@ -92,6 +92,10 @@ public class SQLUtils {
 	static boolean resultSetGetObjectExceptionWarned = false;
 
 	static Set<String> genericObjectsWarned = new HashSet<String>();
+	
+	static {
+		genericObjectsWarned.add(String.class.getName()); // ignoring String class
+	}
 	
 	public static List<Object> getRowObjectListFromRS(ResultSet rs, List<Class<?>> colTypes, int numCol) throws SQLException {
 		return getRowObjectListFromRS(rs, colTypes, numCol, false);
@@ -301,7 +305,8 @@ public class SQLUtils {
 					( (precision>0)&&(scale<0) ) ? Double.class: // might work better for oracle if J2EE13Compliant=false -- should it be (precision != 0) && (scale == -127)) ?
 					( precision>0 ) ? Integer.class:
 					//( (precision==0)&&(scale==0) ) ? Double.class:
-					// being bold and assuming Integer (if actual data is not, dump syntax will hopefully take care)
+					// assuming Integer? (if actual data is not, dump syntax will hopefully take care)
+					// ( precision <= 0 && scale <= 0 ) ==>
 					(strangePrecisionNumericAsInt?Integer.class:Double.class); //"strange" precision: less or equal zero 
 			case Types.REAL:     //  7
 			case Types.FLOAT:    //  6
