@@ -27,6 +27,8 @@ import java.util.regex.Matcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.DBType;
+
 public class SQLUtils {
 	
 	static final Log log = LogFactory.getLog(SQLUtils.class);
@@ -217,7 +219,12 @@ public class SQLUtils {
 					Class<?> clazz = value.getClass();
 					String objectClassName = clazz.getName();
 					if(!genericObjectsWarned.contains(objectClassName)) {
-						log.warn("generic type ["+objectClassName+"/"+coltype.getName()+"] grabbed");
+						if(value instanceof DBType) {
+							log.debug("DBType type ["+objectClassName+";"+i+"] grabbed");
+						}
+						else {
+							log.warn("generic type ["+objectClassName+";"+i+"] grabbed");
+						}
 						genericObjectsWarned.add(objectClassName);
 					}
 					if(canReturnResultSet && ResultSet.class.isAssignableFrom(clazz)) {
@@ -551,6 +558,10 @@ public class SQLUtils {
 		}
 		if(clazz.isEnum()) {
 			//log.info("enum type: "+clazz.getName());
+			return Types.VARCHAR;
+		}
+		if(DBType.class.isAssignableFrom(clazz)) {
+			//log.info("DBType type: "+clazz.getName());
 			return Types.VARCHAR;
 		}
 		/*if(clazz.equals(Class.class)) {

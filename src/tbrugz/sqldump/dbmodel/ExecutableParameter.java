@@ -2,7 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
 
-public class ExecutableParameter implements Serializable {
+public class ExecutableParameter implements DBType, Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public enum INOUT {

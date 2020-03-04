@@ -7,7 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 //XXX: make Grant immutable?
-public class Grant implements Serializable {
+public class Grant implements DBType, Serializable {
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(Grant.class);
 	

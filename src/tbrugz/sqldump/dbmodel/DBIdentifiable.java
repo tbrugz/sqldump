@@ -2,7 +2,7 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.Collection;
 
-public abstract class DBIdentifiable implements NamedDBObject, Comparable<DBIdentifiable> {
+public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparable<DBIdentifiable> {
 	String schemaName;
 	String name;
 
