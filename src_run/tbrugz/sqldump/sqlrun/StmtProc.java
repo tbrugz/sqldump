@@ -350,6 +350,9 @@ public class StmtProc extends AbstractFailable implements Executor {
 	@Override
 	public void setProperties(Properties papp) {
 		String tokenizer = papp.getProperty(StmtProc.PROP_SQLTOKENIZERCLASS);
+		/*if(tokenizer!=null) {
+			log.info("using sqltokenizerclass '"+tokenizer+"' [prop '"+StmtProc.PROP_SQLTOKENIZERCLASS+"']");
+		}*/
 		tokenizerStrategy = TokenizerStrategy.getTokenizerStrategy(tokenizer);
 		usePreparedStatement = Utils.getPropBool(papp, PROP_USE_PREPARED_STATEMENT, usePreparedStatement);
 		if(!usePreparedStatement) {

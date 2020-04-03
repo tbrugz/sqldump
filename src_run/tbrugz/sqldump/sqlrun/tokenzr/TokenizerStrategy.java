@@ -1,8 +1,10 @@
 package tbrugz.sqldump.sqlrun.tokenzr;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.Reader;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +30,9 @@ public enum TokenizerStrategy {
 	
 	public static TokenizerStrategy getTokenizerStrategy(String tokenizer) {
 		if(tokenizer == null) {
-			return TokenizerStrategy.DEFAULT_STRATEGY;
+			TokenizerStrategy ret = TokenizerStrategy.DEFAULT_STRATEGY;
+			//log.debug("using default '"+ret+"' tokenizer strategy");
+			return ret;
 		}
 		tokenizer = tokenizer.trim();
 
@@ -54,6 +58,7 @@ public enum TokenizerStrategy {
 	}
 	
 	public static Tokenizer getTokenizer(TokenizerStrategy tokenizerStrategy, File file, String inputEncoding, boolean escapeBackslashedApos, boolean split) throws IOException {
+		//log.debug("getTokenizer: strategy="+tokenizerStrategy+" ; charset = "+inputEncoding);
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER_NG:
 			//XXX option to define charset
@@ -62,9 +67,10 @@ public enum TokenizerStrategy {
 			//XXX option to define charset
 			return new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
 		default:
-			FileReader reader = null;
+			// https://stackoverflow.com/questions/696626/java-filereader-encoding-issue
+			Reader reader = null;
 			try {
-				reader = new FileReader(file);
+				reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
 				String fileStr = IOUtil.readFromReader(reader);
 				switch (tokenizerStrategy) {
 				case STMT_TOKENIZER:
