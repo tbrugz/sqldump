@@ -47,6 +47,7 @@ import tbrugz.sqldump.sqlrun.FailoverTest;
 import tbrugz.sqldump.sqlrun.SQLRunAndDumpTest;
 import tbrugz.sqldump.sqlrun.SQLRunMainTest;
 import tbrugz.sqldump.sqlrun.SQLTokenizersTest;
+import tbrugz.sqldump.sqlrun.SQLTokenizerFileTest;
 import tbrugz.sqldump.sqlrun.SqlImportTest;
 import tbrugz.sqldump.sqlrun.StmtExecTest;
 import tbrugz.sqldump.sqlrun.StmtProcTest;
@@ -63,6 +64,7 @@ import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 	//"unit" tests
 	ParametrizedPropertiesTest.class,
 	SQLTokenizersTest.class,
+	SQLTokenizerFileTest.class,
 	SQLStmtScannerTest.class,
 	PivotRSTest.class,
 	IOUtilTest.class,
