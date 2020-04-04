@@ -20,11 +20,15 @@ import org.apache.commons.logging.LogFactory;
 public class ParametrizedProperties extends Properties {
 
 	private static final long serialVersionUID = 1L;
+
 	public static final String DIRECTIVE_INCLUDE = "@includes";
+	public static final String NULL_PLACEHOLDER = "_NULL_";
+
 	static final Log log = LogFactory.getLog(ParametrizedProperties.class);
 
 	static boolean useSystemProperties = false;
 	static boolean useSystemEnvironment = true;
+	static boolean nullValueReturnsNull = true;
 
 	//List<File> loadedPropFiles = new ArrayList<File>();
 	Map<File, Boolean> loadedPropFiles = new HashMap<File, Boolean>(); //boolean is: hasWarned
@@ -133,9 +137,11 @@ public class ParametrizedProperties extends Properties {
 			return null;
 		}
 		if(s.indexOf("${")<0) {
+			/*if(nullValueReturnsNull && s.equals(NULL_PLACEHOLDER)) {
+				return null;
+			}*/
 			return s;
 		}
-		
 		return replaceProps(s, this);
 	}
 	
@@ -161,7 +167,11 @@ public class ParametrizedProperties extends Properties {
 				String[] parts = prop.split("\\|");
 				String propval = null;
 				for(int i=0;i<parts.length;i++) {
-					propval = p.getProperty(parts[i].trim());
+					String propKey = parts[i].trim();
+					/*if(nullValueReturnsNull && propKey.equals(NULL_PLACEHOLDER)) {
+						return null;
+					}*/
+					propval = p.getProperty(propKey);
 					if(propval!=null) { break; }
 				}
 				propSuperValue = propval;
@@ -178,7 +188,11 @@ public class ParametrizedProperties extends Properties {
 			
 			sb.replace(pos1, pos2+1, propSuperValue);
 		}
-		return sb.toString();
+		String ret = sb.toString();
+		if(nullValueReturnsNull && ret.equals(NULL_PLACEHOLDER)) {
+			return null;
+		}
+		return ret;
 	}
 	
 	//XXX: make non-static?
@@ -190,6 +204,14 @@ public class ParametrizedProperties extends Properties {
 	public static void setUseSystemProperties(boolean useSystemPropertiesParam) {
 		log.debug("using system properties: "+useSystemPropertiesParam);
 		useSystemProperties = useSystemPropertiesParam;
+	}
+
+	public static boolean isNullValueReturnsNull() {
+		return nullValueReturnsNull;
+	}
+
+	public static void setNullValueReturnsNull(boolean nullValueReturnsNullParam) {
+		nullValueReturnsNull = nullValueReturnsNullParam;
 	}
 	
 	void logKey(String key) {

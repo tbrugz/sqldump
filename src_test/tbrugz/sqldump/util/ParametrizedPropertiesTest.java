@@ -70,4 +70,16 @@ public class ParametrizedPropertiesTest {
 		//ParametrizedProperties.setUseSystemProperties(true);
 		//System.out.println("propDir: "+pp.getProperty("propDir"));
 	}
+
+	@Test
+	public void testP4NullPlaceholder() throws IOException {
+		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
+		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+
+		//Assert.assertEquals(null, pp.getProperty("null"));
+		Assert.assertEquals(null, pp.getProperty("propNull1"));
+		Assert.assertEquals(null, pp.getProperty("propNull2"));
+		Assert.assertEquals("something _NULL_ and something", pp.getProperty("propNull3"));
+	}
+
 }
