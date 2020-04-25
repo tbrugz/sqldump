@@ -8,15 +8,20 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
+import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
@@ -24,7 +29,14 @@ import tbrugz.sqldump.dbmodel.View;
  * see: https://db.apache.org/derby/docs/10.14/tools/ctoolsdblook.html
  */
 public class DerbyFeatures extends DefaultDBMSFeatures {
+
 	static Log log = LogFactory.getLog(DerbyFeatures.class);
+
+	/*@Override
+	public void procProperties(Properties prop) {
+		super.procProperties(prop);
+		log.info("procProperties: "+prop);
+	}*/
 
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
@@ -44,13 +56,17 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current derby db version?
 			log.debug("nested exception: "+e);
 		}
-		
+
+		if(grabUniqueConstraints) {
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
+		}
+
 		if(grabExecutables) {
 			grabDBExecutables(model.getExecutables(), schemaPattern, null, conn);
 		}
 		
 		//XXX: derby: add synonyms?
-		//XXX: derby: add check/unique constraints?
+		//XXX: derby: add check constraints?
 	}
 
 	@Override
@@ -182,7 +198,16 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			eo.setType(getExecutableType(aliasType));
 			
 			String javaClass = rs.getString(4);
-			String aliasInfo = rs.getString(5);
+			
+			String aliasInfo = null;
+			try {
+				aliasInfo = rs.getString(5);
+			}
+			catch(SQLException e) {
+				log.warn("Error grabbing aliasinfo of executable (full derby.jar may be needed in classpath): "+e);
+				log.debug("Error grabbing aliasinfo of executable: "+e.getMessage(), e);
+				break;
+			}
 			
 			//log.info("aliasType '"+aliasType+"; 'aliasInfo: "+aliasInfo);
 			String body = null;
@@ -238,6 +263,82 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		return DBObjectType.EXECUTABLE;
 	}
 	
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+		return "select sc.schemaname, t.tablename, c.constraintname, cg.descriptor "
+				+ "from sys.sysconstraints c "
+				+ "join sys.syskeys k on c.constraintid = k.constraintid "
+				+ "join sys.sysconglomerates cg on k.conglomerateid = cg.conglomerateid "
+				+ "join sys.sysschemas sc on c.schemaid = sc.schemaid "
+				+ "join sys.systables t on c.tableid = t.tableid "
+				+ "where type = 'U' "
+				+(constraintNamePattern!=null?"and c.constraintname = '"+constraintNamePattern+"' ":"");
+	}
+
+	static final Pattern indexesPattern = Pattern.compile(".*\\(([0-9 ,]+)\\).*");
+
+	/*
+	 * see: https://stackoverflow.com/questions/2349785/how-to-get-primary-key-and-unique-constraint-columns-in-derby
+	 */
+	@Override
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+		log.debug("grabbing unique constraints");
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
+		Statement st = conn.createStatement();
+		log.debug("sql: "+query);
+		ResultSet rs = st.executeQuery(query);
+		
+		int countUKs = 0;
+		int countCols = 0;
+		while(rs.next()) {
+			String schemaName = rs.getString(1);
+			String tableName = rs.getString(2);
+			
+			Constraint c = new Constraint();
+			c.setType(Constraint.ConstraintType.UNIQUE);
+			c.setName( rs.getString(3) );
+			String descriptor = null;
+			try {
+				descriptor = rs.getString(4);
+			}
+			catch(SQLException e) {
+				log.warn("Error grabbing descriptor of unique constraint (full derby.jar may be needed in classpath): "+e);
+				log.debug("Error grabbing descriptor of unique constraint: "+e.getMessage(), e);
+				break;
+			}
+			if(descriptor == null) {
+				log.warn("grabDBUniqueConstraints: [constraint "+c+"] null descriptor");
+				continue;
+			}
+			Matcher matcher = indexesPattern.matcher(descriptor);
+			if(!matcher.matches()) {
+				log.warn("grabDBUniqueConstraints: [constraint "+c+"] unrecognizable descriptor: "+descriptor);
+				continue;
+			}
+			String columnList = matcher.group(1);
+			String[] colIdxs = columnList.split(",");
+			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, schemaName, tableName);
+			if(t!=null) {
+				List<String> tCols = t.getColumnNames();
+				for(String ss: colIdxs) {
+					int i = Integer.parseInt(ss);
+					String colName = tCols.get(i-1);
+					c.getUniqueColumns().add(colName);
+					log.debug("grabDBUniqueConstraints: added column #"+i+": "+colName);
+				}
+				countCols += colIdxs.length;
+				countUKs++;
+				t.getConstraints().add(c);
+			}
+			else {
+				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
+			}
+		}
+		
+		rs.close();
+		st.close();
+		log.info(countUKs+" unique constraints grabbed [colcount="+countCols+"]");
+	}
+
 	@Override
 	public boolean supportsExplainPlan() {
 		return true;

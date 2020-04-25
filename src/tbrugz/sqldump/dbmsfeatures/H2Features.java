@@ -94,7 +94,6 @@ public class H2Features extends InformationSchemaFeatures {
 			+ "order by table_name, constraint_name";
 	}
 	
-	
 	@Override
 	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
@@ -126,15 +125,15 @@ public class H2Features extends InformationSchemaFeatures {
 			for(String ss: cols) {
 				c.getUniqueColumns().add(ss.trim());
 			}
-			countCols += cols.length;
 			Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, schemaName, tableName);
 			if(t!=null) {
+				countCols += cols.length;
+				countUKs++;
 				t.getConstraints().add(c);
 			}
 			else {
 				log.warn("constraint "+c+" can't be added to table '"+tableName+"': table not found");
 			}
-			countUKs++;
 		}
 		
 		rs.close();
