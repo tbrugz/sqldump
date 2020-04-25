@@ -263,7 +263,7 @@ public class SQLUtils {
 				errorGettingValueWarnCount++;
 				if( (errorGettingValueWarnCount <= errorGettingValueWarnMaxCount) ) {  //|| is1stRow
 					log.warn("error getting value [col="+i+", type="+coltype.getSimpleName()
-							+", count = "+errorGettingValueWarnCount
+							+", count="+errorGettingValueWarnCount
 							+(errorGettingValueWarnCount==errorGettingValueWarnMaxCount?"; max warn count ["+errorGettingValueWarnMaxCount+"] reached":"")
 							+"]: "+e);
 					log.debug("error getting value [col="+i+"]", e);

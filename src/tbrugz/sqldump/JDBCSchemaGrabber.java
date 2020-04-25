@@ -251,6 +251,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	void initFeatures(Connection conn) throws SQLException {
 		feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
+		feats.procProperties(papp);
 	}
 	
 	@Override
