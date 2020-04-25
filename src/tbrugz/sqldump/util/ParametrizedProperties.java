@@ -118,6 +118,10 @@ public class ParametrizedProperties extends Properties {
 	
 	@Override
 	public String getProperty(String key) {
+		return getProperty(key, true);
+	}
+
+	String getProperty(String key, boolean replaceNullPlaceholder) {
 		if(log.isDebugEnabled()) { logKey(key); }
 		
 		String s = null;
@@ -137,18 +141,65 @@ public class ParametrizedProperties extends Properties {
 			return null;
 		}
 		if(s.indexOf("${")<0) {
-			/*if(nullValueReturnsNull && s.equals(NULL_PLACEHOLDER)) {
+			if(replaceNullPlaceholder && nullValueReturnsNull && s.equals(NULL_PLACEHOLDER)) {
 				return null;
-			}*/
+			}
 			return s;
 		}
-		return replaceProps(s, this);
+
+		s = replaceProps(s);
+		
+		if(replaceNullPlaceholder && nullValueReturnsNull && s.equals(NULL_PLACEHOLDER)) {
+			return null;
+		}
+		return s;
 	}
 	
 	@Override
 	public synchronized void clear() {
 		super.clear();
 		loadedPropFiles.clear();
+	}
+
+	String replaceProps(String s) {
+		if(s==null) { return null; }
+		StringBuilder sb = new StringBuilder(s);
+		//s.replaceAll("\\$\\{(.*?)\\}", );
+		int count = 0;
+		int pos1;
+		while((pos1 = sb.indexOf("${", count)) >= 0) {
+			int pos2 = sb.indexOf("}", pos1);
+			if(pos2<0) { break; }
+			count = pos1+1;
+			String prop = sb.substring(pos1+2, pos2);
+			String propSuperValue = null;
+			if(prop.contains("|")) {
+				String[] parts = prop.split("\\|");
+				String propval = null;
+				for(int i=0;i<parts.length;i++) {
+					String propKey = parts[i].trim();
+					/*if(nullValueReturnsNull && propKey.equals(NULL_PLACEHOLDER)) {
+						return null;
+					}*/
+					propval = getProperty(propKey, false); // recursive call...
+					if(propval!=null) { break; }
+				}
+				propSuperValue = propval;
+			}
+			else {
+				propSuperValue = getProperty(prop.trim(), false);
+			}
+			
+			if(useSystemProperties && propSuperValue==null) {
+				propSuperValue = System.getProperty(prop.trim());
+			}
+			
+			if(propSuperValue==null) { continue; }
+			
+			sb.replace(pos1, pos2+1, propSuperValue);
+		}
+		String ret = sb.toString();
+		return ret;
 	}
 
 	public static String replaceProps(String s, Properties p) {
@@ -171,7 +222,7 @@ public class ParametrizedProperties extends Properties {
 					/*if(nullValueReturnsNull && propKey.equals(NULL_PLACEHOLDER)) {
 						return null;
 					}*/
-					propval = p.getProperty(propKey);
+					propval = p.getProperty(propKey); // recursive call...
 					if(propval!=null) { break; }
 				}
 				propSuperValue = propval;
@@ -189,9 +240,6 @@ public class ParametrizedProperties extends Properties {
 			sb.replace(pos1, pos2+1, propSuperValue);
 		}
 		String ret = sb.toString();
-		if(nullValueReturnsNull && ret.equals(NULL_PLACEHOLDER)) {
-			return null;
-		}
 		return ret;
 	}
 	

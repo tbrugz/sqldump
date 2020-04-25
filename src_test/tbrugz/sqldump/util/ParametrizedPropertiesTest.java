@@ -76,10 +76,11 @@ public class ParametrizedPropertiesTest {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
 		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
 
-		//Assert.assertEquals(null, pp.getProperty("null"));
+		Assert.assertEquals(null, pp.getProperty("null"));
 		Assert.assertEquals(null, pp.getProperty("propNull1"));
 		Assert.assertEquals(null, pp.getProperty("propNull2"));
 		Assert.assertEquals("something _NULL_ and something", pp.getProperty("propNull3"));
+		Assert.assertEquals(null, pp.getProperty("p2prop"));
 	}
 
 }
