@@ -351,39 +351,54 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	 * http://stackoverflow.com/questions/5981406/apache-derby-explain-select
 	 * https://db.apache.org/derby/docs/10.14/tuning/ctun_xplain_style.html
 	 * https://db.apache.org/derby/docs/10.14/tuning/ctun_xplain_tables.html
+	 * https://db.apache.org/derby/docs/10.14/ref/rrefsysxplain_statements.html
 	 */
 	@Override
 	public ResultSet explainPlan(String sql, List<Object> params,
 			Connection conn) throws SQLException {
 		
 		String planSchema = "XPLAIN_SCHEMA";
+		//String cursorName = "xyz";
+
+		log.debug("explainPlan: schema="+planSchema); //+" ; cursorName="+cursorName);
 		
 		// turn on RUNTIMESTATISTICS for connection
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)").execute();
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(1)").execute();
+
 		// https://db.apache.org/derby/docs/10.9/ref/rref_syscs_set_xplain_mode.html
+		// 1: statements are compiled and optimized, but not executed
+		// 0: (default) statements are compiled, optimized, and executed normally
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE(1)").execute();
+		
 		// Indicate that statistics information should be captured into
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA('"+planSchema+"')").execute();
 
 		//ResultSet rs =
-		bindAndExecuteQuery(sqlExplainPlanQuery(sql), params, conn);
+		bindAndExecuteQuery(sqlExplainPlanQuery(sql), params, conn); //, cursorName
 		
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)").execute();
-		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0)").execute();
-		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE(0)").execute();
-		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA('')").execute();
+		//conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0)").execute();
+		//conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE(0)").execute();
+		//conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA('')").execute();
 		
 		String planQuery =
-			"select rs.op_identifier, rs.op_details, rs.lock_mode, rs.lock_granularity, rs.est_row_count, rs.est_cost, \n" + 
+			"select " +
+			//"     st.stmt_name, st.stmt_text, \n" +
+			"     rs.op_identifier, rs.op_details, rs.lock_mode, rs.lock_granularity, rs.est_row_count, rs.est_cost, \n" + 
 			"     sp.scan_object_name, sp.scan_object_type, sp.scan_type \n" + 
 			"from "+planSchema+".sysxplain_statements st \n" + 
 			"join "+planSchema+".sysxplain_resultsets rs on st.stmt_id = rs.stmt_id \n" + 
 			"left outer join "+planSchema+".sysxplain_scan_props sp on rs.scan_rs_id = sp.scan_rs_id \n" + 
 			"where 1=1\n" + 
-			"and stmt_text = ?";
+			"and st.stmt_text = ?";
+			//"and st.stmt_name = ?";
 		
 		List<Object> planQueryParams = Arrays.asList((Object)sql);
+		//List<Object> planQueryParams = Arrays.asList((Object)cursorName);
+		//List<Object> planQueryParams = null;
+
+		log.debug("explainPlan: sql [schema="+planSchema+"]: "+planQuery); //+";cursorName="+cursorName
 
 		return bindAndExecuteQuery(planQuery, planQueryParams, conn);
 	}
