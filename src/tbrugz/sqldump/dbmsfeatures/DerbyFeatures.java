@@ -24,6 +24,7 @@ import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.StringUtils;
 
 /*
  * see: https://db.apache.org/derby/docs/10.14/tools/ctoolsdblook.html
@@ -391,10 +392,12 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			"join "+planSchema+".sysxplain_resultsets rs on st.stmt_id = rs.stmt_id \n" + 
 			"left outer join "+planSchema+".sysxplain_scan_props sp on rs.scan_rs_id = sp.scan_rs_id \n" + 
 			"where 1=1\n" + 
+			//"and trim(both '\n' from trim(st.stmt_text)) = trim(both '\n' from trim(?))";
 			"and st.stmt_text = ?";
 			//"and st.stmt_name = ?";
+			//XXX trim: remove all heading & trailing whitespaces without regex?
 		
-		List<Object> planQueryParams = Arrays.asList((Object)sql);
+		List<Object> planQueryParams = Arrays.asList((Object) StringUtils.lrtrim(sql));
 		//List<Object> planQueryParams = Arrays.asList((Object)cursorName);
 		//List<Object> planQueryParams = null;
 
