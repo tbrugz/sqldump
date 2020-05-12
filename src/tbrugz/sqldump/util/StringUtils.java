@@ -12,6 +12,8 @@ public class StringUtils {
 
 	// see: http://stackoverflow.com/questions/15567010/what-is-a-good-alternative-of-ltrim-and-rtrim-in-java
 	static final String NL = "\n";
+
+	private final static Pattern LTRIM = Pattern.compile("\\A\\s+");
 	private final static Pattern RTRIM = Pattern.compile("\\s+$");
 
 	public static boolean equalsWithTrim(String s1, String s2) {
@@ -38,8 +40,16 @@ public class StringUtils {
 		return s1.equals(s2);
 	}
 	
+	public static String ltrim(String s) {
+		return LTRIM.matcher(s).replaceFirst("");
+	}
+
 	public static String rtrim(String s) {
 		return RTRIM.matcher(s).replaceFirst("");
+	}
+
+	public static String lrtrim(String s) {
+		return ltrim(rtrim(s));
 	}
 	
 	public static List<Class<?>> getClassListFromObjectList(List<?> objects) {
