@@ -556,6 +556,14 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			if(connPrefix==null) {
 				connPrefix = CONN_PROPS_PREFIX;
 			}
+			// if connPrefix+".autocommit" is set, show warning
+			{
+				String autocommitPropKey = connPrefix+ConnectionUtil.SUFFIX_AUTOCOMMIT;
+				String autocommitPropValue = papp.getProperty(autocommitPropKey);
+				if(autocommitPropValue != null) {
+					log.warn("prop '"+autocommitPropKey+"' (value: "+autocommitPropValue+") will be ignored. Commit Strategy is "+commitStrategy);
+				}
+			}
 			conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategyIsAutocommit);
 			if(conn==null) {
 				throw new ProcessingException("null connection [prop prefix: '"+connPrefix+"']");

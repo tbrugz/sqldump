@@ -436,6 +436,7 @@ public class SQLDiff implements Executor {
 		// sql dialect transformer
 		boolean doTransformTargetDialectToSource = Utils.getPropBool(prop, PROP_SCHEMADIFF_TARGET_DIALECT_TO_SOURCE, false);
 		if(doTransformTargetDialectToSource) {
+			log.info("will 'transform-target-dialect-to-source' [dialect="+dialect+"]");
 			Processor sdt = new SQLDialectTransformer();
 			Properties p = new Properties();
 			p.setProperty(SQLDialectTransformer.PROP_TRANSFORM_TO_DBID, dialect);
@@ -465,6 +466,7 @@ public class SQLDiff implements Executor {
 		List<ProcessComponent> pcs = SQLDump.getProcessComponentClasses(processorClassesStr, failonerror);
 		for(ProcessComponent pc: pcs) {
 			if(pc instanceof Processor) {
+				log.debug(modelId+"processor '"+pc+"' running...");
 				Processor proc = (Processor) pc;
 				pc.setProperties(prop);
 				if(proc.needsConnection()) {
@@ -475,7 +477,7 @@ public class SQLDiff implements Executor {
 				}
 				proc.setFailOnError(failonerror);
 				if(proc.acceptsOutputWriter()) {
-					log.warn(modelId+"processor '"+pc+"'needs writer?");
+					log.warn(modelId+"processor '"+pc+"' needs writer?");
 				}
 				proc.process();
 			}
