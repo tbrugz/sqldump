@@ -141,6 +141,14 @@ public class CascadingDataDump extends AbstractSQLProc {
 	//Set<String> dumpedFKs = new LinkedHashSet<String>();
 	
 	void dumpTable(final Table t, final List<FK> fks, final Table filterTable, final String filter, final Boolean followExportedKeys, final boolean doIntersect) {
+		if(t==null) {
+			log.warn("dumpTable: null table");
+			return;
+		}
+		if(t.getName()==null) {
+			log.warn("dumpTable: table with null name: "+t);
+			return;
+		}
 		if(fks!=null) {
 			//prevents infinite recursion... remove this?
 			/*if(!dumpedFKs.add(fks.get(0).toStringFull())) {
@@ -194,7 +202,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 		
 		//add query to dump list
 		//FIXedME: not all columns can be 'distincted' - select only those that can
-		String sql = "select distinct "+getProjectionForDistinct(t)+" from "+t.getName()
+		String sql = "select distinct "+getProjectionForDistinct(t)+" from "+qualifiedTableName(t)
 				+(join!=null?join:
 					(filter!=null?
 						(addSQLremarks?"\n/* original filter start table */":"")+
@@ -270,7 +278,12 @@ public class CascadingDataDump extends AbstractSQLProc {
 				}
 				//if(exportedKeys) {newFKs.add(fk);}
 				try {
-					dumpTable(pkt, newFKs, filterTable, filter, exportedKeys, doIntersect);
+					if(pkt!=null) {
+						dumpTable(pkt, newFKs, filterTable, filter, exportedKeys, doIntersect);
+					}
+					else {
+						log.warn("unknown PK table: "+table);
+					}
 				}
 				catch(StackOverflowError err) {
 					try {
@@ -384,7 +397,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 				if(orderByPK && pk!=null) {
 					addOrderBy(sb, pk);
 				}
-				
+
 				log.debug("join-sql["+tname+"]:\n"+sb.toString());
 				dd.runQuery(conn, sb.toString(), null, prop, null, tname, tname, null, pk!=null?pk.getUniqueColumns():null);
 				dumpedTables.add(tname);
@@ -469,6 +482,20 @@ public class CascadingDataDump extends AbstractSQLProc {
 		return sb.toString();
 	}
 	
+	String qualifiedTableName(Table t) {
+		if(quoter==null) {
+			if(t.getSchemaName()!=null) {
+				return t.getSchemaName()+"."+t.getName();
+			}
+			return t.getName();
+		}
+
+		if(t.getSchemaName()!=null) {
+			return quoter.get(t.getSchemaName())+"."+quoter.get(t.getName());
+		}
+		return quoter.get(t.getName());
+	}
+
 	String qualifiedColName(Table t, String col) {
 		if(quoter==null) {
 			return t.getName()+"."+col;
@@ -544,5 +571,5 @@ public class CascadingDataDump extends AbstractSQLProc {
 		}
 		return tname+".*";
 	}
-	
+
 }
