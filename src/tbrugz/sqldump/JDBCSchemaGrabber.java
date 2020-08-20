@@ -67,9 +67,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PREFIX = "sqldump.schemagrab";
 	
 	// grabber properties
-	static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
-	static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
-	static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
+	public static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
+	public static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
+	public static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
 	static final String PROP_SCHEMAGRAB_EXPORTEDFKS = PREFIX+".exportedfks";
 	@Deprecated
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
@@ -83,7 +83,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMAGRAB_ALLGRANTS = PREFIX+".allgrants"; //XXX: xperimental
 	static final String PROP_SCHEMAGRAB_INDEXES = PREFIX+".indexes";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
-	static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = PREFIX+".proceduresandfunctions";
+	public static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = PREFIX+".proceduresandfunctions";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_IGNORETABLESWITHZEROCOLUMNS = PREFIX+".ignoretableswithzerocolumns";
 	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
@@ -109,7 +109,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	// xtra/generic grabber properties
 	static final String PROP_SCHEMAINFO_DOMAINTABLES = "sqldump.schemainfo.domaintables";
 	
-	static final String PROP_SCHEMAGRAB_DBSPECIFIC = PREFIX+".db-specific-features";
+	public static final String PROP_SCHEMAGRAB_DBSPECIFIC = PREFIX+".db-specific-features";
 	@Deprecated
 	static final String PROP_DUMP_DBSPECIFIC = "sqldump.usedbspecificfeatures";
 	
