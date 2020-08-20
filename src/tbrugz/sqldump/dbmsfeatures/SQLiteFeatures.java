@@ -50,11 +50,11 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 	
 	@Override
-	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 	
 	// see: https://www.sqlite.org/lang_corefunc.html#length

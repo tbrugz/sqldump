@@ -46,7 +46,7 @@ public class SpannerFeatures extends InformationSchemaFeatures {
 	
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBCheckConstraints: not implemented");
 	}

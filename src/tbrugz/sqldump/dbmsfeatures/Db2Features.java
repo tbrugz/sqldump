@@ -52,7 +52,7 @@ public class Db2Features extends InformationSchemaFeatures {
 	 */
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBCheckConstraints: not implemented");
 	}
@@ -63,7 +63,7 @@ public class Db2Features extends InformationSchemaFeatures {
 	 */
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 		log.warn("grabDBUniqueConstraints: not implemented");
 	}

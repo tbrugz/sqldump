@@ -76,10 +76,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			grabDBSequences(model.getSequences(), schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model.getTables(), schemaPattern, null, conn);
+			grabDBCheckConstraints(model.getTables(), schemaPattern, null, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, null, conn);
 		}
 	}
 	
@@ -319,7 +319,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		String query = grabDBCheckConstraintsQuery(schemaPattern);
@@ -366,7 +366,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 	
 	@Override
-	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name

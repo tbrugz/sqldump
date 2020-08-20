@@ -33,7 +33,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	 * suggestion: using before-triggers: http://forums.mysql.com/read.php?136,152474,240479#msg-240479
 	 */
 	@Override
-	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 	}
 	
 	//XXX: see in information_schema: referential_constraints ; table_constraints -> PK, UNIQUE

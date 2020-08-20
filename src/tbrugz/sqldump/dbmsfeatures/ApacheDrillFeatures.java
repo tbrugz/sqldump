@@ -33,34 +33,34 @@ public class ApacheDrillFeatures extends InformationSchemaFeatures {
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern,
 			String tableNamePattern, String triggerNamePattern, Connection conn)
 			throws SQLException {
-		log.warn("grabDBTriggers: noty implemented");
+		log.warn("grabDBTriggers: not implemented");
 	}
 	
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs,
 			String schemaPattern, String execNamePattern, Connection conn)
 			throws SQLException {
-		log.warn("grabDBExecutables: noty implemented");
+		log.warn("grabDBExecutables: not implemented");
 	}
 	
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern,
 			String sequenceNamePattern, Connection conn) throws SQLException {
-		log.warn("grabDBSequences: noty implemented");
+		log.warn("grabDBSequences: not implemented");
 	}
 	
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
-		log.warn("grabDBCheckConstraints: noty implemented");
+		log.warn("grabDBCheckConstraints: not implemented");
 	}
 	
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
-		log.warn("grabDBUniqueConstraints: noty implemented");
+		log.warn("grabDBUniqueConstraints: not implemented");
 	}
 	
 }

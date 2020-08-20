@@ -102,13 +102,13 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 	}
 
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables,
-			String schemaPattern, String constraintNamePattern, Connection conn)
+			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 	}
 

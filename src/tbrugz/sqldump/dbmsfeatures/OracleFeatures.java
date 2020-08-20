@@ -117,10 +117,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			grabDBSequences(model.getSequences(), schemaPattern, null, conn);
 		}
 		if(grabCheckConstraints) {
-			grabDBCheckConstraints(model.getTables(), schemaPattern, null, conn);
+			grabDBCheckConstraints(model.getTables(), schemaPattern, null, null, conn);
 		}
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, null, conn);
 		}
 	}
 	
@@ -782,7 +782,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}*/
 	
 	@Override
-	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
 		//check constraints
@@ -832,7 +832,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 
 	@Override
-	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 
 		//unique constraints

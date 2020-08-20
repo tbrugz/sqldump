@@ -59,7 +59,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		}
 
 		if(grabUniqueConstraints) {
-			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, conn);
+			grabDBUniqueConstraints(model.getTables(), schemaPattern, null, null, conn);
 		}
 
 		if(grabExecutables) {
@@ -281,7 +281,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	 * see: https://stackoverflow.com/questions/2349785/how-to-get-primary-key-and-unique-constraint-columns-in-derby
 	 */
 	@Override
-	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException {
+	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
 		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
 		Statement st = conn.createStatement();
