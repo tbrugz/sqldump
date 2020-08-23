@@ -86,19 +86,21 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBCheckConstraintsQuery(String schemaPattern) {
+	String grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
 		return "select cc.constraint_schema, table_name, cc.constraint_name, check_expression as check_clause " 
 			+ "from information_schema.constraints cc "
 			+ "where cc.constraint_schema = '"+schemaPattern+"'"
 			+ "and constraint_type = 'CHECK'"
+			+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
 			+ "order by table_name, constraint_name";
 	}
 	
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
 				+"from information_schema.constraints tc "
 				+"where constraint_type = 'UNIQUE' "
+				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by table_name, constraint_name ";
 	}
@@ -106,7 +108,7 @@ public class H2Features extends InformationSchemaFeatures {
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

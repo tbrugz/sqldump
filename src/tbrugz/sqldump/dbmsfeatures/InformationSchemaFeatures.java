@@ -310,11 +310,12 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" sequences grabbed");
 	}
 
-	String grabDBCheckConstraintsQuery(String schemaPattern) {
+	String grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
 		return "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
 				+"and cc.constraint_schema = '"+schemaPattern+"' "
+				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
 				+"order by table_name, constraint_name ";
 	}
 	
@@ -322,7 +323,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
-		String query = grabDBCheckConstraintsQuery(schemaPattern);
+		String query = grabDBCheckConstraintsQuery(schemaPattern, tableNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);
@@ -355,12 +356,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	//order by "column_position"? see grabDBUniqueConstraints()
 	//XXX use key_column_usage? see http://www.postgresql.org/docs/9.1/static/infoschema-key-column-usage.html
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.constraint_column_usage ccu "
 				+"where tc.constraint_name = ccu.constraint_name "
 				+"and tc.constraint_schema = '"+schemaPattern+"' "
 				+"and constraint_type = 'UNIQUE' "
+				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by table_name, constraint_name, column_name ";
 	}
@@ -370,7 +372,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.debug("grabbing unique constraints");
 
 		//XXX: table constraint_column_usage has no 'column_order' column... ordering by column name
-		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

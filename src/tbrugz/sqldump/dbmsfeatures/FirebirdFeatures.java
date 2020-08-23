@@ -52,7 +52,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select null as constraint_schema, trim(i.RDB$RELATION_NAME) as table_name, trim(rc.RDB$CONSTRAINT_NAME) as constraint_name, trim(s.RDB$FIELD_NAME) as column_name, "
 				+"s.RDB$FIELD_POSITION as column_position "
 				+"FROM RDB$INDEX_SEGMENTS s "
@@ -60,6 +60,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 				+"LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME "
 				+"WHERE rc.RDB$CONSTRAINT_TYPE IS NOT NULL "
 				+"  AND trim(rc.RDB$CONSTRAINT_TYPE) = 'UNIQUE' "
+				+(tableNamePattern!=null?"  AND trim(i.RDB$RELATION_NAME) = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"  AND trim(rc.RDB$CONSTRAINT_NAME) = '"+constraintNamePattern+"' ":"")
 				+"ORDER BY i.RDB$RELATION_NAME, rc.RDB$CONSTRAINT_NAME, s.RDB$FIELD_POSITION";
 	}

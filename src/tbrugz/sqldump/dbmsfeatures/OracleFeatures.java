@@ -789,6 +789,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
 				+"from "+(useDbaMetadataObjects?"dba_constraints ":"all_constraints ")
 				+"where owner = '"+schemaPattern+"' "
+				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'C' "
 				+"order by owner, table_name, constraint_name ";
@@ -840,6 +841,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"from "+(useDbaMetadataObjects?"dba_constraints al, dba_cons_columns acc ":"all_constraints al, all_cons_columns acc ")
 				+"where al.constraint_name = acc.constraint_name "
 				+"and al.owner = '"+schemaPattern+"' "
+				+(tableNamePattern!=null?"and al.table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and al.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"and constraint_type = 'U' "
 				+"order by owner, table_name, constraint_name, position, column_name ";

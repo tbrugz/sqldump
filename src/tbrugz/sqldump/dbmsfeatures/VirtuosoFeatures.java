@@ -53,12 +53,13 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.key_column_usage kcu "
 				+"where tc.constraint_name = kcu.constraint_name "
 				+"and tc.constraint_schema = '"+schemaPattern+"' "
 				+"and v_key_is_main = 0 "
+				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by tc.table_name, tc.constraint_name, ordinal_position ";
 	}

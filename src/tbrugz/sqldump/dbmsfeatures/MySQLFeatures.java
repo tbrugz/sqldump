@@ -48,12 +48,13 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	) ENGINE=MEMORY DEFAULT CHARSET=utf8
 	 */
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name "
 			+"from information_schema.table_constraints tc, information_schema.key_column_usage ccu "
 			+"where tc.constraint_name = ccu.constraint_name "
 			+"and tc.table_name = ccu.table_name " 
 			+"and constraint_type = 'UNIQUE' "
+			+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 			+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 			+"order by table_name, constraint_name, column_name";
 	}
