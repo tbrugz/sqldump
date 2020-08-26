@@ -79,6 +79,22 @@ public class ModelUtils {
 		return uks;
 	}
 	
+	public static Constraint getPkOrUk(Relation relation) {
+		Constraint pk = null;
+		List<Constraint> conss = relation.getConstraints();
+		if(conss!=null) {
+			Constraint uk = null;
+			for(Constraint c: conss) {
+				if(c.getType()==ConstraintType.PK) { pk = c; break; }
+				if(c.getType()==ConstraintType.UNIQUE && uk == null) { uk = c; }
+			}
+			if(pk == null && uk != null) {
+				pk = uk;
+			}
+		}
+		return pk;
+	}
+
 	public static String getExecutableCountsByType(Set<ExecutableObject> execs) {
 		StringBuilder sb = new StringBuilder();
 		Map<DBObjectType, Long> map = new NonNullGetMap<DBObjectType, Long>(new TreeMap<DBObjectType, Long>(), new LongFactory());

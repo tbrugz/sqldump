@@ -359,12 +359,13 @@ public class DataDump extends AbstractSQLProc {
 		StringDecorator quoteAllDecorator = new StringDecorator.StringQuoterDecorator(quote);
 		
 		if(orderClause==null && orderByPK) { 
-			Constraint ctt = table.getPKConstraint();
+			Constraint ctt = ModelUtils.getPkOrUk(table);
+			
 			if(ctt!=null) {
 				orderClause = Utils.join(ctt.getUniqueColumns(), ", ", quoteAllDecorator);
 			}
 			else {
-				log.warn("table '"+tableName+"' has no PK for datadump ordering");
+				log.warn("table '"+tableName+"' has no PK or UNIQUE constraint for datadump ordering");
 			}
 		}
 
