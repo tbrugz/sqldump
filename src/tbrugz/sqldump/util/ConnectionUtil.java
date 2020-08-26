@@ -250,13 +250,18 @@ public class ConnectionUtil {
 	}
 	
 	// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
-	//TODOne: prop for initial context lookup? like "java:/comp/env"...
 	static Connection getConnectionFromDataSource(String dataSource, String contextLookup) throws SQLException, NamingException {
-		log.debug("getting connection from datasource '"+dataSource+"' [context: "+contextLookup+"]");
-		Context initContext = new InitialContext();
-		Context envContext  = (Context) initContext.lookup(contextLookup);
-		DataSource datasource = (DataSource) envContext.lookup(dataSource);
-		return datasource.getConnection();
+		try {
+			log.debug("getting connection from datasource '"+dataSource+"' [context: "+contextLookup+"]");
+			Context initContext = new InitialContext();
+			Context envContext  = (Context) initContext.lookup(contextLookup);
+			DataSource datasource = (DataSource) envContext.lookup(dataSource);
+			return datasource.getConnection();
+		}
+		catch(NamingException e) {
+			log.warn("data source not found: "+dataSource+" [exception: "+e+"]");
+			throw e;
+		}
 	}
 	
 	public static void closeConnection(Connection conn) {

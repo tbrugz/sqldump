@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
@@ -18,6 +21,8 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
+
+	static final Log log = LogFactory.getLog(DefaultDBMSFeatures.class);
 
 	static final DBObjectType[] supportedTypes = new DBObjectType[]{ DBObjectType.TABLE, DBObjectType.FK, DBObjectType.INDEX };
 	
@@ -31,6 +36,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
+		log.debug("grabDBObjects: not implemented");
 	}
 
 	/*@Override
@@ -71,45 +77,53 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern,
 			String viewNamePattern, Connection conn) throws SQLException {
+		log.debug("grabDBViews: not implemented");
 	}
 	
 	@Override
 	public void grabDBMaterializedViews(Collection<View> views, String schemaPattern,
 			String viewNamePattern, Connection conn) throws SQLException {
+		log.debug("grabDBMaterializedViews: not implemented");
 	}
 
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern,
 			String tableNamePattern, String triggerNamePattern, Connection conn)
 			throws SQLException {
+		log.debug("grabDBTriggers: not implemented");
 	}
 
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs,
 			String schemaPattern, String execNamePattern, Connection conn)
 			throws SQLException {
+		log.debug("grabDBExecutables: not implemented");
 	}
 
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern,
 			String sequenceNamePattern, Connection conn) throws SQLException {
+		log.debug("grabDBSequences: not implemented");
 	}
 
 	@Override
 	public void grabDBSynonyms(Collection<Synonym> synonyms, String schemaPattern,
 			String synonymNamePattern, Connection conn) throws SQLException {
+		log.debug("grabDBSynonyms: not implemented");
 	}
 
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables,
 			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
+		log.debug("grabDBCheckConstraints: not implemented");
 	}
 
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables,
 			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
+		log.debug("grabDBUniqueConstraints: not implemented");
 	}
 
 	@Override
