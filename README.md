@@ -104,7 +104,7 @@ Building from sources (with ant & ivy)
 - Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
   or `ant ivy-install` (if not done already)
 - (*obsolete* - see `ivy-install`) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
-  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/tip/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
+  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/master/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
 - (*obsolete* - see `ivy-install`) Copy `templates/build.properties` to `build.properties`
 - (*optional*) Edit `build.properties`
 - (*optional/eclipse*) Use [IvyDE](https://ant.apache.org/ivy/ivyde/), import project, right click + `Ivy > Resolve`
@@ -129,9 +129,9 @@ Not building? Setup env (without sources)
 - Download `sqldump.jar` jar from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
   (e.g.: [sqldump 0.9.16](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.16/sqldump-0.9.16.jar))
 - Download jar dependencies, especially *apache-commons-logging*, to `lib` (may be downloaded from [sqldump/downloads](https://bitbucket.org/tbrugz/sqldump/downloads))
-- (windows) Download [sqldump.bat.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.bat.template) as `sqldump.bat`
-  or (unix-like) download [sqldump.sh.template](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.sh.template) as `sqldump.sh`
-- Download latest version of [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/raw/tip/sqldump.template.properties) as `sqldump.properties`
+- (windows) Download [sqldump.bat.template](sqldump.bat.template) as `sqldump.bat`
+  or (unix-like) download [sqldump.sh.template](sqldump.sh.template) as `sqldump.sh`
+- Download latest version of [sqldump.template.properties](sqldump.template.properties) as `sqldump.properties`
 - Edit `sqldump.properties` and (windows) `sqldump.bat` or (unix-like) `sqldump.sh` (you may include command-line options at end)
 
 

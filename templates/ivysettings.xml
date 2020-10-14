@@ -7,7 +7,7 @@
         <caches defaultCacheDir="${ivy.cache.dir}"/>
         <include url="${ivy.default.settings.dir}/ivysettings-public.xml" />
         <resolvers>
-                <ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/tip/" m2compatible="true" />
+                <ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/master/" m2compatible="true" />
                 <filesystem name="local-mvn-publish" m2compatible="true">
                         <artifact pattern="${mvn.repository.dir}/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
                 </filesystem>
