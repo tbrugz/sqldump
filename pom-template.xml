@@ -14,7 +14,7 @@
   <packaging>${ivy.pom.packaging}</packaging>
   <name>sqldump</name>
   <description>Utility to dump schema and data from a RDBMS</description>
-  <url>https://bitbucket.org/tbrugz/sqldump</url>
+  <url>https://github.com/tbrugz/sqldump</url>
   <licenses>
     <license>
       <name>GNU Lesser General Public License, Version 3</name>
@@ -23,9 +23,9 @@
     </license>
   </licenses>
   <scm>
-    <connection>scm:hg:https://bitbucket.org/tbrugz/sqldump</connection>
-    <developerConnection>scm:hg:https://bitbucket.org/tbrugz/sqldump</developerConnection>
-    <url>https://bitbucket.org/tbrugz/sqldump</url>
+    <connection>scm:git:https://github.com/tbrugz/sqldump</connection>
+    <developerConnection>scm:git:https://github.com/tbrugz/sqldump</developerConnection>
+    <url>https://github.com/tbrugz/sqldump</url>
   </scm>
   <developers>
     <developer>

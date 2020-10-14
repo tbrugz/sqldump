@@ -14,15 +14,15 @@ Utility to dump schema and data from a RDBMS. Features:
 SQLDump also has three subprojects:
 
 - **SQLRun**: runs SQL scripts from files - may be used for regenerating database from dumped SQL-scripts. 
-	See [sqlrun.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqlrun.template.properties) for more info 
+	See [sqlrun.template.properties](sqlrun.template.properties) for more info 
 - **SQLDiff**: generates a diff from 2 schema models.
-	See [sqldiff.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldiff.template.properties) for more info 
+	See [sqldiff.template.properties](sqldiff.template.properties) for more info 
 - **Diff2Queries**: generates data diff from 2 SQL queries.
-	See [diff2q.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/diff2q.template.properties) for more info 
+	See [diff2q.template.properties](diff2q.template.properties) for more info 
 
 Author: Telmo Brugnara <[tbrugz@gmail.com](mailto:tbrugz@gmail.com)>
 
-License: [LGPLv3](http://www.gnu.org/licenses/lgpl.html) - see [LICENSE.md](https://bitbucket.org/tbrugz/sqldump/src/tip/LICENSE.md)
+License: [LGPLv3](http://www.gnu.org/licenses/lgpl.html) - see [LICENSE.md](LICENSE.md)
 
 
 SQLDump - Basic Process
@@ -63,10 +63,10 @@ SQLDump processing consists of:
 - `xtradumpers.AlterSchemaSuggester` - Generates suggestions of SQL-scripts for altering the schema model (beta)
 - `xtradumpers.DropScriptDumper` - Generates drop SQL-scripts
 
-All processing is controlled by a properties file. See [sqldump.template.properties](https://bitbucket.org/tbrugz/sqldump/src/tip/sqldump.template.properties)
+All processing is controlled by a properties file. See [sqldump.template.properties](sqldump.template.properties)
 for more info.
 
-Usage examples can be found at [doc/examples](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/examples).
+Usage examples can be found at [doc/examples](doc/examples).
 
 
 Dependencies
@@ -90,7 +90,7 @@ Dependencies
 	[jTDS/SQLServer](http://jtds.sourceforge.net/),
 	[Neo4j](https://github.com/neo4j-contrib/neo4j-jdbc)
 	)
-- [kmlutils](https://bitbucket.org/tbrugz/kmlutils) - optional, for graphML output
+- [kmlutils](https://github.com/tbrugz/kmlutils) - optional, for graphML output
 - [jettison](http://jettison.codehaus.org/) - optional, for JSON output
 - [olap4j](http://www.olap4j.org/) & [mondrian](http://mondrian.pentaho.com/) - optional, for Mondrian Schema output, validation & data dump
 - [ant](http://ant.apache.org/) - recommended for building
@@ -99,7 +99,7 @@ Dependencies
 
 Building from sources (with ant & ivy)
 --------------------------------------
-- Run `hg clone https://bitbucket.org/tbrugz/sqldump <project-dir>` (if not done already)
+- Run `git clone https://github.com/tbrugz/sqldump <project-dir>` (if not done already)
 - Run `ant prepare`
 - Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
   or `ant ivy-install` (if not done already)
@@ -173,6 +173,6 @@ Artifact repositories
 
 Misc/End notes
 --------------
-To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](https://bitbucket.org/tbrugz/sqldump/src/tip/doc/jenkins-config.md)
+To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](doc/jenkins-config.md)
 
 To use with Eclipse, [IvyDE](https://ant.apache.org/ivy/ivyde/download.html) is recommended
