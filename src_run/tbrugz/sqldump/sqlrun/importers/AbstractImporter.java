@@ -13,6 +13,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -791,13 +792,31 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		if(useBatchUpdate) {
 			int[] changedRowsArr = stmt.executeBatch();
 			int sum = 0;
+			int successNoInfoCount = 0;
+			int executeFailedCount = 0;
+			int unknownCount = 0;
 			for(int i=0;i<changedRowsArr.length;i++) {
-				sum += changedRowsArr[i];
+				int val = changedRowsArr[i];
+				if(val > 0) {
+					sum += val;
+				}
+				else if(val == 0) {}
+				else if(val == Statement.SUCCESS_NO_INFO) {
+					successNoInfoCount++;
+				}
+				else if(val == Statement.EXECUTE_FAILED) {
+					executeFailedCount++;
+				}
+				else {
+					unknownCount++;
+				}
 			}
 			counter.output += sum;
-			if(sum>0) {
-				Util.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum);
-			}
+			//if(sum>0) {
+			Util.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum+
+				( (successNoInfoCount>0||executeFailedCount>0||unknownCount>0)?" [successNoInfoCount=="+successNoInfoCount+";executeFailedCount=="+executeFailedCount+";unknownCount=="+unknownCount+"]":"")
+				);
+			//}
 		}
 	}
 	
