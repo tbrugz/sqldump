@@ -33,30 +33,37 @@ public class CLIProcessor {
 		boolean useSysPropSetted = false;
 		int loadedCount = 0;
 		if(args!=null) {
-		for(String arg: args) {
-			if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
-				String propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
-				loadFile(papp, propFilename);
-				loadedCount++;
+			for(String arg: args) {
+				if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
+					String propFilename = arg.substring(PARAM_PROPERTIES_FILENAME.length());
+					boolean loaded = loadFile(papp, propFilename);
+					if(loaded) { loadedCount++; }
+				}
+				else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
+					String propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
+					boolean loaded = loadResource(papp, propResource);
+					if(loaded) { loadedCount++; }
+				}
+				else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
+					String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
+					ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
+					useSysPropSetted = true;
+				}
+				else {
+					log.warn("unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP+"' argument");
+					//XXX: show help and exit?
+				}
 			}
-			else if(arg.indexOf(PARAM_PROPERTIES_RESOURCE)==0) {
-				String propResource = arg.substring(PARAM_PROPERTIES_RESOURCE.length());
-				loadResource(papp, propResource);
-				loadedCount++;
-			}
-			else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
-				String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
-				ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
-				useSysPropSetted = true;
-			}
-			else {
-				log.warn("unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP+"' argument");
-				//XXX: show help and exit?
-			}
-		}
 		}
 		if(loadedCount==0) {
-			loadFile(papp, defaultPropFile, true);
+			boolean loaded = loadFile(papp, defaultPropFile, true);
+			if(loaded) { loadedCount++; }
+		}
+
+		//log.debug(papp.size()+" properties defined ; "+loadedCount+" files or resources read");
+		if(papp.size()==0 || (papp.containsKey(PROP_PROPFILEBASEDIR) && papp.size()==1)) {
+			log.warn("no properties loaded"+(loadedCount==0?" (and no properties file or resource read)":""));
+			//XXX throw exception?
 		}
 		if(!useSysPropSetted) {
 			ParametrizedProperties.setUseSystemProperties(true); //set to true by default
@@ -80,7 +87,7 @@ public class CLIProcessor {
 						+ "\t"+PARAM_USE_SYSPROPERTIES+"[true|false]: use system properties (default is true)\n"
 						+ "\t"+PARAM_HELP+": show this help and exit\n"
 						+ "\t"+PARAM_VERSION+": show version and exit\n"
-						+ "\nmore info at <https://bitbucket.org/tbrugz/sqldump>\n";
+						+ "\nmore info at <https://github.com/tbrugz/sqldump>\n";
 					System.out.println(out);
 					return true;
 				}
@@ -89,28 +96,29 @@ public class CLIProcessor {
 		return false;
 	}
 	
-	static void loadResource(Properties p, String propResource) {
+	static boolean loadResource(Properties p, String propResource) {
 		log.info("loading properties resource: "+propResource);
 		InputStream propIS = CLIProcessor.class.getResourceAsStream(propResource);
 		if(propIS==null) {
 			log.warn("properties resource '"+propResource+"' does not exist");
+			return false;
 		}
-		else {
-			try {
-				p.load(propIS);
-				propIS.close();
-			}
-			catch(IOException e) {
-				log.warn("error loading resource '"+propResource+"': "+e);
-			}
+		try {
+			p.load(propIS);
+			propIS.close();
+			return true;
+		}
+		catch(IOException e) {
+			log.warn("error loading resource '"+propResource+"': "+e);
+			return false;
 		}
 	}
 	
-	static void loadFile(Properties p, String propFilename) {
-		loadFile(p, propFilename, false);
+	static boolean loadFile(Properties p, String propFilename) {
+		return loadFile(p, propFilename, false);
 	}
 	
-	static void loadFile(Properties p, String propFilename, boolean defaultFile) {
+	static boolean loadFile(Properties p, String propFilename, boolean defaultFile) {
 		File propFile = new File(propFilename);
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
@@ -121,6 +129,7 @@ public class CLIProcessor {
 			p.load(propIS);
 			propIS.close();
 			log.info("loaded "+(defaultFile?"default ":"")+"properties file: "+propFile);
+			return true;
 		}
 		catch(FileNotFoundException e) {
 			String message = (defaultFile?"default ":"")+"properties file '"+propFile+"' not found: "+e.getMessage();
@@ -130,9 +139,11 @@ public class CLIProcessor {
 			else {
 				log.warn(message);
 			}
+			return false;
 		}
 		catch(IOException e) {
 			log.warn("error loading "+(defaultFile?"default ":"")+"file '"+propFile+"': "+e);
+			return false;
 		}
 	}
 
