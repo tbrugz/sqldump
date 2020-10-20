@@ -17,6 +17,7 @@ public class CSVImporter extends AbstractImporter {
 	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
 	static final String SUFFIX_EMPTY_STRING_AS_NULL = ".emptystringasnull";
 	static final String SUFFIX_NULL_CONSTANT = ".nullconstant";
+	static final String SUFFIX_NULL_CONSTANTS = ".nullconstants";
 	
 	static final String DOUBLEQUOTE = "\"";
 
@@ -29,6 +30,7 @@ public class CSVImporter extends AbstractImporter {
 	String columnDelimiter = ",";
 	@Deprecated boolean setNullWhenEmptyString = false;
 	String nullConstant = null;
+	List<String> nullConstants = null;
 	
 	String lastLine = null;
 	Boolean lastLineComplete = null;
@@ -39,6 +41,7 @@ public class CSVImporter extends AbstractImporter {
 		columnDelimiter = prop.getProperty(importerPrefix+SUFFIX_COLUMNDELIMITER, columnDelimiter);
 		setNullWhenEmptyString = Utils.getPropBool(prop, importerPrefix+SUFFIX_EMPTY_STRING_AS_NULL, setNullWhenEmptyString);
 		nullConstant = prop.getProperty(importerPrefix+SUFFIX_NULL_CONSTANT);
+		nullConstants = Utils.getStringListFromProp(prop, importerPrefix+SUFFIX_NULL_CONSTANTS, ",");
 	}
 	
 	@Override
@@ -81,6 +84,13 @@ public class CSVImporter extends AbstractImporter {
 		if(nullConstant!=null && parts!=null) {
 			for(int i=0;i<parts.length;i++) {
 				if(nullConstant.equals(parts[i])) {
+					parts[i] = null;
+				}
+			}
+		}
+		if(nullConstants!=null && parts!=null) {
+			for(int i=0;i<parts.length;i++) {
+				if(nullConstants.contains(parts[i])) {
 					parts[i] = null;
 				}
 			}
