@@ -72,6 +72,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final Log logRow = LogFactory.getLog(AbstractImporter.class.getName()+"-row");
 	
 	static final int ERRORLINE_MAXSIZE = 40;
+	static final long LOG_EACH_X_ROWS_DEFAULT = 10000L; //50000 ? (DataDump's default)
 
 	Properties prop;
 	Connection conn;
@@ -114,7 +115,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	long skipHeaderN = 0;
 	Pattern skipLineRegex = null;
 	long maxLines = -1;
-	long logEachXrows = 10000L; //XXX: prop for logEachXrows
+	long logEachXrows = 0; //10000L; //XXX: prop for logEachXrows
+	long logEachXInputRows = LOG_EACH_X_ROWS_DEFAULT; //XXX: prop for logEachXInputRows
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;
@@ -351,6 +353,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		lastOutputCountCommit = 0;
+		lastInputCountLog = 0;
 		lastOutputCountLog = 0;
 		
 		//failoverId = 0;
@@ -441,7 +444,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
 										+e);
 								//log.info("error processing line "+linecounter, e);
-								//XXX: throw ProcessingException()?
+								//XXX: ??
+								//if(failonerror) {
+								//	throw new ProcessingException("Error processing line "+linecounter, e);
+								//}
 							}
 							importthisline = false;
 							//break;
@@ -495,6 +501,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 	
 	long lastOutputCountCommit = 0;
+	long lastInputCountLog = 0;
 	long lastOutputCountLog = 0;
 	
 	/**
@@ -522,10 +529,12 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
 			counter.input++;
+			logNRows(counter);
 			return true;
 		}
 		if(skipLineRegex!=null && skipLineRegex.matcher(line).find()) {
 			counter.input++;
+			logNRows(counter);
 			return true;
 		}
 		
@@ -595,10 +604,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		//log.info("insert["+processedLines+"/"+importedLines+"]: "+stmtStr);
 		//stmt.addBatch(); //XXXdone: batch insert? yes!
 		if(useBatchUpdate) {
-			stmt.addBatch();
-			counter.input++;
-			if((counter.input % batchUpdateSize) == 0) {
-				cleanupStatement(counter);
+			try {
+				stmt.addBatch();
+				counter.input++;
+				if((counter.input % batchUpdateSize) == 0) {
+					cleanupStatement(counter);
+				}
+			}
+			catch(SQLException e) {
+				//XXX logging may show posterior line
+				//log.debug("sql-exception(batch): counter.input="+counter.input+" ; parts="+Arrays.toString(parts));
+				throw e;
 			}
 		}
 		else {
@@ -608,7 +624,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				counter.output += changedRows;
 			}
 			catch(SQLException e) {
-				//log.debug("sql err: parts="+Arrays.toString(parts));
+				log.debug("SQLException[counter.input="+counter.input+" ; parts="+Arrays.toString(parts)+"]: "+e.getMessage());
 				throw e;
 			}
 		}
@@ -622,11 +638,21 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			Util.doCommit(conn);
 			lastOutputCountCommit = counter.output;
 		}
+		logNRows(counter);
+		return true;
+	}
+
+	void logNRows(IOCounter counter) {
+		// log input
+		if(logEachXInputRows>0 && (counter.input>lastInputCountLog) && (counter.input%logEachXInputRows==0)) {
+			logRow.info("[exec-id="+execId+"] "+counter.input+" rows read ["+counter.output+" rows imported]");
+			lastInputCountLog = counter.input;
+		}
+		// log output
 		if(logEachXrows>0 && (counter.output>lastOutputCountLog) && (counter.output%logEachXrows==0)) {
-			log.info("[exec-id="+execId+"] "+counter.output+" rows imported");
+			logRow.info("[exec-id="+execId+"] "+counter.output+" rows imported");
 			lastOutputCountLog = counter.output;
 		}
-		return true;
 	}
 	
 	String strTruncated(String s, int max) {
@@ -814,7 +840,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			counter.output += sum;
 			//if(sum>0) {
 			Util.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum+
-				( (successNoInfoCount>0||executeFailedCount>0||unknownCount>0)?" [successNoInfoCount=="+successNoInfoCount+";executeFailedCount=="+executeFailedCount+";unknownCount=="+unknownCount+"]":"")
+				( (successNoInfoCount>0||executeFailedCount>0||unknownCount>0)?" [successNoInfoCount=="+successNoInfoCount+" ; executeFailedCount=="+executeFailedCount+" ; unknownCount=="+unknownCount+"]":"")
 				);
 			//}
 		}
