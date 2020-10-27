@@ -470,17 +470,6 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				
 				String line = scan.next();
 				linecounter++;
-				if(batchRetryBuffer!=null) {
-					if(batchException==null) {
-						batchRetryBuffer.add(line);
-						if(batchRetryBuffer.size()>batchUpdateSize) {
-							batchRetryBuffer.remove(0);
-						}
-					}
-					else {
-						//log.info("[retryWithBatchOff] line read from buffer = "+line);
-					}
-				}
 				
 				while(importthisline) {
 					if(maxLines >= 0 && counter.input > maxLines) {
@@ -488,20 +477,44 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 						break scanNext;
 					}
 					try {
-						boolean isLineComplete = procLineInternal(line, is1stloop);
-						StringBuilder sb = new StringBuilder();
-						sb.append(line);
-						while(!isLineComplete) {
-							line = scan.next();
-							if(batchException!=null) {
-								//log.info("[retryWithBatchOff] line read from buffer [2] = "+line);
-							}
-							String rdr = recordDelimiterReplacer();
-							if(rdr!=null) {
-								sb.append(rdr); // should be scan.lastDelimiter?!?
-							}
+						String[] lineParts = procLineInternal(line, is1stloop);
+						boolean isLineComplete = isLastLineComplete();
+						String finalLine = line;
+
+						if(!isLineComplete) {
+							StringBuilder sb = new StringBuilder();
 							sb.append(line);
-							isLineComplete = procLineInternal(sb.toString(), is1stloop);
+							while(!isLineComplete) {
+								line = scan.next();
+								linecounter++;
+								if(batchException!=null) {
+									//log.info("[retryWithBatchOff] line read from buffer [2] = "+line);
+								}
+								String rdr = recordDelimiterReplacer();
+								if(rdr!=null) {
+									sb.append(rdr); // should be scan.lastDelimiter?!?
+								}
+								sb.append(line);
+								lineParts = procLineInternal(sb.toString(), is1stloop);
+								isLineComplete = isLastLineComplete();
+							}
+							finalLine = sb.toString();
+						}
+
+						if(batchRetryBuffer!=null) {
+							if(batchException==null && lineParts!=null) {
+								batchRetryBuffer.add(finalLine);
+								if(batchRetryBuffer.size()>batchUpdateSize) {
+									batchRetryBuffer.remove(0);
+								}
+							}
+							else {
+								//log.info("[retryWithBatchOff] line read from buffer = "+line);
+							}
+						}
+
+						if(lineParts!=null) {
+							persistLineParts(lineParts);
 						}
 						importthisline = false;
 						//log.debug("procline-ok ["+linecounter+"]: failid="+failoverId);
@@ -513,7 +526,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 						if(e instanceof SQLException && useBatchUpdate && retryWithBatchOff) {
 							batchException = new RuntimeException("[retryWithBatchOff] exception on line #"+counter.input+
 								", will rerun with batch off from line #"+(counter.input - batchUpdateSize), e);
-							log.warn("[retryWithBatchOff] row number [counter.input = "+counter.input+"] will rewind "+batchUpdateSize+" lines & turn off batch mode ; "+
+							log.warn("[retryWithBatchOff] row number [counter.input = "+counter.input+" ; linecounter = "+linecounter+"] will rewind "+batchUpdateSize+" lines & turn off batch mode ; "+
 								"SQLException: "+e.toString().trim());
 							counter.input -= batchUpdateSize;
 							linecounter -= batchUpdateSize;
@@ -618,11 +631,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	/**
 	 * @return true if parser should proceed to next line, false otherwise
 	 */
-	boolean procLineInternal(String line, boolean is1stloop) throws SQLException {
+	String[] procLineInternal(String line, boolean is1stloop) throws SQLException {
 		//log.info("line["+processedLines+"]: "+line);
 		IOCounter counter = countsByFailoverId.get(failoverId);
 		String[] parts = procLine(line, counter.input);
-		if(!isLastLineComplete()) { return false; }
+		if(!isLastLineComplete()) { return null; }
 		
 		if(parts==null) {
 			String lineTrunc = strTruncated(line, ERRORLINE_MAXSIZE);
@@ -641,20 +654,26 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		if(is1stloop && skipHeaderN>counter.input) {
 			counter.input++;
 			logNRows(counter);
-			return true;
+			return null;
 		}
 		if(skipLineRegex!=null && skipLineRegex.matcher(line).find()) {
 			counter.input++;
 			logNRows(counter);
-			return true;
+			return null;
 		}
 		
 		if(columnCount!=null && parts.length < columnCount) {
 			log.debug("#parts ["+parts.length+"] < #columnTypes/columnCount ["+columnCount+"] - set null for missing cols? "+stmtSetNull4MissingCols);
 		}
-		
+
+		return parts;
+	}
+
+	boolean persistLineParts(String[] parts) throws SQLException {
 		List<Integer> partsNotFound = new ArrayList<Integer>();
 		int countNFE = 0, countPE = 0;
+		IOCounter counter = countsByFailoverId.get(failoverId);
+
 		//TODO: what if parts.length for some lines is shorter than others? stmt will keep old value from longer line...
 		for(int i=0;i<parts.length;i++) {
 			int index = i;
