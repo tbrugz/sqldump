@@ -182,7 +182,8 @@ public class InsertIntoDatabase extends InsertIntoDataDump implements DbUpdaterS
 			
 			//executeUpdate - if batch_mode
 			if(batchMode) {
-				stmt.addBatch();
+				int[] updateCounts = stmt.executeBatch();
+				updated += MathUtil.sumInts(updateCounts);
 			}
 			//commit
 			if(!autoCommit) {
