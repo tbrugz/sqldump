@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.CharBuffer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -46,6 +47,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	public static class IOCounter {
 		long input = 0;
 		long output = 0;
+		long successNoInfoCount = 0;
+		long executeFailedCount = 0;
 
 		void add(IOCounter other) {
 			input += other.input;
@@ -55,6 +58,59 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		@Override
 		public String toString() {
 			return "IOCounter[i="+input+";o="+output+"]";
+		}
+	}
+
+	public static class ReadableStringList implements Readable {
+		//XXX implements ReadableByteChannel?
+
+		final List<String> buffer;
+		final String delimiter;
+		final int delimLen;
+		int pos = 0;
+		int strpos = 0;
+
+		public ReadableStringList(List<String> buffer, String recordDelimiterReplacer) {
+			this.buffer = buffer;
+			this.delimiter = recordDelimiterReplacer!=null?recordDelimiterReplacer:"";
+			this.delimLen = delimiter.length();
+		}
+
+		public int read(CharBuffer cb) {
+			if(pos >= buffer.size()) {
+				return -1;
+			}
+			String line = buffer.get(pos);
+			String subline = strpos==0 ? line : line.substring(strpos);
+			int cbl = cb.remaining();
+			int read = 0;
+			try {
+				if(cbl<subline.length()+delimLen) {
+					subline = subline.substring(0, cbl);
+					//cb.clear();
+					cb.put(subline);
+					strpos += cbl;
+					read = cbl;
+					//log.info("[pos=="+pos+";read=="+read+";partial] subline = "+subline+" ; "+
+					//	"position = "+cb.position()+" ; remaining = "+cb.remaining()); //+" ;charbuffer = "+cb);
+				}
+				else {
+					//cb.clear();
+					cb.put(subline);
+					cb.append(delimiter);
+					strpos = 0;
+					read = subline.length();
+					//log.info("[pos=="+pos+";read=="+read+"] subline = "+subline+" ; "+
+					//	"position = "+cb.position()+" ; remaining = "+cb.remaining()); //+" ;charbuffer = "+cb);
+					pos++;
+				}
+				return read;
+			}
+			catch(RuntimeException e) {
+				log.warn("Exception: "+e+" [CharBuffer, class = "+cb.getClass().getName()+" , length = "+cb.length()+", line.length = "+line.length()+"] - line: "+line);
+				throw e;
+				//return -1;
+			}
 		}
 	}
 	
@@ -107,6 +163,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	
 	boolean useBatchUpdate = false;
 	long batchUpdateSize = 1000;
+	boolean retryWithBatchOff = false;
 
 	long commitEachXrows = 0L;
 	static long defaultCommitEachXrowsForFileStrategy = 1000L;
@@ -196,6 +253,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
 		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
 		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
+		retryWithBatchOff = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_RETRY_OFF, retryWithBatchOff);
 		onErrorIntValue = Utils.getPropInt(prop, Constants.PREFIX_EXEC+execId+SUFFIX_ONERROR_TYPE_INT_SET_VALUE);
 		String urlHeaderPrefix = Constants.PREFIX_EXEC+execId+SUFFIX_URLHEADER;
 		List<String> headerKeys = Utils.getKeysStartingWith(prop, urlHeaderPrefix);
@@ -270,6 +328,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 	//XXX add countsByFailoverId for all files?
 	Map<Integer, IOCounter> aggCountsByFailoverId;
+
+	List<String> batchRetryBuffer = null;
 	
 	@Override
 	public long importData() throws SQLException, InterruptedException, IOException {
@@ -365,6 +425,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		log.debug("scan delimiter pattern: ["+p+"]");
 		log.debug("columnTypes"+(columnCount!=null?"[#"+columnCount+"]":"")+": "+columnTypes);
 		//log.info("input file: "+importFile);
+
+		if(useBatchUpdate && retryWithBatchOff) {
+			batchRetryBuffer = new ArrayList<String>();
+		}
+		RuntimeException batchException = null;
 		
 		if(follow) {
 			//add shutdown hook
@@ -405,6 +470,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				
 				String line = scan.next();
 				linecounter++;
+				if(batchRetryBuffer!=null) {
+					if(batchException==null) {
+						batchRetryBuffer.add(line);
+						if(batchRetryBuffer.size()>batchUpdateSize) {
+							batchRetryBuffer.remove(0);
+						}
+					}
+					else {
+						//log.info("[retryWithBatchOff] line read from buffer = "+line);
+					}
+				}
 				
 				while(importthisline) {
 					if(maxLines >= 0 && counter.input > maxLines) {
@@ -417,6 +493,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 						sb.append(line);
 						while(!isLineComplete) {
 							line = scan.next();
+							if(batchException!=null) {
+								//log.info("[retryWithBatchOff] line read from buffer [2] = "+line);
+							}
 							String rdr = recordDelimiterReplacer();
 							if(rdr!=null) {
 								sb.append(rdr); // should be scan.lastDelimiter?!?
@@ -429,6 +508,21 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 					}
 					catch(Exception e) {
 						counter.input++;
+
+						// batch-retry
+						if(e instanceof SQLException && useBatchUpdate && retryWithBatchOff) {
+							batchException = new RuntimeException("[retryWithBatchOff] exception on line #"+counter.input+
+								", will rerun with batch off from line #"+(counter.input - batchUpdateSize), e);
+							log.warn("[retryWithBatchOff] row number [counter.input = "+counter.input+"] will rewind "+batchUpdateSize+" lines & turn off batch mode ; "+
+								"SQLException: "+e.toString().trim());
+							counter.input -= batchUpdateSize;
+							linecounter -= batchUpdateSize;
+							useBatchUpdate = false;
+							scan = createScannerFromBuffer(batchRetryBuffer);
+							//log.info("[retryWithBatchOff] batchRetryBuffer.size()=="+batchRetryBuffer.size());
+						}
+						else {
+
 						//next failover id
 						failoverId++;
 						if(failoverId > maxFailoverId) {
@@ -442,7 +536,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 							if(logMalformedLine) {
 								logRow.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
-										+e);
+										+e.toString().trim());
+								if(batchException!=null) {
+									//XXX warn [retryWithBatchOff]?
+									logRow.info("[retryWithBatchOff] line #"+linecounter+": "+line);
+								}
 								//log.info("error processing line "+linecounter, e);
 								//XXX: ??
 								//if(failonerror) {
@@ -452,11 +550,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 							importthisline = false;
 							//break;
 						}
+
+						}
 					}
 				} //while (importthisline)
 				
 			}
-			
+
 			cleanupStatement(counter);
 			if(commitStrategy==CommitStrategy.FILE) {
 				Util.doCommit(conn);
@@ -478,24 +578,35 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 		//show counters
 		long countAll = logCounts(countsByFailoverId, false);
-		
+
+		if(batchException!=null) {
+			throw batchException;
+		}
+
 		return countAll;
 	}
 	
 	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) { // remove alwaysShowId?
 		long countAllIn = 0, countAllOut = 0;
+		long countAllSNI = 0, countAllEF = 0;
 		int loopCount = 1, mapSize = ccMap.size();
 		for(Entry<Integer, IOCounter> entry: ccMap.entrySet()) {
 			IOCounter cc = entry.getValue();
 			if(cc.input>0 || cc.output>0 || loopCount < mapSize) {
-				log.info( ((mapSize > 1)?"[failover="+entry.getKey()+"] ":"") +"processedLines: "+cc.input+" ; importedRows: "+cc.output);
+				log.info( ((mapSize > 1)?"[failover="+entry.getKey()+"] ":"") +"processedLines: "+cc.input+" ; importedRows: "+cc.output
+					+( (cc.successNoInfoCount>0||cc.executeFailedCount>0)?" [successNoInfoCount=="+cc.successNoInfoCount+" ; executeFailedCount=="+cc.executeFailedCount+"]":"")
+					);
 				countAllIn += cc.input;
 				countAllOut += cc.output;
+				countAllSNI += cc.successNoInfoCount;
+				countAllEF += cc.executeFailedCount;
 			}
 			loopCount++;
 		}
 		if(mapSize > 1) {
-			log.info("[failover=ALL] processedLines: "+countAllIn+" ; importedRows: "+countAllOut);
+			log.info("[failover=ALL] processedLines: "+countAllIn+" ; importedRows: "+countAllOut
+				+( (countAllSNI>0||countAllEF>0)?" [successNoInfoCount=="+countAllSNI+" ; executeFailedCount=="+countAllEF+"]":"")
+			);
 		}
 		return countAllOut;
 	}
@@ -645,7 +756,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	void logNRows(IOCounter counter) {
 		// log input
 		if(logEachXInputRows>0 && (counter.input>lastInputCountLog) && (counter.input%logEachXInputRows==0)) {
-			logRow.info("[exec-id="+execId+"] "+counter.input+" rows read ["+counter.output+" rows imported]");
+			logRow.info("[exec-id="+execId+"] "+counter.input+" rows read ["+counter.output+" rows imported]"
+				+( (counter.successNoInfoCount>0||counter.executeFailedCount>0)?" [successNoInfoCount=="+counter.successNoInfoCount+" ; executeFailedCount=="+counter.executeFailedCount+"]":"")
+				);
 			lastInputCountLog = counter.input;
 		}
 		// log output
@@ -838,6 +951,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				}
 			}
 			counter.output += sum;
+			counter.successNoInfoCount += successNoInfoCount;
+			counter.executeFailedCount += executeFailedCount;
+
 			//if(sum>0) {
 			Util.logBatch.debug("cleanupStatement: executeBatch(): input = "+counter.input+" ; updates = "+changedRowsArr.length+" ; sum = "+sum+
 				( (successNoInfoCount>0||executeFailedCount>0||unknownCount>0)?" [successNoInfoCount=="+successNoInfoCount+" ; executeFailedCount=="+executeFailedCount+" ; unknownCount=="+unknownCount+"]":"")
@@ -881,7 +997,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		scan.useDelimiter(recordDelimiter);
 		return scan;
 	}
-	
+
+	Scanner createScannerFromBuffer(List<String> buffer) {
+		Scanner scan = new Scanner(new ReadableStringList(buffer, recordDelimiterReplacer()));
+		scan.useDelimiter(recordDelimiter);
+		return scan;
+	}
+
 	static final int MAX_LEVEL = 5;
 	
 	static InputStream getURLInputStream(final String importURL, final String urlMethod, final String urlData, final Map<String,String> cookiesHeader, final Map<String,String> urlHeaders, final int level)

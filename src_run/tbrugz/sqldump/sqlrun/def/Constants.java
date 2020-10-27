@@ -13,6 +13,7 @@ public class Constants {
 	public static final String SUFFIX_IMPORT = ".import";
 	public static final String SUFFIX_BATCH_MODE = ".batchmode";
 	public static final String SUFFIX_BATCH_SIZE = ".batchsize";
+	public static final String SUFFIX_BATCH_RETRY_OFF = ".batchmode.retry-with-batch-off";
 	public static final String SUFFIX_ENCODING = ".encoding";
 	public static final String SUFFIX_DEFAULT_ENCODING = ".defaultencoding";
 	public static final String SUFFIX_FAILONERROR = ".failonerror";
