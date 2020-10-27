@@ -1079,7 +1079,7 @@ public class DataDump extends AbstractSQLProc {
 		return names;
 	}
 	
-	static long getTableRowLimit(Properties prop, String tableOrQueryName) {
+	public static long getTableRowLimit(Properties prop, String tableOrQueryName) {
 		Long globalRowLimit = Utils.getPropLong(prop, DataDump.PROP_DATADUMP_ROWLIMIT);
 		Long tablerowlimit = Utils.getPropLong(prop, DATADUMP_PROP_PREFIX+tableOrQueryName+".rowlimit");
 		return tablerowlimit!=null?tablerowlimit:globalRowLimit!=null?globalRowLimit:Long.MAX_VALUE;

@@ -68,7 +68,7 @@ public class SqlImporter extends BaseImporter {
 		syntaxList.add(getInsertIntoSyntax());
 		Connection readConn = getReadConnection();
 		List<Object> params = null;
-		long rowlimit = 1000; //FIXME!
+		long rowlimit = DataDump.getTableRowLimit(prop, insertTable);
 		String schemaName = null, tableOrQueryId = insertTable, tableOrQueryName = insertTable, charset = null;
 		
 		DataDump dd = new DataDump();
