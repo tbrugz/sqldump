@@ -1,5 +1,6 @@
 package tbrugz.sqldump.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -68,13 +69,30 @@ public class IOUtil {
 	}*/
 	
 	public static String readFromFilename(String fileName) {
+		return readFromFile(new File(fileName));
+	}
+
+	public static String readFromFile(File file) {
 		try {
-			Reader reader = new FileReader(fileName);
+			Reader reader = new FileReader(file);
 			String ret = IOUtil.readFromReader(reader);
 			reader.close();
 			return ret;
 		} catch (IOException e) {
-			log.warn("error reading file "+fileName+": "+e);
+			log.warn("error reading file "+file+": "+e);
+		}
+		return null;
+	}
+
+	public static String readFromFile(File file, String inputEncoding) {
+		// https://stackoverflow.com/questions/696626/java-filereader-encoding-issue
+		try {
+			Reader reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
+			String ret = IOUtil.readFromReader(reader);
+			reader.close();
+			return ret;
+		} catch (IOException e) {
+			log.warn("error reading file "+file+" [with encoding "+inputEncoding+"]: "+e);
 		}
 		return null;
 	}

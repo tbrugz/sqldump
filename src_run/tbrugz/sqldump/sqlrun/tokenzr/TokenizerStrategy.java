@@ -17,6 +17,7 @@ public enum TokenizerStrategy {
 	STMT_SCANNER,
 	STMT_SCANNER_NG,
 	STRING_SPLITTER,
+	//NO_TOKENIZER, //??
 	;
 	
 	static final Log log = LogFactory.getLog(TokenizerStrategy.class);
@@ -25,6 +26,7 @@ public enum TokenizerStrategy {
 	public static final String STRING_SPLITTER_CLASS = "StringSpliter";
 	public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
 	public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
+	//public static final String NO_TOKENIZER_CLASS = "NoSplitTokenizer";
 	
 	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_TOKENIZER;
 	
@@ -52,6 +54,10 @@ public enum TokenizerStrategy {
 			log.info("using '"+tokenizer+"' tokenizer class");
 			return TokenizerStrategy.STMT_SCANNER_NG;
 		}
+		/*else if(NO_TOKENIZER_CLASS.equals(tokenizer)) {
+			log.info("using '"+tokenizer+"' (NO) tokenizer class");
+			return TokenizerStrategy.NO_TOKENIZER;
+		}*/
 		else {
 			throw new IllegalArgumentException("unknown string tokenizer class: "+tokenizer);
 		}
@@ -59,6 +65,11 @@ public enum TokenizerStrategy {
 	
 	public static Tokenizer getTokenizer(TokenizerStrategy tokenizerStrategy, File file, String inputEncoding, boolean escapeBackslashedApos, boolean split) throws IOException {
 		//log.debug("getTokenizer: strategy="+tokenizerStrategy+" ; charset = "+inputEncoding);
+		if(!split) {
+			String fileStr = IOUtil.readFromFile(file);
+			return new NoSplitTokenizer(fileStr);
+		}
+
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER_NG:
 			//XXX option to define charset
@@ -68,22 +79,25 @@ public enum TokenizerStrategy {
 			return new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
 		default:
 			// https://stackoverflow.com/questions/696626/java-filereader-encoding-issue
-			Reader reader = null;
-			try {
-				reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
-				String fileStr = IOUtil.readFromReader(reader);
+			//Reader reader = null;
+			//try {
+				//reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
+				//String fileStr = IOUtil.readFromReader(reader);
+				String fileStr = IOUtil.readFromFile(file, inputEncoding);
 				switch (tokenizerStrategy) {
 				case STMT_TOKENIZER:
 					return new SQLStmtTokenizer(fileStr);
 				case STRING_SPLITTER:
-					return new StringSpliter(fileStr, split);
+					return new StringSpliter(fileStr);
+				//case NO_TOKENIZER:
+				//	return new NoSplitTokenizer(fileStr);
 				default:
 					throw new IllegalStateException("unknown TokenizerStrategy: "+tokenizerStrategy);
 				}
-			}
-			finally {
-				if(reader!=null) { reader.close(); }
-			}
+			//}
+			//finally {
+			//	if(reader!=null) { reader.close(); }
+			//}
 		}
 	}
 

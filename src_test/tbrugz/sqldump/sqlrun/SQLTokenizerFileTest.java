@@ -50,12 +50,15 @@ public class SQLTokenizerFileTest {
 	}
 	
 	Tokenizer createTokenizer(File f, String inputEncoding) throws IOException {
+		return createTokenizer(f, inputEncoding, true);
+	}
+
+	Tokenizer createTokenizer(File f, String inputEncoding, boolean split) throws IOException {
 		//System.out.println("strategy: "+strategy+"; file: "+f);
 		boolean escapeBackslashedApos = true;
-		boolean split = true;
 		return TokenizerStrategy.getTokenizer(strategy, f, inputEncoding, escapeBackslashedApos, split);
 	}
-	
+
 	@Test
 	public void testUtf8() throws IOException {
 		String charset = "UTF-8";
@@ -83,6 +86,8 @@ public class SQLTokenizerFileTest {
 
 		Assert.assertEquals(true, p.hasNext());
 		Assert.assertEquals("ê", p.next());
+
+		Assert.assertEquals(false, p.hasNext());
 	}
 
 	@Test
@@ -113,6 +118,19 @@ public class SQLTokenizerFileTest {
 
 		Assert.assertEquals(true, p.hasNext());
 		Assert.assertEquals("ê", p.next());
+
+		Assert.assertEquals(false, p.hasNext());
+	}
+
+	@Test
+	public void testUtf8NoSplit() throws IOException {
+		String charset = "UTF-8";
+		Tokenizer p = createTokenizer(new File(dir, "tokenize-data-utf8.sql"), charset, false);
+		//a;á;à;c;ç;e;ê;
+		Assert.assertEquals(true, p.hasNext());
+		Assert.assertEquals("a;á;à;c;ç;e;ê;", p.next());
+
+		Assert.assertEquals(false, p.hasNext());
 	}
 
 }
