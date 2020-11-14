@@ -289,7 +289,7 @@ public class Table extends DBObject implements Relation {
 		return getColumnRemarks(columns);
 	}
 	
-	static List<String> getColumnNames(List<Column> columns) {
+	public static List<String> getColumnNames(List<Column> columns) {
 		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
 		for(Column c: columns) {

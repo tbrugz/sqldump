@@ -62,7 +62,7 @@ public class CascadingDataDump extends AbstractSQLProc {
 	//generic props
 	static final String PROP_CDD_STARTTABLES = CDD_PROP_PREFIX+".starttables";
 	static final String PROP_CDD_STOPTABLES = CDD_PROP_PREFIX+".stoptables";
-	static final String PROP_CDD_NOEXPORTTABLES = "sqldump.cascadingdd.noexporttables";
+	static final String PROP_CDD_NOEXPORTTABLES = CDD_PROP_PREFIX+".noexporttables";
 	static final String PROP_CDD_ORDERBYPK = CDD_PROP_PREFIX+".orderbypk";
 	static final String PROP_CDD_EXPORTEDKEYS = CDD_PROP_PREFIX+".exportedkeys";
 	//XXX add max(recursion)level for exported FKs?
