@@ -123,6 +123,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		"public",  // postgresql, h2, hsqldb
 		"APP",     // derby
 		"Default", // neo4j
+		"dbo",     // sqlserver
 		"",        // XXX 'schema-less' databases - which ones?
 	};
 	
@@ -1259,11 +1260,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					log.debug("Error on closeResultSetAndStatement: "+e, e);
 					rs.close();
 				}*/
-				if(rs.getStatement()!=null) {
-					rs.getStatement().close();
- 				}
+				/*if(rs.getStatement()!=null) {
+					rs.getStatement().close(); //NPE on sqlserver
+ 				}*/
 				rs.close();
 			}
+		} catch (NullPointerException e) {
+			log.warn("Error closing resultset or statement [NullPointerException]: "+e);
 		} catch (UnsupportedOperationException e) {
 			log.warn("Error closing resultset or statement [UnsupportedOperationException]: "+e);
 			//log.debug("Error closing resultset or statement: "+e.getMessage(), e);
