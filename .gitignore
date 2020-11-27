@@ -1,0 +1,13 @@
+
+bin/*
+dist/*
+lib/*
+work/*
+
+build.properties
+ivy.classpath.properties
+ivysettings.properties
+ivysettings.xml
+
+derby.log
+sqldump.properties
