@@ -573,11 +573,11 @@ public class SQLDiff implements Executor {
 		SchemaModelGrabber schemaGrabber = initSchemaModelGrabberInstance(grabClassName);
 		schemaGrabber.setId(grabberId);
 		schemaGrabber.setPropertiesPrefix(connPropPrefix);
+		schemaGrabber.setProperties(prop);
 		if(schemaGrabber.needsConnection()) {
 			Connection conn = ConnectionUtil.initDBConnection(connPropPrefix, prop);
 			schemaGrabber.setConnection(conn);
 		}
-		schemaGrabber.setProperties(prop);
 		return schemaGrabber;
 	}
 	

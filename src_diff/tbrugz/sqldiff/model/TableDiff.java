@@ -281,4 +281,8 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 		}
 	}
 
+	public String toString() {
+		return "TableDiff[type="+diffType+";name="+table.getQualifiedName()+"]";
+	}
+
 }
