@@ -155,9 +155,16 @@
 		<tstamp>
 			<format property="timestamp" pattern="yyyy-MM-dd hh:mm:ss"/>
 		</tstamp>
-		<exec executable="hg" outputproperty="buildNumber" resultproperty="buildNumber.result" failonerror="false" failifexecutionfails="false">
+		<exec executable="hg" outputproperty="buildNumberHg" resultproperty="buildNumberResHg" failonerror="false" failifexecutionfails="false">
 			<arg line="id -i"/>
 		</exec>
+		<exec executable="git" outputproperty="buildNumberGit" resultproperty="buildNumberResGit" failonerror="false" failifexecutionfails="false">
+			<arg line="rev-parse HEAD"/>
+		</exec>
+		<condition property="buildNumber" value="${buildNumberHg}" else="${buildNumberGit}">
+			<equals arg1="${buildNumberResHg}" arg2="0"/>
+		</condition>
+		<echo message="buildNumberHg: ${buildNumberHg} ; buildNumberGit: ${buildNumberGit} ; buildNumberResHg: ${buildNumberResHg} ; buildNumberResGit: ${buildNumberResGit}" level="verbose" />
 		<echo message="buildNumber: ${buildNumber} ; timestamp: ${timestamp}" />
 		<!-- , ${DSTAMP}, ${TSTAMP}, ${TODAY} -->
 
