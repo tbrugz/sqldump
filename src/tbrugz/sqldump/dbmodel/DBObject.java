@@ -5,9 +5,12 @@ import java.io.Serializable;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.StringDecorator;
 
-public abstract class DBObject extends DBIdentifiable implements Comparable<DBIdentifiable>, Serializable {
+public abstract class DBObject extends DBIdentifiable implements Comparable<DBIdentifiable>, Serializable, ValidatableDBObject {
+	
 	private static final long serialVersionUID = 1L;
 	
+	Boolean valid;
+
 	//dumping parameters
 	//XXX: add dumpWithSchemaName to DBObject ?
 	public static transient boolean dumpCreateOrReplace = false;
@@ -69,4 +72,14 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	
 	//public abstract void setRemarks(String remarks);
 	
+	@Override
+	public Boolean getValid() {
+		return valid;
+	}
+
+	@Override
+	public void setValid(Boolean valid) {
+		this.valid = valid;
+	}
+
 }

@@ -1,8 +1,9 @@
 package tbrugz.sqldump.dbmodel;
 
-public abstract class AbstractConstraint extends DBIdentifiable implements RemarkableDBObject {
+public abstract class AbstractConstraint extends DBIdentifiable implements RemarkableDBObject, ValidatableDBObject {
 
 	String remarks;
+	Boolean valid;
 
 	@Override
 	public String getRemarks() {
@@ -12,6 +13,16 @@ public abstract class AbstractConstraint extends DBIdentifiable implements Remar
 	@Override
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	@Override
+	public Boolean getValid() {
+		return valid;
+	}
+
+	@Override
+	public void setValid(Boolean valid) {
+		this.valid = valid;
 	}
 
 }
