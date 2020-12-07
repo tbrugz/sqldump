@@ -51,6 +51,22 @@ public class StringUtils {
 	public static String lrtrim(String s) {
 		return ltrim(rtrim(s));
 	}
+
+	// https://stackoverflow.com/a/391978/616413
+	public static String rightPad(String s, int n) {
+		return String.format("%-" + n + "s", s);
+	}
+
+	/*public static String leftPad(String s, int n) {
+		return String.format("%" + n + "s", s);
+	}*/
+
+	public static boolean contains(String[] arr, String s) {
+		for(String ss: arr) {
+			if(ss.equals(s)) { return true; }
+		}
+		return false;
+	}
 	
 	public static List<Class<?>> getClassListFromObjectList(List<?> objects) {
 		List<Class<?>> ret = new ArrayList<Class<?>>();

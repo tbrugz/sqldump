@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -16,11 +17,14 @@ public class CLIProcessor {
 	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
 	
 	//cli parameters
-	public static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
-	public static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
-	public static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
-	public static final String PARAM_VERSION = "--version";
-	public static final String PARAM_HELP = "--help";
+	protected static final String PARAM_HELP_DEFAULT = "--help";
+
+	protected static final String PARAM_PROPERTIES_FILENAME = "-propfile=";
+	protected static final String PARAM_PROPERTIES_RESOURCE = "-propresource=";
+	protected static final String PREFIX_DEFINE_PROPERTY = "-D";
+	protected static final String PARAM_USE_SYSPROPERTIES = "-usesysprop=";
+	protected static final String[] PARAMS_VERSION = {"-v", "--version"};
+	protected static final String[] PARAMS_HELP = {"-?", "-h", PARAM_HELP_DEFAULT};
 	
 	static final Log log = LogFactory.getLog(CLIProcessor.class);
 	
@@ -44,14 +48,33 @@ public class CLIProcessor {
 					boolean loaded = loadResource(papp, propResource);
 					if(loaded) { loadedCount++; }
 				}
+				else if(arg.indexOf(PREFIX_DEFINE_PROPERTY)==0) {
+					String propMap = arg.substring(PREFIX_DEFINE_PROPERTY.length());
+					int idx = propMap.indexOf("=");
+					if(idx>=0) {
+						String propName = propMap.substring(0, idx);
+						String propValue = propMap.substring(idx+1);
+						log.debug("setting property '"+propName+"' with value '"+propValue+"'");
+						papp.setProperty(propName, propValue);
+					}
+					else {
+						log.warn("invalid value setting property, arg: "+arg);
+						//throw new IllegalArgumentException("Invalid property syntax: "+arg);
+					}
+				}
 				else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
 					String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
 					ParametrizedProperties.setUseSystemProperties(useSysProp.equalsIgnoreCase("true"));
 					useSysPropSetted = true;
 				}
 				else {
-					log.warn("unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP+"' argument");
-					//XXX: show help and exit?
+					String message = "Unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP_DEFAULT+"' argument";
+					log.error(message);
+					System.out.println(message);
+					throw new IllegalArgumentException(message);
+					//System.exit(1);
+					//show help and exit?
+					//System.out.println(getHelpText(productName));
 				}
 			}
 		}
@@ -75,25 +98,33 @@ public class CLIProcessor {
 	public static boolean shouldStopExec(final String productName, final String[] args) {
 		if(args!=null) {
 			for(String arg: args) {
-				if(arg.equals(PARAM_VERSION)) {
-					System.out.println((productName!=null?productName+" ":"")+"version: "+Version.getVersion());
+				if(StringUtils.contains(PARAMS_VERSION, arg)) {
+					System.out.println((productName!=null?productName+" ":"")+
+						Version.getVersion()+
+						" ("+Version.getBuildNumber()+")");
 					return true;
 				}
-				else if(arg.equals(PARAM_HELP)) {
-					String out = (productName!=null?productName+" ":"")+"version: "+Version.getVersion()+"\n\n"
-						+ "parameters:\n\n"
-						+ "\t"+PARAM_PROPERTIES_FILENAME+"<file>: use <file> properties\n"
-						+ "\t"+PARAM_PROPERTIES_RESOURCE+"<resource>: use <resource> properties\n"
-						+ "\t"+PARAM_USE_SYSPROPERTIES+"[true|false]: use system properties (default is true)\n"
-						+ "\t"+PARAM_HELP+": show this help and exit\n"
-						+ "\t"+PARAM_VERSION+": show version and exit\n"
-						+ "\nmore info at <https://github.com/tbrugz/sqldump>\n";
-					System.out.println(out);
+				else if(StringUtils.contains(PARAMS_HELP, arg)) {
+					System.out.println(getHelpText(productName));
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	static String getHelpText(final String productName) {
+		final int pad = 28;
+		return (productName!=null?productName+" ":"")+Version.getVersion()+"\n\n"
+			+ "Usage: sqldump [options]\n\n"
+			+ "Options:\n\n"
+			+ "  "+StringUtils.rightPad(PARAM_PROPERTIES_FILENAME+"<file>", pad)+" use <file> properties\n"
+			+ "  "+StringUtils.rightPad(PARAM_PROPERTIES_RESOURCE+"<resource>", pad)+" use <resource> properties\n"
+			+ "  "+StringUtils.rightPad(PREFIX_DEFINE_PROPERTY+"<property>=<value>", pad)+" define property <property> with value <value>\n"
+			+ "  "+StringUtils.rightPad(PARAM_USE_SYSPROPERTIES+"[true|false]", pad)+" use system properties (default is true)\n"
+			+ "  "+StringUtils.rightPad(Utils.join(Arrays.asList(PARAMS_HELP),", "), pad)+" show help and exit\n"
+			+ "  "+StringUtils.rightPad(Utils.join(Arrays.asList(PARAMS_VERSION),", "), pad)+" show version and exit\n"
+			+ "\nMore info at <https://github.com/tbrugz/sqldump>";
 	}
 	
 	static boolean loadResource(Properties p, String propResource) {
