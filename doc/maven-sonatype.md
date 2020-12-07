@@ -17,10 +17,12 @@ on `$HOME/.gpgcredentials`, put your private key passphrase
 
 3- upload
 
-`ant publish-sonatype-release`
+* SNAPSHOT: `ant publish-sonatype-snapshot`
+
+* RELEASE: `ant publish-sonatype-release`
 
 
-4- release
+4- release (if RELEASE version)
 
 Go to <https://oss.sonatype.org/>, select 'staging repositories', select your repository (something like
 'comexampleapplication-1010'), review it then 'close' & 'release'  

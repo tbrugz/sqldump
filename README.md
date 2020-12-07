@@ -146,6 +146,7 @@ Command-line options
 --------------------
 - `-propfile=<path-to-prop-file>`: loads a different config properties file
 - `-propresource=<path-to-resource>`: loads a different config properties resource
+- `-D<property>=<value>`: define property with value
 - `-usesysprop=[true|false]`: loads system properties besides the config file properties (default is true)
 - `--help`: show help and exit
 - `--version`: show version and exit
