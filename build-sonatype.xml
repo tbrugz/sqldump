@@ -14,6 +14,7 @@
 	<!--property name="groupId" value="org.bitbucket.tbrugz" /-->
 	<!--property name="artifactId" value="sqldump" /-->
 	<!--property name="version" value="0.9.11" /-->
+	<property name="plugin-maven-deploy" value="org.apache.maven.plugins:maven-deploy-plugin:2.6"/> <!-- 2.8.2? -->
 
 	<!-- define artifacts' name, which follows the convention of Maven -->
 	<property name="maven-pom" value="${dist}/poms/${artifactId}.pom" />
@@ -97,7 +98,7 @@
 
 		<!-- deploy the main artifact -->
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="${plugin-maven-deploy}:deploy-file" />
 			<arg value="-Durl=${maven-snapshots-repository-url}" />
 			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
@@ -107,14 +108,16 @@
 		</artifact:mvn>
 
 		<!-- deploy the sources artifact -->
+		<!--
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-deploy-plugin:2.6:deploy-file" />
+			<arg value="${plugin-maven-deploy}:deploy-file" />
 			<arg value="-Durl=${maven-snapshots-repository-url}" />
 			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-sources-jar}" />
 			<arg value="-Dclassifier=sources" />
 		</artifact:mvn>
+		-->
 	</target>
 
 	<!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
