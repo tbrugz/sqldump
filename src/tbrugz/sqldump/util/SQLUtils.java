@@ -341,6 +341,13 @@ public class SQLUtils {
 				return ResultSet.class;
 			case Types.JAVA_OBJECT:   // 2000
 				return Object.class;
+			case Types.SQLXML:        // 2009
+			case 2007:                // Oracle XMLTYPE?
+				if(!unknownSQLTypes.contains(type)) {
+					log.warn("unknown (XML) SQL type ["+type+"], defaulting to "+(defaultTypeIsString?"String":"Object"));
+					unknownSQLTypes.add(type);
+				}
+				return defaultTypeIsString?String.class:Object.class;
 			case Types.OTHER:         // 1111
 				// postgresql: row, refcursor
 				return Object.class;
@@ -353,10 +360,7 @@ public class SQLUtils {
 					log.warn("unknown SQL type ["+type+"], defaulting to "+(defaultTypeIsString?"String":"Object"));
 					unknownSQLTypes.add(type);
 				}
-				if(defaultTypeIsString) {
-					return String.class;
-				}
-				return Object.class;
+				return defaultTypeIsString?String.class:Object.class;
 		}
 	}
 	

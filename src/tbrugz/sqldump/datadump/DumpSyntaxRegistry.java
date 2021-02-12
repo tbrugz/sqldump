@@ -45,7 +45,7 @@ public class DumpSyntaxRegistry {
 		}
 		else if (DumpSyntax.class.isAssignableFrom(cc)) {
 			if(syntaxes.contains(cc)) {
-				log.warn("dump syntaxes already contains "+cc.getName());
+				log.debug("dump syntaxes already contains "+cc.getName());
 			}
 			else {
 				syntaxes.add((Class<DumpSyntax>)cc);
