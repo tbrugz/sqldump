@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 
 public class CLIProcessor {
 
+	public static final String PROJECT_URL = "https://github.com/tbrugz/sqldump";
+
 	//static/constant properties
 	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
 	
@@ -124,7 +126,7 @@ public class CLIProcessor {
 			+ "  "+StringUtils.rightPad(PARAM_USE_SYSPROPERTIES+"[true|false]", pad)+" use system properties (default is true)\n"
 			+ "  "+StringUtils.rightPad(Utils.join(Arrays.asList(PARAMS_HELP),", "), pad)+" show help and exit\n"
 			+ "  "+StringUtils.rightPad(Utils.join(Arrays.asList(PARAMS_VERSION),", "), pad)+" show version and exit\n"
-			+ "\nMore info at <https://github.com/tbrugz/sqldump>";
+			+ "\nMore info at <"+PROJECT_URL+">";
 	}
 	
 	static boolean loadResource(Properties p, String propResource) {
