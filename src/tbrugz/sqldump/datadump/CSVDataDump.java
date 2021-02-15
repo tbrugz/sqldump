@@ -46,17 +46,28 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	
 	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
+	static final String PREFIX = "sqldump.datadump.";
+
+	/*
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
 	static final String PROP_DATADUMP_COLUMNDELIMITER = "sqldump.datadump.csv.columndelimiter";
 	static final String PROP_DATADUMP_ENCLOSING = "sqldump.datadump.csv.enclosing";
 	static final String PROP_DATADUMP_TABLENAMEHEADER = "sqldump.datadump.csv.tablenameheader";
 	static final String PROP_DATADUMP_COLUMNNAMESHEADER = "sqldump.datadump.csv.columnnamesheader";
 	//static final String PROP_DATADUMP_CSV_FLOATLOCALE = "sqldump.datadump.csv.floatlocale";
-	
+
 	//static final String PROP_DATADUMP_CHARSET = "sqldump.datadump.csv.charset";
 	//static final String PROP_DATADUMP_WRITEBOM = "sqldump.datadump.csv."+DataDump.SUFFIX_DATADUMP_WRITEBOM;
 	static final String PROP_DATADUMP_WRITEBOM_UTF8 = "sqldump.datadump.csv.x-writebom-utf8";
+	*/
 
+	static final String SUFFIX_RECORDDELIMITER = "recorddelimiter";
+	static final String SUFFIX_COLUMNDELIMITER = "columndelimiter";
+	static final String SUFFIX_ENCLOSING = "enclosing";
+	static final String SUFFIX_TABLENAMEHEADER = "tablenameheader";
+	static final String SUFFIX_COLUMNNAMESHEADER = "columnnamesheader";
+	static final String SUFFIX_WRITEBOM_UTF8 = "x-writebom-utf8";
+	
 	public static final String DELIM_RECORD_DEFAULT = "\r\n"; // RFC: record delimiter is \r\n
 	public static final String DELIM_COLUMN_DEFAULT = ",";
 	static final String ENCLOSING_DEFAULT = "\""; //XXXxx: should be '"'? yes!
@@ -76,13 +87,17 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
-		recordDelimiter = prop.getProperty(PROP_DATADUMP_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
-		columnDelimiter = prop.getProperty(PROP_DATADUMP_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
-		enclosing = prop.getProperty(PROP_DATADUMP_ENCLOSING, ENCLOSING_DEFAULT);
-		doTableNameHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_TABLENAMEHEADER, doTableNameHeaderDump);
-		doColumnNamesHeaderDump = Utils.getPropBool(prop, PROP_DATADUMP_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
-		writeUft8Bom = Utils.getPropBool(prop, PROP_DATADUMP_WRITEBOM_UTF8, writeUft8Bom);
+		recordDelimiter = prop.getProperty(fullPrefix() + SUFFIX_RECORDDELIMITER, DELIM_RECORD_DEFAULT);
+		columnDelimiter = prop.getProperty(fullPrefix() + SUFFIX_COLUMNDELIMITER, DELIM_COLUMN_DEFAULT);
+		enclosing = prop.getProperty(fullPrefix() + SUFFIX_ENCLOSING, ENCLOSING_DEFAULT);
+		doTableNameHeaderDump = Utils.getPropBool(prop, fullPrefix() + SUFFIX_TABLENAMEHEADER, doTableNameHeaderDump);
+		doColumnNamesHeaderDump = Utils.getPropBool(prop, fullPrefix() + SUFFIX_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
+		writeUft8Bom = Utils.getPropBool(prop, fullPrefix() + SUFFIX_WRITEBOM_UTF8, writeUft8Bom);
 		postProcProperties();
+	}
+
+	String fullPrefix() {
+		return PREFIX + getSyntaxId() + ".";
 	}
 	
 	@Override
