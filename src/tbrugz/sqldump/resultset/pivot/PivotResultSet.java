@@ -565,6 +565,7 @@ public class PivotResultSet extends AbstractResultSet {
 		
 		String colName = colsToPivotNames.get(colNumber);
 		Set<Object> colVals = keyColValues.get(colName);
+		if(colVals!=null) {
 		for(Object v: colVals) {
 			String colFullName = partialColName+(colNumber==0?"":COLS_SEP)+colName+COLVAL_SEP+valueToString(v);
 			if(colNumber+1==colsToPivotCount) {
@@ -583,6 +584,7 @@ public class PivotResultSet extends AbstractResultSet {
 				//log.info("col-partial-name: "+colFullName);
 				genNewCols(colNumber+1, colFullName, newColumns);
 			}
+		}
 		}
 	}
 	
