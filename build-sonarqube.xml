@@ -1,0 +1,32 @@
+<project name="sonarcube" default="sonar" basedir="." xmlns:sonar="antlib:org.sonar.ant">
+
+	<property name="src.dir" value="src"/>
+
+	<property file="build.properties"/>
+	<property file="${src.dir}/sqldump-version.properties"/>
+
+	<!-- Define the SonarQube global properties (the most usual way is to pass these properties via the command line) -->
+	<property name="sonar.host.url" value="https://sonarcloud.io" />
+ 
+	<!-- Define the SonarQube project properties -->
+	<property name="sonar.organization" value="tbrugz" />
+	<property name="sonar.projectKey" value="tbrugz_sqldump" />
+	<property name="sonar.projectName" value="SQLDump" />
+	<property name="sonar.projectVersion" value="${version}" />
+	<property name="sonar.sources" value="src" />
+	<property name="sonar.java.binaries" value="bin/main" />
+	<property name="sonar.java.libraries" value="lib/*.jar" />
+ 
+	<!-- Define SonarScanner for Ant Target -->
+	<target name="sonar">
+		<taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+			<!-- https://binaries.sonarsource.com/Distribution/sonarqube-ant-task/sonarqube-ant-task-2.7.0.1612.jar -->
+			<!-- Update the following line, or put the "sonarqube-ant-task-*.jar" file in your "$HOME/.ant/lib" folder -->
+			<!--<classpath path="path/to/sonar/ant/task/lib/sonarqube-ant-task-*.jar" />-->
+		</taskdef>
+	
+		<!-- Execute SonarScanner for Ant Analysis -->
+		<sonar:sonar />
+	</target>
+
+</project>

@@ -172,6 +172,12 @@ Artifact repositories
 	</dependency>
 
 
+Publishing
+----------
+- To publish on maven central, see [doc/maven-sonatype.md](doc/maven-sonatype.md)
+- To check code quality on sonarcloud, see [doc/sonarqube.md](doc/sonarqube.md)
+
+
 Misc/End notes
 --------------
 To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](doc/jenkins-config.md)
