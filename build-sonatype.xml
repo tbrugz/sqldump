@@ -1,7 +1,12 @@
-<project name="sonatype-deploy" default="deploy" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+<project name="sonatype-deploy" default="deploy" basedir="."
+	xmlns:if="ant:if"
+	xmlns:unless="ant:unless"
+	xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property environment="env" />
 	
+	<property name="maven.home" value="${env.M2_HOME}" if:set="env.M2_HOME"/>
+
 	<!-- Download Maven Ant Tasks from http://maven.apache.org/ant-tasks/download.html and put it into ~/.ant/lib/ -->
 	<!-- more info: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-7c.DeploySnapshotsandStageReleaseswithAnt -->
 	
@@ -42,7 +47,16 @@
 		<echo message="maven-localRepositoryPath: ${maven-localRepositoryPath}" />
 		<echo message="maven-remoteRepositoryUrl: ${maven-remoteRepositoryUrl}" />
 	</target>
-		
+	
+	<target name="prepare-maven" depends="info">
+		<path id="mvn.classpath">
+			<fileset dir="${maven.home}/boot">
+				<include name="plexus-classworlds-*.jar" />
+			</fileset>
+		</path>
+		<property name="mvn.mainclass" value="org.codehaus.plexus.classworlds.launcher.Launcher" />
+	</target>
+	
 	<target name="prepare-publish-sonatype" depends="info">
 		<echo message="version: ${version}"/>
 		<fail message="version must be set" unless="version"/>
@@ -51,11 +65,28 @@
 		</condition>
 	</target>
 	
+	<target name="mvn-show-version" depends="prepare-maven, info" description="show maven version">
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" if:set="maven.home">
+			<jvmarg value="-Dclassworlds.conf=${maven.home}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${maven.home}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+			<arg value="--version" />
+		</java>
+		<!--<artifact:mvn mavenHome="${maven.home}" if:set="maven.home" fork="true">
+			<env key="M2_HOME" value="${maven.home}"/>
+			<arg value="- -version" />
+		</artifact:mvn>-->
+		<artifact:mvn unless:set="maven.home" fork="true">
+			<arg value="--version" />
+		</artifact:mvn>
+	</target>
+
 	<target name="mvn-install-files" depends="info, mvn-install-file-jar, mvn-install-file-sources-jar, mvn-install-file-pom" description="install files">
 	</target>
 	
 	<target name="mvn-install-file-jar" description="install jar file">
-		<artifact:mvn>
+		<artifact:mvn mavenHome="${maven.home}" fork="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
@@ -67,7 +98,8 @@
 	</target>
 
 	<target name="mvn-install-file-sources-jar" description="install sources jar file">
-		<artifact:mvn>
+		<artifact:mvn mavenHome="${maven.home}" fork="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-sources-jar}" />
@@ -80,7 +112,8 @@
 	</target>
 
 	<target name="mvn-install-file-pom" description="install pom file">
-		<artifact:mvn>
+		<artifact:mvn mavenHome="${maven.home}" fork="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-pom}" />
@@ -94,7 +127,8 @@
 
 	<!-- XXX not working -->
 	<target name="mvn-install" depends="info" description="install maven artifacts">
-		<artifact:mvn>
+		<artifact:mvn mavenHome="${maven.home}" fork="true">
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="install"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
