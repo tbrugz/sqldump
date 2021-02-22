@@ -8,13 +8,16 @@
 	<property name="dist" location="dist" />
 	<property name="artifactId" value="${ivy.module}" />
 
+	<property name="maven-install-plugin.version" value="2.3.1" />
+	<property name="maven-deploy-plugin.version" value="2.6" />
+	<property name="maven-gpg-plugin.version" value="1.3" />
 	<!--property file="${src}/sqldump-version.properties"/-->
 
 	<!-- define Maven coordinates -->
 	<!--property name="groupId" value="org.bitbucket.tbrugz" /-->
 	<!--property name="artifactId" value="sqldump" /-->
 	<!--property name="version" value="0.9.11" /-->
-	<property name="plugin-maven-deploy" value="org.apache.maven.plugins:maven-deploy-plugin:2.6"/> <!-- 2.8.2? -->
+	<property name="plugin-maven-deploy" value="org.apache.maven.plugins:maven-deploy-plugin:${maven-deploy-plugin.version}"/> <!-- 2.8.2? -->
 
 	<!-- define artifacts' name, which follows the convention of Maven -->
 	<property name="maven-pom" value="${dist}/poms/${artifactId}.pom" />
@@ -29,12 +32,15 @@
 	<property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
 
 	<property name="maven-localRepositoryPath" value="${user.home}/.m2/repository" />
+	<property name="maven-remoteRepositoryUrl" value="https://repo1.maven.org/maven2/" />
 
 	<target name="info">
 		<echo message="java.home: ${java.home}" />
 		<echo message="maven.home: ${maven.home}" />
 		<echo message="env.M2_HOME: ${env.M2_HOME}" />
 		<echo message="artifactId: ${artifactId}" />
+		<echo message="maven-localRepositoryPath: ${maven-localRepositoryPath}" />
+		<echo message="maven-remoteRepositoryUrl: ${maven-remoteRepositoryUrl}" />
 	</target>
 		
 	<target name="prepare-publish-sonatype" depends="info">
@@ -50,10 +56,11 @@
 	
 	<target name="mvn-install-file-jar" description="install jar file">
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
+			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
 			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
+			<arg value="-Dmaven.repo.remote=${maven-remoteRepositoryUrl}"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
 		</artifact:mvn>
@@ -61,11 +68,12 @@
 
 	<target name="mvn-install-file-sources-jar" description="install sources jar file">
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
+			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-sources-jar}" />
 			<arg value="-Dclassifier=sources" />
 			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
+			<arg value="-Dmaven.repo.remote=${maven-remoteRepositoryUrl}"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
 		</artifact:mvn>
@@ -73,11 +81,12 @@
 
 	<target name="mvn-install-file-pom" description="install pom file">
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-install-plugin:2.3.1:install-file"/>
+			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-pom}" />
 			<arg value="-Dpackaging=pom" />
 			<arg value="-DlocalRepositoryPath=${maven-localRepositoryPath}"/>
+			<arg value="-Dmaven.repo.remote=${maven-remoteRepositoryUrl}"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
 		</artifact:mvn>
@@ -134,7 +143,7 @@
 		
 		<!-- sign and deploy the main artifact -->
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
@@ -147,7 +156,7 @@
 
 		<!-- sign and deploy the sources artifact -->
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
@@ -159,7 +168,7 @@
 
 		<!-- sign and deploy the javadoc artifact -->
 		<artifact:mvn>
-			<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.3:sign-and-deploy-file" />
+			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
