@@ -56,7 +56,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected static final String DEFAULT_PADDING = "";
 	protected static final boolean DEFAULT_ADD_CAPTION = false;
 
-	protected String padding;
+	//protected String padding;
 	protected boolean innerTable;
 	
 	protected String prepend = null;
@@ -513,7 +513,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		dd.innerTable = this.innerTable;
 		dd.onColsColCount = this.onColsColCount;
 		dd.onRowsColCount = this.onRowsColCount;
-		dd.padding = this.padding;
+		//dd.padding = this.padding;
 		dd.prepend = this.prepend;
 		dd.xpendInnerTable = this.xpendInnerTable;
 	}

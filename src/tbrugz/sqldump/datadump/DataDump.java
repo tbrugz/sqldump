@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Constraint;
+import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
@@ -255,7 +256,7 @@ public class DataDump extends AbstractSQLProc {
 			//ordering tables for dump
 			tablesForDataDumpLoop = new ArrayList<Table>();
 			for(String tName: tables4dump) {
-				Table t = DBObject.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
+				Table t = DBIdentifiable.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
 				if(t==null) {
 					log.warn("table '"+tName+"' not found for dump");
 					ignoredTables++;
