@@ -65,11 +65,17 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String CONN_PROPS_PREFIX = Constants.SQLRUN_PROPS_PREFIX;
 	static final String PRODUCT_NAME = "sqlrun";
 	
+	//exec properties
+	static final String PROP_FILE = "file";
+	static final String PROP_FILES = "files";
+	static final String PROP_STATEMENT = "statement";
+	static final String PROP_QUERY = "query";
+
 	//exec suffixes
-	static final String SUFFIX_FILE = ".file";
-	static final String SUFFIX_FILES = ".files";
-	static final String SUFFIX_STATEMENT = ".statement";
-	static final String SUFFIX_QUERY = ".query";
+	static final String SUFFIX_FILE = "." + PROP_FILE;
+	static final String SUFFIX_FILES = "." + PROP_FILES;
+	static final String SUFFIX_STATEMENT = "." + PROP_STATEMENT;
+	static final String SUFFIX_QUERY = "." + PROP_QUERY;
 
 	//aux suffixes
 	static final String SUFFIX_DIR = ".dir";
