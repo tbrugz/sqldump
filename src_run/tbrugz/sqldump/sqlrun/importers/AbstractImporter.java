@@ -39,6 +39,7 @@ import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.util.SQLUtils;
+import tbrugz.sqldump.util.ShutdownManager;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
@@ -434,20 +435,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		if(follow) {
 			//add shutdown hook
 			log.info("adding shutdown hook...");
-			Runtime.getRuntime().addShutdownHook(new Thread(){
-				public void run() {
-					log.info("commiting & shutting down...");
-					System.err.println("commiting & shutting down...");
-					try {
-						conn.commit();
-					} catch (SQLException e) {
-						log.warn("error commiting: "+e);
-						System.err.println("error commiting: "+e);
-					}
-					log.info("shutting down");
-					System.err.println("shutting down");
-				}
-			});
+			ShutdownManager.instance().removeAllHooks();
+			ShutdownManager.instance().addShutdownHook(getShutdownThread());
 		}
 		
 		boolean is1stloop = true;
@@ -597,6 +586,23 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 
 		return countAll;
+	}
+	
+	Thread getShutdownThread() {
+		return new Thread() {
+			public void run() {
+				log.info("[shutdown] commiting & shutting down...");
+				System.err.println("[shutdown] commiting & shutting down...");
+				try {
+					conn.commit();
+				} catch (SQLException e) {
+					log.warn("[shutdown] error commiting: "+e);
+					System.err.println("[shutdown] error commiting: "+e);
+				}
+				log.info("[shutdown] shutting down");
+				System.err.println("[shutdown] shutting down");
+			}
+		};		
 	}
 	
 	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) { // remove alwaysShowId?

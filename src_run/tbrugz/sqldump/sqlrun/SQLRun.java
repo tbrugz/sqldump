@@ -39,6 +39,7 @@ import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.ShutdownManager;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -184,8 +185,30 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		}
 		else {
 			log.info("processing ids in order: "+Utils.join(allIds.keySet(), ", ")+" ["+allIds.size()+" ids selected]");
+			Thread shutdownThread = getShutdownThread();
+			boolean shutdownHookAdded = ShutdownManager.instance().addShutdownHook(shutdownThread);
+
 			doRunIds(allIds);
+
+			if(shutdownHookAdded) {
+				ShutdownManager.instance().removeShutdownHook(shutdownThread);
+			}
 		}
+	}
+
+	Thread getShutdownThread() {
+		return new Thread() {
+			public void run() {
+				log.warn("[shutdown] Shutdown detected. Will rollback");
+				try {
+					conn.rollback();
+					end(true);
+				} catch (SQLException e) {
+					log.warn("[shutdown] Error rolling back: "+e, e);
+				}
+				log.info("[shutdown] Shutting down");
+			}
+		};
 	}
 	
 	void doRunIds(Map<String, ProcType> allIds) throws IOException, SQLException {
