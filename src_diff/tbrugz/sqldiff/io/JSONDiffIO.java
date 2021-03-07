@@ -18,17 +18,27 @@ public class JSONDiffIO extends XMLDiffIO {
 	}
 	
 	@Override
-	public Diff grabDiff(Reader reader) throws JAXBException {
-		JSONSerializer ser = new JSONSerializer(JAXB_DIFF_PACKAGES);
-		SchemaDiff sdiff = (SchemaDiff) ser.unmarshal(reader);
-		return sdiff;
+	public Diff grabDiff(Reader reader) {
+		try {
+			JSONSerializer ser = new JSONSerializer(JAXB_DIFF_PACKAGES);
+			SchemaDiff sdiff = (SchemaDiff) ser.unmarshal(reader);
+			return sdiff;
+		}
+		catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	public void dumpDiff(Diff diff, Writer writer) throws JAXBException, IOException {
-		JSONSerializer ser = new JSONSerializer(JAXB_DIFF_PACKAGES);
-		ser.marshal(diff, writer);
-		writer.close();
+	public void dumpDiff(Diff diff, Writer writer) throws IOException {
+		try {
+			JSONSerializer ser = new JSONSerializer(JAXB_DIFF_PACKAGES);
+			ser.marshal(diff, writer);
+			writer.close();
+		}
+		catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 }

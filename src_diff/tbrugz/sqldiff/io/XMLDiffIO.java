@@ -37,28 +37,38 @@ public class XMLDiffIO implements DiffGrabber, DiffDumper {
 	}
 	
 	@Override
-	public Diff grabDiff(Reader reader) throws JAXBException {
-		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
-		SchemaDiff sdiff = (SchemaDiff) xmlser.unmarshal(reader);
-		return sdiff;
+	public Diff grabDiff(Reader reader) {
+		try {
+			XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
+			SchemaDiff sdiff = (SchemaDiff) xmlser.unmarshal(reader);
+			return sdiff;
+		}
+		catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Override
-	public Diff grabDiff(File file) throws JAXBException, FileNotFoundException {
+	public Diff grabDiff(File file) throws FileNotFoundException {
 		Diff diff = grabDiff(new FileReader(file));
 		log.info(type()+" diff model grabbed from '"+file.getAbsolutePath()+"'");
 		return diff;
 	}
 
 	@Override
-	public void dumpDiff(Diff diff, Writer writer) throws JAXBException, IOException {
-		XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
-		xmlser.marshal(diff, writer);
-		writer.close();
+	public void dumpDiff(Diff diff, Writer writer) throws IOException {
+		try {
+			XMLSerializer xmlser = new XMLSerializer(JAXB_DIFF_PACKAGES);
+			xmlser.marshal(diff, writer);
+			writer.close();
+		}
+		catch (JAXBException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
-	public void dumpDiff(Diff diff, File file) throws JAXBException, IOException {
+	public void dumpDiff(Diff diff, File file) throws IOException {
 		Utils.prepareDir(file);
 		dumpDiff(diff, new FileWriter(file));
 		log.info(type()+" diff written to: "+file.getAbsolutePath());

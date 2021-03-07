@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import javax.naming.NamingException;
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
@@ -183,7 +182,7 @@ public class SQLDiff implements Executor {
 		}
 	}
 	
-	public int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
+	public int doIt() throws ClassNotFoundException, SQLException, NamingException, IOException, XMLStreamException, InterruptedException, ExecutionException {
 		
 		SchemaModelGrabber fromSchemaGrabber = null;
 		SchemaModelGrabber toSchemaGrabber = null;
@@ -278,7 +277,7 @@ public class SQLDiff implements Executor {
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(XML_IO_CLASS);
 				dd.setProperties(prop);
 				dd.dumpDiff(diff, xmlWriter);
-			} catch (JAXBException e) {
+			} catch (RuntimeException e) {
 				log.warn("error writing xml: "+e);
 				log.debug("error writing xml: "+e.getMessage(),e);
 			}
@@ -289,7 +288,7 @@ public class SQLDiff implements Executor {
 				DiffDumper dd = (DiffDumper) Utils.getClassInstance(JSON_IO_CLASS);
 				dd.setProperties(prop);
 				dd.dumpDiff(diff, jsonWriter);
-			} catch (JAXBException e) {
+			} catch (RuntimeException e) {
 				log.warn("error writing json: "+e);
 				log.debug("error writing json: "+e.getMessage(),e);
 			}
@@ -738,7 +737,7 @@ public class SQLDiff implements Executor {
 	}
 
 	@Override
-	public void doMain(String[] args, Properties properties) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
+	public void doMain(String[] args, Properties properties) throws ClassNotFoundException, SQLException, NamingException, IOException, XMLStreamException, InterruptedException, ExecutionException {
 		if(properties!=null) {
 			prop.putAll(properties);
 		}
@@ -764,7 +763,7 @@ public class SQLDiff implements Executor {
 		lastDiffCount = doIt();
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, JAXBException, XMLStreamException, InterruptedException, ExecutionException {
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, NamingException, IOException, XMLStreamException, InterruptedException, ExecutionException {
 		SQLDiff sqldiff = new SQLDiff();
 		sqldiff.doMain(args, sqldiff.prop);
 	}
