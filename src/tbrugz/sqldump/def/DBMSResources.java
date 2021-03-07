@@ -1,6 +1,7 @@
 package tbrugz.sqldump.def;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
@@ -285,7 +286,8 @@ public final class DBMSResources {
 			//XXX: call Utils.getClassByName()
 			try {
 				Class<?> c = Class.forName(dbSpecificFeaturesClass);
-				feats = (DBMSFeatures) c.newInstance();
+				feats = (DBMSFeatures) c.getConstructor().newInstance();
+				
 				feats.setId(dbid);
 				log.debug("specific DBMS features class: "+c.getName());
 			} catch (ClassNotFoundException e) {
@@ -293,6 +295,10 @@ public final class DBMSResources {
 			} catch (InstantiationException e) {
 				throw new RuntimeException(e);
 			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException(e);
+			} catch (InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}
 		}
