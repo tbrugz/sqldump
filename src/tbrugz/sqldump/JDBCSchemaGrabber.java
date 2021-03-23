@@ -1260,9 +1260,15 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 					log.debug("Error on closeResultSetAndStatement: "+e, e);
 					rs.close();
 				}*/
-				/*if(rs.getStatement()!=null) {
-					rs.getStatement().close(); //NPE on sqlserver
- 				}*/
+				if(rs.getStatement()!=null) {
+					// without this, Oracle may throw "java.sql.SQLException: ORA-01000: maximum open cursors exceeded"
+					// possible NPE on sqlserver
+					try {
+						rs.getStatement().close();
+					} catch (NullPointerException e) {
+						log.debug("Error closing statement [NullPointerException]: "+e);
+					}
+ 				}
 				rs.close();
 			}
 		} catch (NullPointerException e) {
