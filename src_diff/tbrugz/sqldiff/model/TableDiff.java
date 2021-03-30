@@ -123,15 +123,28 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 			diffs.add(tcd);
 		}
 		
-		//constraints
-		//XXX: constraints should be dumper in defined order (FKs at end)
-		List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
 		SchemaDiffer sd = new SchemaDiffer();
-		sd.diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getFinalQualifiedName(), newTable.getFinalQualifiedName());
-		for(int i=0;i<dbiddiffs.size();i++) {
-			dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
+
+		//constraints
+		{
+			//XXX: constraints should be dumper in defined order (FKs at end)
+			List<DBIdentifiableDiff> dbiddiffs = new ArrayList<DBIdentifiableDiff>();
+			sd.diffs(DBObjectType.CONSTRAINT, dbiddiffs, origTable.getConstraints(), newTable.getConstraints(), origTable.getFinalQualifiedName(), newTable.getFinalQualifiedName());
+			for(int i=0;i<dbiddiffs.size();i++) {
+				dbiddiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
+			}
+			diffs.addAll(dbiddiffs);
 		}
-		diffs.addAll(dbiddiffs);
+
+		//constraints: FKs
+		{
+			List<DBIdentifiableDiff> fkdiffs = new ArrayList<DBIdentifiableDiff>();
+			sd.diffs(DBObjectType.FK, fkdiffs, origTable.getForeignKeys(), newTable.getForeignKeys(), origTable.getFinalQualifiedName(), newTable.getFinalQualifiedName());
+			for(int i=0;i<fkdiffs.size();i++) {
+				fkdiffs.get(i).ident().setSchemaName(newTable.getSchemaName());
+			}
+			diffs.addAll(fkdiffs);
+		}
 		
 		//comments??
 		String otRemarks = origTable.getRemarks();

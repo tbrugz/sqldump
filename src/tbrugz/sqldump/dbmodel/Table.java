@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmodel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,6 +18,7 @@ public class Table extends DBObject implements Relation {
 	List<Column> columns = new ArrayList<Column>();
 	List<Grant> grants = new ArrayList<Grant>();
 	List<Constraint> constraints = new ArrayList<Constraint>();
+	List<FK> foreignKeys = new ArrayList<FK>();
 	String remarks; //e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	Boolean domainTable;
 	
@@ -59,7 +61,14 @@ public class Table extends DBObject implements Relation {
 
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return getDefinition(dumpSchemaName, true, false, false, true, null);
+		Set<FK> fks = null;
+		boolean dumpFKs = false;
+		if(foreignKeys!=null && foreignKeys.size()>0) {
+			dumpFKs = true;
+			fks = new TreeSet<FK>();
+			fks.addAll(foreignKeys);
+		}
+		return getDefinition(dumpSchemaName, true, dumpFKs, false, true, fks);
 	}
 	
 	public String getDefinition(boolean dumpWithSchemaName, boolean dumpPKs, boolean dumpFKsInsideTable, boolean dumpDropStatements, boolean dumpComments,
@@ -388,6 +397,14 @@ public class Table extends DBObject implements Relation {
 	@Override
 	public DBObjectType getDBObjectType() {
 		return getDbObjectType();
+	}
+	
+	public List<FK> getForeignKeys() {
+		return foreignKeys;
+	}
+	
+	public void setForeignKeys(List<FK> foreignKeys) {
+		this.foreignKeys = foreignKeys;
 	}
 	
 }
