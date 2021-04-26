@@ -769,10 +769,22 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			log.debug("countNFE = "+countNFE+" ; countPE = "+countPE);
 		}
 
-		if(commitEachXrows>0 && (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0)) {
-			//XXX commit size should be multiple of batch size?
-			Util.doCommit(conn);
-			lastOutputCountCommit = counter.output;
+		if(commitEachXrows>0) {
+			if(!useBatchUpdate) {
+				if( (counter.output>lastOutputCountCommit) && (counter.output%commitEachXrows==0) ) {
+					Util.doCommit(conn);
+					logRow.debug("[exec-id="+execId+"] committed ; counter.output = "+counter.output);
+					lastOutputCountCommit = counter.output;
+				}
+			}
+			else {
+				// counter.output not reliable when using batch mode
+				if(counter.input%commitEachXrows==0) {
+					Util.doCommit(conn);
+					logRow.debug("[exec-id="+execId+"] committed [batch=true]; counter.input = "+counter.input);
+					//lastInputCountCommit = counter.input;
+				}
+			}
 		}
 		logNRows(counter);
 		return true;
