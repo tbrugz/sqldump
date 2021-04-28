@@ -36,6 +36,7 @@ import tbrugz.sqldump.util.Utils;
 
 //XXX: remove references to SQLRun class
 public class StmtProc extends AbstractFailable implements Executor {
+
 	static final Log log = LogFactory.getLog(StmtProc.class);
 	static final Log logRow = LogFactory.getLog(StmtProc.class.getName()+"-row");
 	static final Log logStmt = LogFactory.getLog(StmtProc.class.getName()+"-stmt");
@@ -47,6 +48,8 @@ public class StmtProc extends AbstractFailable implements Executor {
 	static final String PROP_USE_PREPARED_STATEMENT = "sqlrun.usepreparedstatement";
 	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = ".escapebackslashedapos";
 	
+	static final long DEFAULT_LOG_EACH_X_INPUT_ROWS = 1000L;
+
 	boolean useBatchUpdate = false;
 	boolean usePreparedStatement = true;
 	boolean escapeBackslashedApos = false;
@@ -56,6 +59,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
+	long logEachXStmts = DEFAULT_LOG_EACH_X_INPUT_ROWS;
 	
 	TokenizerStrategy tokenizerStrategy = TokenizerStrategy.STMT_SCANNER;
 	
@@ -83,7 +87,6 @@ public class StmtProc extends AbstractFailable implements Executor {
 		Writer logerror = null;
 		
 		log.info("file exec: statements from file '"+file+"'...");
-		long logEachXStmts = 1000;
 		long urowsTotal = 0;
 		long countOk = 0;
 		long countError = 0;
@@ -322,11 +325,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 			log.warn("null properties!");
 			return;
 		}
+		String execId = papp.getProperty(SQLRun.PROP_PROCID);
 		//TODO: useBatchUpdate & batchSize: default value should not be based on previous value
-		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
-		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_BATCH_SIZE, batchSize);
-		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+Constants.SUFFIX_ENCODING, defaultInputEncoding);
-		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SUFFIX_ESCAPE_BACKSLASHED_APOS, escapeBackslashedApos);
+		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_SIZE, batchSize);
+		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC + execId + Constants.SUFFIX_ENCODING, defaultInputEncoding);
+		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + SUFFIX_ESCAPE_BACKSLASHED_APOS, escapeBackslashedApos);
+		logEachXStmts = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, DEFAULT_LOG_EACH_X_INPUT_ROWS);
 	}
 	
 	int closeStatement() throws SQLException {

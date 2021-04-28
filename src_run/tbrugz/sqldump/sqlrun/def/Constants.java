@@ -17,5 +17,7 @@ public class Constants {
 	public static final String SUFFIX_ENCODING = ".encoding";
 	public static final String SUFFIX_DEFAULT_ENCODING = ".defaultencoding";
 	public static final String SUFFIX_FAILONERROR = ".failonerror";
+	public static final String SUFFIX_LOG_EACH_X_INPUT_ROWS = ".log-each-x-input-rows";
+	public static final String SUFFIX_LOG_EACH_X_OUTPUT_ROWS = ".log-each-x-output-rows";
 
 }

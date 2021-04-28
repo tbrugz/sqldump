@@ -129,7 +129,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final Log logRow = LogFactory.getLog(AbstractImporter.class.getName()+"-row");
 	
 	static final int ERRORLINE_MAXSIZE = 40;
-	static final long LOG_EACH_X_ROWS_DEFAULT = 10000L; //50000 ? (DataDump's default)
+	static final long LOG_EACH_X_INPUT_ROWS_DEFAULT = 10000L; //50000 ? (DataDump's default)
 
 	Properties prop;
 	Connection conn;
@@ -173,8 +173,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	long skipHeaderN = 0;
 	Pattern skipLineRegex = null;
 	long maxLines = -1;
-	long logEachXrows = 0; //10000L; //XXX: prop for logEachXrows
-	long logEachXInputRows = LOG_EACH_X_ROWS_DEFAULT; //XXX: prop for logEachXInputRows
+	long logEachXInputRows = LOG_EACH_X_INPUT_ROWS_DEFAULT;
+	long logEachXOutputRows = 0; //10000L;
 
 	//needed as a property for 'follow' mode
 	InputStream fileIS = null;
@@ -226,7 +226,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		SUFFIX_SKIP_REGEX,
 		SUFFIX_URLMESSAGEBODY,
 		SUFFIX_URLMETHOD,
-		SUFFIX_X_COMMIT_EACH_X_ROWS
+		SUFFIX_X_COMMIT_EACH_X_ROWS,
+		Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS,
+		Constants.SUFFIX_LOG_EACH_X_OUTPUT_ROWS,
 	};
 	
 	@Override
@@ -272,7 +274,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		commitEachXrows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
 		
 		logMalformedLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
-		
+		logEachXInputRows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, logEachXInputRows);
+		logEachXOutputRows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LOG_EACH_X_OUTPUT_ROWS, logEachXOutputRows);
+
 		if(useBatchUpdate && commitEachXrows>0 && (commitEachXrows%batchUpdateSize)!=0) {
 			log.warn("[execId="+execId+"] better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
 		}
@@ -799,7 +803,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			lastInputCountLog = counter.input;
 		}
 		// log output
-		if(logEachXrows>0 && (counter.output>lastOutputCountLog) && (counter.output%logEachXrows==0)) {
+		if(logEachXOutputRows>0 && (counter.output>lastOutputCountLog) && (counter.output%logEachXOutputRows==0)) {
 			logRow.info("[exec-id="+execId+"] "+counter.output+" rows imported");
 			lastOutputCountLog = counter.output;
 		}
