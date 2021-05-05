@@ -105,10 +105,40 @@ public class IOUtil {
 		}
 	}
 
+	public static void pipeStreams(InputStream is, OutputStream os, long maxBytes) throws IOException {
+		byte[] buffer = new byte[BUFFER_SIZE];
+		long bytesRead = 0;
+		int len;
+		while ((len = is.read(buffer)) != -1) {
+			bytesRead += len;
+			if(bytesRead>maxBytes) {
+				len -= bytesRead-maxBytes;
+				os.write(buffer, 0, len);
+				break;
+			}
+			os.write(buffer, 0, len);
+		}
+	}
+	
 	public static void pipeCharacterStreams(Reader r, Writer w) throws IOException {
 		char[] buffer = new char[BUFFER_SIZE];
 		int len;
 		while ((len = r.read(buffer)) != -1) {
+			w.write(buffer, 0, len);
+		}
+	}
+	
+	public static void pipeCharacterStreams(Reader r, Writer w, long maxChars) throws IOException {
+		char[] buffer = new char[BUFFER_SIZE];
+		long bytesRead = 0;
+		int len;
+		while ((len = r.read(buffer)) != -1) {
+			bytesRead += len;
+			if(bytesRead>maxChars) {
+				len -= bytesRead-maxChars;
+				w.write(buffer, 0, len);
+				break;
+			}
 			w.write(buffer, 0, len);
 		}
 	}
