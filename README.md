@@ -22,7 +22,7 @@ SQLDump also has three subprojects:
 
 Author: Telmo Brugnara <[tbrugz@gmail.com](mailto:tbrugz@gmail.com)>
 
-License: [LGPLv3](http://www.gnu.org/licenses/lgpl.html) - see [LICENSE.md](LICENSE.md)
+License: [LGPLv3](https://www.gnu.org/licenses/lgpl-3.0.html) - see [LICENSE.md](LICENSE.md)
 
 
 SQLDump - Basic Process
