@@ -47,6 +47,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 	static final String PROP_USE_PREPARED_STATEMENT = "sqlrun.usepreparedstatement";
 	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = ".escapebackslashedapos";
+	static final String SUFFIX_USE_SAVEPOINT = ".use-savepoint";
 	
 	static final long DEFAULT_LOG_EACH_X_INPUT_ROWS = 1000L;
 
@@ -55,6 +56,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	boolean escapeBackslashedApos = false;
 	boolean replacePropsOnFileContents = true; //XXX: add prop for 'replacePropsOnFileContents'
 	boolean rollbackOnError = true;
+	boolean useSavepoint = true;
 	
 	long batchSize = 1000;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
@@ -221,7 +223,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
 		
 		Savepoint sp = null;
-		if(rollbackOnError && !commitStrategy.equals(CommitStrategy.AUTO_COMMIT)) {
+		if(rollbackOnError && useSavepoint && !commitStrategy.equals(CommitStrategy.AUTO_COMMIT)) {
 			sp = ConnectionUtil.setSavepoint(conn);
 		}
 		
@@ -277,7 +279,9 @@ public class StmtProc extends AbstractFailable implements Executor {
 					logUpdates.debug("updated "+updateCount+" rows");
 				}
 			}
-			ConnectionUtil.releaseSavepoint(conn, sp);
+			if(useSavepoint) {
+				ConnectionUtil.releaseSavepoint(conn, sp);
+			}
 			return updateCount;
 		}
 		catch(SQLException e) {
@@ -363,6 +367,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		if(!usePreparedStatement) {
 			log.info("not using prepared statements [prop '"+PROP_USE_PREPARED_STATEMENT+"']");
 		}
+		useSavepoint = Utils.getPropBool(papp, Constants.SQLRUN_PROPS_PREFIX + SUFFIX_USE_SAVEPOINT, useSavepoint);
 		
 		this.papp = papp;
 	}
