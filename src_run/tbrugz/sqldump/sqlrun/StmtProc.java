@@ -49,16 +49,19 @@ public class StmtProc extends AbstractFailable implements Executor {
 	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = ".escapebackslashedapos";
 	static final String SUFFIX_USE_SAVEPOINT = ".use-savepoint";
 	
+	static final boolean DEFAULT_USE_BATCH_UPDATE = false;
+	static final boolean DEFAULT_ESCAPE_BACKSLASHED_APOS = false;
+	static final long DEFAULT_BATCH_SIZE = 1000L;
 	static final long DEFAULT_LOG_EACH_X_INPUT_ROWS = 1000L;
 
-	boolean useBatchUpdate = false;
 	boolean usePreparedStatement = true;
-	boolean escapeBackslashedApos = false;
 	boolean replacePropsOnFileContents = true; //XXX: add prop for 'replacePropsOnFileContents'
-	boolean rollbackOnError = true;
+	boolean rollbackOnError = true; //XXX: add prop for 'rollbackOnError'?
 	boolean useSavepoint = true;
 	
-	long batchSize = 1000;
+	boolean useBatchUpdate = DEFAULT_USE_BATCH_UPDATE;
+	boolean escapeBackslashedApos = DEFAULT_ESCAPE_BACKSLASHED_APOS;
+	long batchSize = DEFAULT_BATCH_SIZE;
 	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
 	long logEachXStmts = DEFAULT_LOG_EACH_X_INPUT_ROWS;
@@ -330,11 +333,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 			return;
 		}
 		String execId = papp.getProperty(SQLRun.PROP_PROCID);
-		//TODO: useBatchUpdate & batchSize: default value should not be based on previous value
-		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
-		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_SIZE, batchSize);
+		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_MODE, DEFAULT_USE_BATCH_UPDATE);
+		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_SIZE, DEFAULT_BATCH_SIZE);
 		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC + execId + Constants.SUFFIX_ENCODING, defaultInputEncoding);
-		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + SUFFIX_ESCAPE_BACKSLASHED_APOS, escapeBackslashedApos);
+		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + SUFFIX_ESCAPE_BACKSLASHED_APOS, DEFAULT_ESCAPE_BACKSLASHED_APOS);
 		logEachXStmts = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, DEFAULT_LOG_EACH_X_INPUT_ROWS);
 	}
 	

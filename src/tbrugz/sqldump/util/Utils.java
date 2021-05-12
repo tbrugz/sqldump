@@ -662,7 +662,7 @@ public class Utils {
 		return ret;
 	}
 	
-	static boolean equalsConsiderNull(String s1, String s2) {
+	public static boolean equalsConsiderNull(String s1, String s2) {
 		if(s1==null) {
 			return (s2==null);
 		}
