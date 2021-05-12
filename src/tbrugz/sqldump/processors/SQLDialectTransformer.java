@@ -62,14 +62,14 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 			}
 		}
 
-		if(!DBMSResources.instance().getDbIds().contains(toDialectId)) {
+		if(!toANSI && !DBMSResources.instance().getDbIds().contains(toDialectId)) {
 			log.warn("unknown database id: "+toDialectId);
 			//toDialectId = null;
 		}
 		
 		String fromDialectId = model.getSqlDialect();
 		log.info("sql dialect transformer: from "
-				+(fromDialectId==null?"ANSI-SQL (null?)":"'"+fromDialectId+"'")
+				+(fromDialectId==null?"ANSI-SQL(?) (null)":"'"+fromDialectId+"'")
 				+" to "
 				+(toANSI?"ANSI-SQL":"'"+toDialectId+"'")
 				);
@@ -129,13 +129,8 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		boolean transformToANSI = Utils.getPropBool(prop, PROP_TRANSFORM_TO_ANSI);
 		boolean transformToConnId = Utils.getPropBool(prop, PROP_TRANSFORM_TO_CONNID);
 
-		if(toDialectId==null && transformToConnId) {
-			toConnectionDialectId = true;
-		}
-
-		if(toDialectId==null && transformToANSI) {
-			toANSI = true;
-		}
+		toConnectionDialectId = toDialectId==null && transformToConnId;
+		toANSI = toDialectId==null && transformToANSI;
 
 		/*if(toDialectId==null) {
 			log.warn("target database id undefined");
@@ -144,6 +139,8 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 			log.warn("unknown database id: "+toDialectId);
 			toDialectId = null;
 		}*/
+
+		//log.debug("setProperties: toDialectId="+toDialectId+"; toANSI="+toANSI+"; toConnectionDialectId="+toConnectionDialectId+"]");
 	}
 
 	@Override
