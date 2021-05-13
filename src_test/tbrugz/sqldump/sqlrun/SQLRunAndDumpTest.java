@@ -249,6 +249,8 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.10.skipnlines=1",
 				"-Dsqlrun.assert.20.sql=select * from ins_dept",
 				"-Dsqlrun.assert.20.row-count.eq=3",
+				"-Dsqlrun.assert.25.sql=select * from ins_dept where DBLID = 4",
+				"-Dsqlrun.assert.25.row-count.eq=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
 				"-Dsqlrun.user=h",

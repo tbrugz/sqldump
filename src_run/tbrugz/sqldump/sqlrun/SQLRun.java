@@ -200,12 +200,17 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		return new Thread() {
 			public void run() {
 				try {
-					boolean isAutocommit = conn.getAutoCommit();
-					log.warn("[shutdown] Shutdown detected." + (!isAutocommit ? " Will rollback":"") );
-					if(!isAutocommit) {
-						conn.rollback();
+					if(conn!=null && !conn.isClosed()) {
+						boolean isAutocommit = conn.getAutoCommit();
+						log.warn("[shutdown] Shutdown detected" + (!isAutocommit ? ". Will rollback":"") );
+						if(!isAutocommit) {
+							conn.rollback();
+						}
+						end(true);
 					}
-					end(true);
+					else {
+						log.warn("[shutdown] Shutdown detected");
+					}
 				} catch (SQLException e) {
 					log.warn("[shutdown] Error rolling back: "+e, e);
 				}
