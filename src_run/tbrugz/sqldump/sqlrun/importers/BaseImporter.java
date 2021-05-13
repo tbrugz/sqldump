@@ -59,6 +59,10 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		String importerPrefix = getImporterPrefix();
 		insertTable = prop.getProperty(importerPrefix + AbstractImporter.SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(importerPrefix + AbstractImporter.SUFFIX_INSERTSQL);
+		if(insertTable!=null && insertSQL!=null) {
+			log.warn("both "+AbstractImporter.SUFFIX_INSERTTABLE+" & "+AbstractImporter.SUFFIX_INSERTSQL+" defined. Will reset "+AbstractImporter.SUFFIX_INSERTTABLE);
+			insertTable = null;
+		}
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + AbstractImporter.SUFFIX_COLUMN_TYPES, ",");
 	}
 

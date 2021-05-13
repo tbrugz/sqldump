@@ -63,5 +63,24 @@ public class XlsImportTest {
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
 	}
-	
+
+	@Test
+	public void doImportXlsxColMapper() throws Exception {
+		String propsStr = 
+			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, DBLSALARY integer)\n"+
+			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n"+
+			"sqlrun.exec.20.insertsql=insert into ins_xls (id, name, dblsalary) values (${0}, ${1}, ${4}+${4})\n"
+			;
+		StringInputStream sis = new StringInputStream(propsStr);
+
+		Properties p = new ParametrizedProperties();
+		p.load(sis);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p);
+		
+		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+	}
+
 }
