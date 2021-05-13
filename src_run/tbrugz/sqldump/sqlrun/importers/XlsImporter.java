@@ -136,20 +136,20 @@ public class XlsImporter extends BaseImporter {
 					}
 
 					boolean rowError = false;
-					if(parts.size() != columnTypes.size()) {
-						log.warn("row "+counter.input+": #values ["+parts.size()+"] != #columnTypes ["+columnTypes.size()+"]"
+					if(parts.size() < columnTypes.size()) {
+						log.warn("row "+counter.input+": #values ["+parts.size()+"] < #columnTypes ["+columnTypes.size()+"]"
 							+ (ignoreRowWithWrongNumberOfColumns?" (row ignored)":"")
 							);
 						rowError = true;
 					}
 
 					if(!rowError || !ignoreRowWithWrongNumberOfColumns) {
-						for(int i=0;i<parts.size();i++) {
+						for(int i=0;i<columnTypes.size();i++) {
 							Object s = parts.get(i);
-							if(columnTypes.size()<=i) {
+							/*if(columnTypes.size()<=i) {
 								log.warn("coltypes="+columnTypes+" i:"+i);
-							}
-							setStmtValue(stmt, columnTypes.get(i), i, s);
+							}*/
+							setStmtMappedValue(stmt, columnTypes.get(i), i, s);
 						}
 						//log.info("coltypes="+columnTypes+" sql="+getInsertSql()+" parts="+parts);
 						int updates = stmt.executeUpdate();
@@ -161,14 +161,21 @@ public class XlsImporter extends BaseImporter {
 				}
 				catch(RuntimeException e) {
 					log.warn("Exception: "+e+" ; parts: "+parts+" ; columnTypes: "+columnTypes);
-					throw e;
+					if(failonerror) {
+						throw e;
+					}
 				}
 				catch(SQLException e) {
 					log.warn("SQLException: "+e+" ; parts: "+parts+" ; columnTypes: "+columnTypes);
-					throw e;
+					if(failonerror) {
+						throw e;
+					}
 				}
 			}
 			conn.commit();
+			log.info( "processedLines: "+counter.input+" ; importedRows: "+counter.output+
+				( (counter.successNoInfoCount>0||counter.executeFailedCount>0)?" [successNoInfoCount=="+counter.successNoInfoCount+" ; executeFailedCount=="+counter.executeFailedCount+"]":"")
+				);
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);

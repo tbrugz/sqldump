@@ -26,7 +26,7 @@ import tbrugz.sqldump.util.Utils;
 
 public abstract class BaseImporter extends AbstractFailable implements Importer {
 
-	static final Log log = LogFactory.getLog(XlsImporter.class);
+	static final Log log = LogFactory.getLog(BaseImporter.class);
 	
 	String execId = null;
 	Properties prop;
@@ -40,6 +40,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	String insertSQL = null;
 	List<String> columnNames;
 	List<String> columnTypes;
+	List<Integer> filecol2tabcolMap = null;
 
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
@@ -119,11 +120,11 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return getCreateTableSql(insertTable, columnNames, columnTypes);
 	}
 	
-	static String getInsertSql(String insertSQL) throws SQLException {
+	String getInsertSql(String insertSQL) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		
 		log.debug("original insert sql: "+insertSQL);
-		List<Integer> filecol2tabcolMap = new ArrayList<Integer>();
+		filecol2tabcolMap = new ArrayList<Integer>();
 		int fromIndex = 0;
 		while(true) {
 			int ind1 = insertSQL.indexOf("${", fromIndex);
@@ -202,6 +203,26 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		sb.append(")");
 		return sb.toString();
 	}
+
+	int setStmtMappedValue(PreparedStatement stmt, String colType, int index, Object objValue) throws SQLException, ParseException {
+		if(filecol2tabcolMap!=null && filecol2tabcolMap.size()>0) {
+			int valsSetted = 0;
+			for(int i=0;i<filecol2tabcolMap.size();i++) {
+				int listIdx = filecol2tabcolMap.get(i);
+				if(listIdx == index) {
+					int colIndex = i;
+					//log.debug("...setStmtMappedValue: "+index+"/"+colIndex+" ; objValue="+objValue+" ; colType="+colType );
+					setStmtValue(stmt, colType, colIndex, objValue);
+					valsSetted++;
+				}
+			}
+			return valsSetted;
+		}
+		else {
+			setStmtValue(stmt, colType, index, objValue);
+			return 1;
+		}
+	}
 	
 	static void setStmtValue(PreparedStatement stmt, String colType, int index, Object objValue) throws SQLException, ParseException {
 		if(objValue==null) {
@@ -265,14 +286,14 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 			}
 			else {
 				//XXX throw?
-				log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
+				log.warn("setStmtValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
 				stmt.setString(index+1, value);
 			}
 			//XXX: more column types (boolean, byte, long, object?, null?, ...)
 			return;
 		}
 		//default: set as string
-		//log.debug("stmtSetValue: index [="+(index+1)+"]: "+value);
+		//log.debug("setStmtValue: index [="+(index+1)+"]: "+value);
 		stmt.setString(index+1, value);
 	}
 	
