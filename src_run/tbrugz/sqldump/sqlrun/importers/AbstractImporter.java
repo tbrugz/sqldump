@@ -606,7 +606,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				log.info("[shutdown] shutting down");
 				System.err.println("[shutdown] shutting down");
 			}
-		};		
+		};
 	}
 	
 	long logCounts(Map<Integer, IOCounter> ccMap, boolean alwaysShowId) { // remove alwaysShowId?
@@ -690,17 +690,19 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			try {
 				
 			if(filecol2tabcolMap!=null && filecol2tabcolMap.size()>0) {
-				//log.info("v: "+i);
-				if(filecol2tabcolMap.contains(i)) {
-					index = filecol2tabcolMap.indexOf(i);
-					int colIndex = colTypesIndexFromTabCol?index:i;
-					//log.debug("v0: "+i+" / "+index+"~"+(index+1)+" / "+parts[i]+" // "+ (columnTypes.size()>colIndex?columnTypes.get(colIndex):"-") );
-					stmtSetValue(index, parts[i], colIndex);
-					//values.add(parts[i]);
-					//log.info("v1: "+i+" / "+index+"~"+(index+1)+" / "+parts[index]+" // "+parts[i]+" // "+ (columnTypes.size()>colIndex?columnTypes.get(colIndex):"-") );
+				//log.info("filecol2tabcolMap: "+filecol2tabcolMap);
+				int valsSetted = 0;
+				for(int j=0;j<filecol2tabcolMap.size();j++) {
+					int listIdx = filecol2tabcolMap.get(j);
+					if(listIdx == index) {
+						int colIndex = colTypesIndexFromTabCol?index:i;
+						log.info("...setStmtMappedValue: p="+j+" ; colIndex="+colIndex+" ; objValue="+parts[i]);
+						//setStmtValue(stmt, colType, colIndex, objValue);
+						stmtSetValue(j, parts[i], colIndex);
+						valsSetted++;
+					}
 				}
-				else {
-					//do nothing!
+				if(valsSetted==0) {
 					partsNotFound.add(i);
 				}
 			}

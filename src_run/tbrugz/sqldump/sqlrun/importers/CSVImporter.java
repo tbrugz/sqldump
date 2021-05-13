@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.Utils;
 
 public class CSVImporter extends AbstractImporter {
+	
 	static final Log log = LogFactory.getLog(CSVImporter.class);
 
 	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";

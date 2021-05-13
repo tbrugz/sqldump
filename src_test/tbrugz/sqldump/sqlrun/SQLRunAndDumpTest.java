@@ -235,5 +235,29 @@ public class SQLRunAndDumpTest {
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(null, p);
 	}
-	
+
+	@Test
+	public void doImportCsvWithMappedCol() throws Exception {
+		String mydbpath = dbpath+"-csv-mapped;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.05.statement=create table ins_dept (ID integer, NAME varchar, DBLID integer)",
+				"-Dsqlrun.exec.10.import=csv",
+				"-Dsqlrun.exec.10.insertsql=insert into ins_dept (id, name, dblid) values (${0}, ${1}, cast(${0} as integer) + cast(${0} as integer))",
+				"-Dsqlrun.exec.10.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.10.skipnlines=1",
+				"-Dsqlrun.assert.20.sql=select * from ins_dept",
+				"-Dsqlrun.assert.20.row-count.eq=3",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p);
+	}
+
 }

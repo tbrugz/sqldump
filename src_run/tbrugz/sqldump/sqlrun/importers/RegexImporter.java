@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.util.Utils;
 
 public class RegexImporter extends AbstractImporter {
+	
 	static final Log log = LogFactory.getLog(RegexImporter.class);
 	
 	static final String SUFFIX_PATTERN = ".pattern";
