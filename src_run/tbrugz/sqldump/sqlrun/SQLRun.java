@@ -450,41 +450,66 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			throw new ProcessingException("unknown action: "+action+" [key="+key+"]");
 		}
 		
+		int assertsChecked = 0;
+		
 		Integer assertRowCountEquals = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_EQ);
 		Integer assertRowCountGreaterThan = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_GT);
 		Integer assertRowCountLessThan = Utils.getPropInt(papp, prefix + SUFFIX_ASSERT_ROW_COUNT_LT);
-		
+
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		ResultSet rs = stmt.executeQuery();
+		List<String> colNames = DataDumpUtils.getColumnNames(rs.getMetaData());
+		int countCols = colNames.size();
 		int countRows = 0;
 		while(rs.next()) {
 			countRows++;
+			for(int i=0;i<countCols;i++) {
+				String colName = colNames.get(i);
+				String prefixRowCol = prefix + ".row@" + countRows + ".col@" + colName;
+				String valueEquals = papp.getProperty(prefixRowCol + ".eq");
+				if(valueEquals!=null) {
+					log.debug("checking for '"+prefixRowCol + ".eq"+"' assert prop");
+					String valueFromQuery = rs.getString(colName);
+					if(!valueEquals.equals(valueFromQuery)) {
+						String message = "[assert #"+procId+"] value '" + valueEquals + "' expected [row="+countRows+";col="+colName+"] but value '"+valueFromQuery+"' found";
+						reportAssertError(message);
+					}
+					assertsChecked++;
+				}
+			}
 		}
 		
 		if(assertRowCountEquals!=null) {
 			if( countRows!=assertRowCountEquals ) {
-				String message = "[assert "+procId+"] " + assertRowCountEquals + " rows expected but "+countRows+" rows found";
+				String message = "[assert #"+procId+"] " + assertRowCountEquals + " rows expected but "+countRows+" rows found";
 				reportAssertError(message);
 			}
+			assertsChecked++;
 		}
 		if(assertRowCountGreaterThan!=null) {
 			if(! (countRows > assertRowCountGreaterThan) ) {
-				String message = "[assert "+procId+"] more than " + assertRowCountGreaterThan + " rows expected but "+countRows+" rows found";
+				String message = "[assert #"+procId+"] more than " + assertRowCountGreaterThan + " rows expected but "+countRows+" rows found";
 				reportAssertError(message);
 			}
+			assertsChecked++;
 		}
 		if(assertRowCountLessThan!=null) {
 			if(! (countRows < assertRowCountLessThan) ) {
-				String message = "[assert "+procId+"] less than " + assertRowCountLessThan + " rows expected but "+countRows+" rows found";
+				String message = "[assert #"+procId+"] less than " + assertRowCountLessThan + " rows expected but "+countRows+" rows found";
 				reportAssertError(message);
 			}
+			assertsChecked++;
 		}
 		
-		if(assertRowCountEquals==null && assertRowCountGreaterThan==null && assertRowCountLessThan==null) {
-			log.warn("no "+SUFFIX_ASSERT_ROW_COUNT+".[eq|gt|lt] property defined?");
+		if(assertsChecked==0) {
+			String message = "no assert property defined?";
+			log.warn(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 		}
 		else {
-			log.info("assert: row count = "+countRows);
+			log.info("assert: "+assertsChecked+" assertions checked [#rows = "+countRows+" ; #cols = "+countCols+"]");
 		}
 		return isAssertId;
 	}
