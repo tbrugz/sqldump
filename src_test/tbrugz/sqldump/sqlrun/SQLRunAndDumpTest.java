@@ -22,6 +22,7 @@ public class SQLRunAndDumpTest {
 	public static final String[] NULL_PARAMS = null;
 
 	public String dbpath = "mem:SQLRunAndDumpTest";
+	public String singleUseDbPath = "mem:";
 	
 	/*Connection setupConnection(String prefix, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(prefix, prop);
@@ -38,6 +39,13 @@ public class SQLRunAndDumpTest {
 		sqlr.doMain(NULL_PARAMS, p, conn);
 	}
 		
+	static void execSqlRun(String[] vmparams) throws Exception {
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p);
+	}
+
 	@Test
 	public void doRunAndDumpModel() throws Exception {
 		String[] vmparamsRun = {
@@ -260,6 +268,58 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(null, p);
+	}
+
+	@Test
+	public void testAssert() throws Exception {
+		String query = "select 1 as a, 1 as b, 1 as c\n" +
+				"union all\n" +
+				"select 1, 2, 3";
+		String[] vmparams = {
+				"-Dsqlrun.assert.10.sql="+query,
+				"-Dsqlrun.assert.10.row-count.eq=2",
+				"-Dsqlrun.dburl=jdbc:h2:"+singleUseDbPath,
+				};
+		execSqlRun(vmparams);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void testAssertError() throws Exception {
+		String query = "select 1 as a, 1 as b, 1 as c\n" +
+				"union all\n" +
+				"select 1, 2, 3";
+		String[] vmparams = {
+				"-Dsqlrun.assert.10.sql="+query,
+				"-Dsqlrun.assert.10.row-count.eq=1",
+				"-Dsqlrun.dburl=jdbc:h2:"+singleUseDbPath,
+				};
+		execSqlRun(vmparams);
+	}
+
+	@Test
+	public void testAssertRowColOk() throws Exception {
+		String query = "select 1 as a, 1 as b, 1 as c\n" +
+				"union all\n" +
+				"select 1, 2, 3";
+		String[] vmparams = {
+				"-Dsqlrun.assert.10.sql="+query,
+				"-Dsqlrun.assert.10.row@1.col@A.eq=1",
+				"-Dsqlrun.dburl=jdbc:h2:"+singleUseDbPath,
+				};
+		execSqlRun(vmparams);
+	}
+
+	@Test(expected = ProcessingException.class)
+	public void testAssertRowColError() throws Exception {
+		String query = "select 1 as a, 1 as b, 1 as c\n" +
+				"union all\n" +
+				"select 1, 2, 3";
+		String[] vmparams = {
+				"-Dsqlrun.assert.10.sql="+query,
+				"-Dsqlrun.assert.10.row@2.col@B.eq=1",
+				"-Dsqlrun.dburl=jdbc:h2:"+singleUseDbPath,
+				};
+		execSqlRun(vmparams);
 	}
 
 }
