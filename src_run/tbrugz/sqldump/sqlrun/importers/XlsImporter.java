@@ -54,7 +54,7 @@ public class XlsImporter extends BaseImporter {
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 		
-		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+AbstractImporter.SUFFIX_IMPORTFILE);
+		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
 		sheetName = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NAME);
 		Long lSheetNumber = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NUMBER);
 		if(lSheetNumber!=null) {
@@ -63,7 +63,7 @@ public class XlsImporter extends BaseImporter {
 		/*if(sheetName==null && sheetNumber==null) {
 			log.info("no sheet number (suffix '"+ SUFFIX_SHEET_NUMBER + "') nor sheet name (suffix '" + SUFFIX_SHEET_NAME + "') defined - will use 1st sheet");
 		}*/
-		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+AbstractImporter.SUFFIX_SKIP_N, linesToSkip);
+		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, linesToSkip);
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
 		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
 		doCreateTable = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_DO_CREATE_TABLE, doCreateTable);

@@ -184,7 +184,6 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	public static final String PREFIX_FAILOVER = ".failover.";
 
 	//suffixes
-	static final String SUFFIX_IMPORTFILE = ".importfile";
 	static final String SUFFIX_IMPORTDIR = ".importdir";
 	static final String SUFFIX_IMPORTFILES = ".importfiles";
 	static final String SUFFIX_IMPORTURL = ".importurl";
@@ -196,12 +195,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
 	static final String SUFFIX_ENCLOSING = ".enclosing";
-	static final String SUFFIX_INSERTTABLE = ".inserttable";
-	static final String SUFFIX_INSERTSQL = ".insertsql";
-	static final String SUFFIX_SKIP_N = ".skipnlines";
-	static final String SUFFIX_LIMIT_LINES = ".limit";
+	static final String SUFFIX_LIMIT_LINES = ".limit"; //XXX commom importer suffix?
 	static final String SUFFIX_SKIP_REGEX = ".skip-line-regex";
-	static final String SUFFIX_COLUMN_TYPES = ".columntypes";
 	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
 	//XXX: add '.onerror.type-(double|date)-value' ?
 	
@@ -209,20 +204,20 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static final String[] AUX_SUFFIXES = {
-		SUFFIX_COLUMN_TYPES,
+		Constants.SUFFIX_COLUMN_TYPES,
 		SUFFIX_ENCLOSING,
 		Constants.SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
-		SUFFIX_IMPORTFILE,
+		Constants.SUFFIX_IMPORTFILE,
 		SUFFIX_IMPORTDIR,
 		SUFFIX_IMPORTFILES,
 		SUFFIX_IMPORTURL,
-		SUFFIX_INSERTTABLE,
-		SUFFIX_INSERTSQL,
+		Constants.SUFFIX_INSERTTABLE,
+		Constants.SUFFIX_INSERTSQL,
 		SUFFIX_LOG_MALFORMED_LINE,
 		SUFFIX_ONERROR_TYPE_INT_SET_VALUE,
 		SUFFIX_RECORDDELIMITER,
-		SUFFIX_SKIP_N,
+		Constants.SUFFIX_SKIP_N,
 		SUFFIX_SKIP_REGEX,
 		SUFFIX_URLMESSAGEBODY,
 		SUFFIX_URLMETHOD,
@@ -239,7 +234,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	@Override
 	public void setProperties(Properties prop) {
 		this.prop = prop;
-		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILE);
+		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
 		importDir = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
 		importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
 		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
@@ -247,7 +242,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
 		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
-		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_N, skipHeaderN);
+		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, skipHeaderN);
 		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LIMIT_LINES, maxLines);
 		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
 		if(skipLineRegexStr!=null) {
@@ -294,9 +289,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 
 	void setImporterProperties(Properties prop, String importerPrefix) {
-		insertTable = prop.getProperty(importerPrefix+SUFFIX_INSERTTABLE);
-		insertSQL = prop.getProperty(importerPrefix+SUFFIX_INSERTSQL);
-		columnTypes = Utils.getStringListFromProp(prop, importerPrefix+SUFFIX_COLUMN_TYPES, ",");
+		insertTable = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTTABLE);
+		insertSQL = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTSQL);
+		columnTypes = Utils.getStringListFromProp(prop, importerPrefix+Constants.SUFFIX_COLUMN_TYPES, ",");
 		if(columnTypes!=null) {
 			columnCount = columnTypes.size();
 		}
@@ -389,8 +384,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
 		else {
-			log.error("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...");
-			if(failonerror) { throw new ProcessingException("neither '"+SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified..."); }
+			log.error("neither '"+Constants.SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...");
+			if(failonerror) { throw new ProcessingException("neither '"+Constants.SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified..."); }
 		}
 		
 		} catch(SQLException e) {
