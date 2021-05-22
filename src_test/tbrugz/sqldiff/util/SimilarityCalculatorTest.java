@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldiff.model.ColumnDiffTest;
-import tbrugz.sqldiff.util.SimilarityCalculator;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Table;
 

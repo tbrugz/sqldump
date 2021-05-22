@@ -34,7 +34,7 @@ public class NonNullGetMap<K,V> implements Map<K,V> {
 					v = factory.getInstance();
 				}
 				else {
-					v = initialValueClass.newInstance();
+					v = initialValueClass.getConstructor().newInstance();
 				}
 				put((K)key, v);
 			} catch (InstantiationException e) {

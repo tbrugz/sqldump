@@ -385,7 +385,7 @@ public class CategorizedOut {
 		return new FileWriter(f, alreadyOpened);
 	}
 	
-	@SuppressWarnings("el-syntax")
+	//@SuppressWarnings("el-syntax")
 	public static String generateFinalOutPattern(String outpattern, String... categories) {
 		for(int i=0;i<categories.length;i++) {
 			String outpatternTmp = outpattern;
@@ -397,7 +397,7 @@ public class CategorizedOut {
 		return outpattern;
 	}
 
-	@SuppressWarnings("el-syntax")
+	//@SuppressWarnings("el-syntax")
 	public static String generateFinalOutPattern(String outpattern, String[]... categoriesArr) {
 		for(int i=0;i<categoriesArr.length;i++) {
 			for(int j=0;j<categoriesArr[i].length;j++) {
