@@ -16,8 +16,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import tbrugz.sqldump.def.ProcessingException;
+import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
+import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
@@ -105,6 +107,27 @@ public class CSVImportTest {
 		imp.setConnection(conn);
 		imp.setExecId(execId);
 		imp.setProperties(p);
+		imp.importStream(is);
+
+		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+	}
+
+	@Test
+	public void useCsvImporterWithHelper() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_csv2 (ID_TSE integer, SIGLA varchar, NOME varchar, DEFERIMENTO varchar, PRESIDENTE_NACIONAL varchar, NUMERO integer)");
+		stmt.execute();
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
+		p.setProperty(".columndelimiter", ";");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
+		//p.setProperty(".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
+		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		
+		Importer imp = new CSVImporter();
+		ImporterHelper.setImporterPlainProperties(imp, p);
+		imp.setConnection(conn);
 		imp.importStream(is);
 
 		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));

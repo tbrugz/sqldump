@@ -10,7 +10,9 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
+import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
 import tbrugz.sqldump.sqlrun.importers.XlsImporter;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -106,4 +108,21 @@ public class XlsImportTest {
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
 	}
 
+	@Test
+	public void useXslImporterWithHelper() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
+		p.setProperty(".do-create-table", "true");
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = new XlsImporter();
+		ImporterHelper.setImporterPlainProperties(imp, p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
+	}
+	
 }
