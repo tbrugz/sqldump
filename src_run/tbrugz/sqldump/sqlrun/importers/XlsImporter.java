@@ -1,7 +1,8 @@
 package tbrugz.sqldump.sqlrun.importers;
 
-import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -74,9 +75,24 @@ public class XlsImporter extends BaseImporter {
 
 	@Override
 	public long importData() throws SQLException, InterruptedException, IOException {
+		if(importFile==null) {
+			throw new IllegalStateException("null importFile");
+		}
+		FileInputStream fis = null;
+		try {
+			fis = new FileInputStream(importFile);
+			return importStream(fis);
+		}
+		finally {
+			fis.close();
+		}
+	}
+		
+	@Override
+	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
 		IOCounter counter = new IOCounter();
 		try {
-			Workbook wb = WorkbookFactory.create(new File(importFile));
+			Workbook wb = WorkbookFactory.create(is);
 			//log.info("number-of-sheets: "+wb.getNumberOfSheets());
 			Sheet sheet = null;
 			if(sheetNumber!=null) {

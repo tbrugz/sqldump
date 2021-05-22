@@ -1,13 +1,18 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Properties;
 
 import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.sqlrun.def.Importer;
+import tbrugz.sqldump.sqlrun.importers.XlsImporter;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
@@ -81,6 +86,25 @@ public class XlsImportTest {
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+	}
+
+	@Test
+	public void useXslImporter() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		String execId = "1";
+		Properties p = new Properties();
+		
+		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_xls2");
+		p.setProperty("sqlrun.exec."+execId+".do-create-table", "true");
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = new XlsImporter();
+		imp.setConnection(conn);
+		imp.setExecId(execId);
+		imp.setProperties(p);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
 	}
 
 }

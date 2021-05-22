@@ -351,7 +351,13 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		
 		try {
 			
-		if(importFile!=null) {
+		if(fileIS!=null) {
+			log.info("importing stream... "+loginfo);
+			ret = importFile();
+			filesImported++;
+			addMapCount(aggCountsByFailoverId, countsByFailoverId);
+		}
+		else if(importFile!=null) {
 			log.info("importing file: "+importFile+loginfo);
 			ret = importFile();
 			filesImported++;
@@ -399,6 +405,20 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		
 		return ret;
+	}
+	
+	@Override
+	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
+		if(fileIS!=null) {
+			throw new IllegalStateException("fileIS must be null");
+		}
+		try {
+			fileIS = is;
+			return importData();
+		}
+		finally {
+			fileIS = null;
+		}
 	}
 	
 	void addMapCount(Map<Integer, IOCounter> agg, Map<Integer, IOCounter> cc) {
@@ -1025,7 +1045,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 	Scanner createScanner() throws IOException {
 		Scanner scan = null;
-		if(importURL!=null) {
+		if(fileIS!=null) {
+			scan = new Scanner(fileIS, inputEncoding);
+		}
+		else if(importURL!=null) {
 			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, urlHeaders, 0), inputEncoding);
 		}
 		else if(Constants.STDIN.equals(importFile)) {

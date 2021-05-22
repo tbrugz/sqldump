@@ -1,8 +1,13 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL; 
 import java.net.URLClassLoader;
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -12,7 +17,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import tbrugz.sqldump.def.ProcessingException;
-import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.sqlrun.def.Importer;
+import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
@@ -81,4 +87,28 @@ public class CSVImportTest {
 		rs.next();
 		return rs.getInt(1);
 	}
+	
+	@Test
+	public void useCsvImporter() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_csv2 (ID_TSE integer, SIGLA varchar, NOME varchar, DEFERIMENTO varchar, PRESIDENTE_NACIONAL varchar, NUMERO integer)");
+		stmt.execute();
+		String execId = "1";
+		Properties p = new Properties();
+		
+		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_csv2");
+		p.setProperty("sqlrun.exec."+execId+".columndelimiter", ";");
+		p.setProperty("sqlrun.exec."+execId+".skipnlines", "1");
+		//p.setProperty("sqlrun.exec."+execId+".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
+		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		
+		Importer imp = new CSVImporter();
+		imp.setConnection(conn);
+		imp.setExecId(execId);
+		imp.setProperties(p);
+		imp.importStream(is);
+
+		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+	}
+	
 }
