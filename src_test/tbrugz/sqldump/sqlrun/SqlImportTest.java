@@ -1,13 +1,13 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Properties;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
@@ -29,7 +29,7 @@ public class SqlImportTest {
 			"sqlrun.exec.050.sql=select * from t1\n"+
 			"sqlrun.exec.050.inserttable=t2\n"+
 			"";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
@@ -57,7 +57,7 @@ public class SqlImportTest {
 			"sqlrun.exec.050.sql=select id from t1\n"+
 			"sqlrun.exec.050.insertsql=insert into t2 (id) values (?)\n"+
 			"";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);

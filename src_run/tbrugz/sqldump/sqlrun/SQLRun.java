@@ -702,11 +702,12 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String[] IMPORTER_IDS = {
 		"csv", "csvplain", "ffc", "regex", "xls", "sql"
 	};
+
 	static final String[] IMPORTER_CLASSES = {
 		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter", "XlsImporter", "SqlImporter"
 	};
 	
-	Importer getImporter(String id) {
+	static Importer getImporter(String id) {
 		for(int i=0;i<IMPORTER_IDS.length;i++) {
 			if(IMPORTER_IDS[i].equals(id)) {
 				return (Importer) Utils.getClassInstance(IMPORTER_CLASSES[i], "tbrugz.sqldump.sqlrun.importers");
@@ -715,7 +716,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		return null;
 	}
 
-	List<Executor> getAllExecutors() {
+	static List<Executor> getAllExecutors() {
 		List<Executor> loe = new ArrayList<Executor>();
 		for(int i=0;i<EXECUTOR_CLASSES.length;i++) {
 			loe.add( (Executor)Utils.getClassInstance(EXECUTOR_CLASSES[i], "tbrugz.sqldump.sqlrun", "tbrugz.sqldump.sqlrun.importers") );

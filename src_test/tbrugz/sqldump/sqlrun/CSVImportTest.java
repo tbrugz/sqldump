@@ -12,7 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -50,7 +49,7 @@ public class CSVImportTest {
 		String propsStr = 
 			"@includes=test/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.00.statement=drop table unexistent";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
@@ -63,7 +62,7 @@ public class CSVImportTest {
 		String propsStr = 
 			"@includes=test/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.20.limit=10";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);

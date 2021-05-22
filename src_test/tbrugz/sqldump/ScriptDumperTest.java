@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import tbrugz.sqldump.JAXBSchemaXMLSerializer;
-import tbrugz.sqldump.SchemaModelScriptDumper;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;

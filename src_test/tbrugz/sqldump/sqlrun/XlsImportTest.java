@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
 
-import org.apache.tools.ant.filters.StringInputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +23,7 @@ public class XlsImportTest {
 			"@includes=test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
 			"";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
@@ -41,7 +40,7 @@ public class XlsImportTest {
 			"@includes=test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
 			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
@@ -58,7 +57,7 @@ public class XlsImportTest {
 			"@includes=test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.20.do-create-table=true\n"+
 			"";
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);
@@ -77,7 +76,7 @@ public class XlsImportTest {
 			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n"+
 			"sqlrun.exec.20.insertsql=insert into ins_xls (id, name, dblsalary) values (${0}, ${1}, ${4}+${4})\n"
 			;
-		StringInputStream sis = new StringInputStream(propsStr);
+		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
 		p.load(sis);

@@ -6,16 +6,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
-import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
 
 @RunWith(Parameterized.class)
