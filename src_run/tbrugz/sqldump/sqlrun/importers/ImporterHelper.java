@@ -55,7 +55,7 @@ public class ImporterHelper {
 				prop.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, "\t");
 			}
 			else if(ext.equals("psv")) {
-				prop.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, "|");
+				prop.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, "\\|");
 			}
 		}
 		else {
