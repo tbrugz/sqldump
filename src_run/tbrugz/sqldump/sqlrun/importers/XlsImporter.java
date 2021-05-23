@@ -36,6 +36,7 @@ public class XlsImporter extends BaseImporter {
 	String sheetName;
 	Integer sheetNumber;
 	long linesToSkip = 0;
+	long linesLimit = -1;
 	boolean hasHeaderLine = true;
 	boolean use1stLineAsColNames = false;
 	boolean doCreateTable = false;
@@ -67,6 +68,7 @@ public class XlsImporter extends BaseImporter {
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
 		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
 		doCreateTable = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_DO_CREATE_TABLE, doCreateTable);
+		linesLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, linesLimit);
 
 		if(!hasHeaderLine && use1stLineAsColNames) {
 			log.warn("using '"+SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
@@ -108,6 +110,7 @@ public class XlsImporter extends BaseImporter {
 			}
 			
 			boolean is1stLine = true;
+			long lineOutputCounter = 0;
 			PreparedStatement stmt = null;
 			boolean tableCreated = false;
 			
@@ -135,6 +138,11 @@ public class XlsImporter extends BaseImporter {
 					}
 				}
 				else {
+					if(linesLimit >= 0 && lineOutputCounter >= linesLimit) {
+						log.info("max (limit) rows reached: "+linesLimit+" [lineOutputCounter="+lineOutputCounter+"]"); 
+						break;
+					}
+					
 					if(columnTypes==null) {
 						columnTypes = new ArrayList<String>();
 						for(int i=0;i<parts.size();i++) {
@@ -170,6 +178,7 @@ public class XlsImporter extends BaseImporter {
 						//log.info("coltypes="+columnTypes+" sql="+getInsertSql()+" parts="+parts);
 						int updates = stmt.executeUpdate();
 						counter.output += updates;
+						lineOutputCounter++;
 					}
 				}
 				

@@ -140,5 +140,22 @@ public class XlsImportTest {
 
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
 	}
+
+	@Test
+	public void useXslImporterWithHelperAndLimit() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
+		p.setProperty(".do-create-table", "true");
+		p.setProperty(".limit", "3");
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(3, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
+	}
 	
 }

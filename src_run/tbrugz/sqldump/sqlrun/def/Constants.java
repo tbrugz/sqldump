@@ -26,5 +26,6 @@ public class Constants {
 	public static final String SUFFIX_INSERTTABLE = ".inserttable";
 	public static final String SUFFIX_INSERTSQL = ".insertsql";
 	public static final String SUFFIX_SKIP_N = ".skipnlines";
+	public static final String SUFFIX_LIMIT_LINES = ".limit";
 
 }

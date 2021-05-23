@@ -195,7 +195,6 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final String SUFFIX_FOLLOW = ".follow";
 	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
 	static final String SUFFIX_ENCLOSING = ".enclosing";
-	static final String SUFFIX_LIMIT_LINES = ".limit"; //XXX commom importer suffix?
 	static final String SUFFIX_SKIP_REGEX = ".skip-line-regex";
 	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
 	//XXX: add '.onerror.type-(double|date)-value' ?
@@ -248,7 +247,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, skipHeaderN);
-		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LIMIT_LINES, maxLines);
+		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, maxLines);
 		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
 		if(skipLineRegexStr!=null) {
 			skipLineRegex = Pattern.compile(skipLineRegexStr);
