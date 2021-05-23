@@ -227,6 +227,11 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	};
 	
 	@Override
+	public String getExecId() {
+		return execId;
+	}
+
+	@Override
 	public void setExecId(String execId) {
 		this.execId = execId;
 	}

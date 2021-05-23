@@ -53,10 +53,15 @@ public class QueryDumper extends AbstractFailable implements Executor {
 	DumpSyntaxInt dumpSyntax = null;
 
 	@Override
+	public String getExecId() {
+		return execId;
+	}
+
+	@Override
 	public void setExecId(String execId) {
 		this.execId = execId;
 	}
-
+	
 	@Override
 	public void setConnection(Connection conn) {
 		this.conn = conn;

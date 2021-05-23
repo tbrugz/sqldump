@@ -69,6 +69,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	TokenizerStrategy tokenizerStrategy = TokenizerStrategy.STMT_SCANNER;
 	
 	Connection conn;
+	String execId;
 	Properties papp;
 	CommitStrategy commitStrategy;
 	
@@ -380,8 +381,13 @@ public class StmtProc extends AbstractFailable implements Executor {
 	}
 
 	@Override
+	public String getExecId() {
+		return execId;
+	}
+
+	@Override
 	public void setExecId(String execId) {
-		// TODO Auto-generated method stub
+		this.execId = execId;
 	}
 
 	@Override
