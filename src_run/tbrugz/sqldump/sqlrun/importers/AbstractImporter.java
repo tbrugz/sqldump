@@ -467,6 +467,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		//int[] filecol2tabcolMap = null;
 		do {
 			int linecounter = 0;
+			long lineOutputCounter = 0;
 			scanNext:
 			while(scan.hasNext()) {
 				boolean importthisline = true;
@@ -485,8 +486,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 				linecounter++;
 				
 				while(importthisline) {
-					if(maxLines >= 0 && counter.input > maxLines) {
-						logRow.info("max (limit) rows reached: "+maxLines+" [linecounter="+linecounter+"]"); 
+					if(maxLines >= 0 && lineOutputCounter >= maxLines) {
+						logRow.info("max (limit) rows reached: "+maxLines+" [lineOutputCounter="+lineOutputCounter+"]"); //+" ; skipnlines="+skipHeaderN+"]"); 
 						break scanNext;
 					}
 					try {
@@ -528,6 +529,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 						if(lineParts!=null) {
 							persistLineParts(lineParts);
+							lineOutputCounter++;
 						}
 						importthisline = false;
 						//log.debug("procline-ok ["+linecounter+"]: failid="+failoverId);

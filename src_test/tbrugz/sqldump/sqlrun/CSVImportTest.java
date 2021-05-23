@@ -18,6 +18,7 @@ import org.junit.Test;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
+import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -174,37 +175,75 @@ public class CSVImportTest {
 	@Test
 	public void usePsvImporterHelper() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
-		PreparedStatement stmt = conn.prepareStatement("create table ins_delim (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_psv (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
 		stmt.execute();
 
 		Properties p = new Properties();
-		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_delim");
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_psv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.psv");
 		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.psv");
 		Importer imp = ImporterHelper.getImporterByFileExt("psv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_delim"));
+		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_psv"));
 	}
 
 	@Test
 	public void useTsvImporterHelper() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
-		PreparedStatement stmt = conn.prepareStatement("create table ins_delim (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_tsv (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
 		stmt.execute();
 
 		Properties p = new Properties();
-		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_delim");
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_tsv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "2");
+
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
-		
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(4, get1stValue(conn, "select count(*) from ins_delim"));
+		Assert.assertEquals(4, get1stValue(conn, "select count(*) from ins_tsv"));
 	}
 
+	/*
+	@Test
+	public void useTsvImporterHelper2() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_tsv2 (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
+		stmt.execute();
+
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("tsv");
+		imp.setConnection(conn);
+		ImporterHelper.setPlainProperty(imp, Constants.SUFFIX_INSERTTABLE, "ins_tsv2");
+		ImporterHelper.setPlainProperty(imp, Constants.SUFFIX_SKIP_N, "2");
+		imp.importStream(is);
+
+		Assert.assertEquals(4, get1stValue(conn, "select count(*) from ins_tsv2"));
+	}
+	*/
+
+	@Test
+	public void useTsvImporterHelperWithLimit() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_tsv (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
+		stmt.execute();
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_tsv");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "2");
+		p.setProperty(".limit", "2");
+
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(2, get1stValue(conn, "select count(*) from ins_tsv"));
+	}
+	
 }
