@@ -133,4 +133,23 @@ public class CSVImportTest {
 		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
 	}
 	
+	@Test
+	public void useCsvImporterWithHelper2() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_csv2 (ID_TSE integer, SIGLA varchar, NOME varchar, DEFERIMENTO varchar, PRESIDENTE_NACIONAL varchar, NUMERO integer)");
+		stmt.execute();
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
+		p.setProperty(".columndelimiter", ";");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
+		//p.setProperty(".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
+		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+	}
 }

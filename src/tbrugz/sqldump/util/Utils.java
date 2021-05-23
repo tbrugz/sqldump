@@ -774,4 +774,25 @@ public class Utils {
 		return s==null || s.trim().isEmpty();
 	}
 	
+	public static <T> int arrayIndexOf(T[] arr, T elem) {
+		if(elem==null) {
+			for(int i=0;i<arr.length;i++) {
+				if(arr[i] == null) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		for(int i=0;i<arr.length;i++) {
+			if(elem.equals(arr[i])) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	public static <T> boolean arrayContains(T[] arr, T elem) {
+		return arrayIndexOf(arr, elem) >= 0;
+	}
+	
 }
