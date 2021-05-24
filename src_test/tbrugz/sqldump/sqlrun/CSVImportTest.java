@@ -253,5 +253,27 @@ public class CSVImportTest {
 		Assert.assertEquals(2, get1stValue(conn, "select count(*) from ins_tsv"));
 		conn.close();
 	}
-	
+
+	@Test
+	public void useTsvImporterHelperColTypes() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		PreparedStatement stmt = conn.prepareStatement("create table ins_tsv (id integer, name varchar, supervisor_id integer)");
+		stmt.execute();
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_tsv");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int");
+
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_tsv"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_tsv");
+		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
+		conn.close();
+	}
+
 }

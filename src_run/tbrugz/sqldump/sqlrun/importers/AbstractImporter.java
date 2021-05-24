@@ -679,7 +679,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
-			setupSQLStatement(parts);
+			setupSQLStatement(columnCount!=null ? columnCount : parts.length);
 			mustSetupSQLStatement = false;
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
@@ -706,7 +706,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		IOCounter counter = countsByFailoverId.get(failoverId);
 
 		//TODO: what if parts.length for some lines is shorter than others? stmt will keep old value from longer line...
-		for(int i=0;i<parts.length;i++) {
+		int columnsToPersist = columnCount!=null ? columnCount : parts.length; 
+		for(int i=0;i<columnsToPersist;i++) {
 			int index = i;
 			try {
 				
@@ -941,7 +942,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	List<Integer> loggedStatementFailoverIds = new ArrayList<Integer>();
 	
 	//TODO: map of statements (one for each failoverId)?
-	void setupSQLStatement(String[] parts) throws SQLException {
+	void setupSQLStatement(int numberOfColumns) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		if(insertSQL!=null) {
 			log.debug("original insert sql: "+insertSQL);
@@ -968,7 +969,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		else {
 			sb.append("insert into "+insertTable+ " values (");
-			for(int i=0;i<parts.length;i++) {
+			for(int i=0;i<numberOfColumns;i++) {
 				sb.append((i==0?"":", ")+"?");
 			}
 			sb.append(")");
