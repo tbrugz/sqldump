@@ -46,6 +46,8 @@ public class SqlImporter extends BaseImporter {
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 		
+		// limit/offset: .limit/.skipnlines - may be better to define in query
+		
 		// .sql
 		sql = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SQL);
 		if(sql==null) {

@@ -111,6 +111,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+		conn.close();
 	}
 
 	@Test
@@ -132,6 +133,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+		conn.close();
 	}
 	
 	@Test
@@ -152,6 +154,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(29, get1stValue(conn, "select count(*) from ins_csv2"));
+		conn.close();
 	}
 
 	@Test
@@ -170,6 +173,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_scsv"));
+		conn.close();
 	}
 
 	@Test
@@ -188,6 +192,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_psv"));
+		conn.close();
 	}
 
 	@Test
@@ -206,6 +211,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(4, get1stValue(conn, "select count(*) from ins_tsv"));
+		conn.close();
 	}
 
 	/*
@@ -224,6 +230,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(4, get1stValue(conn, "select count(*) from ins_tsv2"));
+		conn.close();
 	}
 	*/
 
@@ -236,7 +243,7 @@ public class CSVImportTest {
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_tsv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "2");
-		p.setProperty(".limit", "2");
+		p.setProperty(Constants.SUFFIX_LIMIT_LINES, "2");
 
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
@@ -244,6 +251,7 @@ public class CSVImportTest {
 		imp.importStream(is);
 
 		Assert.assertEquals(2, get1stValue(conn, "select count(*) from ins_tsv"));
+		conn.close();
 	}
 	
 }
