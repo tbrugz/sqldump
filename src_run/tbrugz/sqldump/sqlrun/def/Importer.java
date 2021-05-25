@@ -9,5 +9,5 @@ public interface Importer extends Executor {
 	public long importData() throws SQLException, InterruptedException, IOException;
 
 	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException;
-	
+
 }

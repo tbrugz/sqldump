@@ -28,7 +28,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 
 	static final Log log = LogFactory.getLog(BaseImporter.class);
 	
-	String execId = null;
+	String execId;
 	Properties prop;
 	Connection conn;
 	CommitStrategy commitStrategy;
@@ -73,7 +73,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
 		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 	}
-
+	
 	@Override
 	public void setConnection(Connection conn) {
 		this.conn = conn;
@@ -191,23 +191,33 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 
 	/* private */
 	static String getCreateTableSql(String tableName, List<String> columnNames, List<String> columnTypes) {
+		if(columnNames==null) {
+			throw new IllegalArgumentException("columnNames must not be null");
+		}
+		if(columnTypes==null) {
+			throw new IllegalArgumentException("columnTypes must not be null");
+		}
+		if(columnTypes.size()==0) {
+			throw new IllegalStateException("columnTypes.size()=="+columnTypes.size());
+		}
+
 		StringBuilder sb = new StringBuilder();
 		//log.info("colnames="+columnNames+"; coltypes="+columnTypes);
 		
 		sb.append("create table " + tableName + " (");
-		if(columnNames==null) {
-			log.warn("columnNames must not be null");
-		}
 		if(columnNames.size()==0) {
-			log.info("clear colnames="+columnNames);
-			columnNames.clear();
+			log.info("#colnames = "+columnNames.size());
+			//columnNames.clear();
 			for(int i=0;i<columnTypes.size();i++) {
 				columnNames.add("C"+i);
 			}
+			//log.info("columnTypes: "+columnTypes);
 		}
 		if(columnNames.size()!=columnTypes.size()) {
-			log.warn("#columnNames ["+columnNames.size()+"] != #columnTypes ["+columnTypes.size()+"]");
+			String message = "#columnNames ["+columnNames.size()+"] != #columnTypes ["+columnTypes.size()+"]";
+			log.warn(message);
 			log.info("columnNames: "+columnNames+" ; columnTypes: "+columnTypes);
+			throw new IllegalStateException(message);
 		}
 		for(int i=0;i<columnTypes.size();i++) {
 			sb.append((i==0?"":", ") + columnNames.get(i) + " " + getSqlColumnType(columnTypes.get(i)));
@@ -288,18 +298,15 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 						//[inputstream]: asciistream ; [reader]: characterstream, clob, ncharacterstream, nclob
 						stmt.setCharacterStream(index+1, new FileReader(f));
 					}
-					else {
-						//XXX throw?
-						log.warn("unknown colType: "+colType);
-					}
+					throw new IllegalStateException("unknown colType: "+colType);
 				} catch (Exception e) {
 					log.warn("Error importing '"+colType+"' file '"+f+"': "+e);
 				}
 			}
 			else {
-				//XXX throw?
-				log.warn("setStmtValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
-				stmt.setString(index+1, value);
+				String message = "setStmtValue: unknown columnType '"+colType+"' [#"+index+"]";
+				log.warn(message);
+				throw new IllegalArgumentException(message);
 			}
 			//XXX: more column types (boolean, byte, long, object?, null?, ...)
 			return;
@@ -314,6 +321,5 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		if(type.equals("int")) { return "integer"; }
 		return "varchar";
 	}
-
 
 }
