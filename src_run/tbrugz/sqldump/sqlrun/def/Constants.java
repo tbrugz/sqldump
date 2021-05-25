@@ -22,6 +22,7 @@ public class Constants {
 
 	//commom importer suffixes
 	public static final String SUFFIX_COLUMN_TYPES = ".columntypes";
+	public static final String SUFFIX_DO_CREATE_TABLE = ".do-create-table";
 	public static final String SUFFIX_IMPORTFILE = ".importfile";
 	public static final String SUFFIX_INSERTTABLE = ".inserttable";
 	public static final String SUFFIX_INSERTSQL = ".insertsql";

@@ -158,6 +158,26 @@ public class CSVImportTest {
 	}
 
 	@Test
+	public void useCsvImporterHelperWithCreateTable() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		//PreparedStatement stmt = conn.prepareStatement("create table ins_csv (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
+		//stmt.execute();
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_csv"));
+		conn.close();
+	}
+
+	@Test
 	public void useScsvImporterHelper() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 		PreparedStatement stmt = conn.prepareStatement("create table ins_scsv (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");

@@ -41,6 +41,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	List<String> columnNames;
 	List<String> columnTypes;
 	List<Integer> filecol2tabcolMap = null;
+	boolean doCreateTable = false;
 
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
@@ -70,6 +71,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		}
 		//log.info("importerPrefix = "+importerPrefix+"; insertTable =  "+insertTable);
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
+		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 	}
 
 	@Override

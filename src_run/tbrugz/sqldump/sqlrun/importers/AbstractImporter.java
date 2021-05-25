@@ -31,8 +31,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import tbrugz.sqldump.datadump.DataDumpUtils;
-import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
@@ -43,7 +41,7 @@ import tbrugz.sqldump.util.ShutdownManager;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
-public abstract class AbstractImporter extends AbstractFailable implements Importer {
+public abstract class AbstractImporter extends BaseImporter implements Importer {
 	
 	public static class IOCounter {
 		long input = 0;
@@ -131,11 +129,17 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	static final int ERRORLINE_MAXSIZE = 40;
 	static final long LOG_EACH_X_INPUT_ROWS_DEFAULT = 10000L; //50000 ? (DataDump's default)
 
-	Properties prop;
-	Connection conn;
-	CommitStrategy commitStrategy;
+	// BaseImporter props
+	//String execId = null;
+	//Properties prop;
+	//Connection conn;
+	//CommitStrategy commitStrategy;
+	//String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
+	//String insertTable = null;
+	//String insertSQL = null;
+	//List<String> columnTypes;
+	//List<Integer> filecol2tabcolMap = null;
 	
-	String execId = null;
 	String importFile = null;
 	String importDir = null;
 	String importFiles = null;
@@ -147,13 +151,10 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	
 	boolean follow = false;
 	String recordDelimiter = "\r?\n";
-	String insertTable = null;
-	String insertSQL = null;
-	String defaultInputEncoding = DataDumpUtils.CHARSET_UTF8;
 	String inputEncoding = defaultInputEncoding;
-	List<String> columnTypes;
 	Integer columnCount;
 	Integer onErrorIntValue;
+	// XXX: columnCount should be 'int'??
 	
 	boolean stmtSetNull4MissingCols = true;
 	
@@ -237,7 +238,8 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	
 	@Override
 	public void setProperties(Properties prop) {
-		this.prop = prop;
+		super.setProperties(prop);
+
 		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
 		importDir = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
 		importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
@@ -293,9 +295,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 
 	void setImporterProperties(Properties prop, String importerPrefix) {
-		insertTable = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTTABLE);
-		insertSQL = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTSQL);
-		columnTypes = Utils.getStringListFromProp(prop, importerPrefix+Constants.SUFFIX_COLUMN_TYPES, ",");
+		//insertTable = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTTABLE);
+		//insertSQL = prop.getProperty(importerPrefix+Constants.SUFFIX_INSERTSQL);
+		//columnTypes = Utils.getStringListFromProp(prop, importerPrefix+Constants.SUFFIX_COLUMN_TYPES, ",");
 		if(columnTypes!=null) {
 			columnCount = columnTypes.size();
 		}
@@ -310,6 +312,15 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		else {
 			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
 			setImporterProperties(prop, failoverKey);
+		}
+	}
+	
+	void setupColumnTypes(int columnCount) {
+		if(columnTypes==null) {
+			columnTypes = new ArrayList<String>();
+			for(int i=0;i<columnCount;i++) {
+				columnTypes.add("string");
+			}
 		}
 	}
 
@@ -427,9 +438,9 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	}
 
 	Map<Integer, IOCounter> countsByFailoverId;
-	List<Integer> filecol2tabcolMap = null;
 	boolean colTypesIndexFromTabCol = true;
 	boolean mustSetupSQLStatement = false;
+	boolean tableCreated = false;
 	int failoverId = 0;
 	
 	@SuppressWarnings("resource")
@@ -527,6 +538,15 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 						}
 
 						if(lineParts!=null) {
+							/*
+							if(doCreateTable && !tableCreated) {
+								int colCount = columnCount!=null ? columnCount : parts.length; 
+								log.info("will create table [colCount=="+colCount+"]");
+								setupColumnTypes(colCount);
+								createTable();
+								tableCreated = true;
+							}
+							*/
 							persistLineParts(lineParts);
 							lineOutputCounter++;
 						}
@@ -568,7 +588,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 									//XXX warn [retryWithBatchOff]?
 									logRow.info("[retryWithBatchOff] line #"+linecounter+": "+line);
 								}
-								//log.info("error processing line "+linecounter, e);
+								//logRow.info("error processing line "+linecounter, e);
 								//XXX: ??
 								//if(failonerror) {
 								//	throw new ProcessingException("Error processing line "+linecounter, e);
@@ -679,6 +699,14 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 		}
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
+			if(doCreateTable && !tableCreated) {
+				int colCount = columnCount!=null ? columnCount : parts.length; 
+				log.info("will create table [colCount=="+colCount+"]");
+				setupColumnTypes(colCount);
+				createTable();
+				tableCreated = true;
+			}
+			
 			setupSQLStatement(columnCount!=null ? columnCount : parts.length);
 			mustSetupSQLStatement = false;
 		}
@@ -936,7 +964,6 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 
 	void stmtSetNull(int index) throws SQLException {
 		stmt.setObject(index+1, null);
-		return;
 	}
 	
 	List<Integer> loggedStatementFailoverIds = new ArrayList<Integer>();
@@ -988,7 +1015,7 @@ public abstract class AbstractImporter extends AbstractFailable implements Impor
 	
 	void cleanupStatement(IOCounter counter) throws SQLException {
 		if(stmt==null) {
-			log.warn("null statement! in = "+counter.input);
+			log.warn("null statement! counter.input = "+counter.input);
 			//new NullPointerException().printStackTrace();
 			return;
 		}

@@ -182,7 +182,7 @@ public class XlsImportTest {
 
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls");
-		p.setProperty(".do-create-table", "true");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int");
 		
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
