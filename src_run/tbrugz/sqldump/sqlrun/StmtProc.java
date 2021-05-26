@@ -27,6 +27,7 @@ import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Util;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.MathUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -101,10 +102,22 @@ public class StmtProc extends AbstractFailable implements Executor {
 		long initTime = System.currentTimeMillis();
 		
 		for(String stmtStr: stmtTokenizer) {
-			if(stmtStr==null) { continue; }
-			//XXX: remove SQL comments before trim()?
+			if(stmtStr==null) {
+				log.warn("tokenizer returned null statement? [tokenizer = "+tokenizerStrategy.getClass().getSimpleName()+"]");
+				continue;
+			}
 			stmtStr = stmtStr.trim();
-			if(stmtStr.equals("")) { continue; }
+			if(stmtStr.equals("")) {
+				//log.debug("tokenizer returned empty statement [tokenizer = "+tokenizerStrategy.getClass().getSimpleName()+"]");
+				continue;
+			}
+			// removing SQL comments before check
+			if(!TokenizerUtil.containsSqlStatmement(stmtStr)) {
+				//log.info("statement is empty or comments-only [tokenizer = "+tokenizerStrategy.getClass().getSimpleName()+"]");
+				//log.debug("empty or comments-only statement: ["+stmtStr+"]");
+				log.debug("statement is empty or comments-only [tokenizer = "+tokenizerStrategy.getClass().getSimpleName()+"][stmt = "+stmtStr+"]");
+				continue;
+			}
 			
 			try {
 				//log.debug("stmt: "+stmtStr);
