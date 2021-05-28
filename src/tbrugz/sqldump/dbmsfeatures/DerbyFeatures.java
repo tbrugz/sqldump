@@ -321,7 +321,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			if(t!=null) {
 				List<String> tCols = t.getColumnNames();
 				for(String ss: colIdxs) {
-					int i = Integer.parseInt(ss);
+					int i = Integer.parseInt(ss.trim());
 					String colName = tCols.get(i-1);
 					c.getUniqueColumns().add(colName);
 					log.debug("grabDBUniqueConstraints: added column #"+i+": "+colName);
