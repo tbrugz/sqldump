@@ -7,7 +7,7 @@ public class TokenizerUtil {
 	}
 	
 	enum TknState {
-		DEFAULT, STRING, COMM_LINE, COMM_BLOCK
+		DEFAULT, STRING, DQUOTE, COMM_LINE, COMM_BLOCK
 	}
 	
 	public static String removeSqlComents(String sql) {
@@ -24,6 +24,10 @@ public class TokenizerUtil {
 						state = TknState.STRING;
 						ret.append(c);
 					}
+					else if(c=='"') {
+						state = TknState.DQUOTE;
+						ret.append(c);
+					}
 					else if(c=='-' && !lastChar) {
 						char c2 = sql.charAt(i+1);
 						if(c2=='-') { state = TknState.COMM_LINE; }
@@ -35,18 +39,34 @@ public class TokenizerUtil {
 					else {
 						ret.append(c);
 					}
+					break;
 				}
 				case STRING: {
 					if(c=='\'') {
 						state = TknState.DEFAULT;
 						ret.append(c);
 					}
+					else {
+						ret.append(c);
+					}
+					break;
+				}
+				case DQUOTE: {
+					if(c=='"') {
+						state = TknState.DEFAULT;
+						ret.append(c);
+					}
+					else {
+						ret.append(c);
+					}
+					break;
 				}
 				case COMM_LINE: {
 					if(c=='\n') {
 						state = TknState.DEFAULT;
 						ret.append(c);
 					}
+					break;
 				}
 				case COMM_BLOCK: {
 					if(c=='*' && !lastChar) {
@@ -56,6 +76,7 @@ public class TokenizerUtil {
 							i++; // skips next '/' char
 						}
 					}
+					break;
 				}
 			}
 		}
