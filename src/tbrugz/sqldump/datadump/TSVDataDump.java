@@ -2,6 +2,11 @@ package tbrugz.sqldump.datadump;
 
 import java.util.Properties;
 
+/**
+ * See: 
+ * https://en.wikipedia.org/wiki/Tab-separated_values
+ * https://www.iana.org/assignments/media-types/text/tab-separated-values
+ */
 public class TSVDataDump extends CSVDataDump implements Cloneable {
 
 	static final String TSV_SYNTAX_ID = "tsv";
@@ -24,7 +29,12 @@ public class TSVDataDump extends CSVDataDump implements Cloneable {
 
 	@Override
 	public String getDefaultFileExtension() {
-		return "tsv";
+		return "tsv"; // also '.tab'?
+	}
+
+	@Override
+	public String getMimeType() {
+		return "text/tab-separated-values";
 	}
 
 }
