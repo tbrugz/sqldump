@@ -114,7 +114,7 @@ public class SQLQueries extends AbstractSQLProc {
 		if(queriesStr!=null) {
 			log.debug("prop '"+PROP_QUERIES+"': "+queriesStr);
 		}
-		log.debug("query ids: "+qmap.keySet());
+		log.info("query ids: "+qmap.keySet());
 		
 		for(Map.Entry<String, Properties> qentry: qmap.entrySet()) {
 			String qid = qentry.getKey();
@@ -475,6 +475,9 @@ public class SQLQueries extends AbstractSQLProc {
 			String sqlfile = prop.getProperty(PREFIX_QUERY+qid+".sqlfile");
 			if(sqlfile!=null) {
 				sql = IOUtil.readFromFilename(sqlfile);
+			}
+			else {
+				log.warn("null '.sql' & '.sqlfile' [prefix = "+PREFIX_QUERY+qid+"]");
 			}
 			//replace props! XXX: replaceProps(): should be activated by a prop?
 			sql = ParametrizedProperties.replaceProps(sql, prop);
