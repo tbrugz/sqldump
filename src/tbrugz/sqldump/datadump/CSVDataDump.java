@@ -16,6 +16,7 @@ import tbrugz.sqldump.util.Utils;
 
 /**
  * CSV RFC: http://tools.ietf.org/html/rfc4180 / http://tools.ietf.org/pdf/rfc4180.pdf
+ * Frictionless spec: https://specs.frictionlessdata.io/csv-dialect/
  */
 /*
    TODO: CSV Syntax: comply with RFC 4180

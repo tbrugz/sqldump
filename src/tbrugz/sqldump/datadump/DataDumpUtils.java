@@ -86,7 +86,7 @@ public class DataDumpUtils {
 	}
 	
 	//dumpers: CSV, FFC
-	public static String getFormattedCSVValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat df, String separator, String lineSeparator, String enclosing, String nullValue) {
+	public static String getFormattedCSVValue(Object elem, Class<?> type, NumberFormat floatFormatter, DateFormat dateFormatter, String separator, String lineSeparator, String enclosing, String nullValue) {
 		if(elem == null) {
 			return nullValue;
 		}
@@ -94,7 +94,7 @@ public class DataDumpUtils {
 			return floatFormatter.format(elem);
 		}
 		else if(Date.class.isAssignableFrom(type) && elem instanceof Date) {
-			return df.format((Date)elem);
+			return dateFormatter.format((Date)elem);
 		}
 		else if(ResultSet.class.isAssignableFrom(type)) {
 			return nullValue;
@@ -474,15 +474,18 @@ public class DataDumpUtils {
 	//see: http://tools.ietf.org/html/rfc2822 (NO-WS-CTL)
 	//XXX: [\\x0b-\\x0c] needed? - vertical tab, form feed
 	static final String REGEX_CONTROL_CHARS = "[\\x01-\\x08]|[\\x0b-\\x0c]|[\\x0e-\\x1f]|\\x7f";
-	static final Pattern patternCointrolChars = Pattern.compile(REGEX_CONTROL_CHARS);
+	static final Pattern patternControlChars = Pattern.compile(REGEX_CONTROL_CHARS);
 	static final String STR_CONTROL_CHARS_REPLACEMENT = "?";
 	
 	/*
-	 * should be getPrintableString()?
-	 * XXX: option to change replacement char? option to NOT replace ontrol chars?
+	 * XXX: option to change replacement char? option to NOT replace control chars?
 	 */
+	public static String getPrintableString(Object s) {
+		return patternControlChars.matcher(s.toString()).replaceAll(STR_CONTROL_CHARS_REPLACEMENT);
+	}
+
 	static String getString(Object s) {
-		return (s==null)?"null":patternCointrolChars.matcher(s.toString()).replaceAll(STR_CONTROL_CHARS_REPLACEMENT);
+		return (s==null)?"null":getPrintableString(s);
 	}
 	
 	public static boolean isArray(Class<?> c, Object val) {

@@ -9,6 +9,8 @@ import tbrugz.sqldump.util.SQLUtils;
 
 public abstract class AbstractDumpSyntax extends DumpSyntax {
 
+	public static final String DEFAULT_DATADUMP_PREFIX = "sqldump.datadump.";
+	
 	protected String schemaName;
 	protected String tableName;
 	protected int numCol;

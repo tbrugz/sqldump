@@ -621,7 +621,7 @@ public class Utils {
 		}
 		else {
 			Locale locale = new Locale(floatLocale);
-			log.info(syntax+" syntax float locale: "+locale);
+			log.debug(syntax+" syntax float locale: "+locale);
 			floatFormatter = NumberFormat.getNumberInstance(locale);
 		}
 		DecimalFormat df = (DecimalFormat) floatFormatter;

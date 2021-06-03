@@ -423,7 +423,7 @@ public class DataDumpTest {
 		File f = dumpSelect("select 1 as a, 3 as c", "json",
 				new String[] {"-Dsqldump.datadump.json.null-data-element=true"});
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		Object obj = JSONValue.parse(jsonStr);
 		JSONArray jarr = (JSONArray) obj;
 		JSONObject jobj = (JSONObject) jarr.get(0);
@@ -439,7 +439,7 @@ public class DataDumpTest {
 						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
 		);
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		Object obj = JSONValue.parse(jsonStr);
 		JSONObject jobj = (JSONObject) obj;
 		Assert.assertEquals(1L, jobj.get("A"));
@@ -452,7 +452,7 @@ public class DataDumpTest {
 				,new String[] {"-Dsqldump.datadump.json.force-unique-row=true"}
 		);
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		Object obj = JSONValue.parse(jsonStr);
 		JSONObject jobj = (JSONObject) obj;
 		JSONArray jarr = (JSONArray) jobj.get("q1");
@@ -468,7 +468,7 @@ public class DataDumpTest {
 						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
 		);
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		Object obj = JSONValue.parse(jsonStr);
 		JSONObject jobj = (JSONObject) obj;
 		jobj = (JSONObject) jobj.get("q1");
@@ -483,11 +483,11 @@ public class DataDumpTest {
 						"-Dsqldump.datadump.json.no-array-on-unique-row=true"}
 		);
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		Object obj = JSONValue.parse(jsonStr);
 		JSONObject jobj = (JSONObject) obj;
 		jobj = (JSONObject) jobj.get("q1");
-		System.out.println("size: "+jobj.size());
+		//System.out.println("size: "+jobj.size());
 		Assert.assertEquals(2, jobj.size());
 	}
 
@@ -501,7 +501,7 @@ public class DataDumpTest {
 						}
 		);
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
-		System.out.println(jsonStr);
+		//System.out.println(jsonStr);
 		
 		Object obj = JSONValue.parse(jsonStr);
 		JSONObject jobj = (JSONObject) obj;
@@ -923,7 +923,7 @@ public class DataDumpTest {
 				new String[] {"-Dsqldump.datadump.insertinto.dumpcursors=true"});
 		String str = IOUtil.readFromFilename(f.getAbsolutePath());
 		String LF = "\n";
-		System.out.println(str);
+		//System.out.println(str);
 		Assert.assertEquals("insert into q1 (A, B, C) values (1, null, 3);" + LF + 
 				"insert into B (B) values (1);" + LF +
 				"insert into B (B) values (2);" + LF +
@@ -1019,5 +1019,24 @@ public class DataDumpTest {
 				csv);
 		
 	}
-	
+
+	@Test
+	public void testLinearTsv() throws Exception {
+		File f = dumpSelect(
+			"select 1 as a, 3 as c, null as b, 'abc' as d "+
+			"union all select 2 as a, 6 as c, '\t' as b, '\n' as d "+
+			"union all select 3 as a, 9 as c, '\\' as b, '\r' as d "+
+			"",
+			"linear-tsv");
+		String content = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(content);
+		Assert.assertEquals(
+			"A	C	B	D"       +"\n"+
+			"1	3	\\N	abc"     +"\n"+
+			"2	6	\\t	\\n"     +"\n"+
+			"3	9	\\\\	\\r" +"\n"+
+			"",
+			content);
+	}
+
 }
