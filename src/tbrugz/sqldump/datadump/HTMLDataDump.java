@@ -55,6 +55,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	
 	protected static final String DEFAULT_PADDING = "";
 	protected static final boolean DEFAULT_ADD_CAPTION = false;
+	protected static final String nullPlaceholderReplacer = UNICODE_NULL; // user by pivot & breaks
 
 	//protected String padding;
 	protected boolean innerTable;
@@ -74,6 +75,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected List<String> finalColNames = new ArrayList<String>();
 	protected List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
 	
+	// pivot properties
 	protected int onRowsColCount = 0;
 	protected int onColsColCount = 0;
 	protected String colSep = null;
@@ -81,7 +83,6 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected String colSepPattern = null;
 	protected String colValSepPattern = null;
 	protected static final String nullPlaceholder = PivotResultSet.NULL_PLACEHOLDER;
-	protected static final String nullPlaceholderReplacer = UNICODE_NULL;
 
 	// break properties
 	protected List<String> breakColNamesProperty = new ArrayList<String>();

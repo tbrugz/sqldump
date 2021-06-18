@@ -107,6 +107,8 @@
 	</path>
 
 	<target name="prepare" description="prepares build">
+		<echo>java.version: ${java.version}</echo> 
+		<echo>ant.version = ${ant.version}</echo>
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
 		<mkdir dir="${lib.dir}"/>
@@ -136,7 +138,7 @@
 	<target name="compile" depends="prepare">
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6"><!-- release="6" -->
 			<!-- <compilerarg value="-Xlint:deprecation"/> -->
 			<src path="${src.dir}"/>
 			<src path="${src.graphml.dir}"/>
@@ -148,7 +150,7 @@
 			<src path="${src.anttaks.dir}"/>
 			<exclude name="tbrugz/sqldump/ant/xperimental/**"/>
 		</javac>
-		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6">
+		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" source="1.6" target="1.6"><!-- release="6" -->
 			<src path="${src.test.dir}"/>
 		</javac>
 
