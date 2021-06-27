@@ -35,6 +35,8 @@ import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.resultset.ResultSetDecoratorFactory;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil.QueryParameter;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
@@ -513,15 +515,35 @@ public class SQLQueries extends AbstractSQLProc {
 		ret.setProperty("sql", sql);
 		
 		//bind params
-		int paramCount = 1;
+		int paramCount = 0;
 		//List<Object> params = new ArrayList<Object>();
 		while(true) {
-			String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param."+paramCount);
+			String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param."+(paramCount+1));
 			if(paramStr==null) { break; }
 			//params.add(paramStr);
+			paramCount++;
 			ret.setProperty("param."+paramCount, paramStr);
 			log.debug("added bind param #"+paramCount+": "+paramStr);
-			paramCount++;
+		}
+		
+		//bind named params
+		List<QueryParameter> namedPars = TokenizerUtil.getNamedParameters(sql);
+		if(namedPars.size()>0) {
+			if(paramCount>0) {
+				String message = "can't have positional and named parameters in the same query [paramCount="+paramCount+";#namedPars="+namedPars.size()+"]";
+				log.warn(message);
+				if(failonerror) {
+					throw new IllegalStateException(message);
+				}
+			}
+			for(QueryParameter qp: namedPars) {
+				//String pname = qp.name
+				paramCount++;
+				String paramStr = prop.getProperty(PREFIX_QUERY+qid+".param@"+qp.name);
+				ret.setProperty("param."+paramCount, paramStr);
+				log.debug("added bind param #"+paramCount+" [name = "+qp.name+"]: "+paramStr);
+			}
+			ret.setProperty("sql", TokenizerUtil.replaceNamedParameters(sql, namedPars));
 		}
 
 		ret.setProperty("rowlimit", prop.getProperty(PREFIX_QUERY+qid+".rowlimit"));

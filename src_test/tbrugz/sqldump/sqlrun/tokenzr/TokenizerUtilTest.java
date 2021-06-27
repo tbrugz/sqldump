@@ -188,4 +188,36 @@ public class TokenizerUtilTest {
 		Assert.assertEquals(15, qpl.get(0).position);
 	}
 
+	@Test
+	public void testReplace2NamedParameters() {
+		String test = null;
+		List<QueryParameter> qpl = null;
+
+		test = "select :abc :def";
+		qpl = TokenizerUtil.getNamedParameters(test);
+		Assert.assertEquals(2, qpl.size());
+		Assert.assertEquals("abc", qpl.get(0).name);
+		Assert.assertEquals(7, qpl.get(0).position);
+		Assert.assertEquals("def", qpl.get(1).name);
+		Assert.assertEquals(12, qpl.get(1).position);
+
+		String replaced = TokenizerUtil.replaceNamedParameters(test, qpl);
+		Assert.assertEquals("select ?    ?   ", replaced);
+	}
+	
+	@Test
+	public void testReplaceNamedParametersInBlockComm() {
+		String test = null;
+		List<QueryParameter> qpl = null;
+
+		test = "select :abc /* :def */";
+		qpl = TokenizerUtil.getNamedParameters(test);
+		Assert.assertEquals(1, qpl.size());
+		Assert.assertEquals("abc", qpl.get(0).name);
+		Assert.assertEquals(7, qpl.get(0).position);
+
+		String replaced = TokenizerUtil.replaceNamedParameters(test, qpl);
+		Assert.assertEquals("select ?    /* :def */", replaced);
+	}
+	
 }

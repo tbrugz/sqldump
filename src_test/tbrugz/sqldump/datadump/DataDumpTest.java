@@ -1039,4 +1039,21 @@ public class DataDumpTest {
 			content);
 	}
 
+	@Test
+	public void testBindNamedParameter() throws Exception {
+		File f = dumpSelect(
+				"select :abc as a, 2 as b, :abc as c", "csv",
+				new String[] {"-Dsqldump.query.q1.param@abc=AAA"}
+				);
+		String csv = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(csv);
+		
+		String LF = "\r\n";
+		Assert.assertEquals(
+				"A,B,C" + LF +
+				"AAA,2,AAA" + LF,
+				csv);
+		
+	}
+	
 }

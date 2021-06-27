@@ -6,8 +6,8 @@ import java.util.List;
 public class TokenizerUtil {
 
 	public static class QueryParameter {
-		final String name;
-		final int position;
+		public final String name;
+		public final int position;
 
 		public QueryParameter(String name, int position) {
 			this.name = name;
@@ -179,4 +179,16 @@ public class TokenizerUtil {
 		return ret;
 	}
 
+	public static String replaceNamedParameters(String sql, List<QueryParameter> pars) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(sql);
+		for(QueryParameter qp: pars) {
+			int plen = qp.name.length();
+			String spaces = new String(new char[plen]).replace("\0", " ");
+			String replacement = "?" + spaces;
+			sb.replace(qp.position, qp.position+plen+1, replacement);
+		}
+		return sb.toString();
+	}
+	
 }
