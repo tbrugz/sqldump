@@ -219,5 +219,14 @@ public class TokenizerUtilTest {
 		String replaced = TokenizerUtil.replaceNamedParameters(test, qpl);
 		Assert.assertEquals("select ?    /* :def */", replaced);
 	}
-	
+
+	@Test(expected=RuntimeException.class)
+	public void testNamedAndPositionalParameters() {
+		String test = null;
+		List<QueryParameter> qpl = null;
+
+		test = "select :abc and ?";
+		TokenizerUtil.getNamedParameters(test);
+	}
+
 }

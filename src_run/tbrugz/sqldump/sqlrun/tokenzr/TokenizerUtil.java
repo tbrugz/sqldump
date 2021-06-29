@@ -105,6 +105,7 @@ public class TokenizerUtil {
 	public static List<QueryParameter> getNamedParameters(String sql) {
 		TknState state = TknState.DEFAULT;
 		List<QueryParameter> ret = new ArrayList<QueryParameter>();
+		int countPositionalParameters = 0;
 
 		int len = sql.length();
 		for(int i=0;i<len;i++) {
@@ -140,9 +141,10 @@ public class TokenizerUtil {
 						QueryParameter qp = new QueryParameter(sb.toString(), pos);
 						ret.add(qp);
 					}
-					/*else if(c=='?') {
+					else if(c=='?') {
 						// positional param?
-					}*/
+						countPositionalParameters++;
+					}
 					break;
 				}
 				case STRING: {
@@ -175,7 +177,13 @@ public class TokenizerUtil {
 				}
 			}
 		}
-	
+
+		if(countPositionalParameters>0 && ret.size()>0) {
+			throw new IllegalStateException(
+				"can't have both positional [#"+countPositionalParameters+"] "+
+				"and named [#"+ret.size()+"] parameters in the same query"
+				);
+		}
 		return ret;
 	}
 
@@ -189,6 +197,14 @@ public class TokenizerUtil {
 			sb.replace(qp.position, qp.position+plen+1, replacement);
 		}
 		return sb.toString();
+	}
+
+	public static List<String> getParameterNames(List<QueryParameter> pars) {
+		List<String> ret = new ArrayList<String>();
+		for(QueryParameter qp: pars) {
+			ret.add(qp.name);
+		}
+		return ret;
 	}
 	
 }
