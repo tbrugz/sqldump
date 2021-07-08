@@ -199,6 +199,14 @@ public class TokenizerUtil {
 		return sb.toString();
 	}
 
+	public static String replaceNamedParameters(String sql) {
+		List<QueryParameter> qpl = TokenizerUtil.getNamedParameters(sql);
+		if(qpl.size()>0) {
+			return TokenizerUtil.replaceNamedParameters(sql, qpl);
+		}
+		return sql;
+	}
+
 	public static List<String> getParameterNames(List<QueryParameter> pars) {
 		List<String> ret = new ArrayList<String>();
 		for(QueryParameter qp: pars) {
