@@ -8,6 +8,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
 
 public class Constraint extends AbstractConstraint implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 
 	public static enum ConstraintType {
@@ -23,6 +24,7 @@ public class Constraint extends AbstractConstraint implements Serializable {
 				case UNIQUE:
 					return "unique";
 				case CHECK:
+					return "check";
 				default:
 					return this.toString();
 			}
@@ -34,11 +36,11 @@ public class Constraint extends AbstractConstraint implements Serializable {
 	String checkDescription;
 	List<String> uniqueColumns = new ArrayList<String>();
 	
+	@Override
 	public String getDefinition(boolean dumpSchemaName) {
 		switch (type) {
-			//XXX: use literal type (CHECK, UNIQUE) instead of variable 'type'?
 			case CHECK:
-				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" "+checkDescription;
+				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" ("+checkDescription+")";
 			case UNIQUE:
 			case PK:
 				return "constraint "+DBObject.getFinalIdentifier(name)+" "+type.fullName()+" ("+Utils.join(uniqueColumns, ", ", SQLIdentifierDecorator.getInstance())+")";
