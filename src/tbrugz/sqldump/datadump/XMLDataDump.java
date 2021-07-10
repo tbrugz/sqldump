@@ -129,6 +129,7 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		StringBuilder sb = new StringBuilder();
 		sb.append("\t\t");
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, true);
+		boolean lastColWasRS = false;
 		for(int i=0;i<lsColNames.size();i++) {
 			//XXX: prop for selecting ResultSet dumping or not?
 			Object origVal = vals.get(i);
@@ -167,16 +168,21 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 				}*/
 				DataDumpUtils.dumpRS(xmldd, rsInt.getMetaData(), rsInt, null, lsColNames.get(i), fos, true);
 				//sb.append("\t");
+				lastColWasRS = true;
 			}
 			else {
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, doEscape(i));
 				if(value==null) {
 					if(dumpNullValues) {
+						if(lastColWasRS) { sb.append("\t\t"); }
 						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
+						lastColWasRS = false;
 					}
 				}
 				else {
+					if(lastColWasRS) { sb.append("\t\t"); }
 					sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">" );
+					lastColWasRS = false;
 				}
 			}
 		}
@@ -269,6 +275,15 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 		catch(CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	/* return new line with padding */
+	public String nl() {
+		return "\n"+padding;
+	}
+
+	public String padd() {
+		return padding;
 	}
 	
 }

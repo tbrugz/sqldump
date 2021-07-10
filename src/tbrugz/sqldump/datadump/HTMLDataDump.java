@@ -217,14 +217,14 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		}
 		if(dumpCaptionElement){
 			//XXX: set caption?
-			sb.append("\n\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
+			sb.append(nl()+"\t<caption>" + (schemaName!=null?schemaName+".":"") + tableName + "</caption>");
 		}
 		if(dumpColElement) {
-			sb.append("\n<colgroup>");
+			sb.append(nl()+"\t<colgroup>");
 			for(int i=0;i<finalColNames.size();i++) {
-				sb.append("\n\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\"/>");
+				sb.append(nl()+"\t\t<col colname=\""+finalColNames.get(i)+"\" type=\""+finalColTypes.get(i).getSimpleName()+"\"/>");
 			}
-			sb.append("\n</colgroup>");
+			sb.append(nl()+"\t</colgroup>");
 		}
 		sb.append("\n");
 		//XXX: add thead?
@@ -290,7 +290,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 								"/>");
 					}
 				}
-				sb.append("\n\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+(measuresRow?" measuresrow=\"true\"":"")+">");
+				sb.append(nl()+"\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+(measuresRow?" measuresrow=\"true\"":"")+">");
 				sb.append(sbrow);
 				sb.append("</tr>");
 				dumpedAsLeast1row = true;
@@ -307,7 +307,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	}
 	
 	protected void appendTableHeaderRow(StringBuilder sb) {
-		sb.append("\t<tr>");
+		sb.append(padd()+"\t<tr>");
 		for(int i=0;i<finalColNames.size();i++) {
 			sb.append("<th>"+finalColNames.get(i)+"</th>");
 		}
@@ -412,7 +412,6 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 						+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
 						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
-				
 			}
 		}
 		sb.append("</tr>");
