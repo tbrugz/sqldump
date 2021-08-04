@@ -174,6 +174,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	long skipHeaderN = 0;
 	Pattern skipLineRegex = null;
 	long maxLines = -1;
+	long inputLimit = -1;
 	long logEachXInputRows = LOG_EACH_X_INPUT_ROWS_DEFAULT;
 	long logEachXOutputRows = 0; //10000L;
 
@@ -250,6 +251,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
 		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, skipHeaderN);
 		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, maxLines);
+		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
 		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
 		if(skipLineRegexStr!=null) {
 			skipLineRegex = Pattern.compile(skipLineRegexStr);
@@ -498,6 +500,10 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 				while(importthisline) {
 					if(maxLines >= 0 && lineOutputCounter >= maxLines) {
 						logRow.info("max (limit) rows reached: "+maxLines+" [lineOutputCounter="+lineOutputCounter+"]"); //+" ; skipnlines="+skipHeaderN+"]"); 
+						break scanNext;
+					}
+					if(inputLimit >= 0 && counter.input >= inputLimit) {
+						log.info("max (limit-input) rows reached: "+inputLimit+" [counter.input="+counter.input+"]"); 
 						break scanNext;
 					}
 					try {

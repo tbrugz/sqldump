@@ -36,6 +36,7 @@ public class XlsImporter extends BaseImporter {
 	Integer sheetNumber;
 	long linesToSkip = 0;
 	long linesLimit = -1;
+	long inputLimit = -1;
 	boolean hasHeaderLine = true;
 	boolean use1stLineAsColNames = false;
 	boolean ignoreRowWithWrongNumberOfColumns = true; //XXX: add prop?
@@ -66,6 +67,7 @@ public class XlsImporter extends BaseImporter {
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
 		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
 		linesLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, linesLimit);
+		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
 
 		if(!hasHeaderLine && use1stLineAsColNames) {
 			log.warn("using '"+SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
@@ -137,6 +139,10 @@ public class XlsImporter extends BaseImporter {
 				else {
 					if(linesLimit >= 0 && lineOutputCounter >= linesLimit) {
 						log.info("max (limit) rows reached: "+linesLimit+" [lineOutputCounter="+lineOutputCounter+"]"); 
+						break;
+					}
+					if(inputLimit >= 0 && counter.input >= inputLimit) {
+						log.info("max (limit-input) rows reached: "+inputLimit+" [counter.input="+counter.input+"]"); 
 						break;
 					}
 					
