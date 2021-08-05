@@ -63,7 +63,7 @@ public enum TokenizerStrategy {
 	public static Tokenizer getTokenizer(TokenizerStrategy tokenizerStrategy, File file, String inputEncoding, boolean escapeBackslashedApos, boolean split) throws IOException {
 		//log.debug("getTokenizer: strategy="+tokenizerStrategy+" ; charset = "+inputEncoding);
 		if(!split) {
-			String fileStr = IOUtil.readFromFile(file);
+			String fileStr = IOUtil.readFromFile(file, inputEncoding, true);
 			return new NoSplitTokenizer(fileStr);
 		}
 
@@ -80,7 +80,7 @@ public enum TokenizerStrategy {
 			//try {
 				//reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
 				//String fileStr = IOUtil.readFromReader(reader);
-				String fileStr = IOUtil.readFromFile(file, inputEncoding);
+				String fileStr = IOUtil.readFromFile(file, inputEncoding, true);
 				switch (tokenizerStrategy) {
 				case STMT_TOKENIZER:
 					return new SQLStmtTokenizer(fileStr);

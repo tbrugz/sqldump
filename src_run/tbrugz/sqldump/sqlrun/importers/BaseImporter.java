@@ -319,7 +319,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	static String getSqlColumnType(String type) {
 		if(type.startsWith("double")) { return "double precision"; }
 		if(type.equals("int")) { return "integer"; }
-		return "varchar";
+		return "varchar(4000)";
 	}
 
 }

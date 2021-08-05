@@ -11,6 +11,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,7 +97,26 @@ public class IOUtil {
 		}
 		return null;
 	}
-	
+
+	public static String readFromFile(File file, String inputEncoding, boolean throwException) throws IOException {
+		// https://stackoverflow.com/questions/696626/java-filereader-encoding-issue
+		try {
+			if(inputEncoding==null) {
+				inputEncoding = Charset.defaultCharset().name();
+			}
+			Reader reader = new InputStreamReader(new FileInputStream(file), inputEncoding);
+			String ret = IOUtil.readFromReader(reader);
+			reader.close();
+			return ret;
+		} catch (IOException e) {
+			log.warn("error reading file "+file+" [with encoding "+inputEncoding+"]: "+e);
+			if(throwException) {
+				throw e;
+			}
+		}
+		return null;
+	}
+
 	public static void pipeStreams(InputStream is, OutputStream os) throws IOException {
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int len;

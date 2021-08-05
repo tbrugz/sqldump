@@ -39,7 +39,7 @@ public class XlsImporter extends BaseImporter {
 	long inputLimit = -1;
 	boolean hasHeaderLine = true;
 	boolean use1stLineAsColNames = false;
-	boolean ignoreRowWithWrongNumberOfColumns = true; //XXX: add prop?
+	boolean ignoreRowWithWrongNumberOfColumns = false; //XXX: add prop?
 	
 	static final String[] XLS_AUX_SUFFIXES = {
 		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME, SUFFIX_1ST_LINE_IS_HEADER, SUFFIX_1ST_LINE_AS_COLUMN_NAMES, Constants.SUFFIX_DO_CREATE_TABLE
@@ -113,6 +113,7 @@ public class XlsImporter extends BaseImporter {
 			PreparedStatement stmt = null;
 			boolean tableCreated = false;
 			
+			// iterating xls': https://poi.apache.org/components/spreadsheet/quick-guide.html#Iterator
 			for (Row row : sheet) {
 				counter.input++;
 				if(counter.input<=linesToSkip) { continue; }
@@ -120,8 +121,16 @@ public class XlsImporter extends BaseImporter {
 				List<Object> parts = new ArrayList<Object>();
 				try {
 				
-				for (Cell cell : row) {
-					parts.add(getValue(cell));
+				int lastCol = row.getLastCellNum();
+				for (int i=0; i<lastCol; i++) {
+					Cell cell = row.getCell(i, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if(cell==null) {
+						//log.debug("null cell [#row="+counter.input+";#col="+i+"]");
+						parts.add(null);
+					}
+					else {
+						parts.add(getValue(cell));
+					}
 				}
 
 				//log.info(is1stLine+";"+hasHeaderLine+";"+use1stLineAsColNames+"\nnames = "+columnNames+"\ntypes = "+columnTypes);
@@ -164,10 +173,19 @@ public class XlsImporter extends BaseImporter {
 
 					boolean rowError = false;
 					if(parts.size() < columnTypes.size()) {
-						log.warn("row "+counter.input+": #values ["+parts.size()+"] < #columnTypes ["+columnTypes.size()+"]"
-							+ (ignoreRowWithWrongNumberOfColumns?" (row ignored)":"")
-							);
 						rowError = true;
+						if(ignoreRowWithWrongNumberOfColumns) {
+							log.warn("row "+counter.input+": #values ["+parts.size()+"] < #columnTypes ["+columnTypes.size()+"]"
+								+ " (row ignored)"
+								);
+						}
+						else {
+							log.debug("row "+counter.input+": #values ["+parts.size()+"] < #columnTypes ["+columnTypes.size()+"]");
+							// append nulls to row's parts
+							while(parts.size() < columnTypes.size()) {
+								parts.add(null);
+							}
+						}
 					}
 
 					if(!rowError || !ignoreRowWithWrongNumberOfColumns) {
@@ -213,6 +231,10 @@ public class XlsImporter extends BaseImporter {
 	}
 	
 	Object getValue(Cell cell) {
+		if(cell==null) {
+			log.warn("null cell??");
+			return null;
+		}
 		int type = cell.getCellType();
 		Object value = null;
 		
@@ -230,7 +252,9 @@ public class XlsImporter extends BaseImporter {
 			value = cell.getStringCellValue();
 			break;
 		case Cell.CELL_TYPE_BLANK:
+			break;
 		default:
+			log.warn("Unknown cell type: "+type+" [cell="+cell+"]");
 			break;
 		}
 		return value;
