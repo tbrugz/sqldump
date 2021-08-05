@@ -20,7 +20,7 @@ import tbrugz.sqldump.util.Utils;
  * http://www.postgresql.org/docs/9.2/static/sql-createview.html
  * http://dev.mysql.com/doc/refman/5.0/en/create-view.html
  */
-public class View extends DBObject implements Relation, ParametrizedDBObject {
+public class View extends DBObject implements Relation {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -44,8 +44,8 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 	// see: http://asktom.oracle.com/pls/asktom/f?p=100:11:0::::P11_QUESTION_ID:1448404423206 ,
 	//  http://stackoverflow.com/questions/4498364/create-parameterized-view-in-sql-server-2008 ,
 	//  http://hordine.com/2012/08/workaround-for-parameterized-views-in-mysql/
-	Integer parameterCount; //XXXdone add parameterCount to View?
-	List<String> parameterTypes;
+	//Integer parameterCount; //XXXdone add parameterCount to View?
+	//List<String> parameterTypes;
 	
 	public static transient boolean dumpColumnNames = false;
 	
@@ -253,12 +253,21 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 
 	@Override
 	public Integer getParameterCount() {
+		return null;
+	}
+
+	/*
+	@Deprecated
+	@Override
+	public Integer getParameterCount() {
 		return parameterCount;
 	}
 
+	@Deprecated
 	public void setParameterCount(Integer parameterCount) {
 		this.parameterCount = parameterCount;
 	}
+	*/
 
 	@Override
 	public int getColumnCount() {
@@ -277,12 +286,21 @@ public class View extends DBObject implements Relation, ParametrizedDBObject {
 
 	@Override
 	public List<String> getParameterTypes() {
+		return null;
+	}
+
+	/*
+	@Deprecated
+	@Override
+	public List<String> getParameterTypes() {
 		return parameterTypes;
 	}
 
+	@Deprecated
 	public void setParameterTypes(List<String> parameterTypes) {
 		this.parameterTypes = parameterTypes;
 	}
+	*/
 	
 	@Override
 	public DBObjectType getDbObjectType() {

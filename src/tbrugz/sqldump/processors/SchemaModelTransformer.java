@@ -232,9 +232,9 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 		for(View v: views) {
 			v.setQuery(null);
 			//XXX prop to remove parameterCount, parameterValues?
-			v.setParameterCount(null);
 			if(v instanceof Query) {
 				Query q = (Query) v;
+				q.setParameterCount(null);
 				q.setParameterValues(null);
 			}
 			count++;

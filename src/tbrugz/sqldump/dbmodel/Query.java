@@ -3,12 +3,16 @@ package tbrugz.sqldump.dbmodel;
 import java.util.List;
 import java.util.Map;
 
-public class Query extends View {
+public class Query extends View implements ParametrizedDBObject {
+	
 	private static final long serialVersionUID = 1L;
 
 	String id;
 	List<Object> parameterValues;
 	List<String> namedParameterNames;
+	
+	Integer parameterCount;
+	List<String> parameterTypes;
 
 	String rsDecoratorFactoryClass;
 	Map<String,String> rsDecoratorArguments;
@@ -71,4 +75,22 @@ public class Query extends View {
 		return DBObjectType.QUERY;
 	}
 	
+	@Override
+	public Integer getParameterCount() {
+		return parameterCount;
+	}
+
+	public void setParameterCount(Integer parameterCount) {
+		this.parameterCount = parameterCount;
+	}
+
+	@Override
+	public List<String> getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public void setParameterTypes(List<String> parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
+
 }
