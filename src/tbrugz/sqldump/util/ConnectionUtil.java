@@ -22,7 +22,7 @@ public class ConnectionUtil {
 	
 	static final Log log = LogFactory.getLog(ConnectionUtil.class);
 	
-	static final String DEFAULT_INITIAL_CONTEXT = "java:/comp/env";
+	public static final String DEFAULT_INITIAL_CONTEXT = "java:/comp/env";
 	
 	//connection props
 	public static final String CONN_PROP_USER = "user";
@@ -250,7 +250,7 @@ public class ConnectionUtil {
 	}
 	
 	// see: http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
-	static Connection getConnectionFromDataSource(String dataSource, String contextLookup) throws SQLException, NamingException {
+	public static Connection getConnectionFromDataSource(String dataSource, String contextLookup) throws SQLException, NamingException {
 		try {
 			log.debug("getting connection from datasource '"+dataSource+"' [context: "+contextLookup+"]");
 			Context initContext = new InitialContext();
@@ -260,6 +260,7 @@ public class ConnectionUtil {
 		}
 		catch(NamingException e) {
 			log.warn("data source not found: "+dataSource+" [exception: "+e+"]");
+			log.debug("data source not found: "+dataSource, e);
 			throw e;
 		}
 	}
