@@ -52,17 +52,22 @@ public class CLIProcessor {
 				}
 				else if(arg.indexOf(PREFIX_DEFINE_PROPERTY)==0) {
 					String propMap = arg.substring(PREFIX_DEFINE_PROPERTY.length());
+					String propName = propMap;
+					String propValue = "";
 					int idx = propMap.indexOf("=");
 					if(idx>=0) {
-						String propName = propMap.substring(0, idx);
-						String propValue = propMap.substring(idx+1);
+						propName = propMap.substring(0, idx);
+						propValue = propMap.substring(idx+1);
 						log.debug("setting property '"+propName+"' with value '"+propValue+"'");
-						papp.setProperty(propName, propValue);
+						//papp.setProperty(propName, propValue);
 					}
 					else {
-						log.warn("invalid value setting property, arg: "+arg);
+						log.debug("setting property '"+propName+"' (with empty value)");
+						//papp.setProperty(propName, propValue);
+						//log.warn("invalid value setting property, arg: "+arg);
 						//throw new IllegalArgumentException("Invalid property syntax: "+arg);
 					}
+					papp.setProperty(propName, propValue);
 				}
 				else if(arg.indexOf(PARAM_USE_SYSPROPERTIES)==0) {
 					String useSysProp = arg.substring(PARAM_USE_SYSPROPERTIES.length());
