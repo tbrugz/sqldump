@@ -18,7 +18,6 @@ import org.junit.Test;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
-import tbrugz.sqldump.sqlrun.importers.AbstractImporter;
 import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
 import tbrugz.sqldump.util.ConnectionUtil;
@@ -101,7 +100,6 @@ public class CSVImportTest {
 		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_csv2");
 		p.setProperty("sqlrun.exec."+execId+".columndelimiter", ";");
 		p.setProperty("sqlrun.exec."+execId+".skipnlines", "1");
-		//p.setProperty("sqlrun.exec."+execId+".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
 		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
@@ -124,7 +122,6 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(".columndelimiter", ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		//p.setProperty(".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
 		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
@@ -146,7 +143,6 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(".columndelimiter", ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		//p.setProperty(".do-create-table", "true"); //TODO: add '.do-create-table' to AbstractImporter
 		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
@@ -293,6 +289,29 @@ public class CSVImportTest {
 		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_tsv"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_tsv");
 		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
+		conn.close();
+	}
+
+	@Test
+	public void importCsvSkipCols() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int, - , string");
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, get1stValue(conn, "select count(*) from ins_csv"));
+		
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_csv");
+		Assert.assertEquals(2, rs.getMetaData().getColumnCount());
+
 		conn.close();
 	}
 

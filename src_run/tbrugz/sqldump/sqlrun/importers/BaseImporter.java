@@ -40,7 +40,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	String insertSQL = null;
 	List<String> columnNames;
 	List<String> columnTypes;
-	List<Integer> filecol2tabcolMap = null;
+	transient List<String> finalColumnTypes;
+	transient List<Integer> filecol2tabcolMap = null;
 	boolean doCreateTable = false;
 
 	//XXX: different exec suffixes for each importer class?
@@ -71,6 +72,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		}
 		//log.info("importerPrefix = "+importerPrefix+"; insertTable =  "+insertTable);
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
+		finalColumnTypes = getFinalColumnTypes(columnTypes);
 		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 	}
 	
@@ -107,8 +109,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	void createTable() throws SQLException {
 		String sql = getCreateTableSql();
 		boolean b = conn.createStatement().execute(sql);
-		log.info("create table, return = "+b);
-		//log.info("create table, sql = ["+sql+"] return = "+b);
+		//log.info("create table, return = "+b);
+		log.info("create table, sql = ["+sql+"] return = "+b);
 	}
 	
 	String getInsertSql() throws SQLException {
@@ -117,11 +119,12 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 			sql = getInsertSql(insertSQL);
 		}
 		else if(columnNames==null) {
-			sql = getInsertSql(insertTable, columnTypes.size());
+			sql = getInsertSql(insertTable, finalColumnTypes.size());
 		}
 		else {
-			sql = getInsertSql(insertTable, columnTypes.size(), columnNames);
+			sql = getInsertSql(insertTable, finalColumnTypes.size(), columnNames);
 		}
+		setupColumnMapper();
 		return sql;
 	}
 	
@@ -129,34 +132,58 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		if(columnNames==null) {
 			columnNames = new ArrayList<String>();
 		}
-		return getCreateTableSql(insertTable, columnNames, columnTypes);
+		return getCreateTableSql(insertTable, columnNames, finalColumnTypes);
 	}
 	
 	String getInsertSql(String insertSQL) throws SQLException {
-		StringBuilder sb = new StringBuilder();
+		//StringBuilder sb = new StringBuilder();
 		
 		log.debug("original insert sql: "+insertSQL);
-		filecol2tabcolMap = new ArrayList<Integer>();
-		int fromIndex = 0;
-		while(true) {
-			int ind1 = insertSQL.indexOf("${", fromIndex);
-			//int indQuestion = insertSQL.indexOf("?", fromIndex);
-			if(ind1<0) { break; }
-			int ind2 = insertSQL.indexOf("}", ind1);
-			//log.debug("ind/2: "+ind+" / "+ind2);
-			int number = Integer.parseInt(insertSQL.substring(ind1+2, ind2));
-			fromIndex = ind2;
-			filecol2tabcolMap.add(number);
-		}
 		//XXX: mix ? and ${number} ?
+		//setupColumnMapper();
 		//filecol2tabcolMap = new int[parts.length];
 		//for(int i=0;i<intl.size();i++) { filecol2tabcolMap[i] = intl.get(0); }
 		String thisInsertSQL = insertSQL.replaceAll("\\$\\{[0-9]+\\}", "?");
-		if(filecol2tabcolMap.size()>0) {
-			log.debug("mapper: "+filecol2tabcolMap);
+		//sb.append(thisInsertSQL);
+		//return sb.toString();
+		return thisInsertSQL;
+	}
+
+	void setupColumnMapper() {
+		if(insertSQL!=null) {
+			filecol2tabcolMap = new ArrayList<Integer>();
+			int fromIndex = 0;
+			while(true) {
+				int ind1 = insertSQL.indexOf("${", fromIndex);
+				//int indQuestion = insertSQL.indexOf("?", fromIndex);
+				if(ind1<0) { break; }
+				int ind2 = insertSQL.indexOf("}", ind1);
+				//log.debug("ind/2: "+ind+" / "+ind2);
+				int number = Integer.parseInt(insertSQL.substring(ind1+2, ind2));
+				fromIndex = ind2;
+				filecol2tabcolMap.add(number);
+			}
 		}
-		sb.append(thisInsertSQL);
-		return sb.toString();
+		else {
+			List<Integer> tmpColMap = new ArrayList<Integer>();
+			boolean hasSkipCol = false;
+			int col = 0;
+			for(String s: columnTypes) {
+				if(!skipColumnType(s)) {
+					tmpColMap.add(col++);
+				}
+				else {
+					hasSkipCol = true;
+				}
+			}
+			if(hasSkipCol) {
+				filecol2tabcolMap = tmpColMap;
+			}
+		}
+
+		if(filecol2tabcolMap!=null && filecol2tabcolMap.size()>0) {
+			log.info("mapper: "+filecol2tabcolMap);
+		}
 	}
 
 	static String getInsertSql(String insertTable, int colCount) throws SQLException {
@@ -320,6 +347,25 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		if(type.startsWith("double")) { return "double precision"; }
 		if(type.equals("int")) { return "integer"; }
 		return "varchar(4000)";
+	}
+
+	//static final Pattern SKIP_REGEX = Pattern.compile("[-]+");
+
+	static boolean skipColumnType(String type) {
+		//return type.equals("skip") || type.equals("-");
+		//return SKIP_REGEX.matcher(type).matches();
+		return type.equals("-");
+	}
+
+	static List<String> getFinalColumnTypes(List<String> columnTypes) {
+		if(columnTypes==null) { return null; }
+		List<String> ret = new ArrayList<String>();
+		for(String s: columnTypes) {
+			if(!skipColumnType(s)) {
+				ret.add(s);
+			}
+		}
+		return ret;
 	}
 
 }

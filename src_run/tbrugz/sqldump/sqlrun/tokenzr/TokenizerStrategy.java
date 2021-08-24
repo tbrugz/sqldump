@@ -69,10 +69,8 @@ public enum TokenizerStrategy {
 
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER_NG:
-			//XXX option to define charset
 			return new SQLStmtNgScanner(file, inputEncoding);
 		case STMT_SCANNER:
-			//XXX option to define charset
 			return new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
 		default:
 			// https://stackoverflow.com/questions/696626/java-filereader-encoding-issue

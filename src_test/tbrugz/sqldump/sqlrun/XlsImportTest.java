@@ -196,5 +196,26 @@ public class XlsImportTest {
 		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
 		conn.close();
 	}
+
+	@Test
+	public void importSkipCol() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "-,string,-,-,int");
+		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
+		Assert.assertEquals(2, rs.getMetaData().getColumnCount());
+		conn.close();
+	}
 	
 }

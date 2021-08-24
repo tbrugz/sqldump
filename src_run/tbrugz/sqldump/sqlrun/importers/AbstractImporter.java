@@ -153,6 +153,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	String recordDelimiter = "\r?\n";
 	String inputEncoding = defaultInputEncoding;
 	Integer columnCount;
+	Integer finalColumnCount;
 	Integer onErrorIntValue;
 	// XXX: columnCount should be 'int'??
 	
@@ -302,6 +303,8 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		//columnTypes = Utils.getStringListFromProp(prop, importerPrefix+Constants.SUFFIX_COLUMN_TYPES, ",");
 		if(columnTypes!=null) {
 			columnCount = columnTypes.size();
+			finalColumnTypes = getFinalColumnTypes(columnTypes);
+			finalColumnCount = finalColumnTypes.size();
 		}
 		//XXX add prop for columnCount?
 		mustSetupSQLStatement = true;
@@ -323,6 +326,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 			for(int i=0;i<columnCount;i++) {
 				columnTypes.add("string");
 			}
+			finalColumnTypes = getFinalColumnTypes(columnTypes);
 		}
 	}
 
@@ -706,14 +710,14 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
 			if(doCreateTable && !tableCreated) {
-				int colCount = columnCount!=null ? columnCount : parts.length; 
+				int colCount = finalColumnCount!=null ? finalColumnCount : parts.length; 
 				log.info("will create table [colCount=="+colCount+"]");
 				setupColumnTypes(colCount);
 				createTable();
 				tableCreated = true;
 			}
 			
-			setupSQLStatement(columnCount!=null ? columnCount : parts.length);
+			setupSQLStatement(finalColumnCount!=null ? finalColumnCount : parts.length);
 			mustSetupSQLStatement = false;
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
@@ -740,7 +744,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		IOCounter counter = countsByFailoverId.get(failoverId);
 
 		//TODO: what if parts.length for some lines is shorter than others? stmt will keep old value from longer line...
-		int columnsToPersist = columnCount!=null ? columnCount : parts.length; 
+		int columnsToPersist = finalColumnCount!=null ? finalColumnCount : parts.length; 
 		for(int i=0;i<columnsToPersist;i++) {
 			int index = i;
 			try {
@@ -786,8 +790,8 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 			}
 			//stmtStr = stmtStrPrep.replaceFirst("\\?", parts[i]);
 		}
-		if(stmtSetNull4MissingCols && columnCount!=null && parts.length < columnCount) {
-			for(int i=parts.length;i<columnCount;i++) {
+		if(stmtSetNull4MissingCols && finalColumnCount!=null && parts.length < finalColumnCount) {
+			for(int i=parts.length;i<finalColumnCount;i++) {
 				//log.debug("setNull "+(i+1));
 				stmtSetNull(i);
 			}
@@ -879,9 +883,9 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 			stmtSetNull(index);
 			return;
 		}
-		if(columnTypes!=null) {
-			if(columnTypes.size()>colTypeIndex) {
-				String colType = columnTypes.get(colTypeIndex);
+		if(finalColumnTypes!=null) {
+			if(finalColumnTypes.size()>colTypeIndex) {
+				String colType = finalColumnTypes.get(colTypeIndex);
 				//log.info("i: "+index+" ; type: "+colType+" ; value: '"+value+"'");
 				
 				if(colType.equals("int")) {
@@ -953,8 +957,9 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 				}
 				else {
 					//XXX throw?
-					log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
-					stmt.setString(index+1, value);
+					//log.warn("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"] (will use 'string' type)");
+					//stmt.setString(index+1, value);
+					throw new IllegalArgumentException("stmtSetValue: unknown columnTypes '"+colType+"' [#"+index+"]");
 				}
 				//XXX: more column types (boolean, byte, long, object?, null?, ...)
 				return;

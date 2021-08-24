@@ -160,6 +160,7 @@ public class XlsImporter extends BaseImporter {
 						for(int i=0;i<parts.size();i++) {
 							columnTypes.add(getType(parts.get(i)));
 						}
+						finalColumnTypes = getFinalColumnTypes(columnTypes);
 					}
 					if(doCreateTable && !tableCreated) {
 						log.info("create table: "+getCreateTableSql());
@@ -189,12 +190,17 @@ public class XlsImporter extends BaseImporter {
 					}
 
 					if(!rowError || !ignoreRowWithWrongNumberOfColumns) {
+						int bindPos = 0;
 						for(int i=0;i<columnTypes.size();i++) {
 							Object s = parts.get(i);
 							/*if(columnTypes.size()<=i) {
 								log.warn("coltypes="+columnTypes+" i:"+i);
 							}*/
-							setStmtMappedValue(stmt, columnTypes.get(i), i, s);
+							String colType = columnTypes.get(i);
+							if(!skipColumnType(colType)) {
+								setStmtMappedValue(stmt, colType, bindPos, s);
+								bindPos++;
+							}
 						}
 						//log.info("coltypes="+columnTypes+" sql="+getInsertSql()+" parts="+parts);
 						int updates = stmt.executeUpdate();
