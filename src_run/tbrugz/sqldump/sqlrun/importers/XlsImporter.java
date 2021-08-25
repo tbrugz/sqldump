@@ -29,7 +29,6 @@ public class XlsImporter extends BaseImporter {
 	static final String SUFFIX_SHEET_NUMBER = ".sheet-number";
 	static final String SUFFIX_SHEET_NAME = ".sheet-name";
 	static final String SUFFIX_1ST_LINE_IS_HEADER = ".1st-line-is-header";
-	static final String SUFFIX_1ST_LINE_AS_COLUMN_NAMES = ".1st-line-as-column-names";
 	
 	String importFile;
 	String sheetName;
@@ -42,7 +41,7 @@ public class XlsImporter extends BaseImporter {
 	boolean ignoreRowWithWrongNumberOfColumns = false; //XXX: add prop?
 	
 	static final String[] XLS_AUX_SUFFIXES = {
-		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME, SUFFIX_1ST_LINE_IS_HEADER, SUFFIX_1ST_LINE_AS_COLUMN_NAMES, Constants.SUFFIX_DO_CREATE_TABLE
+		SUFFIX_SHEET_NUMBER, SUFFIX_SHEET_NAME, SUFFIX_1ST_LINE_IS_HEADER, Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, Constants.SUFFIX_DO_CREATE_TABLE
 	};
 	
 	@Override
@@ -65,12 +64,12 @@ public class XlsImporter extends BaseImporter {
 		}*/
 		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, linesToSkip);
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
-		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
+		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
 		linesLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, linesLimit);
 		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
 
 		if(!hasHeaderLine && use1stLineAsColNames) {
-			log.warn("using '"+SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
+			log.warn("using '"+Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
 		}
 	}
 
@@ -142,7 +141,8 @@ public class XlsImporter extends BaseImporter {
 						for(int i=0;i<parts.size();i++) {
 							columnNames.add(String.valueOf(parts.get(i)));
 						}
-						//log.debug("colnames: "+columnNames);
+						finalColumnNames = new ArrayList<String>(columnNames);
+						log.info(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES+": colnames: "+columnNames);
 					}
 				}
 				else {
@@ -160,8 +160,13 @@ public class XlsImporter extends BaseImporter {
 						for(int i=0;i<parts.size();i++) {
 							columnTypes.add(getType(parts.get(i)));
 						}
-						finalColumnTypes = getFinalColumnTypes(columnTypes);
+						finalColumnTypes = new ArrayList<String>(columnTypes);
 					}
+					else {
+						finalColumnTypes = getFinalColumnTypes(columnTypes);
+						finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
+					}
+					
 					if(doCreateTable && !tableCreated) {
 						log.info("create table: "+getCreateTableSql());
 						createTable();

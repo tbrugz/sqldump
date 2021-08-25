@@ -198,6 +198,56 @@ public class XlsImportTest {
 	}
 
 	@Test
+	public void importWith1stLineAsColNames() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
+		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
+		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
+		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
+		Assert.assertEquals("NAME", rs.getMetaData().getColumnName(2));
+		Assert.assertEquals("SALARY", rs.getMetaData().getColumnName(5));
+		conn.close();
+	}
+
+	@Test
+	public void importWith1stLineAsColNamesAndSkip() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,-,-,int");
+		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
+		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
+		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
+		Assert.assertEquals("NAME", rs.getMetaData().getColumnName(2));
+		Assert.assertEquals("SALARY", rs.getMetaData().getColumnName(3));
+		conn.close();
+	}
+	
+	@Test
 	public void importSkipCol() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 

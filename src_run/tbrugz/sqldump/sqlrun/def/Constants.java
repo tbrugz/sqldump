@@ -21,6 +21,7 @@ public class Constants {
 	public static final String SUFFIX_LOG_EACH_X_OUTPUT_ROWS = ".log-each-x-output-rows";
 
 	//commom importer suffixes
+	public static final String SUFFIX_1ST_LINE_AS_COLUMN_NAMES = ".1st-line-as-column-names";
 	public static final String SUFFIX_COLUMN_TYPES = ".columntypes";
 	public static final String SUFFIX_DO_CREATE_TABLE = ".do-create-table";
 	public static final String SUFFIX_IMPORTFILE = ".importfile";

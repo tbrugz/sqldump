@@ -40,6 +40,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	String insertSQL = null;
 	List<String> columnNames;
 	List<String> columnTypes;
+	transient List<String> finalColumnNames;
 	transient List<String> finalColumnTypes;
 	transient List<Integer> filecol2tabcolMap = null;
 	boolean doCreateTable = false;
@@ -118,11 +119,11 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		if(insertSQL!=null) {
 			sql = getInsertSql(insertSQL);
 		}
-		else if(columnNames==null) {
+		else if(finalColumnNames==null) {
 			sql = getInsertSql(insertTable, finalColumnTypes.size());
 		}
 		else {
-			sql = getInsertSql(insertTable, finalColumnTypes.size(), columnNames);
+			sql = getInsertSql(insertTable, finalColumnTypes.size(), finalColumnNames);
 		}
 		setupColumnMapper();
 		return sql;
@@ -130,9 +131,9 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	
 	String getCreateTableSql() {
 		if(columnNames==null) {
-			columnNames = new ArrayList<String>();
+			finalColumnNames = new ArrayList<String>();
 		}
-		return getCreateTableSql(insertTable, columnNames, finalColumnTypes);
+		return getCreateTableSql(insertTable, finalColumnNames, finalColumnTypes);
 	}
 	
 	String getInsertSql(String insertSQL) throws SQLException {
@@ -368,4 +369,20 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return ret;
 	}
 
+	static List<String> getFinalColumnNames(List<String> columnTypes, List<String> columnNames) {
+		if(columnTypes==null) { return columnNames; }
+		if(columnNames==null) { return null; }
+		if(columnTypes.size()!=columnNames.size()) {
+			throw new IllegalArgumentException("columnTypes' size [#"+columnTypes.size()+";"+columnTypes+"] should be equal to columnNames' size [#"+columnNames.size()+";"+columnNames+"]");
+		}
+		List<String> ret = new ArrayList<String>();
+		for(int i=0;i<columnTypes.size();i++) {
+			String s = columnTypes.get(i);
+			if(!skipColumnType(s)) {
+				ret.add(columnNames.get(i));
+			}
+		}
+		return ret;
+	}
+	
 }
