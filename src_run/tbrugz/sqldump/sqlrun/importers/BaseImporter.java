@@ -44,6 +44,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	transient List<String> finalColumnTypes;
 	transient List<Integer> filecol2tabcolMap = null;
 	boolean doCreateTable = false;
+	boolean use1stLineAsColNames = false;
 
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
@@ -75,6 +76,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
 		finalColumnTypes = getFinalColumnTypes(columnTypes);
 		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
+		use1stLineAsColNames = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
 	}
 	
 	@Override

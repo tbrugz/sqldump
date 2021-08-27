@@ -37,7 +37,6 @@ public class XlsImporter extends BaseImporter {
 	long linesLimit = -1;
 	long inputLimit = -1;
 	boolean hasHeaderLine = true;
-	boolean use1stLineAsColNames = false;
 	boolean ignoreRowWithWrongNumberOfColumns = false; //XXX: add prop?
 	
 	static final String[] XLS_AUX_SUFFIXES = {
@@ -64,7 +63,6 @@ public class XlsImporter extends BaseImporter {
 		}*/
 		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, linesToSkip);
 		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
-		use1stLineAsColNames = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, use1stLineAsColNames);
 		linesLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, linesLimit);
 		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
 

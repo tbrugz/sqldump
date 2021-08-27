@@ -709,16 +709,37 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		}
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
+			boolean tabeJustCreated = false;
 			if(doCreateTable && !tableCreated) {
 				int colCount = finalColumnCount!=null ? finalColumnCount : parts.length; 
 				log.info("will create table [colCount=="+colCount+"]");
 				setupColumnTypes(colCount);
+
+				if(use1stLineAsColNames) {
+					// setup statement...
+					columnNames = new ArrayList<String>();
+					for(int i=0;i<parts.length;i++) {
+						columnNames.add(String.valueOf(parts[i]));
+					}
+					finalColumnTypes = getFinalColumnTypes(columnTypes);
+					//finalColumnNames = new ArrayList<String>(columnNames);
+					finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
+					log.info(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES+": colnames: "+columnNames);
+				}
+
 				createTable();
-				tableCreated = true;
+				tabeJustCreated = true;
 			}
 			
 			setupSQLStatement(finalColumnCount!=null ? finalColumnCount : parts.length);
 			mustSetupSQLStatement = false;
+			
+			if(tabeJustCreated) {
+				tableCreated = true;
+				if(use1stLineAsColNames) {
+					return null;
+				}
+			}
 		}
 		if(is1stloop && skipHeaderN>counter.input) {
 			counter.input++;
