@@ -361,5 +361,63 @@ public class CSVImportTest {
 		conn.close();
 	}
 	
+	@Test
+	public void importWithColNamesProperty() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+		// changing column names order:
+		PreparedStatement stmt = conn.prepareStatement(
+			"create table ins_csv (id integer, name varchar, salary integer, supervisor_id integer, dept_id integer)");
+		stmt.execute();
 
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_COLUMN_NAMES, "id, name, supervisor_id, dept_id, salary");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
+		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_csv"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_csv");
+		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
+		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
+		Assert.assertEquals("NAME", rs.getMetaData().getColumnName(2));
+		Assert.assertEquals("SALARY", rs.getMetaData().getColumnName(3));
+		Assert.assertEquals("SUPERVISOR_ID", rs.getMetaData().getColumnName(4));
+		Assert.assertEquals("DEPT_ID", rs.getMetaData().getColumnName(5));
+		conn.close();
+	}
+
+	@Test
+	public void importWithColNamesPropertyAndCreateTable() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_NAMES, "id, name, supervisor_id, dept_id, salary");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
+		
+		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_csv"));
+		ResultSet rs = conn.createStatement().executeQuery("select * from ins_csv");
+		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
+		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
+		Assert.assertEquals("NAME", rs.getMetaData().getColumnName(2));
+		Assert.assertEquals("SUPERVISOR_ID", rs.getMetaData().getColumnName(3));
+		Assert.assertEquals("DEPT_ID", rs.getMetaData().getColumnName(4));
+		Assert.assertEquals("SALARY", rs.getMetaData().getColumnName(5));
+		conn.close();
+	}
+	
 }

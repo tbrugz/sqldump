@@ -75,6 +75,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		//log.info("importerPrefix = "+importerPrefix+"; insertTable =  "+insertTable);
 		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
 		finalColumnTypes = getFinalColumnTypes(columnTypes);
+		columnNames = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_NAMES, ",");
+		//finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
 		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 		use1stLineAsColNames = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
 	}
@@ -134,6 +136,10 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	String getCreateTableSql() {
 		if(columnNames==null) {
 			finalColumnNames = new ArrayList<String>();
+		}
+		else {
+			//finalColumnNames = new ArrayList<String>(columnNames);
+			finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
 		}
 		return getCreateTableSql(insertTable, finalColumnNames, finalColumnTypes);
 	}
