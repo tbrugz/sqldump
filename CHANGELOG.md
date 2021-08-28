@@ -1,4 +1,27 @@
 
+sqldump 0.9.17 [2021-08-29]
+--------------
+- dbmodel: DBObjectType: added AGGREGATE
+- datadump: added MarkdownSyntax (.md)
+- dbmodel: Query: added 'namedParameterNames'
+- processor: SQLQueries: added '.from-dir' property
+- dbmd: DBMSFeatures: added 'sqlExplainPlanQuery()'
+- util: ConnectionUtil: added doCommit/doRollback/releaseSavepoint
+- dbmodel: added ParametrizedDBObject
+- dbmodel: added RemarkableDBObject
+- dbmd: DBMSFeatures: added 'sqlLengthFunctionByType' & 'sqlIsNullFunction'
+- dbmodel: Column: added type-check methods
+- util: ParametrizedProperties: added `_NULL_` placeholder for "coalesced" props
+- doc: updated project url (bitbucket -> github) (2020-10-14)
+- dbmodel: added ValidatableDBObject
+- sqlrun: assert: added `.row@<row-number>.col@<column-name>.eq` checks
+- sqlrun: Importer: added importStream()
+- sqlrun: tokenizer: added TokenizerUtil - removeSqlComents(), ...
+- sqlrun: tokenizer: added TokenizerUtil.getNamedParameters()
+- processor: SQLQueries: added named bind parameters
+- sqlrun: importer: allowing to skip columns
+
+
 sqldump 0.9.16 [2018-01]
 --------------
 - dbms: oracle: added prop suffix '.oracle.grab-executble-privileges'

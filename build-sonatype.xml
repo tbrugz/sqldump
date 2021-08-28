@@ -32,9 +32,9 @@
 
 	<!-- defined maven snapshots and staging repository id and url -->
 	<property name="maven-snapshots-repository-id" value="sonatype-nexus-snapshots" />
-	<property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots/" />
+	<property name="maven-snapshots-repository-url" value="https://oss.sonatype.org/content/repositories/snapshots" />
 	<property name="maven-staging-repository-id" value="sonatype-nexus-staging" />
-	<property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2/" />
+	<property name="maven-staging-repository-url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
 
 	<property name="maven-localRepositoryPath" value="${user.home}/.m2/repository" />
 	<property name="maven-remoteRepositoryUrl" value="https://repo1.maven.org/maven2/" />
