@@ -71,7 +71,7 @@ Usage examples can be found at [doc/examples](doc/examples).
 
 Dependencies
 ------------
-- java 6 or newer
+- java 7 or newer
 - [apache-commons-logging](http://commons.apache.org/logging/)
 - [log4j](http://logging.apache.org/log4j/1.2/) - optional but recommended
 - database-dependent JDBC jars ( e.g.
