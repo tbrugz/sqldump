@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.sql.rowset.CachedRowSet;
-
-import com.sun.rowset.CachedRowSetImpl;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 
 /*
  * java9: https://docs.oracle.com/javase/9/docs/api/javax/sql/rowset
@@ -100,7 +100,8 @@ public class CacheRowSetSyntax extends OutputStreamDumper implements DumpSyntaxB
 	//-----------------------------
 	
 	void dumpHeaderInternal(ResultSet rs) throws SQLException {
-		crs = new CachedRowSetImpl();
+		RowSetFactory factory = RowSetProvider.newFactory();
+		crs = factory.createCachedRowSet();
 		crs.populate(rs);
 	}
 

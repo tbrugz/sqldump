@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Properties;
 
 import javax.sql.rowset.WebRowSet;
-
-import com.sun.rowset.WebRowSetImpl;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 
 /**
  * Should be used isolated (single) from other syntaxes, as it reads all ResultSet
@@ -100,7 +100,8 @@ public class WebRowSetSingleSyntax extends AbstractDumpSyntax implements DumpSyn
 	}
 	
 	void dumpHeaderInternal(ResultSet rs) throws SQLException {
-		wrs = new WebRowSetImpl();
+		RowSetFactory factory = RowSetProvider.newFactory();
+		wrs = factory.createWebRowSet();
 		wrs.populate(rs);
 	}
 
