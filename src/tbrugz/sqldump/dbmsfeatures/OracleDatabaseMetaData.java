@@ -28,7 +28,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	}
 
 	/**
-	 * @param types avaiable table types: TABLE, SYNONYM, VIEW, MATERIALIZED VIEW, EXTERNAL TABLE
+	 * @param types available table types: TABLE, SYNONYM, VIEW, MATERIALIZED VIEW, EXTERNAL TABLE
 	 */
 	@Override
 	public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {

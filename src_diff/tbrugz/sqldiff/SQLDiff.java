@@ -687,7 +687,7 @@ public class SQLDiff implements Executor {
 				//XXX: option to send all SQLs from one diff in only one statement? no problem for h2...  
 				List<String> sqls = d.getDiffList();
 				if(sqls.size()==0) {
-					log.info("diff #"+diffCount+": no SQL diff avaiable for "+d.getChangeType()+" on '"+d.getNamedObject()+"': "+d);
+					log.info("diff #"+diffCount+": no SQL diff available for "+d.getChangeType()+" on '"+d.getNamedObject()+"': "+d);
 				}
 				else {
 				for(int i=0;i<sqls.size();i++) {
