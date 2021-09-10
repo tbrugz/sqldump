@@ -101,7 +101,7 @@ Building from sources (with ant & ivy)
 --------------------------------------
 - Run `git clone https://github.com/tbrugz/sqldump <project-dir>` (if not done already)
 - Run `ant prepare`
-- Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar http://repo2.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
+- Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
   or `ant ivy-install` (if not done already)
 - (*obsolete* - see `ivy-install`) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
   (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/master/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
@@ -112,7 +112,7 @@ Building from sources (with ant & ivy)
 - (*optional*) `ant test`
 - Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`) or `ant all`
 - (*optional*) Publish maven artifacts: Install Maven Ant tasks
-  (`curl -o $HOME/.ant/lib/maven-ant-tasks-2.1.3.jar http://central.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`)
+  (`curl -o $HOME/.ant/lib/maven-ant-tasks-2.1.3.jar https://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`)
   & `ant publish-mvn-files`
 
 
@@ -156,12 +156,12 @@ Artifact repositories
 ---------------------
 
 **Releases:**  
-- [maven central](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)  
+- [maven central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)  
 - [tbrugz/mvn-repo @ bitbucket](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
 
 **Snapshots:**  
 - [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/sqldump/)
-  - see [how to configure settings.xml](http://stackoverflow.com/a/7717234/616413)
+  - see [how to configure settings.xml](https://stackoverflow.com/a/7717234/616413)
 
 **Maven dependency config:**
 

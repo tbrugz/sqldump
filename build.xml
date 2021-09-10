@@ -126,7 +126,7 @@
 	<target name="ivy-install">
 		<mkdir dir="${user.home}/.ant/lib/"/>
 		<!--get src="http://www.apache.org/dist/ant/ivy/${ivy.install.version}/maven2/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/-->
-		<get src="http://central.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
+		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
 	</target>
 
 	<target name="generate-sources" depends="prepare">

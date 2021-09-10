@@ -7,7 +7,7 @@
 	
 	<property name="maven.home" value="${env.M2_HOME}" if:set="env.M2_HOME"/>
 
-	<!-- Download Maven Ant Tasks from http://maven.apache.org/ant-tasks/download.html and put it into ~/.ant/lib/ -->
+	<!-- Download Maven Ant Tasks from https://maven.apache.org/ant-tasks/download.cgi and put it into ~/.ant/lib/ -->
 	<!-- more info: https://docs.sonatype.org/display/Repository/Sonatype+OSS+Maven+Repository+Usage+Guide#SonatypeOSSMavenRepositoryUsageGuide-7c.DeploySnapshotsandStageReleaseswithAnt -->
 	
 	<property name="dist" location="dist" />
