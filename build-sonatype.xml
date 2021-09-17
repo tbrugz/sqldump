@@ -55,6 +55,7 @@
 			</fileset>
 		</path>
 		<property name="mvn.mainclass" value="org.codehaus.plexus.classworlds.launcher.Launcher" />
+		<!-- java17 needs (maven.version > 3.6.0) -->
 	</target>
 	
 	<target name="prepare-publish-sonatype" depends="info">

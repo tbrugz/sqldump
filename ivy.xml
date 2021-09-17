@@ -55,14 +55,30 @@
 		<dependency org="com.googlecode.java-diff-utils" name="diffutils" rev="1.3.0" conf="optional->default"/>
 
 		<!-- test deps -->
-		<dependency org="junit" name="junit" rev="4.12" conf="test->default"/>
+		<dependency org="junit" name="junit" rev="4.13.2" conf="test->default"/>
+		<dependency org="org.hamcrest" name="hamcrest-core" rev="1.3" conf="test->default"/>
 		<dependency org="org.apache.derby" name="derby" rev="10.12.1.1" conf="test->default"/>
 		<dependency org="org.apache.derby" name="derbyclient" rev="10.12.1.1" conf="test->default"/>
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.3.6" conf="test->default"/>
 		<dependency org="com.h2database" name="h2" rev="1.3.174" conf="test->default"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1" conf="test->default"/>
+		<!-- jaxb 2.3.0.1: error on java16+ -->
+		<!--
 		<dependency org="com.sun.xml.bind" name="jaxb-core" rev="2.3.0.1" conf="test->default"/>
 		<dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.3.0.1" conf="test->default"/>
+		-->
+		<!-- java8+ see https://stackoverflow.com/a/61008884/616413 -->
+		<!--
+		<dependency org="com.sun.xml.bind" name="jaxb-core" rev="3.0.2" conf="test->default"/>
+		<dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.3.1" conf="test->default"/>
+		-->
+		<!--
+		<dependency org="org.glassfish.jaxb" name="jaxb-core" rev="3.0.2" conf="test->default"/>
+		<dependency org="org.glassfish.jaxb" name="jaxb-runtime" rev="3.0.2" conf="test->default"/>
+		-->
+		<dependency org="jakarta.xml.bind" name="jakarta.xml.bind-api" rev="2.3.3" conf="test->default"/>
+		<dependency org="com.sun.xml.bind" name="jaxb-impl" rev="2.3.3" conf="test->default"/>
+
 		<!--
 		mondrian 3.6.0-3.6.6 seems to cause "circular dependency warning": xom#xom;1.1->jaxen#jaxen;1.1-beta-8->xom#xom;1.0b3
 		mondrian 3.6.7 needs more explicit dependencies
