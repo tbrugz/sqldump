@@ -13,9 +13,9 @@
 	<property name="dist" location="dist" />
 	<property name="artifactId" value="${ivy.module}" />
 
-	<property name="maven-install-plugin.version" value="2.3.1" />
+	<property name="maven-install-plugin.version" value="2.5.2" />
 	<property name="maven-deploy-plugin.version" value="2.6" />
-	<property name="maven-gpg-plugin.version" value="1.3" />
+	<property name="maven-gpg-plugin.version" value="1.6" />
 	<!--property file="${src}/sqldump-version.properties"/-->
 
 	<!-- define Maven coordinates -->
@@ -85,7 +85,7 @@
 	</target>
 	
 	<target name="mvn-install-file-jar" description="install jar file">
-		<artifact:mvn mavenHome="${maven.home}" fork="true">
+		<artifact:mvn mavenHome="${maven.home}" fork="true" failonerror="true">
 			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
@@ -98,7 +98,7 @@
 	</target>
 
 	<target name="mvn-install-file-sources-jar" description="install sources jar file">
-		<artifact:mvn mavenHome="${maven.home}" fork="true">
+		<artifact:mvn mavenHome="${maven.home}" fork="true" failonerror="true">
 			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
@@ -112,7 +112,7 @@
 	</target>
 
 	<target name="mvn-install-file-pom" description="install pom file">
-		<artifact:mvn mavenHome="${maven.home}" fork="true">
+		<artifact:mvn mavenHome="${maven.home}" fork="true" failonerror="true">
 			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="org.apache.maven.plugins:maven-install-plugin:${maven-install-plugin.version}:install-file"/>
 			<arg value="-DpomFile=${maven-pom}" />
@@ -127,7 +127,7 @@
 
 	<!-- XXX not working -->
 	<target name="mvn-install" depends="info" description="install maven artifacts">
-		<artifact:mvn mavenHome="${maven.home}" fork="true">
+		<artifact:mvn mavenHome="${maven.home}" fork="true" failonerror="true">
 			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
 			<arg value="install"/>
 			<!--arg value="-X" />
