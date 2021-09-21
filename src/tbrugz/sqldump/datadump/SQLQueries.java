@@ -398,7 +398,7 @@ public class SQLQueries extends AbstractSQLProc {
 				String rpath = rpaths.get(i);
 				Properties qp = getQueryProperties(rid);
 				
-				InputStream is = getResourceAsStream(rpath);
+				InputStream is = IOUtil.getResourceAsStream(rpath);
 				String sql = IOUtil.readFromInputStream(is, rpath);
 				if(sql==null) {
 					log.warn("Error reading resource '"+rpath+"' [id="+rid+"]");
@@ -461,11 +461,13 @@ public class SQLQueries extends AbstractSQLProc {
 		return null;
 	}
 	
+	/*
 	protected InputStream getResourceAsStream(String path) {
 		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
 		InputStream is = classloader.getResourceAsStream(path);
 		return is;
 	}
+	*/
 	
 	Properties getQueryProperties(String qid) {
 		Properties ret = new PropertiesWithoutNPE();

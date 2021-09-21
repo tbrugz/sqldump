@@ -107,8 +107,8 @@
 	</path>
 
 	<target name="prepare" description="prepares build">
-		<echo>java.version: ${java.version}</echo> 
-		<echo>ant.version = ${ant.version}</echo>
+		<echo>java.version: ${java.version}</echo>
+		<echo>ant.version: ${ant.version}</echo>
 		<mkdir dir="${bin.dir}"/>
 		<mkdir dir="${bin.test.dir}"/>
 		<mkdir dir="${lib.dir}"/>

@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -164,7 +165,9 @@ public class IOUtil {
 	}
 	
 	public static String readFromResource(String resourcePath) {
-		return readFromResource(resourcePath, Thread.currentThread().getContextClassLoader());
+		InputStream is = getResourceAsStream(resourcePath);
+		return readFromInputStream(is, resourcePath);
+		//return readFromResource(resourcePath, Thread.currentThread().getContextClassLoader());
 	}
 	
 	public static String readFromResource(String resourcePath, ClassLoader classloader) {
@@ -187,6 +190,26 @@ public class IOUtil {
 		}
 		
 		return null;
+	}
+
+	// see: https://github.com/quarkusio/quarkus/issues/2531
+	public static URL getResource(String path) {
+		URL url = IOUtil.class.getResource(path);
+		if(url==null) {
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			url = classloader.getResource(path);
+		}
+		return url;
+	}
+
+	// see: https://github.com/quarkusio/quarkus/issues/2531
+	public static InputStream getResourceAsStream(String path) {
+		InputStream is = IOUtil.class.getResourceAsStream(path);
+		if(is==null) {
+			ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+			is = classloader.getResourceAsStream(path);
+		}
+		return is;
 	}
 	
 	/*

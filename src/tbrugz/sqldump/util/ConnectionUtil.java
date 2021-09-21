@@ -168,7 +168,7 @@ public class ConnectionUtil {
 		}
 		else {
 			try {
-				Class.forName(driverClass);
+				Utils.loadClass(driverClass);
 			}
 			catch(ClassNotFoundException e) {
 				log.warn("class not found: "+driverClass+" [exception: "+e+"]");

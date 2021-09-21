@@ -9,6 +9,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
 public class DumpSyntaxRegistry {
@@ -25,7 +26,7 @@ public class DumpSyntaxRegistry {
 	
 	static void init() throws IOException {
 		Properties prop = new Properties();
-		prop.load(DumpSyntaxRegistry.class.getResourceAsStream(syntaxesProperties));
+		prop.load(IOUtil.getResourceAsStream(syntaxesProperties));
 		List<String> classes = Utils.getStringListFromProp(prop, PROP_CLASSES, ",");
 		loadClasses(classes);
 		initted = true;
@@ -88,7 +89,7 @@ public class DumpSyntaxRegistry {
 	}
 	
 	public static void setSyntaxesResource(String syntaxesResource) throws IOException {
-		URL u = DumpSyntaxRegistry.class.getResource(syntaxesResource);
+		URL u = IOUtil.getResource(syntaxesResource);
 		if(u!=null) {
 			syntaxesProperties = syntaxesResource;
 			clearSyntaxes();

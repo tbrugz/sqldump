@@ -285,7 +285,7 @@ public final class DBMSResources {
 		if(dbSpecificFeaturesClass!=null) {
 			//XXX: call Utils.getClassByName()
 			try {
-				Class<?> c = Class.forName(dbSpecificFeaturesClass);
+				Class<?> c = Utils.loadClass(dbSpecificFeaturesClass);
 				feats = (DBMSFeatures) c.getConstructor().newInstance();
 				
 				feats.setId(dbid);

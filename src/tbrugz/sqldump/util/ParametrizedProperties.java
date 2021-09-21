@@ -89,7 +89,7 @@ public class ParametrizedProperties extends Properties {
 				}
 				loadedPropFiles.put(ff, false);
 				try {
-					InputStream is = ParametrizedProperties.class.getResourceAsStream(f);
+					InputStream is = IOUtil.getResourceAsStream(f);
 					log.debug("loading @include resource: "+f);
 					this.load(is);
 					log.info("loaded @include resource: "+f);

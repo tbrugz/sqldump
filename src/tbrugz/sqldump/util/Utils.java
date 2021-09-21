@@ -482,6 +482,12 @@ public class Utils {
 	public static Object getClassInstance(Class<?> c) {
 		try {
 			return c.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException |
+			InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			log.warn("Exception instantiating class: " + c.getName() + " ; Exception: "+ e);
+			log.debug("Exception instantiating class: " + c.getName(), e);
+		}
+		/*
 		} catch (InstantiationException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
@@ -495,6 +501,7 @@ public class Utils {
 		} catch (SecurityException e) {
 			e.printStackTrace();
 		}
+		*/
 		return null;
 	}
 
@@ -507,7 +514,7 @@ public class Utils {
 			try {
 				String prepend = (pkg!=null&&pkg.length()>0) ? pkg+"." : "";
 				String classToFind = prepend+className;
-				Class<?> c = Class.forName(classToFind);
+				Class<?> c = loadClass(classToFind);
 				return c;
 			} catch (ClassNotFoundException e) {
 				if(ex==null) { ex = e; }
@@ -518,6 +525,16 @@ public class Utils {
 		log.warn("error loading class: "+className+" [ex: "+ex+"]");
 		log.debug("error loading class: "+className+" [ex: "+ex+"]",ex);
 		return null;
+	}
+
+	// see: https://github.com/quarkusio/quarkus/issues/2809
+	public static Class<?> loadClass(String className) throws ClassNotFoundException {
+		try {
+			return Class.forName(className);
+		}
+		catch(ClassNotFoundException | NoClassDefFoundError e) {
+			return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+		}
 	}
 	
 	public static int deleteDirRegularContents(File f) {
