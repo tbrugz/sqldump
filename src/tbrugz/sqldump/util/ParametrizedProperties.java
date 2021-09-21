@@ -122,7 +122,7 @@ public class ParametrizedProperties extends Properties {
 	}
 
 	String getProperty(String key, boolean replaceNullPlaceholder) {
-		if(log.isDebugEnabled()) { logKey(key); }
+		//if(log.isDebugEnabled()) { logKey(key); }
 		
 		String s = null;
 		// precedence: system props, env vars, (file) properties
