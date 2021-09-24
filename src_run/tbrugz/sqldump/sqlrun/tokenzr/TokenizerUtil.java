@@ -13,6 +13,10 @@ public class TokenizerUtil {
 			this.name = name;
 			this.position = position;
 		}
+
+		public String toString() {
+			return "QueryParameter["+name+";"+position+"]";
+		}
 	}
 
 	public static boolean containsSqlStatmement(String sql) {
@@ -138,12 +142,20 @@ public class TokenizerUtil {
 								cp = sql.charAt(++i);
 							}
 						}
-						QueryParameter qp = new QueryParameter(sb.toString(), pos);
-						ret.add(qp);
+						String pName = sb.toString();
+						if(pName.length()>0) {
+							QueryParameter qp = new QueryParameter(pName, pos);
+							ret.add(qp);
+							//System.out.println("named: "+qp);
+						}
+						else {
+							// ignore empty parameter
+						}
 					}
 					else if(c=='?') {
 						// positional param?
 						countPositionalParameters++;
+						//System.out.println("positional: "+i);
 					}
 					break;
 				}
@@ -179,6 +191,7 @@ public class TokenizerUtil {
 		}
 
 		if(countPositionalParameters>0 && ret.size()>0) {
+			//System.out.println(">> sql:\n"+sql);
 			throw new IllegalStateException(
 				"can't have both positional [#"+countPositionalParameters+"] "+
 				"and named [#"+ret.size()+"] parameters in the same query"
