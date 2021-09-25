@@ -62,6 +62,7 @@ public class Query extends View implements ParametrizedDBObject {
 	/**
 	 * getNamedParameterNames - should be null or length == getParameterCount() (even if names are repeated)
 	 */
+	@Override
 	public List<String> getNamedParameterNames() {
 		return namedParameterNames;
 	}

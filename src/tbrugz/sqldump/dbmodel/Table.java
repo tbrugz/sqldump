@@ -407,4 +407,9 @@ public class Table extends DBObject implements Relation {
 		this.foreignKeys = foreignKeys;
 	}
 	
+	@Override
+	public List<String> getNamedParameterNames() {
+		return null;
+	}
+
 }

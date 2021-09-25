@@ -316,4 +316,10 @@ public class View extends DBObject implements Relation {
 	public String getAfterCreateScript() {
 		return null;
 	}*/
+
+	@Override
+	public List<String> getNamedParameterNames() {
+		return null;
+	}
+
 }

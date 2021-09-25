@@ -50,6 +50,8 @@ public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObje
 	public Integer getParameterCount();
 
 	public List<String> getParameterTypes();
+
+	public List<String> getNamedParameterNames();
 	
 	public String getRemarksSnippet(boolean dumpSchemaName);
 	
