@@ -22,6 +22,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.sqldump.util.XMLSerializer;
 
@@ -147,7 +148,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 			}
 		}
 		else if(resourceIn!=null) {
-			is = JAXBSchemaXMLSerializer.class.getResourceAsStream(resourceIn);
+			is = IOUtil.getResourceAsStream(resourceIn);
 			inputDescription = resourceIn;
 			if(is==null) {
 				String message = "resource not found: "+resourceIn;

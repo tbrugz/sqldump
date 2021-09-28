@@ -19,6 +19,7 @@ import tbrugz.sqldump.def.AbstractFailable;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.util.IOUtil;
 
 public class SchemaSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
 
@@ -41,7 +42,7 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 			fileInputStr = prop.getProperty(PROP_SERIALIZATION_INRESOURCE);
 			if(fileInputStr!=null) {
 				filenameIn = fileInputStr;
-				fileInput = SchemaSerializer.class.getResourceAsStream(fileInputStr);
+				fileInput = IOUtil.getResourceAsStream(fileInputStr);
 			}
 		}
 		else {

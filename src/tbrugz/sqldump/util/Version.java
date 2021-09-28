@@ -13,7 +13,7 @@ public class Version {
 	
 	static {
 		try {
-			prop.load(Version.class.getResourceAsStream("/sqldump-version.properties"));
+			prop.load(IOUtil.getResourceAsStream("/sqldump-version.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

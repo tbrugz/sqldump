@@ -136,7 +136,7 @@ public class CLIProcessor {
 	
 	static boolean loadResource(Properties p, String propResource) {
 		log.info("loading properties resource: "+propResource);
-		InputStream propIS = CLIProcessor.class.getResourceAsStream(propResource);
+		InputStream propIS = IOUtil.getResourceAsStream(propResource);
 		if(propIS==null) {
 			log.warn("properties resource '"+propResource+"' does not exist");
 			return false;

@@ -11,6 +11,7 @@ import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -32,7 +33,7 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 		//load properties
 		Properties prop = new Properties();
 		try {
-			prop.load(RDFAbstractSyntax.class.getResourceAsStream("/dumpsyntax-rdf.properties"));
+			prop.load(IOUtil.getResourceAsStream("/dumpsyntax-rdf.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

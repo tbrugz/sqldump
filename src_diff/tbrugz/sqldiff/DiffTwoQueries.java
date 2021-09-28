@@ -26,6 +26,7 @@ import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -69,7 +70,7 @@ public class DiffTwoQueries implements Executor {
 	public void doMain(String[] args, Properties properties) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		try {
 			Properties propDefaults = new Properties();
-			propDefaults.load(DiffTwoQueries.class.getResourceAsStream(PROPERTIES_DEFAULTS_FILENAME));
+			propDefaults.load(IOUtil.getResourceAsStream(PROPERTIES_DEFAULTS_FILENAME));
 			prop.putAll(propDefaults);
 		} catch (IOException e) {
 			log.warn("Error loading properties defaults resource: "+PROPERTIES_DEFAULTS_FILENAME);
