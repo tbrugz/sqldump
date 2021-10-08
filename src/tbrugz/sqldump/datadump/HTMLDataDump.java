@@ -76,8 +76,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected List<Class<?>> finalColTypes = new ArrayList<Class<?>>();
 	
 	// pivot properties
-	protected int onRowsColCount = 0;
-	protected int onColsColCount = 0;
+	protected PivotInfo pivotInfo = null;
 	protected String colSep = null;
 	protected String colValSep = null;
 	protected String colSepPattern = null;
@@ -133,17 +132,20 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	}
 
 	public void procPivotProperties(Properties prop) {
-		onRowsColCount = 0;
-		onColsColCount = 0;
+		int onRowsColCount = 0;
+		int onColsColCount = 0;
 		String onrows = prop.getProperty(PROP_PIVOT_ONROWS);
 		String oncols = prop.getProperty(PROP_PIVOT_ONCOLS);
+		//if(onrows!=null || oncols!=null) {
 		if(onrows!=null) {
 			onRowsColCount = onrows.split(",").length;
 		}
 		if(oncols!=null) {
 			onColsColCount = oncols.split(",").length;
 		}
-		if(isPivotResultSet()) {
+		pivotInfo = new PivotInfo(onColsColCount, onRowsColCount);
+		//}
+		if(pivotInfo.isPivotResultSet()) {
 			colSep = prop.getProperty(PROP_PIVOT_COLSEP, PivotResultSet.COLS_SEP);
 			colValSep = prop.getProperty(PROP_PIVOT_COLVALSEP, PivotResultSet.COLVAL_SEP);
 			colSepPattern = Pattern.quote(colSep);
@@ -151,9 +153,11 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		}
 	}
 	
+	/*
 	public boolean isPivotResultSet() {
 		return onRowsColCount>0 || onColsColCount>0;
 	}
+	*/
 	
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
@@ -238,10 +242,10 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	protected void addTableHeaderRows(StringBuilder sb) {
 		//System.out.println("[1:beforeguess] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 		boolean dumpedAsLeast1row = false;
-		if(isPivotResultSet()) {
-			guessPivotCols(); //guess cols/rows, since measures may be present or not...
+		if(pivotInfo.isPivotResultSet()) {
+			DataDumpUtils.guessPivotCols(finalColNames, colSepPattern, colValSepPattern); //guess cols/rows, since measures may be present or not...
 			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
-			for(int cc=0;cc<onColsColCount;cc++) {
+			for(int cc=0;cc<pivotInfo.onColsColCount;cc++) {
 				StringBuilder sbrow = new StringBuilder();
 				String colname = null;
 				boolean measuresRow = false;
@@ -249,9 +253,9 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 					String[] parts = finalColNames.get(i).split(colSepPattern);
 					
 					if(parts.length>cc) {
-						if(i<onRowsColCount) {
+						if(i<pivotInfo.onRowsColCount) {
 							sbrow.append("<th class=\"blank\""+
-									(i<onRowsColCount?" dimoncol=\"true\"":"")+
+									(i<pivotInfo.onRowsColCount?" dimoncol=\"true\"":"")+
 									"/>");
 							measuresRow = true;
 							//colname = DataDumpUtils.xmlEscapeText(parts[cc]);
@@ -275,8 +279,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 							}
 						}
 					}
-					else if(cc+1==onColsColCount) {
-						if(i<onRowsColCount) {
+					else if(cc+1==pivotInfo.onColsColCount) {
+						if(i<pivotInfo.onRowsColCount) {
 							sbrow.append("<th dimoncol=\"true\" measure=\"true\">"+finalColNames.get(i)+"</th>");
 							measuresRow = true;
 						}
@@ -286,7 +290,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 					}
 					else {
 						sbrow.append("<th class=\"blank\""+
-								(i<onRowsColCount?" dimoncol=\"true\"":"")+
+								(i<pivotInfo.onRowsColCount?" dimoncol=\"true\"":"")+
 								"/>");
 					}
 				}
@@ -314,6 +318,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		sb.append("</tr>\n");
 	}
 	
+	/*
 	protected void guessPivotCols() {
 		//int prevCC = onColsColCount;
 		int prevRC = onRowsColCount;
@@ -347,6 +352,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 			onRowsColCount = prevRC;
 		}
 	}
+	*/
 	
 	protected void appendStyleNumericAlignRight(StringBuilder sb) {
 		List<String> styleSelector = new ArrayList<String>();
@@ -408,7 +414,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 				//sb.append( "<td" + (origVal==null?" null=\"true\"":"") + ">"+ value +"</td>");
 				sb.append("<td"
 						+(origVal==null?" null=\"true\"":"")
-						+(i<onRowsColCount?" dimoncol=\"true\"":"")
+						+(i<getOnRowsColCount()?" dimoncol=\"true\"":"")
 						+(dumpColType?" coltype=\""+ctype.getSimpleName()+"\"":"")
 						+((dumpIsNumeric && DataDumpUtils.isNumericType(ctype))?" numeric=\"true\"":"")
 						+">"+ value +"</td>");
@@ -511,8 +517,9 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		dd.dumpColElement = this.dumpColElement;
 		dd.dumpStyleNumericAlignRight = this.dumpStyleNumericAlignRight;
 		dd.innerTable = this.innerTable;
-		dd.onColsColCount = this.onColsColCount;
-		dd.onRowsColCount = this.onRowsColCount;
+		dd.pivotInfo = this.pivotInfo;
+		//dd.onColsColCount = this.onColsColCount;
+		//dd.onRowsColCount = this.onRowsColCount;
 		//dd.padding = this.padding;
 		dd.prepend = this.prepend;
 		dd.xpendInnerTable = this.xpendInnerTable;
@@ -538,6 +545,10 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		catch(CloneNotSupportedException e) {
 			throw new RuntimeException(e);
 		}
+	}
+	
+	public int getOnRowsColCount() {
+		return pivotInfo.onRowsColCount;
 	}
 
 }

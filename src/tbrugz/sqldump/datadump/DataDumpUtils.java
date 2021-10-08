@@ -21,10 +21,12 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DumpSyntax.PivotInfo;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.resultset.RSMetaDataTypedAdapter;
 import tbrugz.sqldump.resultset.ResultSetArrayAdapter;
 import tbrugz.sqldump.resultset.ResultSetProjectionDecorator;
+import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.util.CategorizedOut;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -579,6 +581,44 @@ public class DataDumpUtils {
 			return true;
 		}
 		return false; 
+	}
+	
+	public static PivotInfo guessPivotCols(List<String> colNames) {
+		String colSepPattern = Pattern.quote(PivotResultSet.COLS_SEP);
+		String colValSepPattern = Pattern.quote(PivotResultSet.COLVAL_SEP);
+		return guessPivotCols(colNames, colSepPattern, colValSepPattern);
+	}
+	
+	public static PivotInfo guessPivotCols(List<String> colNames, String colSepPattern, String colValSepPattern) {
+		int onColsColCount = 0;
+		int onRowsColCount = 0;
+		for(int i=0;i<colNames.size();i++) {
+			int l = colNames.get(i).split(colSepPattern).length;
+			if(l>1) {
+				if(l>onColsColCount) {
+					onColsColCount = l;
+					onRowsColCount = i;
+					break;
+				}
+			}
+		}
+		
+		if(onColsColCount==0 && onRowsColCount==0) {
+			for(int i=0;i<colNames.size();i++) {
+				int l2 = colNames.get(i).split(colValSepPattern).length;
+				if(l2>1) {
+					onColsColCount = 1;
+					onRowsColCount = i;
+					break;
+				}
+			}
+		}
+		
+		if(onColsColCount==0 && onRowsColCount==0) {
+			// when onColsColCount==0, "guess" is not effective
+			return null;
+		}
+		return new PivotInfo(onColsColCount, onRowsColCount);
 	}
 	
 }

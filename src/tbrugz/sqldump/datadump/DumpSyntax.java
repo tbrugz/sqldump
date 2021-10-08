@@ -236,5 +236,19 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 		ds.floatFormatter = this.floatFormatter;
 		ds.nullValueStr = this.nullValueStr;
 	}
+	
+	public static class PivotInfo {
+		public final int onColsColCount;
+		public final int onRowsColCount;
+		
+		public PivotInfo(int onColsColCount, int onRowsColCount) {
+			this.onColsColCount = onColsColCount;
+			this.onRowsColCount = onRowsColCount;
+		}
+		
+		public boolean isPivotResultSet() {
+			return onRowsColCount>0 || onColsColCount>0;
+		}
+	}
 
 }
