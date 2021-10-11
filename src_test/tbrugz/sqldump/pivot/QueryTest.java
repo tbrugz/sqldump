@@ -26,6 +26,7 @@ import tbrugz.sqldump.datadump.HTMLDataDump;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet;
 import tbrugz.sqldump.resultset.pivot.PivotResultSet.Aggregator;
 import tbrugz.sqldump.sqlrun.QueryDumper;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
 public class QueryTest {
@@ -416,6 +417,15 @@ public class QueryTest {
 		Document doc = DataDumpTest.parseXML(file);
 		Node n = doc.getChildNodes().item(0);
 		Assert.assertEquals(2+2, DataDumpTest.countElementsOfType(n.getChildNodes(),"tr"));
+
+		String content = IOUtil.readFromFile(file);
+		String expected = "<table class=\"datadump\">\r\n"
+		+ "	<tr colname=\"B\" measuresrow=\"true\"><th class=\"blank\" dimoncol=\"true\"/><th>false</th><th>false</th><th>true</th><th>true</th></tr>\r\n"
+		+ "	<tr colname=\"C\" measuresrow=\"true\"><th dimoncol=\"true\" measure=\"true\">A</th><th>false</th><th>true</th><th>false</th><th>true</th></tr>\r\n"
+		+ "	<tr><td dimoncol=\"true\">false</td><td>false</td><td>false</td><td>false</td><td>false</td></tr>\r\n"
+		+ "	<tr><td dimoncol=\"true\">false</td><td>false</td><td>false</td><td>false</td><td>false</td></tr>\r\n"
+		+ "</table>";
+		Assert.assertEquals(DataDumpTest.normalizeHtml( expected ), DataDumpTest.normalizeHtml( content ));
 	}
 
 	@Test

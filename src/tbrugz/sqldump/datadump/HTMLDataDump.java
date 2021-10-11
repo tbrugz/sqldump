@@ -230,10 +230,10 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 			}
 			sb.append(nl()+"\t</colgroup>");
 		}
-		sb.append("\n");
 		//XXX: add thead?
 		
 		addTableHeaderRows(sb);
+		sb.append("\n");
 		
 		//XXX: add tbody?
 		out(sb.toString(), fos);

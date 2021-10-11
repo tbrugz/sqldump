@@ -958,6 +958,10 @@ public class DataDumpTest {
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		return dBuilder.parse(f);
 	}
+	
+	public static String normalizeHtml(String s) {
+		return s.replaceAll("\\s+", " ");
+	}
 
 	/*static int countElements(NodeList nl) {
 		int count = 0;

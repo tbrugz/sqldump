@@ -20,19 +20,19 @@ public class ParametrizedPropertiesTest {
 	
 	@Test
 	public void testP1() throws IOException {
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p1.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p1.properties"));
 		Assert.assertEquals("value1", pp.getProperty("id1"));
 	}
 
 	@Test
 	public void testP2Include() throws IOException {
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p2.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p2.properties"));
 		Assert.assertEquals("value1", pp.getProperty("id1"));
 	}
 
 	@Test
 	public void testP3() throws IOException {
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p3.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p3.properties"));
 		Assert.assertEquals("value2", pp.getProperty("id1"));
 	}
 
@@ -40,7 +40,7 @@ public class ParametrizedPropertiesTest {
 	public void testP3SystemProperties() throws IOException {
 		ParametrizedProperties.setUseSystemProperties(true);
 		System.setProperty("id1", "system");
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p3.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p3.properties"));
 		Assert.assertEquals("system", pp.getProperty("id1"));
 		Assert.assertEquals("id2.value", pp.getProperty("id2"));
 	}
@@ -48,21 +48,21 @@ public class ParametrizedPropertiesTest {
 	@Test
 	public void testP4IncludeWithBaseDir() throws IOException {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p4.properties"));
 		Assert.assertEquals("value1", pp.getProperty("id1"));
 	}
 
 	@Test
 	public void testP4GetEnv() throws IOException {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p4.properties"));
 		Assert.assertTrue("JAVA_HOME env should be set: "+pp.getProperty("envtest"), !pp.getProperty("envtest").startsWith("${"));
 	}
 
 	@Test
 	public void testP4Coalesce() throws IOException {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p4.properties"));
 		Assert.assertEquals("aaa", pp.getProperty("prop3"));
 		Assert.assertEquals("aaa", pp.getProperty("prop4"));
 		Assert.assertEquals("bbb", pp.getProperty("prop5"));
@@ -74,7 +74,7 @@ public class ParametrizedPropertiesTest {
 	@Test
 	public void testP4NullPlaceholder() throws IOException {
 		pp.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, path);
-		pp.load(ParametrizedProperties.class.getResourceAsStream(path+"p4.properties"));
+		pp.load(IOUtil.getResourceAsStream(path+"p4.properties"));
 
 		Assert.assertEquals(null, pp.getProperty("null"));
 		Assert.assertEquals(null, pp.getProperty("propNull1"));
