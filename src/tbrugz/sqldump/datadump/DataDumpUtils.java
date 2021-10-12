@@ -614,11 +614,135 @@ public class DataDumpUtils {
 			}
 		}
 		
-		if(onColsColCount==0 && onRowsColCount==0) {
+		/*if(onColsColCount==0 && onRowsColCount==0) {
 			// when onColsColCount==0, "guess" is not effective
 			return null;
-		}
+		}*/
 		return new PivotInfo(onColsColCount, onRowsColCount);
+	}
+	
+	public static class PivotHeaderRow {
+		String colname = null;
+		boolean measuresRow = false;
+		List<PivotHeaderCol> rows = new ArrayList<>();
+	}
+	
+	public static class PivotHeaderCol {
+		String collabel = null;
+		boolean blank = false;
+		boolean dimoncol = false;
+		boolean measure = false;
+		boolean isNull = false;
+	}
+	
+	protected static List<PivotHeaderRow> getPivotedTableHeaderRows(PivotInfo pivotInfo, List<String> colNames) {
+		String colSepPattern = Pattern.quote(PivotResultSet.COLS_SEP);
+		String colValSepPattern = Pattern.quote(PivotResultSet.COLVAL_SEP);
+		return getPivotedTableHeaderRows(pivotInfo, colNames, colSepPattern, colValSepPattern, PivotResultSet.NULL_PLACEHOLDER);
+	}
+	
+	protected static List<PivotHeaderRow> getPivotedTableHeaderRows(PivotInfo pivotInfo, List<String> colNames, String colSepPattern, String colValSepPattern, String nullPlaceholder) {
+		//String nullPlaceholderReplacer) {
+		//StringBuilder sb = new StringBuilder();
+		List<PivotHeaderRow> ret = new ArrayList<>();
+		
+		//System.out.println("[1:beforeguess] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		//boolean dumpedAsLeast1row = false;
+		if(pivotInfo.isPivotResultSet()) {
+			//DataDumpUtils.guessPivotCols(colNames, colSepPattern, colValSepPattern); //guess cols/rows, since measures may be present or not...
+			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+			for(int cc=0;cc<pivotInfo.onColsColCount;cc++) {
+				PivotHeaderRow prow = new PivotHeaderRow();
+				//StringBuilder sbrow = new StringBuilder();
+				//String colname = null;
+				//String collabel = null;
+				//boolean measuresRow = false;
+				//boolean blank = false;
+				//boolean dimoncol = false;
+				//boolean measure = false;
+				//boolean isNull = false;
+				for(int i=0;i<colNames.size();i++) {
+					PivotHeaderCol phc = new PivotHeaderCol();
+					String[] parts = colNames.get(i).split(colSepPattern);
+					
+					if(parts.length>cc) {
+						if(i<pivotInfo.onRowsColCount) {
+							/*sbrow.append("<th class=\"blank\""+
+									(i<pivotInfo.onRowsColCount?" dimoncol=\"true\"":"")+
+									"/>");*/
+							prow.measuresRow = true;
+							phc.blank = true;
+							phc.dimoncol = true;
+							//colname = DataDumpUtils.xmlEscapeText(parts[cc]);
+						}
+						else {
+							//split...
+							String[] p2 = parts[cc].split(colValSepPattern);
+							if(p2.length>1) {
+								String thValue = p2[1];
+								//String nullAttrib = "";
+								if(nullPlaceholder.equals(thValue)) {
+									//thValue = nullPlaceholderReplacer;
+									//nullAttrib = " null=\"true\"";
+									phc.isNull = true;
+								}
+								else {
+									phc.collabel = thValue;
+								}
+								//sbrow.append("<th"+nullAttrib+">"+thValue+"</th>");
+								prow.colname = DataDumpUtils.xmlEscapeText(p2[0]);
+							}
+							else {
+								//sbrow.append("<th measure=\"true\">"+parts[cc]+"</th>");
+								prow.measuresRow = true;
+								phc.measure = true;
+								phc.collabel = parts[cc];
+							}
+						}
+					}
+					else if(cc+1==pivotInfo.onColsColCount) {
+						if(i<pivotInfo.onRowsColCount) {
+							//sbrow.append("<th dimoncol=\"true\" measure=\"true\">"+colNames.get(i)+"</th>");
+							prow.measuresRow = true;
+							phc.dimoncol = true;
+							phc.measure = true;
+						}
+						//else {
+						//	sbrow.append("<th>"+colNames.get(i)+"</th>");
+						//}
+						phc.collabel = colNames.get(i);
+					}
+					else {
+						if(i<pivotInfo.onRowsColCount) {
+							phc.dimoncol = true;
+						}
+						//sbrow.append("<th class=\"blank\""+
+						//		(i<pivotInfo.onRowsColCount?" dimoncol=\"true\"":"")+
+						//		"/>");
+						phc.blank = true;
+					}
+					prow.rows.add(phc);
+					//ret.get(cc).add(phr);
+				}
+				ret.add(prow);
+				//sb.append("\t<tr"+(colname!=null?" colname=\""+colname+"\"":"")+(measuresRow?" measuresrow=\"true\"":"")+">");
+				//sb.append(sbrow);
+				//sb.append("</tr>");
+				//dumpedAsLeast1row = true;
+			}
+		}
+		
+		return ret;
+		/*
+		boolean dumpHeaderRow = !dumpedAsLeast1row &&
+				(!innerTable || innerArrayDumpHeader || finalColNames.size()!=1) &&
+				!breakColsAddColumnHeaderBefore && !breakColsAddColumnHeaderAfter;
+		//log.info("dumpHeaderRow=="+dumpHeaderRow+" ;; dumpedAsLeast1row="+dumpedAsLeast1row+" ; innerTable="+innerTable+" ; innerArrayDumpHeader="+innerArrayDumpHeader+" ; finalColNames.size()="+finalColNames.size());
+		if(dumpHeaderRow) {
+			appendTableHeaderRow(sb);
+		}
+		*/
+		//sb.append("\n");
 	}
 	
 }

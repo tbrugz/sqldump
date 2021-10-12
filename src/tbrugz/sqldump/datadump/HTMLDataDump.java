@@ -243,7 +243,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		//System.out.println("[1:beforeguess] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 		boolean dumpedAsLeast1row = false;
 		if(pivotInfo.isPivotResultSet()) {
-			DataDumpUtils.guessPivotCols(finalColNames, colSepPattern, colValSepPattern); //guess cols/rows, since measures may be present or not...
+			pivotInfo = DataDumpUtils.guessPivotCols(finalColNames, colSepPattern, colValSepPattern); //guess cols/rows, since measures may be present or not...
 			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
 			for(int cc=0;cc<pivotInfo.onColsColCount;cc++) {
 				StringBuilder sbrow = new StringBuilder();
