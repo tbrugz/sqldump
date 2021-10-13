@@ -38,8 +38,9 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 	
 	Workbook wb;
 	Sheet sheet;
-	CellStyle cellDateStyle;
+	CellStyle cellDateStyle, cellHeaderStyle;
 	int numberOfHeaderRows = 1;
+	int numberOfHeaderCols = 0;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -66,10 +67,11 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 		wb = createWorkbook();
 		sheet = wb.createSheet(tableName);
 		
-		CellStyle cellHeaderStyle = getHeaderStyle(wb);
+		cellHeaderStyle = getHeaderStyle(wb);
 		
 		PivotInfo pivotInfo = DataDumpUtils.guessPivotCols(lsColNames);
 		if(pivotInfo.isPivotResultSet()) {
+			numberOfHeaderCols = pivotInfo.onRowsColCount;
 			CellStyle cellMeasureStyle = getMeasureStyle(wb);
 			List<PivotHeaderRow> rows = DataDumpUtils.getPivotedTableHeaderRows(pivotInfo, lsColNames);
 			for(int i=0;i<rows.size();i++) {
@@ -122,6 +124,12 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 			Object o = vals.get(i);
 			Cell cell = row.createCell(i);
 			setCellvalue(cell, o);
+			if(i<getNumberOfHeaderCols()) {
+				cell.setCellStyle(cellHeaderStyle);
+				if(o==null) {
+					cell.setCellValue(UNICODE_NULL);
+				}
+			}
 		}
 	}
 	
@@ -172,6 +180,10 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 		CellStyle style = wb.createCellStyle();
 		style.setFont(font);
 		return style;
+	}
+	
+	int getNumberOfHeaderCols() {
+		return numberOfHeaderCols;
 	}
 
 }
