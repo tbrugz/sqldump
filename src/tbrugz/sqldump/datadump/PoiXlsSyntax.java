@@ -41,6 +41,9 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 	CellStyle cellDateStyle, cellHeaderStyle;
 	int numberOfHeaderRows = 1;
 	int numberOfHeaderCols = 0;
+
+	// https://poi.apache.org/components/spreadsheet/quick-guide.html#Splits
+	static boolean freezeHeaderRowsAndColumns = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -108,6 +111,10 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 				cell.setCellValue(s);
 				cell.setCellStyle(cellHeaderStyle);
 			}
+		}
+		
+		if(freezeHeaderRowsAndColumns) {
+			sheet.createFreezePane( numberOfHeaderCols, numberOfHeaderRows, numberOfHeaderCols, numberOfHeaderRows);
 		}
 		
 		CreationHelper createHelper = wb.getCreationHelper();
