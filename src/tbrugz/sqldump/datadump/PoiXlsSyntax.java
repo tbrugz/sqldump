@@ -43,7 +43,9 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 	int numberOfHeaderCols = 0;
 
 	// https://poi.apache.org/components/spreadsheet/quick-guide.html#Splits
-	static boolean freezeHeaderRowsAndColumns = true;
+	static final boolean freezeHeaderRowsAndColumns = true;
+	// https://poi.apache.org/components/spreadsheet/quick-guide.html#Autofit
+	static final boolean autoSizeColumn = true;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -113,6 +115,12 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 			}
 		}
 		
+		if(autoSizeColumn) {
+			for(int i=0;i<numCol;i++) {
+				sheet.autoSizeColumn(i);
+			}
+		}
+
 		if(freezeHeaderRowsAndColumns) {
 			sheet.createFreezePane( numberOfHeaderCols, numberOfHeaderRows, numberOfHeaderCols, numberOfHeaderRows);
 		}
