@@ -2,6 +2,9 @@
 SQLDump
 =======
 
+[![CI](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml)
+
+
 Utility to dump schema and data from a RDBMS. Features:
 
 - Does schema-dumping, using (mainly) standard java API, by way of `java.sql.DatabaseMetaData`
