@@ -7,7 +7,7 @@
         <caches defaultCacheDir="${ivy.cache.dir}"/>
         <include url="${ivy.default.settings.dir}/ivysettings-public.xml" />
         <resolvers>
-                <ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/master/" m2compatible="true" />
+                <!--<ibiblio name="bitbucket-tbrugz" root="https://bitbucket.org/tbrugz/mvn-repo/raw/master/" m2compatible="true" />-->
                 <filesystem name="local-mvn-publish" m2compatible="true">
                         <artifact pattern="${mvn.repository.dir}/[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]" />
                 </filesystem>
@@ -19,7 +19,7 @@
                         <ibiblio name="ibiblio" m2compatible="true" />
                         <resolver ref="eclipselink"/>
                         <resolver ref="pentaho-rep"/>
-                        <resolver ref="bitbucket-tbrugz"/>
+                        <!--<resolver ref="bitbucket-tbrugz"/>-->
                 </chain>
         </resolvers>
         <include url="${ivy.default.settings.dir}/ivysettings-local.xml" />
