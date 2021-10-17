@@ -17,9 +17,9 @@ on `$HOME/.gpgcredentials`, put your private key passphrase
 
 3- upload
 
-* SNAPSHOT: `ant publish-sonatype-snapshot`
+* SNAPSHOT: **publish-sonatype-snapshot** - `ant clean test publish-sonatype-snapshot`
 
-* RELEASE: `ant publish-sonatype-release`
+* RELEASE: **publish-sonatype-release** - `ant clean test publish-sonatype-release`
 
 
 4- release (if RELEASE version)
