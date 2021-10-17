@@ -27,5 +27,8 @@ jobs:
     - name: Install Ivy
       run: ant -noinput -buildfile build.xml ivy-install
 
-    - name: Build with Ant
-      run: ant -noinput -buildfile build.xml resolve test
+    - name: Resolve Dependencies with Ivy
+      run: ant -noinput -buildfile build.xml resolve
+
+    - name: Build/Test with Ant
+      run: ant -noinput -buildfile build.xml test
