@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '8', '11', '16' ]
+        java: [ '8', '11', '17' ]
     name: java ${{ matrix.java }} build
 
     steps:
@@ -23,6 +23,17 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
         #cache: maven
+
+    # see:
+    # https://github.com/actions/cache/blob/main/examples.md#java---maven
+    # https://github.com/apache/maven-resolver-ant-tasks/blob/57b9af86be9b28f58b6d80d91d8dafef5dc68025/.github/workflows/maven.yml
+    - name: Setup Ivy cache
+      uses: actions/cache@v2
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy-*.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-ivy-
 
     - name: Install Ivy
       run: ant -noinput -buildfile build.xml ivy-install
