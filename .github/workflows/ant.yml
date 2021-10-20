@@ -31,7 +31,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.ivy2/cache
-        key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy-*.xml') }}
+        key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy.xml') }}
         restore-keys: |
           ${{ runner.os }}-ivy-
 
