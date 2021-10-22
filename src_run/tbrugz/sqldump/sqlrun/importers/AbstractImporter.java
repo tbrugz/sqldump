@@ -594,6 +594,9 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 								logRow.warn("error processing line "+linecounter
 										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
 										+e.toString().trim());
+								logRow.debug("error processing line "+linecounter
+										+(maxFailoverId>0?" ["+failoverId+"/"+maxFailoverId+"]: ":": ")
+										+e.toString().trim(), e);
 								if(batchException!=null) {
 									//XXX warn [retryWithBatchOff]?
 									logRow.info("[retryWithBatchOff] line #"+linecounter+": "+line);
@@ -777,7 +780,7 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 					int listIdx = filecol2tabcolMap.get(j);
 					if(listIdx == index) {
 						int colIndex = colTypesIndexFromTabCol?index:i;
-						log.info("...setStmtMappedValue: p="+j+" ; colIndex="+colIndex+" ; objValue="+parts[i]);
+						logRow.trace("...setStmtMappedValue: p="+j+" ; colIndex="+colIndex+" ; objValue="+parts[i]);
 						//setStmtValue(stmt, colType, colIndex, objValue);
 						stmtSetValue(j, parts[i], colIndex);
 						valsSetted++;

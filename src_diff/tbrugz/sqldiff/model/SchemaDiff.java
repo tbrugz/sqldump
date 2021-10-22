@@ -78,9 +78,9 @@ public class SchemaDiff implements Diff {
 			}
 		}
 		
-		if(log.isDebugEnabled()) {
+		if(log.isTraceEnabled()) {
 			for(Diff d: diffs) {
-				log.debug("diff: obj = "+d.getNamedObject().getSchemaName()+"."+d.getNamedObject().getName()+" ; type = "+d.getObjectType());
+				log.trace("diff: obj = "+d.getNamedObject().getSchemaName()+"."+d.getNamedObject().getName()+" ; type = "+d.getObjectType());
 			}
 		}
 	}
