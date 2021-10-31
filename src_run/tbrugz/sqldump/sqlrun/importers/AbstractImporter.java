@@ -36,6 +36,7 @@ import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.def.Util;
+import tbrugz.sqldump.util.FileUtils;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.ShutdownManager;
 import tbrugz.sqldump.util.Utils;
@@ -141,8 +142,9 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	//List<Integer> filecol2tabcolMap = null;
 	
 	String importFile = null;
-	String importDir = null;
-	String importFiles = null;
+	File importDir = null;
+	String importFilesGlob = null;
+	String importFilesRegex = null;
 	String importURL = null;
 	
 	String urlData = null;
@@ -189,6 +191,8 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	//suffixes
 	static final String SUFFIX_IMPORTDIR = ".importdir";
 	static final String SUFFIX_IMPORTFILES = ".importfiles";
+	static final String SUFFIX_IMPORTFILES_GLOB = ".importfiles.glob";
+	static final String SUFFIX_IMPORTFILES_REGEX = ".importfiles.regex";
 	static final String SUFFIX_IMPORTURL = ".importurl";
 	
 	static final String SUFFIX_URLMESSAGEBODY = ".urlmessagebody";
@@ -213,6 +217,8 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		Constants.SUFFIX_IMPORTFILE,
 		SUFFIX_IMPORTDIR,
 		SUFFIX_IMPORTFILES,
+		SUFFIX_IMPORTFILES_GLOB,
+		SUFFIX_IMPORTFILES_REGEX,
 		SUFFIX_IMPORTURL,
 		Constants.SUFFIX_INSERTTABLE,
 		Constants.SUFFIX_INSERTSQL,
@@ -243,8 +249,17 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		super.setProperties(prop);
 
 		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
-		importDir = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
-		importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
+		String importDirStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
+		if(importDirStr!=null) {
+			importDir = new File(importDirStr);
+		}
+		String importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
+		importFilesGlob = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_GLOB);
+		importFilesRegex = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_REGEX);
+		if(importFiles!=null && importFilesGlob==null) {
+			// importFilesGlob is the default
+			importFilesGlob = importFiles;
+		}
 		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
 		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
 		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
@@ -379,12 +394,33 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 			filesImported++;
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
-		else if(importFiles!=null) {
+		else if(importFilesGlob!=null) {
+			// XXX move to BaseImporter
 			if(importDir==null) {
-				importDir = System.getProperty("user.dir");
+				importDir = FileUtils.getInitDirForPath(importFilesGlob);
 			}
-			log.info("importing files from dir: "+importDir+loginfo);
-			List<String> files = Util.getFiles(importDir, importFiles);
+			log.info("importing files from dir [with glob pattern '"+importFilesGlob+"']: "+importDir+loginfo);
+			List<String> files = FileUtils.getFilesGlobAsString(importDir, importFilesGlob);
+			if(files==null || files.size()==0) {
+				log.warn("no files in dir '"+importDir+"'...");
+			}
+			else {
+				for(String file: files) {
+					importFile = file;
+					log.info("importing file: "+importFile+loginfo);
+					ret += importFile();
+					filesImported++;
+					addMapCount(aggCountsByFailoverId, countsByFailoverId);
+				}
+			}
+		}
+		else if(importFilesRegex!=null) {
+			// XXX move to BaseImporter
+			if(importDir==null) {
+				importDir = FileUtils.getInitDirForPath(importFilesRegex);
+			}
+			log.info("importing files from dir [with regex pattern '"+importFilesRegex+"']: "+importDir+loginfo);
+			List<String> files = FileUtils.getFilesRegex(importDir, importFilesRegex);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
 			}

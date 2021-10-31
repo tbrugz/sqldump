@@ -322,4 +322,48 @@ public class SQLRunAndDumpTest {
 		execSqlRun(vmparams);
 	}
 
+	@Test
+	public void doRunImportFiles() throws Exception {
+		String mydbpath = dbpath+"-importfiles;DB_CLOSE_DELAY=-1";
+		
+		String[] vmparams = {
+				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.05.import=csv",
+				"-Dsqlrun.exec.05.inserttable=dept",
+				"-Dsqlrun.exec.05.importfiles.glob=test/data/**/dept*.csv",
+				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/proj/sqldump/test/data/**/dept*.csv",
+				"-Dsqlrun.exec.05.skipnlines=1",
+				"-Dsqlrun.driverclass=org.h2.Driver",
+				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
+				"-Dsqlrun.user=h",
+				"-Dsqlrun.password=h"
+				};
+		Properties p = new Properties();
+		TestUtil.setProperties(p, vmparams);
+		SQLRun sqlr = new SQLRun();
+		sqlr.doMain(null, p);
+		
+		String[] vmparamsDump = {
+					"-Dsqldump.grabclass=JDBCSchemaGrabber",
+					"-Dsqldump.processingclasses=DataDump",
+					"-Dsqldump.datadump.dumpsyntaxes=csv",
+					//"-Dsqldump.datadump.csv.columnnamesheader=false",
+					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data-import_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.writebom=false",
+					"-Dsqldump.driverclass=org.h2.Driver",
+					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
+					"-Dsqldump.user=h",
+					"-Dsqldump.password=h"
+					};
+		SQLDump sqld = new SQLDump();
+		p = new Properties();
+		TestUtil.setProperties(p, vmparamsDump);
+		sqld.doMain(null, p);
+		
+		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data-import_DEPT.csv");
+		//System.out.println(csvDept);
+		int count = TestUtil.countLines(csvDept);
+		Assert.assertEquals(5+1, count);
+	}
+	
 }
