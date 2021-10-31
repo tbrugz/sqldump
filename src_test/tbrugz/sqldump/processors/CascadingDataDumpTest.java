@@ -35,13 +35,13 @@ public class CascadingDataDumpTest {
 		SQLDump sqld = new SQLDump();
 		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
-		//added "2" to linecount: header line + last linefeed
+		//added "1" to linecount: header line
 		
-		int countE = TestUtil.countLines(OUTDIR+"/t1/data_EMP.csv");
-		Assert.assertEquals(3+2, countE); //3 EMPs
+		int countE = TestUtil.countLinesFromPath(OUTDIR+"/t1/data_EMP.csv");
+		Assert.assertEquals(3+1, countE); //3 EMPs
 
-		int countD = TestUtil.countLines(OUTDIR+"/t1/data_DEPT.csv");
-		Assert.assertEquals(1+2, countD); //1 DEPT
+		int countD = TestUtil.countLinesFromPath(OUTDIR+"/t1/data_DEPT.csv");
+		Assert.assertEquals(1+1, countD); //1 DEPT
 	}
 
 	@Test
@@ -52,11 +52,11 @@ public class CascadingDataDumpTest {
 		SQLDump sqld = new SQLDump();
 		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
-		int countE = TestUtil.countLines(OUTDIR+"/t2/data_EMP.csv");
-		Assert.assertEquals(2+2, countE); //2 EMPs
+		int countE = TestUtil.countLinesFromPath(OUTDIR+"/t2/data_EMP.csv");
+		Assert.assertEquals(2+1, countE); //2 EMPs
 
-		int countD = TestUtil.countLines(OUTDIR+"/t2/data_DEPT.csv");
-		Assert.assertEquals(1+2, countD); //1 DEPT
+		int countD = TestUtil.countLinesFromPath(OUTDIR+"/t2/data_DEPT.csv");
+		Assert.assertEquals(1+1, countD); //1 DEPT
 	}
 
 	@Test
@@ -67,8 +67,8 @@ public class CascadingDataDumpTest {
 		SQLDump sqld = new SQLDump();
 		sqld.doMain(TestUtil.NULL_PARAMS, p);
 		
-		int countE = TestUtil.countLines(OUTDIR+"/t3/data_DEPT.csv");
-		Assert.assertEquals(2+2, countE); //2 DEPTs
+		int countE = TestUtil.countLinesFromPath(OUTDIR+"/t3/data_DEPT.csv");
+		Assert.assertEquals(2+1, countE); //2 DEPTs
 	}
 	
 }

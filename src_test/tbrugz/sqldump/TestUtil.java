@@ -42,13 +42,17 @@ public class TestUtil {
 		return p;
 	}
 	
-	public static int countLines(String path) throws IOException {
-		String s = IOUtil.readFromFilename(path);
-		BufferedReader sr = new BufferedReader( new StringReader(s) );
-		String news = "";
+	public static int countLinesFromPath(String path) throws IOException {
+		String content = IOUtil.readFromFilename(path);
+		return countLines(content);
+	}
+	
+	public static int countLines(String content) throws IOException {
+		BufferedReader sr = new BufferedReader( new StringReader(content) );
+		@SuppressWarnings("unused")
+		String news = null;
 		int count = 0;
-		while(news!=null) {
-			news = sr.readLine();
+		while((news = sr.readLine()) != null) {
 			count++;
 		} 
 		return count;
