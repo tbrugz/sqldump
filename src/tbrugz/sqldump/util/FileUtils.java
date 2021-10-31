@@ -145,7 +145,11 @@ public class FileUtils {
 			Path comparatorPath = pathPattern;
 			int dirNameCount = dir.getNameCount();
 			if(dirNameCount < pathPatternNameCount) {
-				comparatorPath = pathPattern.subpath(0, dirNameCount);
+				comparatorPath = getSubpathWithRoot(pathPattern, dirNameCount);
+				/*comparatorPath = pathPattern.subpath(0, dirNameCount);
+				if(pathPattern.isAbsolute()) {
+					comparatorPath = Paths.get(pathPattern.getRoot().toString()+comparatorPath);
+				}*/
 			}
 			PathMatcher dirMatcher = FileSystems.getDefault().getPathMatcher("glob:" + comparatorPath);
 			if(!dirMatcher.matches(dir)) {
@@ -169,19 +173,20 @@ public class FileUtils {
 		}
 	}
 
-	/*
-	public static boolean isAbsolute(String path) {
-		File f = new File(path);
-		return f.isAbsolute();
-	}
-	*/
-	
 	public static File getInitDirForPath(String path) {
 		Path p = Paths.get(path);
 		if(p.isAbsolute()) {
 			return p.getRoot().toFile();
 		}
 		return new File(System.getProperty("user.dir"));
+	}
+	
+	public static Path getSubpathWithRoot(Path path, int endIndex) {
+		Path subpath = path.subpath(0, endIndex);
+		if(path.isAbsolute()) {
+			subpath = Paths.get(path.getRoot().toString()+subpath);
+		}
+		return subpath;
 	}
 
 }

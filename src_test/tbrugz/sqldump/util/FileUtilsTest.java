@@ -54,5 +54,20 @@ public class FileUtilsTest {
 		Assert.assertEquals(4, ll.size()); //dept.csv, etc.csv, emp.csv, processors/proj.csv
 	}
 	
+	/*
+	public static boolean isAbsolute(String path) {
+		File f = new File(path);
+		return f.isAbsolute();
+	}
+	
+	//@Test
+	public void debug() {
+		String s = "/home/tbrugz/proj/sqldump";
+		Path p = Paths.get(s);
+		System.out.println(p);
+		System.out.println(p.subpath(0, 2));
+	}
+	*/
+	
 
 }
