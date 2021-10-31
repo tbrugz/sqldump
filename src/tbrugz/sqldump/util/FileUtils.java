@@ -12,8 +12,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,9 +81,12 @@ public class FileUtils {
 	public static class Finder extends SimpleFileVisitor<Path> {
 	
 		private final PathMatcher matcher;
-		private final Path patternParentPath;
+		//private final Path patternParentPath;
+		private final Path pathPattern;
+		private int pathPatternNameCount;
 		final List<String> files = new ArrayList<>();
 		
+		/*
 		static String getBasePath(String pattern) {
 			Pattern ptrn = Pattern.compile("[*?\\[\\{]");
 			Matcher m = ptrn.matcher(pattern);
@@ -95,10 +96,23 @@ public class FileUtils {
 			}
 			return pattern;
 		}
-	
+		*/
+
+		static String getPathUntilDoubleAsterisk(String pattern) {
+			int idx = pattern.indexOf("**");
+			if(idx>0) {
+				return pattern.substring(0, idx+2);
+			}
+			return pattern;
+		}
+		
 		Finder(String pattern) {
 			matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern); // **/
-			patternParentPath = Paths.get( getBasePath(pattern) );
+			//patternParentPath = Paths.get( getBasePath(pattern) );
+			// using getPathUntilDoubleAsterisk() because "**" crosses directory boundaries
+			// see: https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)
+			pathPattern = Paths.get( getPathUntilDoubleAsterisk(pattern) );
+			pathPatternNameCount = pathPattern.getNameCount();
 			//System.out.println("pattern: "+pattern+" ; patternParentPath: "+patternParentPath);
 		}
 		
@@ -128,10 +142,23 @@ public class FileUtils {
 		
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+			Path comparatorPath = pathPattern;
+			int dirNameCount = dir.getNameCount();
+			if(dirNameCount < pathPatternNameCount) {
+				comparatorPath = pathPattern.subpath(0, dirNameCount);
+			}
+			PathMatcher dirMatcher = FileSystems.getDefault().getPathMatcher("glob:" + comparatorPath);
+			if(!dirMatcher.matches(dir)) {
+				//System.out.println("SKIP: dir: "+dir+" ;; comparatorPath: "+comparatorPath);
+				return FileVisitResult.SKIP_SUBTREE;
+			}
+			
+			/*
 			if(!patternParentPath.startsWith(dir) && !dir.startsWith(patternParentPath)) {
 				//System.out.println("SKIP: dir: "+dir+" ;; patternParentPath: "+patternParentPath);
 				return FileVisitResult.SKIP_SUBTREE;
 			}
+			*/
 			return FileVisitResult.CONTINUE;
 		}
 	
