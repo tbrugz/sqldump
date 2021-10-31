@@ -394,7 +394,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			if(importDir==null) {
 				importDir = FileUtils.getInitDirForPath(importFilesGlob);
 			}
-			log.info("importing files from dir [with glob pattern '"+importFilesGlob+"']: "+importDir+loginfo);
+			log.info("importing files with glob pattern '"+importFilesGlob+"' from dir '"+importDir+"'"+loginfo);
 			List<String> files = FileUtils.getFilesGlobAsString(importDir, importFilesGlob);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");
@@ -414,7 +414,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			if(importDir==null) {
 				importDir = FileUtils.getInitDirForPath(importFilesRegex);
 			}
-			log.info("importing files from dir [with regex pattern '"+importFilesRegex+"']: "+importDir+loginfo);
+			log.info("importing files with regex pattern '"+importFilesRegex+"' from dir '"+importDir+"'"+loginfo);
 			List<String> files = FileUtils.getFilesRegex(importDir, importFilesRegex);
 			if(files==null || files.size()==0) {
 				log.warn("no files in dir '"+importDir+"'...");

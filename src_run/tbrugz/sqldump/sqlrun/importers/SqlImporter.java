@@ -1,5 +1,6 @@
 package tbrugz.sqldump.sqlrun.importers;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -118,6 +119,12 @@ public class SqlImporter extends BaseImporter {
 			log.warn("Exception: "+e);
 			throw new RuntimeException(e);
 		}
+	}
+	
+	@Override
+	public long importFilesGlob(String filesGlobPattern, File importDir)
+			throws SQLException, InterruptedException, IOException {
+		throw new UnsupportedOperationException("importFilesGlob()");
 	}
 
 }
