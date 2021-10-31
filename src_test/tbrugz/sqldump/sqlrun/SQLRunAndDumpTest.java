@@ -331,7 +331,7 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=dept",
 				"-Dsqlrun.exec.05.importfiles.glob=test/data/**/dept*.csv",
-				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/proj/sqldump/test/data/**/dept*.csv",
+				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/test/data/**/dept*.csv", // absolute path
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,

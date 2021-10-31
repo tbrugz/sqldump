@@ -12,6 +12,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,8 +72,9 @@ public class FileUtils {
 
 	public static List<String> getFilesGlobAsString(File dir, String fileGlob) throws IOException {
 		Path origPath = dir.toPath();
-		String finalGlob = origPath+"/"+fileGlob;
+		String finalGlob = Paths.get( origPath+"/"+fileGlob ).toString();
 		Finder finder = new Finder(finalGlob);
+		
 		//log.info("getFilesGlobAsString: dir: "+dir+" ; origPath: "+origPath+" ; fileGlob: "+fileGlob+" finalGlob: "+finalGlob);
 		Files.walkFileTree(origPath, finder);
 		return finder.getFiles();
@@ -80,10 +83,23 @@ public class FileUtils {
 	public static class Finder extends SimpleFileVisitor<Path> {
 	
 		private final PathMatcher matcher;
+		private final Path patternParentPath;
 		final List<String> files = new ArrayList<>();
 		
+		static String getBasePath(String pattern) {
+			Pattern ptrn = Pattern.compile("[*?\\[\\{]");
+			Matcher m = ptrn.matcher(pattern);
+			if (m.find()) {
+				int position = m.start();
+				return pattern.substring(0, position);
+			}
+			return pattern;
+		}
+	
 		Finder(String pattern) {
 			matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern); // **/
+			patternParentPath = Paths.get( getBasePath(pattern) );
+			//System.out.println("pattern: "+pattern+" ; patternParentPath: "+patternParentPath);
 		}
 		
 		void find(Path file) {
@@ -112,7 +128,10 @@ public class FileUtils {
 		
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-			find(dir);
+			if(!patternParentPath.startsWith(dir) && !dir.startsWith(patternParentPath)) {
+				//System.out.println("SKIP: dir: "+dir+" ;; patternParentPath: "+patternParentPath);
+				return FileVisitResult.SKIP_SUBTREE;
+			}
 			return FileVisitResult.CONTINUE;
 		}
 	
@@ -122,7 +141,7 @@ public class FileUtils {
 			return FileVisitResult.CONTINUE;
 		}
 	}
-	
+
 	/*
 	public static boolean isAbsolute(String path) {
 		File f = new File(path);
