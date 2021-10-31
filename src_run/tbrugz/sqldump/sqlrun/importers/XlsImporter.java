@@ -1,5 +1,6 @@
 package tbrugz.sqldump.sqlrun.importers;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +19,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 
+import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.importers.AbstractImporter.IOCounter;
+import tbrugz.sqldump.util.FileUtils;
 import tbrugz.sqldump.util.Utils;
 
-public class XlsImporter extends BaseImporter {
+public class XlsImporter extends BaseFileImporter {
 
 	static final Log log = LogFactory.getLog(XlsImporter.class);
 
@@ -30,7 +33,6 @@ public class XlsImporter extends BaseImporter {
 	static final String SUFFIX_SHEET_NAME = ".sheet-name";
 	static final String SUFFIX_1ST_LINE_IS_HEADER = ".1st-line-is-header";
 	
-	String importFile;
 	String sheetName;
 	Integer sheetNumber;
 	long linesToSkip = 0;
@@ -52,7 +54,6 @@ public class XlsImporter extends BaseImporter {
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 		
-		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
 		sheetName = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NAME);
 		Long lSheetNumber = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NUMBER);
 		if(lSheetNumber!=null) {
@@ -73,19 +74,26 @@ public class XlsImporter extends BaseImporter {
 
 	@Override
 	public long importData() throws SQLException, InterruptedException, IOException {
-		if(importFile==null) {
-			throw new IllegalStateException("null importFile");
+		if(importFile!=null) {
+			FileInputStream fis = null;
+			try {
+				fis = new FileInputStream(importFile);
+				return importStream(fis);
+			}
+			finally {
+				fis.close();
+			}
 		}
-		FileInputStream fis = null;
-		try {
-			fis = new FileInputStream(importFile);
-			return importStream(fis);
-		}
-		finally {
-			fis.close();
-		}
-	}
 		
+		if(importFilesGlob!=null) {
+			return importFilesGlob(importFilesGlob, importDir);
+		}
+		
+		String errMessage = "neither '"+Constants.SUFFIX_IMPORTFILE+"' nor '"+Constants.SUFFIX_IMPORTFILES+"' suffix specified...";
+		log.error(errMessage);
+		throw new ProcessingException(errMessage);
+	}
+	
 	@Override
 	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
 		IOCounter counter = new IOCounter();

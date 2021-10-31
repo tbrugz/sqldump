@@ -42,7 +42,7 @@ import tbrugz.sqldump.util.ShutdownManager;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.util.NonNullGetMap;
 
-public abstract class AbstractImporter extends BaseImporter implements Importer {
+public abstract class AbstractImporter extends BaseFileImporter implements Importer {
 	
 	public static class IOCounter {
 		long input = 0;
@@ -141,9 +141,6 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	//List<String> columnTypes;
 	//List<Integer> filecol2tabcolMap = null;
 	
-	String importFile = null;
-	File importDir = null;
-	String importFilesGlob = null;
 	String importFilesRegex = null;
 	String importURL = null;
 	
@@ -189,9 +186,6 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	public static final String PREFIX_FAILOVER = ".failover.";
 
 	//suffixes
-	static final String SUFFIX_IMPORTDIR = ".importdir";
-	static final String SUFFIX_IMPORTFILES = ".importfiles";
-	static final String SUFFIX_IMPORTFILES_GLOB = ".importfiles.glob";
 	static final String SUFFIX_IMPORTFILES_REGEX = ".importfiles.regex";
 	static final String SUFFIX_IMPORTURL = ".importurl";
 	
@@ -215,9 +209,9 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 		Constants.SUFFIX_ENCODING,
 		SUFFIX_FOLLOW,
 		Constants.SUFFIX_IMPORTFILE,
-		SUFFIX_IMPORTDIR,
-		SUFFIX_IMPORTFILES,
-		SUFFIX_IMPORTFILES_GLOB,
+		Constants.SUFFIX_IMPORTDIR,
+		Constants.SUFFIX_IMPORTFILES,
+		Constants.SUFFIX_IMPORTFILES_GLOB,
 		SUFFIX_IMPORTFILES_REGEX,
 		SUFFIX_IMPORTURL,
 		Constants.SUFFIX_INSERTTABLE,
@@ -248,18 +242,19 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
 
-		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
-		String importDirStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
+		//importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
+		/*String importDirStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
 		if(importDirStr!=null) {
 			importDir = new File(importDirStr);
 		}
-		String importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES);
-		importFilesGlob = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_GLOB);
-		importFilesRegex = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_REGEX);
+		String importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILES);
+		//importFilesGlob = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_GLOB);
 		if(importFiles!=null && importFilesGlob==null) {
 			// importFilesGlob is the default
 			importFilesGlob = importFiles;
 		}
+		*/
+		importFilesRegex = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_REGEX);
 		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
 		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
 		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
@@ -441,8 +436,11 @@ public abstract class AbstractImporter extends BaseImporter implements Importer 
 			addMapCount(aggCountsByFailoverId, countsByFailoverId);
 		}
 		else {
-			log.error("neither '"+Constants.SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...");
-			if(failonerror) { throw new ProcessingException("neither '"+Constants.SUFFIX_IMPORTFILE+"', '"+SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified..."); }
+			String message = "neither '"+Constants.SUFFIX_IMPORTFILE+"', '"+Constants.SUFFIX_IMPORTFILES+"' nor '"+SUFFIX_IMPORTURL+"' suffix specified...";
+			log.error(message);
+			if(failonerror) {
+				throw new ProcessingException(message);
+			}
 		}
 		
 		} catch(SQLException e) {
