@@ -3,11 +3,12 @@ package tbrugz.sqldump.sqlrun.def;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import tbrugz.sqldump.util.FileUtils;
 
 public class Util {
 
@@ -26,23 +27,9 @@ public class Util {
 		}
 	}
 	
+	@Deprecated
 	public static List<String> getFiles(String dir, String fileRegex) {
-		if(dir==null) {
-			log.warn("dir cannot be null");
-			return null;
-		}
-		List<String> ret = new ArrayList<String>();
-		File fdir = new File(dir);
-		String[] files = fdir.list();
-		if(files==null) {
-			return null;
-		}
-		for(String file: files) {
-			if(file.matches(fileRegex)) {
-				ret.add(fdir.getAbsolutePath()+File.separator+file);
-			}
-		}
-		return ret;
+		return FileUtils.getFilesRegex(new File(dir), fileRegex);
 	}
 
 }

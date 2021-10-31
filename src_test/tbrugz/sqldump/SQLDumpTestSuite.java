@@ -58,6 +58,7 @@ import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtilTest;
 import tbrugz.sqldump.util.CLIProcessorTest;
 import tbrugz.sqldump.util.CategorizedOutTest;
 import tbrugz.sqldump.util.ConnectionUtilTest;
+import tbrugz.sqldump.util.FileUtilsTest;
 import tbrugz.sqldump.util.IOUtilTest;
 import tbrugz.sqldump.util.ParametrizedPropertiesTest;
 import tbrugz.sqldump.util.StringUtilsTest;
@@ -78,6 +79,7 @@ import tbrugz.sqldump.util.StringUtilsTest;
 	ScriptDumperTest.class,
 	StringUtilsTest.class,
 	TokenizerUtilTest.class,
+	FileUtilsTest.class,
 	//model unit tests
 	ColumnTest.class,
 	ColTypeUtilTest.class,
