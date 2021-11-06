@@ -1,5 +1,6 @@
 package tbrugz.sqldump.sqlrun;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
+import tbrugz.sqldump.util.FileUtils;
 import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.JMXUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
@@ -69,12 +71,14 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	//exec properties
 	static final String PROP_FILE = "file";
 	static final String PROP_FILES = "files";
+	static final String PROP_FILES_REGEX = "files.regex";
 	static final String PROP_STATEMENT = "statement";
 	static final String PROP_QUERY = "query";
 
 	//exec suffixes
 	static final String SUFFIX_FILE = "." + PROP_FILE;
 	static final String SUFFIX_FILES = "." + PROP_FILES;
+	static final String SUFFIX_FILES_REGEX = "." + PROP_FILES_REGEX;
 	static final String SUFFIX_STATEMENT = "." + PROP_STATEMENT;
 	static final String SUFFIX_QUERY = "." + PROP_QUERY;
 
@@ -104,7 +108,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String PROP_JMX_CREATE_MBEAN = Constants.SQLRUN_PROPS_PREFIX+".jmx.create-mbean";
 
 	//suffix groups
-	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
+	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_FILES_REGEX, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
 	static final String[] ASSERT_SUFFIXES = { SUFFIX_ASSERT_SQL, SUFFIX_ASSERT_SQLFILE };
 	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, Constants.SUFFIX_BATCH_MODE, Constants.SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
@@ -311,35 +315,37 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				}
 			}
 			// .files
-			else if(key.endsWith(SUFFIX_FILES)) {
+			else if(key.endsWith(SUFFIX_FILES) || key.endsWith(SUFFIX_FILES_REGEX)) {
 				try {
 					setExecProperties(srproc, papp, execFailOnError);
 					String dir = getDir(procId);
-					List<String> files = Util.getFiles(dir, execValue);
-					int fileCount = 0;
-					if(files!=null && files.size()>0) {
-					for(String file: files) {
-						if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
-						srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
-						fileCount++;
-					}
-					log.info(fileCount + " files processed");
+					File fdir = null;
+					if(dir==null) {
+						fdir = FileUtils.getInitDirForPath(execValue);
 					}
 					else {
-						log.warn("no files selected in dir '"+dir+"'");
+						fdir = new File(dir);
 					}
-					/*if(dir==null) {
-						log.warn("no '.dir' property...");
-						continue;
+					List<String> files = null;
+					if(key.endsWith(SUFFIX_FILES)) {
+						files = FileUtils.getFilesGlobAsString(fdir, execValue);
 					}
-					File fdir = new File(dir);
-					String[] files = fdir.list();
-					String fileRegex = papp.getProperty(key);
-					for(String file: files) {
-						if(file.matches(fileRegex)) {
-							srproc.execFile(fdir.getAbsolutePath()+File.separator+file, PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+					else {
+						files = FileUtils.getFilesRegex(fdir, execValue);
+					}
+					
+					int fileCount = 0;
+					if(files!=null && files.size()>0) {
+						for(String file: files) {
+							if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
+							srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+							fileCount++;
 						}
-					}*/
+						log.info(fileCount + " files processed");
+					}
+					else {
+						log.warn("no files selected in dir '"+fdir+"'");
+					}
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
