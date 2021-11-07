@@ -71,6 +71,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	//exec properties
 	static final String PROP_FILE = "file";
 	static final String PROP_FILES = "files";
+	static final String PROP_FILES_GLOB = "files.glob";
 	static final String PROP_FILES_REGEX = "files.regex";
 	static final String PROP_STATEMENT = "statement";
 	static final String PROP_QUERY = "query";
@@ -78,6 +79,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	//exec suffixes
 	static final String SUFFIX_FILE = "." + PROP_FILE;
 	static final String SUFFIX_FILES = "." + PROP_FILES;
+	static final String SUFFIX_FILES_GLOB = "." + PROP_FILES_GLOB;
 	static final String SUFFIX_FILES_REGEX = "." + PROP_FILES_REGEX;
 	static final String SUFFIX_STATEMENT = "." + PROP_STATEMENT;
 	static final String SUFFIX_QUERY = "." + PROP_QUERY;
@@ -108,7 +110,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	static final String PROP_JMX_CREATE_MBEAN = Constants.SQLRUN_PROPS_PREFIX+".jmx.create-mbean";
 
 	//suffix groups
-	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES, SUFFIX_FILES_REGEX, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
+	static final String[] PROC_SUFFIXES = { SUFFIX_FILE, SUFFIX_FILES_GLOB, SUFFIX_FILES_REGEX, SUFFIX_FILES, SUFFIX_STATEMENT, Constants.SUFFIX_IMPORT, SUFFIX_QUERY };
 	static final String[] ASSERT_SUFFIXES = { SUFFIX_ASSERT_SQL, SUFFIX_ASSERT_SQLFILE };
 	static final String[] AUX_SUFFIXES = { SUFFIX_DIR, SUFFIX_LOGINVALIDSTATEMENTS, SUFFIX_SPLIT, SUFFIX_PARAM, Constants.SUFFIX_BATCH_MODE, Constants.SUFFIX_BATCH_SIZE };
 	List<String> allAuxSuffixes = new ArrayList<String>();
@@ -315,7 +317,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				}
 			}
 			// .files
-			else if(key.endsWith(SUFFIX_FILES) || key.endsWith(SUFFIX_FILES_REGEX)) {
+			else if(key.endsWith(SUFFIX_FILES) || key.endsWith(SUFFIX_FILES_GLOB) || key.endsWith(SUFFIX_FILES_REGEX)) {
 				try {
 					setExecProperties(srproc, papp, execFailOnError);
 					String dir = getDir(procId);
@@ -327,11 +329,15 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 						fdir = new File(dir);
 					}
 					List<String> files = null;
-					if(key.endsWith(SUFFIX_FILES)) {
+					if(key.endsWith(SUFFIX_FILES_GLOB)) {
 						files = FileUtils.getFilesGlobAsString(fdir, execValue);
 					}
-					else {
+					else if(key.endsWith(SUFFIX_FILES_REGEX)) {
 						files = FileUtils.getFilesRegex(fdir, execValue);
+					}
+					else {
+						//defaults to glob
+						files = FileUtils.getFilesGlobAsString(fdir, execValue);
 					}
 					
 					int fileCount = 0;
