@@ -2,6 +2,8 @@
 SQLDump
 =======
 
+[![GNU Lesser General Public License, v3](https://img.shields.io/github/license/tbrugz/sqldump.svg?label=License&color=blue)](LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/sqldump.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.bitbucket.tbrugz/sqldump)
 [![CI](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml)
 
 

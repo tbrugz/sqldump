@@ -1,4 +1,17 @@
 
+sqldump 0.10 [xxxx-xx-xx]
+------------
+- **java 7+** required
+- java 17 compatibility
+- model: Relation: added 'getNamedParameterNames()'
+- datadump: added PivotInfo/PivotHeaderRow/PivotHeaderCol
+- datadump: xls/xlsx: prettier output
+- sqlrun: importers: added '.importfiles.glob' (glob pattern) & '.importfiles.regex'
+- **breaking**: sqlrun: '.importfiles' now uses glob pattern
+- sqlrun: added '.files.glob' (glob pattern) & '.files.regex' suffixes
+- **breaking**: sqlrun: '.files' suffix now uses glob pattern (2021-11-07)
+
+
 sqldump 0.9.17 [2021-08-29]
 --------------
 - dbmodel: DBObjectType: added AGGREGATE
