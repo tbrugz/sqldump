@@ -275,7 +275,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		initFeatures(conn);
 		DatabaseMetaData dbmd = feats.getMetadataDecorator(conn.getMetaData());
 		log.debug("feats/metadata: "+feats+" / "+dbmd);
-		ConnectionUtil.showDBInfo(conn.getMetaData());
+		//ConnectionUtil.showDBInfo(conn.getMetaData());
 		if(log.isInfoEnabled()) {
 			List<String> catalogs = SQLUtils.getCatalogNames(dbmd);
 			if(catalogs!=null && catalogs.size()>0) {

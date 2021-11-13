@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public enum TableType {
+
 	TABLE,
 	SYNONYM,
 	SYSTEM_TABLE,   //h2
@@ -15,6 +16,7 @@ public enum TableType {
 	TYPE,           //XXX 'TYPE' table type? - postgresql
 	FOREIGN_TABLE,  //postgresql
 	ALIAS,          //db2
+	PARTITIONED_TABLE, // postgresql
 	// MATERIALIZED QUERY TABLE //db2 ??
 	;
 	
@@ -35,6 +37,11 @@ public enum TableType {
 	}
 	
 	public static TableType getTableType(String tableType, String tableName) {
+		if(tableType==null) {
+			log.warn("table "+tableName+" has null tableType");
+			return null;
+		}
+
 		if(tableType.equals("TABLE")) {
 			return TableType.TABLE;
 		}
@@ -75,6 +82,9 @@ public enum TableType {
 		}
 		else if(tableType.equals("ALIAS")) {
 			return TableType.ALIAS;
+		}
+		else if(tableType.equals("PARTITIONED TABLE")) {
+			return TableType.PARTITIONED_TABLE;
 		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");

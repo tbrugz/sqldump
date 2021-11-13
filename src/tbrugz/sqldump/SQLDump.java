@@ -356,9 +356,7 @@ public class SQLDump implements Executor {
 			log.info("connection properties prefix: '"+connPrefix+"'");
 		}
 		conn = ConnectionUtil.initDBConnection(connPrefix, papp);
-		if(log.isDebugEnabled()) { //showConnInfo) {
-			ConnectionUtil.showDBInfo(conn.getMetaData());
-		}
+		ConnectionUtil.showDBInfo(conn.getMetaData());
 		if(conn==null) {
 			if(failonerror) {
 				throw new ProcessingException("can't init connection [prefix="+connPrefix+"]");
