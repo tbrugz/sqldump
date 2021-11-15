@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.util.List;
 
 import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.Utils;
 
@@ -15,10 +16,12 @@ import tbrugz.sqldump.util.Utils;
 public class OracleTable extends Table {
 	private static final long serialVersionUID = 1L;
 
+	/*
 	public enum PartitionType {
 		RANGE, HASH, LIST;
 		//XXX: reference, composite-range, composite-list, system
 	}
+	*/
 	
 	static boolean dumpPhysicalAttributes = true; 
 	static boolean dumpLoggingClause = true; 

@@ -34,6 +34,7 @@ import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.Index.IndexType;
 import tbrugz.sqldump.dbmodel.MaterializedView;
+import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -735,7 +736,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				if("YES".equals(rs.getString(columnName))) {
 					ot.partitioned = true;
 					columnName = "PARTITIONING_TYPE";
-					ot.partitionType = OracleTable.PartitionType.valueOf(rs.getString(columnName));
+					ot.partitionType = PartitionType.valueOf(rs.getString(columnName));
 					
 					//get partition type, columns
 					getPartitionColumns(ot, rs.getStatement().getConnection());
