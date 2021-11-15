@@ -1,4 +1,4 @@
-package tbrugz.sqldump.util;
+package tbrugz.sqldump.dbmodel;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

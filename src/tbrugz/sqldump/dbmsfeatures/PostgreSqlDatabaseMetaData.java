@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import tbrugz.sqldump.util.QueryWithParams;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 
 public class PostgreSqlDatabaseMetaData extends InformationSchemaDatabaseMetaData {
 
