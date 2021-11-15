@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
@@ -604,6 +605,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		List<String> domainTables = Utils.getStringListFromProp(papp, PROP_SCHEMAINFO_DOMAINTABLES, ",");
 		
 		ResultSet rs = dbmd.getTables(null, schemaPattern, tablePattern, null);
+		if(log.isDebugEnabled()) {
+			log.debug("grabRelations: columns: "+DataDumpUtils.getColumnNames(rs.getMetaData()));
+		}
 
 		while(rs.next()) {
 			TableType ttype = null;
@@ -1204,7 +1208,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		while(indexesrs.next()) {
 			String idxName = indexesrs.getString("INDEX_NAME");
-			log.debug("index: "+idxName);
 			if(idxName==null) {
 				 //each table appears to have a no-name index, maybe "oracle-only"...
 				log.debug("nameless index: "+indexesrs.getString("TABLE_NAME"));
@@ -1213,6 +1216,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(idx==null || !idxName.equals(idx.getName())) {
 				//end last object
 				if(idx!=null) {
+					log.debug("getting columns from index '"+idxName+"'");
 					indexes.add(idx);
 				}
 				//new object
@@ -1235,6 +1239,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			idx.getColumns().add(indexesrs.getString("COLUMN_NAME"));
 		}
 		if(idx!=null) {
+			//log.debug("got columns for index '"+idx.getName()+"': "+idx.getColumns());
 			indexes.add(idx);
 		}
 	}

@@ -161,8 +161,7 @@ Artifact repositories
 ---------------------
 
 **Releases:**  
-- [maven central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)  
-- [tbrugz/mvn-repo @ bitbucket](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
+- [maven central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)
 
 **Snapshots:**  
 - [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/sqldump/)
@@ -173,7 +172,7 @@ Artifact repositories
 	<dependency>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>sqldump</artifactId>
-		<version>0.9.16</version>
+		<version>0.9.17</version>
 	</dependency>
 
 
