@@ -21,6 +21,10 @@ public class PostgreSqlTable extends Table {
 	PartitionType partitionType;
 	List<String> partitionColumns;
 
+	// table partition properties
+	String baseTableName;
+	String partitionExpression;
+	
 	@Override
 	public String getTableType4sql() {
 		if(getType()==TableType.FOREIGN_TABLE) { return "foreign"; }
@@ -44,6 +48,9 @@ public class PostgreSqlTable extends Table {
 			StringBuilder sb = new StringBuilder();
 			sb.append("\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")\n");
 			return sb.toString();
+		}
+		if(getType()==TableType.TABLE_PARTITION) {
+			return "\npartition of "+baseTableName+" "+partitionExpression+"\n";
 		}
 		return super.getTableFooter4sql();
 	}

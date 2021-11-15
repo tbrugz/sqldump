@@ -28,7 +28,7 @@ import tbrugz.sqldump.dbmodel.TableType;
  */
 public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 
-	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
+	static final Log log = LogFactory.getLog(PostgreSQLFeatures.class);
 	
 	@Override
 	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException {
@@ -156,17 +156,20 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 	// postgresql 9.1+
 	@Override
 	public void addTableSpecificFeatures(Table t, Connection conn) throws SQLException {
-		if(t.getType().equals(TableType.FOREIGN_TABLE)) {
-			PostgreSqlTable pt = (PostgreSqlTable) t;
-			
+		if(!(t instanceof PostgreSqlTable)) { return; }
+
+		PostgreSqlTable pt = (PostgreSqlTable) t;
+		if(pt.getType().equals(TableType.FOREIGN_TABLE)) {
 			String server = getForeignTableServer(conn, pt.getSchemaName(), pt.getName());
 			Map<String,String> options = getForeignTableOptions(conn, pt.getSchemaName(), pt.getName());
 			pt.setForeignTableServer(server);
 			pt.setForeignTableOptions(options);
 		}
-		if(t.getType().equals(TableType.PARTITIONED_TABLE)) {
-			PostgreSqlTable pt = (PostgreSqlTable) t;
+		if(pt.getType().equals(TableType.PARTITIONED_TABLE)) {
 			addPartitionInfo(pt, getPartitionTableInfo(conn, pt.getSchemaName(), pt.getName()));
+		}
+		if(pt.getType().equals(TableType.TABLE_PARTITION)) {
+			addTablePartitionInfo(pt, getTablePartitionInfo(conn, pt.getSchemaName(), pt.getName()));
 		}
 	}
 	
@@ -251,5 +254,36 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 		}
 		return;
 	}
+
+	/*
+	 * see: https://dba.stackexchange.com/a/221283
+	 */
+	ResultSet getTablePartitionInfo(Connection conn, String schema, String name) throws SQLException {
+		String sql = "select base_tb.relnamespace::regnamespace::text as table_schema,\n"
+				+ "  base_tb.relname as table_name,\n"
+				+ "  pt.relname as partition_name,\n"
+				+ "  pg_get_expr(pt.relpartbound, pt.oid, true) as partition_expression\n"
+				+ "from pg_class base_tb \n"
+				+ "join pg_inherits i on i.inhparent = base_tb.oid\n"
+				+ "join pg_class pt on pt.oid = i.inhrelid\n"
+				+ "where 1=1\n"
+				+ "  and pt.relnamespace::regnamespace::text = ?"
+				+ "  and pt.relname = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, schema);
+		ps.setString(2, name);
+		return ps.executeQuery();
+	}
 	
+	void addTablePartitionInfo(PostgreSqlTable pgtable, ResultSet rs) throws SQLException {
+		for(int i=0;rs.next();i++) {
+			if(i>0) {
+				log.warn("addPartitionedTableInfo: more than 1 row? i=="+i);
+			}
+			pgtable.baseTableName = rs.getString(2);
+			pgtable.partitionExpression = rs.getString(4);
+		}
+		return;
+	}
+
 }
