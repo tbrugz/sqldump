@@ -2,6 +2,7 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Array;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +28,11 @@ import tbrugz.sqldump.dbmodel.TableType;
 public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 
 	static Log log = LogFactory.getLog(PostgreSQLFeatures.class);
+	
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException {
+		return new PostgreSqlDatabaseMetaData(metadata);
+	}
 	
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
@@ -146,6 +152,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 	}
 	*/
 	
+	// postgresql 9.1+
 	@Override
 	public void addTableSpecificFeatures(Table t, Connection conn) throws SQLException {
 		if(t.getType().equals(TableType.FOREIGN_TABLE)) {

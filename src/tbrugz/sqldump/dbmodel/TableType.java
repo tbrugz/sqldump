@@ -17,6 +17,7 @@ public enum TableType {
 	FOREIGN_TABLE,  //postgresql
 	ALIAS,          //db2
 	PARTITIONED_TABLE, // postgresql
+	TABLE_PARTITION,   // postgresql, see: PostgreSqlDatabaseMetaData
 	// MATERIALIZED QUERY TABLE //db2 ??
 	;
 	
@@ -85,6 +86,9 @@ public enum TableType {
 		}
 		else if(tableType.equals("PARTITIONED TABLE")) {
 			return TableType.PARTITIONED_TABLE;
+		}
+		else if(tableType.equals("TABLE PARTITION")) {
+			return TableType.TABLE_PARTITION;
 		}
 		else if(tableType.equalsIgnoreCase("INDEX")) {
 			log.debug("ignoring table "+tableName+" of '"+tableType+"' type");
