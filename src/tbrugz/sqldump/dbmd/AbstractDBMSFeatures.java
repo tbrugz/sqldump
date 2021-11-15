@@ -79,7 +79,7 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 	}
 	
 	@Override
-	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) {
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException {
 		return metadata; //no decorator
 	}
 
