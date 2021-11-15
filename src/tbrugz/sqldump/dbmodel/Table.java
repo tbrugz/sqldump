@@ -85,16 +85,18 @@ public class Table extends DBObject implements Relation {
 		String type4sql = getTableType4sql();
 		sb.append(type4sql);
 		if(type4sql==null || !type4sql.isEmpty()) { sb.append(" "); }
-		sb.append("table "+tableName+" ("
-				+(dumpComments?" -- type="+type:"") );
+		sb.append("table "+tableName);
 
 		int countTabElements=0;
+		StringBuilder sbInner = new StringBuilder();
 		
 		//Columns
+		if(shouldDumpInnerElements()) {
+
 		for(Column c: columns) {
 			String colDesc = c.getDefinition();
 			//if(c.pk) { pkCols.add(c.name); }
-			sb.append((countTabElements==0?"":",")+"\n\t"+colDesc);
+			sbInner.append((countTabElements==0?"":",")+"\n\t"+colDesc);
 			countTabElements++;
 		}
 		
@@ -116,7 +118,7 @@ public class Table extends DBObject implements Relation {
 					if(!dumpPKs) { break; }
 				case CHECK:
 				case UNIQUE:
-					sb.append((countTabElements==0?"":",")+"\n\t"+cons.getDefinition(false));
+					sbInner.append((countTabElements==0?"":",")+"\n\t"+cons.getDefinition(false));
 				default:
 					break;
 			}
@@ -127,16 +129,29 @@ public class Table extends DBObject implements Relation {
 		if(dumpFKsInsideTable) {
 			List<FK> fks = ModelUtils.getImportedKeys(this, foreignKeys);
 			for(FK fk: fks) {
-				sb.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
+				sbInner.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
 				countTabElements++;
 			}
 		}
+
+		}
 		
 		//Table end
+		if(countTabElements==0) {
+			sb.append(dumpComments?" /* type="+type+" */":"");
+		}
+		else {
+			sb.append(" ("+(dumpComments?" -- type="+type:"") );
+			sb.append(sbInner);
+			sb.append("\n)");
+		}
 		//sb.delete(sb.length()-2, sb.length());
-		sb.append("\n)");
 		sb.append(getTableFooter4sql());
 		return sb.toString();
+	}
+	
+	public boolean shouldDumpInnerElements() {
+		return true;
 	}
 	
 	/*public String getConstraintsDefinition(boolean dumpPK) {

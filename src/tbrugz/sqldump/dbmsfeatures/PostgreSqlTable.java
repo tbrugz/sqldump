@@ -54,6 +54,11 @@ public class PostgreSqlTable extends Table {
 		}
 		return super.getTableFooter4sql();
 	}
+	
+	@Override
+	public boolean shouldDumpInnerElements() {
+		return getType()!=TableType.TABLE_PARTITION;
+	}
 
 	
 	// ---
