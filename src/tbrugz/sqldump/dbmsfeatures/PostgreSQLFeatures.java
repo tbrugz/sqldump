@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 
@@ -163,6 +164,10 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 			pt.setForeignTableServer(server);
 			pt.setForeignTableOptions(options);
 		}
+		if(t.getType().equals(TableType.PARTITIONED_TABLE)) {
+			PostgreSqlTable pt = (PostgreSqlTable) t;
+			addPartitionInfo(pt, getPartitionTableInfo(conn, pt.getSchemaName(), pt.getName()));
+		}
 	}
 	
 	String getForeignTableServer(Connection conn, String schema, String name) throws SQLException {
@@ -201,6 +206,50 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 		}
 	
 		return ret;
+	}
+	
+	// see: https://itectec.com/database/postgresql-how-to-identify-the-column-used-to-partition-a-table-from-the-postgres-system-catalogs/
+	// XXX order by: num_columns? column_index?
+	ResultSet getPartitionTableInfo(Connection conn, String schema, String name) throws SQLException {
+		String sql = "select \n"
+				+ "    par.relnamespace::regnamespace::text as table_schema, \n"
+				+ "    par.relname as table_name,\n"
+				+ "    pt.partition_strategy,\n"
+				+ "    partnatts as num_columns,\n"
+				+ "    column_index,\n"
+				+ "    col.column_name\n"
+				+ "from (\n"
+				+ "    select partrelid, partnatts,\n"
+				+ "         case partstrat\n"
+				+ "              when 'h' then 'hash' \n"
+				+ "              when 'l' then 'list' \n"
+				+ "              when 'r' then 'range' end as partition_strategy,\n"
+				+ "         unnest(partattrs) column_index\n"
+				+ "	from pg_partitioned_table\n"
+				+ "	) pt \n"
+				+ "join pg_class par on par.oid = pt.partrelid\n"
+				+ "join information_schema.columns col on col.table_schema = par.relnamespace::regnamespace::text\n"
+				+ "	and col.table_name = par.relname and ordinal_position = pt.column_index\n"
+				+ "where 1=1\n"
+				+ "	and par.relnamespace::regnamespace::text = ?"
+				+ "	and par.relname = ?";
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ps.setString(1, schema);
+		ps.setString(2, name);
+		return ps.executeQuery();
+	}
+	
+	void addPartitionInfo(PostgreSqlTable pgtable, ResultSet rs) throws SQLException {
+		pgtable.partitionColumns = new ArrayList<>();
+		for(int i=0;rs.next();i++) {
+			if(i==0) {
+				String partitionStrategy = rs.getString(3);
+				pgtable.partitionType = PartitionType.valueOf(partitionStrategy.toUpperCase());
+			}
+			String columnName = rs.getString(6);
+			pgtable.partitionColumns.add(columnName);
+		}
+		return;
 	}
 	
 }

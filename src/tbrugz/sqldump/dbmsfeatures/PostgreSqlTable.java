@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.util.Utils;
@@ -15,6 +16,10 @@ public class PostgreSqlTable extends Table {
 	// foreign table properties
 	String foreignTableServer;
 	Map<String,String> foreignTableOptions;
+	
+	// partitioned table properties
+	PartitionType partitionType;
+	List<String> partitionColumns;
 
 	@Override
 	public String getTableType4sql() {
@@ -33,6 +38,11 @@ public class PostgreSqlTable extends Table {
 				options.add(e.getKey()+" '"+e.getValue()+"'");
 			}
 			sb.append(Utils.join(options, ", ")).append(")");
+			return sb.toString();
+		}
+		if(getType()==TableType.PARTITIONED_TABLE) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("\npartition by "+partitionType+" ("+Utils.join(partitionColumns, ", ")+")\n");
 			return sb.toString();
 		}
 		return super.getTableFooter4sql();
