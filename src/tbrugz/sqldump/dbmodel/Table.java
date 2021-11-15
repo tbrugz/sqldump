@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Constraint.ConstraintType;
+import tbrugz.sqldump.util.Utils;
 
 public class Table extends DBObject implements Relation {
 	
@@ -87,8 +88,7 @@ public class Table extends DBObject implements Relation {
 		if(type4sql==null || !type4sql.isEmpty()) { sb.append(" "); }
 		sb.append("table "+tableName);
 
-		int countTabElements=0;
-		StringBuilder sbInner = new StringBuilder();
+		List<String> elements = new ArrayList<>();
 		
 		//Columns
 		if(shouldDumpInnerElements()) {
@@ -96,8 +96,7 @@ public class Table extends DBObject implements Relation {
 		for(Column c: columns) {
 			String colDesc = c.getDefinition();
 			//if(c.pk) { pkCols.add(c.name); }
-			sbInner.append((countTabElements==0?"":",")+"\n\t"+colDesc);
-			countTabElements++;
+			elements.add(colDesc);
 		}
 		
 		//PKs
@@ -118,31 +117,29 @@ public class Table extends DBObject implements Relation {
 					if(!dumpPKs) { break; }
 				case CHECK:
 				case UNIQUE:
-					sbInner.append((countTabElements==0?"":",")+"\n\t"+cons.getDefinition(false));
+					elements.add(cons.getDefinition(false));
 				default:
 					break;
 			}
-			countTabElements++;
 		}
 		
 		//FKs?
 		if(dumpFKsInsideTable) {
 			List<FK> fks = ModelUtils.getImportedKeys(this, foreignKeys);
 			for(FK fk: fks) {
-				sbInner.append((countTabElements==0?"":",")+"\n\t"+fk.fkSimpleScript(" ", dumpWithSchemaName));
-				countTabElements++;
+				elements.add(fk.fkSimpleScript(" ", dumpWithSchemaName));
 			}
 		}
 
 		}
 		
 		//Table end
-		if(countTabElements==0) {
+		if(elements.size()==0) {
 			sb.append(dumpComments?" /* type="+type+" */":"");
 		}
 		else {
-			sb.append(" ("+(dumpComments?" -- type="+type:"") );
-			sb.append(sbInner);
+			sb.append(" (" + (dumpComments?" -- type="+type:"") + "\n\t");
+			sb.append(Utils.join(elements, ",\n\t"));
 			sb.append("\n)");
 		}
 		//sb.delete(sb.length()-2, sb.length());
