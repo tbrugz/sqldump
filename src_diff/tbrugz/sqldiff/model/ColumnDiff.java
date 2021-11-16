@@ -11,6 +11,7 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.BaseNamedDBObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.StringUtils;
@@ -28,6 +29,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		ALWAYS;
 	}
 	
+	/*
 	public static class NamedTable implements NamedDBObject {
 		final String schemaName, tableName;
 		
@@ -73,6 +75,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			return result;
 		}
 	}
+	*/
 	
 	/*static final DBMSUpdateListener updateListener = new DBMSUpdateListener() {
 		@Override
@@ -91,7 +94,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 	final String tableName;
 	final Column column;
 	final Column previousColumn;
-	final transient NamedTable table;
+	final transient BaseNamedDBObject table;
 	
 	public static boolean addComments = true;
 	protected static DBMSFeatures features;
@@ -107,7 +110,7 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		this.tableName = tableName;
 		this.column = newColumn;
 		this.previousColumn = oldColumn;
-		this.table = new NamedTable(schemaName, tableName);
+		this.table = new BaseNamedDBObject(schemaName, tableName);
 		
 		if(features==null) {
 			//updateFeatures(null);

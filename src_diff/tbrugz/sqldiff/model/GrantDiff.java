@@ -2,6 +2,7 @@ package tbrugz.sqldiff.model;
 
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
+import tbrugz.sqldump.dbmodel.BaseNamedDBObject;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
@@ -18,7 +19,7 @@ public class GrantDiff extends SingleDiff implements Diff, Comparable<GrantDiff>
 	// grant "diff" properties
 	final ChangeType changeType;
 	//final transient Grant grant;
-	final transient ColumnDiff.NamedTable namedTable;
+	final transient BaseNamedDBObject namedTable;
 	
 	public GrantDiff(String schemaName, String tableName, PrivilegeType privilege, String grantee, boolean withGrantOption, boolean revoke) {
 		this.schemaName = schemaName;
@@ -28,7 +29,7 @@ public class GrantDiff extends SingleDiff implements Diff, Comparable<GrantDiff>
 		this.withGrantOption = withGrantOption;
 		//this.grant = grant;
 		this.changeType = revoke?ChangeType.DROP:ChangeType.ADD;
-		this.namedTable = new ColumnDiff.NamedTable(schemaName, tableName);
+		this.namedTable = new BaseNamedDBObject(schemaName, tableName);
 	}
 	
 	public GrantDiff(Grant grant, String schemaName, String tableName, boolean isRevoke) {
