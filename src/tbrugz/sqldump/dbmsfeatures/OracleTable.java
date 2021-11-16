@@ -45,7 +45,7 @@ public class OracleTable extends Table {
 	}
 	
 	@Override
-	public String getTableFooter4sql() {
+	public String getTableFooter4sql(boolean dumpWithSchemaName) {
 		String footer = "";
 		if(dumpPhysicalAttributes) {
 			footer += tableSpace!=null?"\ntablespace "+DBObject.getFinalIdentifier(tableSpace):"";

@@ -19,6 +19,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.BaseNamedDBObject;
 import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -280,7 +281,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 			if(i>0) {
 				log.warn("addPartitionedTableInfo: more than 1 row? i=="+i);
 			}
-			pgtable.baseTableName = rs.getString(2);
+			pgtable.baseTable = new BaseNamedDBObject(rs.getString(1), rs.getString(2));
 			pgtable.partitionExpression = rs.getString(4);
 		}
 		return;

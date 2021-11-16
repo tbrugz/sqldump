@@ -143,7 +143,7 @@ public class Table extends DBObject implements Relation {
 			sb.append("\n)");
 		}
 		//sb.delete(sb.length()-2, sb.length());
-		sb.append(getTableFooter4sql());
+		sb.append(getTableFooter4sql(dumpWithSchemaName));
 		return sb.toString();
 	}
 	
@@ -185,7 +185,7 @@ public class Table extends DBObject implements Relation {
 		return "";
 	}
 
-	public String getTableFooter4sql() {
+	public String getTableFooter4sql(boolean dumpSchemaName) {
 		return "";
 	}
 	

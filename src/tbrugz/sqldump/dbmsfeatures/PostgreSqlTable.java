@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import tbrugz.sqldump.dbmodel.DBObject;
+import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -22,7 +24,7 @@ public class PostgreSqlTable extends Table {
 	List<String> partitionColumns;
 
 	// table partition properties
-	String baseTableName;
+	NamedDBObject baseTable;
 	String partitionExpression;
 	
 	@Override
@@ -32,7 +34,7 @@ public class PostgreSqlTable extends Table {
 	}
 	
 	@Override
-	public String getTableFooter4sql() {
+	public String getTableFooter4sql(boolean dumpWithSchemaName) {
 		if(getType()==TableType.FOREIGN_TABLE) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("\nserver ").append(foreignTableServer).append("\n");
@@ -50,9 +52,9 @@ public class PostgreSqlTable extends Table {
 			return sb.toString();
 		}
 		if(getType()==TableType.TABLE_PARTITION) {
-			return "\npartition of "+baseTableName+" "+partitionExpression+"\n";
+			return "\npartition of "+DBObject.getFinalName(baseTable, dumpWithSchemaName)+" "+partitionExpression+"\n";
 		}
-		return super.getTableFooter4sql();
+		return super.getTableFooter4sql(dumpWithSchemaName);
 	}
 	
 	@Override
