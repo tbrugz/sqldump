@@ -3,8 +3,6 @@ package tbrugz.sqldump.resultset;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import tbrugz.sqldump.resultset.AbstractResultSet;
-
 public abstract class AbstractNavigationalResultSet extends AbstractResultSet {
 
 	protected abstract void updateCurrentElement();

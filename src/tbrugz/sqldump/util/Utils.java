@@ -675,6 +675,7 @@ public class Utils {
 		return ret;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> List<T> newList(T... elements) {
 		List<T> ret = new ArrayList<T>();
 		for(T t: elements) {

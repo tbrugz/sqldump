@@ -93,6 +93,7 @@ public class SchemaDiff implements Diff {
 		return ret;
 	}
 	
+	@SuppressWarnings("unchecked")
 	static int getMaxDBObjectNameSize(Collection<? extends Diff>... diffs) {
 		int max = 0;
 		for(Collection<? extends Diff> c: diffs) {
