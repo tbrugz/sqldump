@@ -1,0 +1,13 @@
+<project name="sqldump-docker"
+    default="resolve"
+    xmlns:ivy="antlib:org.apache.ivy.ant">
+
+    <target name="clean">
+        <delete dir="lib"/>
+    </target>
+
+    <target name="resolve" description="retrieve dependencies with Ivy">
+        <ivy:retrieve/>
+    </target>
+
+</project>

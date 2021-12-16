@@ -1,0 +1,19 @@
+
+# see: https://hub.docker.com/_/openjdk
+FROM openjdk:11
+
+# copy app
+COPY lib/* /app/lib/
+COPY resources/* /app/
+
+# data dir - for embedded databases
+#RUN mkdir /data && chmod a+rwx /data
+
+# work dir
+RUN mkdir /work && chmod a+rwx /work
+WORKDIR /work
+
+#WORKDIR /app
+#ENTRYPOINT ["java", "-cp", ".:lib/*", "tbrugz.sqldump.SQLDump"]
+
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*", "tbrugz.sqldump.SQLDump"]

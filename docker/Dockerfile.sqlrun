@@ -1,0 +1,4 @@
+
+FROM sqldump
+
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*", "tbrugz.sqldump.sqlrun.SQLRun"]

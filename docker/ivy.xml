@@ -1,0 +1,43 @@
+<ivy-module version="2.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"
+		xmlns:m="http://ant.apache.org/ivy/maven">
+	<info organisation="org.bitbucket.tbrugz" module="sqldump-docker"/>
+	<dependencies>
+		<!-- main -->
+		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.9.17" conf="default->default"/> <!-- 0.10-SNAPSHOT ? -->
+		<!-- base deps -->
+		<dependency org="commons-logging" name="commons-logging" rev="1.2" conf="default->default"/>
+		<!-- optional deps -->
+		<dependency org="log4j" name="log4j" rev="1.2.17" conf="default->default"/>
+
+		<!-- jdbc deps -->
+
+		<!-- derby 10.12: java6+ - https://db.apache.org/derby/derby_downloads.html -->
+		<!--
+		<dependency org="org.apache.derby" name="derby" rev="10.12.1.1" conf="default->default"/>
+		<dependency org="org.apache.derby" name="derbyclient" rev="10.12.1.1" conf="default->default"/>
+		-->
+		<!-- derby 10.15: java9+ - https://db.apache.org/derby/derby_downloads.html -->
+		<dependency org="org.apache.derby" name="derby" rev="10.15.2.0" conf="default->default"/>
+		<dependency org="org.apache.derby" name="derbyclient" rev="10.15.2.0" conf="default->default"/>
+
+		<!-- h2: java8+ - https://github.com/h2database/h2database/releases/tag/version-2.0.202 -->
+		<dependency org="com.h2database" name="h2" rev="2.0.202" conf="default->default"/> <!-- java8+ -->
+
+		<!-- mariadb/mysql: java8+ - https://mariadb.com/kb/en/about-mariadb-connector-j/ -->
+		<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="2.7.4" conf="default->default"/>
+
+		<!-- mssql server: java11+ - https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server -->
+		<dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.4.0.jre11" conf="default->default"/>
+
+		<!-- oracle: java11+ -->
+		<dependency org="com.oracle.database.jdbc" name="ojdbc11" rev="21.3.0.0" conf="default->default"/>
+
+		<!-- postgresql: java8+ - https://jdbc.postgresql.org/download.html -->
+		<dependency org="org.postgresql" name="postgresql" rev="42.3.1" conf="default->default"/>
+
+		<!-- sqlite -->
+		<dependency org="org.xerial" name="sqlite-jdbc" rev="3.36.0.3" conf="default->default"/>
+	</dependencies>
+</ivy-module>
