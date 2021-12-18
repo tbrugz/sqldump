@@ -28,10 +28,15 @@ docker build -t sqlrun --file Dockerfile.sqlrun .
 
 * sqlrun
 
-`docker run -it --rm sqlrun` - normal execution
+`docker run -it --rm -e TZ=$(</etc/timezone) sqlrun` - normal execution (using host timezone)
 
 
 * debugging
 
 `docker run -it --rm --entrypoint=/bin/bash sqldump`  
 `docker run -it --rm --entrypoint=/bin/bash sqlrun`
+
+
+## misc
+
+- Timezones in Docker: https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes

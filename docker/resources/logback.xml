@@ -1,0 +1,28 @@
+<configuration>
+
+  <!--
+    http://logback.qos.ch/manual/configuration.html
+    http://logback.qos.ch/manual/layouts.html
+  -->
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
+      <!--<pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>-->
+      <!--<pattern>%date %green(%level) %yellow([%thread]) %cyan(%logger{10}) [%file : %line] %msg%n</pattern>-->
+      <!--<pattern>%date %green(%level) [%cyan(%logger{10})] %msg%n</pattern>-->
+      <!--<pattern>%black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable</pattern>-->
+      <!--<pattern>%date %highlight(%-5level) %cyan(%logger{15}): %msg %n</pattern>-->
+      <!--<pattern>%gray(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%cyan(%-30.30logger)] %msg %n</pattern>-->
+      <pattern>%d{HH:mm:ss.SSS} %boldWhite(%-5level) [%cyan(%-30.30logger{30})] %msg%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="tbrugz.sqldump.util.ConnectionUtil" level="DEBUG" />
+  <logger name="tbrugz.sqldump.util.CLIProcessor" level="DEBUG" />
+
+  <root level="info">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>

@@ -10,4 +10,8 @@
         <ivy:retrieve/>
     </target>
 
+    <target name="dependencytree" description="show Ivy dependency tree">
+        <ivy:dependencytree/>
+    </target>
+
 </project>

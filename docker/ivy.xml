@@ -5,11 +5,23 @@
 	<info organisation="org.bitbucket.tbrugz" module="sqldump-docker"/>
 	<dependencies>
 		<!-- main -->
-		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.9.17" conf="default->default"/> <!-- 0.10-SNAPSHOT ? -->
+		<!-- 0.10-SNAPSHOT ? -->
+		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.9.17" conf="default->default">
+			<exclude name="commons-logging" />
+		</dependency>
+
 		<!-- base deps -->
+		<!--
 		<dependency org="commons-logging" name="commons-logging" rev="1.2" conf="default->default"/>
+		-->
+		<!-- http://www.slf4j.org/legacy.html#jclOverSLF4J -->
+		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.32" conf="default->default"/>
+
 		<!-- optional deps -->
+		<!--
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="default->default"/>
+		-->
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.8" conf="default->default"/>
 
 		<!-- jdbc deps -->
 
