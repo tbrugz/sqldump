@@ -1,42 +1,34 @@
 
 # sqldump docker images
 
-Docker images loaded with sqldump & some JDBC drivers
+Docker images loaded with sqldump/sqlrun & some JDBC drivers.
 
+Project repository: https://github.com/tbrugz/sqldump  
+Dockerfiles: https://github.com/tbrugz/sqldump/tree/master/docker/
 
-## building docker images
-
-* sqldump
-
-```shell
-ant clean resolve
-docker build -t sqldump --file Dockerfile.sqldump .
-```
-
-* sqlrun
-
-```shell
-ant clean resolve
-docker build -t sqlrun --file Dockerfile.sqlrun .
-```
 
 ## running containers
 
 * sqldump
 
-`docker run -it --rm sqldump` - normal execution
+`docker run -it --rm tbrugz/sqldump` - normal execution
 
 * sqlrun
 
-`docker run -it --rm -e TZ=$(</etc/timezone) sqlrun` - normal execution (using host timezone)
+`docker run -it --rm -e TZ=$(</etc/timezone) tbrugz/sqlrun` - normal execution (using host timezone)
 
 
-* debugging
+* debugging (running bash)
 
-`docker run -it --rm --entrypoint=/bin/bash sqldump`  
-`docker run -it --rm --entrypoint=/bin/bash sqlrun`
+`docker run -it --rm --entrypoint=/bin/bash tbrugz/sqldump`  
+`docker run -it --rm --entrypoint=/bin/bash tbrugz/sqlrun`
 
 
 ## misc
 
-- Timezones in Docker: https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes
+- Registry Images:  
+  https://hub.docker.com/r/tbrugz/sqldump  
+  https://hub.docker.com/r/tbrugz/sqlrun
+
+- Timezones in Docker:
+  https://serverfault.com/questions/683605/docker-container-time-timezone-will-not-reflect-changes
