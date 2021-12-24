@@ -11,11 +11,11 @@ Dockerfiles: https://github.com/tbrugz/sqldump/tree/master/docker/
 
 * sqldump
 
-`docker run -it --rm tbrugz/sqldump` - normal execution
+`docker run -it --rm tbrugz/sqldump <arguments>` - normal execution
 
 * sqlrun
 
-`docker run -it --rm -e TZ=$(</etc/timezone) tbrugz/sqlrun` - normal execution (using host timezone)
+`docker run -it --rm -e TZ=$(</etc/timezone) tbrugz/sqlrun <arguments>` - normal execution (using host timezone)
 
 
 * debugging (running bash)

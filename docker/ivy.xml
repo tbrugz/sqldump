@@ -5,8 +5,8 @@
 	<info organisation="org.bitbucket.tbrugz" module="sqldump-docker"/>
 	<dependencies>
 		<!-- main -->
-		<!-- 0.10-SNAPSHOT ? -->
-		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.9.17" conf="default->default">
+		<!-- 0.9.17 ? 0.10-SNAPSHOT ? -->
+		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.10-SNAPSHOT" conf="default->default">
 			<exclude name="commons-logging" />
 		</dependency>
 

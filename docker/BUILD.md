@@ -19,21 +19,35 @@ docker build -t sqlrun --file Dockerfile.sqlrun .
 ## tagging & publishing
 
 
+* Login
+
+`docker login`
+
+
+* Tag & Publish
+
 ```shell
-docker login
-docker tag sqldump tbrugz/sqldump:0.9.17
-docker tag sqldump tbrugz/sqldump:latest
-docker tag sqlrun tbrugz/sqlrun:0.9.17
-docker tag sqlrun tbrugz/sqlrun:latest
-docker push tbrugz/sqldump:0.9.17
-docker push tbrugz/sqldump:latest
-docker push tbrugz/sqlrun:0.9.17
-docker push tbrugz/sqlrun:latest
+#export TAG=0.9.17
+# or export TAG=0.10-SNAPSHOT
+# or export TAG=latest
+docker tag sqldump tbrugz/sqldump:$TAG
+docker tag sqlrun tbrugz/sqlrun:$TAG
+docker push tbrugz/sqldump:$TAG
+docker push tbrugz/sqlrun:$TAG
+```
+
+* Publish README
+
+```shell
+docker pushrm --file README.md tbrugz/sqldump
+docker pushrm --file README.md tbrugz/sqlrun
 ```
 
 
 ## misc
 
-https://docs.docker.com/docker-hub/
+- https://docs.docker.com/docker-hub/
 
-https://stackoverflow.com/questions/36022892/how-to-know-if-docker-is-already-logged-in-to-a-docker-registry-server
+- pushrm - https://github.com/christian-korneck/docker-pushrm
+
+- https://stackoverflow.com/questions/36022892/how-to-know-if-docker-is-already-logged-in-to-a-docker-registry-server

@@ -2,6 +2,8 @@
     default="resolve"
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
+    <property name="ivy.settings.file" value="../ivysettings.xml"/>
+
     <target name="clean">
         <delete dir="lib"/>
     </target>
