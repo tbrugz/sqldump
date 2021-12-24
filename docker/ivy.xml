@@ -3,6 +3,11 @@
 		xsi:noNamespaceSchemaLocation="http://ant.apache.org/ivy/schemas/ivy.xsd"
 		xmlns:m="http://ant.apache.org/ivy/maven">
 	<info organisation="org.bitbucket.tbrugz" module="sqldump-docker"/>
+	<configurations>
+		<conf name="default"/>
+		<conf name="deps"/>
+		<conf name="jdbc"/>
+	</configurations>
 	<dependencies>
 		<!-- main -->
 		<!-- 0.9.17 ? 0.10-SNAPSHOT ? -->
@@ -15,13 +20,13 @@
 		<dependency org="commons-logging" name="commons-logging" rev="1.2" conf="default->default"/>
 		-->
 		<!-- http://www.slf4j.org/legacy.html#jclOverSLF4J -->
-		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.32" conf="default->default"/>
+		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.32" conf="deps->default"/>
 
 		<!-- optional deps -->
 		<!--
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="default->default"/>
 		-->
-		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.8" conf="default->default"/>
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.8" conf="deps->default"/>
 
 		<!-- jdbc deps -->
 
@@ -31,25 +36,25 @@
 		<dependency org="org.apache.derby" name="derbyclient" rev="10.12.1.1" conf="default->default"/>
 		-->
 		<!-- derby 10.15: java9+ - https://db.apache.org/derby/derby_downloads.html -->
-		<dependency org="org.apache.derby" name="derby" rev="10.15.2.0" conf="default->default"/>
-		<dependency org="org.apache.derby" name="derbyclient" rev="10.15.2.0" conf="default->default"/>
+		<dependency org="org.apache.derby" name="derby" rev="10.15.2.0" conf="jdbc->default"/>
+		<dependency org="org.apache.derby" name="derbyclient" rev="10.15.2.0" conf="jdbc->default"/>
 
 		<!-- h2: java8+ - https://github.com/h2database/h2database/releases/tag/version-2.0.202 -->
-		<dependency org="com.h2database" name="h2" rev="2.0.202" conf="default->default"/> <!-- java8+ -->
+		<dependency org="com.h2database" name="h2" rev="2.0.202" conf="jdbc->default"/> <!-- java8+ -->
 
 		<!-- mariadb/mysql: java8+ - https://mariadb.com/kb/en/about-mariadb-connector-j/ -->
-		<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="2.7.4" conf="default->default"/>
+		<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="2.7.4" conf="jdbc->default"/>
 
 		<!-- mssql server: java11+ - https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server -->
-		<dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.4.0.jre11" conf="default->default"/>
+		<dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.4.0.jre11" conf="jdbc->default"/>
 
 		<!-- oracle: java11+ -->
-		<dependency org="com.oracle.database.jdbc" name="ojdbc11" rev="21.3.0.0" conf="default->default"/>
+		<dependency org="com.oracle.database.jdbc" name="ojdbc11" rev="21.3.0.0" conf="jdbc->default"/>
 
 		<!-- postgresql: java8+ - https://jdbc.postgresql.org/download.html -->
-		<dependency org="org.postgresql" name="postgresql" rev="42.3.1" conf="default->default"/>
+		<dependency org="org.postgresql" name="postgresql" rev="42.3.1" conf="jdbc->default"/>
 
 		<!-- sqlite -->
-		<dependency org="org.xerial" name="sqlite-jdbc" rev="3.36.0.3" conf="default->default"/>
+		<dependency org="org.xerial" name="sqlite-jdbc" rev="3.36.0.3" conf="jdbc->default"/>
 	</dependencies>
 </ivy-module>

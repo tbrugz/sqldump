@@ -3,7 +3,10 @@
 FROM openjdk:11
 
 # copy app
-COPY lib/* /app/lib/
+#COPY lib/deps/* lib/jdbc/* /app/lib/
+COPY lib/deps/* /app/lib/
+COPY lib/jdbc/* /app/jdbc/
+COPY lib/default/* /app/lib/
 COPY resources/* /app/
 
 # data dir - for embedded databases
@@ -16,4 +19,4 @@ WORKDIR /work
 #WORKDIR /app
 #ENTRYPOINT ["java", "-cp", ".:lib/*", "tbrugz.sqldump.SQLDump"]
 
-ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*", "tbrugz.sqldump.SQLDump"]
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/jdbc/*", "tbrugz.sqldump.SQLDump"]

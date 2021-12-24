@@ -3,12 +3,15 @@
     xmlns:ivy="antlib:org.apache.ivy.ant">
 
     <property name="ivy.settings.file" value="../ivysettings.xml"/>
+    <!--<property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>-->
+    <property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
 
     <target name="clean">
         <delete dir="lib"/>
     </target>
 
     <target name="resolve" description="retrieve dependencies with Ivy">
+        <echo message="ivy.retrieve.pattern = ${ivy.retrieve.pattern}"/>
         <ivy:retrieve/>
     </target>
 
