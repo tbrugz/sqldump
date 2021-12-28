@@ -1,17 +1,14 @@
 
 ## building docker images
 
-* sqldump
+
+`ant buildfull`
+
+**OR**
 
 ```shell
 ant clean resolve
 docker build -t sqldump --file Dockerfile.sqldump .
-```
-
-* sqlrun
-
-```shell
-ant clean resolve
 docker build -t sqlrun --file Dockerfile.sqlrun .
 ```
 
@@ -25,6 +22,11 @@ docker build -t sqlrun --file Dockerfile.sqlrun .
 
 
 * Tag & Publish
+
+
+`ant publish`
+
+**OR**
 
 ```shell
 #export TAG=0.9.17

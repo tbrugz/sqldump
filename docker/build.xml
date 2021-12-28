@@ -5,6 +5,8 @@
     <property name="ivy.settings.file" value="../ivysettings.xml"/>
     <!--<property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>-->
     <property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
+    <!-- 0.9.17 ? 0.10-SNAPSHOT? latest? -->
+    <property name="TAG" value="0.10-SNAPSHOT"/>
 
     <target name="clean">
         <delete dir="lib"/>
@@ -17,6 +19,37 @@
 
     <target name="dependencytree" description="show Ivy dependency tree">
         <ivy:dependencytree/>
+    </target>
+
+    <target name="build" description="builds docker images">
+        <exec executable="docker">
+            <arg line="build -t sqldump --file Dockerfile.sqldump ."/>
+        </exec>
+        <exec executable="docker">
+            <arg line="build -t sqlrun --file Dockerfile.sqlrun ."/>
+        </exec>
+    </target>
+
+    <target name="buildfull" description="clean + resolve + build" depends="clean, resolve, build">
+    </target>
+
+    <target name="publish" description="tag + publishes docker images">
+        <!--
+        load $TAG from sqldump-version.properties ?
+        -->
+        <exec executable="docker">
+            <arg line="tag sqldump tbrugz/sqldump:${TAG}"/>
+        </exec>
+        <exec executable="docker">
+            <arg line="tag sqlrun tbrugz/sqlrun:${TAG}"/>
+        </exec>
+
+        <exec executable="docker">
+            <arg line="push tbrugz/sqldump:${TAG}"/>
+        </exec>
+        <exec executable="docker">
+            <arg line="push tbrugz/sqlrun:${TAG}"/>
+        </exec>
     </target>
 
 </project>
