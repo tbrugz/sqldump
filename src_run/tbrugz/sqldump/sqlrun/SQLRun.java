@@ -136,7 +136,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	void end(boolean closeConnection) throws SQLException {
 		if(closeConnection && conn!=null) {
 			try {
-				log.info("closing connection: "+conn);
+				log.debug("closing connection: "+conn);
 				//conn.rollback();
 				conn.close();
 			}

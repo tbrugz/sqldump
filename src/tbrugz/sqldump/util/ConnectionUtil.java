@@ -177,7 +177,7 @@ public class ConnectionUtil {
 		}
 
 		if(dbUrl==null) {
-			String message = "db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed"; 
+			String message = "db url property '"+propsPrefix+SUFFIX_URL+"' undefined. can't proceed";
 			log.error(message);
 			throw new RuntimeException(message);
 		}
