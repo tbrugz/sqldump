@@ -1,9 +1,6 @@
 package tbrugz.sqldump.resultset;
 
-import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.ResultSetMetaData;
@@ -11,10 +8,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.ReflectionUtil;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -46,13 +46,10 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		columnNames = new ArrayList<String>();
 		columnTypes = new ArrayList<Integer>();
 		
-		//Class<E> clazz = (Class<E>) value.getClass();
-		
-		BeanInfo beanInfo = Introspector.getBeanInfo(clazz);
-		PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+		Map<String, Method> propertyMap = ReflectionUtil.getReadPropertyMethodMap(clazz);
 		if(uniqueCols!=null) {
 			for(String col: uniqueCols) {
-				addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes, true);
+				addMatchProperties(clazz, propertyMap, col, columnNames, columnTypes, true);
 			}
 		}
 		if(!onlyUniqueCols) {
@@ -67,12 +64,12 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				}
 				
 				for(String col: allCols) {
-					addMatchProperties(clazz, propertyDescriptors, col, columnNames, columnTypes, true);
+					addMatchProperties(clazz, propertyMap, col, columnNames, columnTypes, true);
 				}
 			}
 			else {
 				// add all!
-				addMatchProperties(clazz, propertyDescriptors, null, columnNames, columnTypes, false);
+				addMatchProperties(clazz, propertyMap, null, columnNames, columnTypes, false);
 			}
 		}
 		else {
@@ -86,6 +83,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		log.debug("resultset: cols: "+columnNames+" ; types: "+columnTypes); //+" ; methods: "+methods);
 	}
 	
+	/*
 	int addMatchProperties(Class<?> clazz, PropertyDescriptor[] propertyDescriptors, String matchCol, List<String> columnNames, List<Integer> columnTypes, boolean allowClassProperty) {
 		int matched = 0;
 		for (PropertyDescriptor prop : propertyDescriptors) {
@@ -109,11 +107,82 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 			}
 		}
 		if(matched==0) {
-			log.warn("column '"+matchCol+"' not matched: missing a getter? [class: "+clazz.getSimpleName()+"]");
+			if(matchCol!=null && "class".equals(matchCol) && allowClassProperty) {
+				try {
+					methods.add(Object.class.getMethod("getClass"));
+					columnNames.add(matchCol);
+					columnTypes.add(SQLUtils.getSqlTypeFromClass(String.class));
+					if(matchCol!=null) { return 1; }
+					//matched++;
+				} catch (NoSuchMethodException | SecurityException e) {
+					log.warn("Error getting 'getClass' method? prop: "+matchCol+" class: "+clazz.getSimpleName(), e);
+				}
+			}
+			else {
+				log.warn("column '"+matchCol+"' not matched: missing a getter? [class: "+clazz.getSimpleName()+"]");
+				//log.info("propertyDescriptors: "+Arrays.asList(propertyDescriptors)+" ; allowClassProperty: "+allowClassProperty);
+			}
 		}
 		return matched;
 	}
+	*/
 
+	int addMatchProperties(Class<?> clazz, Map<String, Method> propertyReadMethodMap, String matchCol, List<String> columnNames, List<Integer> columnTypes, boolean allowClassProperty) {
+		int matched = 0;
+		for (Entry<String, Method> e: propertyReadMethodMap.entrySet()) {
+			String pname = e.getKey();
+			if(matchCol==null || matchCol.equals(pname)) {
+				if(columnNames.contains(pname)) { continue; }
+				if("class".equals(pname)) {
+					if(!allowClassProperty) { continue; }
+					/*else {
+						try {
+							columnNames.add(pname);
+							columnTypes.add(SQLUtils.getSqlTypeFromClass(Class.class));
+							methods.add(Class.class.getMethod("getClass"));
+							if(matchCol!=null) { return 1; }
+							matched++;
+							continue;
+						} catch (NoSuchMethodException | SecurityException e) {
+							log.warn("Error getting 'getClass' method? prop: "+pname+" class: "+clazz.getSimpleName(), e);
+						}
+					}*/
+				}
+				//XXX: continue on transient, ... ??
+				
+				Method m = e.getValue();
+				if(m==null) {
+					log.warn("null get method? prop: "+pname+" class: "+clazz.getSimpleName());
+					continue;
+				}
+				int ptype = SQLUtils.getSqlTypeFromClass(m.getReturnType());
+				columnNames.add(pname);
+				columnTypes.add(ptype);
+				methods.add(m);
+				if(matchCol!=null) { return 1; }
+				matched++;
+			}
+		}
+		if(matched==0) {
+			if(matchCol!=null && "class".equals(matchCol) && allowClassProperty) {
+				try {
+					methods.add(Object.class.getMethod("getClass"));
+					columnNames.add(matchCol);
+					columnTypes.add(SQLUtils.getSqlTypeFromClass(String.class));
+					if(matchCol!=null) { return 1; }
+					//matched++;
+				} catch (NoSuchMethodException | SecurityException e) {
+					log.warn("Error getting 'getClass' method? prop: "+matchCol+" class: "+clazz.getSimpleName(), e);
+				}
+			}
+			else {
+				log.warn("column '"+matchCol+"' not matched: missing a getter? [class: "+clazz.getSimpleName()+"]");
+				//log.info("propertyDescriptors: "+Arrays.asList(propertyDescriptors)+" ; allowClassProperty: "+allowClassProperty);
+			}
+		}
+		return matched;
+	}
+	
 	static String objectToString(Object obj) {
 		if(obj==null) { return null; }
 		if(collectionValuesJoiner!=null && obj instanceof Collection) {
@@ -144,14 +213,21 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 				throw new IndexOutOfBoundsException("method index "+columnIndex+" not found");
 				//return null;
 			}
-			return m.invoke(currentElement, (Object[]) null);
+			
+			if(m.getDeclaringClass().isAssignableFrom(currentElement.getClass())) {
+				return m.invoke(currentElement, (Object[]) null);
+			}
+			else {
+				//log.debug("Element '"+currentElement+"' (of type "+currentElement.getClass().getSimpleName()+") not of type "+m.getDeclaringClass().getSimpleName()+" [method = "+m.getName()+"]");
+			}
 		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+			log.debug("getObject[IllegalAccessException]: method: "+m+" ; elem: "+currentElement, e);
 		} catch (IllegalArgumentException e) {
-			log.warn("getObject[IllegalArgumentException]: method: "+m+" ; elem: "+currentElement+" ; ex: "+e); 
+			log.warn("getObject[IllegalArgumentException]: method: "+m+" ; elem: "+currentElement+" ; ex: "+e);
+			//log.debug("getObject[IllegalArgumentException]: method: "+m+" ; elem: "+currentElement, e);
 			//e.printStackTrace();
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			log.debug("getObject[InvocationTargetException]: method: "+m+" ; elem: "+currentElement, e);
 		} catch (IndexOutOfBoundsException e) {
 			//log.warn("getObject[IndexOutOfBoundsException]: "+(columnIndex-1)+" / size=="+methods.size());
 			//e.printStackTrace();
