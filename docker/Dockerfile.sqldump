@@ -6,7 +6,8 @@ FROM openjdk:11
 #COPY lib/deps/* lib/jdbc/* /app/lib/
 COPY lib/deps/* /app/lib/
 COPY lib/jdbc/* /app/jdbc/
-COPY lib/default/* /app/lib/
+#COPY lib/default/* /app/lib/
+COPY lib/build/* /app/lib/
 COPY resources/* /app/
 
 # data dir - for embedded databases
