@@ -30,6 +30,7 @@ public class ConnectionUtil {
 	
 	//connection properties suffixes
 	public static final String SUFFIX_CONNECTION_DATASOURCE = ".datasource"; //.(conn(ection))pool(name)
+	public static final String SUFFIX_DATASOURCE_PROVIDER_CLASS = ".datasource.provider-class";
 	public static final String SUFFIX_DATASOURCE_CONTEXTLOOKUP = ".datasource.contextlookup";
 	public static final String SUFFIX_DRIVERCLASS = ".driverclass";
 	public static final String SUFFIX_URL = ".dburl";
@@ -64,13 +65,29 @@ public class ConnectionUtil {
 		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [readOnly="+readOnly+"] [autoCommit="+autoCommit+"]");
 		
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
+		String connectionDataSourceProviderClass = papp.getProperty(propsPrefix+SUFFIX_DATASOURCE_PROVIDER_CLASS);
 		String initialContextLookup = papp.getProperty(propsPrefix+SUFFIX_DATASOURCE_CONTEXTLOOKUP, DEFAULT_INITIAL_CONTEXT);
 		
 		String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
 		String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
 
 		Connection conn = null;
-		if(connectionDataSource!=null) {
+		if(connectionDataSourceProviderClass!=null) {
+			Object o = Utils.getClassInstance(connectionDataSourceProviderClass);
+			if(o==null) {
+				throw new IllegalStateException("null DataSource provider [class="+connectionDataSourceProviderClass+"]");
+			}
+			if(! (o instanceof DataSourceProvider)) {
+				throw new IllegalArgumentException("object not of type DataSourceProvider");
+			}
+			DataSourceProvider dsp = (DataSourceProvider) o;
+			DataSource ds = dsp.getDataSource(connectionDataSource);
+			if(ds==null) {
+				throw new IllegalStateException("null DataSource [class="+connectionDataSourceProviderClass+" ; provider = "+dsp+" ; datasource="+connectionDataSource+"]");
+			}
+			conn = ds.getConnection();
+		}
+		else if(connectionDataSource!=null) {
 			conn = getConnectionFromDataSource(connectionDataSource, initialContextLookup);
 		}
 		else {
