@@ -18,6 +18,8 @@ import javax.sql.DataSource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.cdi.CdiUtils;
+
 public class ConnectionUtil {
 	
 	static final Log log = LogFactory.getLog(ConnectionUtil.class);
@@ -73,7 +75,12 @@ public class ConnectionUtil {
 
 		Connection conn = null;
 		if(connectionDataSourceProviderClass!=null) {
-			Object o = Utils.getClassInstance(connectionDataSourceProviderClass);
+			Class<?> clazz = Utils.getClassWithinPackages(connectionDataSourceProviderClass);
+			Object o = CdiUtils.getClassInstance(clazz);
+			if(o==null) {
+				//log.info("null CDI DataSource provider [class="+connectionDataSourceProviderClass+"]");
+				o = Utils.getClassInstance(clazz);
+			}
 			if(o==null) {
 				throw new IllegalStateException("null DataSource provider [class="+connectionDataSourceProviderClass+"]");
 			}

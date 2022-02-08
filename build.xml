@@ -1,6 +1,7 @@
 <project name="sqldump" xmlns:ivy="antlib:org.apache.ivy.ant" default="dist" basedir=".">
 
 	<property name="src.dir" value="src"/>
+	<property name="src.cdi.dir" value="src_cdi"/>
 	<property name="src.diff.dir" value="src_diff"/>
 	<property name="src.graphml.dir" value="src_graphml"/>
 	<property name="src.mondrian.dir" value="src_mondrian"/>
@@ -145,6 +146,7 @@
 		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" release="7">
 			<!-- <compilerarg value="-Xlint:deprecation"/> -->
 			<src path="${src.dir}"/>
+			<src path="${src.cdi.dir}"/>
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
 			<src path="${src.run.dir}"/>
@@ -263,6 +265,9 @@
 			<fileset dir="${src.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			<fileset dir="${src.cdi.dir}">
+				<include name="**/*.java"/>
+			</fileset>
 			<fileset dir="${src.graphml.dir}">
 				<include name="**/*.java"/>
 			</fileset>
@@ -289,6 +294,7 @@
 		<!--echo message="java.home: ${java.home}" /-->
 		<javadoc destdir="${javadoc.dir}" sourcepath="${src.dir}" classpathref="classpath.compile">
 			<sourcepath location="${src.dir}"/>
+			<sourcepath location="${src.cdi.dir}"/>
 			<sourcepath location="${src.diff.dir}"/>
 			<sourcepath location="${src.run.dir}"/>
 			<sourcepath location="${src.graphml.dir}"/>
