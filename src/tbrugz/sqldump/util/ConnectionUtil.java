@@ -76,6 +76,9 @@ public class ConnectionUtil {
 		Connection conn = null;
 		if(connectionDataSourceProviderClass!=null) {
 			Class<?> clazz = Utils.getClassWithinPackages(connectionDataSourceProviderClass);
+			if(clazz==null) {
+				throw new IllegalArgumentException("invalid DataSource provider class [class="+connectionDataSourceProviderClass+"]");
+			}
 			Object o = CdiUtils.getClassInstance(clazz);
 			if(o==null) {
 				//log.info("null CDI DataSource provider [class="+connectionDataSourceProviderClass+"]");

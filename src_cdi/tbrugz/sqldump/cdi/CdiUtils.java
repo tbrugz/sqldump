@@ -10,6 +10,10 @@ public class CdiUtils {
 	static final Log log = LogFactory.getLog(CdiUtils.class);
 
 	public static <T> Object getClassInstance(Class<T> clazz) {
+		if(clazz==null) {
+			log.warn("null class");
+			return null;
+		}
 		try {
 			//log.info("getClassInstance: class: " + clazz);
 			T obj = CDI.current().select(clazz).get();
