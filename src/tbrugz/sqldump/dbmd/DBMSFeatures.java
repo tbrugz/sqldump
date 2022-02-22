@@ -114,6 +114,7 @@ public interface DBMSFeatures {
 	
 	boolean supportsExplainPlan();
 	boolean supportsCreateIndexWithoutName();
+	boolean supportsReleaseSavepoint();
 	
 	//String getExplainPlanForQuery(String sql);
 	

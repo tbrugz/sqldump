@@ -1127,4 +1127,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return "case when "+columnName+" is null then 't' else 'f' end";
 	}
 
+	@Override
+	public boolean supportsReleaseSavepoint() {
+		return false;
+	}
+
 }

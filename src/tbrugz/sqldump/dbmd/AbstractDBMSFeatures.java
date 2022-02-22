@@ -202,4 +202,9 @@ public abstract class AbstractDBMSFeatures implements DBMSFeatures {
 		return sqlExplainPlanQuery(sql);
 	}
 
+	@Override
+	public boolean supportsReleaseSavepoint() {
+		return true;
+	}
+
 }
