@@ -233,6 +233,7 @@
 	</target>
 
 	<target name="test" depends="compile" description="run junit tests"> <!-- XXX cobertura-instrument? -->
+		<echo message="output dir: ${dist.dir}"/>
 		<junit printsummary="true" filtertrace="off" fork="true" showoutput="false" haltonfailure="true">
 			<sysproperty key="net.sourceforge.cobertura.datafile" file="${basedir}/cobertura.ser" />
 			<classpath location="${bin.cobertura.dir}" />

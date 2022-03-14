@@ -147,6 +147,11 @@ Running (without sources)
 - (unix-like) Run `sqldump.sh` or run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
+Building or running with Docker
+------------------------------
+- See [docker/README.md](docker/README.md) or [docker/BUILD.md](docker/BUILD.md)
+
+
 Command-line options
 --------------------
 - `-propfile=<path-to-prop-file>`: loads a different config properties file

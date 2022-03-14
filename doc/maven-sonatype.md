@@ -21,6 +21,8 @@ on `$HOME/.gpgcredentials`, put your private key passphrase
 
 * RELEASE: **publish-sonatype-release** - `ant clean test publish-sonatype-release`
 
+(do not forget to `ant resolve` if needed)
+
 
 4- release (if RELEASE version)
 
