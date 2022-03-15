@@ -48,6 +48,7 @@ public class ExecOrderDiffComparator implements Comparator<Diff> {
 	
 	public static int dbObjectAddOrder(DBObjectType t) {
 		switch (t) {
+		case SCHEMA_META: return 0;
 		case TABLE: return 1;
 		case COLUMN: return 2;
 		case SYNONYM: return 3;

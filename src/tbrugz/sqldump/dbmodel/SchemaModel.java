@@ -10,7 +10,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "sqlDialect", "modelId", "metadata"})
+//@XmlAccessorType(XmlAccessType.NONE)
+@XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "schemaMetadata", "sqlDialect", "modelId", "metadata"})
 public class SchemaModel implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
@@ -25,6 +26,7 @@ public class SchemaModel implements Serializable {
 	Set<Synonym> synonyms = new TreeSet<Synonym>();
 	Set<Index> indexes = new TreeSet<Index>();
 	Set<Sequence> sequences = new TreeSet<Sequence>();
+	Set<SchemaMetaData> schemasMetadata = new TreeSet<SchemaMetaData>();
 
 	/*
 	 * metadata should contain things like:
@@ -101,7 +103,15 @@ public class SchemaModel implements Serializable {
 	public void setSequences(Set<Sequence> sequences) {
 		this.sequences = sequences;
 	}
-	
+
+	@XmlElement(name="schemaMetadata")
+	public Set<SchemaMetaData> getSchemaMetadata() {
+		return schemasMetadata;
+	}
+	public void setSchemaMetadata(Set<SchemaMetaData> schemasMetadata) {
+		this.schemasMetadata = schemasMetadata;
+	}
+
 	@XmlElement(name="sqlDialect")
 	public String getSqlDialect() {
 		return sqlDialect;

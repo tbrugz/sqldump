@@ -11,6 +11,8 @@ public enum DBObjectType {
 	
 	RELATION, QUERY, // "abstract" object types
 	
+	SCHEMA_META, //metadata
+	
 	/** Abstract type for <em>any</em> database object */
 	ANY,
 	
@@ -33,6 +35,8 @@ public enum DBObjectType {
 			return "materialized view";
 		case PACKAGE_BODY:
 			return "package body";
+		case SCHEMA_META:
+			return "schema";
 		case TYPE_BODY:
 			return "type body";
 		default:
