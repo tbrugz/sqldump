@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
@@ -27,7 +28,7 @@ public class MondrianTests {
 		sqlr.doMain(TestUtil.NULL_PARAMS, p);
 	}
 	
-	@Test
+	@Test @Ignore
 	public void dumpSchemaAndValidate() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Properties p = new ParametrizedProperties();
 		p.load(MondrianTests.class.getResourceAsStream("mondrian1.properties"));
@@ -36,7 +37,7 @@ public class MondrianTests {
 		sqld.doMain(TestUtil.NULL_PARAMS, p);
 	}
 
-	@Test
+	@Test @Ignore
 	public void dumpOlapMDXQuery() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Properties p = new ParametrizedProperties();
 		p.load(MondrianTests.class.getResourceAsStream("mondrian2.properties"));

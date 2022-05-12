@@ -6,7 +6,9 @@
 		<conf name="default"/>
 		<conf name="optional" extends="default" visibility="private"/>
 		<conf name="test" extends="optional" visibility="private"/>
+		<conf name="testmondrian" visibility="private"/>
 		<conf name="findbugs" visibility="private"/>
+		<conf name="codeanalysis" visibility="private"/>
 	</configurations>
 	<publications>
 		<artifact name="sqldump" type="jar" conf="default"/>
@@ -26,6 +28,9 @@
 		<dependency org="jakarta.xml.bind" name="jakarta.xml.bind-api" rev="2.3.2" conf="default->default"/>
 		<!--<dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.0" conf="default->default"/>-->
 		<dependency org="javax.mail" name="mail" rev="1.4.7" conf="optional->default"/>
+
+		<!-- ant tasks deps -->
+		<dependency org="org.apache.ant" name="ant" rev="1.9.16" conf="default->default"/>
 		
 		<!-- datadump syntax deps -->
 		<!-- <dependency org="org.odftoolkit" name="simple-odf" rev="0.6.6"/> -->
@@ -49,7 +54,7 @@
 		<!--<dependency org="org.dom4j" name="dom4j" rev="2.1.1" conf="optional->default"/>-->
 		
 		<!-- mondrian deps -->
-		<dependency org="org.olap4j" name="olap4j" rev="1.2.0" conf="optional->default"/>
+		<dependency org="org.olap4j" name="olap4j" rev="1.2.0" conf="testmondrian->default"/>
 		
 		<!-- optional deps -->
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="optional->default"/>
@@ -87,21 +92,22 @@
 		mondrian 3.6.0-3.6.6 seems to cause "circular dependency warning": xom#xom;1.1->jaxen#jaxen;1.1-beta-8->xom#xom;1.0b3
 		mondrian 3.6.7 needs more explicit dependencies
 		-->
-		<dependency org="pentaho" name="mondrian" rev="3.6.6" conf="test->default"/> <!-- 3.6.0, 3.6.6, 3.6.7, 3.12.0.2-208, 3.14.0.28-223 -->
+		<dependency org="pentaho" name="mondrian" rev="3.6.9" conf="testmondrian->default"/> <!-- 3.6.0, 3.6.6, 3.6.7, 3.12.0.2-208, 3.14.0.28-223 -->
+		<!-- <dependency org="xml-apis" name="xml-apis" rev="1.4.01" conf="testmondrian->default"/> -->
 		<!-- <dependency org="eigenbase" name="eigenbase-xom" rev="1.3.5" conf="test->default"/> -->
 		<!-- <dependency org="eigenbase" name="eigenbase-properties" rev="1.1.4" conf="test->default"/> -->
 		<!-- <dependency org="org.slf4j" name="slf4j-api" rev="1.7.25" conf="test->default"/> -->
 		
 		<!-- code analysis deps -->
-		<dependency org="net.sourceforge.pmd" name="pmd" rev="5.0.4" conf="test->default">
+		<dependency org="net.sourceforge.pmd" name="pmd" rev="5.0.4" conf="codeanalysis->default">
 			<exclude org="commons-io" name="commons-io"/>
 		</dependency>
-		<dependency org="commons-io" name="commons-io" rev="2.5" conf="test->default"/>
+		<dependency org="commons-io" name="commons-io" rev="2.5" conf="codeanalysis->default"/>
 		<!-- <dependency org="net.sourceforge.pmd" name="pmd-core" rev="5.4.2" conf="test->default"/> -->
 		<!-- <dependency org="net.sourceforge.cobertura" name="cobertura" rev="2.1.1" conf="test->default"/> -->
 		<dependency org="com.google.code.findbugs" name="findbugs" rev="2.0.3" conf="findbugs->default"/>
 		<!-- <dependency org="com.puppycrawl.tools" name="checkstyle" rev="5.6" conf="test->default"/> -->
-		<dependency org="jdepend" name="jdepend" rev="2.9.1" conf="test->default"/>
+		<dependency org="jdepend" name="jdepend" rev="2.9.1" conf="codeanalysis->default"/>
 
 		<!-- other/misc deps -->
 		<!--

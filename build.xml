@@ -151,7 +151,7 @@
 			<src path="${src.graphml.dir}"/>
 			<src path="${src.diff.dir}"/>
 			<src path="${src.run.dir}"/>
-			<src path="${src.mondrian.dir}"/>
+			<!--<src path="${src.mondrian.dir}"/>-->
 			<src path="${src.pivot.dir}"/>
 			<src path="${src.xtra.dir}"/>
 			<src path="${src.anttaks.dir}"/>
