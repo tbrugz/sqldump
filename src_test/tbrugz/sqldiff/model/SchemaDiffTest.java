@@ -13,6 +13,7 @@ import tbrugz.sqldiff.RenameDetector;
 import tbrugz.sqldiff.SchemaDiffer;
 import tbrugz.sqldump.JAXBSchemaXMLSerializer;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.SchemaMetaData;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
@@ -141,6 +142,53 @@ public class SchemaDiffTest {
 		System.out.println("diff: "+sd.getDiff());
 	}
 
+	@Test
+	public void schemaNameCreate() {
+		SchemaModel sm1 = new SchemaModel();
+		sm1.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		
+		SchemaModel sm2 = new SchemaModel();
+		sm2.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		sm2.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema2"));
+		
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
+		//System.out.println("diff: "+sd.getDiff());
+		Assert.assertEquals(1, sd.getChildren().size());
+		Assert.assertEquals("create schema schema2;", sd.getDiff().trim());
+	}
+
+	@Test
+	public void schemaNameDrop() {
+		SchemaModel sm1 = new SchemaModel();
+		sm1.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		sm1.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema2"));
+		
+		SchemaModel sm2 = new SchemaModel();
+		sm2.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
+		//System.out.println("diff: "+sd.getDiff());
+		Assert.assertEquals(1, sd.getChildren().size());
+		Assert.assertEquals("drop schema schema2;", sd.getDiff().trim());
+	}
+
+	@Test
+	public void schemaNameEquals() {
+		SchemaModel sm1 = new SchemaModel();
+		sm1.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		sm1.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema3"));
+		
+		SchemaModel sm2 = new SchemaModel();
+		sm2.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema3"));
+		sm2.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData("schema1"));
+		
+		SchemaDiff sd = differ.diffSchemas(sm1, sm2);
+		//System.out.println("diff: "+sd.getDiff());
+		Assert.assertEquals(0, sd.getChildren().size());
+		Assert.assertEquals("", sd.getDiff().trim());
+	}
+
+	
 	/* --- */
 	
 	public static Column newColumn(String name, String type, int precision, int position) {

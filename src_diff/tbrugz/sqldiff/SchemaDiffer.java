@@ -144,7 +144,8 @@ public class SchemaDiffer {
 		DBObjectType.TABLE, DBObjectType.VIEW, DBObjectType.MATERIALIZED_VIEW, DBObjectType.TRIGGER, DBObjectType.EXECUTABLE,
 		DBObjectType.SYNONYM, DBObjectType.INDEX, DBObjectType.SEQUENCE,
 		DBObjectType.FUNCTION, DBObjectType.PROCEDURE,
-		DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
+		DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE,
+		DBObjectType.SCHEMA_META,
 	};
 	
 	static final Set<DBObjectType> diffableTypesSet = new HashSet<DBObjectType>();
@@ -174,6 +175,11 @@ public class SchemaDiffer {
 		String dialect = modelOrig.getSqlDialect();
 		SQLDiff.setupFeaturesIfNull(dialect);
 		
+		//Schema Metadata
+		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.SCHEMA_META)) {
+			diffs(DBObjectType.SCHEMA_META, diff.getDbIdDiffs(), modelOrig.getSchemaMetadata(), modelNew.getSchemaMetadata());
+		}
+
 		//Tables
 		if(doDiffTypes==null || doDiffTypes.contains(DBObjectType.TABLE)) {
 			//TODO: diff or not COLUMN, GRANT & CONSTRAINT types

@@ -36,6 +36,7 @@ import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.Relation;
+import tbrugz.sqldump.dbmodel.SchemaMetaData;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
@@ -154,7 +155,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			doSchemaGrabProceduresAndFunctions = false,
 			doSchemaGrabDbSpecific = false,
 			doSetConnectionReadOnly = false,
-			doGrabMetadata = false;
+			doGrabMetadata = false,
+			doGrabSchemaNames = true;
 
 	boolean ignoretableswithzerocolumns = true,
 		recursivedump = false,
@@ -290,8 +292,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		@SuppressWarnings("deprecation")
 		String schemaPattern = Utils.getPropWithDeprecated(papp, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
+		List<String> schemas = null;
 		if(Utils.isNullOrEmpty(schemaPattern)) {
-			List<String> schemas = SQLUtils.getSchemaNames(dbmd);
+			schemas = SQLUtils.getSchemaNames(dbmd);
 			log.info(getIdDesc()+"schemaPattern not defined. schemas available: "+schemas);
 			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
@@ -321,9 +324,22 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 		else {
 			if(log.isDebugEnabled()) {
-				List<String> schemas = SQLUtils.getSchemaNames(dbmd);
+				schemas = SQLUtils.getSchemaNames(dbmd);
 				log.debug(getIdDesc()+"schemas: "+schemas);
 			}
+			else if(doGrabSchemaNames) {
+				schemas = SQLUtils.getSchemaNames(dbmd);
+			}
+		}
+		
+		if(schemas!=null) {
+			for(String s: schemas) {
+				schemaModel.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData(s));
+			}
+			log.info(getIdDesc()+"schema names: "+schemas);
+		}
+		else {
+			log.info(getIdDesc()+"no schema name grabbed");
 		}
 
 		if(schemaPattern==null) {
@@ -332,7 +348,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			return null;
 		}
 		
-		log.info(getIdDesc()+"schema grab... schema(s): '"+schemaPattern+"' [features: "+feats.getClass().getSimpleName()+"]");
+		log.info(getIdDesc()+"schema grab... schemaPattern = '"+schemaPattern+"' [features: "+feats.getClass().getSimpleName()+"]");
 
 		initCounters();
 		

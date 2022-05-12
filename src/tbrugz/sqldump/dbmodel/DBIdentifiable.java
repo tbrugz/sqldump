@@ -118,6 +118,7 @@ public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparabl
 		if(ident instanceof Trigger) { return DBObjectType.TRIGGER; }
 		if(ident instanceof MaterializedView) { return DBObjectType.MATERIALIZED_VIEW; } //MaterializedView extends View: must come first in "if" order
 		if(ident instanceof View) { return DBObjectType.VIEW; }
+		if(ident instanceof SchemaMetaData) { return DBObjectType.SCHEMA_META; }
 		
 		throw new RuntimeException("getType: DBObjectType not defined for: "+ident.getClass().getName());
 	}

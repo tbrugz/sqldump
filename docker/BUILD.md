@@ -24,7 +24,7 @@ docker build -t sqlrun --file Dockerfile.sqlrun .
 * Tag & Publish
 
 
-`ant publish` ; `ant publish -DTAG=<tag>` (`ant publish -DTAG=latest`)
+`ant publish` (using TAG from `../src/sqldump-version.properties`) ; `ant publish -DTAG=<tag>` (`ant publish -DTAG=latest`)
 
 **OR**
 
