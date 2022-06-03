@@ -5,7 +5,7 @@
         <schemaName>PUBLIC</schemaName>
         <columns>
             <name>ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>1</ordinalPosition>
             <pk>true</pk>
@@ -14,7 +14,7 @@
         </columns>
         <columns>
             <name>NAME</name>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>2</ordinalPosition>
             <pk>false</pk>
@@ -23,7 +23,7 @@
         </columns>
         <columns>
             <name>PARENT_ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
@@ -43,7 +43,7 @@
         <schemaName>PUBLIC</schemaName>
         <columns>
             <name>ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>1</ordinalPosition>
             <pk>true</pk>
@@ -52,7 +52,7 @@
         </columns>
         <columns>
             <name>NAME</name>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>2</ordinalPosition>
             <pk>false</pk>
@@ -61,7 +61,7 @@
         </columns>
         <columns>
             <name>SUPERVISOR_ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
@@ -70,7 +70,7 @@
         </columns>
         <columns>
             <name>DEPARTMENT_ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>4</ordinalPosition>
             <pk>false</pk>
@@ -79,7 +79,7 @@
         </columns>
         <columns>
             <name>SALARY</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
@@ -99,7 +99,7 @@
         <schemaName>PUBLIC</schemaName>
         <columns>
             <name>ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>1</ordinalPosition>
             <pk>true</pk>
@@ -108,7 +108,7 @@
         </columns>
         <columns>
             <name>DT_X</name>
-            <columSize>8</columSize>
+            <columnSize>8</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>2</ordinalPosition>
             <pk>false</pk>
@@ -117,7 +117,7 @@
         </columns>
         <columns>
             <name>DESCRIPTION</name>
-            <columSize>1000</columSize>
+            <columnSize>1000</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>

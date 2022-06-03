@@ -6,37 +6,37 @@
         <columns>
             <name>INSTANCEID</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>REVISION</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>PARID</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>PARTYPE</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>SOLNID</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>READONLY</name>
             <type>boolean</type>
-            <columSize>1</columSize>
+            <columnSize>1</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -94,13 +94,13 @@
         <columns>
             <name>authority</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>description</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -158,19 +158,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -229,19 +229,19 @@
         <columns>
             <name>bgcontid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>bguser</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -299,79 +299,79 @@
         <columns>
             <name>contitemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>name</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>parent_id</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>path</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>title</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>mimetype</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>url</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>latestvernum</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>extension</name>
             <type>varchar</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>writemode</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>namecol</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>pathcol</name>
             <type>varchar</type>
-            <columSize>1024</columSize>
+            <columnSize>1024</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -429,43 +429,43 @@
         <columns>
             <name>contentid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>name</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>solnid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>description</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>dirpath</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>namecol</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -523,68 +523,68 @@
         <columns>
             <name>contifileid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>osfilename</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>ospath</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>actname</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>parent_id</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>versnum</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>filesize</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>filedatetime</name>
             <type>timestamp</type>
-            <columSize>29</columSize>
+            <columnSize>29</columnSize>
             <decimalDigits>6</decimalDigits>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>isinitialized</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>latestverid</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -642,19 +642,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>blob</type>
-            <columSize>2147483647</columSize>
+            <columnSize>2147483647</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -713,55 +713,55 @@
         <columns>
             <name>name</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>maxactconn</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>driverclass</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>idleconn</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>username</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>password</name>
             <type>varchar</type>
-            <columSize>150</columSize>
+            <columnSize>150</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>url</name>
             <type>varchar</type>
-            <columSize>512</columSize>
+            <columnSize>512</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>query</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>wait</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -819,20 +819,20 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>timestamp</type>
-            <columSize>29</columSize>
+            <columnSize>29</columnSize>
             <decimalDigits>6</decimalDigits>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -891,13 +891,13 @@
         <columns>
             <name>username</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>authority</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -956,19 +956,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1027,19 +1027,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>clob</type>
-            <columSize>2147483647</columSize>
+            <columnSize>2147483647</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1098,19 +1098,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1169,31 +1169,31 @@
         <columns>
             <name>acl_id</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>acl_mask</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>recip_type</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>recipient</name>
             <type>varchar</type>
-            <columSize>255</columSize>
+            <columnSize>255</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>acl_position</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1252,55 +1252,55 @@
         <columns>
             <name>file_id</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>parent</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>filename</name>
             <type>varchar</type>
-            <columSize>255</columSize>
+            <columnSize>255</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>fullpath</name>
             <type>varchar</type>
-            <columSize>1024</columSize>
+            <columnSize>1024</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>datacol</name>
             <type>blob</type>
-            <columSize>2147483647</columSize>
+            <columnSize>2147483647</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>directory</name>
             <type>boolean</type>
-            <columSize>1</columSize>
+            <columnSize>1</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>lastmodified</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>child_id</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -1358,75 +1358,75 @@
         <columns>
             <name>scheduleid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>schedtitle</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>schedref</name>
             <type>varchar</type>
-            <columSize>1024</columSize>
+            <columnSize>1024</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>scheddesc</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>cronstring</name>
             <type>varchar</type>
-            <columSize>256</columSize>
+            <columnSize>256</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>repeatcount</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>repeatinterval</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>startdate</name>
             <type>timestamp</type>
-            <columSize>29</columSize>
+            <columnSize>29</columnSize>
             <decimalDigits>6</decimalDigits>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>enddate</name>
             <type>timestamp</type>
-            <columSize>29</columSize>
+            <columnSize>29</columnSize>
             <decimalDigits>6</decimalDigits>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>groupname</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>last_trigger</name>
             <type>timestamp</type>
-            <columSize>29</columSize>
+            <columnSize>29</columnSize>
             <decimalDigits>6</decimalDigits>
             <nullable>true</nullable>
         </columns>
@@ -1485,19 +1485,19 @@
         <columns>
             <name>scheduleid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>elt</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>schedid</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1556,25 +1556,25 @@
         <columns>
             <name>subcontid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subconttype</name>
             <type>varchar</type>
-            <columSize>255</columSize>
+            <columnSize>255</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subcontactref</name>
             <type>varchar</type>
-            <columSize>1024</columSize>
+            <columnSize>1024</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1632,19 +1632,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>blob</type>
-            <columSize>2147483647</columSize>
+            <columnSize>2147483647</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1703,19 +1703,19 @@
         <columns>
             <name>scheduleid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>elt</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>schedid</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1774,43 +1774,43 @@
         <columns>
             <name>subscrid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subscrtype</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subscruser</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subscrtitle</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>subscr_contid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>subscrdest</name>
             <type>varchar</type>
-            <columSize>200</columSize>
+            <columnSize>200</columnSize>
             <nullable>true</nullable>
         </columns>
         <constraints>
@@ -1868,19 +1868,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>blob</type>
-            <columSize>2147483647</columSize>
+            <columnSize>2147483647</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -1939,19 +1939,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>paramvalue</name>
             <type>varchar</type>
-            <columSize>254</columSize>
+            <columnSize>254</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>paramkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -2010,25 +2010,25 @@
         <columns>
             <name>user_settings_id</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>username</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>setting_name</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>setting_value</name>
             <type>varchar</type>
-            <columSize>2048</columSize>
+            <columnSize>2048</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -2086,25 +2086,25 @@
         <columns>
             <name>username</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>password</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>description</name>
             <type>varchar</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>enabled</name>
             <type>boolean</type>
-            <columSize>1</columSize>
+            <columnSize>1</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -2162,19 +2162,19 @@
         <columns>
             <name>itemid</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>versionvalue</name>
             <type>bigint</type>
-            <columSize>19</columSize>
+            <columnSize>19</columnSize>
             <nullable>true</nullable>
         </columns>
         <columns>
             <name>versionkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>
@@ -2233,13 +2233,13 @@
         <columns>
             <name>versionkey</name>
             <type>varchar</type>
-            <columSize>50</columSize>
+            <columnSize>50</columnSize>
             <nullable>false</nullable>
         </columns>
         <columns>
             <name>revision</name>
             <type>integer</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
         </columns>
         <constraints>

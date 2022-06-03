@@ -290,12 +290,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		this.type = type;
 	}
 
-	//TODO: rename [g|s]etColumSize -> [g|s]etColumnSize
-	public Integer getColumSize() {
+	public Integer getColumnSize() {
 		return columnSize;
 	}
 
-	public void setColumSize(Integer columnSize) {
+	public void setColumnSize(Integer columnSize) {
 		this.columnSize = columnSize;
 	}
 

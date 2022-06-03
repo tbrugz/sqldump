@@ -263,6 +263,7 @@ public class SchemaDiffer {
 		ln.addAll(listNew);*/
 		
 		//log.info("diffs: "+objType+" / "+origOwnerTableName);
+		//log.debug("diffs: "+objType+" ; listOrig = "+listOrig+" ; listNew = "+listNew);
 		for(DBIdentifiable cOrig: listOrig) {
 			//log.info("dbid: "+cOrig);
 			//DBIdentifiable cOrig = (DBIdentifiable) lo.get(i);

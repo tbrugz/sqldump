@@ -1060,7 +1060,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			Object columnSize = cols.getObject("COLUMN_SIZE");
 			if(columnSize!=null) {
 				int icolumnSize = ((Number) columnSize).intValue();
-				c.setColumSize(icolumnSize);
+				c.setColumnSize(icolumnSize);
 			}
 		}
 		catch(RuntimeException e) {

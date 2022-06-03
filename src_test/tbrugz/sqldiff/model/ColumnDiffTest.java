@@ -300,7 +300,7 @@ public class ColumnDiffTest {
 		Column c = new Column();
 		c.setName(name);
 		c.setType(type);
-		c.setColumSize(precision);
+		c.setColumnSize(precision);
 		c.setNullable(nullable);
 		c.setDefaultValue(defaultValue);
 		return c;

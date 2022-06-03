@@ -152,7 +152,7 @@ public class StatsProc extends AbstractSQLProc {
 					String a = c.getName();
 					String sqlPrefix = "select '"+t+"' as table_name, '"+a+"' as column_name, "+
 							"'"+c.getType()+"' as type_name, "+
-							c.getColumSize()+" as column_size, "+
+							c.getColumnSize()+" as column_size, "+
 							//c.getDecimalDigits()+" as decimal_digits, '"+
 							//c.isNullable()+"' as nullable,"+
 							"count(*) as count_all, ";

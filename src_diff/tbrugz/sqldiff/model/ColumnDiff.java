@@ -191,8 +191,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 		switch(useTempColumnStrategy) {
 		case ALWAYS: break;
 		case NEWPRECISIONSMALLER:
-			if(column.getColumSize()!=null && previousColumn.getColumSize()!=null
-				&& previousColumn.getColumSize()>column.getColumSize()) break;
+			if(column.getColumnSize()!=null && previousColumn.getColumnSize()!=null
+				&& previousColumn.getColumnSize()>column.getColumnSize()) break;
 		case TYPESDIFFER:
 			if(! column.getType().equals(previousColumn.getType())) break;
 			//if(! column.type.equals(previousColumn.type)) break;

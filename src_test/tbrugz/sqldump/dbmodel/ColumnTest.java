@@ -18,7 +18,7 @@ public class ColumnTest {
 		Column c = new Column();
 		c.setName("one");
 		c.setType("numeric");
-		c.setColumSize(3);
+		c.setColumnSize(3);
 		c.setNullable(true);
 		c.setAutoIncrement(true);
 		return c;

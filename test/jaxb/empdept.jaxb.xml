@@ -6,21 +6,21 @@
         <columns>
             <name>ID</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>NAME</name>
             <type>VARCHAR</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>true</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>PARENT_ID</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <remarks></remarks>
         </columns>
@@ -38,35 +38,35 @@
         <columns>
             <name>ID</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>NAME</name>
             <type>VARCHAR</type>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>SUPERVISOR_ID</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>DEPARTMENT_ID</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <remarks></remarks>
         </columns>
         <columns>
             <name>SALARY</name>
             <type>INTEGER</type>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <remarks></remarks>
         </columns>

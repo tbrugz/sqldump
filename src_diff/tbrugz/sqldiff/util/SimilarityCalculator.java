@@ -67,8 +67,8 @@ public class SimilarityCalculator {
 		if(c1.getOrdinalPosition()!=0 && (c1.getOrdinalPosition()==c2.getOrdinalPosition())) { ret += 0.4; }
 		if(c1.getName().equals(c2.getName())) { ret += 0.3; }
 		if(c1.getType().equals(c2.getType())) { ret += 0.2; }
-		if((c1.getColumSize()==null && c2.getColumSize()==null)
-				|| (c1.getColumSize()!=null && c1.getColumSize().equals(c2.getColumSize()))) { ret += 0.1; }
+		if((c1.getColumnSize()==null && c2.getColumnSize()==null)
+				|| (c1.getColumnSize()!=null && c1.getColumnSize().equals(c2.getColumnSize()))) { ret += 0.1; }
 		
 		return ret;
 	}

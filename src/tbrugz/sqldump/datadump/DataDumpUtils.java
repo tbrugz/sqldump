@@ -462,7 +462,7 @@ public class DataDumpUtils {
 			int precision = md.getPrecision(colpos);
 			int scale = md.getScale(colpos);
 			if(precision!=0) {
-				c.setColumSize(precision);
+				c.setColumnSize(precision);
 			}
 			if(scale!=0) {
 				c.setDecimalDigits(scale);
