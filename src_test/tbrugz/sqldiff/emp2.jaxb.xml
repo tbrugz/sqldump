@@ -5,7 +5,7 @@
         <schemaName>PUBLIC</schemaName>
         <columns>
             <name>ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>1</ordinalPosition>
             <pk>true</pk>
@@ -14,7 +14,7 @@
         </columns>
         <columns>
             <name>NAMEZ</name>
-            <columSize>100</columSize>
+            <columnSize>100</columnSize>
             <nullable>false</nullable>
             <ordinalPosition>2</ordinalPosition>
             <pk>false</pk>
@@ -23,7 +23,7 @@
         </columns>
         <columns>
             <name>SUPERVISOR_ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>3</ordinalPosition>
             <pk>false</pk>
@@ -32,7 +32,7 @@
         </columns>
         <columns>
             <name>DEPARTMENT_ID</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>4</ordinalPosition>
             <pk>false</pk>
@@ -41,7 +41,7 @@
         </columns>
         <columns>
             <name>SALARY</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>5</ordinalPosition>
             <pk>false</pk>
@@ -50,7 +50,7 @@
         </columns>
         <columns>
             <name>IMAGINITIVITY</name>
-            <columSize>10</columSize>
+            <columnSize>10</columnSize>
             <nullable>true</nullable>
             <ordinalPosition>6</ordinalPosition>
             <pk>false</pk>
