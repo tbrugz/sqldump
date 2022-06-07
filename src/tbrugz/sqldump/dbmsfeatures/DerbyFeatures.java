@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.StringUtils;
  */
 public class DerbyFeatures extends DefaultDBMSFeatures {
 
-	static Log log = LogFactory.getLog(DerbyFeatures.class);
+	static final Log log = LogFactory.getLog(DerbyFeatures.class);
 
 	/*@Override
 	public void procProperties(Properties prop) {
@@ -264,7 +264,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		return DBObjectType.EXECUTABLE;
 	}
 	
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String constraintNamePattern) {
+	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select sc.schemaname, t.tablename, c.constraintname, cg.descriptor "
 				+ "from sys.sysconstraints c "
 				+ "join sys.syskeys k on c.constraintid = k.constraintid "
@@ -272,6 +272,8 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 				+ "join sys.sysschemas sc on c.schemaid = sc.schemaid "
 				+ "join sys.systables t on c.tableid = t.tableid "
 				+ "where type = 'U' "
+				+(schemaPattern!=null?"and sc.schemaname = '"+schemaPattern+"' ":"")
+				+(tableNamePattern!=null?"and t.tablename = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and c.constraintname = '"+constraintNamePattern+"' ":"");
 	}
 
@@ -283,7 +285,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery(schemaPattern, constraintNamePattern);
+		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
 		Statement st = conn.createStatement();
 		log.debug("sql: "+query);
 		ResultSet rs = st.executeQuery(query);

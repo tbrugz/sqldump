@@ -54,6 +54,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 			+"where tc.constraint_name = ccu.constraint_name "
 			+"and tc.table_name = ccu.table_name " 
 			+"and constraint_type = 'UNIQUE' "
+			+(schemaPattern!=null?"and tc.constraint_schema = '"+schemaPattern+"' ":"")
 			+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 			+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 			+"order by table_name, constraint_name, column_name";

@@ -23,7 +23,7 @@ import tbrugz.sqldump.util.StringUtils;
  */
 public class H2Features extends InformationSchemaFeatures {
 
-	static Log log = LogFactory.getLog(H2Features.class);
+	static final Log log = LogFactory.getLog(H2Features.class);
 
 	@Override
 	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
@@ -100,6 +100,7 @@ public class H2Features extends InformationSchemaFeatures {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
 				+"from information_schema.constraints tc "
 				+"where constraint_type = 'UNIQUE' "
+				+(schemaPattern!=null?"and tc.constraint_schema = '"+schemaPattern+"' ":"")
 				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
 				+"order by table_name, constraint_name ";
