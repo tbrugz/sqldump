@@ -101,8 +101,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_MAXLEVEL = "sqldump.doschemadump.recursivedumpbasedonfks.maxlevel";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_EXPORTEDFKS = "sqldump.doschemadump.recursivedumpbasedonfks.exportedfks";
 
-	static final String PROP_SCHEMAGRAB_TABLEFILTER = PREFIX+".tablefilter";
-	static final String PROP_SCHEMAGRAB_EXCLUDETABLES = PREFIX+".tablename.excludes";
+	public static final String PROP_SCHEMAGRAB_TABLEFILTER = PREFIX+".tablefilter";
+	public static final String PROP_SCHEMAGRAB_EXCLUDETABLES = PREFIX+".tablename.excludes";
 	@Deprecated
 	static final String PROP_SCHEMADUMP_EXCLUDETABLES = "sqldump.schemadump.tablename.excludes";
 	static final String PROP_SCHEMAGRAB_EXCLUDEOBJECTS = PREFIX+".objectname.excludes";
@@ -1348,7 +1348,6 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 	}
 	
-	
 	@Override
 	public void setId(String grabberId) {
 		this.grabberId = grabberId;
@@ -1357,5 +1356,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	String getIdDesc() {
 		return grabberId!=null?"["+grabberId+"] ":"";
 	}
-	
+
+	/*
+	public String getGrabSchemaNames() {
+		return papp.getProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES);
+	}
+	*/
 }
