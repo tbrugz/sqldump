@@ -6,6 +6,7 @@ glob:lib/*
 glob:lib-jdbc/*
 glob:log/*
 glob:output/*
+glob:target/*
 glob:test/old/*
 glob:tmp/*
 glob:work/*

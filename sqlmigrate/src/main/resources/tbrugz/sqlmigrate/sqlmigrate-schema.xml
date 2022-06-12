@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<schemaModel>
+    <table>
+        <name>sqlmigrate_history</name>
+        <columns>
+            <name>script</name>
+            <columnSize>1000</columnSize>
+            <nullable>false</nullable>
+            <pk>true</pk>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>version</name>
+            <columnSize>100</columnSize>
+            <nullable>true</nullable>
+            <pk>false</pk>
+            <type>VARCHAR</type>
+        </columns>
+        <columns>
+            <name>crc32</name>
+            <columnSize>10</columnSize>
+            <nullable>true</nullable>
+            <pk>false</pk>
+            <type>NUMERIC</type>
+        </columns>
+        <!--
+        <columns>
+            <name>run_status</name>
+            <columnSize>10</columnSize>
+            <nullable>true</nullable>
+            <pk>false</pk>
+            <type>VARCHAR</type>
+        </columns>
+        -->
+    </table>
+
+    <!-- <sqlDialect>?</sqlDialect> -->
+</schemaModel>
