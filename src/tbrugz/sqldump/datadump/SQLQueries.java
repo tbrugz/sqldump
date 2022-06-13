@@ -528,7 +528,7 @@ public class SQLQueries extends AbstractSQLProc {
 		
 		//bind named params
 		List<QueryParameter> namedPars = TokenizerUtil.getNamedParameters(sql);
-		if(namedPars.size()>0) {
+		if(namedPars!=null && namedPars.size()>0) {
 			if(paramCount>0) {
 				String message = "can't have positional and named parameters in the same query [paramCount="+paramCount+";#namedPars="+namedPars.size()+"]";
 				log.warn(message);

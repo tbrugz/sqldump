@@ -107,6 +107,7 @@ public class TokenizerUtil {
 	 * Return named parameters - defined as <code>:[a-zA-Z_][0-9a-zA-Z_]*</code>. Ex: <code>:someParam</code>
 	 */
 	public static List<QueryParameter> getNamedParameters(String sql) {
+		if(sql==null) { return null; }
 		TknState state = TknState.DEFAULT;
 		List<QueryParameter> ret = new ArrayList<QueryParameter>();
 		int countPositionalParameters = 0;
@@ -201,6 +202,7 @@ public class TokenizerUtil {
 	}
 
 	public static String replaceNamedParameters(String sql, List<QueryParameter> pars) {
+		if(sql==null) { return null; }
 		StringBuilder sb = new StringBuilder();
 		sb.append(sql);
 		for(QueryParameter qp: pars) {
