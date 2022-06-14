@@ -120,6 +120,8 @@ public class SqlMigrate extends BaseExecutor {
 		log.info(">> setup action [dry-run="+isDryRun()+"]");
 		SchemaDiff diff = SchemaUtils.diffModel(conn, migrationsSchemaName, migrationsTable);
 		if(diff.getDiffListSize()>0) {
+			log.info("diffs found [#"+diff.getDiffListSize()+"]");
+			SchemaDiff.logInfo(diff);
 			SchemaUtils.applySchemaDiff(diff, conn, !isDryRun());
 		}
 		else {
@@ -182,6 +184,10 @@ public class SqlMigrate extends BaseExecutor {
 			Set<DotVersion> dups = MigrationIO.getDuplicatedVersions(mios);
 			log.warn("filesystem migrations have duplicates [#"+dups.size()+"]");
 			log.info("filesystem duplicates: "+dups);
+			for(DotVersion v: dups) {
+				List<Migration> dm = MigrationIO.getMigrationsFromVersion(mios, v);
+				log.info("version '"+v+"' - dups[#"+dm.size()+"]: "+dm);
+			}
 		}
 		if(hasDbDuplicates || hasFsDuplicates) {
 			log.warn("duplicated migration versions found "+

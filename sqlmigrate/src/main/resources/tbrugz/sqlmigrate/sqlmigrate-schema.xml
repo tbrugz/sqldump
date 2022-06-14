@@ -6,21 +6,21 @@
             <name>script</name>
             <columnSize>1000</columnSize>
             <nullable>false</nullable>
-            <pk>true</pk>
+            <!-- <pk>true</pk> -->
             <type>VARCHAR</type>
         </columns>
         <columns>
             <name>version</name>
             <columnSize>100</columnSize>
             <nullable>true</nullable>
-            <pk>false</pk>
+            <!-- <pk>false</pk> -->
             <type>VARCHAR</type>
         </columns>
         <columns>
             <name>crc32</name>
             <columnSize>10</columnSize>
             <nullable>true</nullable>
-            <pk>false</pk>
+            <!-- <pk>false</pk> -->
             <type>NUMERIC</type>
         </columns>
         <!--
@@ -32,6 +32,16 @@
             <type>VARCHAR</type>
         </columns>
         -->
+        <constraints>
+            <name>sqlm_pk</name>
+            <type>PK</type>
+            <uniqueColumns>script</uniqueColumns>
+        </constraints>
+        <constraints>
+            <name>sqlm_version_uk</name>
+            <type>UNIQUE</type>
+            <uniqueColumns>version</uniqueColumns>
+        </constraints>
     </table>
 
     <!-- <sqlDialect>?</sqlDialect> -->

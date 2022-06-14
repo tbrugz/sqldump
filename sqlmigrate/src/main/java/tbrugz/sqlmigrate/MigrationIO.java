@@ -122,5 +122,15 @@ public class MigrationIO {
 		ret.removeAll(vs2);
 		return ret;
 	}
+
+	public static List<Migration> getMigrationsFromVersion(List<Migration> migs, DotVersion version) {
+		List<Migration> ret = new ArrayList<>();
+		for(Migration m: migs) {
+			if(version.equals(m.getVersion())) {
+				ret.add(m);
+			}
+		}
+		return ret;
+	}
 	
 }
