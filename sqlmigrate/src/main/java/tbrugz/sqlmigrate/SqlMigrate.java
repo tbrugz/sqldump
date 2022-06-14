@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.SchemaDiff;
+import tbrugz.sqldump.util.Utils;
 import tbrugz.sqlmigrate.util.SchemaUtils;
 
 public class SqlMigrate extends BaseExecutor {
@@ -27,6 +28,8 @@ public class SqlMigrate extends BaseExecutor {
 	static final String PROP_MIGRATION_TABLE = PRODUCT_NAME + "." + "migration-table";
 	static final String PROP_MIGRATION_TABLE_SCHEMA = PRODUCT_NAME + "." + "schema-name";
 	static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
+	static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
+	static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
 
 	static final String DEFAULT_MIGRATION_TABLE = "SQLMIGRATE_HISTORY"; //"sqlmigrate_history"; //"sqlm_changelog";
 	static final String DEFAULT_MIGRATIONS_DIR = ".";
@@ -37,11 +40,16 @@ public class SqlMigrate extends BaseExecutor {
 		MIGRATE,
 	}
 
+	// common properties
 	MigrateAction action = null;
 	String migrationsSchemaName = null;
 	String migrationsTable = DEFAULT_MIGRATION_TABLE;
 	String versionedMigrationsDir = null;
 	//String repeatableMigrationsDir = null;
+	
+	// setup/baseline properties
+	boolean baseline = false;
+	String baselineVersion = null;
 
 	@Override
 	public Log getLogger() {
@@ -82,6 +90,8 @@ public class SqlMigrate extends BaseExecutor {
 		migrationsTable = papp.getProperty(PROP_MIGRATION_TABLE, DEFAULT_MIGRATION_TABLE);
 		migrationsSchemaName = papp.getProperty(PROP_MIGRATION_TABLE_SCHEMA);
 		versionedMigrationsDir = papp.getProperty(PROP_MIGRATIONS_DIR, DEFAULT_MIGRATIONS_DIR);
+		baseline = Utils.getPropBool(papp, PROP_BASELINE, baseline);
+		baselineVersion = papp.getProperty(PROP_BASELINE_VERSION, baselineVersion);
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
@@ -127,7 +137,62 @@ public class SqlMigrate extends BaseExecutor {
 		else {
 			log.info("no diffs to apply [diff.getDiffListSize() = "+diff.getDiffListSize()+"]");
 		}
-		//TODO: baseline
+		if(baseline) {
+			doSetupBaseline();
+		}
+	}
+	
+	void doSetupBaseline() throws SQLException, FileNotFoundException, IOException {
+		log.info(">> setup::baseline [dry-run="+isDryRun()+"]");
+		boolean getChecksum = false;
+		DotVersion upperVersion = null; 
+		if(baselineVersion!=null) {
+			upperVersion = DotVersion.getDotVersion(baselineVersion);
+			log.info("baseline-version = "+upperVersion);
+		}
+		
+		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
+		List<Migration> mds = md.listMigrations(conn);
+		MigrationIO.sortMigrations(mds);
+
+		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
+		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksum);
+		MigrationIO.sortMigrations(mios);
+
+		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
+		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
+		if(hasDbDuplicates || hasFsDuplicates) {
+			log.warn("duplicated migration versions found "+
+					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed");
+			return;
+		}
+		
+		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
+		for(Migration m: mios) {
+			DotVersion fsmv = m.getVersion();
+			if(upperVersion!=null && upperVersion.compareTo(fsmv) < 0) {
+				if(vdb.contains(fsmv)) {
+					log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"' and in database. removing");
+					//TODO: remove migration from db
+				}
+				else {
+					log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"'");
+				}
+			}
+			else if(vdb.contains(fsmv)) {
+				// db already has this migration, do nothing
+				log.info("migration "+m+" already in database. doing nothing");
+			}
+			else {
+				if(!isDryRun()) {
+					log.info("migration "+m+" will be inserted");
+					//TODO: insert/save migration
+				}
+				else {
+					log.info("migration "+m+" would be inserted [dry-run is true]");
+				}
+			}
+		}
 	}
 	
 	/*
