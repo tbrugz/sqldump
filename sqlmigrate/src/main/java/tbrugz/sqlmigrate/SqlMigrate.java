@@ -144,6 +144,7 @@ public class SqlMigrate extends BaseExecutor {
 	
 	void doSetupBaseline() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> setup::baseline [dry-run="+isDryRun()+"]");
+		long initTime = System.currentTimeMillis();
 		boolean getChecksum = false;
 		DotVersion upperVersion = null; 
 		if(baselineVersion!=null) {
@@ -168,12 +169,19 @@ public class SqlMigrate extends BaseExecutor {
 		}
 		
 		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
+		long countSaves = 0, countRemoves = 0, countUnchanged = 0;
 		for(Migration m: mios) {
 			DotVersion fsmv = m.getVersion();
 			if(upperVersion!=null && upperVersion.compareTo(fsmv) < 0) {
 				if(vdb.contains(fsmv)) {
-					log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"' and in database. removing");
-					//TODO: remove migration from db
+					if(!isDryRun()) {
+						log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"' and in database. removing");
+						md.removeByVersion(m, conn);
+					}
+					else {
+						log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"' and in database. would be removed");
+					}
+					countRemoves += 1;
 				}
 				else {
 					log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"'");
@@ -182,17 +190,24 @@ public class SqlMigrate extends BaseExecutor {
 			else if(vdb.contains(fsmv)) {
 				// db already has this migration, do nothing
 				log.info("migration "+m+" already in database. doing nothing");
+				countUnchanged += 1;
 			}
 			else {
 				if(!isDryRun()) {
+					// insert/save migration
 					log.info("migration "+m+" will be inserted");
-					//TODO: insert/save migration
+					md.save(m, conn);
 				}
 				else {
 					log.info("migration "+m+" would be inserted [dry-run is true]");
 				}
+				countSaves += 1;
 			}
 		}
+		log.info("baseline: # migrations saved = "+countSaves +
+				" ; # migrations removed = "+countRemoves +
+				" ; # migrations unchanged = "+countUnchanged +
+				" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
 	/*

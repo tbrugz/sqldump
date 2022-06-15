@@ -3,6 +3,8 @@ package tbrugz.sqlmigrate;
 import java.util.ArrayList;
 import java.util.List;
 
+import tbrugz.sqldump.util.Utils;
+
 public class DotVersion implements Comparable<DotVersion> {
 
 	final List<Integer> version;
@@ -84,4 +86,9 @@ public class DotVersion implements Comparable<DotVersion> {
 		}
 		return size - othersize;
 	}
+	
+	public String asVersionString() {
+		return Utils.join(version, ".");
+	}
+
 }
