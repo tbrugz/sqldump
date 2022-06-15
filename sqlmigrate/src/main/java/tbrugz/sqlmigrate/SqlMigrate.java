@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.SchemaDiff;
+import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.sqlmigrate.util.SchemaUtils;
 
@@ -30,6 +36,7 @@ public class SqlMigrate extends BaseExecutor {
 	static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
 	static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
 	static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
+	static final String PROP_CHARSET = PRODUCT_NAME + "." + "scripts-charset";
 
 	static final String DEFAULT_MIGRATION_TABLE = "SQLMIGRATE_HISTORY"; //"sqlmigrate_history"; //"sqlm_changelog";
 	static final String DEFAULT_MIGRATIONS_DIR = ".";
@@ -46,6 +53,7 @@ public class SqlMigrate extends BaseExecutor {
 	String migrationsTable = DEFAULT_MIGRATION_TABLE;
 	String versionedMigrationsDir = null;
 	//String repeatableMigrationsDir = null;
+	String charset = DataDumpUtils.CHARSET_UTF8;
 	
 	// setup/baseline properties
 	boolean baseline = false;
@@ -92,6 +100,7 @@ public class SqlMigrate extends BaseExecutor {
 		versionedMigrationsDir = papp.getProperty(PROP_MIGRATIONS_DIR, DEFAULT_MIGRATIONS_DIR);
 		baseline = Utils.getPropBool(papp, PROP_BASELINE, baseline);
 		baselineVersion = papp.getProperty(PROP_BASELINE_VERSION, baselineVersion);
+		charset = papp.getProperty(PROP_CHARSET, charset);
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {
@@ -146,7 +155,7 @@ public class SqlMigrate extends BaseExecutor {
 		log.info(">> setup::baseline [dry-run="+isDryRun()+"]");
 		long initTime = System.currentTimeMillis();
 		boolean getChecksum = false;
-		DotVersion upperVersion = null; 
+		DotVersion upperVersion = null;
 		if(baselineVersion!=null) {
 			upperVersion = DotVersion.getDotVersion(baselineVersion);
 			log.info("baseline-version = "+upperVersion);
@@ -163,13 +172,14 @@ public class SqlMigrate extends BaseExecutor {
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
 		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
 		if(hasDbDuplicates || hasFsDuplicates) {
-			log.warn("duplicated migration versions found "+
+			log.error("duplicated migration versions found "+
 					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed");
+			//XXX: throw ?
 			return;
 		}
 		
 		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
-		long countSaves = 0, countRemoves = 0, countUnchanged = 0;
+		long countSaves = 0, countRemoves = 0, countUnchanged = 0, countIgnored = 0;
 		for(Migration m: mios) {
 			DotVersion fsmv = m.getVersion();
 			if(upperVersion!=null && upperVersion.compareTo(fsmv) < 0) {
@@ -185,6 +195,7 @@ public class SqlMigrate extends BaseExecutor {
 				}
 				else {
 					log.info("version '"+fsmv+"' greater than baseline-version '"+upperVersion+"'");
+					countIgnored += 1;
 				}
 			}
 			else if(vdb.contains(fsmv)) {
@@ -207,6 +218,7 @@ public class SqlMigrate extends BaseExecutor {
 		log.info("baseline: # migrations saved = "+countSaves +
 				" ; # migrations removed = "+countRemoves +
 				" ; # migrations unchanged = "+countUnchanged +
+				" ; # migrations ignored = "+countIgnored +
 				" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
@@ -297,9 +309,104 @@ public class SqlMigrate extends BaseExecutor {
 	 * dry-run: create sqlrun properties file without running
 	 * options: run-versioned-migrations ; run-repeatable-migrations
 	 */
-	//TODO: migrate
-	public void doMigrate() {
+	public void doMigrate() throws SQLException, FileNotFoundException, IOException {
+		log.info(">> migrate [dry-run="+isDryRun()+"]");
+		long initTime = System.currentTimeMillis();
+		boolean getChecksum = false;
+		/*DotVersion upperVersion = null;
+		if(maxVersion!=null) {
+			upperVersion = DotVersion.getDotVersion(maxVersion);
+			log.info("max-version = "+upperVersion);
+		}*/
 		
+		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
+		List<Migration> mds = md.listMigrations(conn);
+		MigrationIO.sortMigrations(mds);
+
+		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
+		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksum);
+		MigrationIO.sortMigrations(mios);
+
+		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
+		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
+		if(hasDbDuplicates || hasFsDuplicates) {
+			log.error("duplicated migration versions found "+
+					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed");
+			//XXX: throw ?
+			return;
+		}
+		
+		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
+		long countExecuted = 0, countNotRun = 0;
+		try {
+			for(Migration m: mios) {
+				DotVersion fsmv = m.getVersion();
+				if(vdb.contains(fsmv)) {
+					// db already has this migration, do nothing
+					log.info("migration "+m+" already executed. doing nothing");
+					countNotRun += 1;
+				}
+				else {
+					if(!isDryRun()) {
+						// insert/save migration
+						log.info("migration "+m+" will be executed");
+						// exec and save and commit
+						try {
+							executeFileContents(m.script);
+							md.save(m, conn);
+							ConnectionUtil.doCommitIfNotAutocommit(conn);
+						}
+						catch(SQLException e) {
+							log.warn("error executing migration: "+e);
+							ConnectionUtil.doRollbackIfNotAutocommit(conn);
+							if(failonerror) {
+								throw e;
+							}
+						}
+					}
+					else {
+						log.info("migration "+m+" would be executed [dry-run is true]");
+					}
+					countExecuted += 1;
+				}
+			}
+		}
+		finally {
+			log.info("migrate: # migrations executed = "+countExecuted +
+					" ; # migrations already executed = "+countNotRun +
+					" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
+		}
+		
+	}
+	
+	/*
+	 * see also: tbrugz.sqldump.sqlrun.StmtProc.execFile()
+	 */
+	void executeFileContents(String script) throws IOException, SQLException {
+		File file = new File(versionedMigrationsDir, script);
+		Statement st = conn.createStatement();
+		Tokenizer scanner = TokenizerStrategy.getDefaultTokenizer(file, charset);
+		int stmtCount = 0;
+		long updateCount = 0;
+		for(String sql: scanner) {
+			if(sql==null) { continue; }
+			sql = sql.trim();
+			if(sql.equals("")) { continue; }
+			if(!TokenizerUtil.containsSqlStatmement(sql)) { continue; }
+			/*if(replacePropsOnFileContents) {
+				//replacing ${...} parameters
+				sql = ParametrizedProperties.replaceProps(sql, papp);
+			}*/
+			try {
+				updateCount += st.executeUpdate(sql);
+			}
+			catch(SQLException e) {
+				log.warn("error executing script: "+e+"\nsql = "+sql);
+				throw e;
+			}
+			stmtCount++;
+		}
+		log.info("script "+script+" executed [#statements="+stmtCount+";#updates="+updateCount+"]");
 	}
 
 }

@@ -62,7 +62,7 @@ public class ConnectionUtil {
 		return initDBConnection(propsPrefix, papp, autoCommit, readonly);
 	}
 	
-	static Connection initDBConnection(String propsPrefix, Properties papp, Boolean autoCommit, Boolean readOnly) throws ClassNotFoundException, SQLException, NamingException {
+	public static Connection initDBConnection(String propsPrefix, Properties papp, Boolean autoCommit, Boolean readOnly) throws ClassNotFoundException, SQLException, NamingException {
 		//init database
 		log.debug("initDBConnection... [propsPrefix="+propsPrefix+"] [readOnly="+readOnly+"] [autoCommit="+autoCommit+"]");
 		

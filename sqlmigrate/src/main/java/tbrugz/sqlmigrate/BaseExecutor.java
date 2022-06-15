@@ -70,6 +70,13 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 	void init(Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		ColTypeUtil.setProperties(papp);
 		
+		// subclasses properties
+		procProterties();
+		// default properties
+		// dryRun: -n , --dry-run, xxx.dry-run
+		dryRun = Utils.getPropBool(papp, getProductName() + ".dry-run", dryRun);
+		failonerror = Utils.getPropBool(papp, getPropertiesPrefix() + ".failonerror", failonerror);
+
 		//commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
 		//boolean commitStrategyIsAutocommit = commitStrategy==CommitStrategy.AUTO_COMMIT;
 		if(c!=null) {
@@ -93,7 +100,7 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 				}
 			}*/
 			//conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategyIsAutocommit);
-			conn = ConnectionUtil.initDBConnection(connPrefix, papp);
+			conn = ConnectionUtil.initDBConnection(connPrefix, papp, null, isDryRun());
 			if(conn==null) {
 				throw new ProcessingException("null connection [prop prefix: '"+connPrefix+"']");
 			}
@@ -109,11 +116,6 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 		//XXX: really needed?
 		//DBMSFeatures feats = DBMSResources.instance().databaseSpecificFeaturesClass();
 		//log.debug("DBMSFeatures: "+feats);
-		procProterties();
-		
-		// XXX: dryRun: -n , --dry-run, xxx.dry-run
-		dryRun = Utils.getPropBool(papp, getProductName() + ".dry-run", dryRun);
-		failonerror = Utils.getPropBool(papp, getPropertiesPrefix() + ".failonerror", failonerror);
 		//defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		//jmxCreateMBean = Utils.getPropBool(papp, PROP_JMX_CREATE_MBEAN, jmxCreateMBean);
 	}
