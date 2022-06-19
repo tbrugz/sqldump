@@ -20,6 +20,7 @@ public class TokenizerUtil {
 	}
 
 	public static boolean containsSqlStatmement(String sql) {
+		if(sql==null) { return false; }
 		return removeSqlComents(sql).trim().length()>0;
 	}
 	

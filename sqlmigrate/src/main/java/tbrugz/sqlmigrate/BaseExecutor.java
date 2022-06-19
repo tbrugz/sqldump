@@ -91,6 +91,8 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 			if(connPrefix==null) {
 				connPrefix = getPropertiesPrefix();
 			}
+			// using autocommit property (default is false)
+			boolean isAutoCommit = Utils.getPropBool(papp, connPrefix+ConnectionUtil.SUFFIX_AUTOCOMMIT, false);
 			// if connPrefix+".autocommit" is set, show warning
 			/*{
 				String autocommitPropKey = connPrefix+ConnectionUtil.SUFFIX_AUTOCOMMIT;
@@ -100,7 +102,7 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 				}
 			}*/
 			//conn = ConnectionUtil.initDBConnection(connPrefix, papp, commitStrategyIsAutocommit);
-			conn = ConnectionUtil.initDBConnection(connPrefix, papp, null, isDryRun());
+			conn = ConnectionUtil.initDBConnection(connPrefix, papp, isAutoCommit, isDryRun());
 			if(conn==null) {
 				throw new ProcessingException("null connection [prop prefix: '"+connPrefix+"']");
 			}

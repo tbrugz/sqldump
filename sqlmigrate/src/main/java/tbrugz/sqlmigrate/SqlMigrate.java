@@ -124,14 +124,25 @@ public class SqlMigrate extends BaseExecutor {
 			default:
 				break;
 			}
+			quietRollback();
 		} catch (IOException | SQLException e) {
 			log.warn("doIt: Error: "+e, e);
 			throw new RuntimeException(e);
 		}
 	}
 	
+	void quietRollback() {
+		try {
+			if(conn.getAutoCommit()) { return; }
+			conn.rollback();
+		} catch (SQLException e) {
+			log.warn("error in rollback(): "+e, e);
+		}
+	}
+	
 	/*
 	 * setup: create (if needed) the migration table
+	 * only changes migration-table
 	 * populate/baseline: populate migration table with scripts from migration dir as if they had already executed (optional param: baseline-version)
 	 * dry-run: show if table would be created ; [populate/baseline] show scripts that would be populated 
 	 */
@@ -147,7 +158,12 @@ public class SqlMigrate extends BaseExecutor {
 			log.info("no diffs to apply [diff.getDiffListSize() = "+diff.getDiffListSize()+"]");
 		}
 		if(baseline) {
-			doSetupBaseline();
+			if(diff.getDiffListSize()>0 && isDryRun()) {
+				log.warn("diffs found [diff.getDiffListSize() = "+diff.getDiffListSize()+"] & dry-run active (diffs not applyed): can't baseline");
+			}
+			else {
+				doSetupBaseline();
+			}
 		}
 	}
 	
@@ -172,9 +188,12 @@ public class SqlMigrate extends BaseExecutor {
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
 		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
 		if(hasDbDuplicates || hasFsDuplicates) {
-			log.error("duplicated migration versions found "+
-					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed");
-			//XXX: throw ?
+			String message = "duplicated migration versions found "+
+					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed";
+			log.error(message);
+			if(failonerror) {
+				throw new IllegalStateException(message);
+			}
 			return;
 		}
 		
@@ -215,16 +234,17 @@ public class SqlMigrate extends BaseExecutor {
 				countSaves += 1;
 			}
 		}
-		log.info("baseline: # migrations saved = "+countSaves +
-				" ; # migrations removed = "+countRemoves +
-				" ; # migrations unchanged = "+countUnchanged +
-				" ; # migrations ignored = "+countIgnored +
+		log.info("baseline: migrations... #saved = "+countSaves +
+				" ; #removed = "+countRemoves +
+				" ; #unchanged = "+countUnchanged +
+				" ; #ignored = "+countIgnored +
 				" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 	}
 	
 	/*
 	 * show if migration table is present
 	 * show executed & pending migrations
+	 * does not perform any change in database (dry-run has no effect)
 	 */
 	public void doStatus() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> status action");
@@ -306,13 +326,17 @@ public class SqlMigrate extends BaseExecutor {
 	
 	/*
 	 * migrate: execute pending migrations + update migration table
-	 * dry-run: create sqlrun properties file without running
+	 * dry-run: only shows with migrations would be executed
 	 * options: run-versioned-migrations ; run-repeatable-migrations
 	 */
 	public void doMigrate() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> migrate [dry-run="+isDryRun()+"]");
 		long initTime = System.currentTimeMillis();
 		boolean getChecksum = false;
+		boolean isAutoCommit = conn.getAutoCommit();
+		if(isAutoCommit) { // && !isDryRun() 
+			log.warn("autocommit is enabled. not recomended for migrate action");
+		}
 		/*DotVersion upperVersion = null;
 		if(maxVersion!=null) {
 			upperVersion = DotVersion.getDotVersion(maxVersion);
@@ -330,9 +354,12 @@ public class SqlMigrate extends BaseExecutor {
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
 		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
 		if(hasDbDuplicates || hasFsDuplicates) {
-			log.error("duplicated migration versions found "+
-					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed");
-			//XXX: throw ?
+			String message = "duplicated migration versions found "+
+					"[hasDbDuplicates="+hasDbDuplicates+";hasFsDuplicates="+hasFsDuplicates+"]. can't proceed";
+			log.error(message);
+			if(failonerror) {
+				throw new IllegalStateException(message);
+			}
 			return;
 		}
 		
@@ -372,8 +399,8 @@ public class SqlMigrate extends BaseExecutor {
 			}
 		}
 		finally {
-			log.info("migrate: # migrations executed = "+countExecuted +
-					" ; # migrations already executed = "+countNotRun +
+			log.info("migrate: migrations... #executed = "+countExecuted +
+					" ; #not-run (already executed) = "+countNotRun +
 					" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 		}
 		
@@ -389,9 +416,9 @@ public class SqlMigrate extends BaseExecutor {
 		int stmtCount = 0;
 		long updateCount = 0;
 		for(String sql: scanner) {
-			if(sql==null) { continue; }
-			sql = sql.trim();
-			if(sql.equals("")) { continue; }
+			//if(sql==null) { continue; }
+			//sql = sql.trim();
+			//if(sql.equals("")) { continue; }
 			if(!TokenizerUtil.containsSqlStatmement(sql)) { continue; }
 			/*if(replacePropsOnFileContents) {
 				//replacing ${...} parameters
@@ -406,7 +433,7 @@ public class SqlMigrate extends BaseExecutor {
 			}
 			stmtCount++;
 		}
-		log.info("script "+script+" executed [#statements="+stmtCount+";#updates="+updateCount+"]");
+		log.info("script "+script+" executed [#statements="+stmtCount+"; #updates="+updateCount+"]");
 	}
 
 }
