@@ -126,7 +126,7 @@ public class SqlMigrate extends BaseExecutor {
 			}
 			quietRollback();
 		} catch (IOException | SQLException e) {
-			log.warn("doIt: Error: "+e, e);
+			log.error("doIt: Error: "+e, e);
 			throw new RuntimeException(e);
 		}
 	}
@@ -332,6 +332,15 @@ public class SqlMigrate extends BaseExecutor {
 	public void doMigrate() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> migrate [dry-run="+isDryRun()+"]");
 		long initTime = System.currentTimeMillis();
+		if(baseline || baselineVersion!=null) {
+			String message = "baseline properties sould not be used in migrate action "+
+					"[baseline="+baseline+";baselineVersion="+baselineVersion+"]. can't proceed";
+			log.error(message);
+			if(failonerror) {
+				throw new IllegalArgumentException(message);
+			}
+			return;
+		}
 		boolean getChecksum = false;
 		boolean isAutoCommit = conn.getAutoCommit();
 		if(isAutoCommit) { // && !isDryRun() 
