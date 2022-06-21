@@ -1,7 +1,8 @@
 
 bin/*
 dist/*
-lib/*
+lib/
+target/
 work/*
 
 .scannerwork
