@@ -19,17 +19,21 @@ public class MigrationIO {
 
 	static final Log log = LogFactory.getLog(MigrationIO.class);
 
-	//XXX: sorts alphanumerically, not by dotted version
+	// sorts alphanumerically, not by dotted version...
 	/*public static String[] listFilesSorted(File dir) {
 		String[] files = dir.list();
 		Arrays.sort(files);
 		return files;
 	}*/
 	
-	//XXX: repeatable migrations? different method, since they may be on different dir
 	public static List<Migration> listMigrations(File dir, boolean getChecksum) throws FileNotFoundException, IOException {
 		List<Migration> migs = new ArrayList<>();
 		//String[] files = listFilesSorted(dir);
+		if(!dir.isDirectory()) {
+			String message = "path '"+dir+"' is not a directory";
+			log.error(message);
+			throw new IllegalArgumentException(message);
+		}
 		String[] files = dir.list();
 		for(String f: files) {
 			if(f.endsWith(".sql")) {
@@ -117,16 +121,54 @@ public class MigrationIO {
 		return versions;
 	}
 	
+	public static <T extends Object> Set<T> diffSets(Set<T> vs1, Set<T> vs2) {
+		Set<T> ret = new TreeSet<>(vs1);
+		ret.removeAll(vs2);
+		return ret;
+	}
+
+	/*
 	public static Set<DotVersion> diffVersions(Set<DotVersion> vs1, Set<DotVersion> vs2) {
 		Set<DotVersion> ret = new TreeSet<>(vs1);
 		ret.removeAll(vs2);
 		return ret;
 	}
 
+	public static Set<String> diffScripts(Set<String> vs1, Set<String> vs2) {
+		Set<String> ret = new TreeSet<>(vs1);
+		ret.removeAll(vs2);
+		return ret;
+	}
+	*/
+	
+	public static <T extends Object> Set<T> intersectSets(Set<T> vs1, Set<T> vs2) {
+		Set<T> ret = new TreeSet<>(vs1);
+		ret.retainAll(vs2);
+		return ret;
+	}
+
+	public static Set<String> getScriptSet(List<Migration> migs) {
+		Set<String> scripts = new HashSet<>();
+		for(Migration m: migs) {
+			scripts.add(m.getScript());
+		}
+		return scripts;
+	}
+
 	public static List<Migration> getMigrationsFromVersion(List<Migration> migs, DotVersion version) {
 		List<Migration> ret = new ArrayList<>();
 		for(Migration m: migs) {
 			if(version.equals(m.getVersion())) {
+				ret.add(m);
+			}
+		}
+		return ret;
+	}
+
+	public static List<Migration> getMigrationsFromScript(List<Migration> migs, String script) {
+		List<Migration> ret = new ArrayList<>();
+		for(Migration m: migs) {
+			if(script.equals(m.getScript())) {
 				ret.add(m);
 			}
 		}

@@ -29,10 +29,19 @@ public class MigrationDao {
 		this.tableName = tableName;
 	}
 
-	public List<Migration> listMigrations(Connection conn) throws SQLException {
+	public List<Migration> listVersionedMigrations(Connection conn) throws SQLException {
+		return listMigrations(conn, "where version is not null");
+	}
+
+	public List<Migration> listUnversionedMigrations(Connection conn) throws SQLException {
+		return listMigrations(conn, "where version is null");
+	}
+	
+	List<Migration> listMigrations(Connection conn, String filter) throws SQLException {
 		List<Migration> ret = new ArrayList<>();
 		String sql = "select " + MIG_COLUMNS_STR + " " +
 				"from "+ (schemaName!=null?schemaName+".":"") + tableName + " " +
+				(filter!=null?filter+" ":"") +
 				"order by version";
 		log.debug("list.sql: "+sql);
 		ResultSet rs = conn.createStatement().executeQuery(sql);
@@ -48,7 +57,7 @@ public class MigrationDao {
 		log.debug("save.sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, mig.getVersion().asVersionString());
-		st.setString(2, mig.script);
+		st.setString(2, mig.getScript());
 		if(mig.crc32!=null) {
 			st.setLong(3, mig.crc32);
 		}

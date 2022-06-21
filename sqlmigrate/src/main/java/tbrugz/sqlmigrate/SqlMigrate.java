@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.naming.NamingException;
 
@@ -34,12 +35,14 @@ public class SqlMigrate extends BaseExecutor {
 	static final String PROP_MIGRATION_TABLE = PRODUCT_NAME + "." + "migration-table";
 	static final String PROP_MIGRATION_TABLE_SCHEMA = PRODUCT_NAME + "." + "schema-name";
 	static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
+	static final String PROP_REPEATABLE_MIGRATIONS_DIR = PRODUCT_NAME + "." + "repeatable-migrations-dir";
 	static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
 	static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
 	static final String PROP_CHARSET = PRODUCT_NAME + "." + "scripts-charset";
 
 	static final String DEFAULT_MIGRATION_TABLE = "SQLMIGRATE_HISTORY"; //"sqlmigrate_history"; //"sqlm_changelog";
 	static final String DEFAULT_MIGRATIONS_DIR = ".";
+	static final String DEFAULT_REPEATABLE_MIGRATIONS_DIR = null;
 	
 	public enum MigrateAction {
 		SETUP,
@@ -47,12 +50,14 @@ public class SqlMigrate extends BaseExecutor {
 		MIGRATE,
 	}
 
+	static final boolean getChecksumForVersionedScripts = false;
+	
 	// common properties
 	MigrateAction action = null;
 	String migrationsSchemaName = null;
 	String migrationsTable = DEFAULT_MIGRATION_TABLE;
 	String versionedMigrationsDir = null;
-	//String repeatableMigrationsDir = null;
+	String repeatableMigrationsDir = null;
 	String charset = DataDumpUtils.CHARSET_UTF8;
 	
 	// setup/baseline properties
@@ -98,6 +103,7 @@ public class SqlMigrate extends BaseExecutor {
 		migrationsTable = papp.getProperty(PROP_MIGRATION_TABLE, DEFAULT_MIGRATION_TABLE);
 		migrationsSchemaName = papp.getProperty(PROP_MIGRATION_TABLE_SCHEMA);
 		versionedMigrationsDir = papp.getProperty(PROP_MIGRATIONS_DIR, DEFAULT_MIGRATIONS_DIR);
+		repeatableMigrationsDir = papp.getProperty(PROP_REPEATABLE_MIGRATIONS_DIR, DEFAULT_REPEATABLE_MIGRATIONS_DIR);
 		baseline = Utils.getPropBool(papp, PROP_BASELINE, baseline);
 		baselineVersion = papp.getProperty(PROP_BASELINE_VERSION, baselineVersion);
 		charset = papp.getProperty(PROP_CHARSET, charset);
@@ -170,7 +176,6 @@ public class SqlMigrate extends BaseExecutor {
 	void doSetupBaseline() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> setup::baseline [dry-run="+isDryRun()+"]");
 		long initTime = System.currentTimeMillis();
-		boolean getChecksum = false;
 		DotVersion upperVersion = null;
 		if(baselineVersion!=null) {
 			upperVersion = DotVersion.getDotVersion(baselineVersion);
@@ -178,11 +183,11 @@ public class SqlMigrate extends BaseExecutor {
 		}
 		
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
-		List<Migration> mds = md.listMigrations(conn);
+		List<Migration> mds = md.listVersionedMigrations(conn);
 		MigrationIO.sortMigrations(mds);
 
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
-		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksum);
+		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksumForVersionedScripts);
 		MigrationIO.sortMigrations(mios);
 
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
@@ -248,7 +253,6 @@ public class SqlMigrate extends BaseExecutor {
 	 */
 	public void doStatus() throws SQLException, FileNotFoundException, IOException {
 		log.info(">> status action");
-		boolean getChecksum = false;
 		
 		// check if table exists, show diff (type) to be applyed
 		SchemaDiff diff = SchemaUtils.diffModel(conn, migrationsSchemaName, migrationsTable);
@@ -265,7 +269,7 @@ public class SqlMigrate extends BaseExecutor {
 		
 		// show migrations
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
-		List<Migration> mds = md.listMigrations(conn);
+		List<Migration> mds = md.listVersionedMigrations(conn);
 		MigrationIO.sortMigrations(mds);
 		if(log.isDebugEnabled()) {
 			log.debug(">> db migrations:");
@@ -275,7 +279,7 @@ public class SqlMigrate extends BaseExecutor {
 		}
 		
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
-		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksum);
+		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksumForVersionedScripts);
 		MigrationIO.sortMigrations(mios);
 		if(log.isDebugEnabled()) {
 			log.debug(">> filesystem migrations:");
@@ -312,15 +316,80 @@ public class SqlMigrate extends BaseExecutor {
 		Set<DotVersion> vio = MigrationIO.getVersionSet(mios);
 
 		// show executed migrations with no filesystem correspondence
-		Set<DotVersion> vdb0 = MigrationIO.diffVersions(vdb, vio);
+		Set<DotVersion> vdb0 = MigrationIO.diffSets(vdb, vio);
 		if(vdb0.size()>0) {
 			log.warn(vdb0.size()+" executed migrations with no filesystem correspondence ["+vdb0+"]");
 		}
 		
 		// show pending migrations
-		Set<DotVersion> vio0 = MigrationIO.diffVersions(vio, vdb);
+		Set<DotVersion> vio0 = MigrationIO.diffSets(vio, vdb);
 		if(vio0.size()>0) {
 			log.info(vio0.size()+" pending migrations: "+vio0);
+		}
+		
+		// show repeatable migrations
+		if(repeatableMigrationsDir!=null) {
+			doStatus4RepeatableMigrations(md);
+		}
+	}
+	
+	void doStatus4RepeatableMigrations(MigrationDao md) throws SQLException, FileNotFoundException, IOException {
+		List<Migration> umd = md.listUnversionedMigrations(conn);
+		umd.sort(new Migration.MigrationScriptComparator());
+		if(log.isDebugEnabled()) {
+			log.debug(">> db repeatable migrations:");
+			for(Migration m: umd) {
+				log.debug(m);
+			}
+		}
+		log.info("grabbing fs repeatable migrations from: "+repeatableMigrationsDir);
+		List<Migration> umfs = MigrationIO.listMigrations(new File(repeatableMigrationsDir), true);
+		umfs.sort(new Migration.MigrationScriptComparator());
+		if(log.isDebugEnabled()) {
+			log.debug(">> filesystem repeatable migrations:");
+			for(Migration m: umfs) {
+				log.debug(m);
+			}
+		}
+		//XXX: check for duplicates... hasDuplicates?
+		Set<String> sdb = MigrationIO.getScriptSet(umd);
+		Set<String> sio = MigrationIO.getScriptSet(umfs);
+
+		// show executed migrations with no filesystem correspondence
+		Set<String> vdb0 = MigrationIO.diffSets(sdb, sio);
+		if(vdb0.size()>0) {
+			log.warn(vdb0.size()+" executed migrations with no filesystem correspondence ["+vdb0+"]");
+		}
+		
+		// show pending migrations
+		Set<String> vio0 = MigrationIO.diffSets(sio, sdb);
+		if(vio0.size()>0) {
+			log.info(vio0.size()+" pending migrations: "+vio0);
+		}
+		
+		// show pending (updated) migrations
+		Set<String> intersect = MigrationIO.diffSets(sdb, sio);
+		Set<String> unmatchedChecksumMigs = new TreeSet<>();
+		for(String s: intersect) {
+			List<Migration> mdbl = MigrationIO.getMigrationsFromScript(umd, s);
+			List<Migration> mfsl = MigrationIO.getMigrationsFromScript(umfs, s);
+			if(mdbl.size()!=1) {
+				log.warn("multiple or none migration in DB with script '"+s+"' [#"+mdbl.size()+"]");
+				continue;
+			}
+			if(mfsl.size()!=1) {
+				log.warn("multiple or none migration in filesystem with script '"+s+"' [#"+mfsl.size()+"]");
+				continue;
+			}
+			Migration mdb0 = mdbl.get(0);
+			Migration mfs0 = mfsl.get(0);
+			if(!mdb0.matchesChecksum(mfs0)) {
+				unmatchedChecksumMigs.add(s);
+				log.debug("script '"+s+"' has unmatching checksum: db="+mdb0.getChecksumString()+" ; fs="+mfs0.getChecksumString());
+			}
+		}
+		if(unmatchedChecksumMigs.size()>0) {
+			log.info(unmatchedChecksumMigs.size()+" pending (updated) migrations: "+unmatchedChecksumMigs);
 		}
 	}
 	
@@ -341,7 +410,6 @@ public class SqlMigrate extends BaseExecutor {
 			}
 			return;
 		}
-		boolean getChecksum = false;
 		boolean isAutoCommit = conn.getAutoCommit();
 		if(isAutoCommit) { // && !isDryRun() 
 			log.warn("autocommit is enabled. not recomended for migrate action");
@@ -353,11 +421,11 @@ public class SqlMigrate extends BaseExecutor {
 		}*/
 		
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
-		List<Migration> mds = md.listMigrations(conn);
+		List<Migration> mds = md.listVersionedMigrations(conn);
 		MigrationIO.sortMigrations(mds);
 
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
-		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksum);
+		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), getChecksumForVersionedScripts);
 		MigrationIO.sortMigrations(mios);
 
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
@@ -388,7 +456,7 @@ public class SqlMigrate extends BaseExecutor {
 						log.info("migration "+m+" will be executed");
 						// exec and save and commit
 						try {
-							executeFileContents(m.script);
+							executeFileContents(m.getScript());
 							md.save(m, conn);
 							ConnectionUtil.doCommitIfNotAutocommit(conn);
 						}
