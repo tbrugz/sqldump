@@ -151,14 +151,14 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 		if(closeConnection && conn!=null) {
 			try {
 				getLogger().debug("closing connection: "+conn);
-				if(!conn.getAutoCommit()) {
+				/*if(!conn.getAutoCommit()) {
 					conn.rollback(); // derby likes this (if transaction is active)
-				}
+				}*/
 				conn.close();
 			}
 			catch(Exception e) {
 				getLogger().warn("exception in close(): "+e); 
-				getLogger().debug("exception in close(): "+e.getMessage(), e); 
+				//getLogger().debug("exception in close(): "+e.getMessage(), e); 
 			}
 		}
 		getLogger().info("...done");

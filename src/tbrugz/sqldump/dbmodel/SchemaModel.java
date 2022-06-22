@@ -9,6 +9,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+/*
+see: http://blog.bdoughan.com/2011/06/using-jaxbs-xmlaccessortype-to.html
+*/
 @XmlRootElement
 //@XmlAccessorType(XmlAccessType.NONE)
 @XmlType(propOrder={"tables", "foreignKeys", "views", "triggers", "executables", "indexes", "sequences", "synonyms", "schemaMetadata", "sqlDialect", "modelId", "metadata"})

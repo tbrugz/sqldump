@@ -137,9 +137,9 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		if(closeConnection && conn!=null) {
 			try {
 				log.debug("closing connection: "+conn);
-				if(!conn.getAutoCommit()) {
+				/*if(!conn.getAutoCommit()) {
 					conn.rollback(); // derby likes this (if transaction is active)
-				}
+				}*/
 				conn.close();
 			}
 			catch(Exception e) {
