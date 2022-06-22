@@ -54,7 +54,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			}
 		}
 		catch(SQLSyntaxErrorException e) {
-			log.warn("can't grab derby sequences. database version 10.6+ required"); //XXX output current derby db version?
+			String currentVersion = ""+conn.getMetaData().getDatabaseMajorVersion()+"."+
+					conn.getMetaData().getDatabaseMinorVersion();
+			log.warn("can't grab derby sequences. database version 10.6+ required [currentVersion="+currentVersion+"]");
 			log.debug("nested exception: "+e);
 		}
 
@@ -76,21 +78,25 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		//String query = "select tableid, viewdefinition "
 		//		+"from sys.sysviews "
 		//		+"order by tableid ";
-		String query = "select st.tablename, sv.tableid, sv.viewdefinition "
-				+"from sys.systables as st, sys.sysviews as sv "
-				+"where st.tableid = sv.tableid "
+		String query = "select sc.schemaname, st.tablename, sv.tableid, sv.viewdefinition "
+				+"from sys.systables as st "
+				+"join sys.sysviews as sv on st.tableid = sv.tableid "
+				+"join sys.sysschemas as sc on st.schemaid = sc.schemaid "
+				+"where 1=1 "
+				+(schemaPattern!=null?"and sc.schemaname = '"+schemaPattern+"' ":"")
 				+(viewNamePattern!=null?"and st.tablename = '"+viewNamePattern+"'":"")
-				+"order by tablename ";
+				+"order by st.tablename ";
+		log.debug("grabbing views query: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
 		while(rs.next()) {
 			View v = new View();
-			v.setName( rs.getString(1) );
+			v.setSchemaName( rs.getString(1) );
+			v.setName( rs.getString(2) );
 			//v.query = getStringFromReader(rs.getCharacterStream(3));
-			v.setQuery( rs.getString(3) );
-			v.setSchemaName( schemaPattern );
+			v.setQuery( rs.getString(4) );
 			views.add(v);
 			count++;
 		}
@@ -103,10 +109,15 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = "select triggername, event, firingtime, type, st.tableid, tablename, triggerdefinition "
-				+"from sys.systables as st, sys.systriggers as tr "
-				+"where st.tableid = tr.tableid "
-				+(triggerNamePattern!=null?"and triggername ='"+triggerNamePattern+"'":"");
+		String query = "select triggername, event, firingtime, type, st.tableid, sc.schemaname, tablename, triggerdefinition "
+				+"from sys.systables as st "
+				+"join sys.systriggers as tr on st.tableid = tr.tableid "
+				+"join sys.sysschemas as sc on st.schemaid = sc.schemaid "
+				+"where 1=1"
+				+(schemaPattern!=null?" and sc.schemaname = '"+schemaPattern+"' ":"")
+				+(tableNamePattern!=null?" and st.tablename = '"+tableNamePattern+"'":"")
+				+(triggerNamePattern!=null?" and triggername ='"+triggerNamePattern+"'":"");
+		log.debug("grabbing triggers query: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -117,7 +128,6 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			InformationSchemaTrigger t = new InformationSchemaTrigger();
 			//t.addSplitter = true;
 			t.setName( rs.getString(1) );
-			t.setSchemaName( schemaPattern );
 			//t.tableName = rs.getString(3);
 			//t.description = rs.getString(4);
 			//t.description = t.schemaName+"."+t.name+" as";
@@ -129,8 +139,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 			//t.name = rs.getString(1);
 			String event = rs.getString(2);
 			t.eventsManipulation.add("I".equals(event)?"INSERT":"U".equals(event)?"UPDATE":"DELETE");
-			t.setTableName(rs.getString(6));
-			t.actionStatement = rs.getString(7);
+			t.setSchemaName(rs.getString(6));
+			t.setTableName(rs.getString(7));
+			t.actionStatement = rs.getString(8);
 			String forEachX = rs.getString(4);
 			t.actionOrientation = "R".equals(forEachX)?"ROW":"STATEMENT";
 			String timing = rs.getString(3);
@@ -148,22 +159,26 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
-		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype "
-				+"from sys.syssequences "
-				+(sequenceNamePattern!=null?"where sequencename = '"+sequenceNamePattern+"' ":"")
+		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype, sc.schemaname "
+				+"from sys.syssequences ss "
+				+"join sys.sysschemas as sc on ss.schemaid = sc.schemaid "
+				+"where 1=1"
+				+(schemaPattern!=null?" and sc.schemaname = '"+schemaPattern+"' ":"")
+				+(sequenceNamePattern!=null?" and sequencename = '"+sequenceNamePattern+"' ":"")
 				+"order by sequencename ";
+		log.debug("grabbing sequences query: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
 		int count = 0;
 		while(rs.next()) {
 			Sequence s = new Sequence();
-			s.setSchemaName( schemaPattern );
 			s.setName( rs.getString(1) );
 			s.setMinValue(rs.getLong(2));
 			s.setMaxValue(rs.getLong(3));
 			s.setLastNumber(rs.getLong(4));
 			s.setIncrementBy(rs.getLong(5));
+			s.setSchemaName( rs.getString(7) );
 			seqs.add(s);
 			count++;
 		}
@@ -185,7 +200,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 				"where not a.systemalias\n" +
 				"  and a.aliastype in ('F', 'P', 'G')" +
 				(schemaPattern!=null?"\nand s.schemaname like '"+schemaPattern+"'":"");
-		//log.debug("sql: "+query);
+		log.debug("grabbing executables query: "+query);
 		Statement st = conn.createStatement();
 		ResultSet rs = st.executeQuery(query);
 		
@@ -287,7 +302,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		log.debug("grabbing unique constraints");
 		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
 		Statement st = conn.createStatement();
-		log.debug("sql: "+query);
+		log.debug("grabbing unique constraints query: "+query);
 		ResultSet rs = st.executeQuery(query);
 		
 		int countUKs = 0;
@@ -326,7 +341,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 					int i = Integer.parseInt(ss.trim());
 					String colName = tCols.get(i-1);
 					c.getUniqueColumns().add(colName);
-					log.debug("grabDBUniqueConstraints: added column #"+i+": "+colName);
+					log.trace("grabDBUniqueConstraints: added column #"+i+": "+colName);
 				}
 				countCols += colIdxs.length;
 				countUKs++;
