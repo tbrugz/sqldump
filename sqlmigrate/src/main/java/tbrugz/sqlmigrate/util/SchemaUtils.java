@@ -109,18 +109,17 @@ public class SchemaUtils {
 		log.debug("transformDialectBackAndForth: SQLDialectTransformer: todbid dialect="+dialect);
 		Processor transf = new SQLDialectTransformer();
 		transf.setSchemaModel(schema);
+		Properties transformProps = new Properties();
+		transformProps.setProperty(SQLDialectTransformer.PROP_TRANSFORM_QUIET, TRUE);
 		
 		{
-			Properties transformProps = new Properties();
-			//"sqldump.schematransform.toansi"
 			transformProps.setProperty(SQLDialectTransformer.PROP_TRANSFORM_TO_ANSI, TRUE);
 			transf.setProperties(transformProps);
 			transf.process();
 		}
 
 		{
-			Properties transformProps = new Properties();
-			// "sqldump.schematransform.todbid"
+			transformProps.remove(SQLDialectTransformer.PROP_TRANSFORM_TO_ANSI);
 			transformProps.setProperty(SQLDialectTransformer.PROP_TRANSFORM_TO_DBID, dialect);
 			transf.setProperties(transformProps);
 			transf.process();
@@ -209,7 +208,7 @@ public class SchemaUtils {
 		}
 		
 		// logging
-		log.info("migrationModel.tables: "+model.getTables());
+		log.info("model.tables: "+model.getTables());
 		log.info("dbModel.tables: "+dbModel.getTables());
 		
 		// diff

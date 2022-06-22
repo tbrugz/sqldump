@@ -227,7 +227,7 @@ public class SqlMigrate extends BaseExecutor {
 			}
 			else if(vdb.contains(fsmv)) {
 				// db already has this migration, do nothing
-				log.info("migration "+m+" already in database. doing nothing");
+				log.debug("migration "+m+" already in database. doing nothing");
 				countUnchanged += 1;
 			}
 			else {

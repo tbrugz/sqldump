@@ -28,6 +28,7 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 	public static final String PROP_TRANSFORM_TO_ANSI = PROP_PREFIX+".toansi";
 	public static final String PROP_TRANSFORM_TO_DBID = PROP_PREFIX+".todbid";
 	public static final String PROP_TRANSFORM_TO_CONNID = PROP_PREFIX+".to-conn-id";
+	public static final String PROP_TRANSFORM_QUIET = PROP_PREFIX+".quiet";
 	
 	static final Log log = LogFactory.getLog(SQLDialectTransformer.class);
 	
@@ -35,6 +36,7 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 	boolean toANSI = false;
 	boolean toConnectionDialectId = false;
 	String toDialectId;
+	boolean quiet = false;
 	
 	@Override
 	public void process() {
@@ -51,7 +53,9 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 				Connection conn = getConnection();
 				DBMSFeatures feats = DBMSResources.instance().getSpecificFeatures(conn.getMetaData());
 				String dialectId = feats.getId();
-				log.info("using '.to-conn-id', dialect = "+dialectId);
+				if(!quiet) {
+					log.info("using '.to-conn-id', dialect = "+dialectId);
+				}
 				toDialectId = dialectId;
 			}
 			catch(SQLException e) {
@@ -68,11 +72,13 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		}
 		
 		String fromDialectId = model.getSqlDialect();
+		if(!quiet) {
 		log.info("sql dialect transformer: from "
 				+(fromDialectId==null?"ANSI-SQL(?) (null)":"'"+fromDialectId+"'")
 				+" to "
 				+(toANSI?"ANSI-SQL":"'"+toDialectId+"'")
 				);
+		}
 		
 		int tableCount = 0, columnCount = 0;
 		for(Table table: model.getTables()) {
@@ -119,7 +125,9 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		else if(toANSI) {
 			model.setSqlDialect(null); //???
 		}
-		log.info("model transformer ended ok [tableCount="+tableCount+"; columnCount="+columnCount+"]");
+		if(!quiet) {
+			log.info("model transformer ended ok [tableCount="+tableCount+"; columnCount="+columnCount+"]");
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -128,6 +136,7 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		toDialectId = Utils.getPropWithDeprecated(prop, PROP_TRANSFORM_TO_DBID, Defs.PROP_TO_DB_ID, null);
 		boolean transformToANSI = Utils.getPropBool(prop, PROP_TRANSFORM_TO_ANSI);
 		boolean transformToConnId = Utils.getPropBool(prop, PROP_TRANSFORM_TO_CONNID);
+		quiet = Utils.getPropBool(prop, PROP_TRANSFORM_QUIET, quiet);
 
 		toConnectionDialectId = toDialectId==null && transformToConnId;
 		toANSI = toDialectId==null && transformToANSI;
