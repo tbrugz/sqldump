@@ -14,7 +14,7 @@ public class Migration {
 	//Boolean checksumMatched;
 	
 	public Migration(String version, String script, Long crc32) {
-		this.version = DotVersion.getDotVersion(version);
+		this.version = (version==null) ? null : DotVersion.getDotVersion(version);
 		this.script = script;
 		this.crc32 = crc32;
 	}
@@ -25,6 +25,10 @@ public class Migration {
 	
 	public String getScript() {
 		return script;
+	}
+	
+	public Long getCrc32() {
+		return crc32;
 	}
 	
 	public String getChecksumString() {

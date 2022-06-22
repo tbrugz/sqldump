@@ -52,26 +52,42 @@ public class MigrationDao {
 		return ret;
 	}
 
-	public void save(Migration mig, Connection conn) throws SQLException {
+	public int save(Migration mig, Connection conn) throws SQLException {
 		String sql = DmlUtils.createInsert(schemaName, tableName, Arrays.asList(MIG_COLUMNS));
 		log.debug("save.sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
-		st.setString(1, mig.getVersion().asVersionString());
+		if(mig.getVersion()!=null) {
+			st.setString(1, mig.getVersion().asVersionString());
+		}
+		else {
+			st.setObject(1, null);
+		}
 		st.setString(2, mig.getScript());
-		if(mig.crc32!=null) {
-			st.setLong(3, mig.crc32);
+		if(mig.getCrc32()!=null) {
+			st.setLong(3, mig.getCrc32());
 		}
 		else {
 			st.setObject(3, null);
 		}
 		st.execute();
+		return st.getUpdateCount();
 	}
 
+	public int updateChecksumByScript(Migration mig, Long crc32, Connection conn) throws SQLException {
+		String sql = DmlUtils.createUpdate(schemaName, tableName, Arrays.asList(new String[]{"crc32"}), Arrays.asList(new String[]{"script"}));
+		log.debug("updateChecksumByScript.sql: "+sql);
+		PreparedStatement st = conn.prepareStatement(sql);
+		st.setLong(1, crc32);
+		st.setString(2, mig.getScript());
+		st.execute();
+		return st.getUpdateCount();
+	}
+	
 	static final String[] MIG_VERSION = { "version" };
 	
 	public int removeByVersion(Migration mig, Connection conn) throws SQLException {
 		String sql = DmlUtils.createDelete(schemaName, tableName, Arrays.asList(MIG_VERSION));
-		log.debug("remove.sql: "+sql);
+		log.debug("removeByVersion.sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, mig.getVersion().asVersionString());
 		st.execute();

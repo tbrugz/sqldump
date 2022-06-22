@@ -26,7 +26,7 @@ public class MigrationIO {
 		return files;
 	}*/
 	
-	public static List<Migration> listMigrations(File dir, boolean getChecksum) throws FileNotFoundException, IOException {
+	public static List<Migration> listMigrations(File dir, boolean splitVersion, boolean getChecksum) throws FileNotFoundException, IOException {
 		List<Migration> migs = new ArrayList<>();
 		//String[] files = listFilesSorted(dir);
 		if(!dir.isDirectory()) {
@@ -38,28 +38,34 @@ public class MigrationIO {
 		for(String f: files) {
 			if(f.endsWith(".sql")) {
 				//log.info("file: "+f);
-				int idx = f.indexOf('_');
-				if(idx > 0) {
-					String strVersion = f.substring(0, idx);
-					//DotVersion dv = DotVersion.getDotVersion(strVersion);
-					//String rest = f.substring(idx+1);
-					Long checksum = null;
-					if(getChecksum) {
-						checksum = ChecksumUtils.getChecksumCRC32(new FileInputStream(new File(dir, f)));
+				Long checksum = null;
+				if(getChecksum) {
+					checksum = ChecksumUtils.getChecksumCRC32(new FileInputStream(new File(dir, f)));
+				}
+				if(splitVersion) {
+					int idx = f.indexOf('_');
+					if(idx > 0) {
+						String strVersion = f.substring(0, idx);
+						//DotVersion dv = DotVersion.getDotVersion(strVersion);
+						//String rest = f.substring(idx+1);
+						if(!DotVersion.isValidVersion(strVersion)) {
+							//log.warn("not a valid version: "+strVersion+" [file: "+f+"]");
+							log.info("ignored file (invalid version: ["+strVersion+"]): "+f);
+							continue;
+						}
+						Migration m = new Migration(strVersion, f, checksum);
+						migs.add(m);
+						//log.info("migration file: "+f+" ; mig: "+m);
 					}
-					if(!DotVersion.isValidVersion(strVersion)) {
-						//log.warn("not a valid version: "+strVersion+" [file: "+f+"]");
-						log.info("ignored file (invalid version: ["+strVersion+"]): "+f);
-						continue;
+					else {
+						// repeatable?
+						//log.info("repeatable migration file? file: "+f);
+						log.info("ignored file (no version): "+f);
 					}
-					Migration m = new Migration(strVersion, f, checksum);
-					migs.add(m);
-					//log.info("migration file: "+f+" ; mig: "+m);
 				}
 				else {
-					// repeatable?
-					//log.info("repeatable migration file? file: "+f);
-					log.info("ignored file (no version): "+f);
+					Migration m = new Migration(null, f, checksum);
+					migs.add(m);
 				}
 			}
 			//XXX: .properties file
