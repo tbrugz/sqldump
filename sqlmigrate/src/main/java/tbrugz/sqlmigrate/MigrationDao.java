@@ -30,19 +30,19 @@ public class MigrationDao {
 	}
 
 	public List<Migration> listVersionedMigrations(Connection conn) throws SQLException {
-		return listMigrations(conn, "where version is not null");
+		return listMigrations(conn, true);
 	}
 
 	public List<Migration> listUnversionedMigrations(Connection conn) throws SQLException {
-		return listMigrations(conn, "where version is null");
+		return listMigrations(conn, false);
 	}
 	
-	List<Migration> listMigrations(Connection conn, String filter) throws SQLException {
+	List<Migration> listMigrations(Connection conn, boolean versioned) throws SQLException {
 		List<Migration> ret = new ArrayList<>();
 		String sql = "select " + MIG_COLUMNS_STR + " " +
 				"from "+ (schemaName!=null?schemaName+".":"") + tableName + " " +
-				(filter!=null?filter+" ":"") +
-				"order by version";
+				"where version " + (versioned?"is not null ":"is null ") +
+				"order by " + (versioned?"version":"script");
 		log.debug("list.sql: "+sql);
 		ResultSet rs = conn.createStatement().executeQuery(sql);
 		while(rs.next()) {

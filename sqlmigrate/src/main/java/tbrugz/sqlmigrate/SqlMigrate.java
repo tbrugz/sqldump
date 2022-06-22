@@ -186,11 +186,11 @@ public class SqlMigrate extends BaseExecutor {
 		
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
 		List<Migration> mds = md.listVersionedMigrations(conn);
-		MigrationIO.sortMigrations(mds);
+		MigrationIO.sortMigrationsByVersion(mds);
 
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
 		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), true, getChecksumForVersionedScripts);
-		MigrationIO.sortMigrations(mios);
+		MigrationIO.sortMigrationsByVersion(mios);
 
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
 		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
@@ -302,7 +302,7 @@ public class SqlMigrate extends BaseExecutor {
 		// show migrations
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
 		List<Migration> mds = md.listVersionedMigrations(conn);
-		MigrationIO.sortMigrations(mds);
+		MigrationIO.sortMigrationsByVersion(mds);
 		if(log.isDebugEnabled()) {
 			log.debug(">> db migrations:");
 			for(Migration m: mds) {
@@ -312,7 +312,7 @@ public class SqlMigrate extends BaseExecutor {
 		
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
 		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), true, getChecksumForVersionedScripts);
-		MigrationIO.sortMigrations(mios);
+		MigrationIO.sortMigrationsByVersion(mios);
 		if(log.isDebugEnabled()) {
 			log.debug(">> filesystem migrations:");
 			for(Migration m: mios) {
@@ -460,11 +460,11 @@ public class SqlMigrate extends BaseExecutor {
 		
 		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
 		List<Migration> mds = md.listVersionedMigrations(conn);
-		MigrationIO.sortMigrations(mds);
+		MigrationIO.sortMigrationsByVersion(mds);
 
 		log.info("grabbing fs migrations from: "+versionedMigrationsDir);
 		List<Migration> mios = MigrationIO.listMigrations(new File(versionedMigrationsDir), true, getChecksumForVersionedScripts);
-		MigrationIO.sortMigrations(mios);
+		MigrationIO.sortMigrationsByVersion(mios);
 
 		boolean hasDbDuplicates = MigrationIO.hasDuplicatedVersions(mds);
 		boolean hasFsDuplicates = MigrationIO.hasDuplicatedVersions(mios);
@@ -531,10 +531,10 @@ public class SqlMigrate extends BaseExecutor {
 		log.info(">> migrate::repeatables [dry-run="+isDryRun()+"]");
 		long initTime = System.currentTimeMillis();
 		List<Migration> umd = md.listUnversionedMigrations(conn);
-		umd.sort(new Migration.MigrationScriptComparator());
+		MigrationIO.sortMigrationsByScript(umd);
 		log.info("grabbing fs repeatable migrations from: "+repeatableMigrationsDir);
 		List<Migration> umfs = MigrationIO.listMigrations(new File(repeatableMigrationsDir), false, true);
-		umfs.sort(new Migration.MigrationScriptComparator());
+		MigrationIO.sortMigrationsByScript(umfs);
 		//XXX: check for duplicates... hasDuplicates?
 		Set<String> sdb = MigrationIO.getScriptSet(umd);
 		Set<String> sio = MigrationIO.getScriptSet(umfs);
@@ -559,7 +559,9 @@ public class SqlMigrate extends BaseExecutor {
 		//log.debug("db repeatables: "+sdb);
 		//log.debug("fs repeatables: "+sio);
 		Set<String> intersect = MigrationIO.intersectSets(sdb, sio);
+		log.debug("known repeatables [#"+intersect.size()+"]: "+intersect);
 		Set<String> unmatchedChecksumMigs = new TreeSet<>();
+		long countAlreadyExecuted = 0;
 		for(String s: intersect) {
 			List<Migration> mdbl = MigrationIO.getMigrationsFromScript(umd, s);
 			List<Migration> mfsl = MigrationIO.getMigrationsFromScript(umfs, s);
@@ -585,6 +587,9 @@ public class SqlMigrate extends BaseExecutor {
 			if(!mdb0.matchesChecksum(mfs0)) {
 				unmatchedChecksumMigs.add(s);
 				log.debug("script '"+s+"' has unmatching checksum: db="+mdb0.getChecksumString()+" ; fs="+mfs0.getChecksumString());
+			}
+			else {
+				countAlreadyExecuted++;
 			}
 		}
 		if(unmatchedChecksumMigs.size()>0) {
@@ -645,6 +650,7 @@ public class SqlMigrate extends BaseExecutor {
 		finally {
 			log.info("migrate: repeatable migrations... #executed (new) = "+countExecutedNew +
 					" ; #executed (updated) = "+countExecutedUpdated +
+					" ; #not-run (already executed) = "+countAlreadyExecuted +
 					" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 		}
 	}

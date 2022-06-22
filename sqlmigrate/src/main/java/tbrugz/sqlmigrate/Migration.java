@@ -47,7 +47,7 @@ public class Migration {
 		return crc32.equals(other.crc32);
 	}
 	
-	public static class MigrationComparator implements Comparator<Migration> {
+	public static class MigrationVersionComparator implements Comparator<Migration> {
 		@Override
 		public int compare(Migration o1, Migration o2) {
 			return o1.getVersion().compareTo(o2.getVersion());

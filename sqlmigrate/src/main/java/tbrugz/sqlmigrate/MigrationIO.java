@@ -93,10 +93,14 @@ public class MigrationIO {
 	}
 	*/
 	
-	public static void sortMigrations(List<Migration> migrations) {
-		migrations.sort(new Migration.MigrationComparator());
+	public static void sortMigrationsByVersion(List<Migration> migrations) {
+		migrations.sort(new Migration.MigrationVersionComparator());
 	}
 
+	public static void sortMigrationsByScript(List<Migration> migrations) {
+		migrations.sort(new Migration.MigrationScriptComparator());
+	}
+	
 	public static boolean hasDuplicatedVersions(List<Migration> migs) {
 		int originalSize = migs.size();
 		Set<DotVersion> versions = new HashSet<>();
