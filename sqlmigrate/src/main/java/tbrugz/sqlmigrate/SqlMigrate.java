@@ -88,17 +88,47 @@ public class SqlMigrate extends BaseExecutor {
 	//protected void init(Connection c) {
 	//}
 	
+	/*
+	@Override
+	protected String[] preprocessArgs(String[] args) {
+		// if args[i]==action, then set action, remove arg from array
+		return super.preprocessArgs(args);
+	}
+	*/
+	
+	@Override
+	protected void postProcessArgs(List<String> xtraArgs) {
+		for(String arg: xtraArgs) {
+			if(action!=null) {
+				throw new IllegalArgumentException("Illegal argument '"+arg+"'. Action '"+action+"' already set");
+			}
+			try {
+				action = MigrateAction.valueOf(arg.toUpperCase());
+			}
+			catch(IllegalArgumentException e) {
+				throw new IllegalArgumentException("unknown action '"+arg+"'", e);
+			}
+		}
+		/*if(xtraArgs.size()>0) {
+			CLIProcessor.throwUnknownArgException(xtraArgs.get(0));
+		}*/
+	}
+	
 	@Override
 	public void procProterties() {
 		String actionStr = papp.getProperty(PROP_ACTION);
-		if(actionStr==null) {
-			throw new IllegalArgumentException("null migration action");
-		}
-		try {
-			action = MigrateAction.valueOf(actionStr.toUpperCase());
-		}
-		catch(IllegalArgumentException e) {
-			throw new IllegalArgumentException("unknown action '"+actionStr+"'", e);
+		if(actionStr!=null) {
+			if(action==null) {
+				try {
+					action = MigrateAction.valueOf(actionStr.toUpperCase());
+				}
+				catch(IllegalArgumentException e) {
+					throw new IllegalArgumentException("unknown action '"+actionStr+"'", e);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("action '"+action+"' already set [prop '"+PROP_ACTION+"' = '"+actionStr+"']");
+			}
 		}
 		migrationsTable = papp.getProperty(PROP_MIGRATION_TABLE, DEFAULT_MIGRATION_TABLE);
 		migrationsSchemaName = papp.getProperty(PROP_MIGRATION_TABLE_SCHEMA);
@@ -107,6 +137,13 @@ public class SqlMigrate extends BaseExecutor {
 		baseline = Utils.getPropBool(papp, PROP_BASELINE, baseline);
 		baselineVersion = papp.getProperty(PROP_BASELINE_VERSION, baselineVersion);
 		charset = papp.getProperty(PROP_CHARSET, charset);
+	}
+	
+	@Override
+	protected void initCheck() {
+		if(action==null) {
+			throw new IllegalStateException("action not set");
+		}
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, IOException, SQLException, NamingException, IllegalStateException {

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.naming.NamingException;
@@ -56,7 +57,9 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 				}
 			}
 			else {
-				CLIProcessor.init(getProductName(), args, getPropertiesFilename(), papp);
+				//args = preProcessArgs(args);
+				List<String> xtraArgs = CLIProcessor.init(getProductName(), args, getPropertiesFilename(), papp, false);
+				postProcessArgs(xtraArgs);
 			}
 			init(c);
 			if(conn==null) { return; }
@@ -66,7 +69,20 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 			end(c==null);
 		}
 	}
+	
+	/*protected String[] preProcessArgs(String[] args) {
+		return args;
+	}*/
 
+	protected void postProcessArgs(List<String> xtraArgs) {
+		if(xtraArgs.size()>0) {
+			CLIProcessor.throwUnknownArgException(xtraArgs.get(0));
+		}
+	}
+	
+	protected void initCheck() {
+	}
+	
 	void init(Connection c) throws IOException, ClassNotFoundException, SQLException, NamingException {
 		ColTypeUtil.setProperties(papp);
 		
@@ -120,6 +136,7 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 		//log.debug("DBMSFeatures: "+feats);
 		//defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		//jmxCreateMBean = Utils.getPropBool(papp, PROP_JMX_CREATE_MBEAN, jmxCreateMBean);
+		initCheck();
 	}
 	
 	protected abstract void procProterties();

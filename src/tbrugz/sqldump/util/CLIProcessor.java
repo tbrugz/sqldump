@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -33,11 +35,17 @@ public class CLIProcessor {
 	//XXX: move to utils(?)... (used by sqldump & sqlrun -- why not sqldiff?) 
 	public static void init(final String productName, final String[] args,
 			final String defaultPropFile, final Properties papp) throws IOException {
+		init(productName, args, defaultPropFile, papp, true);
+	}
+	
+	public static List<String> init(final String productName, final String[] args,
+			final String defaultPropFile, final Properties papp, boolean failOnUnknownArg) throws IOException {
 		log.info((productName!=null?productName+" ":"")+
 				"init... [version "+Version.getVersion()+"]");
 		log.debug("buildNumber: "+Version.getBuildNumber()+" ; buildTimestamp: "+Version.getBuildTimestamp());
 		boolean useSysPropSetted = false;
 		int loadedCount = 0;
+		List<String> ret = new ArrayList<>();
 		if(args!=null) {
 			for(String arg: args) {
 				if(arg.indexOf(PARAM_PROPERTIES_FILENAME)==0) {
@@ -75,13 +83,20 @@ public class CLIProcessor {
 					useSysPropSetted = true;
 				}
 				else {
-					String message = "Unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP_DEFAULT+"' argument";
-					log.error(message);
-					System.out.println(message);
-					throw new IllegalArgumentException(message);
-					//System.exit(1);
-					//show help and exit?
-					//System.out.println(getHelpText(productName));
+					//String message = "Unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP_DEFAULT+"' argument";
+					if(failOnUnknownArg) {
+						throwUnknownArgException(arg);
+						//log.error(message);
+						//System.out.println(message);
+						//throw new IllegalArgumentException(message);
+						//System.exit(1);
+						//show help and exit?
+						//System.out.println(getHelpText(productName));
+					}
+					else {
+						log.debug("unrecognized param '"+arg+"'");
+						ret.add(arg);
+					}
 				}
 			}
 		}
@@ -100,6 +115,17 @@ public class CLIProcessor {
 			useSysPropSetted = true;
 		}
 		log.debug("using sys properties: "+ParametrizedProperties.isUseSystemProperties());
+		return ret;
+	}
+	
+	public static void throwUnknownArgException(String arg) {
+		String message = "Unrecognized param '"+arg+"' (ignored). for more information use '"+PARAM_HELP_DEFAULT+"' argument";
+		log.error(message);
+		System.out.println(message);
+		throw new IllegalArgumentException(message);
+		//System.exit(1);
+		//show help and exit?
+		//System.out.println(getHelpText(productName));
 	}
 	
 	public static boolean shouldStopExec(final String productName, final String[] args) {
