@@ -185,10 +185,12 @@
 			<fileset dir="${src.graphml.dir}">
 				<include name="**/*.properties"/>
 			</fileset>
+			<!--
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/*.xsl"/>
 			</fileset>
+			-->
 			<fileset dir="${src.diff.dir}">
 				<include name="**/*.properties"/>
 				<include name="**/jaxb.index"/>
@@ -279,9 +281,11 @@
 			<fileset dir="${src.run.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			<!--
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			-->
 			<fileset dir="${src.xtra.dir}">
 				<include name="**/*.java"/>
 			</fileset>
@@ -300,7 +304,7 @@
 			<sourcepath location="${src.diff.dir}"/>
 			<sourcepath location="${src.run.dir}"/>
 			<sourcepath location="${src.graphml.dir}"/>
-			<sourcepath location="${src.mondrian.dir}"/>
+			<!--<sourcepath location="${src.mondrian.dir}"/>-->
 			<sourcepath location="${src.pivot.dir}"/>
 		</javadoc>
 		<jar destfile="${dist.dir}/javadocs/sqldump.jar"
@@ -440,9 +444,11 @@
 			<fileset dir="${src.run.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			<!--
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			-->
 			<fileset dir="${src.xtra.dir}">
 				<include name="**/*.java"/>
 			</fileset>
@@ -465,9 +471,11 @@
 			<fileset dir="${src.run.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			<!--
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			-->
 			<fileset dir="${src.xtra.dir}">
 				<include name="**/*.java"/>
 			</fileset>
@@ -489,9 +497,11 @@
 			<fileset dir="${src.run.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			<!--
 			<fileset dir="${src.mondrian.dir}">
 				<include name="**/*.java"/>
 			</fileset>
+			-->
 			<fileset dir="${src.xtra.dir}">
 				<include name="**/*.java"/>
 			</fileset>
@@ -528,7 +538,7 @@
 			<sourcePath path="${src.diff.dir}" />
 			<sourcePath path="${src.dir}" />
 			<sourcePath path="${src.graphml.dir}" />
-			<sourcePath path="${src.mondrian.dir}" />
+			<!--<sourcePath path="${src.mondrian.dir}" />-->
 			<sourcePath path="${src.run.dir}" />
 			<sourcePath path="${src.xtra.dir}" />
 			<class location="${bin.dir}" />
@@ -542,7 +552,7 @@
 			<fileset dir="${src.diff.dir}" includes="**/*.java"/>
 			<fileset dir="${src.dir}" includes="**/*.java"/>
 			<fileset dir="${src.graphml.dir}" includes="**/*.java"/>
-			<fileset dir="${src.mondrian.dir}" includes="**/*.java"/>
+			<!--<fileset dir="${src.mondrian.dir}" includes="**/*.java"/>-->
 			<fileset dir="${src.run.dir}" includes="**/*.java"/>
 			<fileset dir="${src.xtra.dir}" includes="**/*.java"/>
 			<!--formatter type="plain"/-->
