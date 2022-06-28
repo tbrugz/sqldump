@@ -11,39 +11,41 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.TestUtil;
-import tbrugz.sqldump.processors.CascadingDataDump;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class MondrianTests {
 
-	String OUTDIR = "work/output/mondrian";
+	static final String[] NULL_PARAMS = null;
+	static final String OUTDIR = "target/test-output/mondrian";
 	
 	@BeforeClass
 	public static void setupDB() throws Exception {
 		Properties p = new ParametrizedProperties();
-		p.load(CascadingDataDump.class.getResourceAsStream("setupdb.properties"));
+		//System.out.println("current dir == "+System.getProperty("user.dir"));
+		p.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, ".");
+		p.load(MondrianTests.class.getResourceAsStream("/setupdb.properties"));
 		SQLRun sqlr = new SQLRun();
-		sqlr.doMain(TestUtil.NULL_PARAMS, p);
+		sqlr.doMain(NULL_PARAMS, p);
 	}
 	
-	@Test @Ignore
+	@Test
 	public void dumpSchemaAndValidate() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Properties p = new ParametrizedProperties();
 		p.load(MondrianTests.class.getResourceAsStream("mondrian1.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p);
+		sqld.doMain(NULL_PARAMS, p);
 	}
 
-	@Test @Ignore
+	@Test
 	public void dumpOlapMDXQuery() throws IOException, ClassNotFoundException, SQLException, NamingException {
 		Properties p = new ParametrizedProperties();
 		p.load(MondrianTests.class.getResourceAsStream("mondrian2.properties"));
 		p.setProperty("baseoutdir", OUTDIR);
 		SQLDump sqld = new SQLDump();
-		sqld.doMain(TestUtil.NULL_PARAMS, p);
+		sqld.doMain(NULL_PARAMS, p);
 	}
 	
 }
