@@ -30,7 +30,7 @@ public class JSONSchemaSerializer extends JAXBSchemaXMLSerializer implements Sch
 	public JSONSchemaSerializer() {
 		propertiesPrefix = JSONSERIALIZATION_DEFAULT_PREFIX;
 		try {
-			JAXBContext jc = JAXBContext.newInstance(JAXB_SCHEMA_PACKAGES);
+			JAXBContext jc = JAXBContext.newInstance(jaxbSchemaPackages);
 			jsonser = new JSONSerializer(jc);
 		} catch (JAXBException e) {
 			log.error("impossible to create JAXBContext: "+e);

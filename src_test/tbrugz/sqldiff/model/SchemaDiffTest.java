@@ -199,7 +199,7 @@ public class SchemaDiffTest {
 	
 	public static String schema2string(Object model) throws JAXBException {
 		XMLSerializer xmlser;
-		xmlser = new XMLSerializer(JAXBSchemaXMLSerializer.JAXB_SCHEMA_PACKAGES);
+		xmlser = new XMLSerializer(JAXBSchemaXMLSerializer.DEFAULT_JAXB_SCHEMA_PACKAGES);
 		StringWriter sw = new StringWriter();
 		xmlser.marshal(model, sw);
 		return sw.toString();
@@ -207,7 +207,7 @@ public class SchemaDiffTest {
 
 	public static Object string2schema(String model) throws JAXBException {
 		XMLSerializer xmlser;
-		xmlser = new XMLSerializer(JAXBSchemaXMLSerializer.JAXB_SCHEMA_PACKAGES);
+		xmlser = new XMLSerializer(JAXBSchemaXMLSerializer.DEFAULT_JAXB_SCHEMA_PACKAGES);
 		StringReader sr = new StringReader(model);
 		return xmlser.unmarshal(sr);
 	}

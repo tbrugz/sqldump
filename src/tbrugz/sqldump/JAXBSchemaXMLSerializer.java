@@ -35,7 +35,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INRESOURCE = ".inresource";
 	
-	public static final String JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
+	public static final String DEFAULT_JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
 
 	String propertiesPrefix = XMLSERIALIZATION_JAXB_DEFAULT_PREFIX;
 	
@@ -47,16 +47,26 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	XMLSerializer xmlser;
 	String grabberId;
 	
+	static String jaxbSchemaPackages = DEFAULT_JAXB_SCHEMA_PACKAGES;
+
 	public JAXBSchemaXMLSerializer() {
 		try {
-			xmlser = new XMLSerializer(JAXB_SCHEMA_PACKAGES);
+			xmlser = new XMLSerializer(jaxbSchemaPackages);
 		} catch (JAXBException e) {
 			log.error(getIdDesc()+"impossible to create JAXBContext: "+e);
 			log.debug("impossible to create JAXBContext", e);
 			if(failonerror) { throw new ProcessingException(e); }
 		}
 	}
-	
+
+	public static void setJaxbSchemaPackages(String packages) {
+		jaxbSchemaPackages = packages;
+	}
+
+	public static void resetJaxbSchemaPackages() {
+		jaxbSchemaPackages = DEFAULT_JAXB_SCHEMA_PACKAGES;
+	}
+
 	@Override
 	public void setProperties(Properties prop) {
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
