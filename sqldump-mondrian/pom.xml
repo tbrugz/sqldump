@@ -49,7 +49,7 @@
     <httpclient.version>4.5.13</httpclient.version>
 
     -->
-    <h2.version>1.4.200</h2.version>
+    <h2.version>2.1.210</h2.version>
     <!--
     <postgresql.version>42.2.14.jre7</postgresql.version>
     <mariadb.version>2.6.2</mariadb.version>
