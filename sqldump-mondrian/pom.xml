@@ -49,7 +49,7 @@
     <httpclient.version>4.5.13</httpclient.version>
 
     -->
-    <h2.version>1.4.200</h2.version>
+    <h2.version>2.1.214</h2.version>
     <!--
     <postgresql.version>42.2.14.jre7</postgresql.version>
     <mariadb.version>2.6.2</mariadb.version>
@@ -356,14 +356,14 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>mondrian</artifactId>
-      <version>3.6.9</version>
+      <version>3.12.0.19-384</version>
       <scope>compile</scope>
     </dependency>
     <!--
     <dependency org="org.olap4j" name="olap4j" rev="1.2.0" conf="testmondrian->default"/>
     <dependency org="pentaho" name="mondrian" rev="3.6.9" conf="testmondrian->default"/>
     -->
-    <!-- 3.6.0, 3.6.6, 3.6.7, 3.12.0.2-208, 3.14.0.28-223 -->
+    <!-- 3.6.0, 3.6.6, 3.6.7, **3.6.9**, 3.12.0.2-208, 3.14.0.28-223, 3.14.0.32-242 -->
 
     <!-- <dependency>
       <groupId>org.slf4j</groupId>
