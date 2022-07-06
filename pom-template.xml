@@ -41,10 +41,12 @@
       <id>central</id>
       <url>https://repo.maven.apache.org/maven2/</url>
     </repository>
+    <!--
     <repository>
       <id>pentaho</id>
       <url>https://nexus.pentaho.org/content/groups/omni/</url>
     </repository>
+    -->
     <repository>
       <id>eclipselink</id>
       <url>http://download.eclipse.org/rt/eclipselink/maven.repo/</url>
