@@ -267,4 +267,8 @@ public class H2Features extends InformationSchemaFeatures {
 		return "length("+columnName+")";
 	}
 	
+	protected boolean allowViewSetWithReadOnly() {
+		return false;
+	}
+
 }

@@ -121,7 +121,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("unknown check option: "+checkOption+" [view '"+v.getName()+"']");
 				}
 			}
-			if(!"YES".equalsIgnoreCase(rs.getString(6))) {
+			if(allowViewSetWithReadOnly() && !"YES".equalsIgnoreCase(rs.getString(6))) {
 				v.setWithReadOnly(true);
 			}
 			views.add(v);
@@ -426,6 +426,10 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	@Override
 	public List<DBObjectType> getSupportedObjectTypes() {
 		return Arrays.asList(supportedTypes);
+	}
+
+	protected boolean allowViewSetWithReadOnly() {
+		return true;
 	}
 	
 }
