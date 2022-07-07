@@ -11,6 +11,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -491,9 +492,10 @@ public class DataDumpUtils {
 	}
 	
 	public static boolean isArray(Class<?> c, Object val) {
+		//System.out.println("isArray: c:"+c+" v:"+val);
 		return (Array.class.isAssignableFrom(c)) // || c.isArray()
 			&&
-			(val instanceof Object[] || (val instanceof Collection) );
+			(val instanceof Object[] || (val instanceof Collection) || (val instanceof ResultSet));
 			//(val instanceof Object[] || (val!=null && Collection.class.isAssignableFrom(val.getClass())) );
 	}
 
@@ -560,7 +562,7 @@ public class DataDumpUtils {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public static ResultSet getResultSetFromArray(Object obj, boolean withIndexColumn, String columnName) {
+	public static ResultSet getResultSetFromArray(Object obj, boolean withIndexColumn, String columnName) throws SQLException {
 		if(obj==null) { return null; }
 		
 		Object[] arr = null;
@@ -570,10 +572,38 @@ public class DataDumpUtils {
 		else if(obj instanceof Object[]) {
 			arr = (Object[]) obj;
 		}
+		else if(obj instanceof ResultSet) {
+			return projectResultSetAsArray((ResultSet) obj);
+		}
 		else {
-			throw new IllegalArgumentException("object '"+obj+"' is not array nor collection ["+obj.getClass().getName()+"]");
+			throw new IllegalArgumentException("object '"+obj+"' is not array, collection, or resultSet ["+obj.getClass().getName()+"]");
 		}
 		return new ResultSetArrayAdapter(arr, withIndexColumn, columnName);
+	}
+	
+	static ResultSet projectResultSetAsArray(ResultSet rs) throws SQLException {
+		int cc = rs.getMetaData().getColumnCount();
+		String colName = null;
+		/*
+		if(cc==1) {
+			colName = rs.getMetaData().getColumnName(1);
+			List<String> cols = Arrays.asList(new String[]{colName});
+			return new ResultSetProjectionDecorator(rs, cols);
+		}
+		if(cc==2) {
+			colName = rs.getMetaData().getColumnName(2);
+			List<String> cols = Arrays.asList(new String[]{colName});
+			return new ResultSetProjectionDecorator(rs, cols);
+		}
+		*/
+		if(cc<=2) {
+			// assuming arary value is always on the last column - works for H2
+			colName = rs.getMetaData().getColumnName(cc);
+			List<String> cols = Arrays.asList(new String[]{colName});
+			return new ResultSetProjectionDecorator(rs, cols, true);
+		}
+		throw new IllegalArgumentException("resultSet has wrong number of columns" +
+				"[#cols="+cc+" ; cols="+getColumnNames(rs.getMetaData())+" ; class="+rs.getClass().getName()+"]");
 	}
 	
 	public static boolean isNumericType(Class<?> clazz) {
