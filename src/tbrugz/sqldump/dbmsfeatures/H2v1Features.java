@@ -19,23 +19,23 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.StringUtils;
 
 /*
- * Use this features class for H2 version >= 2.0.202
+ * Use this features class for H2 version <= 1.4.197
  *
  * see: http://www.h2database.com/html/grammar.html#information_schema
  */
-public class H2Features extends InformationSchemaFeatures {
+public class H2v1Features extends H2Features {
 
-	static final Log log = LogFactory.getLog(H2Features.class);
+	static final Log log = LogFactory.getLog(H2v1Features.class);
 
 	@Override
 	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
 		// other columns: REMARKS, SQL, QUEUE_SIZE, NO_WAIT, ID
-		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table "
+		return "select trigger_catalog, trigger_schema, trigger_name, lower(trigger_type) as event_manipulation, null as event_object_schema, table_name as event_object_table "
 				+"  , 'call \"'||java_class||'\"' as action_statement "
-				+"  , action_orientation, action_timing, null as action_condition "
+				+"  , 'row' as action_orientation, casewhen(before, 'before', 'after') as action_timing, null as action_condition "
 				+"from information_schema.triggers "
 				+"where trigger_schema = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?"and event_object_table = '"+tableNamePattern+"' ":"")
+				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
 				+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
 				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
 	}
@@ -46,7 +46,6 @@ public class H2Features extends InformationSchemaFeatures {
 	 * 
 	 * INFORMATION_SCHEMA: FUNCTION_ALIASES, FUNCTION_COLUMNS
 	 */
-	 /*
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select r.alias_name as routine_name, "+
@@ -79,9 +78,7 @@ public class H2Features extends InformationSchemaFeatures {
 				(execNamePattern!=null?"and r.alias_name = '"+execNamePattern+"' ":"")+
 				"\norder by r.alias_catalog, r.alias_schema, r.alias_name, p.pos ";
 	}
-	*/
 
-	/*
 	@Override
 	String grabDBSequencesQuery(String schemaPattern) {
 		return "select sequence_name, null as minimum_value, increment, null as maximum_value "
@@ -89,9 +86,7 @@ public class H2Features extends InformationSchemaFeatures {
 				+"where sequence_schema = '"+schemaPattern+"' "
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
 	}
-	*/
 	
-	/*
 	@Override
 	String grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
 		return "select cc.constraint_schema, table_name, cc.constraint_name, check_expression as check_clause " 
@@ -101,9 +96,7 @@ public class H2Features extends InformationSchemaFeatures {
 			+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
 			+ "order by table_name, constraint_name";
 	}
-	*/
-	
-	/*
+
 	@Override
 	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
@@ -152,8 +145,8 @@ public class H2Features extends InformationSchemaFeatures {
 		st.close();
 		log.info(countUKs+" unique constraints grabbed [colcount="+countCols+"]");
 	}
-	*/
 	
+	/*
 	@Override
 	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
 		return "alter table "+DBObject.getFinalName(table, true)+" alter column "+DBObject.getFinalIdentifier(column.getName())
@@ -164,6 +157,7 @@ public class H2Features extends InformationSchemaFeatures {
 	public boolean supportsDiffingColumn() {
 		return true;
 	}
+	*/
 	/*
 	@Override
 	public String sqlAlterColumnByDiffing(NamedDBObject table, Column previousColumn, Column column) {
@@ -217,7 +211,8 @@ public class H2Features extends InformationSchemaFeatures {
 		//throw new UnsupportedOperationException("no differences between H2 columns found");
 	}
 	*/
-	
+
+	/*
 	@Override
 	public String sqlAlterColumnByDiffing(Column previousColumn, Column column) {
 		//String alterSql = "";
@@ -242,10 +237,12 @@ public class H2Features extends InformationSchemaFeatures {
 	public boolean supportsExplainPlan() {
 		return true;
 	}
+	*/
 	
 	/*
 	 * http://www.h2database.com/html/grammar.html#explain
 	 */
+	/*
 	@Override
 	public ResultSet explainPlan(String sql, List<Object> params, Connection conn) throws SQLException {
 		String expsql = sqlExplainPlanQuery(sql);
@@ -280,5 +277,6 @@ public class H2Features extends InformationSchemaFeatures {
 	protected boolean allowViewSetWithReadOnly() {
 		return false;
 	}
+	*/
 
 }
