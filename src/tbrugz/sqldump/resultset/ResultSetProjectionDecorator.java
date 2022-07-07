@@ -24,11 +24,15 @@ public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 	protected final Map<String, Integer> name2colMap = new LinkedHashMap<String, Integer>();
 	
 	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns) throws SQLException {
-		this(rs, columns, false);
+		this(rs, columns, null, false);
 	}
 	
-	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns, boolean ignoreInvalidColumns) throws SQLException {
+	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns, List<String> aliases, boolean ignoreInvalidColumns) throws SQLException {
 		super(rs);
+		
+		if(aliases!=null && aliases.size()!=columns.size()) {
+			throw new IllegalArgumentException("aliases list must have same size as columns list [cols="+columns+";aliases="+aliases+"]");
+		}
 		
 		ResultSetMetaData rsmd = super.getMetaData();
 		
@@ -115,7 +119,7 @@ public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 			colTypes.add(typesMap.get(i));
 		}
 		
-		metadata = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), colNames, colTypes);
+		metadata = new RSMetaDataTypedAdapter(rsmd.getSchemaName(1), rsmd.getTableName(1), aliases!=null?aliases:colNames, colTypes);
 	}
 	
 	@Override

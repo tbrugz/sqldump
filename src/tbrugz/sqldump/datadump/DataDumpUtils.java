@@ -573,7 +573,7 @@ public class DataDumpUtils {
 			arr = (Object[]) obj;
 		}
 		else if(obj instanceof ResultSet) {
-			return projectResultSetAsArray((ResultSet) obj);
+			return projectResultSetAsArray((ResultSet) obj, columnName);
 		}
 		else {
 			throw new IllegalArgumentException("object '"+obj+"' is not array, collection, or resultSet ["+obj.getClass().getName()+"]");
@@ -581,7 +581,7 @@ public class DataDumpUtils {
 		return new ResultSetArrayAdapter(arr, withIndexColumn, columnName);
 	}
 	
-	static ResultSet projectResultSetAsArray(ResultSet rs) throws SQLException {
+	static ResultSet projectResultSetAsArray(ResultSet rs, String alias) throws SQLException {
 		int cc = rs.getMetaData().getColumnCount();
 		String colName = null;
 		/*
@@ -600,7 +600,11 @@ public class DataDumpUtils {
 			// assuming arary value is always on the last column - works for H2
 			colName = rs.getMetaData().getColumnName(cc);
 			List<String> cols = Arrays.asList(new String[]{colName});
-			return new ResultSetProjectionDecorator(rs, cols, true);
+			List<String> aliases = null;
+			if(alias!=null) {
+				aliases = Arrays.asList(new String[]{alias});
+			}
+			return new ResultSetProjectionDecorator(rs, cols, aliases, true);
 		}
 		throw new IllegalArgumentException("resultSet has wrong number of columns" +
 				"[#cols="+cc+" ; cols="+getColumnNames(rs.getMetaData())+" ; class="+rs.getClass().getName()+"]");

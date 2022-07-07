@@ -112,7 +112,7 @@ public class RsProjectionAdapterTest {
 		String[] projectedCols = {"description", "id", "category", "etc"};
 		//String[] projectedCols = {"id", "etc2", "etc", "category"};
 		
-		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), true);
+		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), null, true);
 		
 		/*StringWriter sw = new StringWriter();
 		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
@@ -140,7 +140,7 @@ public class RsProjectionAdapterTest {
 				l1, TestBean.class);
 		String[] projectedCols = {"id", "etc2", "etc", "category"};
 		
-		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), true);
+		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), null, true);
 		
 		StringWriter sw = new StringWriter();
 		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
