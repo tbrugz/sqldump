@@ -21,7 +21,7 @@ import tbrugz.sqldump.util.StringUtils;
 /*
  * Use this features class for H2 version >= 2.0.202
  *
- * see: http://www.h2database.com/html/grammar.html#information_schema
+ * see: https://www.h2database.com/html/systemtables.html
  */
 public class H2Features extends InformationSchemaFeatures {
 
@@ -38,6 +38,19 @@ public class H2Features extends InformationSchemaFeatures {
 				+(tableNamePattern!=null?"and event_object_table = '"+tableNamePattern+"' ":"")
 				+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
 				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
+	}
+
+	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		return "select routine_name, routine_type, r.data_type, external_language, "
+				+"case when r.routine_definition is not null then routine_definition else "
+				+"  external_name end as routine_definition, "
+				+"p.parameter_name, p.data_type, p.ordinal_position "
+				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
+				+"\nwhere 1=1 "
+				+"and (r.routine_definition is not null or external_name is not null)"
+				+"and r.specific_schema = '"+schemaPattern+"' "
+				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
+				+"\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
 	}
 
 	/*
