@@ -493,7 +493,7 @@ public class DataDumpTest {
 
 	@Test
 	public void testJsonUniqueRowNoArrayWithInnerArray() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c", "json"
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c", "json"
 				,new String[] {
 						//"-Dsqldump.datadump.json.null-data-element=true",
 						"-Dsqldump.datadump.json.no-array-on-unique-row=true",
@@ -718,7 +718,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testHtmlWithArray() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3) as b", "html");
+		File f = dumpSelect("select 1 as a, array[1,2,3] as b", "html");
 		Document doc = parseXML(f);
 		
 		Node n = doc.getChildNodes().item(0);
@@ -737,8 +737,11 @@ public class DataDumpTest {
 
 	@Test
 	public void testXmlWithArray() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3) as b", "xml");
+		File f = dumpSelect("select 1 as a, array[1,2,3] as b", "xml");
 		Document doc = parseXML(f);
+		
+		//String content = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(content);
 		
 		Node n = doc.getChildNodes().item(0);
 		Assert.assertEquals(1, countElementsOfType(n.getChildNodes(),"row")); // 1 row
@@ -756,9 +759,12 @@ public class DataDumpTest {
 
 	@Test
 	public void testXmlWithArray2() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "xml");
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "xml");
 		Document doc = parseXML(f);
 		
+		//String content = IOUtil.readFromFilename(f.getAbsolutePath());
+		//System.out.println(content);
+
 		Node n = doc.getChildNodes().item(0);
 		Assert.assertEquals(2, countElementsOfType(n.getChildNodes(),"row")); // 1 row
 		
@@ -775,7 +781,7 @@ public class DataDumpTest {
 
 	@Test
 	public void testJsonWithArray2() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json");
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "json");
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
 		//System.out.println(jsonStr);
 
@@ -796,7 +802,7 @@ public class DataDumpTest {
 		//System.out.println("jarr: "+jarr+" / "+jarr.get(3));
 		Object i3 = jarr.get(3);
 		//System.out.println(jobj);
-		Assert.assertEquals("8", i3);
+		Assert.assertEquals(8l, i3);
 	}
 
 	@Test
@@ -829,7 +835,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testJsonWithArrayMetadataParentOnly() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "json", new String[] {
 				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
 				});
 		String jsonStr = IOUtil.readFromFilename(f.getAbsolutePath());
@@ -856,7 +862,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testJsonWithArrayWithData() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "json", new String[] {
 				"-D"+JSONDataDump.PROP_ADD_METADATA+"=true",
 				"-D"+JSONDataDump.PROP_TABLE_AS_DATA_ELEMENT+"=false",
 				"-D"+JSONDataDump.PROP_INNER_TABLE_ADD_DATA_ELEMENT+"=true",
@@ -885,7 +891,7 @@ public class DataDumpTest {
 
 	@Test
 	public void testJsonWithInnerArrayAsArray() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "json", new String[] {
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "json", new String[] {
 				"-D"+JSONDataDump.PROP_TABLE_AS_DATA_ELEMENT+"=false",
 				"-D"+JSONDataDump.PROP_INNER_ARRAY_DUMP_AS_ARRAY+"=true",
 				});
@@ -919,7 +925,7 @@ public class DataDumpTest {
 	
 	@Test
 	public void testInsertIntoWithArray2() throws Exception {
-		File f = dumpSelect("select 1 as a, (1,2,3,4) as b, 3 as c union all select 4, (5,6,7,8), 9", "insertinto",
+		File f = dumpSelect("select 1 as a, array[1,2,3,4] as b, 3 as c union all select 4, array[5,6,7,8], 9", "insertinto",
 				new String[] {"-Dsqldump.datadump.insertinto.dumpcursors=true"});
 		String str = IOUtil.readFromFilename(f.getAbsolutePath());
 		String LF = "\n";

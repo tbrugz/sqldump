@@ -88,6 +88,7 @@ public class FunctionTest {
 		sg.setConnection(conn);
 		SchemaModel sm = sg.grabSchema();
 		Set<ExecutableObject> execs = sm.getExecutables();
+		//System.out.println("execs.size()=" + execs.size() + " ; execs="+execs);
 		Assert.assertEquals(3, execs.size());
 		
 		Iterator<ExecutableObject> it = execs.iterator();
