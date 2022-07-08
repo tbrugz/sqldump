@@ -42,7 +42,13 @@ public class H2Features extends InformationSchemaFeatures {
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, r.data_type, external_language, "
-				+"routine_definition, external_name, "
+				//+"routine_definition, "
+				+"\ncase "
+				+"when routine_type='FUNCTION' and routine_definition is not null then 'create alias '||routine_name||' as $$'||routine_definition||'$$;' "
+				+"when routine_type='FUNCTION' and external_name is not null then 'create alias '||routine_name||' for \"'||external_name||'\";' "
+				+"when routine_type='AGGREGATE' and external_name is not null then 'create aggregate '||routine_name||' for \"'||external_name||'\";' "
+				+"else routine_definition end as routine_definition, "
+				+"\nexternal_name, "
 				+"p.parameter_name, p.data_type, p.ordinal_position "
 				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere 1=1 "
