@@ -31,15 +31,19 @@ public class FunctionTest {
 	static final String DIR_OUT = "work/output/FunctionTest/";
 
 	Properties prop = new Properties();
-	
+
+	static final String DDL_MY_SQRT = "create alias MY_SQRT for \"java.lang.Math.sqrt\";";
+	static final String DDL_REVERSE = "create alias REVERSE as $$ String reverse(String s) { return new StringBuilder(s).reverse().toString(); } $$;";
+	static final String DDL_AGG_COUNT = "create aggregate SIMPLE_COUNT for \"tbrugz.sqldump.dbmsfeatures.H2CountAggregate\";";
+
 	@BeforeClass
 	public static void setupDB() throws Exception {
 		Properties p = new Properties();
 		p.load(TriggerTest.class.getResourceAsStream(PROP_FILE));
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.statement=CREATE ALIAS MY_SQRT FOR \"java.lang.Math.sqrt\"",
-				"-Dsqlrun.exec.02.statement=CREATE ALIAS REVERSE AS $$ String reverse(String s) { return new StringBuilder(s).reverse().toString(); } $$;",
-				"-Dsqlrun.exec.03.statement=CREATE AGGREGATE SIMPLE_COUNT FOR \"tbrugz.sqldump.dbmsfeatures.H2CountAggregate\"",
+				"-Dsqlrun.exec.01.statement="+DDL_MY_SQRT,
+				"-Dsqlrun.exec.02.statement="+DDL_REVERSE,
+				"-Dsqlrun.exec.03.statement="+DDL_AGG_COUNT,
 				};
 		TestUtil.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
@@ -97,6 +101,7 @@ public class FunctionTest {
 			ExecutableObject eo = it.next();
 			Assert.assertEquals("my_sqrt", eo.getName().toLowerCase());
 			log.info(">> exec["+count+"]:\n"+eo.getDefinition(true));
+			Assert.assertEquals(DDL_MY_SQRT, eo.getDefinition(true));
 			count++;
 		}
 
@@ -104,6 +109,7 @@ public class FunctionTest {
 			ExecutableObject eo = it.next();
 			Assert.assertEquals("reverse", eo.getName().toLowerCase());
 			log.info(">> exec["+count+"]:\n"+eo.getDefinition(true));
+			Assert.assertEquals(DDL_REVERSE, eo.getDefinition(true));
 			count++;
 		}
 
@@ -111,6 +117,7 @@ public class FunctionTest {
 			ExecutableObject eo = it.next();
 			Assert.assertEquals("simple_count", eo.getName().toLowerCase());
 			log.info(">> exec["+count+"]:\n"+eo.getDefinition(true));
+			Assert.assertEquals(DDL_AGG_COUNT, eo.getDefinition(true));
 			count++;
 		}
 	}
