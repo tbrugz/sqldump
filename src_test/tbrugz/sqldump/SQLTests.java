@@ -18,7 +18,6 @@ import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.def.AbstractSQLProc;
 import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
@@ -170,7 +169,7 @@ public class SQLTests extends AbstractSQLProc {
 		File f = new File(fileName);
 
 		ParametrizedProperties p = new ParametrizedProperties();
-		p.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, f.getParent());
+		p.setProperty(ParametrizedProperties.PROP_PROPFILEBASEDIR, f.getParent());
 		p.load(new FileInputStream(f));
 		log.info("initing conn: "+connPrefix);
 		Connection conn = ConnectionUtil.initDBConnection(connPrefix, p);

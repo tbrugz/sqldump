@@ -12,7 +12,6 @@ import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.sqlrun.SQLRun;
-import tbrugz.sqldump.util.CLIProcessor;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class MondrianTests {
@@ -24,7 +23,7 @@ public class MondrianTests {
 	public static void setupDB() throws Exception {
 		Properties p = new ParametrizedProperties();
 		//System.out.println("current dir == "+System.getProperty("user.dir"));
-		p.setProperty(CLIProcessor.PROP_PROPFILEBASEDIR, ".");
+		p.setProperty(ParametrizedProperties.PROP_PROPFILEBASEDIR, ".");
 		p.load(MondrianTests.class.getResourceAsStream("/setupdb.properties"));
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(NULL_PARAMS, p);

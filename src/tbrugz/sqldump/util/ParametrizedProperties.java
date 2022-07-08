@@ -24,6 +24,8 @@ public class ParametrizedProperties extends Properties {
 	public static final String DIRECTIVE_INCLUDE = "@includes";
 	public static final String NULL_PLACEHOLDER = "_NULL_";
 
+	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
+
 	static final Log log = LogFactory.getLog(ParametrizedProperties.class);
 
 	static boolean useSystemProperties = false;
@@ -52,8 +54,8 @@ public class ParametrizedProperties extends Properties {
 	static final String SYSPROPKEY_USER_DIR = "user.dir";
 
 	static final String ENVPROPKEY_PREPEND = "env.";
-	
-	static final String PROPFILEBASEDIR_PATTERN = Pattern.quote("${"+CLIProcessor.PROP_PROPFILEBASEDIR+"}");
+
+	static final String PROPFILEBASEDIR_PATTERN = Pattern.quote("${"+PROP_PROPFILEBASEDIR+"}");
 	static final String SYS_USER_HOME_PROP = Pattern.quote("${"+SYSPROPKEY_USER_HOME+"}");
 	static final String SYS_USER_HOME_VALUE = Matcher.quoteReplacement(""+System.getProperty(SYSPROPKEY_USER_HOME));
 	static final String SYS_USER_DIR_PROP = Pattern.quote("${"+SYSPROPKEY_USER_DIR+"}");
@@ -70,7 +72,7 @@ public class ParametrizedProperties extends Properties {
 		
 		String includes = ptmp.getProperty(DIRECTIVE_INCLUDE);
 		if(includes!=null) {
-			String baseDir = getProperty(CLIProcessor.PROP_PROPFILEBASEDIR);
+			String baseDir = getProperty(PROP_PROPFILEBASEDIR);
 			if(baseDir!=null) {
 				includes = includes.replaceAll(PROPFILEBASEDIR_PATTERN, Matcher.quoteReplacement(baseDir));
 			}
@@ -260,6 +262,10 @@ public class ParametrizedProperties extends Properties {
 
 	public static void setNullValueReturnsNull(boolean nullValueReturnsNullParam) {
 		nullValueReturnsNull = nullValueReturnsNullParam;
+	}
+
+	public void setBaseDir(String dir) {
+		setProperty(PROP_PROPFILEBASEDIR, dir);
 	}
 	
 	void logKey(String key) {

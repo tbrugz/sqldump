@@ -18,6 +18,7 @@ public class CLIProcessor {
 	public static final String PROJECT_URL = "https://github.com/tbrugz/sqldump";
 
 	//static/constant properties
+	@Deprecated
 	public static final String PROP_PROPFILEBASEDIR = "propfilebasedir"; //"propfiledir" / "propfilebasedir" / "propertiesbasedir" / "basepropdir"
 	
 	//cli parameters
@@ -106,7 +107,7 @@ public class CLIProcessor {
 		}
 
 		//log.debug(papp.size()+" properties defined ; "+loadedCount+" files or resources read");
-		if(papp.size()==0 || (papp.containsKey(PROP_PROPFILEBASEDIR) && papp.size()==1)) {
+		if(papp.size()==0 || (papp.containsKey(ParametrizedProperties.PROP_PROPFILEBASEDIR) && papp.size()==1)) {
 			log.warn("no properties loaded"+(loadedCount==0?" (and no properties file or resource read)":""));
 			//XXX throw exception?
 		}
@@ -186,7 +187,7 @@ public class CLIProcessor {
 		File propFile = new File(propFilename);
 		File propFileDir = propFile.getAbsoluteFile().getParentFile();
 		log.debug("propfile base dir: "+propFileDir);
-		p.setProperty(PROP_PROPFILEBASEDIR, propFileDir.toString());
+		p.setProperty(ParametrizedProperties.PROP_PROPFILEBASEDIR, propFileDir.toString());
 		
 		try {
 			InputStream propIS = new FileInputStream(propFile);
