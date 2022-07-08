@@ -31,13 +31,20 @@ public class InformationSchemaRoutine extends ExecutableObject {
 			}
 		}
 		
-		return "create or replace "+getType()+" "+getName()+"("
+		String bodyStr = getBody();
+		if(bodyStr==null) {
+			bodyStr = " /* null */ ";
+		}
+
+		return "create "
+				+(dumpCreateOrReplace?"or replace ":"")
+				+getType()+" "+getName()+"("
 				+(sb!=null?sb.toString():"")
 				//+")\n  returns "+returnType+" as \n$BODY$"
 				+")"
 				+(returnParam!=null?"\n  returns "+returnParam.getDataType():"")
 				+" as \n"+BODY_SEP
-				+getBody()+BODY_SEP
+				+bodyStr+BODY_SEP
 				+(externalLanguage!=null?"\n  language "+externalLanguage:"")
 				+";";
 	}

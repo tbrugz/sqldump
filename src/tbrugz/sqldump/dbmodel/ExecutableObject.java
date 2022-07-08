@@ -13,6 +13,7 @@ import tbrugz.sqldump.util.StringUtils;
  * see: https://en.wikipedia.org/wiki/SQL/JRT
  */
 public class ExecutableObject extends DBObject implements TypedDBObject, ParametrizedDBObject, RemarkableDBObject {
+
 	private static final long serialVersionUID = 1L;
 
 	static transient SQLIdentifierDecorator sqlId = new SQLIdentifierDecorator();
@@ -22,6 +23,7 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 	String body;
 	final List<Grant> grants = new ArrayList<Grant>(); //XXX: should be Set<Grant>?
 	String remarks;
+	boolean deterministic;
 
 	String packageName;
 	protected List<ExecutableParameter> params;
@@ -246,4 +248,12 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		return types;
 	}
 	
+	public boolean isDeterministic() {
+		return deterministic;
+	}
+
+	public void setDeterministic(boolean deterministic) {
+		this.deterministic = deterministic;
+	}
+
 }
