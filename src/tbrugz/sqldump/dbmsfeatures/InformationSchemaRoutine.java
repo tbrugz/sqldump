@@ -5,9 +5,11 @@ import java.util.regex.Pattern;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 
 public class InformationSchemaRoutine extends ExecutableObject {
+
 	private static final long serialVersionUID = 1L;
 	
 	public String externalLanguage;
+	public String externalName;
 
 	static final Pattern PATTERN_CREATE_EXECUTABLE = Pattern.compile("\\s*create\\s+", Pattern.CASE_INSENSITIVE);
 	static final String BODY_SEP = "$BODY$";

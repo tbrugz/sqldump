@@ -7,6 +7,8 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 	 * http://stackoverflow.com/questions/636452/what-is-the-best-way-to-check-whether-a-trigger-exists-in-sql-server
 	 * select name, object_definition(object_id) from sys.triggers ...
 	 * 
+	 * information_schema: https://docs.microsoft.com/en-us/sql/relational-databases/system-information-schema-views/system-information-schema-views-transact-sql
+	 *
 	 * sys.triggers: http://msdn.microsoft.com/en-us/library/ms188746.aspx
 	 */
 	//XXX: add event_manipulation value ; also add action_orientation, action_timing, action_condition?
