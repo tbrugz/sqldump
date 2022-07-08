@@ -333,7 +333,7 @@
 	</target>
 
 	<target name="mvn-modules-install">
-		<exec executable="mvn">
+		<exec executable="mvn" failonerror="true">
 			<arg line="-f sqlmigrate/ clean install"/>
 		</exec>
 		<exec executable="mvn">

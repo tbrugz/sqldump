@@ -36,7 +36,10 @@ public class MigrationIO {
 		}
 		String[] files = dir.list();
 		for(String f: files) {
-			if(f.endsWith(".sql")) {
+			if(f.startsWith(".") || f.startsWith("_")) {
+				log.debug("ignored (special/hidden) file: "+f);
+			}
+			else if(f.endsWith(".sql")) {
 				//log.info("file: "+f);
 				Long checksum = null;
 				if(getChecksum) {
@@ -68,7 +71,8 @@ public class MigrationIO {
 					migs.add(m);
 				}
 			}
-			//XXX: .properties file
+			//XXX: .properties file - import (csv, xls, ...)
+			//XXX: .diff.xml, .diff.json
 			else {
 				log.info("ignored file (unknown extension): "+f);
 			}
