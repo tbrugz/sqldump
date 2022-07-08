@@ -17,7 +17,7 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition "
+		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition, external_name "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
 				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")

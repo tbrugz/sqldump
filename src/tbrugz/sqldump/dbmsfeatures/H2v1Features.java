@@ -71,6 +71,7 @@ public class H2v1Features extends H2Features {
 				// else...
 				"    else r.java_class||'#'||r.java_method||'#'||r.source "+ //???
 				"  end as routine_definition, "+
+				" null as external_name, "+
 				" p.column_name as parameter_name, p.type_name as data_type, p.pos as ordinal_position "+
 				"\nfrom "+informationSchema+".function_aliases r left outer join "+informationSchema+".function_columns p on r.alias_name = p.alias_name "+
 				"\nwhere 1=1 "+

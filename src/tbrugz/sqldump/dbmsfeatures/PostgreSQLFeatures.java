@@ -38,7 +38,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 	
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, data_type, external_language, routine_definition "
+		return "select routine_name, routine_type, data_type, external_language, routine_definition, external_name "
 				+" , (select array_agg(parameter_name::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
 				+" , (select array_agg(data_type::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_types "
 				+"from information_schema.routines r "

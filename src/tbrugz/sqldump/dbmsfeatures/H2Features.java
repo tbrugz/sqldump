@@ -42,8 +42,7 @@ public class H2Features extends InformationSchemaFeatures {
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		return "select routine_name, routine_type, r.data_type, external_language, "
-				+"case when r.routine_definition is not null then routine_definition else "
-				+"  external_name end as routine_definition, "
+				+"routine_definition, external_name, "
 				+"p.parameter_name, p.data_type, p.ordinal_position "
 				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere 1=1 "
