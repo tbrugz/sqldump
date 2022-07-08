@@ -13,11 +13,15 @@ import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 
+/*
+ * see:
+ * https://dev.mysql.com/doc/refman/8.0/en/general-information-schema-tables.html
+ */
 public class MySQLFeatures extends InformationSchemaFeatures {
 
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition, external_name "
+		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition, external_name, is_deterministic "
 				+"from information_schema.routines "
 				+"where routine_definition is not null "
 				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")

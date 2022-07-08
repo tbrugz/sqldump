@@ -25,6 +25,9 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 
 /*
+ * see:
+ * https://www.postgresql.org/docs/current/information-schema.html
+ *
  * TODO: add grab materialized views...
  */
 public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
@@ -38,7 +41,7 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 	
 	@Override
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, data_type, external_language, routine_definition, external_name "
+		return "select routine_name, routine_type, data_type, external_language, routine_definition, external_name, is_deterministic "
 				+" , (select array_agg(parameter_name::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
 				+" , (select array_agg(data_type::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_types "
 				+"from information_schema.routines r "

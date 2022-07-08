@@ -12,6 +12,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 /*
  * see:
  * http://www.monetdb.org/Documentation/SQLcatalog
+ * https://www.monetdb.org/documentation-Jan2022/user-guide/sql-catalog/functions-arguments-types/
  */
 public class MonetDBFeatures extends InformationSchemaFeatures {
 	static Log log = LogFactory.getLog(MonetDBFeatures.class);
@@ -57,6 +58,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		return "select functions.name as routine_name, 'FUNCTION' as routine_type, ret.type as data_type"
 				//+", functions.mod as external_language, func as routine_definition"
 				+", null as external_language, func as routine_definition, null as external_name "
+				+", null as is_deterministic " //XXX: use 'functions.side_effect'?
 				+", p.name as parameter_name, p.type as data_type, p.number as ordinal_position "
 				+"from sys.functions "
 				+"inner join sys.schemas on functions.schema_id = schemas.id "

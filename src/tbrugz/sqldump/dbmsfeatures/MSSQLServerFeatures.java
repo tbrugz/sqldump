@@ -1,5 +1,9 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+/*
+ * see:
+ * https://docs.microsoft.com/en-us/sql/relational-databases/system-information-schema-views/system-information-schema-views-transact-sql
+ */
 public class MSSQLServerFeatures extends InformationSchemaFeatures {
 
 	/*

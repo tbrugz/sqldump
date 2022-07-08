@@ -39,7 +39,9 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	static final Pattern patternLastSemicolon = Pattern.compile(";\\s*$");
 	
 	public static final String DEFAULT_SCHEMA = "information_schema";
-	
+
+	static final String YES = "YES";
+
 	String informationSchema = DEFAULT_SCHEMA;
 	
 	static final DBObjectType[] execTypes = {
@@ -121,7 +123,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 					log.warn("unknown check option: "+checkOption+" [view '"+v.getName()+"']");
 				}
 			}
-			if(allowViewSetWithReadOnly() && !"YES".equalsIgnoreCase(rs.getString(6))) {
+			if(allowViewSetWithReadOnly() && !YES.equalsIgnoreCase(rs.getString(6))) {
 				v.setWithReadOnly(true);
 			}
 			views.add(v);
@@ -185,7 +187,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, external_name, p.parameter_name, p.data_type, p.ordinal_position "
+		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, external_name, is_deterministic, "
+				+"p.parameter_name, p.data_type, p.ordinal_position "
 				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere r.routine_definition is not null "
 				+"and r.specific_schema = '"+schemaPattern+"' "
@@ -238,11 +241,12 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				eo.externalLanguage = rs.getString(4);
 				eo.setBody( rs.getString(5) );
 				eo.externalName = rs.getString(6);
+				eo.setDeterministic( YES.equals(rs.getString(7)) );
 			}
 			ExecutableParameter ep = new ExecutableParameter();
-			ep.setName(rs.getString(7));
-			ep.setDataType(rs.getString(8));
-			ep.setPosition(rs.getInt(9));
+			ep.setName(rs.getString(8));
+			ep.setDataType(rs.getString(9));
+			ep.setPosition(rs.getInt(10));
 			
 			// routine may have no parameters
 			if(ep.getName()!=null || ep.getDataType()!=null) {
