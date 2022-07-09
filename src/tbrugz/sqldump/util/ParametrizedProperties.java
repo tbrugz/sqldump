@@ -268,6 +268,17 @@ public class ParametrizedProperties extends Properties {
 		setProperty(PROP_PROPFILEBASEDIR, dir);
 	}
 	
+	public static void loadFile(final Properties prop, final File file) throws IOException {
+		File dir = file.getAbsoluteFile().getParentFile();
+		log.debug("properties base dir: "+dir);
+		prop.setProperty(PROP_PROPFILEBASEDIR, dir.toString());
+		
+		try(InputStream propIS = new FileInputStream(file)) {
+			prop.load(propIS);
+			log.debug("loaded properties file: "+file);
+		}
+	}
+
 	void logKey(String key) {
 		if(key.startsWith("sqldump.")) {}
 		else if(key.startsWith("sqldiff.")) {}

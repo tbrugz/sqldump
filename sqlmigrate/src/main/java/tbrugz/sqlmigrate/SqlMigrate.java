@@ -16,11 +16,13 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.datadump.DataDumpUtils;
+import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerStrategy;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
+import tbrugz.sqlmigrate.util.ImporterUtils;
 import tbrugz.sqlmigrate.util.SchemaUtils;
 
 public class SqlMigrate extends BaseExecutor {
@@ -531,7 +533,7 @@ public class SqlMigrate extends BaseExecutor {
 						log.info("migration "+m+" will be executed");
 						// exec and save and commit
 						try {
-							executeFileContents(versionedMigrationsDir, m.getScript());
+							executeScript(versionedMigrationsDir, m.getScript());
 							md.save(m, conn);
 							ConnectionUtil.doCommitIfNotAutocommit(conn);
 						}
@@ -654,7 +656,7 @@ public class SqlMigrate extends BaseExecutor {
 					log.info( (mdb==null?"new ":"updated ") + "repeatable migration "+mfs+" will be executed");
 					// exec and save and commit
 					try {
-						executeFileContents(repeatableMigrationsDir, mfs.getScript());
+						executeScript(repeatableMigrationsDir, mfs.getScript());
 						if(mdb==null) {
 							md.save(mfs, conn);
 							countExecutedNew++;
@@ -692,6 +694,25 @@ public class SqlMigrate extends BaseExecutor {
 		}
 	}
 
+	void executeScript(String dir, String script) throws IOException, SQLException {
+		if(script.endsWith(".sql")) {
+			executeFileContents(dir, script);
+		}
+		else if(script.endsWith(".properties")) { // import.properties
+			File file = new File(dir, script);
+			
+			Importer importer = ImporterUtils.getImporter(file);
+			importer.setConnection(conn);
+			importer.importData();
+		}
+		// XXX: diff.xml, diff.json
+		else {
+			String message = "Unknown file type: "+script;
+			log.warn(message);
+			throw new IllegalArgumentException(message);
+		}
+	}
+
 	/*
 	 * see also: tbrugz.sqldump.sqlrun.StmtProc.execFile()
 	 */
@@ -702,9 +723,6 @@ public class SqlMigrate extends BaseExecutor {
 		int stmtCount = 0;
 		long updateCount = 0;
 		for(String sql: scanner) {
-			//if(sql==null) { continue; }
-			//sql = sql.trim();
-			//if(sql.equals("")) { continue; }
 			if(!TokenizerUtil.containsSqlStatmement(sql)) { continue; }
 			/*if(replacePropsOnFileContents) {
 				//replacing ${...} parameters

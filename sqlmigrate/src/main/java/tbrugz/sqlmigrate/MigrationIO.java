@@ -39,7 +39,10 @@ public class MigrationIO {
 			if(f.startsWith(".") || f.startsWith("_")) {
 				log.debug("ignored (special/hidden) file: "+f);
 			}
-			else if(f.endsWith(".sql")) {
+			else if(f.endsWith(".sql") || f.endsWith(".properties")) {
+				// '.sql' - sql script
+				// '.properties' - import (csv, xls, ...)
+				//XXX: .diff.xml, .diff.json
 				//log.info("file: "+f);
 				Long checksum = null;
 				if(getChecksum) {
@@ -71,8 +74,6 @@ public class MigrationIO {
 					migs.add(m);
 				}
 			}
-			//XXX: .properties file - import (csv, xls, ...)
-			//XXX: .diff.xml, .diff.json
 			else {
 				log.info("ignored file (unknown extension): "+f);
 			}
