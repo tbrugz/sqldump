@@ -67,7 +67,7 @@ public class SqlImporter extends BaseImporter {
 	}
 	
 	@Override
-	public long importData() throws SQLException, InterruptedException, IOException {
+	public long importData() throws SQLException, IOException {
 		List<DumpSyntax> syntaxList = new ArrayList<DumpSyntax>();
 		syntaxList.add(getInsertIntoSyntax());
 		Connection readConn = getReadConnection();
@@ -92,7 +92,7 @@ public class SqlImporter extends BaseImporter {
 	}
 	
 	@Override
-	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
+	public long importStream(InputStream is) throws SQLException, IOException {
 		throw new UnsupportedOperationException("importStream()");
 	}
 	
@@ -122,8 +122,7 @@ public class SqlImporter extends BaseImporter {
 	}
 	
 	@Override
-	public long importFilesGlob(String filesGlobPattern, File importDir)
-			throws SQLException, InterruptedException, IOException {
+	public long importFilesGlob(String filesGlobPattern, File importDir) {
 		throw new UnsupportedOperationException("importFilesGlob()");
 	}
 

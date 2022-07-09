@@ -71,7 +71,7 @@ public class XlsImporter extends BaseFileImporter {
 	}
 
 	@Override
-	public long importData() throws SQLException, InterruptedException, IOException {
+	public long importData() throws SQLException, IOException {
 		if(importFile!=null) {
 			FileInputStream fis = null;
 			try {
@@ -93,7 +93,7 @@ public class XlsImporter extends BaseFileImporter {
 	}
 	
 	@Override
-	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
+	public long importStream(InputStream is) throws SQLException, IOException {
 		IOCounter counter = new IOCounter();
 		try {
 			Workbook wb = WorkbookFactory.create(is);

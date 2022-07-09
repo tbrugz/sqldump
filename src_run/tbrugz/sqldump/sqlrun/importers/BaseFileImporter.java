@@ -34,7 +34,7 @@ public abstract class BaseFileImporter extends BaseImporter {
 	}
 	
 	@Override
-	public long importFilesGlob(String filesGlobPattern, File importDir) throws IOException, SQLException, InterruptedException {
+	public long importFilesGlob(String filesGlobPattern, File importDir) throws IOException, SQLException {
 		long ret = 0;
 		if(importDir==null) {
 			importDir = FileUtils.getInitDirForPath(filesGlobPattern);

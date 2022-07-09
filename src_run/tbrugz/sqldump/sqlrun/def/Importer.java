@@ -7,10 +7,10 @@ import java.sql.SQLException;
 
 public interface Importer extends Executor {
 
-	public long importData() throws SQLException, InterruptedException, IOException;
+	public long importData() throws SQLException, IOException;
 
-	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException;
+	public long importStream(InputStream is) throws SQLException, IOException;
 	
-	public long importFilesGlob(String filesGlobPattern, File importDir) throws SQLException, InterruptedException, IOException;
+	public long importFilesGlob(String filesGlobPattern, File importDir) throws SQLException, IOException;
 
 }

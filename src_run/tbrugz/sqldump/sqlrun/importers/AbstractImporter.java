@@ -363,7 +363,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	List<String> batchRetryBuffer = null;
 	
 	@Override
-	public long importData() throws SQLException, InterruptedException, IOException {
+	public long importData() throws SQLException, IOException {
 		aggCountsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		long ret = 0;
 		long filesImported = 0;
@@ -458,7 +458,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	}
 	
 	@Override
-	public long importStream(InputStream is) throws SQLException, InterruptedException, IOException {
+	public long importStream(InputStream is) throws SQLException, IOException {
 		if(fileIS!=null) {
 			throw new IllegalStateException("fileIS must be null");
 		}
@@ -484,7 +484,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	int failoverId = 0;
 	
 	@SuppressWarnings("resource")
-	long importFile() throws SQLException, InterruptedException, IOException {
+	long importFile() throws SQLException, IOException {
 		//init counters
 		countsByFailoverId = new NonNullGetMap<Integer, IOCounter>(new HashMap<Integer, IOCounter>(), IOCounter.class);
 		lastOutputCountCommit = 0;
@@ -658,7 +658,13 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 
 			//XXX: commit in follow mode? here?
 			//XXX: sleep only in follow mode?
-			if(follow) { Thread.sleep(sleepMilis); }
+			if(follow) {
+				try {
+					Thread.sleep(sleepMilis);
+				} catch (InterruptedException e) {
+					throw new IllegalStateException(e);
+				}
+			}
 			if(fileIS!=null && fileIS.available()>0) {
 				//log.debug("available: "+fileIS.available());
 				scan = createScanner(); 

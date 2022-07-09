@@ -384,8 +384,14 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				long imported = 0;
 				try {
 					imported = importer.importData();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				} catch (RuntimeException e) {
+					Throwable t = e.getCause();
+					if(t instanceof InterruptedException) {
+						log.warn("InterruptedException: "+t.getMessage(), t);
+					}
+					else {
+						throw e;
+					}
 				}
 			}
 			// .query
