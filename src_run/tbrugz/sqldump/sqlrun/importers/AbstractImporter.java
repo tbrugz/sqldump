@@ -481,6 +481,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	boolean colTypesIndexFromTabCol = true;
 	boolean mustSetupSQLStatement = false;
 	boolean tableCreated = false;
+	boolean statementBeforeExecuted = false;
 	int failoverId = 0;
 	
 	@SuppressWarnings("resource")
@@ -753,6 +754,10 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 		
 		if(counter.input==0 || mustSetupSQLStatement ) {
 			boolean tabeJustCreated = false;
+			if(statementBefore!=null && !statementBeforeExecuted) {
+				executeStatementBefore();
+				statementBeforeExecuted = true;
+			}
 			if(doCreateTable && !tableCreated) {
 				int colCount = finalColumnCount!=null ? finalColumnCount : parts.length; 
 				log.info("will create table [colCount=="+colCount+"]");

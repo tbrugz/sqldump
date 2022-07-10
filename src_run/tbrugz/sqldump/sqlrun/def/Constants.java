@@ -32,7 +32,9 @@ public class Constants {
 	public static final String SUFFIX_IMPORTFILE = ".importfile";
 	public static final String SUFFIX_INSERTTABLE = ".inserttable";
 	public static final String SUFFIX_INSERTSQL = ".insertsql";
+	public static final String SUFFIX_STATEMENT_BEFORE = "statement-before";
 	public static final String SUFFIX_SKIP_N = ".skipnlines";
+	//public static final String SUFFIX_TRUNCATE_BEFORE = "truncate-before";
 	public static final String SUFFIX_LIMIT_LINES = ".limit";
 	public static final String SUFFIX_LIMIT_INPUT = ".limit-input";
 

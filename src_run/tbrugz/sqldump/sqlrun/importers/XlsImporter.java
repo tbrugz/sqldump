@@ -115,6 +115,7 @@ public class XlsImporter extends BaseFileImporter {
 			long lineOutputCounter = 0;
 			PreparedStatement stmt = null;
 			boolean tableCreated = false;
+			boolean statementBeforeExecuted = false;
 			
 			// iterating xls': https://poi.apache.org/components/spreadsheet/quick-guide.html#Iterator
 			for (Row row : sheet) {
@@ -171,6 +172,10 @@ public class XlsImporter extends BaseFileImporter {
 						finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
 					}
 					
+					if(statementBefore!=null && !statementBeforeExecuted) {
+						executeStatementBefore();
+						statementBeforeExecuted = true;
+					}
 					if(doCreateTable && !tableCreated) {
 						log.info("create table: "+getCreateTableSql());
 						createTable();

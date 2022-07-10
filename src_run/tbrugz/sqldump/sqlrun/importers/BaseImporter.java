@@ -28,6 +28,9 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 
 	static final Log log = LogFactory.getLog(BaseImporter.class);
 	
+	//dot (.)
+	public static final String DOT = ".";
+
 	String execId;
 	Properties prop;
 	Connection conn;
@@ -45,6 +48,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	transient List<Integer> filecol2tabcolMap = null;
 	boolean doCreateTable = false;
 	boolean use1stLineAsColNames = false;
+	String statementBefore;
 
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
@@ -79,6 +83,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		//finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
 		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 		use1stLineAsColNames = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
+		statementBefore = prop.getProperty(importerPrefix + DOT + Constants.SUFFIX_STATEMENT_BEFORE);
 	}
 	
 	@Override
@@ -393,4 +398,9 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		return ret;
 	}
 	
+	void executeStatementBefore() throws SQLException {
+		long updateCount = conn.createStatement().executeUpdate(statementBefore);
+		log.info("'"+Constants.SUFFIX_STATEMENT_BEFORE+"' executed, sql = ["+statementBefore+"], updateCount = "+updateCount);
+	}
+
 }
