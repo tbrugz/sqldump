@@ -120,7 +120,7 @@ public class CSVImportTest {
 
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
-		p.setProperty(".columndelimiter", ";");
+		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
 		
@@ -141,7 +141,7 @@ public class CSVImportTest {
 
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
-		p.setProperty(".columndelimiter", ";");
+		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
 		

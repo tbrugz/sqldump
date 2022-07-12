@@ -116,7 +116,7 @@ public class XlsImportTest {
 
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
-		p.setProperty(".do-create-table", "true");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = new XlsImporter();
@@ -137,7 +137,7 @@ public class XlsImportTest {
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
-		p.setProperty(".do-create-table", "true");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		Importer imp = ImporterHelper.getImporterByFileExt("xlsx", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
@@ -162,7 +162,7 @@ public class XlsImportTest {
 
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
-		p.setProperty(".do-create-table", "true");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_LIMIT_LINES, "3");
 		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
 		

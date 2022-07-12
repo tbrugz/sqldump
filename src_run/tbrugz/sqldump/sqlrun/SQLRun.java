@@ -102,6 +102,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 
 	//properties
 	static final String PROP_COMMIT_STATEGY = Constants.SQLRUN_PROPS_PREFIX+".commit.strategy";
+	static final String PROP_DEFAULT_ENCODING = Constants.SQLRUN_PROPS_PREFIX+".defaultencoding";
 	static final String PROP_LOGINVALIDSTATEMENTS = Constants.SQLRUN_PROPS_PREFIX+SUFFIX_LOGINVALIDSTATEMENTS;
 	static final String PROP_FILTERBYIDS = Constants.SQLRUN_PROPS_PREFIX+".filterbyids";
 	static final String PROP_FAILONERROR = Constants.SQLRUN_PROPS_PREFIX+".failonerror";
@@ -664,7 +665,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		//log.debug("DBMSFeatures: "+feats);
 		
 		failonerror = Utils.getPropBool(papp, PROP_FAILONERROR, failonerror);
-		defaultEncoding = papp.getProperty(Constants.SQLRUN_PROPS_PREFIX+Constants.SUFFIX_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
+		defaultEncoding = papp.getProperty(PROP_DEFAULT_ENCODING, DataDumpUtils.CHARSET_UTF8);
 		jmxCreateMBean = Utils.getPropBool(papp, PROP_JMX_CREATE_MBEAN, jmxCreateMBean);
 		
 		if(Utils.getPropBool(papp, PROP_TRUST_ALL_CERTS, false)) {

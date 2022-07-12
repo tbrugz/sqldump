@@ -15,10 +15,10 @@ public class CSVImporter extends AbstractImporter {
 	
 	static final Log log = LogFactory.getLog(CSVImporter.class);
 
-	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
-	static final String SUFFIX_EMPTY_STRING_AS_NULL = ".emptystringasnull";
-	static final String SUFFIX_NULL_CONSTANT = ".nullconstant";
-	static final String SUFFIX_NULL_CONSTANTS = ".nullconstants";
+	public static final String SUFFIX_COLUMNDELIMITER = "columndelimiter";
+	static final String SUFFIX_EMPTY_STRING_AS_NULL = "emptystringasnull";
+	static final String SUFFIX_NULL_CONSTANT = "nullconstant";
+	static final String SUFFIX_NULL_CONSTANTS = "nullconstants";
 	
 	static final String DOUBLEQUOTE = "\"";
 

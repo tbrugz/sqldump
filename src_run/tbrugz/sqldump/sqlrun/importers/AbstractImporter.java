@@ -186,22 +186,22 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	public static final String PREFIX_FAILOVER = ".failover.";
 
 	//suffixes
-	static final String SUFFIX_IMPORTFILES_REGEX = ".importfiles.regex";
-	static final String SUFFIX_IMPORTURL = ".importurl";
+	static final String SUFFIX_IMPORTFILES_REGEX = "importfiles.regex";
+	static final String SUFFIX_IMPORTURL = "importurl";
 	
-	static final String SUFFIX_URLMESSAGEBODY = ".urlmessagebody";
-	static final String SUFFIX_URLMETHOD = ".urlmethod";
-	static final String SUFFIX_URLHEADER = ".urlheader@";
+	static final String SUFFIX_URLMESSAGEBODY = "urlmessagebody";
+	static final String SUFFIX_URLMETHOD = "urlmethod";
+	static final String SUFFIX_URLHEADER = "urlheader@";
 	
-	static final String SUFFIX_FOLLOW = ".follow";
-	static final String SUFFIX_RECORDDELIMITER = ".recorddelimiter";
-	static final String SUFFIX_ENCLOSING = ".enclosing";
-	static final String SUFFIX_SKIP_REGEX = ".skip-line-regex";
-	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = ".onerror.type-int-value";
+	static final String SUFFIX_FOLLOW = "follow";
+	static final String SUFFIX_RECORDDELIMITER = "recorddelimiter";
+	static final String SUFFIX_ENCLOSING = "enclosing";
+	static final String SUFFIX_SKIP_REGEX = "skip-line-regex";
+	static final String SUFFIX_ONERROR_TYPE_INT_SET_VALUE = "onerror.type-int-value";
 	//XXX: add '.onerror.type-(double|date)-value' ?
 	
-	static final String SUFFIX_LOG_MALFORMED_LINE = ".logmalformedline";
-	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = ".x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
+	static final String SUFFIX_LOG_MALFORMED_LINE = "logmalformedline";
+	static final String SUFFIX_X_COMMIT_EACH_X_ROWS = "x-commiteachxrows"; //XXX: to be overrided by SQLRun (CommitStrategy: STATEMENT, ...)?
 	
 	static final String[] AUX_SUFFIXES = {
 		Constants.SUFFIX_COLUMN_TYPES,
@@ -241,6 +241,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
+		String prefix = Constants.PREFIX_EXEC + execId + DOT;
 
 		//importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
 		/*String importDirStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTDIR);
@@ -254,25 +255,25 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			importFilesGlob = importFiles;
 		}
 		*/
-		importFilesRegex = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTFILES_REGEX);
-		importURL = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_IMPORTURL);
-		urlData = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMESSAGEBODY);
-		urlMethod = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_URLMETHOD);
-		inputEncoding = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_ENCODING, defaultInputEncoding);
-		recordDelimiter = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_RECORDDELIMITER, recordDelimiter);
-		skipHeaderN = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, skipHeaderN);
-		maxLines = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, maxLines);
-		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
-		String skipLineRegexStr = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SKIP_REGEX);
+		importFilesRegex = prop.getProperty(prefix+SUFFIX_IMPORTFILES_REGEX);
+		importURL = prop.getProperty(prefix+SUFFIX_IMPORTURL);
+		urlData = prop.getProperty(prefix+SUFFIX_URLMESSAGEBODY);
+		urlMethod = prop.getProperty(prefix+SUFFIX_URLMETHOD);
+		inputEncoding = prop.getProperty(prefix+Constants.SUFFIX_ENCODING, defaultInputEncoding);
+		recordDelimiter = prop.getProperty(prefix+SUFFIX_RECORDDELIMITER, recordDelimiter);
+		skipHeaderN = Utils.getPropLong(prop, prefix+Constants.SUFFIX_SKIP_N, skipHeaderN);
+		maxLines = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LIMIT_LINES, maxLines);
+		inputLimit = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
+		String skipLineRegexStr = prop.getProperty(prefix+SUFFIX_SKIP_REGEX);
 		if(skipLineRegexStr!=null) {
 			skipLineRegex = Pattern.compile(skipLineRegexStr);
 		}
-		follow = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_FOLLOW, follow);
-		useBatchUpdate = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
-		batchUpdateSize = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
-		retryWithBatchOff = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_BATCH_RETRY_OFF, retryWithBatchOff);
-		onErrorIntValue = Utils.getPropInt(prop, Constants.PREFIX_EXEC+execId+SUFFIX_ONERROR_TYPE_INT_SET_VALUE);
-		String urlHeaderPrefix = Constants.PREFIX_EXEC+execId+SUFFIX_URLHEADER;
+		follow = Utils.getPropBool(prop, prefix+SUFFIX_FOLLOW, follow);
+		useBatchUpdate = Utils.getPropBool(prop, prefix+Constants.SUFFIX_BATCH_MODE, useBatchUpdate);
+		batchUpdateSize = Utils.getPropLong(prop, prefix+Constants.SUFFIX_BATCH_SIZE, batchUpdateSize);
+		retryWithBatchOff = Utils.getPropBool(prop, prefix+Constants.SUFFIX_BATCH_RETRY_OFF, retryWithBatchOff);
+		onErrorIntValue = Utils.getPropInt(prop, prefix+SUFFIX_ONERROR_TYPE_INT_SET_VALUE);
+		String urlHeaderPrefix = prefix+SUFFIX_URLHEADER;
 		List<String> headerKeys = Utils.getKeysStartingWith(prop, urlHeaderPrefix);
 		if(headerKeys!=null) {
 			urlHeaders = new HashMap<String, String>();
@@ -285,11 +286,11 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 		}
 		
 		long defaultCommitEachXrows = commitStrategy==CommitStrategy.FILE?defaultCommitEachXrowsForFileStrategy:commitEachXrows;
-		commitEachXrows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
+		commitEachXrows = Utils.getPropLong(prop, prefix+SUFFIX_X_COMMIT_EACH_X_ROWS, defaultCommitEachXrows);
 		
-		logMalformedLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
-		logEachXInputRows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, logEachXInputRows);
-		logEachXOutputRows = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LOG_EACH_X_OUTPUT_ROWS, logEachXOutputRows);
+		logMalformedLine = Utils.getPropBool(prop, prefix+SUFFIX_LOG_MALFORMED_LINE, logMalformedLine);
+		logEachXInputRows = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, logEachXInputRows);
+		logEachXOutputRows = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LOG_EACH_X_OUTPUT_ROWS, logEachXOutputRows);
 
 		if(useBatchUpdate && commitEachXrows>0 && (commitEachXrows%batchUpdateSize)!=0) {
 			log.warn("[execId="+execId+"] better if commit size ("+commitEachXrows+") is a multiple of batch size ("+batchUpdateSize+")...");
@@ -322,10 +323,10 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	
 	void setImporterProperties(Properties prop) {
 		if(failoverId==0) {
-			setImporterProperties(prop, Constants.PREFIX_EXEC+execId);
+			setImporterProperties(prop, Constants.PREFIX_EXEC+execId+DOT);
 		}
 		else {
-			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId;
+			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+failoverId+DOT;
 			setImporterProperties(prop, failoverKey);
 		}
 	}
@@ -1136,7 +1137,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	
 	int getMaxFailoverId() {
 		for(int i=1;;i++) {
-			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+i;
+			String failoverKey = Constants.PREFIX_EXEC+execId+PREFIX_FAILOVER+i+DOT;
 			List<String> foids = Utils.getKeysStartingWith(prop, failoverKey);
 			if(foids==null || foids.size()==0) {
 				return i-1;

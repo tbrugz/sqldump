@@ -47,8 +47,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 	//properties
 	static final String PROP_SQLTOKENIZERCLASS = "sqlrun.sqltokenizerclass";
 	static final String PROP_USE_PREPARED_STATEMENT = "sqlrun.usepreparedstatement";
-	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = ".escapebackslashedapos";
-	static final String SUFFIX_USE_SAVEPOINT = ".use-savepoint";
+	static final String PROP_USE_SAVEPOINT = "sqlrun.use-savepoint";
+	
+	//suffixes
+	static final String SUFFIX_ESCAPE_BACKSLASHED_APOS = "escapebackslashedapos";
 	
 	static final boolean DEFAULT_USE_BATCH_UPDATE = false;
 	static final boolean DEFAULT_ESCAPE_BACKSLASHED_APOS = false;
@@ -347,11 +349,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 			return;
 		}
 		String execId = papp.getProperty(SQLRun.PROP_PROCID);
-		useBatchUpdate = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_MODE, DEFAULT_USE_BATCH_UPDATE);
-		batchSize = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_BATCH_SIZE, DEFAULT_BATCH_SIZE);
-		inputEncoding = papp.getProperty(Constants.PREFIX_EXEC + execId + Constants.SUFFIX_ENCODING, defaultInputEncoding);
-		escapeBackslashedApos = Utils.getPropBool(papp, Constants.PREFIX_EXEC + execId + SUFFIX_ESCAPE_BACKSLASHED_APOS, DEFAULT_ESCAPE_BACKSLASHED_APOS);
-		logEachXStmts = Utils.getPropLong(papp, Constants.PREFIX_EXEC + execId + Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, DEFAULT_LOG_EACH_X_INPUT_ROWS);
+		String prefix = Constants.PREFIX_EXEC + execId + ".";
+		useBatchUpdate = Utils.getPropBool(papp, prefix + Constants.SUFFIX_BATCH_MODE, DEFAULT_USE_BATCH_UPDATE);
+		batchSize = Utils.getPropLong(papp, prefix + Constants.SUFFIX_BATCH_SIZE, DEFAULT_BATCH_SIZE);
+		inputEncoding = papp.getProperty(prefix + Constants.SUFFIX_ENCODING, defaultInputEncoding);
+		escapeBackslashedApos = Utils.getPropBool(papp, prefix + SUFFIX_ESCAPE_BACKSLASHED_APOS, DEFAULT_ESCAPE_BACKSLASHED_APOS);
+		logEachXStmts = Utils.getPropLong(papp, prefix + Constants.SUFFIX_LOG_EACH_X_INPUT_ROWS, DEFAULT_LOG_EACH_X_INPUT_ROWS);
 	}
 	
 	int closeStatement() throws SQLException {
@@ -383,7 +386,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		if(!usePreparedStatement) {
 			log.info("not using prepared statements [prop '"+PROP_USE_PREPARED_STATEMENT+"']");
 		}
-		useSavepoint = Utils.getPropBool(papp, Constants.SQLRUN_PROPS_PREFIX + SUFFIX_USE_SAVEPOINT, useSavepoint);
+		useSavepoint = Utils.getPropBool(papp, PROP_USE_SAVEPOINT, useSavepoint);
 		
 		this.papp = papp;
 	}

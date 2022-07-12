@@ -70,20 +70,22 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		this.prop = prop;
 		
 		String importerPrefix = getImporterPrefix();
-		insertTable = prop.getProperty(importerPrefix + Constants.SUFFIX_INSERTTABLE);
-		insertSQL = prop.getProperty(importerPrefix + Constants.SUFFIX_INSERTSQL);
+		String prefix = importerPrefix + DOT;
+		
+		insertTable = prop.getProperty(prefix + Constants.SUFFIX_INSERTTABLE);
+		insertSQL = prop.getProperty(prefix + Constants.SUFFIX_INSERTSQL);
 		if(insertTable!=null && insertSQL!=null) {
 			log.warn("both "+Constants.SUFFIX_INSERTTABLE+" & "+Constants.SUFFIX_INSERTSQL+" defined. Will reset "+Constants.SUFFIX_INSERTTABLE);
 			insertTable = null;
 		}
 		//log.info("importerPrefix = "+importerPrefix+"; insertTable =  "+insertTable);
-		columnTypes = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_TYPES, ",");
+		columnTypes = Utils.getStringListFromProp(prop, prefix + Constants.SUFFIX_COLUMN_TYPES, ",");
 		finalColumnTypes = getFinalColumnTypes(columnTypes);
-		columnNames = Utils.getStringListFromProp(prop, importerPrefix + Constants.SUFFIX_COLUMN_NAMES, ",");
+		columnNames = Utils.getStringListFromProp(prop, prefix + Constants.SUFFIX_COLUMN_NAMES, ",");
 		//finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
-		doCreateTable = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
-		use1stLineAsColNames = Utils.getPropBool(prop, importerPrefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
-		statementBefore = prop.getProperty(importerPrefix + DOT + Constants.SUFFIX_STATEMENT_BEFORE);
+		doCreateTable = Utils.getPropBool(prop, prefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
+		use1stLineAsColNames = Utils.getPropBool(prop, prefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
+		statementBefore = prop.getProperty(prefix + Constants.SUFFIX_STATEMENT_BEFORE);
 	}
 	
 	@Override

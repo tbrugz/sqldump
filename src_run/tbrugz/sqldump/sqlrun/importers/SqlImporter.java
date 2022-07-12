@@ -27,9 +27,9 @@ public class SqlImporter extends BaseImporter {
 
 	static final Log log = LogFactory.getLog(SqlImporter.class);
 
-	static final String SUFFIX_READ_CONN_PREFIX = ".read-connection-prefix";
-	static final String SUFFIX_SQL = ".sql";
-	static final String SUFFIX_SQLFILE = ".sqlfile";
+	static final String SUFFIX_READ_CONN_PREFIX = "read-connection-prefix";
+	static final String SUFFIX_SQL = "sql";
+	static final String SUFFIX_SQLFILE = "sqlfile";
 
 	static final String[] SQLI_AUX_SUFFIXES = {
 		SUFFIX_READ_CONN_PREFIX, SUFFIX_SQL, SUFFIX_SQLFILE
@@ -46,14 +46,15 @@ public class SqlImporter extends BaseImporter {
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
+		String prefix = Constants.PREFIX_EXEC + execId + DOT;
 		
 		// limit/offset: .limit/.skipnlines - may be better to define in query
 		
 		// .sql
-		sql = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SQL);
+		sql = prop.getProperty(prefix+SUFFIX_SQL);
 		if(sql==null) {
 			// .sqlfile
-			String sqlFile = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SQLFILE);
+			String sqlFile = prop.getProperty(prefix+SUFFIX_SQLFILE);
 			if(sqlFile!=null) {
 				try {
 					sql = IOUtil.readFromReader(new FileReader(sqlFile));
@@ -63,7 +64,7 @@ public class SqlImporter extends BaseImporter {
 			}
 		}
 		
-		readConnPropPrefix = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_READ_CONN_PREFIX);
+		readConnPropPrefix = prop.getProperty(prefix+SUFFIX_READ_CONN_PREFIX);
 	}
 	
 	@Override

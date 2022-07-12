@@ -13,8 +13,8 @@ import tbrugz.sqldump.util.Utils;
 public class CSVImporterPlain extends AbstractImporter {
 	static final Log log = LogFactory.getLog(CSVImporter.class);
 
-	static final String SUFFIX_COLUMNDELIMITER = ".columndelimiter";
-	static final String SUFFIX_EMPTY_STRING_AS_NULL = ".emptystringasnull";
+	static final String SUFFIX_COLUMNDELIMITER = "columndelimiter";
+	static final String SUFFIX_EMPTY_STRING_AS_NULL = "emptystringasnull";
 
 	static final String[] CSV_AUX_SUFFIXES = {
 		SUFFIX_COLUMNDELIMITER

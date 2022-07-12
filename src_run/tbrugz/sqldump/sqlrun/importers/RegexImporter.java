@@ -16,9 +16,9 @@ public class RegexImporter extends AbstractImporter {
 	
 	static final Log log = LogFactory.getLog(RegexImporter.class);
 	
-	static final String SUFFIX_PATTERN = ".pattern";
-	static final String SUFFIX_PATTERNFLAGS = ".patternflags";
-	static final String SUFFIX_SUBPATTERNS2IGNORE = ".subpatterns2ignore";
+	static final String SUFFIX_PATTERN = "pattern";
+	static final String SUFFIX_PATTERNFLAGS = "patternflags";
+	static final String SUFFIX_SUBPATTERNS2IGNORE = "subpatterns2ignore";
 	
 	static final String[] NULL_STR_ARRAY = {};
 	

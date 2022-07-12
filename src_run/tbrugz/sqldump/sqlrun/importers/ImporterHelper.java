@@ -16,11 +16,14 @@ public class ImporterHelper {
 		"csv", "ssv", "scsv", "tsv", "psv"
 	};
 	
+	//dot (.)
+	static final String DOT = ".";
+
 	public static void setImporterPlainProperties(Importer importer, Properties prop) {
 		String execId = "1";
 		Properties p = new Properties();
 		for(Object key: prop.keySet()) {
-			p.setProperty(Constants.PREFIX_EXEC+execId+key, prop.getProperty(key.toString()));
+			p.setProperty(Constants.PREFIX_EXEC+execId+DOT+key, prop.getProperty(key.toString()));
 		}
 		importer.setExecId(execId);
 		importer.setProperties(p);

@@ -19,14 +19,15 @@ public abstract class BaseFileImporter extends BaseImporter {
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
+		String prefix = Constants.PREFIX_EXEC + execId + DOT;
 		
-		importFile = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILE);
-		String importDirStr = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTDIR);
+		importFile = prop.getProperty(prefix+Constants.SUFFIX_IMPORTFILE);
+		String importDirStr = prop.getProperty(prefix+Constants.SUFFIX_IMPORTDIR);
 		if(importDirStr!=null) {
 			importDir = new File(importDirStr);
 		}
-		String importFiles = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILES);
-		importFilesGlob = prop.getProperty(Constants.PREFIX_EXEC+execId+Constants.SUFFIX_IMPORTFILES_GLOB);
+		String importFiles = prop.getProperty(prefix+Constants.SUFFIX_IMPORTFILES);
+		importFilesGlob = prop.getProperty(prefix+Constants.SUFFIX_IMPORTFILES_GLOB);
 		if(importFiles!=null && importFilesGlob==null) {
 			// importFilesGlob is the default
 			importFilesGlob = importFiles;

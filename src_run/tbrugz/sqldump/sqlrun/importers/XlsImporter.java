@@ -27,9 +27,9 @@ public class XlsImporter extends BaseFileImporter {
 
 	static final Log log = LogFactory.getLog(XlsImporter.class);
 
-	static final String SUFFIX_SHEET_NUMBER = ".sheet-number";
-	static final String SUFFIX_SHEET_NAME = ".sheet-name";
-	static final String SUFFIX_1ST_LINE_IS_HEADER = ".1st-line-is-header";
+	static final String SUFFIX_SHEET_NUMBER = "sheet-number";
+	static final String SUFFIX_SHEET_NAME = "sheet-name";
+	static final String SUFFIX_1ST_LINE_IS_HEADER = "1st-line-is-header";
 	
 	String sheetName;
 	Integer sheetNumber;
@@ -51,19 +51,20 @@ public class XlsImporter extends BaseFileImporter {
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
+		String prefix = Constants.PREFIX_EXEC + execId + DOT;
 		
-		sheetName = prop.getProperty(Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NAME);
-		Long lSheetNumber = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+SUFFIX_SHEET_NUMBER);
+		sheetName = prop.getProperty(prefix+SUFFIX_SHEET_NAME);
+		Long lSheetNumber = Utils.getPropLong(prop, prefix+SUFFIX_SHEET_NUMBER);
 		if(lSheetNumber!=null) {
 			sheetNumber = lSheetNumber.intValue();
 		}
 		/*if(sheetName==null && sheetNumber==null) {
 			log.info("no sheet number (suffix '"+ SUFFIX_SHEET_NUMBER + "') nor sheet name (suffix '" + SUFFIX_SHEET_NAME + "') defined - will use 1st sheet");
 		}*/
-		linesToSkip = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_SKIP_N, linesToSkip);
-		hasHeaderLine = Utils.getPropBool(prop, Constants.PREFIX_EXEC+execId+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
-		linesLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_LINES, linesLimit);
-		inputLimit = Utils.getPropLong(prop, Constants.PREFIX_EXEC+execId+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
+		linesToSkip = Utils.getPropLong(prop, prefix+Constants.SUFFIX_SKIP_N, linesToSkip);
+		hasHeaderLine = Utils.getPropBool(prop, prefix+SUFFIX_1ST_LINE_IS_HEADER, hasHeaderLine);
+		linesLimit = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LIMIT_LINES, linesLimit);
+		inputLimit = Utils.getPropLong(prop, prefix+Constants.SUFFIX_LIMIT_INPUT, inputLimit);
 
 		if(!hasHeaderLine && use1stLineAsColNames) {
 			log.warn("using '"+Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES+"' without '"+SUFFIX_1ST_LINE_IS_HEADER+"' is invalid - will be ignored");
