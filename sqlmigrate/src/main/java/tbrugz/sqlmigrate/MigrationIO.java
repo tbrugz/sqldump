@@ -34,9 +34,13 @@ public class MigrationIO {
 			log.error(message);
 			throw new IllegalArgumentException(message);
 		}
-		String[] files = dir.list();
-		for(String f: files) {
-			if(f.startsWith(".") || f.startsWith("_")) {
+		File[] files = dir.listFiles();
+		for(File file: files) {
+			String f = file.getName();
+			if(file.isDirectory()) {
+				log.debug("ignored directory: "+f);
+			}
+			else if(f.startsWith(".") || f.startsWith("_")) {
 				log.debug("ignored (special/hidden) file: "+f);
 			}
 			else if(f.endsWith(".sql") || f.endsWith(".properties")) {
@@ -46,7 +50,7 @@ public class MigrationIO {
 				//log.info("file: "+f);
 				Long checksum = null;
 				if(getChecksum) {
-					checksum = ChecksumUtils.getChecksumCRC32(new FileInputStream(new File(dir, f)));
+					checksum = ChecksumUtils.getChecksumCRC32(new FileInputStream( file ));
 				}
 				if(splitVersion) {
 					int idx = f.indexOf('_');
