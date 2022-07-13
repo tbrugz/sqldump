@@ -33,7 +33,7 @@ public class FunctionTest {
 	Properties prop = new Properties();
 
 	static final String DDL_MY_SQRT = "create alias MY_SQRT for \"java.lang.Math.sqrt\";";
-	static final String DDL_REVERSE = "create alias REVERSE as $$ String reverse(String s) { return new StringBuilder(s).reverse().toString(); } $$;";
+	static final String DDL_REVERSE = "create alias REVERSE deterministic as $$ String reverse(String s) { return new StringBuilder(s).reverse().toString(); } $$;";
 	static final String DDL_AGG_COUNT = "create aggregate SIMPLE_COUNT for \"tbrugz.sqldump.dbmsfeatures.H2CountAggregate\";";
 
 	@BeforeClass

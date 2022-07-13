@@ -46,6 +46,7 @@ public class InformationSchemaRoutine extends ExecutableObject {
 				+" as \n"+BODY_SEP
 				+bodyStr+BODY_SEP
 				+(externalLanguage!=null?"\n  language "+externalLanguage:"")
+				//+(isDeterministic()?" immutable":"") // postgresql syntax
 				+";";
 	}
 
