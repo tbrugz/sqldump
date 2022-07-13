@@ -53,4 +53,12 @@ public class DmlUtils {
 		return sb.toString();
 	}
 	
+	public static String createDelete(String schemaName, String tableName, String filter) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("delete from "+(schemaName!=null?schemaName+".":"")+tableName);
+		sb.append(" where ");
+		sb.append(filter);
+		return sb.toString();
+	}
+	
 }

@@ -39,12 +39,16 @@ public class SqlMigrate extends BaseExecutor {
 	static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
 	static final String PROP_REPEATABLE_MIGRATIONS_DIR = PRODUCT_NAME + "." + "repeatable-migrations-dir";
 	static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
+	static final String PROP_BASELINE_REPEATABLES = PRODUCT_NAME + "." + "baseline-repeatables";
 	static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
 	static final String PROP_CHARSET = PRODUCT_NAME + "." + "scripts-charset";
 
 	static final String DEFAULT_MIGRATION_TABLE = "SQLMIGRATE_HISTORY"; //"sqlmigrate_history"; //"sqlm_changelog";
 	static final String DEFAULT_MIGRATIONS_DIR = ".";
 	static final String DEFAULT_REPEATABLE_MIGRATIONS_DIR = null;
+
+	static final String BASELINE_REPEATABLES_ALL = "all";
+	static final String BASELINE_REPEATABLES_NONE = "none";
 	
 	public enum MigrateAction {
 		SETUP,
@@ -65,6 +69,7 @@ public class SqlMigrate extends BaseExecutor {
 	// setup/baseline properties
 	boolean baseline = false;
 	String baselineVersion = null;
+	String baselineRepeatables = null;
 
 	@Override
 	public Log getLogger() {
@@ -137,6 +142,7 @@ public class SqlMigrate extends BaseExecutor {
 		versionedMigrationsDir = papp.getProperty(PROP_MIGRATIONS_DIR, DEFAULT_MIGRATIONS_DIR);
 		repeatableMigrationsDir = papp.getProperty(PROP_REPEATABLE_MIGRATIONS_DIR, DEFAULT_REPEATABLE_MIGRATIONS_DIR);
 		baseline = Utils.getPropBool(papp, PROP_BASELINE, baseline);
+		baselineRepeatables = papp.getProperty(PROP_BASELINE_REPEATABLES, baselineRepeatables);
 		baselineVersion = papp.getProperty(PROP_BASELINE_VERSION, baselineVersion);
 		charset = papp.getProperty(PROP_CHARSET, charset);
 	}
@@ -202,12 +208,17 @@ public class SqlMigrate extends BaseExecutor {
 		else {
 			log.info("no diffs to apply [diff.getDiffListSize() = "+diff.getDiffListSize()+"]");
 		}
-		if(baseline) {
+		if(baseline || (baselineRepeatables != null)) {
 			if(diff.getDiffListSize()>0 && isDryRun()) {
 				log.warn("diffs found [diff.getDiffListSize() = "+diff.getDiffListSize()+"] & dry-run active (diffs not applyed): can't baseline");
 			}
 			else {
-				doSetupBaseline();
+				if(baseline) {
+					doSetupBaseline();
+				}
+				if(baselineRepeatables!=null) {
+					doSetupBaselineRepeatables();
+				}
 			}
 		}
 		ConnectionUtil.doRollbackIfNotAutocommit(conn);
@@ -316,7 +327,94 @@ public class SqlMigrate extends BaseExecutor {
 				" ; #ignored = "+countIgnored +
 				" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 	}
-	
+
+	void doSetupBaselineRepeatables() throws SQLException, FileNotFoundException, IOException {
+		log.info(">> setup::baseline-repeatables [dry-run="+isDryRun()+"]");
+		boolean removeNotFoundOnFs = false;
+		long initTime = System.currentTimeMillis();
+		long countSaves = 0, countRemoves = 0;
+		MigrationDao md = new MigrationDao(migrationsSchemaName, migrationsTable);
+
+		List<Migration> umd = md.listUnversionedMigrations(conn);
+		MigrationIO.sortMigrationsByScript(umd);
+
+		// none: remove all
+		if(BASELINE_REPEATABLES_NONE.equals( baselineRepeatables )) {
+			if(!isDryRun()) {
+				log.info("removing all repeatable migrations...");
+				countRemoves += md.removeAllUnversioned(conn);
+			}
+			else {
+				log.info("would have removed all repeatable migrations...");
+				countRemoves += umd.size();
+			}
+		}
+		// all: insert all
+		else if(BASELINE_REPEATABLES_ALL.equals( baselineRepeatables )) {
+			log.info("grabbing fs repeatable migrations from: "+repeatableMigrationsDir);
+			List<Migration> umfs = MigrationIO.listMigrations(new File(repeatableMigrationsDir), false, true);
+			MigrationIO.sortMigrationsByScript(umfs);
+			//XXX: check for duplicates... hasDuplicates?
+			Set<String> sdb = MigrationIO.getScriptSet(umd);
+			Set<String> sio = MigrationIO.getScriptSet(umfs);
+
+			{
+			Set<String> vdb0 = MigrationIO.diffSets(sdb, sio);
+			// show/remove repeatables not found no FS
+			if(vdb0.size()>0) {
+				String message = vdb0.size()+" executed repeatable migrations with no filesystem correspondence";
+				log.warn(message);
+				if(removeNotFoundOnFs) {
+					for(String script: vdb0) {
+						Migration m = MigrationIO.getMigrationsFromScript(umd, script).get(0);
+						if(!isDryRun()) {
+							log.info("removing repeatable migration "+m);
+							md.removeByScript(m, conn);
+						}
+						else {
+							log.info("would have removed repeatable migration "+m);
+						}
+					}
+				}
+			}
+			}
+			
+			{
+			// insert pending migrations
+			Set<String> pendingMigs = MigrationIO.diffSets(sio, sdb);
+			if(pendingMigs.size()>0) {
+				log.info(pendingMigs.size()+" pending repeatable migrations: "+pendingMigs);
+				for(String script: pendingMigs) {
+					Migration m = MigrationIO.getMigrationsFromScript(umfs, script).get(0);
+					if(!isDryRun()) {
+						log.info("saving repeatable migration "+m);
+						md.save(m, conn);
+					}
+					else {
+						log.info("would have saved repeatable migration "+m);
+					}
+					countSaves++;
+				}
+			}
+			}
+		}
+		else {
+			String message = "Unknown '"+PROP_BASELINE_REPEATABLES+"' value: "+baselineRepeatables;
+			log.error(message);
+			throw new IllegalArgumentException(message);
+		}
+
+		if(!isDryRun() && (countSaves > 0 || countRemoves > 0)) {
+			ConnectionUtil.doCommitIfNotAutocommit(conn);
+		}
+
+		log.info("baseline-repeatables: migrations... #saved = "+countSaves +
+				" ; #removed = "+countRemoves +
+				//" ; #unchanged = "+countUnchanged +
+				//" ; #ignored = "+countIgnored +
+				" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
+	}
+
 	/*
 	 * show if migration table is present
 	 * show executed & pending migrations

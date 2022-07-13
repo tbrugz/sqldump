@@ -84,12 +84,30 @@ public class MigrationDao {
 	}
 	
 	static final String[] MIG_VERSION = { "version" };
+	static final String[] MIG_SCRIPT = { "script" };
 	
 	public int removeByVersion(Migration mig, Connection conn) throws SQLException {
 		String sql = DmlUtils.createDelete(schemaName, tableName, Arrays.asList(MIG_VERSION));
 		log.debug("removeByVersion.sql: "+sql);
 		PreparedStatement st = conn.prepareStatement(sql);
 		st.setString(1, mig.getVersion().asVersionString());
+		st.execute();
+		return st.getUpdateCount();
+	}
+
+	public int removeByScript(Migration mig, Connection conn) throws SQLException {
+		String sql = DmlUtils.createDelete(schemaName, tableName, Arrays.asList(MIG_SCRIPT));
+		log.debug("removeByScript.sql: "+sql);
+		PreparedStatement st = conn.prepareStatement(sql);
+		st.setString(1, mig.getScript());
+		st.execute();
+		return st.getUpdateCount();
+	}
+	
+	public int removeAllUnversioned(Connection conn) throws SQLException {
+		String sql = DmlUtils.createDelete(schemaName, tableName, "version is null");
+		log.debug("removeAllUnversioned.sql: "+sql);
+		PreparedStatement st = conn.prepareStatement(sql);
 		st.execute();
 		return st.getUpdateCount();
 	}
