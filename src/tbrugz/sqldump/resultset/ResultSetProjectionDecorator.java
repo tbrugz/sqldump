@@ -26,7 +26,11 @@ public class ResultSetProjectionDecorator extends AbstractResultSetDecorator {
 	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns) throws SQLException {
 		this(rs, columns, null, false);
 	}
-	
+
+	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns, boolean ignoreInvalidColumns) throws SQLException {
+		this(rs, columns, null, ignoreInvalidColumns);
+	}
+
 	public ResultSetProjectionDecorator(ResultSet rs, List<String> columns, List<String> aliases, boolean ignoreInvalidColumns) throws SQLException {
 		super(rs);
 		
