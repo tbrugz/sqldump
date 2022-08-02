@@ -22,6 +22,8 @@ SQLDump also has three subprojects:
 	See [sqlrun.template.properties](sqlrun.template.properties) for more info 
 - **SQLDiff**: generates a diff from 2 schema models.
 	See [sqldiff.template.properties](sqldiff.template.properties) for more info 
+- **SQLMigrate**: tool for schema migration.
+	See [sqlmigrate/README.md](sqlmigrate/README.md) and [sqlmigrate.template.properties](sqlmigrate/doc/sqlmigrate.template.properties) for more info
 - **Diff2Queries**: generates data diff from 2 SQL queries.
 	See [diff2q.template.properties](diff2q.template.properties) for more info 
 
