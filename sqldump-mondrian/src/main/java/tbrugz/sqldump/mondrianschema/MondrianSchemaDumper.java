@@ -248,7 +248,7 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 			integerTypes = Utils.getStringListFromProp(mondrianProp, "type.integer", ",");
 			//log.debug("numeric types: "+numericTypes);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn("init: IOException: "+e.getMessage(), e);
 		}
 	}
 
@@ -324,9 +324,8 @@ public class MondrianSchemaDumper extends AbstractFailable implements SchemaMode
 		try {
 			dumpSchemaInternal(schemaModel);
 		} catch (XOMException e) {
-			log.warn("error: "+e);
-			log.debug("error: "+e.getMessage(), e);
-			e.printStackTrace();
+			log.warn("dumpSchema: error: "+e);
+			log.debug("dumpSchema: error: "+e.getMessage(), e);
 		}
 	}
 	
