@@ -617,10 +617,30 @@ public class SqlMigrate extends BaseExecutor {
 		}
 		
 		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
+		Set<DotVersion> vio = MigrationIO.getVersionSet(mios);
+		Set<DotVersion> pendingMigVers = MigrationIO.diffSets(vio, vdb);
+		if(pendingMigVers.size()>0) {
+			log.info(pendingMigVers.size()+" pending migrations: "+pendingMigVers);
+		}
+
+		/*
+		Set<DotVersion> intersect = MigrationIO.intersectSets(vio, vdb);
+		if(intersect.size()>0) {
+			log.info(intersect.size()+" migrations already executed: "+intersect);
+		}
+		*/
+		/*
+		for(DotVersion v: pendingMigVers) {
+			Migration m = MigrationIO.getMigrationsFromVersion(mios, v).get(0);
+			if(!isDryRun()) {
+				//XXX...
+			}
+		}
+		*/
+
 		long countExecuted = 0, countNotRun = 0;
 		try {
-			List<Migration> pendingMigs = new ArrayList<>();
-			List<DotVersion> pendingMigsVersions = new ArrayList<>();
+			//List<Migration> pendingMigs = new ArrayList<>();
 			for(Migration m: mios) {
 				DotVersion fsmv = m.getVersion();
 				if(vdb.contains(fsmv)) {
@@ -629,9 +649,7 @@ public class SqlMigrate extends BaseExecutor {
 					countNotRun += 1;
 				}
 				else {
-					pendingMigs.add(m);
-					pendingMigsVersions.add(fsmv);
-					/*
+					//pendingMigs.add(m);
 					if(!isDryRun()) {
 						// insert/save migration
 						log.info("migration "+m+" will be executed");
@@ -653,12 +671,9 @@ public class SqlMigrate extends BaseExecutor {
 						log.info("migration "+m+" would be executed [dry-run is true]");
 					}
 					countExecuted += 1;
-					*/
 				}
 			}
-			if(pendingMigs.size()>0) {
-				log.info(pendingMigs.size()+" pending migrations: "+pendingMigsVersions);
-			}
+			/*
 			for(Migration m: pendingMigs) {
 				if(!isDryRun()) {
 					// insert/save migration
@@ -682,6 +697,7 @@ public class SqlMigrate extends BaseExecutor {
 				}
 				countExecuted += 1;
 			}
+			*/
 		}
 		finally {
 			log.info("migrate: migrations... #executed = "+countExecuted +
