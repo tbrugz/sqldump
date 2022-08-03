@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -618,6 +619,8 @@ public class SqlMigrate extends BaseExecutor {
 		Set<DotVersion> vdb = MigrationIO.getVersionSet(mds);
 		long countExecuted = 0, countNotRun = 0;
 		try {
+			List<Migration> pendingMigs = new ArrayList<>();
+			List<DotVersion> pendingMigsVersions = new ArrayList<>();
 			for(Migration m: mios) {
 				DotVersion fsmv = m.getVersion();
 				if(vdb.contains(fsmv)) {
@@ -626,6 +629,9 @@ public class SqlMigrate extends BaseExecutor {
 					countNotRun += 1;
 				}
 				else {
+					pendingMigs.add(m);
+					pendingMigsVersions.add(fsmv);
+					/*
 					if(!isDryRun()) {
 						// insert/save migration
 						log.info("migration "+m+" will be executed");
@@ -647,7 +653,34 @@ public class SqlMigrate extends BaseExecutor {
 						log.info("migration "+m+" would be executed [dry-run is true]");
 					}
 					countExecuted += 1;
+					*/
 				}
+			}
+			if(pendingMigs.size()>0) {
+				log.info(pendingMigs.size()+" pending migrations: "+pendingMigsVersions);
+			}
+			for(Migration m: pendingMigs) {
+				if(!isDryRun()) {
+					// insert/save migration
+					log.info("migration "+m+" will be executed");
+					// exec and save and commit
+					try {
+						executeScript(versionedMigrationsDir, m.getScript());
+						md.save(m, conn);
+						ConnectionUtil.doCommitIfNotAutocommit(conn);
+					}
+					catch(SQLException e) {
+						log.warn("error executing migration: "+e);
+						ConnectionUtil.doRollbackIfNotAutocommit(conn);
+						if(failonerror) {
+							throw e;
+						}
+					}
+				}
+				else {
+					log.info("migration "+m+" would be executed [dry-run is true]");
+				}
+				countExecuted += 1;
 			}
 		}
 		finally {
