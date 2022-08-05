@@ -23,6 +23,10 @@ on `$HOME/.gpgcredentials`, put your private key passphrase
 
 (do not forget to `ant resolve` if needed)
 
+3.1- upload sqlmigrate
+
+* SNAPSHOT: (`cd sqlmigrate` && ) `mvn clean deploy`
+
 
 4- release (if RELEASE version)
 
