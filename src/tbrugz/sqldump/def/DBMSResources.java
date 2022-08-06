@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.Utils;
@@ -46,7 +47,7 @@ public final class DBMSResources {
 	
 	protected DBMSResources() {
 		try {
-			dbmsSpecificResource.load(DBMSResources.class.getClassLoader().getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE));
+			dbmsSpecificResource.load(IOUtil.getResourceAsStream(Defs.DBMS_SPECIFIC_RESOURCE));
 		} catch (IOException e) {
 			log.warn("error loading resource: "+Defs.DBMS_SPECIFIC_RESOURCE);
 		}

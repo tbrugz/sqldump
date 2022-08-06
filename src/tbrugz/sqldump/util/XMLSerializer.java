@@ -17,8 +17,7 @@ public class XMLSerializer {
 	final JAXBContext jc;
 	
 	public XMLSerializer(String contextPath) throws JAXBException {
-		//this.jc = JAXBContext.newInstance( SchemaModel.class );
-		this.jc = JAXBContext.newInstance( contextPath, XMLSerializer.class.getClassLoader());
+		this.jc = JAXBContext.newInstance(contextPath, Thread.currentThread().getContextClassLoader());
 	}
 
 	public XMLSerializer(JAXBContext jc) throws JAXBException {
