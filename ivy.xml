@@ -6,7 +6,7 @@
 		<conf name="default"/>
 		<conf name="optional" extends="default" visibility="private"/>
 		<conf name="test" extends="optional" visibility="private"/>
-		<conf name="testmondrian" visibility="private"/>
+		<!--<conf name="testmondrian" visibility="private"/>-->
 		<conf name="findbugs" visibility="private"/>
 		<conf name="codeanalysis" visibility="private"/>
 	</configurations>
@@ -54,7 +54,7 @@
 		<!--<dependency org="org.dom4j" name="dom4j" rev="2.1.1" conf="optional->default"/>-->
 		
 		<!-- mondrian deps -->
-		<dependency org="org.olap4j" name="olap4j" rev="1.2.0" conf="testmondrian->default"/>
+		<!--<dependency org="org.olap4j" name="olap4j" rev="1.2.0" conf="testmondrian->default"/>-->
 		
 		<!-- optional deps -->
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="optional->default"/>
