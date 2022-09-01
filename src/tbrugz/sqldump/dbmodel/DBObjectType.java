@@ -50,6 +50,20 @@ public enum DBObjectType {
 		}
 		return DBObjectType.valueOf(s);
 	}
+
+	public boolean isRelationType() {
+		switch (this) {
+		case TABLE:
+		case VIEW:
+		case MATERIALIZED_VIEW:
+		case RELATION:
+		case QUERY:
+		case SYNONYM:
+			return true;
+		default:
+			return false;
+		}
+	}
 	
 	public boolean isExecutableType() {
 		switch (this) {
