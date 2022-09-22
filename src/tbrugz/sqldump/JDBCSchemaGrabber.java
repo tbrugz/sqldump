@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -126,6 +127,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		"APP",     // derby
 		"Default", // neo4j
 		"dbo",     // sqlserver
+		"main",    // duckdb
 		"",        // XXX 'schema-less' databases - which ones?
 	};
 	
@@ -688,7 +690,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				
 				//PKs
 				if(doSchemaGrabPKs) {
-					table.getConstraints().addAll(grabRelationPKs(dbmd, table));
+					try {
+						table.getConstraints().addAll(grabRelationPKs(dbmd, table));
+					}
+					catch(SQLFeatureNotSupportedException e) {
+						log.warn("error grabbing PK: "+e);
+						log.debug("error grabbing PK: "+e, e);
+					}
 				}
 
 				//FKs
@@ -731,8 +739,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				throw oome;
 			}
 			catch(SQLException sqle) {
-				log.warn("exception in table: "+tableName+" ["+sqle+"]");
-				log.info("exception in table: "+tableName+" ["+sqle.getMessage()+"]", sqle);
+				log.warn("exception in table '"+tableName+"' ["+sqle+"]");
+				log.info("exception in table '"+tableName+"'", sqle);
 				//tableNamesForDataDump.remove(tableName);
 			}
 			
@@ -761,6 +769,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		String fullTablename = (relation.getSchemaName()==null?"":relation.getSchemaName()+".")+relation.getName();
 		List<FK> ret = new ArrayList<FK>();
 		
+		try {
 		//FKs
 		if(grabFKs) {
 			log.debug("getting FKs from "+fullTablename);
@@ -775,6 +784,11 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			ResultSet fkrs = dbmd.getExportedKeys(null, relation.getSchemaName(), relation.getName());
 			ret.addAll(grabSchemaFKs(fkrs, dbmsfeatures));
 			closeResultSetAndStatement(fkrs);
+		}
+		}
+		catch(SQLFeatureNotSupportedException e) {
+			log.warn("error grabbing FKs: "+e);
+			log.debug("error grabbing FKs: "+e, e);
 		}
 		
 		return ret;
