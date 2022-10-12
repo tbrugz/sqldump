@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,15 +33,15 @@ public class SqlMigrate extends BaseExecutor {
 	//static final String CONN_PROPS_PREFIX = "sqlmigrate";
 	static final String PRODUCT_NAME = "sqlmigrate";
 
-	static final String PROP_ACTION = PRODUCT_NAME + "." + "action";
-	static final String PROP_MIGRATION_TABLE = PRODUCT_NAME + "." + "migration-table";
-	static final String PROP_MIGRATION_TABLE_SCHEMA = PRODUCT_NAME + "." + "schema-name";
-	static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
-	static final String PROP_REPEATABLE_MIGRATIONS_DIR = PRODUCT_NAME + "." + "repeatable-migrations-dir";
-	static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
-	static final String PROP_BASELINE_REPEATABLES = PRODUCT_NAME + "." + "baseline-repeatables";
-	static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
-	static final String PROP_CHARSET = PRODUCT_NAME + "." + "scripts-charset";
+	public static final String PROP_ACTION = PRODUCT_NAME + "." + "action";
+	public static final String PROP_MIGRATION_TABLE = PRODUCT_NAME + "." + "migration-table";
+	public static final String PROP_MIGRATION_TABLE_SCHEMA = PRODUCT_NAME + "." + "schema-name";
+	public static final String PROP_MIGRATIONS_DIR = PRODUCT_NAME + "." + "migrations-dir";
+	public static final String PROP_REPEATABLE_MIGRATIONS_DIR = PRODUCT_NAME + "." + "repeatable-migrations-dir";
+	public static final String PROP_BASELINE = PRODUCT_NAME + "." + "baseline";
+	public static final String PROP_BASELINE_REPEATABLES = PRODUCT_NAME + "." + "baseline-repeatables";
+	public static final String PROP_BASELINE_VERSION = PRODUCT_NAME + "." + "baseline-version";
+	public static final String PROP_CHARSET = PRODUCT_NAME + "." + "scripts-charset";
 
 	static final String DEFAULT_MIGRATION_TABLE = "SQLMIGRATE_HISTORY"; //"sqlmigrate_history"; //"sqlm_changelog";
 	static final String DEFAULT_MIGRATIONS_DIR = ".";
@@ -55,7 +54,16 @@ public class SqlMigrate extends BaseExecutor {
 		SETUP,
 		STATUS,
 		MIGRATE,
+		;
+		
+		public String lower() {
+			return this.toString().toLowerCase();
+		}
 	}
+
+	public static final String ACTION_SETUP = MigrateAction.SETUP.lower();
+	public static final String ACTION_STATUS = MigrateAction.STATUS.lower();
+	public static final String ACTION_MIGRATE = MigrateAction.MIGRATE.lower();
 
 	static final boolean getChecksumForVersionedScripts = false;
 	
