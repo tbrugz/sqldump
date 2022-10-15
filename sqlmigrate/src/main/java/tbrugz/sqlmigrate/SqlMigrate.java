@@ -52,16 +52,27 @@ public class SqlMigrate extends BaseExecutor {
 	
 	public enum MigrateAction {
 		SETUP,
+		SETUP_AND_MIGRATE,
 		STATUS,
 		MIGRATE,
 		;
+
+		//static final String SETUP_PLUS_MIGRATE = "setup+migrate";
 		
+		public static MigrateAction get(String value) {
+			/*if(SETUP_PLUS_MIGRATE.equals(value)) {
+				return SETUP_AND_MIGRATE;
+			}*/
+			return MigrateAction.valueOf(value.toUpperCase());
+		}
+
 		public String lower() {
 			return this.toString().toLowerCase();
 		}
 	}
 
 	public static final String ACTION_SETUP = MigrateAction.SETUP.lower();
+	public static final String ACTION_SETUP_AND_MIGRATE = MigrateAction.SETUP_AND_MIGRATE.lower();
 	public static final String ACTION_STATUS = MigrateAction.STATUS.lower();
 	public static final String ACTION_MIGRATE = MigrateAction.MIGRATE.lower();
 
@@ -119,7 +130,7 @@ public class SqlMigrate extends BaseExecutor {
 				throw new IllegalArgumentException("Illegal argument '"+arg+"'. Action '"+action+"' already set");
 			}
 			try {
-				action = MigrateAction.valueOf(arg.toUpperCase());
+				action = MigrateAction.get(arg);
 			}
 			catch(IllegalArgumentException e) {
 				throw new IllegalArgumentException("unknown action '"+arg+"'", e);
@@ -136,7 +147,7 @@ public class SqlMigrate extends BaseExecutor {
 		if(actionStr!=null) {
 			if(action==null) {
 				try {
-					action = MigrateAction.valueOf(actionStr.toUpperCase());
+					action = MigrateAction.get(actionStr);
 				}
 				catch(IllegalArgumentException e) {
 					throw new IllegalArgumentException("unknown action '"+actionStr+"'", e);
@@ -180,6 +191,9 @@ public class SqlMigrate extends BaseExecutor {
 				break;
 			case MIGRATE:
 				doMigrate();
+				break;
+			case SETUP_AND_MIGRATE:
+				doSetupAndMigrate();
 				break;
 			default:
 				break;
@@ -847,6 +861,11 @@ public class SqlMigrate extends BaseExecutor {
 					" ; #not-run (already executed) = "+countAlreadyExecuted +
 					" [elapsed = "+(System.currentTimeMillis()-initTime)+"ms]");
 		}
+	}
+
+	public void doSetupAndMigrate() throws SQLException, FileNotFoundException, IOException {
+		doSetup();
+		doMigrate();
 	}
 
 	void executeScript(String dir, String script) throws IOException, SQLException {
