@@ -17,11 +17,18 @@ public class ImporterUtils {
 	static final String IMPORT_ID_XLS = "xls";
 
 	public static Importer getImporter(File propertiesFile) throws IOException {
+		return getImporter(propertiesFile, null);
+	}
+
+	public static Importer getImporter(File propertiesFile, Boolean failonerror) throws IOException {
 		ParametrizedProperties prop = new ParametrizedProperties();
 		ParametrizedProperties.loadFile(prop, propertiesFile);
 
 		String importerId = prop.getProperty(PROP_IMPORT);
 		Importer importer = getImporterById(importerId);
+		if(failonerror!=null) {
+			importer.setFailOnError(failonerror);
+		}
 		ImporterHelper.setImporterPlainProperties(importer, prop);
 		
 		return importer;

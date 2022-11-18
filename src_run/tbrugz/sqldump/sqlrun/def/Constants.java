@@ -11,7 +11,7 @@ public class Constants {
 
 	//base suffixes
 	public static final String SUFFIX_IMPORT = ".import";
-	public static final String SUFFIX_FAILONERROR = ".failonerror";
+	public static final String SUFFIX_FAILONERROR = "failonerror";
 	
 	//suffixes
 	public static final String SUFFIX_BATCH_MODE = "batchmode";

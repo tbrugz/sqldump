@@ -80,7 +80,9 @@ public class XlsImporter extends BaseFileImporter {
 				return importStream(fis);
 			}
 			finally {
-				fis.close();
+				if(fis!=null) {
+					fis.close();
+				}
 			}
 		}
 		

@@ -274,6 +274,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	boolean doExec(String procId, int sqlrunCounter) throws IOException, SQLException {
 			boolean isExecId = false;
 			//String procId = getExecId(key, Constants.PREFIX_EXEC);
+			String prefixDot = Constants.PREFIX_EXEC + procId + ".";
 			String key = getKeyEndsWithAny(papp, Constants.PREFIX_EXEC+procId, PROC_SUFFIXES);
 			//log.info("procid: "+procId);
 			if(key==null) {
@@ -285,7 +286,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
 			
 			String execValue = papp.getProperty(key);
-			boolean execFailOnError = Utils.getPropBool(papp, Constants.PREFIX_EXEC+procId+Constants.SUFFIX_FAILONERROR, failonerror);
+			boolean execFailOnError = Utils.getPropBool(papp, prefixDot + Constants.SUFFIX_FAILONERROR, failonerror);
 			
 			if(endsWithAny(key, PROC_SUFFIXES)) {
 				log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; "+
@@ -428,6 +429,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	boolean doAssert(String procId, int sqlrunCounter) throws IOException, SQLException {
 		boolean isAssertId = false;
 		String prefix = Constants.PREFIX_ASSERT+procId;
+		String prefixDot = prefix + ".";
 		String key = getKeyEndsWithAny(papp, prefix, ASSERT_SUFFIXES);
 		
 		//log.info("procid: "+procId+" / "+prefix);
@@ -440,7 +442,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		if(filterByIds!=null && !filterByIds.contains(procId)) { return false; }
 		
 		String execValue = papp.getProperty(key);
-		boolean execFailOnError = Utils.getPropBool(papp, prefix + Constants.SUFFIX_FAILONERROR, failonerror);
+		boolean execFailOnError = Utils.getPropBool(papp, prefixDot + Constants.SUFFIX_FAILONERROR, failonerror);
 		
 		if(endsWithAny(key, ASSERT_SUFFIXES)) {
 			log.info(">>> processing: id = '"+procId+"' ; action = '"+action+"' ; failonerror = "+execFailOnError);

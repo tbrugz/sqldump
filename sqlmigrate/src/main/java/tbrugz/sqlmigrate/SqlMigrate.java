@@ -875,7 +875,7 @@ public class SqlMigrate extends BaseExecutor {
 		else if(script.endsWith(".properties")) { // import.properties
 			File file = new File(dir, script);
 			
-			Importer importer = ImporterUtils.getImporter(file);
+			Importer importer = ImporterUtils.getImporter(file, failonerror);
 			importer.setConnection(conn);
 			importer.importData();
 		}

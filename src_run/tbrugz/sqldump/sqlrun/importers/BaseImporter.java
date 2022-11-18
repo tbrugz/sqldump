@@ -72,6 +72,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		String importerPrefix = getImporterPrefix();
 		String prefix = importerPrefix + DOT;
 		
+		setFailOnError(Utils.getPropBool(prop, prefix + Constants.SUFFIX_FAILONERROR, failonerror));
 		insertTable = prop.getProperty(prefix + Constants.SUFFIX_INSERTTABLE);
 		insertSQL = prop.getProperty(prefix + Constants.SUFFIX_INSERTSQL);
 		if(insertTable!=null && insertSQL!=null) {
@@ -198,7 +199,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		}
 
 		if(filecol2tabcolMap!=null && filecol2tabcolMap.size()>0) {
-			log.info("mapper: "+filecol2tabcolMap);
+			log.debug("mapper: "+filecol2tabcolMap);
 		}
 	}
 
