@@ -92,6 +92,7 @@ public abstract class BaseExecutor implements tbrugz.sqldump.def.Executor {
 		// dryRun: -n , --dry-run, xxx.dry-run
 		dryRun = Utils.getPropBool(papp, getProductName() + ".dry-run", dryRun);
 		failonerror = Utils.getPropBool(papp, getPropertiesPrefix() + ".failonerror", failonerror);
+		getLogger().debug("dryRun="+dryRun+" ; failonerror="+failonerror);
 
 		//commitStrategy = getCommitStrategy( papp.getProperty(PROP_COMMIT_STATEGY), commitStrategy );
 		//boolean commitStrategyIsAutocommit = commitStrategy==CommitStrategy.AUTO_COMMIT;

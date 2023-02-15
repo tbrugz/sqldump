@@ -4,13 +4,15 @@ sqlmigrate
 
 Tool to ease/automate database migration tasks.
 
-sqlmigrate has three main tasks:
+sqlmigrate has three main tasks (and one "aggregated" task):
 
 1. **status**: checks if database has needed control table and tests if there are pending migrations (*no changes are performed in the database*).
 
 2. **setup**: inits the control table (`SQLMIGRATE_HISTORY` by default) and optionally populates the existing migrations (*only the controle table may be created/updated by this task*).
 
 3. **migrate**: run migrations (*changes are performed in the database and the control table is updated accordingly*).
+
+4. **setup_and_migrate**: runs both *setup* and *migrate* tasks.
 
 Variables like the control table's name and migrations directory are usually defined in a properties file. An exemple file with the avaiable properties can be seen at [doc/sqlmigrate.template.properties](doc/sqlmigrate.template.properties).
 
@@ -71,6 +73,11 @@ Baseline properties:
 ### `migrate` task
 
 This task represents the main purpose of this tool. First if checks if the migration table has the needed columns. If not, the process halts (`setup` task needed). After that, pending migrations are executed.
+
+
+### `setup_and_migrate` task
+
+Runs the **setup** task and the **migrate** task - in this order.
 
 
 command line
