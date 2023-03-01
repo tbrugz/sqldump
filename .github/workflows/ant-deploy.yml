@@ -84,6 +84,7 @@ jobs:
     - name: Build and push sqldump Docker image
       uses: docker/build-push-action@v4
       with:
+        context: ./docker/
         file: ./docker/Dockerfile.sqldump
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqldump:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqldump:latest
@@ -92,6 +93,7 @@ jobs:
     - name: Build and push sqlrun Docker image
       uses: docker/build-push-action@v4
       with:
+        context: ./docker/
         file: ./docker/Dockerfile.sqlrun
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:latest
