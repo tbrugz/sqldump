@@ -28,7 +28,7 @@
 	<property file="ivy.classpath.properties"/>
 
 	<!-- defaut properties values -->
-	<property name="maven.repository" value="https://repo1.maven.org/maven2/" />
+	<property name="maven.repository" value="https://repo1.maven.org/maven2" />
 	<property name="mvn-ant-tasks.version" value="2.1.3"/>
 	<property name="ivy.install.version" value="2.5.0"/>
 	<property name="ivy.settings.file" value="templates/ivysettings.xml"/>
