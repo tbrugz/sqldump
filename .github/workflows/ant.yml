@@ -52,13 +52,15 @@ jobs:
       run: mvn -V -B package --file sqlmigrate/pom.xml
 
     - name: Publish ant-built artifacts to GitHub Packages
-      if: ( github.head_ref == 'deploy' && ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
-      run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
+      if: ( github.head_ref == 'deploy' ) && ( ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
+      run: mvn -V -B org.apache.maven.plugins:maven-deploy-plugin:deploy-file -Durl=${{ env.REPOSITORY }} -DrepositoryId=github -DpomFile=dist/poms/sqldump.pom -Dfile=dist/jars/sqldump.jar
+      #run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
     - name: Publish maven-built artifacts to GitHub Packages
-      if: ( github.head_ref == 'deploy' && ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
+      if: ( github.head_ref == 'deploy' ) && ( ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
       run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -14,7 +14,7 @@
 	<property name="artifactId" value="${ivy.module}" />
 
 	<property name="maven-install-plugin.version" value="2.5.2" />
-	<property name="maven-deploy-plugin.version" value="2.6" />
+	<property name="maven-deploy-plugin.version" value="2.7" />
 	<property name="maven-gpg-plugin.version" value="1.6" />
 	<!--property file="${src}/sqldump-version.properties"/-->
 
