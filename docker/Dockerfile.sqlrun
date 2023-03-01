@@ -1,4 +1,4 @@
 
-FROM sqldump
+FROM ghcr.io/tbrugz/sqldump:latest
 
 ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/jdbc/*", "tbrugz.sqldump.sqlrun.SQLRun"]
