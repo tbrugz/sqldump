@@ -46,7 +46,7 @@ jobs:
       run: ant -noinput -buildfile build.xml resolve
 
     - name: Build/Test with Ant
-      run: ant -noinput -buildfile build.xml test
+      run: ant -noinput -buildfile build.xml test dist
 
     - name: Build sqlmigrate with Maven
       run: mvn -V -B package --file sqlmigrate/pom.xml
