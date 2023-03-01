@@ -4,8 +4,12 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, deploy ]
   workflow_dispatch:
+
+env:
+  REPOSITORY: https://maven.pkg.github.com/tbrugz/sqldump/
+  JDK_DEPLOY_VERSION: '11'
 
 jobs:
   build:
@@ -46,3 +50,15 @@ jobs:
 
     - name: Build sqlmigrate with Maven
       run: mvn -V -B package --file sqlmigrate/pom.xml
+
+    - name: Publish ant-built artifacts to GitHub Packages
+      if: ( github.head_ref == 'deploy' && ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
+      run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish maven-built artifacts to GitHub Packages
+      if: ( github.head_ref == 'deploy' && ${{ matrix.java }} == ${{ env.JDK_DEPLOY_VERSION }} )
+      run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
