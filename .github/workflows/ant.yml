@@ -16,19 +16,19 @@ jobs:
     name: java ${{ matrix.java }} build
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Setup JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
-        #cache: maven
+        cache: maven
 
     # see:
     # https://github.com/actions/cache/blob/main/examples.md#java---maven
     # https://github.com/apache/maven-resolver-ant-tasks/blob/57b9af86be9b28f58b6d80d91d8dafef5dc68025/.github/workflows/maven.yml
     - name: Setup Ivy cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy.xml') }}
@@ -43,3 +43,6 @@ jobs:
 
     - name: Build/Test with Ant
       run: ant -noinput -buildfile build.xml test
+
+    - name: Build sqlmigrate with Maven
+      run: mvn -V -B package --file sqlmigrate/pom.xml
