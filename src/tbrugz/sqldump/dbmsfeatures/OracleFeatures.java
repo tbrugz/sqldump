@@ -61,7 +61,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	 * DBA_TRIGGERS describes all triggers in the database.
 	 */
 	public static final String PROP_USE_DBA_TRIGGERS = PREFIX_DBMS+".oracle.trigger.use-dba-triggers";
-	
+
+	public static final boolean DEFAULT_USE_DBA_METAOBJECTS = false;
+
 	static final DBObjectType[] execTypes = {
 		DBObjectType.FUNCTION, DBObjectType.PACKAGE, DBObjectType.PACKAGE_BODY, DBObjectType.PROCEDURE
 		, DBObjectType.TYPE, DBObjectType.TYPE_BODY, DBObjectType.JAVA_SOURCE
@@ -74,8 +76,8 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	//boolean dumpSequenceStartWith = true;
 	boolean grabExecutablePrivileges = true;
-	boolean useDbaMetadataObjects = true;
-	boolean useDbaTriggers = useDbaMetadataObjects;
+	boolean useDbaMetadataObjects = DEFAULT_USE_DBA_METAOBJECTS;
+	boolean useDbaTriggers = DEFAULT_USE_DBA_METAOBJECTS;
 	
 	@Override
 	public void procProperties(Properties prop) {
