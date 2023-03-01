@@ -28,6 +28,8 @@
 	<property file="ivy.classpath.properties"/>
 
 	<!-- defaut properties values -->
+	<property name="maven.repository" value="https://repo1.maven.org/maven2/" />
+	<property name="mvn-ant-tasks.version" value="2.1.3"/>
 	<property name="ivy.install.version" value="2.5.0"/>
 	<property name="ivy.settings.file" value="templates/ivysettings.xml"/>
 	<property name="log4j.version" value="1.2.17"/>
@@ -132,7 +134,12 @@
 	<target name="ivy-install">
 		<mkdir dir="${user.home}/.ant/lib/"/>
 		<!--get src="http://www.apache.org/dist/ant/ivy/${ivy.install.version}/maven2/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/-->
-		<get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
+		<get src="${maven.repository}/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
+	</target>
+
+	<target name="mvn-ant-tasks-install">
+		<mkdir dir="${user.home}/.ant/lib/"/>
+		<get src="${maven.repository}/org/apache/maven/maven-ant-tasks/${mvn-ant-tasks.version}/maven-ant-tasks-${mvn-ant-tasks.version}.jar" dest="${user.home}/.ant/lib/"/>
 	</target>
 
 	<target name="generate-sources" depends="prepare">

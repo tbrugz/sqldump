@@ -39,8 +39,8 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-ivy-
 
-    - name: Install Ivy
-      run: ant -noinput -buildfile build.xml ivy-install
+    - name: Install Ivy + Maven Ant Tasks
+      run: ant -noinput -buildfile build.xml ivy-install mvn-ant-tasks-install
 
     - name: Resolve Dependencies with Ivy
       run: ant -noinput -buildfile build.xml resolve

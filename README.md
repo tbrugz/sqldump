@@ -120,6 +120,7 @@ Building from sources (with ant & ivy)
 - Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`) or `ant all`
 - (*optional*) Publish maven artifacts: Install Maven Ant tasks
   (`curl -o $HOME/.ant/lib/maven-ant-tasks-2.1.3.jar https://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`)
+  or `ant mvn-ant-tasks-install`
   & `ant publish-mvn-files`
 
 
