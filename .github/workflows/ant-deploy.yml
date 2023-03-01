@@ -1,19 +1,21 @@
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
 
-name: CI
+name: CI-deploy
 
 on:
   push:
-    branches: [ master ]
+    branches: [ deploy ]
   workflow_dispatch:
+
+env:
+  REPOSITORY: https://maven.pkg.github.com/tbrugz/sqldump/
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ '8', '11', '17' ]
-    name: java ${{ matrix.java }} build
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - uses: actions/checkout@v3
@@ -21,12 +23,9 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: ${{ matrix.java }}
+        java-version: '11'
         cache: maven
 
-    # see:
-    # https://github.com/actions/cache/blob/main/examples.md#java---maven
-    # https://github.com/apache/maven-resolver-ant-tasks/blob/57b9af86be9b28f58b6d80d91d8dafef5dc68025/.github/workflows/maven.yml
     - name: Setup Ivy cache
       uses: actions/cache@v3
       with:
@@ -42,7 +41,19 @@ jobs:
       run: ant -noinput -buildfile build.xml resolve
 
     - name: Build/Test with Ant
-      run: ant -noinput -buildfile build.xml test
+      run: ant -noinput -buildfile build.xml test dist
 
     - name: Build sqlmigrate with Maven
       run: mvn -V -B package --file sqlmigrate/pom.xml
+
+    - name: Publish ant-built artifacts to GitHub Packages
+      run: mvn -V -B org.apache.maven.plugins:maven-deploy-plugin:deploy-file -Durl=${{ env.REPOSITORY }} -DrepositoryId=github -DpomFile=dist/poms/sqldump.pom -Dfile=dist/jars/sqldump.jar
+      #run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+    - name: Publish maven-built artifacts to GitHub Packages
+      run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
