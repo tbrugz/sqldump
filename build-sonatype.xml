@@ -147,6 +147,7 @@
 			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
 			<arg value="-DpomFile=${maven-pom}" />
 			<arg value="-Dfile=${maven-jar}" />
+			<arg value="-Dmaven.repo.remote=${maven-remoteRepositoryUrl}"/>
 			<!--arg value="-X" />
 			<arg value="-e" /-->
 		</artifact:mvn>
