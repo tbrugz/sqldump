@@ -90,6 +90,12 @@ jobs:
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqldump:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqldump:latest
         labels: ${{ steps.meta.outputs.labels }}
 
+    - name: Extract metadata (tags, labels) from Git repo for Docker (sqlrun)
+      id: meta-sqlrun
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/sqlrun
+
     - name: Build and push sqlrun Docker image
       uses: docker/build-push-action@v4
       with:
@@ -97,4 +103,4 @@ jobs:
         file: ./docker/Dockerfile.sqlrun
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:latest
-        labels: ${{ steps.meta.outputs.labels }}
+        labels: ${{ steps.meta-sqlrun.outputs.labels }}
