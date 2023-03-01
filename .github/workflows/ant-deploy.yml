@@ -8,6 +8,8 @@ on:
   workflow_dispatch:
 
 env:
+  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: ghcr.io
   REPOSITORY: https://maven.pkg.github.com/tbrugz/sqldump/
 
 jobs:
@@ -52,8 +54,45 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
     - name: Publish maven-built artifacts to GitHub Packages
       run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # docker stuff
+
+    - name: Resolve docker dependencies
+      run: ant -noinput -buildfile docker/build.xml resolve write-version
+
+    - name: Set project version
+      id: set_version
+      run: echo PROJECT_VERSION=$(< dist/project-version.txt) >> $GITHUB_ENV
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) from Git repo for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Build and push sqldump Docker image
+      uses: docker/build-push-action@v4
+      with:
+        file: ./docker/Dockerfile.sqldump
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqldump:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqldump:latest
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Build and push sqlrun Docker image
+      uses: docker/build-push-action@v4
+      with:
+        file: ./docker/Dockerfile.sqlrun
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:latest
+        labels: ${{ steps.meta.outputs.labels }}
