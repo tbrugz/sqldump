@@ -1,6 +1,6 @@
 
-# see: https://hub.docker.com/_/openjdk
-FROM openjdk:11
+# see: https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:17-jre
 
 # copy app
 #COPY lib/deps/* lib/jdbc/* /app/lib/
