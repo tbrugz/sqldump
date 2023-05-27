@@ -69,7 +69,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 	String inputEncoding = defaultInputEncoding;
 	long logEachXStmts = DEFAULT_LOG_EACH_X_INPUT_ROWS;
 	
-	TokenizerStrategy tokenizerStrategy = TokenizerStrategy.STMT_SCANNER;
+	TokenizerStrategy tokenizerStrategy = TokenizerStrategy.DEFAULT_STRATEGY;
 	
 	Connection conn;
 	String execId;

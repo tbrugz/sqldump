@@ -10,7 +10,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtNgScanner;
+import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtParserTokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.Tokenizer;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScanner;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtTokenizer;
@@ -32,6 +34,7 @@ public class SQLTokenizersTest {
 		//list.add(new Object[]{SQLStmtScanner.class, null});
 		list.add(new Object[]{SQLStmtTokenizer.class, null});
 		list.add(new Object[]{SQLStmtNgScanner.class, null});
+		list.add(new Object[]{SQLStmtParserTokenizer.class, null});
 		return list;
 	}
 	
@@ -50,6 +53,9 @@ public class SQLTokenizersTest {
 		}
 		if(clazz.equals(SQLStmtNgScanner.class)) {
 			return new SQLStmtNgScanner(str);
+		}
+		if(clazz.equals(SQLStmtParserTokenizer.class)) {
+			return new SQLStmtParserTokenizer(str, DataDumpUtils.CHARSET_UTF8);
 		}
 		/*if(clazz.equals(StringSpliter.class)) {
 			return new StringSpliter(str);
@@ -155,6 +161,17 @@ public class SQLTokenizersTest {
 	}
 	
 	@Test
+	@Ignore("does not work with SQLStmtTokenizer")
+	public void testTokenCommentAndApos() {
+		Tokenizer p = createTokenizer(clazz, "abc;eee--zz'ab\na;bc");
+		
+		Assert.assertEquals("abc", p.next());
+		Assert.assertEquals("eee--zz'ab\na", p.next());
+		Assert.assertEquals("bc", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+	
+	@Test
 	@Ignore("does not work with SQLStmtNgScanner")
 	public void testTokenApos() {
 		Tokenizer p = createTokenizer(clazz, "'wil'';son'");
@@ -162,5 +179,16 @@ public class SQLTokenizersTest {
 		Assert.assertEquals("'wil'';son'", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
+
+	@Test
+	public void testTokenCommentAndApos() {
+		Tokenizer p = createTokenizer(clazz, "abc;eee--'z\nzx;ab");
+		
+		Assert.assertEquals("abc", p.next());
+		Assert.assertEquals("eee--'z\nzx", p.next());
+		Assert.assertEquals("ab", p.next());
+		Assert.assertEquals(false, p.hasNext());
+	}
+	
 
 }

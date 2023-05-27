@@ -13,6 +13,7 @@ public enum TokenizerStrategy {
 	STMT_TOKENIZER,
 	STMT_SCANNER,
 	STMT_SCANNER_NG,
+	STMT_PARSER_TOKENIZER,
 	STRING_SPLITTER,
 	//NO_TOKENIZER, //??
 	;
@@ -23,9 +24,10 @@ public enum TokenizerStrategy {
 	public static final String STRING_SPLITTER_CLASS = "StringSpliter";
 	public static final String STMT_SCANNER_CLASS = "SQLStmtScanner";
 	public static final String STMT_SCANNER_NG_CLASS = "SQLStmtNgScanner";
+	public static final String STMT_PARSER_TOKENIZER_CLASS = "SQLStmtParserTokenizer";
 	//public static final String NO_TOKENIZER_CLASS = "NoSplitTokenizer";
 	
-	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_TOKENIZER;
+	public static final TokenizerStrategy DEFAULT_STRATEGY = STMT_PARSER_TOKENIZER;
 	
 	public static TokenizerStrategy getTokenizerStrategy(String tokenizer) {
 		if(tokenizer == null) {
@@ -51,6 +53,10 @@ public enum TokenizerStrategy {
 			log.info("using '"+tokenizer+"' tokenizer class");
 			return TokenizerStrategy.STMT_SCANNER_NG;
 		}
+		else if(STMT_PARSER_TOKENIZER_CLASS.equals(tokenizer)) {
+			log.info("using '"+tokenizer+"' tokenizer class");
+			return TokenizerStrategy.STMT_PARSER_TOKENIZER;
+		}
 		/*else if(NO_TOKENIZER_CLASS.equals(tokenizer)) {
 			log.info("using '"+tokenizer+"' (NO) tokenizer class");
 			return TokenizerStrategy.NO_TOKENIZER;
@@ -70,6 +76,8 @@ public enum TokenizerStrategy {
 		switch(tokenizerStrategy) {
 		case STMT_SCANNER_NG:
 			return new SQLStmtNgScanner(file, inputEncoding);
+		case STMT_PARSER_TOKENIZER:
+			return new SQLStmtParserTokenizer(file, inputEncoding);
 		case STMT_SCANNER:
 			return new SQLStmtScanner(file, inputEncoding, escapeBackslashedApos);
 		default:
