@@ -162,7 +162,7 @@ public class SQLTokenizersTest {
 	
 	@Test
 	@Ignore("does not work with SQLStmtTokenizer")
-	public void testTokenCommentAndApos() {
+	public void testTokenCommentAndApos2() {
 		Tokenizer p = createTokenizer(clazz, "abc;eee--zz'ab\na;bc");
 		
 		Assert.assertEquals("abc", p.next());
@@ -189,6 +189,5 @@ public class SQLTokenizersTest {
 		Assert.assertEquals("ab", p.next());
 		Assert.assertEquals(false, p.hasNext());
 	}
-	
 
 }

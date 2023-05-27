@@ -127,7 +127,7 @@ public class SQLStmtParserTokenizer implements Tokenizer, Iterator<String>, Iter
 	
 		//String sret = ret.toString();
 		//System.out.println("["+sret+"]");
-		if(ret.isEmpty()) { return null; }
+		if(ret.length()==0) { return null; }
 		return ret.toString();
 	}
 
@@ -152,6 +152,10 @@ public class SQLStmtParserTokenizer implements Tokenizer, Iterator<String>, Iter
 		String ret = nextToken;
 		nextToken = null;
 		return ret;
+	}
+
+	@Override
+	public void remove() {
 	}
 
 }
