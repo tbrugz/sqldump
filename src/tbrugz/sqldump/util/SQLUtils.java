@@ -40,7 +40,7 @@ public class SQLUtils {
 	static final String PROP_DEFAULT_TYPE_IS_STRING = "sqldump.sqlutils.defaultTypeIsString";
 	static final String PROP_CLOB_TYPE_IS_STRING = "sqldump.sqlutils.clobTypeIsString";
 	
-	static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
+	public static final String BLOB_NOTNULL_PLACEHOLDER = "[blob]"; //""
 	
 	static boolean strangePrecisionNumericAsInt = false;
 	static boolean defaultTypeIsString = true;

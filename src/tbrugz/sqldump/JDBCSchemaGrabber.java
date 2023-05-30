@@ -325,11 +325,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 		else {
-			if(log.isDebugEnabled()) {
+			/*if(log.isDebugEnabled()) {
 				schemas = SQLUtils.getSchemaNames(dbmd);
 				log.debug(getIdDesc()+"schemas: "+schemas);
 			}
-			else if(doGrabSchemaNames) {
+			else
+			*/
+			if(doGrabSchemaNames) {
 				schemas = SQLUtils.getSchemaNames(dbmd);
 			}
 		}
@@ -338,7 +340,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			for(String s: schemas) {
 				schemaModel.getSchemaMetadata().add(SchemaMetaData.newSchemaMetaData(s));
 			}
-			log.info(getIdDesc()+"schema names: "+schemas);
+			if(log.isDebugEnabled()) {
+				log.debug(getIdDesc()+"schema names: "+schemas);
+			}
 		}
 		else {
 			log.info(getIdDesc()+"no schema name grabbed");
