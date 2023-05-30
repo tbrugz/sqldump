@@ -119,3 +119,18 @@ jobs:
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqldiff:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqldiff:latest
         labels: ${{ steps.meta-sqldiff.outputs.labels }}
+
+    - name: Extract metadata (tags, labels) from Git repo for Docker (sqlmigrate)
+      id: meta-sqlmigrate
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/sqlmigrate
+
+    - name: Build and push sqlmigrate Docker image (sqlmigrate)
+      uses: docker/build-push-action@v4
+      with:
+        context: ./docker/
+        file: ./docker/Dockerfile.sqlmigrate
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqlmigrate:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqlmigrate:latest
+        labels: ${{ steps.meta-sqlmigrate.outputs.labels }}
