@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -161,8 +162,9 @@ public class SQLTokenizersTest {
 	}
 	
 	@Test
-	@Ignore("does not work with SQLStmtTokenizer")
+	//@Ignore("does not work with SQLStmtTokenizer")
 	public void testTokenCommentAndApos2() {
+		Assume.assumeTrue("does not work with SQLStmtTokenizer", !clazz.equals(SQLStmtTokenizer.class));
 		Tokenizer p = createTokenizer(clazz, "abc;eee--zz'ab\na;bc");
 		
 		Assert.assertEquals("abc", p.next());
@@ -172,8 +174,9 @@ public class SQLTokenizersTest {
 	}
 	
 	@Test
-	@Ignore("does not work with SQLStmtNgScanner")
+	//@Ignore("does not work with SQLStmtNgScanner")
 	public void testTokenApos() {
+		Assume.assumeTrue("does not work with SQLStmtNgScanner", !clazz.equals(SQLStmtNgScanner.class));
 		Tokenizer p = createTokenizer(clazz, "'wil'';son'");
 		
 		Assert.assertEquals("'wil'';son'", p.next());
@@ -181,8 +184,9 @@ public class SQLTokenizersTest {
 	}
 
 	@Test
-	@Ignore("does not work with SQLStmtTokenizer")
+	//@Ignore("does not work with SQLStmtTokenizer")
 	public void testTokenCommentAndApos() {
+		Assume.assumeTrue("does not work with SQLStmtTokenizer", !clazz.equals(SQLStmtTokenizer.class));
 		Tokenizer p = createTokenizer(clazz, "abc;eee--'z\nzx;ab");
 		
 		Assert.assertEquals("abc", p.next());
