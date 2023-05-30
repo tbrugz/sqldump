@@ -32,6 +32,9 @@
         <exec executable="docker">
             <arg line="build -t sqlrun --file Dockerfile.sqlrun ."/>
         </exec>
+        <exec executable="docker">
+            <arg line="build -t sqldiff --file Dockerfile.sqldiff ."/>
+        </exec>
     </target>
 
     <target name="buildfull" description="clean + resolve + build" depends="clean, resolve, build">

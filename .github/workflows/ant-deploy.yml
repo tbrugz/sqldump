@@ -104,3 +104,18 @@ jobs:
         push: true
         tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqlrun:latest
         labels: ${{ steps.meta-sqlrun.outputs.labels }}
+
+    - name: Extract metadata (tags, labels) from Git repo for Docker (sqldiff)
+      id: meta-sqldiff
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/sqldiff
+
+    - name: Build and push sqldiff Docker image (sqldiff)
+      uses: docker/build-push-action@v4
+      with:
+        context: ./docker/
+        file: ./docker/Dockerfile.sqldiff
+        push: true
+        tags: ${{ env.REGISTRY }}/${{ github.actor }}/sqldiff:${{ env.PROJECT_VERSION }},${{ env.REGISTRY }}/${{ github.actor }}/sqldiff:latest
+        labels: ${{ steps.meta-sqldiff.outputs.labels }}
