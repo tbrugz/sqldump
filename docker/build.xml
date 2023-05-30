@@ -19,6 +19,7 @@
         <echo message="ivy.retrieve.pattern = ${ivy.retrieve.pattern}"/>
         <ivy:retrieve/>
         <copy file="../dist/jars/sqldump.jar" tofile="${ivy.lib.dir}/build/sqldump-${TAG}.jar"/>
+        <copy file="../sqlmigrate/target/sqlmigrate-${version}.jar" tofile="${ivy.lib.dir}/build/sqlmigrate-${TAG}.jar"/>
     </target>
 
     <target name="dependencytree" description="show Ivy dependency tree">
@@ -34,6 +35,9 @@
         </exec>
         <exec executable="docker">
             <arg line="build -t sqldiff --file Dockerfile.sqldiff ."/>
+        </exec>
+        <exec executable="docker">
+            <arg line="build -t sqlmigrate --file Dockerfile.sqlmigrate ."/>
         </exec>
     </target>
 

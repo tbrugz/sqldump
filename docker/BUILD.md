@@ -11,6 +11,7 @@ ant clean resolve
 docker build -t sqldump --file Dockerfile.sqldump .
 docker build -t sqlrun --file Dockerfile.sqlrun .
 docker build -t sqldiff --file Dockerfile.sqldiff .
+docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 ```
 
 
