@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Query;
+import tbrugz.sqldump.dbmodel.Relation;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.View;
 import tbrugz.sqldump.def.AbstractSchemaProcessor;
@@ -79,7 +81,10 @@ public class SchemaModelTransformer extends AbstractSchemaProcessor {
 	//moved from SchemaModelTransformer.dumpSchema()
 	void addFKs() {
 		addedFKs = new ArrayList<FK>();
-		for(Table t: model.getTables()) {
+		Set<Relation> relations = new TreeSet<Relation>();
+		relations.addAll(model.getTables());
+		relations.addAll(model.getViews());
+		for(Relation t: relations) {
 			//sqldump.modeltransform.table@<fktable>.xtrafk=<fkcolumn>:[<schema>.]<pktable>:<pkcolumn>[:<fk-name>][;(...)]
 			List<String> xtraFKs = Utils.getStringListFromProp(prop, prefix+".table@"+t.getName()+".xtrafk", ";");
 			if(xtraFKs==null) { continue; }
