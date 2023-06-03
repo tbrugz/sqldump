@@ -151,4 +151,6 @@ public interface DBMSFeatures {
 	String sqlLengthFunctionByType(String columnName, String columnType);
 	String sqlIsNullFunction(String columnName);
 	
+	boolean sqlStatementsAreTrimmed();
+	
 }

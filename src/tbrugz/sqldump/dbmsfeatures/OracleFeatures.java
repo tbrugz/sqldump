@@ -1134,4 +1134,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return false;
 	}
 
+	@Override
+	public boolean sqlStatementsAreTrimmed() {
+		return false;
+	}
+
 }

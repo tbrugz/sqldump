@@ -439,4 +439,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		return columnName+" is null";
 	}
 	
+	@Override
+	public boolean sqlStatementsAreTrimmed() {
+		return true;
+	}
+
 }

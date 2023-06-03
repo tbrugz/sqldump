@@ -212,4 +212,9 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		return null;
 	}
 
+	@Override
+	public boolean sqlStatementsAreTrimmed() {
+		return false;
+	}
+
 }
