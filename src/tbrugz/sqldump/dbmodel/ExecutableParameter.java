@@ -17,7 +17,7 @@ public class ExecutableParameter implements DBType, Serializable {
 	}
 	
 	String name;
-	Integer position; // Integer? so it can be null...
+	Integer position;
 	String dataType;
 	INOUT inout;
 	//String remarks; //XXX add remarks?
@@ -35,7 +35,7 @@ public class ExecutableParameter implements DBType, Serializable {
 				+ ((dataType == null) ? 0 : dataType.hashCode());
 		result = prime * result + ((inout == null) ? 0 : inout.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + position;
+		result = prime * result + ((position == null) ? 0 : position.hashCode());
 		return result;
 	}
 

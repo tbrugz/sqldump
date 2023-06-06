@@ -28,6 +28,7 @@ import tbrugz.sqldump.dbmodel.ColTypeUtilTest;
 import tbrugz.sqldump.dbmodel.ColumnTest;
 import tbrugz.sqldump.dbmodel.ConstraintTest;
 import tbrugz.sqldump.dbmodel.DBObjectUtilsTest;
+import tbrugz.sqldump.dbmodel.ExecutableParamaterTest;
 import tbrugz.sqldump.dbmodel.GrantTest;
 import tbrugz.sqldump.dbmsfeatures.FunctionTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
@@ -85,6 +86,7 @@ import tbrugz.sqldump.util.StringUtilsTest;
 	ColTypeUtilTest.class,
 	ConstraintTest.class,
 	DBObjectUtilsTest.class,
+	ExecutableParamaterTest.class,
 	GrantTest.class,
 	//datadump unit tests
 	JsonTest.class,
