@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 
 import tbrugz.sqldump.JDBCSchemaGrabber;
@@ -24,6 +25,8 @@ public class SQLRunAndDumpTest {
 	public String dbpath = "mem:SQLRunAndDumpTest";
 	public String singleUseDbPath = "mem:";
 	
+	final static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("win");
+
 	/*Connection setupConnection(String prefix, Properties prop) throws ClassNotFoundException, SQLException, NamingException {
 		Connection conn = SQLUtils.ConnectionUtil.initDBConnection(prefix, prop);
 		return conn;
@@ -324,6 +327,8 @@ public class SQLRunAndDumpTest {
 
 	@Test
 	public void doRunImportFiles() throws Exception {
+		Assume.assumeFalse(isWindows);
+
 		String mydbpath = dbpath+"-importfiles;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
@@ -368,6 +373,8 @@ public class SQLRunAndDumpTest {
 
 	@Test
 	public void doRunImportXlsFiles() throws Exception {
+		Assume.assumeFalse(isWindows);
+
 		String mydbpath = dbpath+"-importfiles-xls;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
