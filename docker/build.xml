@@ -37,6 +37,9 @@
             <arg line="build -t sqldiff --file Dockerfile.sqldiff ."/>
         </exec>
         <exec executable="docker">
+            <arg line="build -t diff2queries --file Dockerfile.diff2queries ."/>
+        </exec>
+        <exec executable="docker">
             <arg line="build -t sqlmigrate --file Dockerfile.sqlmigrate ."/>
         </exec>
     </target>

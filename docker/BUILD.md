@@ -11,6 +11,7 @@ ant clean resolve
 docker build -t sqldump --file Dockerfile.sqldump .
 docker build -t sqlrun --file Dockerfile.sqlrun .
 docker build -t sqldiff --file Dockerfile.sqldiff .
+docker build -t diff2queries --file Dockerfile.diff2queries .
 docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 ```
 
@@ -36,8 +37,15 @@ docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 # or export TAG=latest
 docker tag sqldump tbrugz/sqldump:$TAG
 docker tag sqlrun tbrugz/sqlrun:$TAG
+docker tag sqldiff tbrugz/sqldiff:$TAG
+docker tag diff2queries tbrugz/diff2queries:$TAG
+docker tag sqlmigrate tbrugz/sqlmigrate:$TAG
+
 docker push tbrugz/sqldump:$TAG
 docker push tbrugz/sqlrun:$TAG
+docker push tbrugz/sqldiff:$TAG
+docker push tbrugz/diff2queries:$TAG
+docker push tbrugz/sqlmigrate:$TAG
 ```
 
 * Publish README
