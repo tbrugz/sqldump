@@ -5,7 +5,10 @@
     http://logback.qos.ch/manual/layouts.html
   -->
 
+  <conversionRule conversionWord="clr" converterClass="tbrugz.util.logback.LevelColorConverter" />
+
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!--<withJansi>true</withJansi>-->
     <encoder>
       <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
       <!--<pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>-->
@@ -14,7 +17,10 @@
       <!--<pattern>%black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable</pattern>-->
       <!--<pattern>%date %highlight(%-5level) %cyan(%logger{15}): %msg %n</pattern>-->
       <!--<pattern>%gray(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%cyan(%-30.30logger)] %msg %n</pattern>-->
+      <!--
       <pattern>%d{HH:mm:ss.SSS} %boldWhite(%-5level) [%cyan(%-30.30logger{30})] %msg%n%xException</pattern>
+      -->
+      <pattern>%d{HH:mm:ss.SSS} %clr(%-5level) [%cyan(%-30.30logger{30})] %msg%n%xException</pattern>
     </encoder>
   </appender>
 

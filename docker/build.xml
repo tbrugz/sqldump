@@ -20,6 +20,7 @@
         <ivy:retrieve/>
         <copy file="../dist/jars/sqldump.jar" tofile="${ivy.lib.dir}/build/sqldump-${TAG}.jar"/>
         <copy file="../sqlmigrate/target/sqlmigrate-${version}.jar" tofile="${ivy.lib.dir}/build/sqlmigrate-${TAG}.jar"/>
+        <copy file="../sqldump-logback/target/sqldump-logback-${version}.jar" tofile="${ivy.lib.dir}/build/sqldump-logback-${TAG}.jar"/>
     </target>
 
     <target name="dependencytree" description="show Ivy dependency tree">
