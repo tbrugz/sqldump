@@ -344,6 +344,9 @@
 			<arg line="-f sqlmigrate/ clean install"/>
 		</exec>
 		<exec executable="mvn" failonerror="true">
+			<arg line="-f sqldump-logback/ clean install"/>
+		</exec>
+		<exec executable="mvn" failonerror="true">
 			<arg line="-f sqldump-mondrian/ clean install"/>
 		</exec>
 	</target>
