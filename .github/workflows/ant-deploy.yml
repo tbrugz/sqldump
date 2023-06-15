@@ -48,6 +48,9 @@ jobs:
     - name: Build sqlmigrate with Maven
       run: mvn -V -B package --file sqlmigrate/pom.xml
 
+    - name: Build sqldump-logback with Maven
+      run: mvn -V -B package --file sqldump-logback/pom.xml
+
     - name: Publish ant-built artifacts to GitHub Packages
       run: mvn -V -B org.apache.maven.plugins:maven-deploy-plugin:deploy-file -Durl=${{ env.REPOSITORY }} -DrepositoryId=github -DpomFile=dist/poms/sqldump.pom -Dfile=dist/jars/sqldump.jar
       #run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot

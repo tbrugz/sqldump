@@ -46,3 +46,6 @@ jobs:
 
     - name: Build sqlmigrate with Maven
       run: mvn -V -B package --file sqlmigrate/pom.xml
+
+    - name: Build sqldump-logback with Maven
+      run: mvn -V -B package --file sqldump-logback/pom.xml
