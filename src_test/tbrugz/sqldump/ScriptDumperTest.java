@@ -1,12 +1,19 @@
 package tbrugz.sqldump;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
+import tbrugz.sqldump.dbmodel.Grant;
+import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
@@ -142,6 +149,42 @@ public class ScriptDumperTest {
 		String sql = IOUtil.readFromFilename(file);
 		String expected = "create table `DEPT` (\n	`ID` INTEGER not null,\n	`NAME` VARCHAR(100),\n	`PARENT_ID` INTEGER,\n	constraint `DEPT_PK` primary key (`ID`)\n);";
 		Assert.assertEquals(expected, sql.substring(0, sql.indexOf(";")+1));
+	}
+
+	@Test
+	public void dumpSelectPrivilege() throws Exception {
+		Grant gr = new Grant("GRANTOR", PrivilegeType.SELECT, "GRANTEE");
+		List<Grant> grants = new ArrayList<>();
+		grants.add(gr);
+		Set<String> privs = new TreeSet<>();
+		privs.add("SELECT");
+		
+		String sql = SchemaModelScriptDumper.compactGrantDump(grants, "TABLE_X", privs);
+		Assert.assertEquals("grant SELECT on TABLE_X to GRANTEE;", sql.trim());
+	}
+
+	@Test
+	public void dumpSelectPrivilegeWithColumn() throws Exception {
+		Grant gr = new Grant("GRANTOR", "COL_1", PrivilegeType.SELECT, "GRANTEE", false);
+		List<Grant> grants = new ArrayList<>();
+		grants.add(gr);
+		Set<String> privs = new TreeSet<>();
+		privs.add("SELECT");
+		
+		String sql = SchemaModelScriptDumper.compactGrantDump(grants, "TABLE_X", privs);
+		Assert.assertEquals("grant SELECT (COL_1) on TABLE_X to GRANTEE;", sql.trim());
+	}
+
+	@Test
+	public void dumpSelectPrivilegeWithoutColumn() throws Exception {
+		Grant gr = new Grant("GRANTOR", "COL_1", PrivilegeType.DELETE, "GRANTEE", false);
+		List<Grant> grants = new ArrayList<>();
+		grants.add(gr);
+		Set<String> privs = new TreeSet<>();
+		privs.add("DELETE");
+		
+		String sql = SchemaModelScriptDumper.compactGrantDump(grants, "TABLE_X", privs);
+		Assert.assertEquals("grant DELETE on TABLE_X to GRANTEE;", sql.trim());
 	}
 	
 }

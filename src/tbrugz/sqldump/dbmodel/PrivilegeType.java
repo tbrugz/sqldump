@@ -8,6 +8,17 @@ public enum PrivilegeType {
 	;
 	//XXX: filter privilegetype on output based on dbid... see: column-type-mapping.properties
 	
+	public boolean allowedForColumn() {
+		switch(this) {
+		case DELETE:
+		case TRIGGER:
+		case TRUNCATE:
+			return false;
+		default:
+			return true;
+		}
+	}
+	
 	@Override
 	public String toString() {
 		switch(this) {

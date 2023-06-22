@@ -269,6 +269,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			return;
 		}
 		
+		Set<String> privilegesToDump = getPrivilegesToDump(toDbId!=null?toDbId:fromDbId);
+		
 		for(Table table: schemaModel.getTables()) {
 			switch(table.getType()) {
 				case TABLE: 
@@ -320,7 +322,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			
 			//Grants
 			if(dumpGrantsWithReferencingTable) {
-				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
+				String grantOutput = compactGrantDump(table.getGrants(), tableName, privilegesToDump);
 				if(!Utils.isNullOrEmpty(grantOutput)) {
 					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.TABLE, grantOutput);
 				}
@@ -390,7 +392,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			//tables
 			for(Table table: schemaModel.getTables()) {
 				String tableName = DBObject.getFinalName(table.getSchemaName(), table.getName(), dumpWithSchemaName);
-				String grantOutput = compactGrantDump(table.getGrants(), tableName, toDbId);
+				String grantOutput = compactGrantDump(table.getGrants(), tableName, privilegesToDump);
 				if(!Utils.isNullOrEmpty(grantOutput)) {
 					categorizedOut(table.getSchemaName(), table.getName(), DBObjectType.GRANT, grantOutput);
 				}
@@ -401,7 +403,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			for(ExecutableObject eo: schemaModel.getExecutables()) {
 				String eoName = DBObject.getFinalName(eo.getSchemaName(), eo.getName(), dumpWithSchemaName);
 				//log.debug("exec to dump grants: "+eoName+" garr: "+eo.grants);
-				String grantOutput = compactGrantDump(eo.getGrants(), eoName, toDbId);
+				String grantOutput = compactGrantDump(eo.getGrants(), eoName, privilegesToDump);
 				if(!Utils.isNullOrEmpty(grantOutput)) {
 					categorizedOut(eo.getSchemaName(), eo.getName(), DBObjectType.GRANT, grantOutput);
 				}
@@ -564,13 +566,10 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		}
 	}
 	
-	static String compactGrantDump(Collection<Grant> grants, String finalTableName, String toDbId) {
-		Map<String, List<PrivilegeWithColumns>> mapWithGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
-		Map<String, List<PrivilegeWithColumns>> mapWOGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
-		
+	public static Set<String> getPrivilegesToDump(String dbId) {
 		Set<String> privsToDump = new TreeSet<String>();
-		if(!Utils.isNullOrEmpty(toDbId)) {
-			String sPriv = DBMSResources.instance().getPrivileges(toDbId);
+		if(!Utils.isNullOrEmpty(dbId)) {
+			String sPriv = DBMSResources.instance().getPrivileges(dbId);
 			//dbmsSpecificsProperties.getProperty("privileges."+toDbId);
 			if(sPriv!=null) {
 				String[] privs = sPriv.split(",");
@@ -580,10 +579,18 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 				}
 			}
 		}
-		
+		log.debug("getPrivilegesToDump: "+privsToDump+" [dbId = "+dbId+"]");
+		return privsToDump;
+	}
+	
+	public static String compactGrantDump(Collection<Grant> grants, String finalTableName, Set<String> privsToDump) {
+		Map<String, List<PrivilegeWithColumns>> mapWithGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
+		Map<String, List<PrivilegeWithColumns>> mapWOGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
+
+		int count = 0;
 		for(Grant g: grants) {
 			//if privilege is not defined for target DB, do not dump
-			if(toDbId!=null && !privsToDump.contains(g.getPrivilege().toString())) { continue; }
+			if(!privsToDump.contains(g.getPrivilege().toString())) { continue; }
 			
 			if(g.isWithGrantOption()) {
 				addGrantToMap(mapWithGrant, g);
@@ -591,7 +598,9 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 			else {
 				addGrantToMap(mapWOGrant, g);
 			}
+			count++;
 		}
+		log.debug("compactGrantDump: "+count+" of "+grants.size()+" grants will be dumped [object = "+finalTableName+"]"); //; privs = "+privsToDump+"]");
 		
 		StringBuilder sb = new StringBuilder();
 		
@@ -638,7 +647,7 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 					sb2.append(", ");
 				}
 				sb2.append(pwc.priv);
-				if(pwc.columns.size()>0) {
+				if(pwc.priv.allowedForColumn() && pwc.columns.size()>0) {
 					sb2.append(" ("+Utils.join(pwc.columns, ", ")+")");
 				}
 				is1st = false;
