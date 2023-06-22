@@ -74,18 +74,21 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 			}
 			ExecutableParameter ep = new ExecutableParameter();
 			ep.setDataType(rs.getString(3));
-			//eo.returnType = rs.getString(3);
 			eo.setReturnParam(ep);
+			//log.debug("exec="+eo+" [exec="+eo.getName()+"]");
 			
 			eo.externalLanguage = rs.getString(4);
 			eo.setBody( rs.getString(5) );
 			
+			//rs.getString(6) - external_name
+			//rs.getString(7) - is_deterministic
+			
 			//parameters!
-			Array paramsArr = rs.getArray(6);
+			Array paramsArr = rs.getArray(8);
 			if(paramsArr!=null) {
 				String[] params = (String[]) paramsArr.getArray();
 				//eo.parameterNames = Arrays.asList(params);
-				String[] paramTypes = (String[]) rs.getArray(7).getArray();
+				String[] paramTypes = (String[]) rs.getArray(9).getArray();
 				//eo.parameterTypes = Arrays.asList(paramTypes);
 				List<ExecutableParameter> lpar = new ArrayList<ExecutableParameter>();
 				for(int i=0;i<params.length;i++) {
@@ -97,6 +100,10 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 				if(lpar.size()>0) {
 					eo.setParams(lpar);
 				}
+				//log.debug("lpar="+lpar+" [exec="+eo.getName()+"]");
+			}
+			else {
+				//log.debug("paramsArr is null [exec="+eo.getName()+"]");
 			}
 			
 			if(addExecutableToModel(execs, eo)) {
