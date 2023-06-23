@@ -12,6 +12,8 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,7 +72,8 @@ public class FileUtils {
 
 	public static List<String> getFilesGlobAsString(File dir, String fileGlob) throws IOException {
 		Path origPath = dir.toPath();
-		String finalGlob = Paths.get( origPath+"/"+fileGlob ).toString();
+		//String finalGlob = Paths.get( origPath + File.separator + fileGlob ).toString();
+		String finalGlob = origPath + File.separator + fileGlob;
 		Finder finder = new Finder(finalGlob);
 		
 		//log.info("getFilesGlobAsString: dir: "+dir+" ; origPath: "+origPath+" ; fileGlob: "+fileGlob+" finalGlob: "+finalGlob);
@@ -78,8 +81,11 @@ public class FileUtils {
 		return finder.getFiles();
 	}
 
-	public static class Finder extends SimpleFileVisitor<Path> {
+	static class Finder extends SimpleFileVisitor<Path> {
 	
+		static final boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("win");
+		static final String GLOB = "glob:";
+
 		private final PathMatcher matcher;
 		//private final Path patternParentPath;
 		private final Path pathPattern;
@@ -107,19 +113,21 @@ public class FileUtils {
 		}
 		
 		Finder(String pattern) {
-			matcher = FileSystems.getDefault().getPathMatcher("glob:" + pattern); // **/
+			matcher = FileSystems.getDefault().getPathMatcher(GLOB + normalizeComparatorPath( pattern) ); // **/
 			//patternParentPath = Paths.get( getBasePath(pattern) );
 			// using getPathUntilDoubleAsterisk() because "**" crosses directory boundaries
 			// see: https://docs.oracle.com/javase/7/docs/api/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)
-			pathPattern = Paths.get( getPathUntilDoubleAsterisk(pattern) );
+			String path = normalizePath( getPathUntilDoubleAsterisk(pattern) );
+			//log.info("path: "+path+" ; pattern: "+pattern);
+			pathPattern = Paths.get( path );
 			pathPatternNameCount = pathPattern.getNameCount();
-			//System.out.println("pattern: "+pattern+" ; patternParentPath: "+patternParentPath);
+			//log.info("pathPattern: "+pathPattern+" ; pathPatternNameCount: "+pathPatternNameCount);
 		}
 		
 		void find(Path file) {
-			//System.out.println("f: "+file);
+			//log.debug("find: f: "+file);
 			if (matcher.matches(file)) {
-				//System.out.println("match: "+file);
+				//log.debug("find: match: "+file);
 				files.add(file.toString());
 			}
 			/*
@@ -128,6 +136,28 @@ public class FileUtils {
 				files.add(name.toString());
 			}
 			*/
+		}
+		
+		static String normalizePath(String path) {
+			if(isWindows) {
+				if(path.indexOf('$')>=0) {
+					throw new IllegalArgumentException("Illegal char <$>");
+				}
+				path = path.replace('*', '$');
+				path = path.replace('/', '\\');
+				return path;
+			}
+			return path;
+		}
+
+		static String normalizeComparatorPath(String path) {
+			if(isWindows) {
+				path = path.replace('/', '\\');
+				path = path.replace('$', '*');
+				path = path.replaceAll(Pattern.quote("\\"), Matcher.quoteReplacement("\\\\"));
+				return path;
+			}
+			return path;
 		}
 
 		List<String> getFiles() {
@@ -142,19 +172,24 @@ public class FileUtils {
 		
 		@Override
 		public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-			Path comparatorPath = pathPattern;
+			//log.info("preVisitDirectory: "+dir);
+			String comparatorPath = pathPattern.toString();
 			int dirNameCount = dir.getNameCount();
 			if(dirNameCount < pathPatternNameCount) {
-				comparatorPath = getSubpathWithRoot(pathPattern, dirNameCount);
+				comparatorPath = getSubpathWithRoot(pathPattern, dirNameCount).toString();
 				/*comparatorPath = pathPattern.subpath(0, dirNameCount);
 				if(pathPattern.isAbsolute()) {
 					comparatorPath = Paths.get(pathPattern.getRoot().toString()+comparatorPath);
 				}*/
 			}
-			PathMatcher dirMatcher = FileSystems.getDefault().getPathMatcher("glob:" + comparatorPath);
+			comparatorPath = normalizeComparatorPath( comparatorPath );
+			PathMatcher dirMatcher = FileSystems.getDefault().getPathMatcher(GLOB + comparatorPath);
 			if(!dirMatcher.matches(dir)) {
-				//System.out.println("SKIP: dir: "+dir+" ;; comparatorPath: "+comparatorPath);
+				//log.info("SKIP: dir: "+dir+" ;; comparatorPath: "+comparatorPath);
 				return FileVisitResult.SKIP_SUBTREE;
+			}
+			else {
+				//log.info("NO-SKIP: dir: "+dir+" ;; comparatorPath: "+comparatorPath);
 			}
 			
 			/*
@@ -168,7 +203,7 @@ public class FileUtils {
 	
 		@Override
 		public FileVisitResult visitFileFailed(Path file, IOException exc) {
-			System.err.println(exc);
+			log.warn(exc);
 			return FileVisitResult.CONTINUE;
 		}
 	}
