@@ -98,10 +98,18 @@ public class FK extends AbstractConstraint implements Serializable {
 
 	public int compareTo(DBIdentifiable o) {
 		if(! (o instanceof FK)) { return super.compareTo(o); }
+		FK ofk = (FK) o;
 		
-		int fkCompare = fkTable.compareTo(((FK) o).fkTable);
+		int fkCompare = fkTable.compareTo(ofk.fkTable);
 		if(fkCompare==0) { //if same FK Table, compare FK Name
-			return name.compareTo(o.name);
+			fkCompare = getName()!=null?getName().compareTo(o.getName()):o.getName()!=null?1:0;
+			//return name.compareTo(o.name);
+		}
+		if(fkCompare==0) {
+			fkCompare = getUpdateRule()!=null?getUpdateRule().compareTo(ofk.getUpdateRule()):ofk.getUpdateRule()!=null?1:0;
+		}
+		if(fkCompare==0) {
+			fkCompare = getDeleteRule()!=null?getDeleteRule().compareTo(ofk.getDeleteRule()):ofk.getDeleteRule()!=null?1:0;
 		}
 		return fkCompare;
 		// return name.compareTo(o.name);
@@ -201,8 +209,13 @@ public class FK extends AbstractConstraint implements Serializable {
 	public boolean equals(Object obj) {
 		if(obj instanceof FK) {
 			FK fk = (FK) obj;
-			return pkTable.equalsIgnoreCase(fk.pkTable) && fkTable.equalsIgnoreCase(fk.fkTable) 
-					&& Utils.stringListEqualIgnoreCase(pkColumns, fk.pkColumns) && Utils.stringListEqualIgnoreCase(fkColumns, fk.fkColumns);
+			return pkTable.equalsIgnoreCase(fk.pkTable)
+					&& fkTable.equalsIgnoreCase(fk.fkTable) 
+					&& Utils.stringListEqualIgnoreCase(pkColumns, fk.pkColumns)
+					&& Utils.stringListEqualIgnoreCase(fkColumns, fk.fkColumns)
+					&& getUpdateRule()!=null ? getUpdateRule().equals(fk.getUpdateRule()) : (fk.getUpdateRule()!=null?false:true)
+					&& getDeleteRule()!=null ? getDeleteRule().equals(fk.getDeleteRule()) : (fk.getDeleteRule()!=null?false:true)
+					;
 		}
 		return false;
 	}

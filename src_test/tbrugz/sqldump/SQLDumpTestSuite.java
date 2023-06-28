@@ -11,6 +11,7 @@ import tbrugz.sqldiff.apply.DiffApplyTest;
 import tbrugz.sqldiff.datadiff.ResultSetDiffTest;
 import tbrugz.sqldiff.io.DiffIOTest;
 import tbrugz.sqldiff.model.ColumnDiffTest;
+import tbrugz.sqldiff.model.ConstraintDiffTest;
 import tbrugz.sqldiff.model.SchemaDiffTest;
 import tbrugz.sqldiff.test.DiffFromJAXB;
 import tbrugz.sqldiff.test.HSQLDBDiffTest;
@@ -98,6 +99,7 @@ import tbrugz.sqldump.util.StringUtilsTest;
 
 	//diff "unit" tests
 	ColumnDiffTest.class,
+	ConstraintDiffTest.class,
 	CompareTest.class,
 	DiffIOTest.class,
 	DiffValidatorTest.class,
