@@ -74,7 +74,7 @@
 		<dependency org="org.apache.derby" name="derby" rev="10.12.1.1" conf="test->default"/>
 		<dependency org="org.apache.derby" name="derbyclient" rev="10.12.1.1" conf="test->default"/>
 		<dependency org="org.hsqldb" name="hsqldb" rev="2.3.6" conf="test->default"/>
-		<dependency org="com.h2database" name="h2" rev="2.1.214" conf="test->default"/>
+		<dependency org="com.h2database" name="h2" rev="2.2.220" conf="test->default"/>
 		<dependency org="com.googlecode.json-simple" name="json-simple" rev="1.1.1" conf="test->default"/>
 		<!-- jaxb 2.3.0.1: error on java16+ -->
 		<!--
