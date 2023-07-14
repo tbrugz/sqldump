@@ -85,6 +85,7 @@ public class FileUtils {
 	
 		static final boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("win");
 		static final String GLOB = "glob:";
+		static final char WIN_ASTERISK_SUB = '$';
 
 		private final PathMatcher matcher;
 		//private final Path patternParentPath;
@@ -140,10 +141,10 @@ public class FileUtils {
 		
 		static String normalizePath(String path) {
 			if(isWindows) {
-				if(path.indexOf('$')>=0) {
-					throw new IllegalArgumentException("Illegal char <$>");
+				if(path.indexOf(WIN_ASTERISK_SUB)>=0) {
+					throw new IllegalArgumentException("Illegal char <"+WIN_ASTERISK_SUB+">");
 				}
-				path = path.replace('*', '$');
+				path = path.replace('*', WIN_ASTERISK_SUB);
 				path = path.replace('/', '\\');
 				return path;
 			}
@@ -153,7 +154,7 @@ public class FileUtils {
 		static String normalizeComparatorPath(String path) {
 			if(isWindows) {
 				path = path.replace('/', '\\');
-				path = path.replace('$', '*');
+				path = path.replace(WIN_ASTERISK_SUB, '*');
 				path = path.replaceAll(Pattern.quote("\\"), Matcher.quoteReplacement("\\\\"));
 				return path;
 			}
