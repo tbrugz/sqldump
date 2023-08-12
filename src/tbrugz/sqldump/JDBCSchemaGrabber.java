@@ -70,6 +70,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PREFIX = "sqldump.schemagrab";
 	
 	// grabber properties
+	public static final String PROP_SCHEMAGRAB_SCHEMANAMES = Defs.PROP_SCHEMAGRAB_SCHEMANAMES;
 	public static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
 	public static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
 	public static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
@@ -140,7 +141,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	//tables OK for data dump
 	//public List<String> tableNamesForDataDump = new Vector<String>();
 
-	Properties papp = new ParametrizedProperties();
+	Properties papp; // = new ParametrizedProperties();
 	Properties propOriginal;
 	DBMSFeatures feats = null;
 	String grabberId;
@@ -178,8 +179,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		log.info(getIdDesc()+"init JDBCSchemaGrabber...");
 		
 		propOriginal = prop;
-		//papp = prop;
-		papp.putAll(prop);
+		papp = prop;
+		//papp.putAll(prop);
 		
 		//init control vars
 		doSchemaGrabTables = Utils.getPropBool(papp, PROP_SCHEMAGRAB_TABLES, doSchemaGrabTables);
@@ -292,7 +293,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		
 		SchemaModel schemaModel = new SchemaModel();
 		@SuppressWarnings("deprecation")
-		String schemaPattern = Utils.getPropWithDeprecated(papp, Defs.PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
+		String schemaPattern = Utils.getPropWithDeprecated(papp, PROP_SCHEMAGRAB_SCHEMANAMES, Defs.PROP_DUMPSCHEMAPATTERN, null);
 		
 		List<String> schemas = null;
 		if(Utils.isNullOrEmpty(schemaPattern)) {
@@ -318,9 +319,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(schemaPattern!=null) {
 				log.info(getIdDesc()+"setting suggested schema: '"+schemaPattern+"'"
 						+(equalsUsername?" (same as username)":"") );
-				papp.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
+				papp.setProperty(PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 				if(propOriginal!=null) {
-					propOriginal.setProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
+					propOriginal.setProperty(PROP_SCHEMAGRAB_SCHEMANAMES, schemaPattern);
 				}
 			}
 		}
@@ -349,8 +350,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		}
 
 		if(schemaPattern==null) {
-			log.error("schema name undefined (prop '"+Defs.PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting...");
-			if(failonerror) { throw new ProcessingException("schema name undefined (prop '"+Defs.PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting..."); }
+			log.error("schema name undefined (prop '"+PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting...");
+			if(failonerror) { throw new ProcessingException("schema name undefined (prop '"+PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting..."); }
 			return null;
 		}
 		
@@ -1377,7 +1378,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 	/*
 	public String getGrabSchemaNames() {
-		return papp.getProperty(Defs.PROP_SCHEMAGRAB_SCHEMANAMES);
+		return papp.getProperty(PROP_SCHEMAGRAB_SCHEMANAMES);
 	}
 	*/
 }
