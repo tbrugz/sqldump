@@ -13,9 +13,9 @@ public class StmtProcTest {
 		StmtProc proc = new StmtProc();
 		Properties prop = new Properties();
 		prop.setProperty("sqlrun.exec.a.param.1", "x");
-		prop.setProperty("_procid", "a");
+		//prop.setProperty("_procid", "a");
 		proc.setProperties(prop);
-		String replaced = proc.replaceParameters("abc ? cde");
+		String replaced = proc.replaceParameters("abc ? cde", "a");
 		Assert.assertEquals("abc x cde", replaced);
 	}
 }

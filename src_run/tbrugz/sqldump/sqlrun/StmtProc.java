@@ -86,8 +86,9 @@ public class StmtProc extends AbstractFailable implements Executor {
 	Statement batchStmt = null;
 
 	//@SuppressWarnings("deprecation")
-	public void execFile(String filePath, String errorLogKey, boolean split) throws IOException {
-		setupProperties();
+	public void execFile(String filePath, String procId, boolean split) throws IOException {
+		String errorLogKey = Constants.PREFIX_EXEC + procId + SQLRun.SUFFIX_LOGINVALIDSTATEMENTS;
+		setupProperties(procId);
 		//String errorLogFilePath = papp.getProperty(errorLogKey);
 		File file = new File(filePath);
 		//FIXedME: SQLStmtTokenizer not working (on big files?)
@@ -127,7 +128,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 					//replacing ${...} parameters
 					stmtStr = ParametrizedProperties.replaceProps(stmtStr, papp);
 				}
-				urowsTotal += execStatementInternal(stmtStr);
+				urowsTotal += execStatementInternal(stmtStr, procId);
 				countOk++;
 			}
 			catch(SQLException e) {
@@ -214,12 +215,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 		return logerror;
 	}
 	
-	public int execStatement(String stmtStr) throws IOException {
-		setupProperties();
+	public int execStatement(String stmtStr, String procId) throws IOException {
+		setupProperties(procId);
 		try {
 			long initTime = System.currentTimeMillis();
 			
-			int urows = execStatementInternal(stmtStr);
+			int urows = execStatementInternal(stmtStr, procId);
 			urows += closeStatement();
 			
 			long totalTime = System.currentTimeMillis() - initTime;
@@ -236,7 +237,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 	}
 	
-	int execStatementInternal(String stmtStr) throws IOException, SQLException {
+	int execStatementInternal(String stmtStr, String procId) throws IOException, SQLException {
 		if(stmtStr==null) { throw new IllegalArgumentException("null parameter"); }
 		stmtStr = stmtStr.trim();
 		if(stmtStr.equals("")) { throw new IllegalArgumentException("null parameter"); }
@@ -253,7 +254,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				if(batchStmt==null) {
 					batchStmt = conn.createStatement();
 				}
-				batchStmt.addBatch(replaceParameters(stmtStr));
+				batchStmt.addBatch(replaceParameters(stmtStr, procId));
 				batchExecCounter++;
 				
 				if((batchExecCounter%batchSize)==0) {
@@ -272,7 +273,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				if(usePreparedStatement){
 					PreparedStatement stmt = conn.prepareStatement(stmtStr);
 					try {
-						setParameters(stmt);
+						setParameters(stmt, procId);
 						updateCount = stmt.executeUpdate();
 						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					}
@@ -283,7 +284,7 @@ public class StmtProc extends AbstractFailable implements Executor {
 				else {
 					Statement stmt = conn.createStatement();
 					try {
-						updateCount = stmt.executeUpdate(replaceParameters(stmtStr));
+						updateCount = stmt.executeUpdate(replaceParameters(stmtStr, procId));
 						//if(log.isInfoEnabled()) { SQLUtils.logWarningsInfo(stmt.getWarnings(), log); }
 					}
 					finally {
@@ -312,10 +313,10 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 	}
 	
-	void setParameters(PreparedStatement stmt) throws SQLException {
+	void setParameters(PreparedStatement stmt, String procId) throws SQLException {
 		int i=1;
 		while(true) {
-			String key = Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String key = Constants.PREFIX_EXEC+procId+SQLRun.SUFFIX_PARAM+"."+i;
 			String param = papp.getProperty(key);
 			if(param!=null) {
 				log.debug("param #"+i+"/"+key+": "+param);
@@ -328,11 +329,11 @@ public class StmtProc extends AbstractFailable implements Executor {
 
 	static final String questionMarkPattern = Pattern.quote("?");
 	
-	String replaceParameters(String stmt) throws SQLException {
+	String replaceParameters(String stmt, String procId) throws SQLException {
 		int i=1;
 		String retStmt = stmt;
 		while(true) {
-			String key = Constants.PREFIX_EXEC+papp.getProperty(SQLRun.PROP_PROCID)+SQLRun.SUFFIX_PARAM+"."+i;
+			String key = Constants.PREFIX_EXEC+procId+SQLRun.SUFFIX_PARAM+"."+i;
 			String param = papp.getProperty(key);
 			if(param!=null) {
 				log.debug("param #"+i+"/"+key+": "+param);
@@ -343,12 +344,12 @@ public class StmtProc extends AbstractFailable implements Executor {
 		}
 	}
 
-	void setupProperties() {
+	void setupProperties(String execId) {
 		if(papp==null) {
 			log.warn("null properties!");
 			return;
 		}
-		String execId = papp.getProperty(SQLRun.PROP_PROCID);
+		//String execId = papp.getProperty(SQLRun.PROP_PROCID);
 		String prefix = Constants.PREFIX_EXEC + execId + ".";
 		useBatchUpdate = Utils.getPropBool(papp, prefix + Constants.SUFFIX_BATCH_MODE, DEFAULT_USE_BATCH_UPDATE);
 		batchSize = Utils.getPropLong(papp, prefix + Constants.SUFFIX_BATCH_SIZE, DEFAULT_BATCH_SIZE);

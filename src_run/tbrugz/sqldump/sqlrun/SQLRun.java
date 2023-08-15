@@ -116,7 +116,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	List<String> allAuxSuffixes = new ArrayList<String>();
 	
 	//other/reserved props
-	static final String PROP_PROCID = "_procid";
+	//static final String PROP_PROCID = "_procid"; //XXX: remove
 	
 	public enum ProcType {
 		EXEC, ASSERT;
@@ -301,7 +301,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 				log.warn("no exec suffix for key '"+key+"' [id="+procId+",action="+action+"]");
 				return false;
 			}
-			papp.setProperty(PROP_PROCID, procId);
+			//papp.setProperty(PROP_PROCID, procId);
 			
 			boolean splitBySemicolon = Utils.getPropBool(papp, Constants.PREFIX_EXEC+procId+SUFFIX_SPLIT, true);
 			
@@ -309,7 +309,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			if(key.endsWith(SUFFIX_FILE)) {
 				try {
 					setExecProperties(srproc, papp, execFailOnError);
-					srproc.execFile(execValue, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+					srproc.execFile(execValue, procId, splitBySemicolon);
 				}
 				catch(FileNotFoundException e) {
 					log.warn("file not found: "+e);
@@ -347,7 +347,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 					if(files!=null && files.size()>0) {
 						for(String file: files) {
 							if((fileCount>0) && (commitStrategy==CommitStrategy.FILE)) { doCommit(); }
-							srproc.execFile(file, Constants.PREFIX_EXEC+procId+SUFFIX_LOGINVALIDSTATEMENTS, splitBySemicolon);
+							srproc.execFile(file, procId, splitBySemicolon);
 							fileCount++;
 						}
 						log.info(fileCount + " files processed");
@@ -365,7 +365,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			else if(key.endsWith(SUFFIX_STATEMENT)) {
 				setExecProperties(srproc, papp, execFailOnError);
 				@SuppressWarnings("unused")
-				int urows = srproc.execStatement(execValue);
+				int urows = srproc.execStatement(execValue, procId);
 			}
 			// .import
 			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
@@ -455,7 +455,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			log.warn("no assert suffix for key '"+key+"' [id="+procId+",action="+action+"]");
 			return false;
 		}
-		papp.setProperty(PROP_PROCID, procId);
+		//papp.setProperty(PROP_PROCID, procId);
 		
 		String sql = null;
 		
