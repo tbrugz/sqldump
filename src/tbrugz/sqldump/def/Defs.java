@@ -11,7 +11,7 @@ public class Defs {
 	public static final String PROP_SCHEMAGRAB_SCHEMANAMES = "sqldump.schemagrab.schemas";
 	
 	// program-defined 'special' properties
-	public static final String PROP_START_TIME_MILLIS = "sqlx.startTimeMillis";
+	//public static final String PROP_START_TIME_MILLIS = "sqlx.startTimeMillis";
 	
 	static final String DBMS_SPECIFIC_RESOURCE = "dbms-specific.properties";
 	

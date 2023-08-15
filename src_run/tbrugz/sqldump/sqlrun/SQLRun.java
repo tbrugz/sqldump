@@ -26,7 +26,6 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.datadump.DataDumpUtils;
 import tbrugz.sqldump.dbmodel.Column.ColTypeUtil;
 import tbrugz.sqldump.def.DBMSResources;
-import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.sqlrun.def.CommitStrategy;
 import tbrugz.sqldump.sqlrun.def.Constants;
@@ -230,7 +229,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 	
 	void doRunIds(Map<String, ProcType> allIds) throws IOException, SQLException {
 		long initTime = System.currentTimeMillis();
-		papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
+		//papp.setProperty(Defs.PROP_START_TIME_MILLIS, String.valueOf(initTime));
 		
 		if(jmxCreateMBean) {
 			sqlrmbean = new SQLR(allIds.size(), conn.getMetaData());
