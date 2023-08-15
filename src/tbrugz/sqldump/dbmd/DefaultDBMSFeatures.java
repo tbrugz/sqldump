@@ -34,6 +34,11 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 	
 	@Override
+	public String getDefaultSchemaName() {
+		return null;
+	}
+
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern,
 			Connection conn) throws SQLException {
 		log.debug("grabDBObjects: not implemented");

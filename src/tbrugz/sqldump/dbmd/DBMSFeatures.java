@@ -22,6 +22,7 @@ import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
 
 public interface DBMSFeatures {
+
 	void procProperties(Properties prop); //XXX: really needed?
 	void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException; //XXX: remove this too?
 	DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException;
@@ -152,5 +153,7 @@ public interface DBMSFeatures {
 	String sqlIsNullFunction(String columnName);
 	
 	boolean sqlStatementsAreTrimmed();
+	
+	String getDefaultSchemaName();
 	
 }

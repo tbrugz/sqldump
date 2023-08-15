@@ -49,7 +49,6 @@ import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ModelMetaData;
-import tbrugz.sqldump.util.ParametrizedProperties;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -125,9 +124,9 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	
 	static final String[] DEFAULT_SCHEMA_NAMES = {
 		"public",  // postgresql, h2, hsqldb
-		"APP",     // derby
+		//"APP",     // derby
 		"Default", // neo4j
-		"dbo",     // sqlserver
+		//"dbo",     // sqlserver
 		"main",    // duckdb
 		"",        // XXX 'schema-less' databases - which ones?
 	};
@@ -299,23 +298,36 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 		if(Utils.isNullOrEmpty(schemaPattern)) {
 			schemas = SQLUtils.getSchemaNames(dbmd);
 			log.info(getIdDesc()+"schemaPattern not defined. schemas available: "+schemas);
-			schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, papp.getProperty(SQLDump.CONN_PROPS_PREFIX + ConnectionUtil.SUFFIX_USER));
 			boolean equalsUsername = false;
-			if(schemaPattern!=null) { equalsUsername = true; }
 			
-			/*
-			int counter = 0;
-			while(schemaPattern==null && DEFAULT_SCHEMA_NAMES.length>counter) {
-				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[counter]);
-				if(schemaPattern!=null) { break; }
-				counter++;
+			if(schemaPattern==null) {
+				// works for Oracle, Derby, ...
+				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, dbmd.getUserName());
+				if(schemaPattern!=null) {
+					equalsUsername = true;
+					log.info(getIdDesc()+"schemaPattern set from username ["+schemaPattern+"]");
+				}
 			}
-			*/
-			
-			for(int i=0;Utils.isNullOrEmpty(schemaPattern) && i<DEFAULT_SCHEMA_NAMES.length;i++) {
-				schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[i]);
+
+			if(schemaPattern==null) {
+				String defaultSchemaName = feats.getDefaultSchemaName();
+				if(defaultSchemaName!=null) {
+					schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, defaultSchemaName);
+					if(schemaPattern!=null) {
+						log.info(getIdDesc()+"schemaPattern set from default schema name ["+schemaPattern+"]");
+					}
+				}
 			}
-			
+
+			if(schemaPattern==null) {
+				for(int i=0;Utils.isNullOrEmpty(schemaPattern) && i<DEFAULT_SCHEMA_NAMES.length;i++) {
+					schemaPattern = Utils.getEqualIgnoreCaseFromList(schemas, DEFAULT_SCHEMA_NAMES[i]);
+				}
+				if(schemaPattern!=null) {
+					log.info(getIdDesc()+"schemaPattern set from global DEFAULT_SCHEMA_NAMES ["+schemaPattern+"]");
+				}
+			}
+
 			if(schemaPattern!=null) {
 				log.info(getIdDesc()+"setting suggested schema: '"+schemaPattern+"'"
 						+(equalsUsername?" (same as username)":"") );

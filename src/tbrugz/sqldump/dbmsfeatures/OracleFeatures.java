@@ -1139,4 +1139,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return false;
 	}
 
+	@Override
+	public String getDefaultSchemaName() {
+		return null;
+	}
+
 }

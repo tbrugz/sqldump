@@ -443,5 +443,10 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	public boolean sqlStatementsAreTrimmed() {
 		return true;
 	}
+	
+	@Override
+	public String getDefaultSchemaName() {
+		return "APP";
+	}
 
 }

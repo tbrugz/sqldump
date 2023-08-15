@@ -31,5 +31,10 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 			(tableNamePattern!=null?"and p.name = '"+tableNamePattern+"' ":"") +
 			(triggerNamePattern!=null?"and t.name = '"+triggerNamePattern+"' ":"");
 	}
-	
+
+	@Override
+	public String getDefaultSchemaName() {
+		return "dbo";
+	}
+
 }
