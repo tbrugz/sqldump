@@ -50,6 +50,12 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	private static final Log log = LogFactory.getLog(OracleFeatures.class);
 
 	public static final String PROP_GRAB_EXECUTABLE_PRIVS = PREFIX_DBMS+".oracle.grab-executble-privileges";
+
+	/**
+	 * Grab objects' metadata based on 'DBA_%' tables.
+	 * 
+	 * Role 'SELECT_CATALOG_ROLE' may be needed to allow select on DBA metadata objects
+	 */
 	public static final String PROP_USE_DBA_METAOBJECTS = PREFIX_DBMS+".oracle.use-dba-metaobjects";
 	
 	/*

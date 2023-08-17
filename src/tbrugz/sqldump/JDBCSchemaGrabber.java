@@ -73,7 +73,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	public static final String PROP_SCHEMAGRAB_TABLES = PREFIX+".tables";
 	public static final String PROP_SCHEMAGRAB_PKS = PREFIX+".pks";
 	public static final String PROP_SCHEMAGRAB_FKS = PREFIX+".fks";
-	static final String PROP_SCHEMAGRAB_EXPORTEDFKS = PREFIX+".exportedfks";
+	public static final String PROP_SCHEMAGRAB_EXPORTEDFKS = PREFIX+".exportedfks";
 	@Deprecated
 	static final String PROP_DO_SCHEMADUMP_PKS = "sqldump.doschemadump.pks";
 	@Deprecated
@@ -84,7 +84,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_DO_SCHEMADUMP_GRANTS = "sqldump.doschemadump.grants";
 	public static final String PROP_SCHEMAGRAB_GRANTS = PREFIX+".grants";
 	static final String PROP_SCHEMAGRAB_ALLGRANTS = PREFIX+".allgrants"; //XXX: xperimental
-	static final String PROP_SCHEMAGRAB_INDEXES = PREFIX+".indexes";
+	public static final String PROP_SCHEMAGRAB_INDEXES = PREFIX+".indexes";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_INDEXES = "sqldump.doschemadump.indexes";
 	public static final String PROP_SCHEMAGRAB_PROCEDURESANDFUNCTIONS = PREFIX+".proceduresandfunctions";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_IGNORETABLESWITHZEROCOLUMNS = "sqldump.doschemadump.ignoretableswithzerocolumns";
@@ -92,10 +92,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	static final String PROP_SCHEMAGRAB_SETCONNREADONLY = PREFIX+".setconnectionreadonly";
 	static final String PROP_SCHEMAGRAB_METADATA = PREFIX+".metadata";
 	
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivegrabbasedonfks";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivegrabbasedonfks.deep";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL = PREFIX+".recursivegrabbasedonfks.maxlevel";
-	static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS = PREFIX+".recursivegrabbasedonfks.exportedfks";
+	public static final String PROP_SCHEMAGRAB_RECURSIVEDUMP = PREFIX+".recursivegrabbasedonfks";
+	public static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_DEEP = PREFIX+".recursivegrabbasedonfks.deep";
+	public static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_MAXLEVEL = PREFIX+".recursivegrabbasedonfks.maxlevel";
+	public static final String PROP_SCHEMAGRAB_RECURSIVEDUMP_EXPORTEDFKS = PREFIX+".recursivegrabbasedonfks.exportedfks";
 	
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP = "sqldump.doschemadump.recursivedumpbasedonfks";
 	@Deprecated static final String PROP_DO_SCHEMADUMP_RECURSIVEDUMP_DEEP = "sqldump.doschemadump.recursivedumpbasedonfks.deep";
