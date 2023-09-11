@@ -64,7 +64,7 @@ public class SimilarityCalculator {
 		double ret = 0;
 		
 		//XXX name similarity (not equals)? type similarity?
-		if(c1.getOrdinalPosition()!=0 && (c1.getOrdinalPosition()==c2.getOrdinalPosition())) { ret += 0.4; }
+		if(c1.getOrdinalPosition()!=null && c2.getOrdinalPosition()!=null && c1.getOrdinalPosition()!=0 && (c1.getOrdinalPosition()==c2.getOrdinalPosition())) { ret += 0.4; }
 		if(c1.getName().equals(c2.getName())) { ret += 0.3; }
 		if(c1.getType().equals(c2.getType())) { ret += 0.2; }
 		if((c1.getColumnSize()==null && c2.getColumnSize()==null)
