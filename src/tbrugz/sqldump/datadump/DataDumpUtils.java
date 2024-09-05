@@ -253,6 +253,14 @@ public class DataDumpUtils {
 		return escape?xmlEscapeText(getString(elem)):getString(elem);
 	}
 	
+	public static String getFormattedXMLValue(Object elem, String nullValue, boolean escape) {
+		if(elem == null) {
+			return nullValue;
+		}
+
+		return escape?xmlEscapeText(getString(elem)):getString(elem);
+	}
+
 	/*
 	 * see: http://stackoverflow.com/a/10035382/616413
 	 * http://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references#Predefined_entities_in_XML

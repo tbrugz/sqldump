@@ -48,11 +48,13 @@ import tbrugz.sqldump.util.Utils;
 public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSyntaxBuilder {
 
 	static final String PROP_DATADUMP_FFC_COLUMNDELIMITER = "sqldump.datadump.ffc.columndelimiter";
-	static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
+	//static final String PROP_DATADUMP_FFC_LINEGROUPSIZE = "sqldump.datadump.ffc.linegroupsize";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMES = "sqldump.datadump.ffc.showcolnames";
 	static final String PROP_DATADUMP_FFC_SHOWCOLNAMESLINES = "sqldump.datadump.ffc.showcolnameslines";
 	static final String PROP_DATADUMP_FFC_SPACES_FOR_EACH_TAB = "sqldump.datadump.ffc.spaces-for-each-tab";
 	static final String PROP_DATADUMP_FFC_ALIGNED_TAB_REPLACING = "sqldump.datadump.ffc.aligned-tab-replacing";
+
+	static final String SUFFIX_LINEGROUPSIZE = "linegroupsize";
 
 	static final String FFC_SYNTAX_ID = "ffc";
 	
@@ -61,7 +63,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	//static final String DEFAULT_NULL_VALUE = "";
 	static final Log log = LogFactory.getLog(FFCDataDump.class);
 	
-	static final long DEFAULT_LINEGROUPSIZE = 20;
+	static final int DEFAULT_LINEGROUPSIZE = 20;
 	
 	static final String recordDemimiter = "\n";
 	
@@ -72,12 +74,21 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	Integer spacesForEachTab = null;
 	boolean alignedTabReplacing = true;
 	
+	String fullPrefix() {
+		return DEFAULT_DATADUMP_PREFIX + getSyntaxId() + ".";
+	}
+
 	@Override
 	public void procProperties(Properties prop) {
 		procStandardProperties(prop);
-		Long propLineGroupSize = Utils.getPropLong(prop, PROP_DATADUMP_FFC_LINEGROUPSIZE, DEFAULT_LINEGROUPSIZE);
+		String propLineGroupSizeKey = fullPrefix() + SUFFIX_LINEGROUPSIZE;
+		Long propLineGroupSize = Utils.getPropLong(prop, propLineGroupSizeKey);
 		if(propLineGroupSize!=null && propLineGroupSize>0) {
 			lineGroupSize = (int)(long) propLineGroupSize;
+			log.debug("syntax '"+getSyntaxId()+"': prop '"+propLineGroupSizeKey+"' = "+lineGroupSize);
+		}
+		else {
+			lineGroupSize = DEFAULT_LINEGROUPSIZE;
 		}
 		String propColDelim = prop.getProperty(PROP_DATADUMP_FFC_COLUMNDELIMITER);
 		if(propColDelim!=null) {
