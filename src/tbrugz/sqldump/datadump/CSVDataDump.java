@@ -47,7 +47,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	
 	static final Log log = LogFactory.getLog(CSVDataDump.class);
 	
-	static final String PREFIX = "sqldump.datadump.";
+	//static final String PREFIX = "sqldump.datadump.";
 
 	/*
 	static final String PROP_DATADUMP_RECORDDELIMITER = "sqldump.datadump.csv.recorddelimiter";
@@ -97,9 +97,11 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		postProcProperties();
 	}
 
+	/*
 	String fullPrefix() {
 		return PREFIX + getSyntaxId() + ".";
 	}
+	*/
 	
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {

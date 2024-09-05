@@ -45,9 +45,11 @@ public class LinearTsvSyntax extends AbstractDumpSyntax implements Cloneable, Du
 		return LINEARTSV_MIMETYPE;
 	}
 
+	/*
 	String fullPrefix() {
 		return DEFAULT_DATADUMP_PREFIX + getSyntaxId() + ".";
 	}
+	*/
 	
 	public static String escape(String s) {
 		StringBuilder sb = new StringBuilder();

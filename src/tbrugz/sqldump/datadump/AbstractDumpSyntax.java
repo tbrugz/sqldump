@@ -19,6 +19,10 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	//ResultSetMetaData md;
 	protected List<String> pkCols;
 	
+	public String fullPrefix() {
+		return DEFAULT_DATADUMP_PREFIX + getSyntaxId() + ".";
+	}
+
 	@Override
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.schemaName = schema;

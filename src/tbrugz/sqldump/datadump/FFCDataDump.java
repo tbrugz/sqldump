@@ -74,9 +74,11 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	Integer spacesForEachTab = null;
 	boolean alignedTabReplacing = true;
 	
+	/*
 	String fullPrefix() {
 		return DEFAULT_DATADUMP_PREFIX + getSyntaxId() + ".";
 	}
+	*/
 
 	@Override
 	public void procProperties(Properties prop) {
