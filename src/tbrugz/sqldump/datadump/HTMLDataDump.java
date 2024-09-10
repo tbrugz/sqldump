@@ -136,6 +136,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		int onColsColCount = 0;
 		String onrows = prop.getProperty(PROP_PIVOT_ONROWS);
 		String oncols = prop.getProperty(PROP_PIVOT_ONCOLS);
+		//log.info("onrows="+onrows+" ; oncols="+oncols);
 		//if(onrows!=null || oncols!=null) {
 		if(onrows!=null) {
 			onRowsColCount = onrows.split(",").length;
@@ -151,6 +152,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 			colSepPattern = Pattern.quote(colSep);
 			colValSepPattern = Pattern.quote(colValSep);
 		}
+		//log.info("pivotInfo: isPivotResultSet()="+pivotInfo.isPivotResultSet());
 	}
 	
 	/*
@@ -233,18 +235,20 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		//XXX: add thead?
 		
 		addTableHeaderRows(sb);
-		sb.append("\n");
+		//sb.append("\n");
 		
 		//XXX: add tbody?
 		out(sb.toString(), fos);
 	}
 	
 	protected void addTableHeaderRows(StringBuilder sb) {
-		//System.out.println("[1:beforeguess] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+		//log.info("[1:beforeguess] onRowsColCount="+pivotInfo.onRowsColCount+" ; onColsColCount="+pivotInfo.onColsColCount);
 		boolean dumpedAsLeast1row = false;
+		//log.info("addTableHeaderRows0: isPivotResultSet()="+pivotInfo.isPivotResultSet());
+		pivotInfo = DataDumpUtils.guessPivotCols(finalColNames, colSepPattern, colValSepPattern, pivotInfo); //guess cols/rows, since measures may be present or not...
 		if(pivotInfo.isPivotResultSet()) {
-			pivotInfo = DataDumpUtils.guessPivotCols(finalColNames, colSepPattern, colValSepPattern); //guess cols/rows, since measures may be present or not...
-			//System.out.println("[2:afterguess ] onRowsColCount="+onRowsColCount+" ; onColsColCount="+onColsColCount);
+			//log.info("addTableHeaderRows1: isPivotResultSet()="+pivotInfo.isPivotResultSet());
+			//log.info("[2:afterguess ] onRowsColCount="+pivotInfo.onRowsColCount+" ; onColsColCount="+pivotInfo.onColsColCount);
 			for(int cc=0;cc<pivotInfo.onColsColCount;cc++) {
 				StringBuilder sbrow = new StringBuilder();
 				String colname = null;
@@ -311,7 +315,7 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 	}
 	
 	protected void appendTableHeaderRow(StringBuilder sb) {
-		sb.append(padd()+"\t<tr>");
+		sb.append(nl()+"\t<tr>");
 		for(int i=0;i<finalColNames.size();i++) {
 			sb.append("<th>"+finalColNames.get(i)+"</th>");
 		}
@@ -420,8 +424,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 						+">"+ value +"</td>");
 			}
 		}
-		sb.append("</tr>");
-		out(sb.toString()+"\n", fos);
+		sb.append("</tr>\n");
+		out(sb.toString(), fos);
 	}
 	
 	protected void appendBreaksIfNeeded(List<Object> vals, String clazz, StringBuilder sb) {

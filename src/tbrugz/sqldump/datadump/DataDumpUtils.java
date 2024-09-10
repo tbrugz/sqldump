@@ -620,10 +620,10 @@ public class DataDumpUtils {
 	public static PivotInfo guessPivotCols(List<String> colNames) {
 		String colSepPattern = Pattern.quote(PivotResultSet.COLS_SEP);
 		String colValSepPattern = Pattern.quote(PivotResultSet.COLVAL_SEP);
-		return guessPivotCols(colNames, colSepPattern, colValSepPattern);
+		return guessPivotCols(colNames, colSepPattern, colValSepPattern, null);
 	}
 	
-	public static PivotInfo guessPivotCols(List<String> colNames, String colSepPattern, String colValSepPattern) {
+	public static PivotInfo guessPivotCols(List<String> colNames, String colSepPattern, String colValSepPattern, PivotInfo originalPivotInfo) {
 		int onColsColCount = 0;
 		int onRowsColCount = 0;
 		for(int i=0;i<colNames.size();i++) {
@@ -648,10 +648,10 @@ public class DataDumpUtils {
 			}
 		}
 		
-		/*if(onColsColCount==0 && onRowsColCount==0) {
+		if(onColsColCount==0 && onRowsColCount==0 && originalPivotInfo!=null) {
 			// when onColsColCount==0, "guess" is not effective
-			return null;
-		}*/
+			return originalPivotInfo;
+		}
 		return new PivotInfo(onColsColCount, onRowsColCount);
 	}
 	
