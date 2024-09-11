@@ -146,12 +146,10 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		}
 		pivotInfo = new PivotInfo(onColsColCount, onRowsColCount);
 		//}
-		if(pivotInfo.isPivotResultSet()) {
-			colSep = prop.getProperty(PROP_PIVOT_COLSEP, PivotResultSet.COLS_SEP);
-			colValSep = prop.getProperty(PROP_PIVOT_COLVALSEP, PivotResultSet.COLVAL_SEP);
-			colSepPattern = Pattern.quote(colSep);
-			colValSepPattern = Pattern.quote(colValSep);
-		}
+		colSep = prop.getProperty(PROP_PIVOT_COLSEP, PivotResultSet.COLS_SEP);
+		colValSep = prop.getProperty(PROP_PIVOT_COLVALSEP, PivotResultSet.COLVAL_SEP);
+		colSepPattern = Pattern.quote(colSep);
+		colValSepPattern = Pattern.quote(colValSep);
 		//log.info("pivotInfo: isPivotResultSet()="+pivotInfo.isPivotResultSet());
 	}
 	
@@ -516,7 +514,8 @@ public class HTMLDataDump extends XMLDataDump implements DumpSyntaxBuilder, Hier
 		dd.append = this.append;
 		dd.colSep = this.colSep;
 		dd.colSepPattern = this.colSepPattern;
-		dd.colValSep = this.colValSepPattern;
+		dd.colValSep = this.colValSep;
+		dd.colValSepPattern = this.colValSepPattern;
 		dd.dumpCaptionElement = this.dumpCaptionElement;
 		dd.dumpColElement = this.dumpColElement;
 		dd.dumpStyleNumericAlignRight = this.dumpStyleNumericAlignRight;

@@ -339,7 +339,7 @@
 		</delete-->
 	</target>
 
-	<target name="mvn-modules-install">
+	<target name="mvn-modules-install" description="build and install maven modules">
 		<exec executable="mvn" failonerror="true">
 			<arg line="-f sqlmigrate/ clean install"/>
 		</exec>
