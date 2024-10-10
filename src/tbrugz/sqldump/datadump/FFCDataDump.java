@@ -181,6 +181,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		//	headersColsMaxLenght.add(lsColNames.get(i).length());
 		//}
 		clearBuffer();
+		//log.info("lsColNames: "+lsColNames+" ; lsColTypes: "+lsColTypes+" ; leftAlignField: "+leftAlignField);
 		//colsMaxLenght.addAll(headersColsMaxLenght);
 	}
 	
