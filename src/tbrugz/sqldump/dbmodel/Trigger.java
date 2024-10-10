@@ -1,5 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.util.StringUtils;
 
 public class Trigger extends DBObject {
@@ -72,7 +73,7 @@ public class Trigger extends DBObject {
 	
 	/* ignoring whitespaces */
 	@Override
-	public boolean equals4Diff(DBIdentifiable obj) {
+	public boolean equals4Diff(DBIdentifiable obj, WhitespaceIgnoreType wsIgnore) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -83,7 +84,7 @@ public class Trigger extends DBObject {
 		if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore))
 		//} else if (!body.equals(other.body))
 			return false;
 		if (description == null) {

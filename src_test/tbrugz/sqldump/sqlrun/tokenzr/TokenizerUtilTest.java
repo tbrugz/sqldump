@@ -223,10 +223,44 @@ public class TokenizerUtilTest {
 	@Test(expected=RuntimeException.class)
 	public void testNamedAndPositionalParameters() {
 		String test = null;
-		List<QueryParameter> qpl = null;
+		//List<QueryParameter> qpl = null;
 
 		test = "select :abc and ?";
 		TokenizerUtil.getNamedParameters(test);
 	}
 
+	@Test
+	public void testRemoveWhitespace() {
+		String test = null;
+		String ret = null;
+
+		test = "select abc from def";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, test);
+
+		test = "select abc   from def";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select abc from def");
+
+		test = "select 'ab  c'  from def";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select 'ab  c' from def");
+
+		test = "select 'ab  c' \tfrom \"de  f\"";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+
+		test = "select 'ab  c' \tfrom \"de  f\"  ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+
+		test = " \t select 'ab  c' \tfrom \"de  f\"  ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+
+		test = " \t select 'ab  c' \n from \"de  f\"  ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(ret, "select 'ab  c'\nfrom \"de  f\"");
+	}
+	
 }

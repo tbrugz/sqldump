@@ -66,6 +66,7 @@ public class SQLDiff implements Executor {
 	public static final String PROP_SOURCE = PROP_PREFIX+"."+ID_SOURCE;
 	public static final String PROP_TARGET = PROP_PREFIX+"."+ID_TARGET;
 	public static final String PROP_TYPES_TO_DIFF = PROP_PREFIX+".typestodiff";
+	public static final String PROP_WHITESPACE_DIFF = PROP_PREFIX+".whitespace-diff"; //NONE, EOL, SOL, SOL+EOL, ALL (intra)
 	
 	//schema input/output props
 	static final String PREFIX_INPUT = PROP_PREFIX+".input";
@@ -458,6 +459,7 @@ public class SQLDiff implements Executor {
 		log.info("diffing... [dialect="+dialect+"]");
 		SchemaDiffer differ = new SchemaDiffer();
 		differ.setTypesForDiff(prop.getProperty(PROP_TYPES_TO_DIFF));
+		differ.setWSIgnoreType(prop.getProperty(PROP_WHITESPACE_DIFF));
 		return differ.diffSchemas(fromSM, toSM);
 	}
 	

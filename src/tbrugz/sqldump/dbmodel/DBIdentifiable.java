@@ -2,6 +2,8 @@ package tbrugz.sqldump.dbmodel;
 
 import java.util.Collection;
 
+import tbrugz.sqldiff.WhitespaceIgnoreType;
+
 public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparable<DBIdentifiable> {
 	String schemaName;
 	String name;
@@ -169,7 +171,7 @@ public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparabl
 		return true;
 	}
 	
-	public boolean equals4Diff(DBIdentifiable obj) {
+	public boolean equals4Diff(DBIdentifiable obj, WhitespaceIgnoreType wsIgnore) {
 		return equals(obj);
 	}
 	

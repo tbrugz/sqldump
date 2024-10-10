@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
@@ -146,11 +147,11 @@ public class View extends DBObject implements Relation {
 
 	/* ignoring whitespaces */
 	@Override
-	public boolean equals4Diff(DBIdentifiable obj) {
+	public boolean equals4Diff(DBIdentifiable obj, WhitespaceIgnoreType wsIgnore) {
 		if(obj instanceof View) {
 			View v = (View) obj;
 			//return name.equals(v.name) && query.equals(v.query);
-			return name.equals(v.name) && StringUtils.equalsIgnoreWhitespacesEachLine(query, v.query);
+			return name.equals(v.name) && StringUtils.equalsIgnoreWhitespacesEachLine(query, v.query, wsIgnore);
 		}
 		return false;
 	}

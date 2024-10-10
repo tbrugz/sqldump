@@ -28,11 +28,13 @@ import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 
 public class SchemaDiffer {
+
 	static final Log log = LogFactory.getLog(SchemaDiffer.class);
 
 	static boolean mayReplaceDbId = true;
 	
 	Set<DBObjectType> doDiffTypes = null;
+	WhitespaceIgnoreType wsIgnore = WhitespaceIgnoreType.EOL;
 	
 	static final TableType[] diffableTableTypesArray = {
 		TableType.BASE_TABLE, TableType.EXTERNAL_TABLE, TableType.FOREIGN_TABLE,
@@ -274,7 +276,7 @@ public class SchemaDiffer {
 			DBIdentifiable cNew = DiffUtil.getDBIdentifiableByTypeSchemaAndName(listNew, DBIdentifiable.getType(cOrig), cOrig.getSchemaName(), cOrig.getName());
 			if(cNew!=null) {
 				newDBObjectsThatExistsInOrigModel.add(cNew);
-				if(!cOrig.equals4Diff(cNew)) {
+				if(!cOrig.equals4Diff(cNew, wsIgnore)) {
 					if(!cOrig.isDumpable()) {
 						log.debug("original/new object not dumpable: "+cOrig);
 						continue;
@@ -349,6 +351,15 @@ public class SchemaDiffer {
 				log.warn("unknown object type: "+s);
 			}
 		}
+	}
+	
+	public void setWSIgnoreType(String wsIgnoreStr) {
+		setWSIgnoreType(WhitespaceIgnoreType.getType(wsIgnoreStr));
+	}
+	
+	public void setWSIgnoreType(WhitespaceIgnoreType wsIgnore) {
+		this.wsIgnore = wsIgnore;
+		log.info("whitespaceIgnore: "+wsIgnore);
 	}
 
 }

@@ -5,8 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import tbrugz.sqldiff.WhitespaceIgnoreType;
+import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil;
 
 public class StringUtils {
 
@@ -132,7 +136,41 @@ public class StringUtils {
 		}
 		return true;
 	}
+
+	public static boolean equalsIgnoreWhitespacesEachLine(String s1, String s2, WhitespaceIgnoreType wsIgnore) {
+		if(s1==null && s2==null) { return true; }
+		if(s1==null || s2==null) { return false; }
+		
+		List<String> s1a = stringToLines(s1, wsIgnore);
+		List<String> s2a = stringToLines(s2, wsIgnore);
+		
+		if(s1a.size() != s2a.size()) { return false; }
+		
+		for(int i=0;i<s1a.size();i++) {
+			if(! s1a.get(i).equals(s2a.get(i))) { return false; }
+		}
+		return true;
+	}
+
+	static final Pattern PTRN_LEADING_WHITESPACE = Pattern.compile("^\\s+", Pattern.MULTILINE);
+	static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
 	
+	static List<String> stringToLines(String s, WhitespaceIgnoreType wsIgnore) {
+		if(s==null) { s = ""; }
+		if(wsIgnore.stripInside()) {
+			s = TokenizerUtil.removeMultipleWhitespaces(s);
+		}
+		else {
+			if(wsIgnore.stripSol()) {
+				s = PTRN_LEADING_WHITESPACE.matcher(s).replaceAll("");
+			}
+			if(wsIgnore.stripEol()) {
+				s = PTRN_TRAILING_WHITESPACE.matcher(s).replaceAll("");
+			}
+		}
+		return Arrays.asList(s.split("\n"));
+	}
+
 	// http://stackoverflow.com/a/1102916/616413
 	/* public static boolean isNumeric(String str) {
 		try {

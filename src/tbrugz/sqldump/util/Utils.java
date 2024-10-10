@@ -748,6 +748,11 @@ public class Utils {
 	
 	static Set<String> deprecatedKeysWarned = new HashSet<String>();
 	
+	public static String getProp(Properties p, String key, String defaultValue) {
+		String ret = p.getProperty(key, defaultValue);
+		return ret;
+	}
+	
 	public static String getPropWithDeprecated(Properties p, String key, String deprecatedKey, String defaultValue) {
 		String ret = defaultValue;
 		if(Utils.propertyExists(p, deprecatedKey)) {

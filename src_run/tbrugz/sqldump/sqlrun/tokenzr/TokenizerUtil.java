@@ -202,6 +202,86 @@ public class TokenizerUtil {
 		return ret;
 	}
 
+	public static String removeMultipleWhitespaces(String sql) {
+		if(sql==null) { return null; }
+		TknState state = TknState.DEFAULT;
+		StringBuilder ret = new StringBuilder();
+		//int countPositionalParameters = 0;
+
+		int len = sql.length();
+		boolean lastWasWS = false;
+		for(int i=0;i<len;i++) {
+			char c = sql.charAt(i);
+			boolean isLastChar = (i==len-1);
+			boolean thisIsWS = c==' ' || c == '\t';
+			switch (state) {
+				case DEFAULT: {
+					if(c=='\'') {
+						state = TknState.STRING;
+					}
+					else if(c=='"') {
+						state = TknState.DQUOTE;
+					}
+					else if(c=='\n' || isLastChar) {
+						// removes trailing whitespaces
+						for(int j=ret.length()-1;true;j--) {
+							char cc = ret.charAt(j);
+							if(cc==' ' || cc == '\t') {
+								ret.deleteCharAt(j);
+							}
+							else { break; }
+						}
+					}
+					if(thisIsWS && (lastWasWS || i==0)) {}
+					else { ret.append(c); }
+					//lastWasWS = thisIsWS;
+					break;
+				}
+				case STRING: {
+					if(c=='\'') {
+						state = TknState.DEFAULT;
+					}
+					ret.append(c);
+					break;
+				}
+				case DQUOTE: {
+					if(c=='"') {
+						state = TknState.DEFAULT;
+					}
+					ret.append(c);
+					break;
+				}
+				case COMM_LINE: {
+					if(c=='\n') {
+						state = TknState.DEFAULT;
+					}
+					ret.append(c);
+					break;
+				}
+				case COMM_BLOCK: {
+					if(c=='*' && !isLastChar) {
+						char c2 = sql.charAt(i+1);
+						if(c2=='/') {
+							state = TknState.DEFAULT;
+							i++; // skips next '/' char
+						}
+						ret.append(c);
+						ret.append(c2);
+					}
+					else {
+						ret.append(c);
+					}
+					break;
+				}
+			}
+			//lastWasWS = thisIsWS;
+			//lastWasWS = c==' ' || c == '\t' || c == '\n';
+			lastWasWS = thisIsWS || c == '\n';;
+		}
+
+		return ret.toString();
+	}
+	
 	public static String replaceNamedParameters(String sql, List<QueryParameter> pars) {
 		if(sql==null) { return null; }
 		StringBuilder sb = new StringBuilder();

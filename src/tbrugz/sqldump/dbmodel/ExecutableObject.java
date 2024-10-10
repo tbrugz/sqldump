@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmodel;
 import java.util.ArrayList;
 import java.util.List;
 
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.StringUtils;
 
@@ -134,7 +135,7 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 
 	/* ignoring whitespaces */
 	@Override
-	public boolean equals4Diff(DBIdentifiable obj) {
+	public boolean equals4Diff(DBIdentifiable obj, WhitespaceIgnoreType wsIgnore) {
 		if (this == obj)
 			return true;
 		if (!super.equals(obj))
@@ -145,7 +146,7 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body,other.body))
+		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore))
 		//} else if (!body.equals(other.body))
 			return false;
 		if (packageName == null) {
