@@ -8,11 +8,13 @@ see: http://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/
 http://central.sonatype.org/pages/working-with-pgp-signatures.html
 
 
-2- setup .m2/settings.xml ; setup .gpgcredentials
+2- setup `~/.m2/settings.xml` ; setup `~/.gpgcredentials`
 
 **settings.xml**: on servers, add sonatype-nexus-snapshots & sonatype-nexus-staging (with users & passwords);
 
 on `$HOME/.gpgcredentials`, put your private key passphrase
+
+see: https://central.sonatype.org/publish/generate-token/
 
 
 3- upload

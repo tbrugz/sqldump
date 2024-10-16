@@ -165,6 +165,29 @@
 		-->
 	</target>
 
+	<!-- experimental deploy -->
+	<target name="deploy1" depends="prepare-maven, prepare-publish-sonatype">
+		<echo message="artifactId: ${artifactId}"/>
+		<fail message="Must be SNAPSHOT version" unless="version-snapshot"/>
+
+		<property environment="env" />
+
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" failonerror="true">
+			<jvmarg value="-Dclassworlds.conf=${env.M2_HOME}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${env.M2_HOME}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+
+			<arg value="${plugin-maven-deploy}:deploy-file" />
+			<arg value="-Durl=${maven-snapshots-repository-url}" />
+			<arg value="-DrepositoryId=${maven-snapshots-repository-id}" />
+			<arg value="-DpomFile=${maven-pom}" />
+			<arg value="-Dfile=${maven-jar}" />
+			<arg value="-Dmaven.repo.remote=${maven-remoteRepositoryUrl}"/>
+			<arg value="-X" />
+			<arg value="-e" />
+		</java>
+	</target>
+
 	<!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
 	<target name="stage" depends="prepare-publish-sonatype" description="deploy release version to Maven staging repository">
 		<echo message="artifactId: ${artifactId}"/>
