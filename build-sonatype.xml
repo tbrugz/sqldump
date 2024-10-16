@@ -4,6 +4,7 @@
 	xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 
 	<property environment="env" />
+	<property file="build.properties"/>
 	
 	<property name="maven.home" value="${env.M2_HOME}" if:set="env.M2_HOME"/>
 

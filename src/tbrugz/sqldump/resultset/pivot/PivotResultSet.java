@@ -397,7 +397,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 		//log.info("nonPivotKeyValues (before): "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
 		if(sortNonPivotKeyValues) {
-			//nonPivotKeyValues.sort(null); //java 8
+			//nonPivotKeyValues.sort(null); //java 8 ; java8
 			Collections.sort(nonPivotKeyValues);
 		}
 		//log.info("nonPivotKeyValues: "+nonPivotKeyValues);
