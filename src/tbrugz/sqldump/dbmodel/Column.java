@@ -136,6 +136,19 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		}
 		
 	}
+
+	/* XXX generated/virtual columns
+	https://www.postgresql.org/docs/current/ddl-generated-columns.html
+	https://blog.jooq.org/2012/02/19/subtle-sql-differences-identity-columns/
+	*/
+	public static class GeneratedInfo {
+		boolean generated;
+		boolean generatedAlways = true;
+		boolean identity;
+		boolean stored;
+		boolean virtual;
+		boolean autoIncrement; // GENERATED { ALWAYS | BY DEFAULT } AS IDENTITY ; start-with, increment
+	}
 	
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(Column.class);
@@ -147,7 +160,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	boolean nullable = true;
 	String defaultValue;
 	String remarks;
-	Boolean autoIncrement; // GENERATED { ALWAYS | BY DEFAULT } AS IDENTITY ; start-with, increment - see: https://blog.jooq.org/2012/02/19/subtle-sql-differences-identity-columns/ 
+	GeneratedInfo generated;
 	//XXX add transient String tableName; //??
 	//XXX Boolean updateable; //?? - http://english.stackexchange.com/questions/56431/correct-spelling-updatable-or-updateable
 	Integer ordinalPosition; //XXXdone add column position in table? nice for column compare...
@@ -240,18 +253,30 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		/*if((autoIncrement!=null && autoIncrement)) {
 			log.info("auto-increment["+name+"]: useAutoIncrement? "+ColTypeUtil.useAutoIncrement()+" [dbid="+ColTypeUtil.dbid+"]");
 		}*/
-		return getDefaultSnippet()
+		return (isGenerated()?"":getDefaultSnippet())
 			+getNullableSnippet()
-			+(ColTypeUtil.useAutoIncrement()?
-				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
-			:"");
+			+getGeneratedSnippet()
+			;
 	}
 
 	public String getFullColumnConstraints() {
-		return getDefaultSnippet()
+		return (isGenerated()?"":getDefaultSnippet())
 			+getFullNullableSnippet()
-			+(ColTypeUtil.useAutoIncrement()?
-				((autoIncrement!=null && autoIncrement)?" auto_increment":"")
+			+getGeneratedSnippet()
+			;
+	}
+
+	public String getGeneratedSnippet() {
+		if(generated==null) { return ""; }
+		return
+			( generated.generated ? " generated "+(generated.generatedAlways?"always":"by default")+
+				" as " + (generated.identity?"identity":"("+defaultValue+")") +
+				( generated.stored ? " stored" : "" ) +
+				( generated.virtual ? " virtual" : "" )
+				: ""
+			) +
+			(ColTypeUtil.useAutoIncrement()?
+				((generated.autoIncrement)?" auto_increment":"")
 			:"");
 	}
 	
@@ -323,11 +348,14 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	}
 
 	public Boolean getAutoIncrement() {
-		return autoIncrement;
+		return generated!=null?generated.autoIncrement:null;
 	}
 
 	public void setAutoIncrement(Boolean autoIncrement) {
-		this.autoIncrement = autoIncrement;
+		if(generated==null) {
+			initGeneratedInfo();
+		}
+		this.generated.autoIncrement = autoIncrement;
 	}
 
 	public Integer getOrdinalPosition() {
@@ -338,4 +366,13 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		this.ordinalPosition = ordinalPosition;
 	}
 	
+	void initGeneratedInfo() {
+		generated = new GeneratedInfo();
+	}
+	
+	public boolean isGenerated() {
+		if(generated==null) return false;
+		return generated.generated;
+	}
+
 }

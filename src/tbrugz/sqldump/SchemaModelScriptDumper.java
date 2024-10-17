@@ -622,16 +622,16 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		boolean added = false;
 		for(int i=0;i<privs.size();i++) {
 			if(privs.get(i).priv.equals(g.getPrivilege())) {
-				if(g.getColumn()!=null) {
-					privs.get(i).columns.add(g.getColumn());
+				if(g.getColumns()!=null) {
+					privs.get(i).columns.addAll(g.getColumns());
 				}
 				added = true;
 			}
 		}
 		if(!added) {
 			PrivilegeWithColumns pwc = new PrivilegeWithColumns(g.getPrivilege());
-			if(g.getColumn()!=null) {
-				pwc.columns.add(g.getColumn());
+			if(g.getColumns()!=null) {
+				pwc.columns.addAll(g.getColumns());
 			}
 			privs.add(pwc);
 		}
