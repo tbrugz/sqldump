@@ -26,7 +26,7 @@
 		<!--
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="default->default"/>
 		-->
-		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.8" conf="deps->default"/>
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.13" conf="deps->default"/>
 
 		<!-- jdbc deps -->
 

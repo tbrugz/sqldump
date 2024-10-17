@@ -33,7 +33,7 @@
 
     <sqldump.version>0.10-SNAPSHOT</sqldump.version>
     <slf4j.version>1.7.32</slf4j.version>
-    <logback.version>1.2.3</logback.version>
+    <logback.version>1.2.13</logback.version>
 
     <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
   </properties>
@@ -242,7 +242,7 @@
     <dependency>
         <groupId>ch.qos.logback</groupId>
         <artifactId>logback-classic</artifactId>
-        <version>1.2.12</version>
+        <version>${logback.version}</version>
     </dependency>
   </dependencies>
 
