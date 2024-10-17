@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -13,14 +14,15 @@ public class Grant implements DBType, Serializable {
 	
 	//XXX exclude 'table'? Grant is not (or should be) an 'independent' db object
 	String table; //XXX rename to object? may be used by Views or Executables
-	String column;
+	//String column;
+	List<String> columns;
 	PrivilegeType privilege;
 	String grantee;
 	boolean withGrantOption;
 	
 	public Grant(String owner, String column, PrivilegeType privilege, String grantee, boolean grantOption) {
 		this.table = owner;
-		this.column = column;
+		this.columns = column!=null ? Arrays.asList( column ) : null;
 		this.privilege = privilege;
 		this.grantee = grantee;
 		this.withGrantOption = grantOption;
@@ -36,7 +38,7 @@ public class Grant implements DBType, Serializable {
 	@Override
 	public String toString() {
 		return "["+table+";priv="+privilege+";to="+grantee
-				+";"+(column!=null?"col="+column:"")
+				+";"+(columns!=null?"cols="+columns:"")
 				+";"+(withGrantOption?"GO!":"")+"]";
 	}
 	
@@ -74,10 +76,10 @@ public class Grant implements DBType, Serializable {
 		} else if (!table.equals(other.table))
 			return false;
 
-		if (column == null) {
-			if (other.column != null)
+		if (columns == null) {
+			if (other.columns != null)
 				return false;
-		} else if (!column.equals(other.column))
+		} else if (!columns.equals(other.columns))
 			return false;
 
 		if (withGrantOption != other.withGrantOption)
@@ -127,12 +129,21 @@ public class Grant implements DBType, Serializable {
 		this.withGrantOption = withGrantOption;
 	}
 	
+	public List<String> getColumns() {
+		return columns;
+	}
+	
+	public void setColumns(List<String> columns) {
+		this.columns = columns;
+	}
+
+	@Deprecated
 	public String getColumn() {
-		return column;
+		return (columns!=null && columns.size()>0)?columns.get(0):null;
 	}
 
 	public void setColumn(String column) {
-		this.column = column;
+		this.columns = column!=null ? Arrays.asList( column ) : null;
 	}
 
 	public static Grant parseGrant(final String grantStrPar) {
@@ -143,10 +154,10 @@ public class Grant implements DBType, Serializable {
 			PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
 			String grantee = parts[2].substring(3, parts[2].length());
 			//String columnPart = parts[3];
-			String column = (parts[3].length()>0)?parts[3].substring(4):null;
+			String columns = (parts[3].length()>0)?parts[3].substring(6, parts[3].length()-1):null;
 			//String column = (parts.length>=4)?parts[3].substring(4):null;
 			boolean grantOption = (parts[4].length()>0)?parts[4].equals("GO!"):false;
-			Grant g = new Grant(parts[0], column, privilege, grantee, grantOption);
+			Grant g = new Grant(parts[0], columns, privilege, grantee, grantOption);
 			return g;
 		}
 		catch(Exception e) {

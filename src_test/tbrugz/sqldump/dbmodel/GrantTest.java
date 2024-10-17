@@ -39,6 +39,7 @@ public class GrantTest {
 		Grant gr = new Grant("USER_X", "COLUMN_Z", PrivilegeType.SELECT, "USER_Y", false);
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
+		//System.out.println(gr+" // "+gr2);
 		Assert.assertEquals(gr, gr2);
 	}
 
