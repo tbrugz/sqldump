@@ -25,9 +25,13 @@ see: https://central.sonatype.org/publish/generate-token/
 
 (do not forget to `ant resolve` if needed)
 
-3.1- upload sqlmigrate
+3.1- upload maven modules (sqlmigrate, sqldump-jopendoc, sqldump-logback & sqldump-mondrian)
 
-* SNAPSHOT: (`cd sqlmigrate` && ) `mvn clean deploy`
+* SNAPSHOT:  
+	`(cd sqlmigrate && mvn clean deploy)`  
+	`(cd sqldump-jopendoc && mvn clean deploy)`  
+	`(cd sqldump-logback && mvn clean deploy)`  
+	`(cd sqldump-mondrian && mvn clean deploy)`  
 
 
 4- release (if RELEASE version)

@@ -152,7 +152,7 @@ Running (without sources)
 
 Building maven 'modules'
 ------------------------
-- `ant mvn-modules-install` (sqlmigrate & sqldump-mondrian modules)
+- `ant mvn-modules-install` (sqlmigrate, sqldump-jopendoc, sqldump-logback & sqldump-mondrian modules)
 
 
 Building or running with Docker

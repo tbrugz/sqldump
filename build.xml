@@ -340,18 +340,24 @@
 	</target>
 
 	<target name="mvn-modules-install" description="build and install maven modules">
-		<exec executable="mvn" failonerror="true">
+		<condition property="mvn-executable" value="mvn.cmd">
+			<os family="windows"/>
+		</condition>
+		<property name="mvn-executable" value="mvn.cmd"/>
+		<exec executable="${mvn-executable}" failonerror="true">
 			<arg line="-f sqlmigrate/ clean install"/>
 		</exec>
-		<exec executable="mvn" failonerror="true">
+		<exec executable="${mvn-executable}" failonerror="true">
 			<arg line="-f sqldump-jopendoc/ clean install"/>
 		</exec>
-		<exec executable="mvn" failonerror="true">
+		<exec executable="${mvn-executable}" failonerror="true">
 			<arg line="-f sqldump-logback/ clean install"/>
 		</exec>
-		<exec executable="mvn" failonerror="true">
+		<!--
+		<exec executable="${mvn-executable}" failonerror="true">
 			<arg line="-f sqldump-mondrian/ clean install"/>
 		</exec>
+		-->
 	</target>
 
 	<!-- ========= dependencies tasks ========== -->
