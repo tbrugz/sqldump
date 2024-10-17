@@ -343,7 +343,7 @@
 		<condition property="mvn-executable" value="mvn.cmd">
 			<os family="windows"/>
 		</condition>
-		<property name="mvn-executable" value="mvn.cmd"/>
+		<property name="mvn-executable" value="mvn"/>
 		<exec executable="${mvn-executable}" failonerror="true">
 			<arg line="-f sqlmigrate/ clean install"/>
 		</exec>

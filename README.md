@@ -177,7 +177,7 @@ Artifact repositories
 - [maven central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)
 
 **Snapshots:**  
-- [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/sqldump/)
+- [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)
   - see [how to configure settings.xml](https://stackoverflow.com/a/7717234/616413)
 
 **Maven dependency config:**
