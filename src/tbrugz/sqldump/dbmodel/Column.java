@@ -137,9 +137,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		
 	}
 
-	/* XXX generated/virtual columns
+	/*
+	generated/virtual columns
 	https://www.postgresql.org/docs/current/ddl-generated-columns.html
 	https://blog.jooq.org/2012/02/19/subtle-sql-differences-identity-columns/
+	GENERATED { ALWAYS | BY DEFAULT } AS IDENTITY ; start-with, increment
 	*/
 	public static class GeneratedInfo {
 		boolean generated;
@@ -147,7 +149,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		boolean identity;
 		boolean stored;
 		boolean virtual;
-		boolean autoIncrement; // GENERATED { ALWAYS | BY DEFAULT } AS IDENTITY ; start-with, increment
+		//boolean autoIncrement; //using 'identity'
 	}
 	
 	private static final long serialVersionUID = 1L;
@@ -276,7 +278,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 				: ""
 			) +
 			(ColTypeUtil.useAutoIncrement()?
-				((generated.autoIncrement)?" auto_increment":"")
+				((generated.identity)?" auto_increment":"")
 			:"");
 	}
 	
@@ -348,14 +350,14 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	}
 
 	public Boolean getAutoIncrement() {
-		return generated!=null?generated.autoIncrement:null;
+		return generated!=null?generated.identity:null;
 	}
 
 	public void setAutoIncrement(Boolean autoIncrement) {
 		if(generated==null) {
 			initGeneratedInfo();
 		}
-		this.generated.autoIncrement = autoIncrement;
+		this.generated.identity = autoIncrement;
 	}
 
 	public Integer getOrdinalPosition() {
