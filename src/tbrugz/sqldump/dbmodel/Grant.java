@@ -9,27 +9,32 @@ import org.apache.commons.logging.LogFactory;
 
 //XXX: make Grant immutable?
 public class Grant implements DBType, Serializable {
+	
 	private static final long serialVersionUID = 1L;
 	static final Log log = LogFactory.getLog(Grant.class);
 	
 	//XXX exclude 'table'? Grant is not (or should be) an 'independent' db object
 	String table; //XXX rename to object? may be used by Views or Executables
-	//String column;
 	List<String> columns;
 	PrivilegeType privilege;
 	String grantee;
 	boolean withGrantOption;
 	
+	@Deprecated
 	public Grant(String owner, String column, PrivilegeType privilege, String grantee, boolean grantOption) {
+		this(owner, (column!=null ? Arrays.asList( column ) : null), privilege, grantee, grantOption);
+	}
+	
+	public Grant(String owner, List<String> columns, PrivilegeType privilege, String grantee, boolean grantOption) {
 		this.table = owner;
-		this.columns = column!=null ? Arrays.asList( column ) : null;
+		this.columns = columns;
 		this.privilege = privilege;
 		this.grantee = grantee;
 		this.withGrantOption = grantOption;
 	}
 
 	public Grant(String owner, PrivilegeType privilege, String grantee) {
-		this(owner, null, privilege, grantee, false);
+		this(owner, (List<String>) null, privilege, grantee, false);
 	}
 	
 	public Grant() {
@@ -154,7 +159,8 @@ public class Grant implements DBType, Serializable {
 			PrivilegeType privilege = PrivilegeType.valueOf(parts[1].substring(5));
 			String grantee = parts[2].substring(3, parts[2].length());
 			//String columnPart = parts[3];
-			String columns = (parts[3].length()>0)?parts[3].substring(6, parts[3].length()-1):null;
+			String columnsStr = (parts[3].length()>0)?parts[3].substring(6, parts[3].length()-1):null;
+			List<String> columns = columnsStr!=null ? Arrays.asList( columnsStr.split(",") ) : null;
 			//String column = (parts.length>=4)?parts[3].substring(4):null;
 			boolean grantOption = (parts[4].length()>0)?parts[4].equals("GO!"):false;
 			Grant g = new Grant(parts[0], columns, privilege, grantee, grantOption);
@@ -162,7 +168,7 @@ public class Grant implements DBType, Serializable {
 		}
 		catch(Exception e) {
 			log.warn("parseGrant error ["+grantStrPar+"]");
-			//log.debug("parseGrant error ["+grantStrPar+"]", e);
+			//log.info("parseGrant error ["+grantStrPar+"]", e);
 			return null;
 		}
 	}

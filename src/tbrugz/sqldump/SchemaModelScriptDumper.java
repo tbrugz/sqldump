@@ -30,7 +30,6 @@ import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Grant;
 import tbrugz.sqldump.dbmodel.Index;
-import tbrugz.sqldump.dbmodel.PrivilegeType;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
@@ -557,14 +556,14 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	*/
 	
-	static class PrivilegeWithColumns {
+	/*static class PrivilegeWithColumns {
 		final PrivilegeType priv;
 		final TreeSet<String> columns = new TreeSet<String>();
 		
 		public PrivilegeWithColumns(PrivilegeType priv) {
 			this.priv = priv;
 		}
-	}
+	}*/
 	
 	public static Set<String> getPrivilegesToDump(String dbId) {
 		Set<String> privsToDump = new TreeSet<String>();
@@ -584,8 +583,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 	}
 	
 	public static String compactGrantDump(Collection<Grant> grants, String finalTableName, Set<String> privsToDump) {
-		Map<String, List<PrivilegeWithColumns>> mapWithGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
-		Map<String, List<PrivilegeWithColumns>> mapWOGrant = new TreeMap<String, List<PrivilegeWithColumns>>();
+		Map<String, List<Grant>> mapWithGrant = new TreeMap<String, List<Grant>>();
+		Map<String, List<Grant>> mapWOGrant = new TreeMap<String, List<Grant>>();
 
 		int count = 0;
 		for(Grant g: grants) {
@@ -613,42 +612,44 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		return "";
 	}
 	
-	static void addGrantToMap(Map<String, List<PrivilegeWithColumns>> grantMap, Grant g) {
-		List<PrivilegeWithColumns> privs = grantMap.get(g.getGrantee());
+	static void addGrantToMap(Map<String, List<Grant>> grantMap, Grant g) {
+		List<Grant> privs = grantMap.get(g.getGrantee());
 		if(privs==null) {
-			privs = new ArrayList<PrivilegeWithColumns>();
+			privs = new ArrayList<Grant>();
 			grantMap.put(g.getGrantee(), privs);
 		}
 		boolean added = false;
 		for(int i=0;i<privs.size();i++) {
-			if(privs.get(i).priv.equals(g.getPrivilege())) {
+			if(privs.get(i).getPrivilege().equals(g.getPrivilege())) {
 				if(g.getColumns()!=null) {
-					privs.get(i).columns.addAll(g.getColumns());
+					privs.get(i).getColumns().addAll(g.getColumns());
 				}
 				added = true;
 			}
 		}
 		if(!added) {
-			PrivilegeWithColumns pwc = new PrivilegeWithColumns(g.getPrivilege());
-			if(g.getColumns()!=null) {
-				pwc.columns.addAll(g.getColumns());
-			}
+			//Grant pwc = new Grant(null, g.getPrivilege(), null);
+			Grant pwc = new Grant(null, g.getColumns(), g.getPrivilege(), null, false);
+			
+			/*if(g.getColumns()!=null) {
+				pwc.getColumns().addAll(g.getColumns());
+			}*/
 			privs.add(pwc);
 		}
 	}
 	
-	static void appendGrantDump(Map<String, List<PrivilegeWithColumns>> grantMap, String finalTableName, String footerString, StringBuilder sb) {
-		for(Entry<String, List<PrivilegeWithColumns>> entry: grantMap.entrySet()) {
-			List<PrivilegeWithColumns> privs = entry.getValue();
+	static void appendGrantDump(Map<String, List<Grant>> grantMap, String finalTableName, String footerString, StringBuilder sb) {
+		for(Entry<String, List<Grant>> entry: grantMap.entrySet()) {
+			List<Grant> privs = entry.getValue();
 			StringBuilder sb2 = new StringBuilder();
 			boolean is1st = true;
-			for(PrivilegeWithColumns pwc: privs) {
+			for(Grant pwc: privs) {
 				if(!is1st) {
 					sb2.append(", ");
 				}
-				sb2.append(pwc.priv);
-				if(pwc.priv.allowedForColumn() && pwc.columns.size()>0) {
-					sb2.append(" ("+Utils.join(pwc.columns, ", ")+")");
+				sb2.append(pwc.getPrivilege());
+				if(pwc.getPrivilege().allowedForColumn() && pwc.getColumns() != null && pwc.getColumns().size()>0) {
+					sb2.append(" ("+Utils.join(pwc.getColumns(), ", ")+")");
 				}
 				is1st = false;
 			}

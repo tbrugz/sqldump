@@ -1,7 +1,7 @@
 package tbrugz.sqldump;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -165,7 +165,7 @@ public class ScriptDumperTest {
 
 	@Test
 	public void dumpSelectPrivilegeWithColumn() throws Exception {
-		Grant gr = new Grant("GRANTOR", "COL_1", PrivilegeType.SELECT, "GRANTEE", false);
+		Grant gr = new Grant("GRANTOR", Arrays.asList("COL_1"), PrivilegeType.SELECT, "GRANTEE", false);
 		List<Grant> grants = new ArrayList<>();
 		grants.add(gr);
 		Set<String> privs = new TreeSet<>();
@@ -177,7 +177,7 @@ public class ScriptDumperTest {
 
 	@Test
 	public void dumpSelectPrivilegeWithoutColumn() throws Exception {
-		Grant gr = new Grant("GRANTOR", "COL_1", PrivilegeType.DELETE, "GRANTEE", false);
+		Grant gr = new Grant("GRANTOR", Arrays.asList("COL_1"), PrivilegeType.DELETE, "GRANTEE", false);
 		List<Grant> grants = new ArrayList<>();
 		grants.add(gr);
 		Set<String> privs = new TreeSet<>();

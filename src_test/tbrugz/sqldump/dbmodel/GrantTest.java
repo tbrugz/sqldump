@@ -1,5 +1,8 @@
 package tbrugz.sqldump.dbmodel;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,7 +39,7 @@ public class GrantTest {
 
 	@Test
 	public void testParseWithColumn() {
-		Grant gr = new Grant("USER_X", "COLUMN_Z", PrivilegeType.SELECT, "USER_Y", false);
+		Grant gr = new Grant("USER_X", Arrays.asList("COLUMN_Z"), PrivilegeType.SELECT, "USER_Y", false);
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
 		//System.out.println(gr+" // "+gr2);
@@ -45,7 +48,7 @@ public class GrantTest {
 
 	@Test
 	public void testParseWithGrantOption() {
-		Grant gr = new Grant("USER_X", null, PrivilegeType.SELECT, "USER_Y", true);
+		Grant gr = new Grant("USER_X", (List<String>) null, PrivilegeType.SELECT, "USER_Y", true);
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
 		Assert.assertEquals(gr, gr2);
