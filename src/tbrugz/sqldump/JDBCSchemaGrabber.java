@@ -47,7 +47,6 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelGrabber;
-import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ModelMetaData;
 import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
@@ -1124,6 +1123,24 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			if(iDecimalDigits!=0) {
 				c.setDecimalDigits(iDecimalDigits);
 			}
+		}
+		try {
+			String defaultValue = cols.getString("COLUMN_DEF");
+			if(!Utils.isNullOrEmpty(defaultValue)) {
+				if((Utils.isDouble(defaultValue) || Utils.isStringLiteral(defaultValue))) {
+					c.setDefaultValue(defaultValue);
+				}
+				else {
+					// XXX parse generated clause?
+					//c.setGenerated(true);
+					//c.setDefaultValue(defaultValue);
+					c.setGeneratedDefinition(defaultValue);
+				}
+			}
+		}
+		catch(RuntimeException e) {
+			log.warn("Exception [COLUMN_DEF]: "+e);
+			log.debug("Exception [COLUMN_DEF]: "+e.getMessage(), e);
 		}
 		return c;
 	}

@@ -349,6 +349,26 @@ public class Utils {
 		}
 	}
 
+	public static boolean isDouble(String str) {
+		try {
+			Double.parseDouble(str);
+			return true;
+		}
+		catch(Exception e) {
+			return false;
+		}
+	}
+	
+	public static boolean isStringLiteral(String str) {
+		try {
+			return (str.charAt(0)=='\'' && str.charAt(str.length()-1)=='\'');
+		}
+		catch(Exception e) {
+			log.warn("isStringLiteral["+str+"]: "+e);
+			return false;
+		}
+	}
+
 	public static boolean propertyExists(Properties prop, String key) {
 		return prop.getProperty(key)!=null;
 	}
