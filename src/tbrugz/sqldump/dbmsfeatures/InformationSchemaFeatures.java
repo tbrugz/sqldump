@@ -33,6 +33,7 @@ import tbrugz.sqldump.dbmodel.View;
  * TODO: use bind parameter in SQL queries
  */
 public class InformationSchemaFeatures extends DefaultDBMSFeatures {
+
 	private static final Log log = LogFactory.getLog(InformationSchemaFeatures.class);
 
 	//boolean dumpSequenceStartWith = true;

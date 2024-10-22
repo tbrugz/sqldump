@@ -3,19 +3,14 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.Column;
-import tbrugz.sqldump.dbmodel.Constraint;
-import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
-import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.util.StringUtils;
 
 /*
