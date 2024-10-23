@@ -66,6 +66,7 @@ public enum TokenizerStrategy {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static Tokenizer getTokenizer(TokenizerStrategy tokenizerStrategy, File file, String inputEncoding, boolean escapeBackslashedApos, boolean split) throws IOException {
 		//log.debug("getTokenizer: strategy="+tokenizerStrategy+" ; charset = "+inputEncoding);
 		if(!split) {
@@ -91,6 +92,7 @@ public enum TokenizerStrategy {
 				case STMT_TOKENIZER:
 					return new SQLStmtTokenizer(fileStr);
 				case STRING_SPLITTER:
+					log.warn("Strategy "+tokenizerStrategy+" is deprecated");
 					return new StringSpliter(fileStr);
 				//case NO_TOKENIZER:
 				//	return new NoSplitTokenizer(fileStr);
