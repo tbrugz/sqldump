@@ -63,12 +63,12 @@ public class DropScriptDumper extends AbstractFailable implements SchemaModelDum
 			
 			int dropCount = 0;
 			dropCount += dumpDropFKs(schemaModel, useIfExists, co);
-			dropCount += dumpDropObject(DBObjectType.INDEX.toString(), schemaModel.getIndexes(), useIfExists, co);
-			dropCount += dumpDropObject(DBObjectType.VIEW.toString(), schemaModel.getViews(), useIfExists, co);
-			dropCount += dumpDropObject(DBObjectType.SEQUENCE.toString(), schemaModel.getSequences(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.INDEX.desc(), schemaModel.getIndexes(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.VIEW.desc(), schemaModel.getViews(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.SEQUENCE.desc(), schemaModel.getSequences(), useIfExists, co);
 			//XXX: dump drop executables/triggers
 			//XXX: dump truncate tables?
-			dropCount += dumpDropObject(DBObjectType.TABLE.toString(), schemaModel.getTables(), useIfExists, co);
+			dropCount += dumpDropObject(DBObjectType.TABLE.desc(), schemaModel.getTables(), useIfExists, co);
 			log.info(dropCount + " drop scripts dumped [output pattern: "+finalPattern+"]");
 		}
 		catch (IOException e) {
