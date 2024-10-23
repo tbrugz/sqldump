@@ -1132,11 +1132,18 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 				}
 				else {
 					// XXX parse generated clause?
-					//c.setGenerated(true);
-					//c.setDefaultValue(defaultValue);
+					// Derby puts generated definition in 'COLUMN_DEF'
+					// H2 does not (H2 has INFORMATION_SCHEMA.COLUMNS.GENERATION_EXPRESSION)
 					c.setGeneratedDefinition(defaultValue);
 				}
 			}
+			/*
+			boolean isGenerated = false;
+			isGenerated = VALUE_YES.equals( cols.getString("IS_GENERATEDCOLUMN") );
+			if(isGenerated) {
+				c.setGenerated(isGenerated);
+			}
+			*/
 		}
 		catch(RuntimeException e) {
 			log.warn("Exception [COLUMN_DEF]: "+e);

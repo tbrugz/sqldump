@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -21,6 +22,11 @@ import tbrugz.sqldump.util.StringUtils;
 public class H2Features extends InformationSchemaFeatures {
 
 	static final Log log = LogFactory.getLog(H2Features.class);
+	
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException {
+		return new H2DatabaseMetaData(metadata);
+	}
 
 	@Override
 	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {

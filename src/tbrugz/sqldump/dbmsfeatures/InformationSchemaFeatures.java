@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmd.DefaultDBMSFeatures;
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -26,6 +27,7 @@ import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.Utils;
 
 /*
  * see: https://en.wikipedia.org/wiki/Information_schema
@@ -54,6 +56,13 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		DBObjectType.TRIGGER, DBObjectType.SEQUENCE,
 		//DBObjectType.SYNONYM, DBObjectType.GRANT, DBObjectType.MATERIALIZED_VIEW
 	};
+	
+	/*
+	@Override
+	public DatabaseMetaData getMetadataDecorator(DatabaseMetaData metadata) throws SQLException {
+		return new InformationSchemaDatabaseMetaData(metadata);
+	}
+	*/
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -436,6 +445,20 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 
 	protected boolean allowViewSetWithReadOnly() {
 		return true;
+	}
+	
+	@Override
+	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
+		try {
+			String genExpression = rs.getString("GENERATION_EXPRESSION");
+			if(!Utils.isNullOrEmpty(genExpression)) {
+				// H2, see: http://www.h2database.com/html/grammar.html
+				c.setGeneratedDefinition("generated always as ("+genExpression+")");
+			}
+		} catch (SQLException e) {
+			log.warn("resultset has no 'GENERATION_EXPRESSION'(?); column: '"+c+"', message: '"+e.getMessage()+"'");
+			log.debug("sql exception:", e);
+		}
 	}
 	
 }
