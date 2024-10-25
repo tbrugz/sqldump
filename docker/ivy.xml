@@ -40,7 +40,7 @@
 		<dependency org="org.apache.derby" name="derbyclient" rev="10.15.2.0" conf="jdbc->default"/>
 
 		<!-- h2: java8+ - https://github.com/h2database/h2database/releases/tag/version-2.0.202 -->
-		<dependency org="com.h2database" name="h2" rev="2.2.220" conf="jdbc->default"/> <!-- java8+ -->
+		<dependency org="com.h2database" name="h2" rev="2.2.224" conf="jdbc->default"/> <!-- java8+ -->
 
 		<!-- mariadb/mysql: java8+ - https://mariadb.com/kb/en/about-mariadb-connector-j/ -->
 		<dependency org="org.mariadb.jdbc" name="mariadb-java-client" rev="2.7.4" conf="jdbc->default"/>

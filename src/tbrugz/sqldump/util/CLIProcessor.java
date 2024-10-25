@@ -33,7 +33,6 @@ public class CLIProcessor {
 	
 	static final Log log = LogFactory.getLog(CLIProcessor.class);
 	
-	//XXX: move to utils(?)... (used by sqldump & sqlrun -- why not sqldiff?) 
 	public static void init(final String productName, final String[] args,
 			final String defaultPropFile, final Properties papp) throws IOException {
 		init(productName, args, defaultPropFile, papp, true);

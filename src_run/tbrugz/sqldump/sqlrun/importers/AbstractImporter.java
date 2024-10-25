@@ -167,7 +167,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 	long batchUpdateSize = 1000;
 	boolean retryWithBatchOff = false;
 
-	long commitEachXrows = 0L;
+	long commitEachXrows = 0L; //XXX move to BaseImporter?
 	static long defaultCommitEachXrowsForFileStrategy = 1000L;
 	
 	long sleepMilis = 100; //XXX: prop for sleepMilis (used in follow mode)?
@@ -753,6 +753,19 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			log.debug("parts[count="+counter.input+"; parts="+parts.length+"]: "+Arrays.asList(parts)+" ; columnTypes="+columnTypes);
 		}
 		
+		/*
+		if(is1stloop && skipHeaderN>counter.input) {
+			counter.input++;
+			logNRows(counter);
+			return null;
+		}
+		if(skipLineRegex!=null && skipLineRegex.matcher(line).find()) {
+			counter.input++;
+			logNRows(counter);
+			return null;
+		}
+		*/
+
 		if(counter.input==0 || mustSetupSQLStatement ) {
 			boolean tabeJustCreated = false;
 			if(statementBefore!=null && !statementBeforeExecuted) {
@@ -790,6 +803,8 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 				}
 			}
 		}
+
+		// after or before "if(counter.input==0 || mustSetupSQLStatement )"?
 		if(is1stloop && skipHeaderN>counter.input) {
 			counter.input++;
 			logNRows(counter);
@@ -1159,6 +1174,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			scan = new Scanner(fileIS, inputEncoding);
 		}
 		else if(importURL!=null) {
+			// XXX move to BaseImporter?
 			scan = new Scanner(getURLInputStream(importURL, urlMethod, urlData, cookiesHeader, urlHeaders, 0), inputEncoding);
 		}
 		else if(Constants.STDIN.equals(importFile)) {
