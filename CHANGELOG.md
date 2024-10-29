@@ -1,5 +1,5 @@
 
-sqldump 0.10 [xxxx-xx-xx]
+sqldump 0.10 [2024-10-29]
 ------------
 - **java 7+** required
 - java 17 compatibility
@@ -10,6 +10,16 @@ sqldump 0.10 [xxxx-xx-xx]
 - **breaking**: sqlrun: '.importfiles' now uses glob pattern
 - sqlrun: added '.files.glob' (glob pattern) & '.files.regex' suffixes
 - **breaking**: sqlrun: '.files' suffix now uses glob pattern (2021-11-07)
+- github: added ant workflow (2021-10-17)
+- docker: added image building scripts (2021-12-16)
+- util: ConnectionUtil: added DataSourceProvider
+- cdi: added (+ CdiUtils) ; util: ConnectionUtil: using CdiUtils
+- project: **sqlmigrate**! (2022-06-12)
+- project/refactoring: 'sqldump-mondrian' mavenized
+- dbmodel: ExecutableObject: added 'deterministic'
+- module: sqldump-logback (2023-06-15)
+- sqldump/diff: add WhitespaceIgnoreType (2024-10-09)
+- dbmodel: Column: added GeneratedInfo
 
 
 sqldump 0.9.17 [2021-08-29]
