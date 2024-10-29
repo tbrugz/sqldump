@@ -10,6 +10,7 @@
 
   <name>sqldump-logback</name>
   <description>
+    Logback extensions for sqldump.
   </description>
   <url>https://github.com/tbrugz/sqldump</url>
 

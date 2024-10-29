@@ -10,6 +10,7 @@
 
   <name>sqldump-mondrian</name>
   <description>
+    Mondrian Schema dumper for sqldump.
   </description>
   <url>https://github.com/tbrugz/sqldump</url>
 

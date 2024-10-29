@@ -10,6 +10,7 @@
 
   <name>sqldump-jopendoc</name>
   <description>
+    OpenDocument Spreadsheet (.ods) Syntax dumper for sqldump.
   </description>
   <url>https://github.com/tbrugz/sqldump</url>
 

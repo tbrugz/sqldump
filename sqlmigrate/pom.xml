@@ -10,6 +10,7 @@
 
   <name>sqlmigrate</name>
   <description>
+    Relational Database Migrations.
   </description>
   <url>https://github.com/tbrugz/sqldump</url>
 
