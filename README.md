@@ -174,7 +174,8 @@ Artifact repositories
 ---------------------
 
 **Releases:**  
-- [maven central](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.bitbucket.tbrugz%22%20AND%20a%3A%22sqldump%22)
+- [maven central/sqldump](https://central.sonatype.com/artifact/org.bitbucket.tbrugz/sqldump/versions)  
+  [maven central/org.bitbucket.tbrugz](https://central.sonatype.com/namespace/org.bitbucket.tbrugz)
 
 **Snapshots:**  
 - [sonatype snapshots](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)

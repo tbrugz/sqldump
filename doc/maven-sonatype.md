@@ -33,10 +33,16 @@ see: https://central.sonatype.org/publish/generate-token/
 	`(cd sqldump-logback && mvn clean deploy)`  
 	`(cd sqldump-mondrian && mvn clean deploy)`  
 
+* RELEASE:  
+	`(cd sqlmigrate && mvn clean javadoc:jar deploy -P release)`  
+	`(cd sqldump-jopendoc && mvn clean javadoc:jar deploy -P release)`  
+	`(cd sqldump-logback && mvn clean javadoc:jar deploy -P release)`  
+	`(cd sqldump-mondrian && mvn clean javadoc:jar deploy -P release)`  
+
 
 4- release (if RELEASE version)
 
-Go to <https://oss.sonatype.org/>, select 'staging repositories', select your repository (something like
+Go to <https://oss.sonatype.org/>, login, select 'staging repositories', select your repository (something like
 'comexampleapplication-1010'), review it then 'close' & 'release'  
 see: http://central.sonatype.org/pages/releasing-the-deployment.html
 

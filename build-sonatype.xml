@@ -49,6 +49,12 @@
 		<echo message="maven-remoteRepositoryUrl: ${maven-remoteRepositoryUrl}" />
 	</target>
 	
+	<target name="mvn-info" depends="info">
+		<artifact:mvn mavenHome="${maven.home}" fork="true" failonerror="true">
+			<arg value="-version"/>
+		</artifact:mvn>
+	</target>
+
 	<target name="prepare-maven" depends="info">
 		<path id="mvn.classpath">
 			<fileset dir="${maven.home}/boot">
@@ -190,7 +196,7 @@
 	</target>
 
 	<!-- before this, update project version (both build.xml and pom.xml) from SNAPSHOT to RELEASE -->
-	<target name="stage" depends="prepare-publish-sonatype" description="deploy release version to Maven staging repository">
+	<target name="stage" depends="prepare-maven, prepare-publish-sonatype" description="deploy release version to Maven staging repository">
 		<echo message="artifactId: ${artifactId}"/>
 		<fail message="Must NOT be SNAPSHOT version" if="version-snapshot"/>
 		
@@ -200,9 +206,26 @@
 		<echo message="sonatype-nexus-staging.username: ${sonatype-nexus-staging.username}"/>
 		<echo message="sonatype-nexus-staging.password: ${sonatype-nexus-staging.password}"/>
 		-->
-		
-		<!-- sign and deploy the main artifact -->
+		<!--
 		<artifact:mvn>
+			<arg value="-v" />
+		</artifact:mvn>
+		-->
+
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" failonerror="true">
+			<jvmarg value="-Dclassworlds.conf=${env.M2_HOME}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${env.M2_HOME}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+
+			<arg value="-v" />
+		</java>
+
+		<!-- sign and deploy the main artifact -->
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" failonerror="true">
+			<jvmarg value="-Dclassworlds.conf=${env.M2_HOME}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${env.M2_HOME}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
@@ -212,10 +235,14 @@
 			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
 			<!--<arg value="-Dsonatype-nexus-staging.username=${sonatype-nexus-staging.username}" />
 			<arg value="-Dsonatype-nexus-staging.password=${sonatype-nexus-staging.password}" />-->
-		</artifact:mvn>
+		</java>
 
 		<!-- sign and deploy the sources artifact -->
-		<artifact:mvn>
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" failonerror="true">
+			<jvmarg value="-Dclassworlds.conf=${env.M2_HOME}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${env.M2_HOME}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
@@ -224,10 +251,14 @@
 			<arg value="-Dclassifier=sources" />
 			<arg value="-Pgpg" />
 			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
-		</artifact:mvn>
+		</java>
 
 		<!-- sign and deploy the javadoc artifact -->
-		<artifact:mvn>
+		<java classname="${mvn.mainclass}" classpathref="mvn.classpath" fork="true" failonerror="true">
+			<jvmarg value="-Dclassworlds.conf=${env.M2_HOME}/bin/m2.conf" />
+			<jvmarg value="-Dmaven.home=${env.M2_HOME}" />
+			<jvmarg value="-Dmaven.multiModuleProjectDirectory=${basedir}" />
+
 			<arg value="org.apache.maven.plugins:maven-gpg-plugin:${maven-gpg-plugin.version}:sign-and-deploy-file" />
 			<arg value="-Durl=${maven-staging-repository-url}" />
 			<arg value="-DrepositoryId=${maven-staging-repository-id}" />
@@ -236,7 +267,7 @@
 			<arg value="-Dclassifier=javadoc" />
 			<arg value="-Pgpg" />
 			<arg value="-Dgpg.passphrase=${gpg.passphrase}" />
-		</artifact:mvn>
+		</java>
 	</target>
 
 </project>
