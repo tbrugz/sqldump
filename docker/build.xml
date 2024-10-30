@@ -6,7 +6,7 @@
     <!--<property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>-->
     <property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[conf]/[artifact]-[revision](-[classifier]).[ext]"/>
 
-    <!-- 0.9.17 ? 0.10-SNAPSHOT? latest? -->
+    <!-- 0.11-SNAPSHOT? latest? -->
     <property file="../src/sqldump-version.properties"/>
     <property name="TAG" value="${version}"/>
     <property name="project-version.file" value="../dist/project-version.txt"/>

@@ -186,7 +186,7 @@ Artifact repositories
 	<dependency>
 		<groupId>org.bitbucket.tbrugz</groupId>
 		<artifactId>sqldump</artifactId>
-		<version>0.9.17</version>
+		<version>0.10</version>
 	</dependency>
 
 
