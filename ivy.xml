@@ -30,7 +30,7 @@
 		<dependency org="javax.mail" name="mail" rev="1.4.7" conf="optional->default"/>
 
 		<!-- ant tasks deps -->
-		<dependency org="org.apache.ant" name="ant" rev="1.9.16" conf="default->default"/>
+		<dependency  org="org.apache.ant" name="ant" rev="1.10.15" conf="default->default"/>
 		
 		<!-- datadump syntax deps -->
 		<!-- <dependency org="org.odftoolkit" name="simple-odf" rev="0.6.6"/> -->
