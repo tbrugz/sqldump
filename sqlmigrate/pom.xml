@@ -6,7 +6,7 @@
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqlmigrate</artifactId>
   <packaging>jar</packaging>
-  <version>0.10</version>
+  <version>0.11-SNAPSHOT</version>
 
   <name>sqlmigrate</name>
   <description>
@@ -33,7 +33,7 @@
     <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
 
     <!-- <queryon.version>${project.version}</queryon.version> -->
-    <sqldump.version>0.10</sqldump.version>
+    <sqldump.version>0.11-SNAPSHOT</sqldump.version>
     <!--
     <kmlutils.version>0.5.6</kmlutils.version>
     -->

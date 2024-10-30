@@ -43,7 +43,7 @@ see: https://central.sonatype.org/publish/generate-token/
 4- release (if RELEASE version)
 
 Go to <https://oss.sonatype.org/>, login, select 'staging repositories', select your repository (something like
-'comexampleapplication-1010'), review it then 'close' & 'release'  
+'comexampleapplication-1010' or 'orgbitbuckettbrugz-1019'), review it then 'close' & 'release'  
 see: http://central.sonatype.org/pages/releasing-the-deployment.html
 
 
