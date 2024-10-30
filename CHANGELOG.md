@@ -1,4 +1,9 @@
 
+sqldump 0.11 [xxxx-xx-xx]
+------------
+- **java 8+** required
+
+
 sqldump 0.10 [2024-10-29]
 ------------
 - **java 7+** required

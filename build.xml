@@ -151,7 +151,7 @@
 	<target name="compile" depends="prepare">
 		<!--property name="classpath.compile.prop" refid="classpath.compile"/>
 		<echo message="classpath.compile: ${classpath.compile.prop}" /-->
-		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" release="7">
+		<javac destdir="${bin.dir}" classpathref="classpath.compile" includeantruntime="false" debug="on" encoding="UTF-8" release="8">
 			<!-- <compilerarg value="-Xlint:deprecation"/> -->
 			<src path="${src.dir}"/>
 			<src path="${src.cdi.dir}"/>
@@ -164,7 +164,7 @@
 			<src path="${src.anttaks.dir}"/>
 			<exclude name="tbrugz/sqldump/ant/xperimental/**"/>
 		</javac>
-		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" release="7">
+		<javac destdir="${bin.test.dir}" classpathref="classpath.compiletest" includeantruntime="false" debug="on" encoding="UTF-8" release="8">
 			<src path="${src.test.dir}"/>
 		</javac>
 
