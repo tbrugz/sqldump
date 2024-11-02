@@ -4,7 +4,6 @@
 	<property name="src.cdi.dir" value="src_cdi"/>
 	<property name="src.diff.dir" value="src_diff"/>
 	<property name="src.graphml.dir" value="src_graphml"/>
-	<property name="src.mondrian.dir" value="src_mondrian"/>
 	<property name="src.run.dir" value="src_run"/>
 	<property name="src.pivot.dir" value="src_pivot"/>
 	<property name="src.xtra.dir" value="src_xtra"/>
