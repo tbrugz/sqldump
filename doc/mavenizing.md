@@ -11,6 +11,15 @@ https://maven.apache.org/ref/3.9.9/maven-model/maven.html#build
 https://stackoverflow.com/questions/270445/maven-compile-with-multiple-src-directories
 
 
+## tests
+
+```sh
+mvn test -Dtest=tbrugz.sqldiff.SQLDiffMainTest                 # ok when running solo
+mvn test -Dtest=tbrugz.sqldump.RoundTripTest#testRoundtrip     # should be ignored
+mvn test -Dtest=tbrugz.sqldiff.io.DiffIOTest
+```
+
+
 ## comparing two jars
 
 ```sh

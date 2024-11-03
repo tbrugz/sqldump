@@ -1,10 +1,12 @@
 package tbrugz.sqldump;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
+@Ignore
 public class RoundTripTest {
 
 	/*

@@ -7,14 +7,25 @@ import java.io.InputStreamReader;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldiff.model.ColumnDiff;
+//import tbrugz.sqldiff.model.ColumnDiff.TempColumnAlterStrategy;
 import tbrugz.sqldiff.model.SchemaDiff;
 
 public class DiffIOTest {
 
 	static String DIR_OUT = "work/output/DiffIOTest";
 	
+	@Before
+	public void before() {
+		//updateDbId(null);
+		ColumnDiff.updateFeatures(DBMSResources.instance().getSpecificFeatures((String)null));
+		//ColumnDiff.useTempColumnStrategy = TempColumnAlterStrategy.NEVER;
+	}
+
 	@Test
 	public void testReadWriteXML() throws JAXBException, IOException {
 		XMLDiffIO xio = new XMLDiffIO();

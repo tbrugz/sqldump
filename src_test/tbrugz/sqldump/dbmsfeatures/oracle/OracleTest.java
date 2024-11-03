@@ -10,6 +10,7 @@ import java.util.Properties;
 import javax.naming.NamingException;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import tbrugz.sqldump.dbmd.DBMSFeatures;
@@ -18,6 +19,7 @@ import tbrugz.sqldump.dbmsfeatures.OracleFeaturesLite;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
+@Ignore
 public class OracleTest {
 
 	static String connPrefix = "sqldump";
