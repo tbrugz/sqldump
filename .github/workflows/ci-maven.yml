@@ -1,0 +1,32 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: CI-maven
+
+on:
+  push:
+  #  branches: [ master ]
+  pull_request:
+  #  branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Java 20+ drops support for -source/-target/–release 7 -- https://inside.java/2022/09/26/quality-heads-up/
+        java: [ '8', '11', '17', '21' ]
+    name: java ${{ matrix.java }} build
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
+        cache: maven
+
+    - name: Build with Maven
+      run: mvn -V -B package --file pom.xml
