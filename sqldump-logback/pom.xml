@@ -3,6 +3,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>sqldump</artifactId>
+    <version>0.11-SNAPSHOT</version>
+  </parent>
+
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqldump-logback</artifactId>
   <packaging>jar</packaging>
@@ -15,28 +22,6 @@
   <url>https://github.com/tbrugz/sqldump</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-    <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
-    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-    <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-
-    <!-- release: maven-compiler 3.6.0+ required -->
-    <!--
-    <maven.compiler.release>7</maven.compiler.release>
-    -->
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-
-    <maven-enforcer-plugin.requireJavaVersion>1.7.0</maven-enforcer-plugin.requireJavaVersion>
-    <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
-
-    <sqldump.version>0.11-SNAPSHOT</sqldump.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <logback.version>1.2.13</logback.version>
-
-    <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
   </properties>
   
   <licenses>

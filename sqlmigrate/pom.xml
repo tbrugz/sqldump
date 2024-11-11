@@ -3,6 +3,13 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>sqldump</artifactId>
+    <version>0.11-SNAPSHOT</version>
+  </parent>
+
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqlmigrate</artifactId>
   <packaging>jar</packaging>
@@ -15,59 +22,6 @@
   <url>https://github.com/tbrugz/sqldump</url>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-    <maven-clean-plugin.version>2.6.1</maven-clean-plugin.version>
-    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
-    <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
-
-    <!-- release: maven-compiler 3.6.0+ required -->
-    <!--
-    <maven.compiler.release>7</maven.compiler.release>
-    -->
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-
-    <maven-enforcer-plugin.requireJavaVersion>1.7.0</maven-enforcer-plugin.requireJavaVersion>
-    <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
-
-    <!-- <queryon.version>${project.version}</queryon.version> -->
-    <sqldump.version>0.11-SNAPSHOT</sqldump.version>
-    <!--
-    <kmlutils.version>0.5.6</kmlutils.version>
-    -->
-    <log4j.version>1.2.17</log4j.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <logback.version>1.2.13</logback.version>
-
-    <!--
-    <jaxb.version>2.3.3</jaxb.version>
-    <jaxb.impl.version>2.3.0.1</jaxb.impl.version>
-    <jaxws.version>2.3.2</jaxws.version>
-    <gson.version>2.8.6</gson.version>
-
-    <httpclient.version>4.5.13</httpclient.version>
-
-    <h2.version>1.4.200</h2.version>
-    <postgresql.version>42.2.14.jre7</postgresql.version>
-    <mariadb.version>2.6.2</mariadb.version>
-    <mssql-jdbc.version>8.4.1.jre8</mssql-jdbc.version>
-    <derby.version>10.12.1.1</derby.version>
-    <sqlite.version>3.28.0</sqlite.version>
-    -->
-
-    <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
-
-    <!--
-    <findbugs.version>2.5.2</findbugs.version>
-    <checkstyle.version>2.10</checkstyle.version>
-    <cobertura.version>2.5.2</cobertura.version>
-    <pmd.version>3.0.1</pmd.version>
-    <jdepend-maven-plugin.version>2.0</jdepend-maven-plugin.version>
-
-    <checkstyle.config.location>checkstyle_checks.xml</checkstyle.config.location>
-    -->
   </properties>
   
   <licenses>
@@ -311,8 +265,8 @@
   <dependencies>
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
-      <artifactId>sqldump</artifactId>
-      <version>${sqldump.version}</version>
+      <artifactId>sqldump-core</artifactId>
+      <version>${project.version}</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
