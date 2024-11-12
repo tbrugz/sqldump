@@ -622,7 +622,8 @@ public class SchemaModelScriptDumper extends AbstractFailable implements SchemaM
 		for(int i=0;i<privs.size();i++) {
 			if(privs.get(i).getPrivilege().equals(g.getPrivilege())) {
 				if(g.getColumns()!=null) {
-					privs.get(i).getColumns().addAll(g.getColumns());
+					//privs.get(i).getColumns().addAll(g.getColumns());
+					privs.get(i).addColumns(g.getColumns());
 				}
 				added = true;
 			}

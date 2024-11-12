@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -142,13 +143,26 @@ public class Grant implements DBType, Serializable {
 		this.columns = columns;
 	}
 
+	public void addColumns(List<String> columns) {
+		if(getColumns()==null) {
+			setColumns(columns);
+		}
+		else {
+			// what if 'columns' is an immutable list?
+			getColumns().addAll(columns);
+		}
+	}
+
 	@Deprecated
 	public String getColumn() {
 		return (columns!=null && columns.size()>0)?columns.get(0):null;
 	}
 
 	public void setColumn(String column) {
-		this.columns = column!=null ? Arrays.asList( column ) : null;
+		List<String> l = new ArrayList<>();
+		l.add(column);
+		this.columns = l;
+		//this.columns = column!=null ? Arrays.asList( column ) : null;
 	}
 
 	public static Grant parseGrant(final String grantStrPar) {
