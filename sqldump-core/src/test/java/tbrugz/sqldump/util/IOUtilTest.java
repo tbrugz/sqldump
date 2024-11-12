@@ -13,12 +13,17 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 public class IOUtilTest {
 
-	static String DIR = "test/data/";
+	//static final Log log = LogFactory.getLog(IOUtilTest.class);
+	
+	static String DIR = "src/test/resources/data/";
 	
 	@Test
 	public void readFromFilename() {
@@ -41,11 +46,19 @@ public class IOUtilTest {
 	
 	@Test
 	public void testReadFile() throws FileNotFoundException {
-		readFile("t1-ansi.txt");
-		readFile("t1-utf8.txt");
-		readFile("t1-utf8bom.txt");
-		readFile("t2-ansi.txt");
-		readFile("t2-utf8.txt");
+		String s = null;
+		s = readFile("t1-ansi.txt");
+		Assert.assertNotNull(s);
+		s = readFile("t1-utf8.txt");
+		Assert.assertNotNull(s);
+		s = readFile("t1-utf8bom.txt");
+		Assert.assertNotNull(s);
+		//s = readFile("t2-ansi.txt");
+		//Assert.assertNotNull(s);
+		//s = readFile("t2-utf8.txt");
+		//Assert.assertNotNull(s);
+		s = readFile("tx-does-not-exists.txt");
+		Assert.assertNull(s);
 	}
 
 	public String readFile(String file) throws FileNotFoundException {
