@@ -17,7 +17,7 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class CascadingDataDumpTest {
 
-	String OUTDIR = "work/output/CDD";
+	String OUTDIR = "target/work/output/CDD";
 	
 	@BeforeClass
 	public static void setupDB() throws Exception {

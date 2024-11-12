@@ -136,7 +136,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.schemadump.quoteallsqlidentifiers=true",
 					"-Dsqldump.schemadump.dumpdropstatements=true",
 					"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
-					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.outfilepattern=target/work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/SQLRunAndDumpTest/empdept.jaxb.xml",
 					"-Dsqldump.driverclass=org.h2.Driver",
@@ -150,11 +150,11 @@ public class SQLRunAndDumpTest {
 		//setSystemProperties(vmparamsDump);
 		sqld.doMain(null, p);
 		
-		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_DEPT.csv");
+		String csvDept = IOUtil.readFromFilename("target/work/output/SQLRunAndDumpTest/data_DEPT.csv");
 		String expected = "ID,NAME,PARENT_ID\r\n0,CEO,0\r\n1,HR,0\r\n2,Engineering,0\r\n";
 		Assert.assertEquals(expected, csvDept);
 		
-		String sqlEmp = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data_EMP.sql");
+		String sqlEmp = IOUtil.readFromFilename("target/work/output/SQLRunAndDumpTest/data_EMP.sql");
 		expected = "insert into EMP (ID, NAME, SUPERVISOR_ID, DEPARTMENT_ID, SALARY) values (1, 'john', 1, 1, 2000);";
 		Assert.assertEquals(expected, sqlEmp.substring(0, expected.length()));
 	}

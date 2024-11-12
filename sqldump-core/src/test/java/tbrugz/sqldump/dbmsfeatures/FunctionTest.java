@@ -28,7 +28,7 @@ public class FunctionTest {
 
 	static final Log log = LogFactory.getLog(FunctionTest.class);
 	static final String PROP_FILE = "FunctionTest.properties"; 
-	static final String DIR_OUT = "work/output/FunctionTest/";
+	static final String DIR_OUT = "target/work/output/FunctionTest/";
 
 	Properties prop = new Properties();
 

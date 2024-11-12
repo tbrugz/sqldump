@@ -30,7 +30,7 @@ public class SQLDiffTest {
 	//TODO: test with different databases
 	//see: http://www.mkyong.com/unittest/junit-4-tutorial-6-parameterized-test/
 	
-	static String DIR_OUT = "work/output/SQLDiffTest";
+	static String DIR_OUT = "target/work/output/SQLDiffTest";
 	
 	static String dbURL = null;
 	static String dbDriver = null;

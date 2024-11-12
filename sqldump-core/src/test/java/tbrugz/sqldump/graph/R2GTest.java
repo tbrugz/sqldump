@@ -34,12 +34,12 @@ public class R2GTest {
 		
 		/*
 		//dom4j...
-		Document dom = new SAXReader().read("work/output/graph/r2g.graphml");
+		Document dom = new SAXReader().read("target/work/output/graph/r2g.graphml");
 		Element e = dom.getRootElement();
 		System.out.println(dom.getName()+" / "+dom.getNodeType()+" / "+dom.nodeCount());
 		System.out.println(dom.asXML());
 		*/
-		Document doc = XMLUtil.getDoc(new File("work/output/graph/r2g.graphml"));
+		Document doc = XMLUtil.getDoc(new File("target/work/output/graph/r2g.graphml"));
 		
 		//List ln = e.selectNodes("//node");//graphml/graph/node
 		NodeList ln = XMLUtil.getList(doc, "node");
@@ -63,7 +63,7 @@ public class R2GTest {
 		proc.setConnection(conn);
 		proc.process();
 		
-		Document doc = XMLUtil.getDoc(new File("work/output/graph/r2g-sql.graphml"));
+		Document doc = XMLUtil.getDoc(new File("target/work/output/graph/r2g-sql.graphml"));
 		
 		//List ln = e.selectNodes("//node");//graphml/graph/node
 		NodeList ln = XMLUtil.getList(doc, "node");

@@ -24,7 +24,7 @@ import tbrugz.sqldump.util.SQLIdentifierDecorator;
 
 public class ScriptDumperTest {
 
-	final static String OUTDIR = "work/output/ScriptDumperTest";
+	final static String OUTDIR = "target/work/output/ScriptDumperTest";
 	
 	final static String T = "true";
 	final static String F = "false";

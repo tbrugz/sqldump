@@ -31,7 +31,7 @@ import tbrugz.sqldump.util.Utils;
 
 public class QueryTest {
 
-	static String DIR_OUT = "work/output/PivotTest/";
+	static String DIR_OUT = "target/work/output/PivotTest/";
 	
 	String pivotDriverClass = SQLPivotDriver.class.getName();
 	Properties prop = new Properties(); 

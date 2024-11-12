@@ -52,7 +52,7 @@ public class DataDumpTest {
 
 	static Log log = LogFactory.getLog(DataDumpTest.class);
 
-	static final String DIR_OUT = "work/output/DataDumpTest/";
+	static final String DIR_OUT = "target/work/output/DataDumpTest/";
 	static final String dbpath = "mem:DataDumpTest;DB_CLOSE_DELAY=-1";
 	static final String[] emptyArgs = {};
 	

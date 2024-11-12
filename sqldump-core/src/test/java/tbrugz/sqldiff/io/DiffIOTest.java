@@ -17,7 +17,7 @@ import tbrugz.sqldiff.model.SchemaDiff;
 
 public class DiffIOTest {
 
-	static String DIR_OUT = "work/output/DiffIOTest";
+	static String DIR_OUT = "target/output/DiffIOTest";
 	
 	@Before
 	public void before() {

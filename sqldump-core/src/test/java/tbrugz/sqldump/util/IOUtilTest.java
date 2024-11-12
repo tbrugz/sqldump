@@ -28,7 +28,7 @@ public class IOUtilTest {
 
 	@Test
 	public void writeAndRead() throws IOException {
-		String file = "work/output/util-ioutiltest.txt";
+		String file = "target/work/output/util-ioutiltest.txt";
 		Utils.prepareDir(new File(file));
 		Writer w = new FileWriter(file);
 		IOUtil.writeFile("abc123", w);

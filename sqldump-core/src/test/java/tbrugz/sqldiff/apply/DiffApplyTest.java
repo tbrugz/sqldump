@@ -14,7 +14,7 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class DiffApplyTest {
 
-	String OUTDIR = "work/output/DiffApplyTest";
+	String OUTDIR = "target/work/output/DiffApplyTest";
 	
 	@BeforeClass
 	public static void setupDB() throws Exception {

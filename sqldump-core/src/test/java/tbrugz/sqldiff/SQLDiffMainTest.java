@@ -27,7 +27,7 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class SQLDiffMainTest {
 
-	String OUTDIR = "work/output/SQLDiffMainTest";
+	String OUTDIR = "target/work/output/SQLDiffMainTest";
 	
 	@Test
 	public void testMain1() throws IOException, ClassNotFoundException, SQLException, NamingException, XMLStreamException, InterruptedException, ExecutionException, TimeoutException {
