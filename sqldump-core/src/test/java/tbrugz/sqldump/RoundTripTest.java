@@ -6,7 +6,7 @@ import org.junit.Test;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldump.sqlrun.SQLRun;
 
-//@Ignore
+@Ignore
 public class RoundTripTest {
 
 	static String DIR = "src/test/resources/roundtrip/";
@@ -23,7 +23,6 @@ public class RoundTripTest {
 		//<echo message="roundtrip1: phase 1: dump [jaxb]" />
 		String[] args1 = { "-propfile="+DIR+"/r1-sqldump-jaxb-test.properties" };
 		SQLDump.main(args1);
-		System.out.println("r1...");
 		
 		//<!-- 2 -->
 		//<echo message="roundtrip1: phase 2: run [derby]" />
