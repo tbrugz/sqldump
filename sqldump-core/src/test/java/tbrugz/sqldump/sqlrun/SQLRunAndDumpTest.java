@@ -34,7 +34,7 @@ public class SQLRunAndDumpTest {
 	
 	public static void setupModel(Connection conn) throws Exception {
 		String[] vmparamsRun = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				};
 		SQLRun sqlr = new SQLRun();
 		Properties p = new Properties();
@@ -108,14 +108,14 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-import;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
 				"-Dsqlrun.exec.02.inserttable=dept",
-				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=emp",
-				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
+				"-Dsqlrun.exec.05.importfile=src/test/resources/tbrugz/sqldump/sqlrun/emp.csv",
 				//"-Dsqlrun.exec.05.emptystringasnull=true",
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
@@ -164,10 +164,10 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-assert1;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
 				"-Dsqlrun.exec.02.inserttable=dept",
-				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.assert.03.sql=select * from dept",
 				"-Dsqlrun.assert.03.row-count.eq=3",
@@ -187,7 +187,7 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-assert2;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.assert.03.sql=select * from emp",
 				"-Dsqlrun.assert.03.row-count.eq=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
@@ -206,10 +206,10 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-assert3;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
 				"-Dsqlrun.exec.02.inserttable=dept",
-				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.assert.03.sql=select * from dept",
 				"-Dsqlrun.assert.03.row-count.gt=3",
@@ -229,10 +229,10 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-assert4;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
 				"-Dsqlrun.exec.02.inserttable=dept",
-				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.assert.03.sql=select * from dept",
 				"-Dsqlrun.assert.03.row-count.lt=3",
@@ -252,11 +252,11 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-csv-mapped;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.statement=create table ins_dept (ID integer, NAME varchar, DBLID integer)",
 				"-Dsqlrun.exec.10.import=csv",
 				"-Dsqlrun.exec.10.insertsql=insert into ins_dept (id, name, dblid) values (${0}, ${1}, cast(${0} as integer) + cast(${0} as integer))",
-				"-Dsqlrun.exec.10.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.10.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.10.skipnlines=1",
 				"-Dsqlrun.assert.20.sql=select * from ins_dept",
 				"-Dsqlrun.assert.20.row-count.eq=3",
@@ -332,10 +332,10 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-importfiles;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=dept",
-				"-Dsqlrun.exec.05.importfiles.glob=test/data/**/dept*.csv",
+				"-Dsqlrun.exec.05.importfiles.glob=../test/data/**/dept*.csv",
 				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/test/data/**/dept*.csv", // absolute path
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
@@ -353,7 +353,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.processingclasses=DataDump",
 					"-Dsqldump.datadump.dumpsyntaxes=csv",
 					//"-Dsqldump.datadump.csv.columnnamesheader=false",
-					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data-import_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.outfilepattern=../work/output/SQLRunAndDumpTest/data-import_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
@@ -365,7 +365,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparamsDump);
 		sqld.doMain(null, p);
 		
-		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data-import_DEPT.csv");
+		String csvDept = IOUtil.readFromFilename("../work/output/SQLRunAndDumpTest/data-import_DEPT.csv");
 		//System.out.println(csvDept);
 		int count = TestUtil.countLines(csvDept);
 		Assert.assertEquals(5+1, count);
@@ -378,10 +378,10 @@ public class SQLRunAndDumpTest {
 		String mydbpath = dbpath+"-importfiles-xls;DB_CLOSE_DELAY=-1";
 		
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.import=xls",
 				"-Dsqlrun.exec.05.inserttable=dept",
-				"-Dsqlrun.exec.05.importfiles.glob=test/data/**/dept*.xlsx",
+				"-Dsqlrun.exec.05.importfiles.glob=../test/data/**/dept*.xlsx",
 				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/test/data/**/dept*.csv", // absolute path
 				//"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
@@ -399,7 +399,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.processingclasses=DataDump",
 					"-Dsqldump.datadump.dumpsyntaxes=csv",
 					//"-Dsqldump.datadump.csv.columnnamesheader=false",
-					"-Dsqldump.datadump.outfilepattern=work/output/SQLRunAndDumpTest/data-import-xls_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.outfilepattern=../work/output/SQLRunAndDumpTest/data-import-xls_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
@@ -411,7 +411,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparamsDump);
 		sqld.doMain(null, p);
 		
-		String csvDept = IOUtil.readFromFilename("work/output/SQLRunAndDumpTest/data-import-xls_DEPT.csv");
+		String csvDept = IOUtil.readFromFilename("../work/output/SQLRunAndDumpTest/data-import-xls_DEPT.csv");
 		//System.out.println(csvDept);
 		int count = TestUtil.countLines(csvDept);
 		Assert.assertEquals(6+1, count);

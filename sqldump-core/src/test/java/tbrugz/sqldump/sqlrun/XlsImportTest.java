@@ -23,7 +23,7 @@ public class XlsImportTest {
 	@Test
 	public void doImportXls() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"@includes=../test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
 			"";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -40,9 +40,9 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsx() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"@includes=../test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
-			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n";
+			"sqlrun.exec.20.importfile=${basedir}/src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx\n";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
 		Properties p = new ParametrizedProperties();
@@ -57,7 +57,7 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsWithCreateTable() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"@includes=../test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.20.do-create-table=true\n"+
 			"";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -74,9 +74,9 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsxColMapper() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-xls.properties\n"+
+			"@includes=../test/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, DBLSALARY integer)\n"+
-			"sqlrun.exec.20.importfile=${basedir}/src_test/tbrugz/sqldump/sqlrun/emp.xlsx\n"+
+			"sqlrun.exec.20.importfile=${basedir}/src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx\n"+
 			"sqlrun.exec.20.insertsql=insert into ins_xls (id, name, dblsalary) values (${0}, ${1}, ${4}+${4})\n"
 			;
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -98,7 +98,7 @@ public class XlsImportTest {
 		
 		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_xls2");
 		p.setProperty("sqlrun.exec."+execId+".do-create-table", "true");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = new XlsImporter();
 		imp.setConnection(conn);
@@ -117,7 +117,7 @@ public class XlsImportTest {
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = new XlsImporter();
 		ImporterHelper.setImporterPlainProperties(imp, p);
@@ -134,7 +134,7 @@ public class XlsImportTest {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 		
 		// read xlsx
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
@@ -144,7 +144,7 @@ public class XlsImportTest {
 		Assert.assertEquals(5, CSVImportTest.get1stValue(conn, "select count(*) from ins_xls2"));
 
 		// read xls
-		is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xls");
+		is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xls");
 		p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
 		imp = ImporterHelper.getImporterByFileExt("xls", p);
@@ -164,7 +164,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_xls2");
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_LIMIT_LINES, "3");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
@@ -185,7 +185,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
@@ -207,7 +207,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
@@ -232,7 +232,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,-,-,int");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
@@ -256,7 +256,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "-,string,-,-,int");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
@@ -279,7 +279,7 @@ public class XlsImportTest {
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
 		//p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
 
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.xlsx");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);

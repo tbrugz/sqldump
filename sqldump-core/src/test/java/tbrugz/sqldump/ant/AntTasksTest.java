@@ -13,7 +13,7 @@ import tbrugz.sqldump.def.ProcessingException;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class AntTasksTest {
 	
-	File file = new File("src_test/build-test.xml");
+	File file = new File("src/test/resources/build-test.xml");
 
 	@Test(expected=BuildException.class) //inner exception should be ProcessingException...
 	public void testDumpFail() {

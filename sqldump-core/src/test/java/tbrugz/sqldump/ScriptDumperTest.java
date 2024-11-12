@@ -143,7 +143,7 @@ public class ScriptDumperTest {
 	@Test
 	public void dumpMysqlFull() throws Exception {
 		String file = OUTDIR+"/empdept-mysql-full.sql";
-		String[] args1 = { "-propfile=src_test/tbrugz/sqldump/sqld-mysql.properties" };
+		String[] args1 = { "-propfile=src/test/resources/tbrugz/sqldump/sqld-mysql.properties" };
 		SQLDump.main(args1);
 		
 		String sql = IOUtil.readFromFilename(file);

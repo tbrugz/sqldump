@@ -10,8 +10,8 @@ import org.junit.Test;
 
 public class FileUtilsTest {
 	
-	final File srcTestDir = new File("src_test/");
-	final File srcTestSqlrunDir = new File("src_test/tbrugz/sqldump/sqlrun");
+	final File srcTestDir = new File("src/test/resources/");
+	final File srcTestSqlrunDir = new File("src/test/resources/tbrugz/sqldump/sqlrun");
 
 	// see: https://stackoverflow.com/questions/26427450/run-junit-test-only-on-linux
 	final static boolean isWindows = System.getProperty("os.name").toLowerCase().startsWith("win");

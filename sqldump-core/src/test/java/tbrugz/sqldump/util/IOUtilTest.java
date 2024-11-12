@@ -22,7 +22,7 @@ public class IOUtilTest {
 	
 	@Test
 	public void readFromFilename() {
-		String sread = IOUtil.readFromFilename("src_test/tbrugz/sqldump/util/p1.properties");
+		String sread = IOUtil.readFromFilename("src/test/resources/tbrugz/sqldump/util/p1.properties");
 		Assert.assertEquals("id1=value1", sread);
 	}
 

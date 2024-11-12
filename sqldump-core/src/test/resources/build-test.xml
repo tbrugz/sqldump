@@ -76,7 +76,7 @@
 
 	<target name="diff2q-lib">
 		<sqld:diff2q failonerror="true">
-			<arg value="-propfile=src_test/tbrugz/sqldiff/diff2qtest.properties"/>
+			<arg value="-propfile=src/test/resources/tbrugz/sqldiff/diff2qtest.properties"/>
 		</sqld:diff2q>
 	</target>
 
@@ -87,7 +87,7 @@
 	<target name="diff2q">
 		<taskdef name="diff2q" classname="tbrugz.sqldump.ant.DiffTwoQueriesTask" classpathref="sqldump.exec"/>
 		<diff2q failonerror="true">
-			<arg value="-propfile=src_test/tbrugz/sqldiff/diff2qtest.properties"/>
+			<arg value="-propfile=src/test/resources/tbrugz/sqldiff/diff2qtest.properties"/>
 		</diff2q>
 	</target>
 

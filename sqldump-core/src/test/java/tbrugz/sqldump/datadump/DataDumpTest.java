@@ -71,18 +71,18 @@ public class DataDumpTest {
 	@BeforeClass
 	public static void setupDB() throws Exception {
 		String[] vmparams = {
-				"-Dsqlrun.exec.01.file=src_test/tbrugz/sqldump/sqlrun/empdept.sql",
+				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.02.import=csv",
 				"-Dsqlrun.exec.02.inserttable=dept",
-				"-Dsqlrun.exec.02.importfile=src_test/tbrugz/sqldump/sqlrun/dept.csv",
+				"-Dsqlrun.exec.02.importfile=src/test/resources/tbrugz/sqldump/sqlrun/dept.csv",
 				"-Dsqlrun.exec.02.skipnlines=1",
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=emp",
-				"-Dsqlrun.exec.05.importfile=src_test/tbrugz/sqldump/sqlrun/emp.csv",
+				"-Dsqlrun.exec.05.importfile=src/test/resources/tbrugz/sqldump/sqlrun/emp.csv",
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.exec.10.import=csv",
 				"-Dsqlrun.exec.10.inserttable=etc",
-				"-Dsqlrun.exec.10.importfile=src_test/tbrugz/sqldump/sqlrun/etc.csv",
+				"-Dsqlrun.exec.10.importfile=src/test/resources/tbrugz/sqldump/sqlrun/etc.csv",
 				"-Dsqlrun.exec.10.skipnlines=1",
 				//"-Dsqlrun.exec.05.emptystringasnull=true",
 				"-Dsqlrun.driverclass=org.h2.Driver",

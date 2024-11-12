@@ -42,14 +42,14 @@ public class CSVImportTest {
 
 	@Test
 	public void doImport() throws Exception {
-		String[] params = {"-propfile=test/sqlrun-h2-csv.properties"};
+		String[] params = {"-propfile=../test/sqlrun-h2-csv.properties"};
 		SQLRun.main(params);
 	}
 
 	@Test(expected = ProcessingException.class)
 	public void doImportWithError() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-csv.properties\n"+
+			"@includes=../test/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.00.statement=drop table unexistent";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
@@ -62,7 +62,7 @@ public class CSVImportTest {
 	@Test
 	public void doImportWithLimit() throws Exception {
 		String propsStr = 
-			"@includes=test/sqlrun-h2-csv.properties\n"+
+			"@includes=../test/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.20.limit=10";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
@@ -100,7 +100,7 @@ public class CSVImportTest {
 		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_csv2");
 		p.setProperty("sqlrun.exec."+execId+".columndelimiter", ";");
 		p.setProperty("sqlrun.exec."+execId+".skipnlines", "1");
-		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
 		imp.setConnection(conn);
@@ -122,7 +122,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
 		ImporterHelper.setImporterPlainProperties(imp, p);
@@ -143,7 +143,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -163,7 +163,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -182,7 +182,7 @@ public class CSVImportTest {
 		Properties p = new Properties();
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_scsv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.scsv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.scsv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("scsv", p);
 		imp.setConnection(conn);
@@ -202,7 +202,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_psv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.psv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.psv");
 		Importer imp = ImporterHelper.getImporterByFileExt("psv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
@@ -221,7 +221,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_tsv");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "2");
 
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.tsv");
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
@@ -237,7 +237,7 @@ public class CSVImportTest {
 		PreparedStatement stmt = conn.prepareStatement("create table ins_tsv2 (id integer, name varchar, supervisor_id integer, department_id integer, salary float)");
 		stmt.execute();
 
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.tsv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv");
 		imp.setConnection(conn);
@@ -261,7 +261,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_SKIP_N, "2");
 		p.setProperty(Constants.SUFFIX_LIMIT_LINES, "2");
 
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.tsv");
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
@@ -281,7 +281,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int");
 
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.tsv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.tsv");
 		Importer imp = ImporterHelper.getImporterByFileExt("tsv", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
@@ -301,7 +301,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int, - , string");
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -324,7 +324,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
 		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -346,7 +346,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, "true");
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,-,-,int");
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -375,7 +375,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
@@ -403,7 +403,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
 		
-		InputStream is = new FileInputStream("src_test/tbrugz/sqldump/sqlrun/emp.csv");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);

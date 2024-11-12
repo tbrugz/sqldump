@@ -27,7 +27,7 @@ public class SQLTokenizerFileTest {
 	charsets: UTF-8, ISO-8859-1
 	*/
 
-	static final String dir = "src_test/tbrugz/sqldump/sqlrun/";
+	static final String dir = "src/test/resources/tbrugz/sqldump/sqlrun/";
 
 	@Parameters
 	public static Collection<TokenizerStrategy> data() {
