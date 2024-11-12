@@ -53,12 +53,14 @@
       </resource>
     </resources>
     <!--<sourceDirectory>src, src_anttasks, src_castor, src_cdi, src_diff, src_graphml, src_pivot, src_run, src_utilities, src_xtra</sourceDirectory>-->
-    <testSourceDirectory>../src_test</testSourceDirectory>
+    <!--
+    <testSourceDirectory>src/test/java</testSourceDirectory>
     <testResources>
       <testResource>
         <directory>../src_test</directory>
       </testResource>
     </testResources>
+    -->
 
     <plugins>
         <plugin>
