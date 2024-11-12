@@ -27,36 +27,36 @@
     <!--<sourceDirectory>src</sourceDirectory>-->
     <resources>
       <resource>
-        <directory>src</directory>
+        <directory>src/main/resources</directory>
         <excludes>
           <exclude>log4j.properties</exclude>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
       <resource>
-        <directory>src_anttasks</directory>
+        <directory>../src_anttasks</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
       <resource>
-        <directory>src_diff</directory>
+        <directory>../src_diff</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
       <resource>
-        <directory>src_graphml</directory>
+        <directory>../src_graphml</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
     </resources>
     <!--<sourceDirectory>src, src_anttasks, src_castor, src_cdi, src_diff, src_graphml, src_pivot, src_run, src_utilities, src_xtra</sourceDirectory>-->
-    <testSourceDirectory>src_test</testSourceDirectory>
+    <testSourceDirectory>../src_test</testSourceDirectory>
     <testResources>
       <testResource>
-        <directory>src_test</directory>
+        <directory>../src_test</directory>
       </testResource>
     </testResources>
 
