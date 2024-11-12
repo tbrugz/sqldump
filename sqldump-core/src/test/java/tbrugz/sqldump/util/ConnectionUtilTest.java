@@ -12,7 +12,7 @@ public class ConnectionUtilTest {
 
 	@Before
 	public void setup() throws Exception {
-		File db = new File("work/connection.h2.db");
+		File db = new File("target/work/connection.h2.db");
 		db.delete();
 		Properties p = new Properties();
 		p.load(ConnectionUtilTest.class.getResourceAsStream("conn.properties"));

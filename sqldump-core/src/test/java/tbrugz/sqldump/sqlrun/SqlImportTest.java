@@ -17,7 +17,7 @@ public class SqlImportTest {
 	public void doImportSql() throws Exception {
 		String propsStr =
 			"sqlrun.driverclass=org.h2.Driver\n"+
-			"sqlrun.dburl=jdbc:h2:./work/db/sqlimport\n"+
+			"sqlrun.dburl=jdbc:h2:./target/work/db/sqlimport\n"+
 			"sqlrun.exec.005.statement=drop table if exists t1\n"+
 			"sqlrun.exec.006.statement=drop table if exists t2\n"+
 			"sqlrun.exec.010.statement=create table t1 (ID integer, NAME varchar)\n"+
@@ -45,7 +45,7 @@ public class SqlImportTest {
 	public void doImportSqlWithInsertSql() throws Exception {
 		String propsStr =
 			"sqlrun.driverclass=org.h2.Driver\n"+
-			"sqlrun.dburl=jdbc:h2:./work/db/sqlimport\n"+
+			"sqlrun.dburl=jdbc:h2:./target/work/db/sqlimport\n"+
 			"sqlrun.exec.005.statement=drop table if exists t1\n"+
 			"sqlrun.exec.006.statement=drop table if exists t2\n"+
 			"sqlrun.exec.010.statement=create table t1 (ID integer, NAME varchar)\n"+

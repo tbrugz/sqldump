@@ -70,8 +70,8 @@ public class SQLRunAndDumpTest {
 		String[] vmparamsDump = {
 					"-Dsqldump.grabclass=JDBCSchemaGrabber",
 					"-Dsqldump.processingclasses=JAXBSchemaXMLSerializer, JSONSchemaSerializer",
-					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/empdept.jaxb.xml",
-					"-Dsqldump.jsonserialization.outfile=work/output/empdept.json",
+					"-Dsqldump.xmlserialization.jaxb.outfile=target/work/output/empdept.jaxb.xml",
+					"-Dsqldump.jsonserialization.outfile=target/work/output/empdept.json",
 					/*"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+dbpath,
 					"-Dsqldump.user=h",
@@ -132,13 +132,13 @@ public class SQLRunAndDumpTest {
 		String[] vmparamsDump = {
 					"-Dsqldump.grabclass=JDBCSchemaGrabber",
 					"-Dsqldump.processingclasses=DataDump, JAXBSchemaXMLSerializer, SchemaModelScriptDumper",
-					"-Dsqldump.schemadump.outputfilepattern=work/output/SQLRunAndDumpTest/dbobjects.sql",
+					"-Dsqldump.schemadump.outputfilepattern=target/work/output/SQLRunAndDumpTest/dbobjects.sql",
 					"-Dsqldump.schemadump.quoteallsqlidentifiers=true",
 					"-Dsqldump.schemadump.dumpdropstatements=true",
 					"-Dsqldump.datadump.dumpsyntaxes=insertinto, csv",
 					"-Dsqldump.datadump.outfilepattern=target/work/output/SQLRunAndDumpTest/data_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
-					"-Dsqldump.xmlserialization.jaxb.outfile=work/output/SQLRunAndDumpTest/empdept.jaxb.xml",
+					"-Dsqldump.xmlserialization.jaxb.outfile=target/work/output/SQLRunAndDumpTest/empdept.jaxb.xml",
 					"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
 					"-Dsqldump.user=h",
@@ -335,8 +335,8 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.import=csv",
 				"-Dsqlrun.exec.05.inserttable=dept",
-				"-Dsqlrun.exec.05.importfiles.glob=../test/data/**/dept*.csv",
-				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/test/data/**/dept*.csv", // absolute path
+				"-Dsqlrun.exec.05.importfiles.glob=src/test/resources/data/**/dept*.csv",
+				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/src/test/resources/data/**/dept*.csv", // absolute path
 				"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
@@ -353,7 +353,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.processingclasses=DataDump",
 					"-Dsqldump.datadump.dumpsyntaxes=csv",
 					//"-Dsqldump.datadump.csv.columnnamesheader=false",
-					"-Dsqldump.datadump.outfilepattern=../work/output/SQLRunAndDumpTest/data-import_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.outfilepattern=target/work/output/SQLRunAndDumpTest/data-import_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
@@ -365,7 +365,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparamsDump);
 		sqld.doMain(null, p);
 		
-		String csvDept = IOUtil.readFromFilename("../work/output/SQLRunAndDumpTest/data-import_DEPT.csv");
+		String csvDept = IOUtil.readFromFilename("target/work/output/SQLRunAndDumpTest/data-import_DEPT.csv");
 		//System.out.println(csvDept);
 		int count = TestUtil.countLines(csvDept);
 		Assert.assertEquals(5+1, count);
@@ -381,8 +381,8 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.import=xls",
 				"-Dsqlrun.exec.05.inserttable=dept",
-				"-Dsqlrun.exec.05.importfiles.glob=../test/data/**/dept*.xlsx",
-				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/test/data/**/dept*.csv", // absolute path
+				"-Dsqlrun.exec.05.importfiles.glob=src/test/resources/data/**/dept*.xlsx",
+				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/src/test/resources/data/**/dept*.csv", // absolute path
 				//"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
@@ -399,7 +399,7 @@ public class SQLRunAndDumpTest {
 					"-Dsqldump.processingclasses=DataDump",
 					"-Dsqldump.datadump.dumpsyntaxes=csv",
 					//"-Dsqldump.datadump.csv.columnnamesheader=false",
-					"-Dsqldump.datadump.outfilepattern=../work/output/SQLRunAndDumpTest/data-import-xls_[tablename].[syntaxfileext]",
+					"-Dsqldump.datadump.outfilepattern=target/work/output/SQLRunAndDumpTest/data-import-xls_[tablename].[syntaxfileext]",
 					"-Dsqldump.datadump.writebom=false",
 					"-Dsqldump.driverclass=org.h2.Driver",
 					"-Dsqldump.dburl=jdbc:h2:"+mydbpath,
@@ -411,7 +411,7 @@ public class SQLRunAndDumpTest {
 		TestUtil.setProperties(p, vmparamsDump);
 		sqld.doMain(null, p);
 		
-		String csvDept = IOUtil.readFromFilename("../work/output/SQLRunAndDumpTest/data-import-xls_DEPT.csv");
+		String csvDept = IOUtil.readFromFilename("target/work/output/SQLRunAndDumpTest/data-import-xls_DEPT.csv");
 		//System.out.println(csvDept);
 		int count = TestUtil.countLines(csvDept);
 		Assert.assertEquals(6+1, count);

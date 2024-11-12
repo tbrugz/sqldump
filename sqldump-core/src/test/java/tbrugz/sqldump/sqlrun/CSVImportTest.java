@@ -42,14 +42,14 @@ public class CSVImportTest {
 
 	@Test
 	public void doImport() throws Exception {
-		String[] params = {"-propfile=../test/sqlrun-h2-csv.properties"};
+		String[] params = {"-propfile=src/test/resources/sqlrun-h2-csv.properties"};
 		SQLRun.main(params);
 	}
 
 	@Test(expected = ProcessingException.class)
 	public void doImportWithError() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-csv.properties\n"+
+			"@includes=src/test/resources/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.00.statement=drop table unexistent";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
@@ -62,7 +62,7 @@ public class CSVImportTest {
 	@Test
 	public void doImportWithLimit() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-csv.properties\n"+
+			"@includes=src/test/resources/sqlrun-h2-csv.properties\n"+
 			"sqlrun.exec.20.limit=10";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
 
@@ -100,7 +100,7 @@ public class CSVImportTest {
 		p.setProperty("sqlrun.exec."+execId+".inserttable", "ins_csv2");
 		p.setProperty("sqlrun.exec."+execId+".columndelimiter", ";");
 		p.setProperty("sqlrun.exec."+execId+".skipnlines", "1");
-		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("src/test/resources/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
 		imp.setConnection(conn);
@@ -122,7 +122,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("src/test/resources/data/tse_partidos.csv");
 		
 		Importer imp = new CSVImporter();
 		ImporterHelper.setImporterPlainProperties(imp, p);
@@ -143,7 +143,7 @@ public class CSVImportTest {
 		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv2");
 		p.setProperty(CSVImporter.SUFFIX_COLUMNDELIMITER, ";");
 		p.setProperty(Constants.SUFFIX_SKIP_N, "1");
-		InputStream is = new FileInputStream("../test/data/tse_partidos.csv");
+		InputStream is = new FileInputStream("src/test/resources/data/tse_partidos.csv");
 		
 		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
 		imp.setConnection(conn);
