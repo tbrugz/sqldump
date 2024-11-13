@@ -32,3 +32,15 @@ https://unix.stackexchange.com/questions/128303/how-to-list-files-in-a-zip-witho
 https://unix.stackexchange.com/questions/452673/compare-two-zip-files-for-differences
 
 https://diffoscope.org/
+
+
+## build, install
+
+`mvn clean package`  
+`mvn clean install`
+
+
+## deploy
+
+* SNAPSHOTs:  
+`mvn clean deploy`
