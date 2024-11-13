@@ -39,12 +39,14 @@
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
+      <!--
       <resource>
         <directory>../src_diff</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
+      -->
       <resource>
         <directory>../src_graphml</directory>
         <excludes>
@@ -78,7 +80,7 @@
                             <source>../src_anttasks</source>
                             <!--<source>src_castor</source>-->
                             <!--<source>../src_cdi</source>-->
-                            <source>../src_diff</source>
+                            <!--<source>../src_diff</source>-->
                             <source>../src_graphml</source>
                             <!--<source>../src_pivot</source>-->
                             <source>../src_run</source>
