@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>sqldump</artifactId>
+    <version>0.11-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.bitbucket.tbrugz</groupId>
+  <artifactId>utils4sqldump</artifactId>
+  <version>0.11-SNAPSHOT</version>
+  <packaging>jar</packaging>
+
+  <description>
+    Utilities for sqldump
+  </description>
+  <url>https://github.com/tbrugz/sqldump</url>
+
+  <properties>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>tbrugz.util.XsdGenerator</mainClass>
+          <!--
+          <executable>maven</executable>
+          <arguments>
+            <argument>-X</argument>
+            <argument>myproject:dist</argument>
+          </arguments>
+          -->
+          <!--
+          <environmentVariables>
+            <LANG>en_US</LANG>
+          </environmentVariables>
+          -->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>sqldump-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId>
+      <artifactId>jaxb-impl</artifactId>
+      <version>2.3.3</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
+</project>

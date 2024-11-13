@@ -33,7 +33,7 @@ public class XsdGenerator {
 	 *  com.sun.xml.internal.bind.v2.ContextFactory
 	 */
 	
-	static String schemaFileName = "src/sqld-model.xsd"; // schemamodel.xsd ?
+	static String schemaFileName = "target/sqld-model.xsd"; // schemamodel.xsd ?
 
 	public class MySchemaOutputResolver extends SchemaOutputResolver {
 		@Override
