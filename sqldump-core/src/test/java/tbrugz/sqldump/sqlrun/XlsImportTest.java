@@ -20,10 +20,12 @@ import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class XlsImportTest {
 	
+	static String DIR = "src/test/resources/";
+	
 	@Test
 	public void doImportXls() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-xls.properties\n"+
+			"@includes="+DIR+"/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
 			"";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -40,7 +42,7 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsx() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-xls.properties\n"+
+			"@includes="+DIR+"/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, SUPERVISOR_ID integer, DEPARTMENT_ID integer, SALARY integer)\n"+
 			"sqlrun.exec.20.importfile=${basedir}/src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx\n";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -57,7 +59,7 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsWithCreateTable() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-xls.properties\n"+
+			"@includes="+DIR+"/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.20.do-create-table=true\n"+
 			"";
 		InputStream sis = new ByteArrayInputStream(propsStr.getBytes());
@@ -74,7 +76,7 @@ public class XlsImportTest {
 	@Test
 	public void doImportXlsxColMapper() throws Exception {
 		String propsStr = 
-			"@includes=../test/sqlrun-h2-xls.properties\n"+
+			"@includes="+DIR+"/sqlrun-h2-xls.properties\n"+
 			"sqlrun.exec.02.statement=create table ins_xls (ID integer, NAME varchar, DBLSALARY integer)\n"+
 			"sqlrun.exec.20.importfile=${basedir}/src/test/resources/tbrugz/sqldump/sqlrun/emp.xlsx\n"+
 			"sqlrun.exec.20.insertsql=insert into ins_xls (id, name, dblsalary) values (${0}, ${1}, ${4}+${4})\n"
