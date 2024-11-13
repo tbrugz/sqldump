@@ -47,6 +47,7 @@
 
   <modules>
     <module>sqldump-core</module>
+    <module>sqldump-anttasks</module>
     <module>sqldump-jopendoc</module>
     <module>sqldump-logback</module>
     <!--<module>sqldump-mondrian</module>-->
