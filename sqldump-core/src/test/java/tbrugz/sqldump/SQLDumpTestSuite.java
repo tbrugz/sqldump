@@ -35,7 +35,7 @@ import tbrugz.sqldump.dbmsfeatures.FunctionTest;
 import tbrugz.sqldump.dbmsfeatures.TriggerTest;
 //import tbrugz.sqldump.dbmsfeatures.oracle.OracleTest;
 import tbrugz.sqldump.def.DBMSResourcesTest;
-import tbrugz.sqldump.graph.R2GTest;
+//import tbrugz.sqldump.graph.R2GTest;
 //import tbrugz.sqldump.mondrianschema.MondrianTests;
 import tbrugz.sqldump.pivot.DriverTest;
 import tbrugz.sqldump.pivot.KeyTest;
@@ -145,7 +145,7 @@ import tbrugz.sqldump.util.StringUtilsTest;
 	SQLRunProcessorTest.class,
 	
 	//graph
-	R2GTest.class,
+	//R2GTest.class,
 	
 	//mondrian - moved to 'sqldump-mondrian' project
 	//MondrianTests.class,

@@ -49,12 +49,14 @@
         </excludes>
       </resource>
       -->
+      <!--
       <resource>
         <directory>../src_graphml</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
       </resource>
+      -->
     </resources>
     <!--<sourceDirectory>src, src_anttasks, src_castor, src_cdi, src_diff, src_graphml, src_pivot, src_run, src_utilities, src_xtra</sourceDirectory>-->
     <!--
@@ -83,7 +85,7 @@
                             <!--<source>src_castor</source>-->
                             <!--<source>../src_cdi</source>-->
                             <!--<source>../src_diff</source>-->
-                            <source>../src_graphml</source>
+                            <!--<source>../src_graphml</source>-->
                             <!--<source>../src_pivot</source>-->
                             <!--<source>../src_run</source>-->
                             <!--<source>src_utilities</source>-->
@@ -111,12 +113,14 @@
       <version>2.0</version>
       <scope>compile</scope>
     </dependency>
+    <!--
     <dependency>
       <groupId>org.bitbucket.tbrugz</groupId>
       <artifactId>kmlutils</artifactId>
       <version>0.5.6</version>
       <scope>compile</scope>
     </dependency>
+    -->
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
