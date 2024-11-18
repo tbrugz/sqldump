@@ -44,3 +44,10 @@ https://diffoscope.org/
 
 * SNAPSHOTs:  
 `mvn clean deploy`
+
+
+## maven goals & tips
+
+`mvn enforcer:display-info`  
+`mvn versions:display-plugin-updates`  
+`mvn versions:display-dependency-updates`  
