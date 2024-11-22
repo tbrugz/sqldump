@@ -13,7 +13,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.poi.ss.usermodel.Cell;
-//import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -261,24 +261,24 @@ public class XlsImporter extends BaseFileImporter {
 		}
 		// https://stackoverflow.com/questions/52819907/cell-type-boolean-cannot-be-resolved-or-is-not-a-field-error
 		// POI 4.0.1+ (java8)
-		int type = cell.getCellType();
-		//CellType type = cell.getCellType();
+		//int type = cell.getCellType();
+		CellType type = cell.getCellType();
 		Object value = null;
 		
 		switch (type) {
-		case Cell.CELL_TYPE_BOOLEAN: //BOOLEAN:
+		case BOOLEAN:
 			value = cell.getBooleanCellValue();
 			break;
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 			value = cell.getCellFormula();
 			break;
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			value = cell.getNumericCellValue();
 			break;
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			value = cell.getStringCellValue();
 			break;
-		case Cell.CELL_TYPE_BLANK:
+		case BLANK:
 			break;
 		default:
 			log.warn("Unknown cell type: "+type+" [cell="+cell+"]");
