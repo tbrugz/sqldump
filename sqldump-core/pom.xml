@@ -36,6 +36,7 @@
     <resources>
       <resource>
         <directory>src/main/resources</directory>
+        <filtering>true</filtering>
         <excludes>
           <exclude>log4j.properties</exclude>
         </excludes>
@@ -52,6 +53,25 @@
     -->
 
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>buildnumber-maven-plugin</artifactId>
+        <version>${buildnumber-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <phase>validate</phase>
+            <goals>
+              <goal>create</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <doCheck>true</doCheck>
+          <doUpdate>false</doUpdate>
+          <failTheBuild>false</failTheBuild>
+          <timestampFormat>{0,date,yyyy-MM-dd HH:mm:ss}</timestampFormat>
+        </configuration>
+      </plugin>
         <!--
         <plugin>
             <groupId>org.codehaus.mojo</groupId>

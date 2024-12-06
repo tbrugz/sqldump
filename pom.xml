@@ -33,7 +33,7 @@
     <maven-enforcer-plugin.requireJavaVersion>1.8.0</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.2.5</maven-enforcer-plugin.requireMavenVersion>
 
-    <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
+    <buildnumber-maven-plugin.version>3.1.0</buildnumber-maven-plugin.version>
     <versions-maven-plugin.version>2.16.2</versions-maven-plugin.version>
     <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
 

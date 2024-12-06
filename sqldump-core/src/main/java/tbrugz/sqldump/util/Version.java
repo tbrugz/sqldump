@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class Version {
 
-	static final String PROP_VERSION = "version";
+	static final String PROP_VERSION = "project.version";
 	static final String PROP_BUILD_NUMBER = "build.revisionNumber";
 	static final String PROP_BUILD_TIMESTAMP = "build.timestamp";
 	
