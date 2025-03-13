@@ -23,6 +23,8 @@ import tbrugz.sqldump.cdi.CdiUtils;
 public class ConnectionUtil {
 	
 	static final Log log = LogFactory.getLog(ConnectionUtil.class);
+
+	//static Boolean cdiAvailable = null;
 	
 	public static final String DEFAULT_INITIAL_CONTEXT = "java:/comp/env";
 	
@@ -79,7 +81,10 @@ public class ConnectionUtil {
 			if(clazz==null) {
 				throw new IllegalArgumentException("invalid DataSource provider class [class="+connectionDataSourceProviderClass+"]");
 			}
-			Object o = CdiUtils.getClassInstance(clazz);
+			Object o = null;
+			//if(isCdiAvailable()) {
+			o = CdiUtils.getClassInstance(clazz);
+			//}
 			if(o==null) {
 				//log.info("null CDI DataSource provider [class="+connectionDataSourceProviderClass+"]");
 				o = Utils.getClassInstance(clazz);
@@ -418,5 +423,21 @@ public class ConnectionUtil {
 		}
 		return true;
 	}
+
+	/*
+	public static boolean isCdiAvailable() {
+		if(cdiAvailable!=null) {
+			return cdiAvailable;
+		}
+		Class<?> c = Utils.getClassWithinPackages("javax.enterprise.inject.spi.CDI", null);
+		if(c==null) {
+			cdiAvailable = false;
+		}
+		else {
+			cdiAvailable = true;
+		}
+		return cdiAvailable;
+	}
+	*/
 	
 }
