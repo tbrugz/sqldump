@@ -172,16 +172,17 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 			}
 			else {
 				String value = DataDumpUtils.getFormattedXMLValue(origVal, ctype, floatFormatter, dateFormatter, doEscape(i));
+				String tag = normalizeTag(lsColNames.get(i));
 				if(value==null) {
 					if(dumpNullValues) {
 						if(lastColWasRS) { sb.append("\t\t"); }
-						sb.append( "<"+lsColNames.get(i)+">"+ nullValueStr +"</"+lsColNames.get(i)+">" );
+						sb.append( "<"+tag+">"+ nullValueStr +"</"+tag+">" );
 						lastColWasRS = false;
 					}
 				}
 				else {
 					if(lastColWasRS) { sb.append("\t\t"); }
-					sb.append( "<"+lsColNames.get(i)+">"+ value +"</"+lsColNames.get(i)+">" );
+					sb.append( "<"+tag+">"+ value +"</"+tag+">" );
 					lastColWasRS = false;
 				}
 			}
@@ -194,9 +195,10 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 	}
 	
 	public boolean doEscape(final int i) {
+		String colName = lsColNames.get(i);
 		return escape4table?
-				( (colsNot2Escape==null || !colsNot2Escape.contains(lsColNames.get(i))) && (!useUnderscoreRaw2escape || !lsColNames.get(i).endsWith("_RAW") ) ):
-				(cols2Escape!=null && cols2Escape.contains(lsColNames.get(i)));
+				( (colsNot2Escape==null || !colsNot2Escape.contains(colName)) && (!useUnderscoreRaw2escape || !colName.endsWith("_RAW") ) ):
+				(cols2Escape!=null && cols2Escape.contains(colName));
 	}
 	
 	protected void dumpAndClearBuffer(StringBuilder sb, Writer fos) throws IOException {
@@ -280,6 +282,12 @@ public class XMLDataDump extends AbstractDumpSyntax implements DumpSyntaxBuilder
 	/* return new line with padding */
 	public String nl() {
 		return "\n"+padding;
+	}
+
+	public static String normalizeTag(String s) {
+		return s
+			.replaceAll("\\|+", "-" )
+			.replaceAll("\\:+", "." );
 	}
 
 	public String padd() {
