@@ -10,7 +10,9 @@ import tbrugz.sqldump.util.SQLUtils;
 public abstract class AbstractDumpSyntax extends DumpSyntax {
 
 	public static final String DEFAULT_DATADUMP_PREFIX = "sqldump.datadump.";
-	
+
+	public static final String SUFFIX_SIMPLE_COLUMNNAME = "simple-column-names";
+
 	protected String schemaName;
 	protected String tableName;
 	protected int numCol;

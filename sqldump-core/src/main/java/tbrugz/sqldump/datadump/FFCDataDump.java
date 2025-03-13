@@ -73,6 +73,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	
 	Integer spacesForEachTab = null;
 	boolean alignedTabReplacing = true;
+	boolean dumpSimpleColumnNames = false;
 	
 	/*
 	String fullPrefix() {
@@ -108,6 +109,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		showColNamesLowerLine = Utils.getPropBool(prop, PROP_DATADUMP_FFC_SHOWCOLNAMESLINES, showColNamesLowerLine);
 		spacesForEachTab = Utils.getPropInt(prop, PROP_DATADUMP_FFC_SPACES_FOR_EACH_TAB);
 		alignedTabReplacing = Utils.getPropBool(prop, PROP_DATADUMP_FFC_ALIGNED_TAB_REPLACING, alignedTabReplacing);
+		dumpSimpleColumnNames = Utils.getPropBool(prop, fullPrefix() + SUFFIX_SIMPLE_COLUMNNAME, dumpSimpleColumnNames);
 		postProcProperties();
 		validateProperties();
 	}
@@ -222,15 +224,16 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		//setting colsMaxLenght
 		for(int i=0;i<lsColNames.size();i++) {
 			int max = colsMaxLenght.get(i);
+			String colname = normalizeColumnName( lsColNames.get(i) );
 
 			if(showColNames) {
-				int maxCol = lsColNames.get(i).length();
+				int maxCol = colname.length();
 				if(max<maxCol) {
 					max = maxCol;
 					colsMaxLenght.set(i, max);
 				}
 			}
-			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+lsColNames.get(i)); }
+			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+colname); }
 		}
 	}
 
@@ -269,14 +272,15 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 				colsMaxLenght.set(i, max);
 			}
 
+			String colname = normalizeColumnName( lsColNames.get(i) );
 			if(showColNames) {
-				int maxCol = lsColNames.get(i).length();
+				int maxCol = colname.length();
 				if(max<maxCol) {
 					max = maxCol;
 					colsMaxLenght.set(i, max);
 				}
 			}
-			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+lsColNames.get(i)); }
+			if(colsMaxLenght.get(i)<=0) { log.warn("FFC: size=0; i="+i+"; name="+colname); }
 			valsStr.add(valueStr);
 		}
 		valuesBuffer.add(valsStr);
@@ -340,7 +344,8 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 			if(show1stColSeparator) { sb.append(firstPositionSeparator); }
 			for(int j=0;j<lsColNames.size();j++) {
 				//log.debug("format: "+colsMaxLenght.get(j)+": "+lsColNames.get(j)+"/"+lsColNames.get(j).length());
-				appendString(sb, colsMaxLenght.get(j), lsColNames.get(j), j);
+				String colname = normalizeColumnName( lsColNames.get(j) );
+				appendString(sb, colsMaxLenght.get(j), colname, j);
 			}
 			sb.append(recordDemimiter);
 	
@@ -520,4 +525,13 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	public String getMimeType() {
 		return PLAINTEXT_MIMETYPE; //XXX add ";Format=Fixed" ?
 	}
+
+	public String normalizeColumnName(String s) {
+		if(dumpSimpleColumnNames) {
+			List<String> values = DataDumpUtils.guessPivotColValues(s);
+			return Utils.join(values, "/");
+		}
+		return s;
+	}
+
 }

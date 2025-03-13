@@ -84,6 +84,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	String recordDelimiter;
 	String enclosing;
 	boolean writeUft8Bom = false;
+	boolean dumpSimpleColumnNames = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -94,6 +95,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		doTableNameHeaderDump = Utils.getPropBool(prop, fullPrefix() + SUFFIX_TABLENAMEHEADER, doTableNameHeaderDump);
 		doColumnNamesHeaderDump = Utils.getPropBool(prop, fullPrefix() + SUFFIX_COLUMNNAMESHEADER, DEFAULT_COLUMNNAMESHEADER);
 		writeUft8Bom = Utils.getPropBool(prop, fullPrefix() + SUFFIX_WRITEBOM_UTF8, writeUft8Bom);
+		dumpSimpleColumnNames = Utils.getPropBool(prop, fullPrefix() + SUFFIX_SIMPLE_COLUMNNAME, dumpSimpleColumnNames);
 		postProcProperties();
 	}
 
@@ -126,7 +128,7 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		if(doColumnNamesHeaderDump) {
 			StringBuilder sb = new StringBuilder();
 			for(int i=0;i<numCol;i++) {
-				sb.append( (i!=0?columnDelimiter:"") + lsColNames.get(i));
+				sb.append( (i!=0?columnDelimiter:"") + normalizeColumnName(lsColNames.get(i)) );
 			}
 			out(sb.toString(), fos, recordDelimiter);
 		}
@@ -221,5 +223,13 @@ public class CSVDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 		updateProperties(dd);
 		return dd;
 	}
-	
+
+	public String normalizeColumnName(String s) {
+		if(dumpSimpleColumnNames) {
+			List<String> values = DataDumpUtils.guessPivotColValues(s);
+			return Utils.join(values, "/");
+		}
+		return DataDumpUtils.getFormattedCsvString( s, columnDelimiter, recordDelimiter, enclosing, nullValueStr );
+	}
+
 }

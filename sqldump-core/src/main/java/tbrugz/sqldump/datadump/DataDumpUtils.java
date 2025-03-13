@@ -95,6 +95,14 @@ public class DataDumpUtils {
 			return nullValue;
 		}
 
+		return getFormattedCsvString(elem, separator, lineSeparator, enclosing, nullValue);
+	}
+
+	public static String getFormattedCsvString(Object elem, String separator, String lineSeparator, String enclosing, String nullValue) {
+		if(elem == null) {
+			return nullValue;
+		}
+
 		// String output:
 		String val = getString(elem);
 		
@@ -778,5 +786,32 @@ public class DataDumpUtils {
 		*/
 		//sb.append("\n");
 	}
+
+	public static List<String> guessPivotColValues(String colName) {
+		String colSepPattern = Pattern.quote(PivotResultSet.COLS_SEP);
+		String colValSepPattern = Pattern.quote(PivotResultSet.COLVAL_SEP);
+		return guessPivotColValues(colName, colSepPattern, colValSepPattern);
+	}
 	
+	public static List<String> guessPivotColValues(String colName, String colSepPattern, String colValSepPattern) {
+		List<String> ret = new ArrayList<>();
+		String[] partz = colName.split(colSepPattern);
+		//System.out.println("partz["+partz.length+"]: "+Arrays.asList(partz));
+		if(partz.length<=1) {
+			ret.add(colName);
+			return ret;
+		}
+
+		for(int i=0;i<partz.length;i++) {
+			//if(partz[i].contains(colValSepPattern)) {
+				String[] p2 = partz[i].split(colValSepPattern);
+				if(p2.length==2) {
+					ret.add(p2[1]);
+				}
+			//}
+		}
+		//System.out.println("vals: "+ret);
+		return ret;
+	}
+
 }
