@@ -781,6 +781,10 @@ public class Utils {
 	
 	static Set<String> deprecatedKeysWarned = new HashSet<String>();
 	
+	public static String getProp(Properties prop, String key) {
+		return getProp(prop, key, null);
+	}
+
 	public static String getProp(Properties prop, String key, String defaultValue) {
 		String ret = prop.getProperty(key, defaultValue);
 		//log.debug("getProp: "+key+" [value omitted]"); //" = "+ret);
@@ -827,6 +831,16 @@ public class Utils {
 		return ret;
 	}
 	
+	public static String getPropSecret(Properties prop, String key) {
+		return getPropSecret(prop, key, null);
+	}
+
+	public static String getPropSecret(Properties prop, String key, String defaultValue) {
+		String ret = prop.getProperty(key, defaultValue);
+		//log.debug("getPropSecret: "+key+" [value omitted]");
+		return ret;
+	}
+
 	public static boolean isNullOrEmpty(String s) {
 		return s==null || s.isEmpty();
 	}

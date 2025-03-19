@@ -232,20 +232,20 @@ public class ConnectionUtil {
 		}
 		
 		Properties p = new Properties();
-		String user = papp.getProperty(propsPrefix+SUFFIX_USER);
-		String password = papp.getProperty(propsPrefix+SUFFIX_PASSWD);
+		String user = Utils.getProp(papp, propsPrefix+SUFFIX_USER);
+		String password = Utils.getPropSecret(papp, propsPrefix+SUFFIX_PASSWD);
 		
 		if(user==null) {
-		if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME)) {
-			user = Utils.readText("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
-		}
-		else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME_GUI)) {
-			user = Utils.readTextGUI("username for '"+papp.getProperty(propsPrefix+SUFFIX_URL)+"': ");
-		}
+			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME)) {
+				user = Utils.readText("username for '"+dbUrl+"': ");
+			}
+			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORUSERNAME_GUI)) {
+				user = Utils.readTextGUI("username for '"+dbUrl+"': ");
+			}
 		}
 
 		if(password==null) {
-			String passBase64 = papp.getProperty(propsPrefix+SUFFIX_PASSWD_BASE64);
+			String passBase64 = Utils.getPropSecret(papp, propsPrefix+SUFFIX_PASSWD_BASE64);
 			if(passBase64!=null) {
 				try {
 					password = Utils.parseBase64(passBase64);
@@ -255,12 +255,12 @@ public class ConnectionUtil {
 			}
 		}
 		if(password==null) {
-		if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
-			password = Utils.readPassword("password [user="+user+"]: ");
-		}
-		else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD_GUI)) {
-			password = Utils.readPasswordGUI("password [user="+user+"]: ");
-		}
+			if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD)) {
+				password = Utils.readPassword("password [user="+user+"]: ");
+			}
+			else if(Utils.getPropBool(papp, propsPrefix+SUFFIX_ASKFORPASSWD_GUI)) {
+				password = Utils.readPasswordGUI("password [user="+user+"]: ");
+			}
 		}
 		
 		if(user!=null) { p.setProperty(CONN_PROP_USER, user); }
