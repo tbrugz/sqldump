@@ -182,9 +182,9 @@ public class ConnectionUtil {
 		String connectionDataSource = papp.getProperty(propsPrefix+SUFFIX_CONNECTION_DATASOURCE);
 		if(connectionDataSource!=null) { return true; }
 		
-		String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
-		String dbUrl = papp.getProperty(propsPrefix+SUFFIX_URL);
-		if(driverClass!=null && dbUrl!=null) { return true; }
+		//String driverClass = papp.getProperty(propsPrefix+SUFFIX_DRIVERCLASS);
+		String dbUrl = Utils.getProp(papp, propsPrefix+SUFFIX_URL);
+		if(dbUrl!=null) { return true; }
 		
 		return false;
 	}

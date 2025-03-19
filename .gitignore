@@ -14,3 +14,9 @@ ivysettings.xml
 
 derby.log
 sqldump.properties
+
+# eclipse
+.project
+.classpath
+**/.settings/org.eclipse*
+#.settings/org.eclipse.core.resources.prefs
