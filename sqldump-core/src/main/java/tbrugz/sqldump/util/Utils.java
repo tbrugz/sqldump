@@ -289,7 +289,9 @@ public class Utils {
 	public static boolean getPropBool(Properties prop, String key, boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
-		return isTrue(value.trim());
+		boolean ret = isTrue(value.trim());
+		//log.debug("getPropBool: "+key+" = "+ret);
+		return ret;
 	}
 
 	/** returns Boolean, so that return can be null */
@@ -301,7 +303,9 @@ public class Utils {
 	public static Boolean getPropBoolean(Properties prop, String key, Boolean defaultValue) {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
-		return isTrue(value.trim());
+		Boolean ret = isTrue(value.trim());
+		//log.debug("getPropBoolean: "+key+" = "+ret);
+		return ret;
 	}
 	
 	public static Integer getPropInt(Properties prop, String key) {
@@ -310,11 +314,14 @@ public class Utils {
 	
 	public static Integer getPropInt(Properties prop, String key, Integer defaultValue) {
 		String str = prop.getProperty(key);
+		if(str==null) { return defaultValue; }
 		try {
 			int i = Integer.parseInt(str);
+			//log.debug("getPropInt: "+key+" = "+i);
 			return i;
 		}
 		catch(Exception e) {
+			log.debug("getPropInt["+key+"]: Exception: "+e);
 			return defaultValue;
 		}
 	}
@@ -325,11 +332,14 @@ public class Utils {
 	
 	public static Long getPropLong(Properties prop, String key, Long defaultValue) {
 		String str = prop.getProperty(key);
+		if(str==null) { return defaultValue; }
 		try {
 			long l = Long.parseLong(str);
+			//log.debug("getPropLong: "+key+" = "+l);
 			return l;
 		}
 		catch(Exception e) {
+			log.debug("getPropLong["+key+"]: Exception: "+e);
 			return defaultValue;
 		}
 	}
@@ -340,11 +350,14 @@ public class Utils {
 	
 	public static Double getPropDouble(Properties prop, String key, Double defaultValue) {
 		String str = prop.getProperty(key);
+		if(str==null) { return defaultValue; }
 		try {
 			double d = Double.parseDouble(str);
+			//log.debug("getPropDouble: "+key+" = "+d);
 			return d;
 		}
 		catch(Exception e) {
+			log.debug("getPropDouble["+key+"]: Exception: "+e);
 			return defaultValue;
 		}
 	}
@@ -374,12 +387,12 @@ public class Utils {
 	}
 	
 	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter) {
-		String strings = prop.getProperty(key);
+		String strings = getProp(prop, key, null);
 		return getStringList(strings, delimiter);
 	}
 
 	public static List<String> getStringListFromProp(Properties prop, String key, String delimiter, Object[] allowedValues) {
-		String strings = prop.getProperty(key);
+		String strings = getProp(prop, key, null);
 		return getStringList(strings, delimiter, allowedValues);
 	}
 	
@@ -768,21 +781,23 @@ public class Utils {
 	
 	static Set<String> deprecatedKeysWarned = new HashSet<String>();
 	
-	public static String getProp(Properties p, String key, String defaultValue) {
-		String ret = p.getProperty(key, defaultValue);
+	public static String getProp(Properties prop, String key, String defaultValue) {
+		String ret = prop.getProperty(key, defaultValue);
+		//log.debug("getProp: "+key+" [value omitted]"); //" = "+ret);
 		return ret;
 	}
 	
-	public static String getPropWithDeprecated(Properties p, String key, String deprecatedKey, String defaultValue) {
+	public static String getPropWithDeprecated(Properties prop, String key, String deprecatedKey, String defaultValue) {
 		String ret = defaultValue;
-		if(Utils.propertyExists(p, deprecatedKey)) {
+		if(Utils.propertyExists(prop, deprecatedKey)) {
 			if(!deprecatedKeysWarned.contains(deprecatedKey)) { 
 				log.warn("deprecated prop '"+deprecatedKey+"' present - use '"+key+"' instead");
 				deprecatedKeysWarned.add(deprecatedKey);
 			}
-			ret = p.getProperty(deprecatedKey, defaultValue);
+			ret = prop.getProperty(deprecatedKey, defaultValue);
 		}
-		ret = p.getProperty(key, ret);
+		ret = getProp(prop, key, ret);
+		//log.debug("getPropWithDeprecated: "+key+" = "+ret);
 		return ret;
 	}
 

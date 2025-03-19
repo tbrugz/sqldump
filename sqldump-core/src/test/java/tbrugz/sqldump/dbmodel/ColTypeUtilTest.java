@@ -114,6 +114,6 @@ public class ColTypeUtilTest {
 	@AfterClass
 	public static void tearDown() {
 		log.info("tearDown");
-		Column.ColTypeUtil.setProperties(null);
+		Column.ColTypeUtil.resetProperties();
 	}
 }

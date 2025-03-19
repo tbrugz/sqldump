@@ -34,21 +34,22 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		public static void init(Properties prop) { //DBMS
 			usePrecisionMap.clear();
 			if(prop!=null) {
-					dbmsSpecificProps.clear();
-					dbmsSpecificProps.putAll(prop);
-					//setupPrecisionMap(prop);
-					setupStaticVars(prop);
+				dbmsSpecificProps.clear();
+				dbmsSpecificProps.putAll(prop);
+				//setupPrecisionMap(prop);
+				setupStaticVars(prop);
 			}
 		}
 		
 		public static void setProperties(Properties prop) {
 			if(prop==null) {
-				//reset...
-				usePrecisionMap.clear();
+				throw new IllegalArgumentException("null properties");
 			}
-			else {
-				setupPrecisionMap(prop);
-			}
+			setupPrecisionMap(prop);
+		}
+
+		public static void resetProperties() {
+			usePrecisionMap.clear();
 		}
 		
 		static void setupPrecisionMap(Properties prop) {
@@ -94,6 +95,9 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 			Boolean usePrecision = Utils.getPropBoolean(dbmsSpecificProps, "type."+colType+".useprecision");
 			if(usePrecision==null) {
 				usePrecision = Utils.getPropBoolean(dbmsSpecificProps, "type."+colType+"@"+dbid+".useprecision");
+			}
+			else {
+				usePrecisionMap.put(colType, usePrecision);
 			}
 			// add types.useprecision.regex? types.ignoreprecision.regex? ex: types.ignoreprecision.regex=TIMESTAMP\(\d+\)
 			if(usePrecision==null) {
@@ -223,8 +227,8 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 
 	@Override
 	public String toString() {
-		return "[column:"+this.getDefinition()+"]";
-		//return "[column: "+name+" "+type+"]";
+		//return "[column:"+this.getDefinition()+"]";
+		return "[column: "+name+" "+type+"]";
 	}
 
 	@Override
