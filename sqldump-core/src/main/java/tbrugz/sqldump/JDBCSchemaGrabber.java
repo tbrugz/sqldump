@@ -1145,7 +1145,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 			*/
 		}
-		catch(RuntimeException e) {
+		catch(SQLException | RuntimeException e) {
 			log.warn("Exception [COLUMN_DEF]: "+e);
 			log.debug("Exception [COLUMN_DEF]: "+e.getMessage(), e);
 		}
