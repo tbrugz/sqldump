@@ -4,7 +4,7 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ ant-build ]
   workflow_dispatch:
 
 jobs:
