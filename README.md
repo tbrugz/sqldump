@@ -5,7 +5,7 @@ SQLDump
 [![GNU Lesser General Public License, v3](https://img.shields.io/github/license/tbrugz/sqldump.svg?label=License&color=blue)](LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/sqldump.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.bitbucket.tbrugz/sqldump)
 [![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.bitbucket.tbrugz/sqldump?server=https%3A%2F%2Foss.sonatype.org&label=Snapshots)](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)
-[![CI](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ant.yml)
+[![CI](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml)
 
 
 Utility to dump schema and data from a RDBMS. Features:
@@ -101,31 +101,20 @@ Dependencies
 - [kmlutils](https://github.com/tbrugz/kmlutils) - optional, for graphML output
 - [jettison](http://jettison.codehaus.org/) - optional, for JSON output
 - [olap4j](http://www.olap4j.org/) & [mondrian](http://mondrian.pentaho.com/) - optional, for Mondrian Schema output, validation & data dump
-- [ant](http://ant.apache.org/) - recommended for building
-- [ivy](http://ant.apache.org/ivy/) - recommended for building
+- [maven](https://maven.apache.org/) - for building
 
 
-Building from sources (with ant & ivy)
+Building from sources (with maven)
 --------------------------------------
 - Run `git clone https://github.com/tbrugz/sqldump <project-dir>` (if not done already)
-- Run `ant prepare`
-- Install Ivy (`mkdir -p $HOME/.ant/lib` + `curl -o $HOME/.ant/lib/ivy-2.5.0.jar https://repo1.maven.org/maven2/org/apache/ivy/ivy/2.5.0/ivy-2.5.0.jar`)
-  or `ant ivy-install` (if not done already)
-- (*obsolete* - see `ivy-install`) Add to project dir an `ivysettings.xml` file that points to the [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo)
-  (like [this](https://bitbucket.org/tbrugz/mvn-repo/raw/master/ivysettings.xml) ; better: `cp templates/ivysettings.xml ivysettings.xml`)
-- (*obsolete* - see `ivy-install`) Copy `templates/build.properties` to `build.properties`
-- (*optional*) Edit `build.properties`
-- (*optional/eclipse*) Use [IvyDE](https://ant.apache.org/ivy/ivyde/), import project, right click + `Ivy > Resolve`
-- Run `ant resolve`
-- (*optional*) `ant test`
-- Run `ant dist` or `ant publish` (publishes, by default, to local maven repo: `$HOME/.m2/repository`) or `ant all`
-- (*optional*) Publish maven artifacts: Install Maven Ant tasks
-  (`curl -o $HOME/.ant/lib/maven-ant-tasks-2.1.3.jar https://repo1.maven.org/maven2/org/apache/maven/maven-ant-tasks/2.1.3/maven-ant-tasks-2.1.3.jar`)
-  or `ant mvn-ant-tasks-install`
-  & `ant publish-mvn-files`
+- Run `mvn package`
+- (install artifacts locally) `mvn install`
+- (deploy snapshot artifacts to snoatype) `mvn deploy`
+
+See also: [doc/mavenizing.md](doc/mavenizing.md)
 
 
-Running (with sources)
+**[deprecated]** Running (with sources)
 ----------------------
 - Download jdbc jars for your database of choice
 - Edit `sqldump.properties`
@@ -133,7 +122,7 @@ Running (with sources)
 - Run `tbrugz.sqldump.SQLDump`, e.g., `java -cp bin;lib/kmlutils.jar;lib/commons-logging-1.1.1.jar;lib/log4j-1.2.15.jar;<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
-Not building? Setup env (without sources)
+**[deprecated]** Not building? Setup env (without sources)
 -----------------------------------------
 - Download `sqldump.jar` jar from [sqldump maven repo](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump)
   (e.g.: [sqldump 0.9.16](https://bitbucket.org/tbrugz/mvn-repo/src/tip/org/bitbucket/tbrugz/sqldump/0.9.16/sqldump-0.9.16.jar))
@@ -148,12 +137,7 @@ Running (without sources)
 -------------------------
 - Download jdbc jars for your database of choice
 - (windows) Run `sqldump.bat`
-- (unix-like) Run `sqldump.sh` or run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
-
-
-Building maven 'modules'
-------------------------
-- `ant mvn-modules-install` (sqlmigrate, sqldump-jopendoc, sqldump-logback & sqldump-mondrian modules)
+- (unix-like) Run `sqldump.sh` or run `tbrugz.sqldump.SQLDump`, e.g., `java -cp sqldump-core.jar:lib/kmlutils.jar:lib/commons-logging-1.1.1.jar:lib/log4j-1.2.15.jar:<jdbc-driver-path> tbrugz.sqldump.SQLDump <options>`
 
 
 Building or running with Docker
@@ -200,5 +184,3 @@ Publishing
 Misc/End notes
 --------------
 To build with [Jenkins](http://jenkins-ci.org/), see [doc/jenkins-config.md](doc/jenkins-config.md)
-
-To use with Eclipse, [IvyDE](https://ant.apache.org/ivy/ivyde/download.html) is recommended
