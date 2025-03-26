@@ -3,6 +3,7 @@ package tbrugz.sqldump;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
@@ -690,9 +691,10 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 
 				//columns
 				ResultSet cols = dbmd.getColumns(null, table.getSchemaName(), tableName, null);
+				ResultSetMetaData colsMD = cols.getMetaData();
 				int numCol = 0;
 				while(cols.next()) {
-					Column c = retrieveColumn(cols);
+					Column c = retrieveColumn(cols, colsMD);
 					table.getColumns().add(c);
 					dbmsfeatures.addColumnSpecificFeatures(c, cols);
 					numCol++;
@@ -1074,8 +1076,13 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	}
 	
 	static boolean grabColumnIsAutoincrement = true;
-	
+
 	public static Column retrieveColumn(ResultSet cols) throws SQLException {
+		return retrieveColumn(cols, cols.getMetaData());
+	}
+
+	public static Column retrieveColumn(ResultSet cols, ResultSetMetaData colsMD) throws SQLException {
+		List<String> colsNames = DataDumpUtils.getColumnNames(colsMD);
 		Column c = new Column();
 		c.setName( cols.getString("COLUMN_NAME") );
 		try {
@@ -1125,17 +1132,23 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 		try {
-			String defaultValue = cols.getString("COLUMN_DEF");
-			if(!Utils.isNullOrEmpty(defaultValue)) {
-				if((Utils.isDouble(defaultValue) || Utils.isStringLiteral(defaultValue))) {
-					c.setDefaultValue(defaultValue);
+			// Oracle does not have it?
+			if(colsNames.contains("COLUMN_DEF")) {
+				String defaultValue = cols.getString("COLUMN_DEF");
+				if(!Utils.isNullOrEmpty(defaultValue)) {
+					if((Utils.isDouble(defaultValue) || Utils.isStringLiteral(defaultValue))) {
+						c.setDefaultValue(defaultValue);
+					}
+					else {
+						// XXX parse generated clause?
+						// Derby puts generated definition in 'COLUMN_DEF'
+						// H2 does not (H2 has INFORMATION_SCHEMA.COLUMNS.GENERATION_EXPRESSION)
+						c.setGeneratedDefinition(defaultValue);
+					}
 				}
-				else {
-					// XXX parse generated clause?
-					// Derby puts generated definition in 'COLUMN_DEF'
-					// H2 does not (H2 has INFORMATION_SCHEMA.COLUMNS.GENERATION_EXPRESSION)
-					c.setGeneratedDefinition(defaultValue);
-				}
+			}
+			else {
+				log.debug("column 'COLUMN_DEF' not available");
 			}
 			/*
 			boolean isGenerated = false;
