@@ -50,7 +50,7 @@ public class DataDumpUtils {
 	
 	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
 	static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-	static final NumberFormat floatFormatterSQL;
+	static final NumberFormat floatFormatterSQL; //TODO: add prop for floatFormatterSQL precision
 	static final NumberFormat longFormatter;
 	static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields
 	
@@ -69,7 +69,7 @@ public class DataDumpUtils {
 		floatFormatterSQL = NumberFormat.getNumberInstance(Locale.ENGLISH); //new DecimalFormat("##0.00#");
 		DecimalFormat df = (DecimalFormat) floatFormatterSQL;
 		df.setGroupingUsed(false);
-		df.applyPattern("###0.00#");
+		df.applyPattern("###0.0#####");
 	}
 
 	static {
