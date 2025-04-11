@@ -277,6 +277,10 @@ public class Utils {
 		return strEnumConstant.replace('_', ' ');
 	}
 	*/
+
+	static void logGetProp(String message) {
+		//log.debug(message);
+	}
 	
 	public static boolean getPropBool(Properties prop, String key) {
 		return getPropBool(prop, key, false);
@@ -290,7 +294,7 @@ public class Utils {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
 		boolean ret = isTrue(value.trim());
-		//log.debug("getPropBool: "+key+" = "+ret);
+		logGetProp("getPropBool: "+key+" = "+ret);
 		return ret;
 	}
 
@@ -304,7 +308,7 @@ public class Utils {
 		String value = prop.getProperty(key);
 		if(value==null) { return defaultValue; }
 		Boolean ret = isTrue(value.trim());
-		//log.debug("getPropBoolean: "+key+" = "+ret);
+		logGetProp("getPropBoolean: "+key+" = "+ret);
 		return ret;
 	}
 	
@@ -317,7 +321,7 @@ public class Utils {
 		if(str==null) { return defaultValue; }
 		try {
 			int i = Integer.parseInt(str);
-			//log.debug("getPropInt: "+key+" = "+i);
+			logGetProp("getPropInt: "+key+" = "+i);
 			return i;
 		}
 		catch(Exception e) {
@@ -335,7 +339,7 @@ public class Utils {
 		if(str==null) { return defaultValue; }
 		try {
 			long l = Long.parseLong(str);
-			//log.debug("getPropLong: "+key+" = "+l);
+			logGetProp("getPropLong: "+key+" = "+l);
 			return l;
 		}
 		catch(Exception e) {
@@ -353,7 +357,7 @@ public class Utils {
 		if(str==null) { return defaultValue; }
 		try {
 			double d = Double.parseDouble(str);
-			//log.debug("getPropDouble: "+key+" = "+d);
+			logGetProp("getPropDouble: "+key+" = "+d);
 			return d;
 		}
 		catch(Exception e) {
@@ -787,7 +791,10 @@ public class Utils {
 
 	public static String getProp(Properties prop, String key, String defaultValue) {
 		String ret = prop.getProperty(key, defaultValue);
-		//log.debug("getProp: "+key+" [value omitted]"); //" = "+ret);
+		if(ret==null || ret.equals(defaultValue)) {
+			return ret;
+		}
+		logGetProp("getProp: "+key+" = "+ret); // [value omitted]
 		return ret;
 	}
 	
@@ -837,7 +844,10 @@ public class Utils {
 
 	public static String getPropSecret(Properties prop, String key, String defaultValue) {
 		String ret = prop.getProperty(key, defaultValue);
-		//log.debug("getPropSecret: "+key+" [value omitted]");
+		if(ret==null || ret.equals(defaultValue)) {
+			return ret;
+		}
+		logGetProp("getPropSecret: "+key+" [value omitted]");
 		return ret;
 	}
 

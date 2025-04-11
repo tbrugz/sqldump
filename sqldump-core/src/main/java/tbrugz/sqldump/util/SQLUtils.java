@@ -127,6 +127,7 @@ public class SQLUtils {
 		if(rs.getMetaData().getColumnCount()!=numCol) {
 			log.debug("getMetaData().getColumnCount() ["+rs.getMetaData().getColumnCount()+"] != numCol ["+numCol+"]");
 		}
+		//log.info("getRowObjectListFromRS ["+rs.getMetaData().getColumnCount()+"] colTypes = "+colTypes);
 		List<Object> ls = new ArrayList<Object>();
 		for(int i=1;i<=numCol;i++) {
 			Object value = null;
@@ -209,6 +210,7 @@ public class SQLUtils {
 					value = rs.getLong(i);
 				}
 				else { value = rs.getDouble(i); }
+				//log.info("double type ["+i+"/"+coltype+"]: value = "+value);
 			}
 			else if(coltype.equals(Date.class)) {
 				value = rs.getTimestamp(i);
