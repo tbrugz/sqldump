@@ -68,6 +68,8 @@ public class ResultSetDiff {
 		boolean hasNextTarget = true;
 		List<Comparable> sourceVals = null;
 		List<Comparable> targetVals = null;
+		List<Object> sourceObjectVals = null;
+		List<Object> targetObjectVals = null;
 		final String fullTableName = (schemaName!=null?schemaName+".":"")+tableName;
 		
 		ResultSetMetaData md = source.getMetaData();
@@ -123,14 +125,16 @@ public class ResultSetDiff {
 				hasNextSource = source.next();
 				if(hasNextSource) {
 					sourceRowCount++;
-					sourceVals = cast(SQLUtils.getRowObjectListFromRS(source, lsColTypes, numCol));
+					sourceObjectVals = SQLUtils.getRowObjectListFromRS(source, lsColTypes, numCol);
+					sourceVals = cast(sourceObjectVals);
 				}
 			}
 			if(readTarget) {
 				hasNextTarget = target.next();
 				if(hasNextTarget) {
 					targetRowCount++;
-					targetVals = cast(SQLUtils.getRowObjectListFromRS(target, lsColTypes, numCol));
+					targetObjectVals = SQLUtils.getRowObjectListFromRS(target, lsColTypes, numCol);
+					targetVals = cast(targetObjectVals);
 				}
 			}
 			
@@ -145,6 +149,7 @@ public class ResultSetDiff {
 				else if(sourceVals==null) { compare = -1; }
 				else if(targetVals==null) { compare = 1; }
 				else {
+					//log.info("comparing source row "+sourceRowCount+" with target row "+targetRowCount);
 					compare = compareVals(sourceVals, targetVals, keyIndexes);
 				}
 			}
@@ -168,7 +173,8 @@ public class ResultSetDiff {
 					//last 'updated' that counts...
 					//TODO: compare (equals) should not be dumpSyntax responsability... or should it? no! so that 'getCategorizedWriter' may not be called
 					CategorizedOut cout = dscouts.get(ds);
-					updated = ds.dumpUpdateRowIfNotEquals(source, target, count, dumpEquals, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
+					//updated = ds.dumpUpdateRowIfNotEquals(source, target, count, dumpEquals, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
+					updated = ds.dumpUpdateRowIfNotEquals(sourceObjectVals, targetObjectVals, count, dumpEquals, target, cout.getCategorizedWriter("", tableName, "update", ds.getDefaultFileExtension()));
 				}
 				log.debug("update? "+sourceVals+" / "+targetVals+(updated?" [updated]":"")+" // "+hasNextSource+"/"+hasNextTarget);
 				}
@@ -200,6 +206,7 @@ public class ResultSetDiff {
 				}
 			}
 			else {
+				// ( compare>0 )
 				readSource = false; readTarget = true;
 				if(hasNextTarget) {
 					if(dumpInserts) {

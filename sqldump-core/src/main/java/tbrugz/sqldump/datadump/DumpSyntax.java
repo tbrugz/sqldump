@@ -55,8 +55,8 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 			nullValueStr = nullValue;
 		}
 		//XXX: test for 'global' properties, like 'sqldump.datadump.floatformat'?
-		String floatLocale = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatlocale");
-		String floatFormat = prop.getProperty("sqldump.datadump."+getSyntaxId()+".floatformat");
+		String floatLocale = Utils.getProp(prop, "sqldump.datadump."+getSyntaxId()+".floatlocale");
+		String floatFormat = Utils.getProp(prop, "sqldump.datadump."+getSyntaxId()+".floatformat");
 		floatFormatter = Utils.getFloatFormatter(floatLocale, floatFormat, getSyntaxId());
 	}
 

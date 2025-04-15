@@ -50,10 +50,20 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 	//XXX: rename to something like 'dumpRowWithMatchedKey' ?
 	@Override
 	public boolean dumpUpdateRowIfNotEquals(ResultSet rsSource,
-			ResultSet rsTarget, long count, boolean alsoDumpIfEquals, Writer w) throws IOException,
+			ResultSet rsTarget, long count, boolean dumpIfEquals, Writer w) throws IOException,
 			SQLException {
-		List<String> valsS = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol), dateFormatter );
-		List<String> valsT = (List<String>) DataDumpUtils.values4sql( SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol), dateFormatter );
+		List<Object> valsS = SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol);
+		List<Object> valsT = SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol);
+		
+		return dumpUpdateRowIfNotEquals(valsS, valsT, count, /*dumpIfEquals*/ false, /*rsTarget*/ null, w);
+	}
+	
+	@Override
+	public boolean dumpUpdateRowIfNotEquals(List<Object> valsSource, List<Object> valsTarget,
+			long count, boolean dumpIfEquals, ResultSet dumpIfEqualsRS, Writer w) throws IOException,
+			SQLException {
+		List<String> valsS = (List<String>) DataDumpUtils.values4sql( valsSource, dateFormatter );
+		List<String> valsT = (List<String>) DataDumpUtils.values4sql( valsTarget, dateFormatter );
 		
 		List<String> changedCols = getChangedCols(lsColNames, valsS, valsT);
 		if(changedCols.size()>0) {
@@ -62,7 +72,6 @@ public class SQLDataDiffSyntax extends InsertIntoDataDump implements DiffSyntax 
 			return true;
 		}
 		else {
-			//XXX: alsoDumpIfEquals??
 			return false;
 		}
 	}

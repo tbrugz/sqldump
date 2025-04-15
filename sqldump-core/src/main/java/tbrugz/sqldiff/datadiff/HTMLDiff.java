@@ -43,6 +43,13 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 		List<Object> valsS = SQLUtils.getRowObjectListFromRS(rsSource, lsColTypes, numCol, true);
 		List<Object> valsT = SQLUtils.getRowObjectListFromRS(rsTarget, lsColTypes, numCol, true);
 		
+		return dumpUpdateRowIfNotEquals(valsS, valsT, count, alsoDumpIfEquals, rsTarget, w);
+	}
+
+	@Override
+	public boolean dumpUpdateRowIfNotEquals(List<Object> valsS, List<Object> valsT,
+			long count, boolean dumpIfEquals, ResultSet dumpIfEqualsRS, Writer w) throws
+			IOException, SQLException {
 		List<Object> fvalS = getFormattedVals(valsS);
 		List<Object> fvalT = getFormattedVals(valsT);
 		if(!equals(fvalS, fvalT)) {
@@ -51,9 +58,8 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 			return true;
 		}
 		else {
-			if(alsoDumpIfEquals) {
-				//XXXxxx: really dump? add prop?
-				dumpRow(rsTarget, count, "equal", w);
+			if(dumpIfEquals) {
+				dumpRow(dumpIfEqualsRS, count, "equal", w);
 			}
 			if(shouldFlush) { flush(w); }
 			return false;
