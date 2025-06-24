@@ -344,10 +344,14 @@ public class PivotResultSet extends AbstractResultSet {
 			
 			//XXX: observer: count%COUNT_SIZE==0 ...
 			
+			if(count == 1) {
+				log.debug("1st row processed");
+			}
 			if(count%logEachXRows == 0) {
 				log.debug("processed row count: "+count);
 			}
 		}
+		log.debug("all rows processed [count: "+count+"]");
 		
 		if(countErrPrevValueEquals>0 || countErrPrevValue>0) {
 			log.warn("prevValue error count: countErrPrevValue=="+countErrPrevValue+" ; countErrPrevValueEquals=="+countErrPrevValueEquals+" [aggr="+aggregator+"]");
@@ -396,12 +400,14 @@ public class PivotResultSet extends AbstractResultSet {
 		}
 
 		//log.info("nonPivotKeyValues (before): "+nonPivotKeyValues+" / "+Arrays.asList(nonPivotKeyValues.get(0).values[0])+" / "+nonPivotKeyValues.get(0).values[0].getClass());
+		//log.debug("#nonPivotKeyValues = "+nonPivotKeyValues.size()+" (before sort)");
 		if(sortNonPivotKeyValues) {
 			//nonPivotKeyValues.sort(null); //java 8 ; java8
 			Collections.sort(nonPivotKeyValues);
 		}
-		//log.info("nonPivotKeyValues: "+nonPivotKeyValues);
-		//log.info("valuesByKey: "+valuesByKey);
+		log.debug("#nonPivotKeyValues = "+nonPivotKeyValues.size());
+		//log.debug("nonPivotKeyValues: "+nonPivotKeyValues);
+		//log.debug("valuesByKey: "+valuesByKey);
 		
 		originalRSRowCount = count;
 		processed = true;
@@ -418,6 +424,7 @@ public class PivotResultSet extends AbstractResultSet {
 		newColNames.clear();
 		newColTypes.clear();
 		
+		log.debug("processMetadata: #measures = "+measureCols.size());
 		//log.debug("processMetadata: measures="+measureCols);
 		
 		//measures in columns first
@@ -444,10 +451,11 @@ public class PivotResultSet extends AbstractResultSet {
 		//foreach pivoted column
 		genNewCols(0, "", dataColumns);
 		//log.debug("dataColumns[#"+dataColumns.size()+"] = "+dataColumns);
+		log.debug("#dataColumns = "+dataColumns.size());
 		
 		//single-measure
 		if(measureCols.size()==1 || !showMeasuresInColumns) {
-			//log.info("single-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns);
+			log.debug("single-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns);
 			newColNames.addAll(dataColumns);
 			if(measureCols.size()>=1) {
 				for(int i=0;i<dataColumns.size();i++) {
@@ -482,7 +490,7 @@ public class PivotResultSet extends AbstractResultSet {
 		}
 		//multi-measure (or zero-measure)
 		else {
-			//log.info("multi-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns+" ; showMeasuresFirst="+showMeasuresFirst);
+			log.debug("multi-measure: "+measureCols+" ; showMeasuresInColumns="+showMeasuresInColumns+" ; showMeasuresFirst="+showMeasuresFirst);
 			//TODOne: multi-measure
 			//List<String> colNames = new ArrayList<String>();
 			//colNames.addAll(newColNames);
@@ -533,6 +541,7 @@ public class PivotResultSet extends AbstractResultSet {
 
 			//log.info("processMetadata[2]:: measureCols="+measureCols+" ; dataColumns="+dataColumns+" ; newColNames="+newColNames);
 		}
+		log.debug("#newColNames: "+newColNames.size());
 		
 		if(noColsWithNullValues) {
 			removeColumnsWithNoValues();
@@ -541,14 +550,18 @@ public class PivotResultSet extends AbstractResultSet {
 		int nonDataColumns = colsNotToPivot.size()+(showMeasuresInColumns?0:1);
 		keysForDataColumns = new Key[newColNames.size()];
 		//log.info("nonDataColumns="+nonDataColumns+" ; newColNames.size()="+newColNames.size());
+		log.debug("nonDataColumns="+nonDataColumns+" ; newColNames.size()="+newColNames.size());
 		
 		for(int i=nonDataColumns;i<newColNames.size();i++) {
 			String colName = newColNames.get(i);
 			keysForDataColumns[i] = getKeyFromDataColumnName(colName);
 			//log.info("["+i+"/"+nonDataColumns+"] colName="+colName+" ; idx="+(i-nonDataColumns)+" // "+keysForDataColumns[i]);
 		}
+		log.debug("#keysForDataColumns="+keysForDataColumns.length);
 		
 		resetPosition();
+
+		log.debug("processMetadata: #columns(newColNames)="+newColNames.size()+" #types="+newColTypes.size());
 
 		//log.debug("keysForDataColumns: "+Arrays.asList(keysForDataColumns));
 		//log.debug("processMetadata: columns(newColNames)="+newColNames+" types="+newColTypes);
@@ -613,6 +626,7 @@ public class PivotResultSet extends AbstractResultSet {
 		int cntpl = colsNotToPivot.size();
 		//boolean[] colsToKeep = new boolean[newColNames.size()];
 		//log.info("colsNotToPivot: "+colsNotToPivot+" ; colsToPivotNames: "+colsToPivotNames+" ; newColNames: "+newColNames);
+		log.debug("removeColumnsWithNoValues: #colsNotToPivot: "+cntpl+" ; #colsToPivotNames: "+colsToPivotNames.size()+" ; #newColNames: "+newColNames.size());
 		for(int i=newColNames.size()-1;i>=cntpl+(showMeasuresInColumns?0:1);i--) {
 			String col = newColNames.get(i);
 			String[] parts = col.split(COLS_SEP_PATTERN);
@@ -652,6 +666,7 @@ public class PivotResultSet extends AbstractResultSet {
 				newColTypes.remove(i);
 			}
 		}
+		log.debug("after removeColumnsWithNoValues: #colsNotToPivot: "+cntpl+" ; #colsToPivotNames: "+colsToPivotNames.size()+" ; #newColNames: "+newColNames.size());
 		
 		if(newColNames.size()==0) {
 			log.warn("newColNames is empty [colsNotToPivot="+colsNotToPivot+"][colsToPivotNames="+colsToPivotNames+"]");
@@ -769,7 +784,7 @@ public class PivotResultSet extends AbstractResultSet {
 	
 	void validateKeyValue(String col, Object val) {
 		if(val==null) {
-			log.debug("value for key col is null [col = "+col+"]");
+			//log.debug("value for key col is null [col = "+col+"]");
 		}
 		else {
 			if(val.toString().contains(COLS_SEP)) {
