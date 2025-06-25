@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Key implements Comparable<Key> {
 
-	public final Object[] values;
+	final Object[] values;
 	
 	public Key(Object[] values) {
 		if(values==null) {

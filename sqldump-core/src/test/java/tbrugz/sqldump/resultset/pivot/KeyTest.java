@@ -1,4 +1,4 @@
-package tbrugz.sqldump.pivot;
+package tbrugz.sqldump.resultset.pivot;
 
 import java.util.Arrays;
 
@@ -6,8 +6,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Assert;
 import org.junit.Test;
-
-import tbrugz.sqldump.resultset.pivot.Key;
 
 public class KeyTest {
 
@@ -50,8 +48,8 @@ public class KeyTest {
 		Key k3 = k1.copy(2);
 		Key k4 = k1.copy(2, 4);
 		
-		log.debug(k3);
-		log.debug(k4);
+		//log.debug(k3);
+		//log.debug(k4);
 		
 		Assert.assertEquals(k1, k2);
 		Assert.assertArrayEquals(Arrays.copyOfRange(k1.values, 2, k1.values.length), k3.values);
