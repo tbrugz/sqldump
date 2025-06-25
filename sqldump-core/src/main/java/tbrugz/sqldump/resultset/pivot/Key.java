@@ -3,6 +3,7 @@ package tbrugz.sqldump.resultset.pivot;
 import java.util.Arrays;
 
 public class Key implements Comparable<Key> {
+
 	final Object[] values;
 	
 	public Key(Object[] values) {
@@ -55,9 +56,9 @@ public class Key implements Comparable<Key> {
 			//System.out.println("v: "+v+" ["+v.getClass()+"] / ov: "+ov+" ["+ov.getClass()+"]");
 			
 			// nulls last ;)
-			if(v!=null && ov==null) { return 1; }
-			if(v==null && ov!=null) { return -1; }
-			if(v==null && ov==null) { return 0; }
+			if(v!=null && ov==null) { return -1; }
+			if(v==null && ov!=null) { return 1; }
+			if(v==null && ov==null) { continue; }
 			
 			if(!v.equals(ov)) {
 				
@@ -86,6 +87,13 @@ public class Key implements Comparable<Key> {
 		if((values.length < o.values.length)) { return -1; }
 		if((values.length > o.values.length)) { return 1; }
 		return 0;
+	}
+	
+	public Key copy() {
+		Object[] vals = new Object[values.length];
+		System.arraycopy(values, 0, vals, 0, values.length);
+		Key k = new Key(vals);
+		return k;
 	}
 
 }
