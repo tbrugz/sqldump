@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public class Key implements Comparable<Key> {
 
-	final Object[] values;
+	public final Object[] values;
 	
 	public Key(Object[] values) {
 		if(values==null) {
@@ -90,8 +90,23 @@ public class Key implements Comparable<Key> {
 	}
 	
 	public Key copy() {
+		/*
 		Object[] vals = new Object[values.length];
 		System.arraycopy(values, 0, vals, 0, values.length);
+		Key k = new Key(vals);
+		return k;
+		*/
+		return copy(0, values.length);
+	}
+
+	public Key copy(int srcPos) {
+		return copy(srcPos, values.length);
+	}
+
+	public Key copy(int srcPos, int destPos) {
+		Object[] vals = new Object[destPos - srcPos];
+		//System.out.println("src=" + srcPos + "; dest="+ destPos + "; vals="+Arrays.asList(values));
+		System.arraycopy(values, srcPos, vals, 0, destPos - srcPos);
 		Key k = new Key(vals);
 		return k;
 	}

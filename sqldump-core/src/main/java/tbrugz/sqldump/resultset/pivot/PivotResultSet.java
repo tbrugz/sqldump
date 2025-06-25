@@ -620,22 +620,29 @@ public class PivotResultSet extends AbstractResultSet {
 		if(colsToPivotNames.size()==0) {
 			return newColumns;
 		}
-		int measurel = 1;
+		//int measurel = 1;
 		int cntpl = colsNotToPivot.size();
-		int offset = measurel+cntpl;
+		int offset = 0; //measurel+cntpl;
 		int ctpl = colsToPivotNames.size();
 		//int colsz = measurel+cntpl+ctpl;
 		//Set<Key> keys = valuesByKey.keySet();
 		List<Key> keys = new ArrayList<>();
 		for(Key key: valuesByKey.keySet()) {
-			keys.add(key.copy());
+			/*
+			Object[] vals = new Object[ctpl];
+			System.arraycopy(key.values, cntpl+1, vals, 0, ctpl);
+			//log.debug("key.values: "+Arrays.asList(key.values)+" vals: "+Arrays.asList(vals));
+			Key k = new Key(vals);
+			keys.add(k);
+			*/
+			keys.add(key.copy(cntpl+1));
 		}
 		//log.debug("keys[0]:: "+keys);
-		for(Key key: keys) {
+		/*for(Key key: keys) {
 			for(int i=0;i<measurel+cntpl;i++) {
 				key.values[i] = null;
 			}
-		}
+		}*/
 		//log.debug("keys[1]:: "+keys);
 		Collections.sort(keys);
 		//log.debug("keys[2]:: "+keys);
@@ -649,8 +656,10 @@ public class PivotResultSet extends AbstractResultSet {
 			//log.debug(Arrays.asList(values));
 			//Arrays.sort(values, nullOkComparator);
 			sb.append( colsToPivotNames.get(0) + COLVAL_SEP + valueToString(key.values[offset]));
+			//log.debug( "["+0+"] " + colsToPivotNames.get(0) + COLVAL_SEP + valueToString(key.values[offset]) );
 			for(int i=1;i<ctpl;i++) {
-				sb.append( COLS_SEP + colsToPivotNames.get(i) + COLVAL_SEP + valueToString(key.values[offset+i]));
+				//log.debug( "["+i+"] "+ COLS_SEP + colsToPivotNames.get(i) + COLVAL_SEP + valueToString(key.values[offset+i]) );
+				sb.append( COLS_SEP + colsToPivotNames.get(i) + COLVAL_SEP + valueToString(key.values[offset+i]) );
 			}
 			String nc = sb.toString();
 			if(!newColumns.contains(nc)) {
