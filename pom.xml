@@ -6,8 +6,9 @@
 
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqldump</artifactId>
-  <version>0.11-SNAPSHOT</version>
   <packaging>pom</packaging>
+  <version>0.11-SNAPSHOT</version>
+
   <name>sqldump</name>
   <description>
     Utility to dump schema and data from a RDBMS
@@ -20,8 +21,8 @@
 
     <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
-    <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     <!--<maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>-->
+    <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
 
     <maven-enforcer-plugin.requireJavaVersion>1.8.0</maven-enforcer-plugin.requireJavaVersion>
@@ -62,8 +63,8 @@
 
   <licenses>
     <license>
-      <name>GNU Affero General Public License, Version 3</name>
-      <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <name>GNU Lesser General Public License, Version 3</name>
+      <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
