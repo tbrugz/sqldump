@@ -3,13 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <!--
-  <parent>
-    <groupId>org.sonatype.oss</groupId>
-    <artifactId>oss-parent</artifactId>
-    <version>7</version>
-  </parent>
-  -->
+
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqldump</artifactId>
   <version>0.11-SNAPSHOT</version>
@@ -90,6 +84,15 @@
 
   <distributionManagement>
     <snapshotRepository>
+      <id>central</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </snapshotRepository>
+    <repository>
+      <id>central</id>
+      <url>hhttps://repo.maven.apache.org/maven2/</url>
+    </repository>
+    <!--
+    <snapshotRepository>
       <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
@@ -97,6 +100,7 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
+    -->
   </distributionManagement>
 
   <build>
