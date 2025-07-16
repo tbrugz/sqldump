@@ -116,9 +116,7 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 		}
 		
 		if(autoSizeColumn) {
-			for(int i=0;i<numCol;i++) {
-				sheet.autoSizeColumn(i);
-			}
+			autoSizeColumns();
 		}
 
 		if(freezeHeaderRowsAndColumns) {
@@ -128,6 +126,12 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 		CreationHelper createHelper = wb.getCreationHelper();
 		cellDateStyle = wb.createCellStyle();
 		cellDateStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
+	}
+
+	public void autoSizeColumns() {
+		for(int i=0;i<numCol;i++) {
+			sheet.autoSizeColumn(i);
+		}
 	}
 	
 	@Override
@@ -150,7 +154,7 @@ public class PoiXlsSyntax extends OutputStreamDumper implements DumpSyntaxBuilde
 	
 	Workbook createWorkbook() {
 		return new HSSFWorkbook();
-	}	
+	}
 	
 	void setCellvalue(Cell cell, Object o) {
 		if(o == null) {}
