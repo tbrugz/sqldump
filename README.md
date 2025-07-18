@@ -4,7 +4,8 @@ SQLDump
 
 [![GNU Lesser General Public License, v3](https://img.shields.io/github/license/tbrugz/sqldump.svg?label=License&color=blue)](LICENSE)
 [![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/sqldump.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.bitbucket.tbrugz/sqldump)
-[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.bitbucket.tbrugz/sqldump?server=https%3A%2F%2Foss.sonatype.org&label=Snapshots)](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)
+[![Maven Central (Snapshots)](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Forg%2Fbitbucket%2Ftbrugz%2Fsqldump%2Fmaven-metadata.xml&label=Central%20Snapshots)](https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/sqldump/maven-metadata.xml)
+[![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/org.bitbucket.tbrugz/sqldump?server=https%3A%2F%2Foss.sonatype.org&label=OSSRH%20Snapshots)](https://oss.sonatype.org/content/repositories/snapshots/org/bitbucket/tbrugz/)
 [![CI](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml)
 
 
