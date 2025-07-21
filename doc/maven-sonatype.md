@@ -19,6 +19,10 @@ see: https://central.sonatype.org/publish/generate-token/
 
 3- upload
 
+* SNAPSHOT: `mvn clean deploy`
+
+<!--
+(ant - deprecated)
 * SNAPSHOT: **publish-sonatype-snapshot** - `ant clean test publish-sonatype-snapshot`
 
 * RELEASE: **publish-sonatype-release** - `ant clean test publish-sonatype-release`
@@ -38,9 +42,10 @@ see: https://central.sonatype.org/publish/generate-token/
 	`(cd sqldump-jopendoc && mvn clean javadoc:jar deploy -P release)`  
 	`(cd sqldump-logback && mvn clean javadoc:jar deploy -P release)`  
 	`(cd sqldump-mondrian && mvn clean javadoc:jar deploy -P release)`  
+-->
 
 
-4- release (if RELEASE version)
+[**obsolete**] 4- release (if RELEASE version) 
 
 Go to <https://oss.sonatype.org/>, login, select 'staging repositories', select your repository (something like
 'comexampleapplication-1010' or 'orgbitbuckettbrugz-1019'), review it then 'close' & 'release'  

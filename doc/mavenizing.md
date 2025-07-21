@@ -46,6 +46,11 @@ https://diffoscope.org/
 `mvn clean deploy`
 
 
+## upgrade version
+
+`mvn versions:set -DnewVersion=<new-version>` - ex: `mvn versions:set -DnewVersion=0.11-SNAPSHOT`
+
+
 ## maven goals & tips
 
 `mvn enforcer:display-info`  

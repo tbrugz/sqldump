@@ -1,7 +1,15 @@
 
-sqldump 0.11 [xxxx-xx-xx]
+sqldump 0.11 [2025-07-xx]
 ------------
-- **java 8+** required
+- **java 8+** required (2024-10-30)
+- mavenize: **mavenizing sqldump** (2024-11-02)
+- mavenize: sqldump: packaging as pom, added modules
+- **breaking** moved: sqldump.jar -> **sqldump-core.jar**
+- dbmodel: Grant: add 'addColumns'
+- build/pom: updated apache poi (xls/xlsx): 3.17 -> 5.3.0
+- cdi: CdiUtils: checking if CDI is available (2025-03-13)
+- resultset-pivot: performance issue probably fixed
+- datadump: xlsx: added suffix '.use-streaming' (2025-07-16)
 
 
 sqldump 0.10 [2024-10-29]
@@ -50,7 +58,7 @@ sqldump 0.9.17 [2021-08-29]
 - sqlrun: importer: allowing to skip columns
 
 
-sqldump 0.9.16 [2018-01]
+sqldump 0.9.16 [2018-01-30]
 --------------
 - dbms: oracle: added prop suffix '.oracle.grab-executble-privileges'
 - resultset-pivot: allow "no pivot cols"
@@ -63,7 +71,7 @@ sqldump 0.9.16 [2018-01]
 - datadump: json: add suffixes '.null-data-element', '.no-array-on-unique-row', '.force-unique-row' (1877)
 
 
-sqldump 0.9.15
+sqldump 0.9.15 [2017-03-07]
 --------------
 - dumper: DropScriptDumper: added prop '.ifexists'
 - sqlrun: added 'sql' importer (1712)
@@ -82,7 +90,7 @@ sqldump 0.9.15
 - dumper: SchemaModelScriptDumper: added [syntaxfileext] pattern
 
 
-sqldump 0.9.14
+sqldump 0.9.14 [2016-08-03]
 --------------
 - dbms: added explainPlan()
 - util: ParametrizedProperties: accept env vars & added coalesce-like function
@@ -99,7 +107,7 @@ sqldump 0.9.14
 - sqlrun: added .assert 'processor' (1701)
 
 
-sqldump 0.9.13
+sqldump 0.9.13 [2015-06-26]
 --------------
 - util: ConnectionUtil: added suffix '.datasource.contextlookup'
 - diff: added prop suffix '.patchfilepattern' / PatchDumper - outputs patch (unified diff)
@@ -113,7 +121,7 @@ sqldump 0.9.13
 - many other refactorings & fixes
 
 
-sqldump 0.9.12
+sqldump 0.9.12 [2014-07-03]
 --------------
 - fixes: changes from checkstyle & findbugs
 - model: refactoring: added many getters & setters
@@ -122,7 +130,7 @@ sqldump 0.9.12
 - many other small changes/fixes
 
 
-sqldump 0.9.11
+sqldump 0.9.11 [2014-02-07]
 --------------
 - dbms: H2: added grabDBTriggers()
 - added sqlpivot driver
@@ -134,7 +142,7 @@ sqldump 0.9.11
 - jmx: added sqldump & sqlrun props for creating mbean
 
 
-sqldump 0.9.10
+sqldump 0.9.10 [2013-10-03]
 --------------
 - sqlrun: importer: more column types
 - processors: added SendMail
@@ -152,7 +160,7 @@ sqldump 0.9.10
 - mondrian: added caption (cube, dimension, level, hierarchy's 'all-member')
 
 
-sqldump 0.9.9
+sqldump 0.9.9 [2013-08-30]
 -------------
 - r2g: initial & final node types
 - mondrian: added prop '.measurecolsregex'
@@ -162,7 +170,7 @@ sqldump 0.9.9
 - fixed: some findbugs/pmd warnings ; ColumnDiff.compareTo()
 
 
-sqldump 0.9.8
+sqldump 0.9.8 [2013-08-12]
 -------------
 - LGPLv3 (.md) - https://github.com/tallus/forecast.io.py/blob/master/LICENSE-LGPL.md
 - added XML & JSON Serializer
@@ -194,7 +202,7 @@ sqldump 0.9.8
 - sqldiff: dbid.REPLACE
 
 
-sqldump 0.9.7
+sqldump 0.9.7 [2013-07-16]
 -------------
 - change deletefiles to processor
 - add deletefiles processor to sqldiff
@@ -218,7 +226,7 @@ sqldump 0.9.7
 - ~ test sqldump.jar in command-line! (jaxb serializarion w/ diff, ...)
 
 
-sqldump 0.9.6
+sqldump 0.9.6 [2013-06-18]
 -------------
 - datadump: iidb - insert into database
 - SMscriptdumper: dump to database
@@ -237,7 +245,7 @@ sqldump 0.9.6
 - package sources jar (ivy/mvn)
 
 
-sqldump 0.9.5
+sqldump 0.9.5 [2013-05-14]
 -------------
 - JMX monitoring: sqlrun
 - mondrian validator
@@ -247,7 +255,7 @@ sqldump 0.9.5
 - information_schema bugfixes
 
 
-sqldump 0.9.4
+sqldump 0.9.4 [2013-04-19]
 -------------
 - ~ DataDump: unit tests for 1 partitionby, many partitionby, 1 dumper, many dumpers
 - 'sqldump.failonerror' prop
@@ -261,7 +269,7 @@ sqldump 0.9.4
 - ~ monetdb - features
 
 
-sqldump 0.9.3
+sqldump 0.9.3 [2013-04-04]
 ------------- 
 - finish DataDiff: create connection
 - change ${} to [] for patterns
