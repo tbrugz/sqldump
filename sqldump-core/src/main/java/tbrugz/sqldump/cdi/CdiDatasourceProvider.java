@@ -1,5 +1,6 @@
 package tbrugz.sqldump.cdi;
 
+/*
 import javax.enterprise.inject.spi.CDI;
 import javax.sql.DataSource;
 
@@ -7,7 +8,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.util.DataSourceProvider;
-
+*/
 /*
  * Experimental...
  */

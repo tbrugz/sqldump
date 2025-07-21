@@ -1,6 +1,6 @@
 package tbrugz.sqldump.cdi;
 
-import javax.enterprise.inject.spi.CDI;
+import jakarta.enterprise.inject.spi.CDI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
