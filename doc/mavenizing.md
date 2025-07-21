@@ -45,6 +45,20 @@ https://diffoscope.org/
 * SNAPSHOTs:  
 `mvn clean deploy`
 
+* RELEASE:
+`mvn clean javadoc:jar source:jar deploy -P release`
+(publishing may require to go to https://central.sonatype.com/publishing/deployments)
+
+
+## upgrade version
+
+`mvn versions:set -DnewVersion=<new-version>` - ex: `mvn versions:set -DnewVersion=0.11-SNAPSHOT`
+
+
+## generate changelog (git)
+
+`git log --pretty=format:"- %s (%ad)%C(yellow)%d%Creset" --date=short --reverse v0.10^^..`
+
 
 ## maven goals & tips
 

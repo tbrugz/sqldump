@@ -7,14 +7,14 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>sqldump</artifactId>
-    <version>0.11-SNAPSHOT</version>
+    <version>0.12-SNAPSHOT</version>
   </parent>
 
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>utils4sqldump</artifactId>
-  <version>0.11-SNAPSHOT</version>
+  <version>0.12-SNAPSHOT</version>
   <packaging>jar</packaging>
-
+  <name>utils4sqldump</name>
   <description>
     Utilities for sqldump
   </description>

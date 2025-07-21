@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * @see: http://stackoverflow.com/questions/109383/how-to-sort-a-mapkey-value-on-the-values-in-java
+ * see: http://stackoverflow.com/questions/109383/how-to-sort-a-mapkey-value-on-the-values-in-java
  */
 public class MapEntryValueComparator<K,V> implements Comparator<Map.Entry<K,V>> {
 	public MapEntryValueComparator() {}

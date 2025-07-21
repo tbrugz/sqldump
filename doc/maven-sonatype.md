@@ -4,8 +4,10 @@ tips for publishing maven artifacts to sonatype
 
 1- setup gpg
 
-see: http://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/,
-http://central.sonatype.org/pages/working-with-pgp-signatures.html
+see:
+https://www.sonatype.com/blog/2010/01/how-to-generate-pgp-signatures-with-maven
+https://central.sonatype.org/publish/requirements/gpg/
+https://central.sonatype.org/publish/publish-portal-maven/
 
 
 2- setup `~/.m2/settings.xml` ; setup `~/.gpgcredentials`
@@ -19,6 +21,12 @@ see: https://central.sonatype.org/publish/generate-token/
 
 3- upload
 
+* SNAPSHOT: `mvn clean deploy`
+
+* RELEASE: `mvn clean javadoc:jar source:jar deploy -P release`
+
+<!--
+(ant - deprecated)
 * SNAPSHOT: **publish-sonatype-snapshot** - `ant clean test publish-sonatype-snapshot`
 
 * RELEASE: **publish-sonatype-release** - `ant clean test publish-sonatype-release`
@@ -38,9 +46,10 @@ see: https://central.sonatype.org/publish/generate-token/
 	`(cd sqldump-jopendoc && mvn clean javadoc:jar deploy -P release)`  
 	`(cd sqldump-logback && mvn clean javadoc:jar deploy -P release)`  
 	`(cd sqldump-mondrian && mvn clean javadoc:jar deploy -P release)`  
+-->
 
 
-4- release (if RELEASE version)
+[**obsolete**] 4- release (if RELEASE version) 
 
 Go to <https://oss.sonatype.org/>, login, select 'staging repositories', select your repository (something like
 'comexampleapplication-1010' or 'orgbitbuckettbrugz-1019'), review it then 'close' & 'release'  
