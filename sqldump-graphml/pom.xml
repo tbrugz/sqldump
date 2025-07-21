@@ -14,6 +14,7 @@
   <artifactId>sqldump-graphml</artifactId>
   <version>0.11</version>
   <packaging>jar</packaging>
+  <name>sqldump-graphml</name>
   <description>
     Utility to generate graphml graphs from sqldump
   </description>
