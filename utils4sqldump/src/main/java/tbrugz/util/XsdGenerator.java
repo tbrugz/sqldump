@@ -14,7 +14,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 /**
  * see: http://stackoverflow.com/questions/7212064/is-it-possible-to-generate-a-xsd-from-a-jaxb-annotated-class
  * 
- * XXX: add 'targetNamespace' && 'xmlns' attributes?
+ * XXX: add 'targetNamespace' and 'xmlns' attributes?
  */
 public class XsdGenerator {
 
