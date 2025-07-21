@@ -1,5 +1,5 @@
 
-sqldump 0.11 [2025-07-xx]
+sqldump 0.11 [2025-07-21]
 ------------
 - **java 8+** required (2024-10-30)
 - mavenize: **mavenizing sqldump** (2024-11-02)
