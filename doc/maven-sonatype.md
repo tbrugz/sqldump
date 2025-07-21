@@ -4,8 +4,10 @@ tips for publishing maven artifacts to sonatype
 
 1- setup gpg
 
-see: http://blog.sonatype.com/2010/01/how-to-generate-pgp-signatures-with-maven/,
-http://central.sonatype.org/pages/working-with-pgp-signatures.html
+see:
+https://www.sonatype.com/blog/2010/01/how-to-generate-pgp-signatures-with-maven
+https://central.sonatype.org/publish/requirements/gpg/
+https://central.sonatype.org/publish/publish-portal-maven/
 
 
 2- setup `~/.m2/settings.xml` ; setup `~/.gpgcredentials`
@@ -20,6 +22,8 @@ see: https://central.sonatype.org/publish/generate-token/
 3- upload
 
 * SNAPSHOT: `mvn clean deploy`
+
+* RELEASE: `mvn clean javadoc:jar source:jar deploy -P release`
 
 <!--
 (ant - deprecated)
