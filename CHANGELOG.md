@@ -1,4 +1,10 @@
 
+sqldump 0.12 [xxxx-xx-xx]
+------------
+- cdi: updating javax -> jakarta (2.0 -> 3.0.1)
+- pom: updated required maven (3.2.5 -> 3.6.3)
+
+
 sqldump 0.11 [2025-07-21]
 ------------
 - **java 8+** required (2024-10-30)
