@@ -16,7 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-//import java.util.Base64; //java8+
+import java.util.Base64; //java8+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,7 +33,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -773,14 +772,14 @@ public class Utils {
 
 	//see: http://stackoverflow.com/questions/469695/decode-base64-data-in-java/2054226#2054226
 	public static String parseBase64(String str) throws UnsupportedEncodingException {
-		byte[] arr = DatatypeConverter.parseBase64Binary(str);
-		//byte[] arr = Base64.getDecoder().decode(str); //java8+
+		//byte[] arr = DatatypeConverter.parseBase64Binary(str);
+		byte[] arr = Base64.getDecoder().decode(str); //java8+
 		return new String(arr, "UTF-8");
 	}
 
 	public static String printBase64(String str) {
-		return DatatypeConverter.printBase64Binary(str.getBytes());
-		//return Base64.getEncoder().encodeToString(str.getBytes());
+		//return DatatypeConverter.printBase64Binary(str.getBytes());
+		return Base64.getEncoder().encodeToString(str.getBytes());
 	}
 	
 	static Set<String> deprecatedKeysWarned = new HashSet<String>();
