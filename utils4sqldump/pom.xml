@@ -63,12 +63,14 @@
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
+    <!--
     <dependency>
-      <groupId>com.sun.xml.bind</groupId>
-      <artifactId>jaxb-impl</artifactId>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
       <version>${jaxb-impl.version}</version>
       <scope>runtime</scope>
     </dependency>
+    -->
   </dependencies>
 
 </project>
