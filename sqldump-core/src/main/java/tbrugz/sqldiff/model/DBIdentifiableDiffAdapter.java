@@ -1,6 +1,6 @@
 package tbrugz.sqldiff.model;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 import tbrugz.sqldiff.model.adapted.DBIdDiff;
 

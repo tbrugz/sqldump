@@ -2,7 +2,7 @@ package tbrugz.sqldiff.model;
 
 import java.util.Arrays;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import org.junit.Assert;
 import org.junit.Before;

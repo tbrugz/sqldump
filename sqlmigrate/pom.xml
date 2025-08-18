@@ -106,7 +106,7 @@
           <artifactId>org.eclipse.persistence.asm</artifactId>
         </exclusion>-->
         <!--<exclusion>
-          <groupId>javax.xml.bind</groupId>
+          <groupId>jakarta.xml.bind</groupId>
           <artifactId>jaxb-api</artifactId>
         </exclusion>-->
       </exclusions>

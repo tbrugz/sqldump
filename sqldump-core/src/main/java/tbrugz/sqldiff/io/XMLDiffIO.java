@@ -9,7 +9,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.Properties;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -3,7 +3,7 @@ package tbrugz.sqldiff.model;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import org.junit.Assert;
 import org.junit.Before;

@@ -10,4 +10,4 @@
 )*/
 package tbrugz.sqldump.dbmodel;
 
-//import javax.xml.bind.annotation.*;
+//import jakarta.xml.bind.annotation.*;

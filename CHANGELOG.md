@@ -1,8 +1,11 @@
 
-sqldump 0.12 [xxxx-xx-xx]
+sqldump ng [xxxx-xx-xx]
 ------------
+- CDI: upgrading to **CDI 3.0** (Jakarta EE 9)
 - cdi: updating javax -> jakarta (2.0 -> 3.0.1)
 - pom: updated required maven (3.2.5 -> 3.6.3)
+- JAXB: upgrading to **JAXB 3.0** (Jakarta EE 9)
+- jaxb: updating javax -> jakarta (2.3.3 -> 3.0.1)
 
 
 sqldump 0.11 [2025-07-21]
