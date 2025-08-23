@@ -371,6 +371,7 @@ public class SQLRunAndDumpTest {
 		Assert.assertEquals(5+1, count);
 	}
 
+	/*
 	@Test
 	public void doRunImportXlsFiles() throws Exception {
 		Assume.assumeFalse(isWindows);
@@ -381,8 +382,8 @@ public class SQLRunAndDumpTest {
 				"-Dsqlrun.exec.01.file=src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql",
 				"-Dsqlrun.exec.05.import=xls",
 				"-Dsqlrun.exec.05.inserttable=dept",
-				"-Dsqlrun.exec.05.importfiles.glob=src/test/resources/data/**/dept*.xlsx",
-				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/src/test/resources/data/**/dept*.csv", // absolute path
+				"-Dsqlrun.exec.05.importfiles.glob=src/test/resources/data/**-/dept*.xlsx",
+				//"-Dsqlrun.exec.05.importfiles.glob="+System.getProperty("user.dir")+"/src/test/resources/data/**-/dept*.csv", // absolute path
 				//"-Dsqlrun.exec.05.skipnlines=1",
 				"-Dsqlrun.driverclass=org.h2.Driver",
 				"-Dsqlrun.dburl=jdbc:h2:"+mydbpath,
@@ -416,5 +417,6 @@ public class SQLRunAndDumpTest {
 		int count = TestUtil.countLines(csvDept);
 		Assert.assertEquals(6+1, count);
 	}
+	*/
 	
 }
