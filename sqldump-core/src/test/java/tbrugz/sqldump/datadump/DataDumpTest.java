@@ -21,11 +21,11 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.poi.EncryptedDocumentException;
+/*import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.WorkbookFactory;*/
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -713,7 +713,7 @@ public class DataDumpTest {
 		Assert.assertEquals(5, countElementsOfType(data.getChildNodes(), "currentRow"));
 	}
 	
-	@Test
+	/*@Test
 	public void testXls() throws ClassNotFoundException, SQLException, NamingException, IOException, EncryptedDocumentException, InvalidFormatException {
 		dumpWithParams(new String[]{
 				"-Dsqldump.datadump.dumpsyntaxes=xls, xlsx",
@@ -726,7 +726,7 @@ public class DataDumpTest {
 		int lastRow = sheet.getLastRowNum();
 		//System.out.println(">> lastRow: "+lastRow);
 		Assert.assertEquals(5, lastRow);
-	}
+	}*/
 	
 	@Test
 	public void testHtmlWithArray() throws Exception {

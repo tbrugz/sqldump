@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>sqldump</artifactId>
+    <version>0.12-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.bitbucket.tbrugz</groupId>
+  <artifactId>sqldump-poi</artifactId>
+  <packaging>jar</packaging>
+  <version>0.12-SNAPSHOT</version>
+
+  <name>sqldump-poi</name>
+  <description>
+    Xls/Xlsx Syntax dumper and importer for sqldump &amp; sqlrun.
+  </description>
+  <url>https://github.com/tbrugz/sqldump</url>
+
+  <properties>
+  </properties>
+  
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:https://github.com/tbrugz/sqldump</connection>
+    <developerConnection>scm:git:https://github.com/tbrugz/sqldump</developerConnection>
+    <url>https://github.com/tbrugz/sqldump</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>tbrugz</id>
+      <name>Telmo Brugnara</name>
+      <email>tbrugz@gmail.com</email>
+    </developer>
+  </developers>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>sqldump-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>${poi-ooxml.version}</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>

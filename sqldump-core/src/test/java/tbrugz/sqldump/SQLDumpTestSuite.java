@@ -54,7 +54,7 @@ import tbrugz.sqldump.sqlrun.SQLTokenizerFileTest;
 import tbrugz.sqldump.sqlrun.SqlImportTest;
 import tbrugz.sqldump.sqlrun.StmtExecTest;
 import tbrugz.sqldump.sqlrun.StmtProcTest;
-import tbrugz.sqldump.sqlrun.XlsImportTest;
+//import tbrugz.sqldump.sqlrun.XlsImportTest;
 import tbrugz.sqldump.sqlrun.tokenzr.SQLStmtScannerTest;
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtilTest;
 import tbrugz.sqldump.util.CLIProcessorTest;
@@ -110,7 +110,7 @@ import tbrugz.sqldump.util.StringUtilsTest;
 
 	//import
 	CSVImportTest.class,
-	XlsImportTest.class,
+	//XlsImportTest.class, //moved to project sqldump-poi
 	SqlImportTest.class,
 	
 	//dbms features
