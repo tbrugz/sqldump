@@ -32,6 +32,7 @@ import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Executor;
 import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.def.Util;
+import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
 import tbrugz.sqldump.sqlrun.jmx.SQLR;
 import tbrugz.sqldump.sqlrun.util.SSLUtil;
 import tbrugz.sqldump.util.CLIProcessor;
@@ -370,7 +371,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 			// .import
 			else if(key.endsWith(Constants.SUFFIX_IMPORT)) {
 				String importType = execValue;
-				Importer importer = getImporter(importType);
+				Importer importer = ImporterHelper.getImporterInstance(importType);
 				if(importer==null) {
 					log.warn("unknown import type: "+importType);
 					return false;
@@ -721,6 +722,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		"StmtProc", "QueryDumper"
 	};
 	
+	/*
 	static final String[] IMPORTER_IDS = {
 		"csv", "csvplain", "ffc", "regex", "xls", "sql"
 	};
@@ -737,6 +739,7 @@ public class SQLRun implements tbrugz.sqldump.def.Executor {
 		}
 		return null;
 	}
+	*/
 
 	static List<Executor> getAllExecutors() {
 		List<Executor> loe = new ArrayList<Executor>();

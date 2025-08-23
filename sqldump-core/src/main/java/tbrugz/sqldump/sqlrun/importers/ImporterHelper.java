@@ -43,10 +43,10 @@ public class ImporterHelper {
 			prop = new Properties();
 		}
 		if(Utils.arrayContains(EXTENSIONS_XLS, ext)) {
-			imp = new XlsImporter();
+			imp = getImporterInstance(IMPORTER_XLS); //new XlsImporter();
 		}
 		else if(Utils.arrayContains(EXTENSIONS_DELIM, ext)) {
-			imp = new CSVImporter();
+			imp = getImporterInstance(IMPORTER_CSV); //new CSVImporter();
 			if(ext.equals("csv")) {
 				// do nothing
 			}
@@ -66,6 +66,26 @@ public class ImporterHelper {
 		}
 		setImporterPlainProperties(imp, prop);
 		return imp;
+	}
+	
+	static final String IMPORTER_CSV = "csv";
+	static final String IMPORTER_XLS = "xls";
+	
+	static final String[] IMPORTER_IDS = {
+		"csv", "csvplain", "ffc", "regex", "xls", "sql"
+	};
+
+	static final String[] IMPORTER_CLASSES = {
+		"CSVImporter", "CSVImporterPlain", "FFCImporter", "RegexImporter", "XlsImporter", "SqlImporter"
+	};
+	
+	public static Importer getImporterInstance(String id) {
+		for(int i=0;i<IMPORTER_IDS.length;i++) {
+			if(IMPORTER_IDS[i].equals(id)) {
+				return (Importer) Utils.getClassInstance(IMPORTER_CLASSES[i], "tbrugz.sqldump.sqlrun.importers");
+			}
+		}
+		throw new IllegalArgumentException("Unknown importer [id: "+id+"]");
 	}
 	
 }

@@ -93,7 +93,7 @@ public class XlsImportTest {
 	}
 
 	@Test
-	public void useXslImporter() throws Exception {
+	public void useXlsImporter() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 		String execId = "1";
 		Properties p = new Properties();
@@ -113,7 +113,7 @@ public class XlsImportTest {
 	}
 
 	@Test
-	public void useXslImporterWithHelper() throws Exception {
+	public void useXlsImporterWithHelper() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 
 		Properties p = new Properties();
@@ -131,7 +131,7 @@ public class XlsImportTest {
 	}
 
 	@Test
-	public void useXslImporterWithHelper2() throws Exception {
+	public void useXlsImporterWithHelper2() throws Exception {
 		// setup
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 		
@@ -159,7 +159,7 @@ public class XlsImportTest {
 	}
 
 	@Test
-	public void useXslImporterWithHelperAndLimit() throws Exception {
+	public void useXlsImporterWithHelperAndLimit() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 
 		Properties p = new Properties();
@@ -179,7 +179,7 @@ public class XlsImportTest {
 	}
 
 	@Test
-	public void useXslImporterColTypes() throws Exception {
+	public void useXlsImporterColTypes() throws Exception {
 		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
 
 		Properties p = new Properties();

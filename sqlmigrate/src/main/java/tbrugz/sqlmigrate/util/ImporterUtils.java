@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import tbrugz.sqldump.sqlrun.def.Importer;
-import tbrugz.sqldump.sqlrun.importers.CSVImporter;
 import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
-import tbrugz.sqldump.sqlrun.importers.XlsImporter;
 import tbrugz.sqldump.util.ParametrizedProperties;
 
 public class ImporterUtils {
@@ -36,12 +34,14 @@ public class ImporterUtils {
 
 	static Importer getImporterById(String id) {
 		if(IMPORT_ID_CSV.equals(id)) {
-			return new CSVImporter();
+			//return new CSVImporter();
+			return ImporterHelper.getImporterInstance(id);
 		}
 		else if(IMPORT_ID_XLS.equals(id)) {
-			return new XlsImporter();
+			//return new XlsImporter();
+			return ImporterHelper.getImporterInstance(id);
 		}
-		//XXX: ffc? regex? 
+		//XXX: ffc? regex?
 		throw new IllegalArgumentException("Unknown importer [id: "+id+"]");
 	}
 
