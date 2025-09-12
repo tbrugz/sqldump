@@ -12,9 +12,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import difflib.Delta;
-import difflib.DiffUtils;
-import difflib.Patch;
+import com.github.difflib.DiffUtils;
+import com.github.difflib.patch.AbstractDelta;
+import com.github.difflib.patch.Patch;
+
 import tbrugz.sqldiff.DiffDumper;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.Diff;
@@ -78,6 +79,11 @@ public class PatchDumper implements DiffDumper {
 		}
 	}
 	
+	/*
+	https://github.com/java-diff-utils/java-diff-utils/commit/33f2d744abcb1898ba3b0538cbb5e499fbb0a236 -  Jun 28, 2018
+	original -> source
+	revised -> target
+	*/
 	public void diffOne(Diff diff, Writer writer) throws IOException {
 		try {
 		List<String> original = bigStringToLines(diff.getPreviousDefinition());
@@ -86,29 +92,29 @@ public class PatchDumper implements DiffDumper {
 		
 		//writer.write("### "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
 		writeHeader(writer, diff);
-		for (Delta<String> delta : patch.getDeltas()) {
+		for (AbstractDelta<String> delta : patch.getDeltas()) {
 			//writer.write(delta.toString()+"\n");
 			//System.out.println(delta);
-			int beforeDeltaContextSize = (delta.getOriginal().getPosition())>context?context:delta.getOriginal().getPosition();
-			int beforeDeltaStart = delta.getOriginal().getPosition()-beforeDeltaContextSize;
-			int beforeDeltaEnd = delta.getOriginal().getPosition()-1;
+			int beforeDeltaContextSize = (delta.getSource().getPosition())>context?context:delta.getSource().getPosition();
+			int beforeDeltaStart = delta.getSource().getPosition()-beforeDeltaContextSize;
+			int beforeDeltaEnd = delta.getSource().getPosition()-1;
 			
-			int afterDeltaContextSize = ( delta.getOriginal().getPosition()+delta.getOriginal().size()+context < original.size()) ?
-					context:(original.size()-delta.getOriginal().getPosition()-delta.getOriginal().size());
-			int afterDeltaStart = delta.getOriginal().getPosition()+delta.getOriginal().size();
+			int afterDeltaContextSize = ( delta.getSource().getPosition()+delta.getSource().size()+context < original.size()) ?
+					context:(original.size()-delta.getSource().getPosition()-delta.getSource().size());
+			int afterDeltaStart = delta.getSource().getPosition()+delta.getSource().size();
 			int afterDeltaEnd = afterDeltaStart+afterDeltaContextSize-1;
 			
-			writer.write("@@ -"+(delta.getOriginal().getPosition()-beforeDeltaContextSize+1)+","+delta.getOriginal().size()
-					+" +"+(delta.getRevised().getPosition()-beforeDeltaContextSize+1)+","+delta.getRevised().size()
+			writer.write("@@ -"+(delta.getSource().getPosition()-beforeDeltaContextSize+1)+","+delta.getSource().size()
+					+" +"+(delta.getTarget().getPosition()-beforeDeltaContextSize+1)+","+delta.getTarget().size()
 					+" @@"
-					/*+" DELTA:: o:"+delta.getOriginal().getPosition()+" r:"+delta.getRevised().getPosition()
+					/*+" DELTA:: o:"+delta.getSource().getPosition()+" r:"+delta.getTarget().getPosition()
 					+" // BEFORE:: c:"+beforeDeltaContextSize+" | s:"+beforeDeltaStart+" | e:"+beforeDeltaEnd
 					+" // AFTER:: c:"+afterDeltaContextSize+" | s:"+afterDeltaStart+" | e:"+afterDeltaEnd
 					+" // ORIGINAL: "+original.size()+" | REVISED: "+revised.size()*/
 					+"\n");
 			writeLines(writer, original, beforeDeltaStart, beforeDeltaEnd, " ");
-			writeLines(writer, delta.getOriginal().getLines(), "-");
-			writeLines(writer, delta.getRevised().getLines(), "+");
+			writeLines(writer, delta.getSource().getLines(), "-");
+			writeLines(writer, delta.getTarget().getLines(), "+");
 			writeLines(writer, original, afterDeltaStart, afterDeltaEnd, " ");
 		}
 		//writer.write("###\n");
