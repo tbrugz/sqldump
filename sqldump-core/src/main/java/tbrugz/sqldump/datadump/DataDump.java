@@ -98,6 +98,7 @@ public class DataDump extends AbstractSQLProc {
 	static final String PATTERN_PARTITIONBY = "partitionby";
 	static final String PATTERN_SYNTAXFILEEXT = "syntaxfileext"; //syntaxdefaultfileext, defaultsyntaxfileext, defaultfileext, fileext
 	
+	static final String PATTERN_SCHEMANAME_FINAL = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_SCHEMANAME));
 	static final String PATTERN_TABLE_QUERY_ID_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_TABLE_QUERY_ID));
 	public static final String PATTERN_TABLENAME_FINAL = Pattern.quote(Defs.addSquareBraquets(Defs.PATTERN_TABLENAME));
 	static final String PATTERN_PARTITIONBY_FINAL = Pattern.quote(Defs.addSquareBraquets(PATTERN_PARTITIONBY));
@@ -256,7 +257,22 @@ public class DataDump extends AbstractSQLProc {
 			//ordering tables for dump
 			tablesForDataDumpLoop = new ArrayList<Table>();
 			for(String tName: tables4dump) {
-				Table t = DBIdentifiable.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
+				Table t = null;
+				int dotidx = tName.indexOf(".");
+				if(dotidx >= 0) {
+					if(dotidx == 0 || tName.length()==dotidx+1) {
+						log.warn("invalid qualified table name: "+tName);
+					}
+					else {
+						String qtschema = tName.substring(0, dotidx);
+						String qtname = tName.substring(dotidx+1);
+						log.debug("qualified table name: "+qtschema+"."+qtname);
+						t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(tablesForDataDump, DBObjectType.TABLE, qtschema, qtname);
+					}
+				}
+				else {
+					t = DBIdentifiable.getDBIdentifiableByTypeAndName(tablesForDataDump, DBObjectType.TABLE, tName);
+				}
 				if(t==null) {
 					log.warn("table '"+tName+"' not found for dump");
 					ignoredTables++;
@@ -618,6 +634,8 @@ public class DataDump extends AbstractSQLProc {
 							+FILENAME_PATTERN_TABLE_QUERY_ID+", "+FILENAME_PATTERN_TABLENAME+", "+FILENAME_PATTERN_PARTITIONBY+" or "+FILENAME_PATTERN_SYNTAXFILEEXT
 							+" [filename="+filenameTmp+"]"); // filenameTmp = filename;
 					}
+					String schema = schemaName==null?"":schemaName;
+					filename = filename.replaceAll(PATTERN_SCHEMANAME_FINAL, Matcher.quoteReplacement(schema));
 					filename = filename.replaceAll(PATTERN_TABLE_QUERY_ID_FINAL, Matcher.quoteReplacement(tableOrQueryId));
 					filename = filename.replaceAll(PATTERN_TABLENAME_FINAL, Matcher.quoteReplacement(tableOrQueryName));
 					filename = filename.replaceAll(PATTERN_SYNTAXFILEEXT_FINAL, Matcher.quoteReplacement(ds.getDefaultFileExtension()));
