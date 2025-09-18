@@ -10,7 +10,10 @@ public interface NamedDBObject /* extends Comparable<NamedDBObject>? */ {
 	
 	//public String getRemarks();
 	
-	//public default String getQualifiedName(); // java8
+	// java8+
+	public default String getQualifiedName() {
+		return (getSchemaName()!=null?getSchemaName()+".":"")+getName();
+	};
 
 	public static class SchemaAndNameComparator implements Comparator<NamedDBObject> {
 		@Override

@@ -120,13 +120,13 @@ public class PatchDumper implements DiffDumper {
 		//writer.write("###\n");
 		}
 		catch(RuntimeException e) {
-			log.warn("Error diffing "+diff.getObjectType()+" '"+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"' ("+diff.getChangeType()+"): "+e);
+			log.warn("Error diffing "+diff.getObjectType()+" '"+diff.getNamedObject().getQualifiedName()+"' ("+diff.getChangeType()+"): "+e);
 			throw e;
 		}
 	}
 	
 	void writeHeader(Writer w, Diff diff) throws IOException {
-		String objectId = diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName();
+		String objectId = diff.getObjectType()+": "+diff.getNamedObject().getQualifiedName();
 		StringBuilder sb = new StringBuilder();
 		for(int i=objectId.length();i<60;i++) { sb.append(" "); }
 		
