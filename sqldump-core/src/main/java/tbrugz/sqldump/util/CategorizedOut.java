@@ -215,6 +215,9 @@ public class CategorizedOut {
 	static final OutputStream osSTDERR = new NonCloseableOutputStreamDecorator(System.err);
 	static final OutputStream nullOS = new NullOutputStream();
 	
+	static final boolean replaceNullWithString = true;
+	static final String nullValueReplacement = "";
+	
 	public CategorizedOut(String filePathPattern) {
 		this(filePathPattern, null);
 	}
@@ -344,7 +347,12 @@ public class CategorizedOut {
 			String c = categories[i];
 			if(c==null) {
 				hasnull = true;
-				continue;
+				if(replaceNullWithString) {
+					c = nullValueReplacement;
+				}
+				else {
+					continue;
+				}
 			}
 			c = Matcher.quoteReplacement(c);
 			//String tmpThisFP = thisFP;
