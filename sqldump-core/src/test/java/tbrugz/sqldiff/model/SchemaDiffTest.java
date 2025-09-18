@@ -17,6 +17,7 @@ import tbrugz.sqldump.dbmodel.SchemaMetaData;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.def.DBMSResources;
+import tbrugz.sqldump.util.SQLIdentifierDecorator;
 import tbrugz.sqldump.util.XMLSerializer;
 
 public class SchemaDiffTest {
@@ -26,6 +27,7 @@ public class SchemaDiffTest {
 	
 	@Before
 	public void before() {
+		SQLIdentifierDecorator.dumpQuoteAll = false;
 		Table t = new Table();
 		t.setName("a");
 		t.getColumns().add(newColumn("c1", "int", 1, 1));

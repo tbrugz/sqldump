@@ -6,9 +6,18 @@ public class SchemaMetaData extends DBObject {
 
 	//XXX: add owner? charset?
 	
+	// schema has no schema name??
+	/*
+	@Override
+	public String getSchemaName() {
+		return ""; //?
+		return null; //?
+	}
+	*/
+
 	@Override
 	public String getDefinition(boolean dumpSchemaName) {
-		return "create schema "+name;
+		return "create schema "+DBObject.getFinalIdentifier(name);
 	}
 	
 	@Override
