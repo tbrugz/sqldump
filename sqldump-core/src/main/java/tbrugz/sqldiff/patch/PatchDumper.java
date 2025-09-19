@@ -7,7 +7,6 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,6 +19,7 @@ import tbrugz.sqldiff.DiffDumper;
 import tbrugz.sqldiff.SQLDiff;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
+import tbrugz.sqldump.util.StringUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -160,13 +160,13 @@ public class PatchDumper implements DiffDumper {
 		fw.close();
 	}
 	
-	static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
+	//static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
 	
 	//XXX: option to ignore or not trailing whitespace? - see equals4Diff...
 	List<String> bigStringToLines(String s) {
 		if(s==null) { s = ""; }
-		s = PTRN_TRAILING_WHITESPACE.matcher(s).replaceAll("");
-		return Arrays.asList(s.split("\n"));
+		s = StringUtils.PTRN_TRAILING_WHITESPACE.matcher(s).replaceAll("");
+		return Arrays.asList(s.split("\r?\n"));
 	}
 	
 }

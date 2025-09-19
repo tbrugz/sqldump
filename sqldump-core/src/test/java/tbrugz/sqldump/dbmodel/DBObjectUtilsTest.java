@@ -3,6 +3,7 @@ package tbrugz.sqldump.dbmodel;
 import org.junit.Assert;
 import org.junit.Test;
 
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.util.StringUtils;
 
 public class DBObjectUtilsTest {
@@ -11,14 +12,14 @@ public class DBObjectUtilsTest {
 	public void testEqualsEachLineOk() {
 		String s1 = "ab \nz ";
 		String s2 = "ab\nz";
-		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
+		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2, WhitespaceIgnoreType.EOL));
 	}
 
 	@Test
 	public void testEqualsEachLineError() {
 		String s1 = " ab \n z";
 		String s2 = "ab\nzb";
-		Assert.assertFalse(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2));
+		Assert.assertFalse(StringUtils.equalsIgnoreWhitespacesEachLine(s1, s2, WhitespaceIgnoreType.EOL));
 	}
 
 	@Test

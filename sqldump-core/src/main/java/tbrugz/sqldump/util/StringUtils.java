@@ -121,6 +121,7 @@ public class StringUtils {
 		return out.toString();
 	}
 	
+	/*
 	public static boolean equalsIgnoreWhitespacesEachLine(String s1, String s2) {
 		if(s1==null && s2==null) { return true; }
 		if(s1==null || s2==null) { return false; }
@@ -136,6 +137,7 @@ public class StringUtils {
 		}
 		return true;
 	}
+	*/
 
 	public static boolean equalsIgnoreWhitespacesEachLine(String s1, String s2, WhitespaceIgnoreType wsIgnore) {
 		if(s1==null && s2==null) { return true; }
@@ -152,8 +154,8 @@ public class StringUtils {
 		return true;
 	}
 
-	static final Pattern PTRN_LEADING_WHITESPACE = Pattern.compile("^\\s+", Pattern.MULTILINE);
-	static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
+	public static final Pattern PTRN_LEADING_WHITESPACE = Pattern.compile("^\\s+", Pattern.MULTILINE);
+	public static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
 	
 	static List<String> stringToLines(String s, WhitespaceIgnoreType wsIgnore) {
 		if(s==null) { s = ""; }

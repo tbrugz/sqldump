@@ -626,21 +626,24 @@ public class SQLDiff implements Executor {
 					);
 			CategorizedOut co = new CategorizedOut(finalPattern);
 			setCategorizedOut(co);
-			log.debug("final pattern: "+finalPattern);
+			log.info("final diff pattern: "+finalPattern);
 		}
 		
 		if(xmloutfile!=null) {
 			File f = new File(xmloutfile);
+			log.info("xml diff file: "+f);
 			Utils.prepareDir(f);
 			xmlWriter = new FileWriter(f);
 		}
 		if(jsonoutfile!=null) {
 			File f = new File(jsonoutfile);
+			log.info("json diff file: "+f);
 			Utils.prepareDir(f);
 			jsonWriter = new FileWriter(f);
 		}
 		if(patchfilePattern!=null) {
 			File f = new File(patchfilePattern);
+			log.info("patch diff file: "+f);
 			Utils.prepareDir(f);
 			patchWriter = new FileWriter(f);
 		}
