@@ -73,7 +73,7 @@ public class SchemaDiffer {
 				//new and old tables exists
 				newTablesThatExistsInOrigModel.add(tNew);
 				//rename XXX: what about rename? external info needed?
-				List<Diff> diffs = TableDiff.tableDiffs(tOrig, tNew);
+				List<Diff> diffs = TableDiff.tableDiffs(tOrig, tNew, wsIgnore);
 				
 				//FKs
 				diffs(DBObjectType.FK, diff.getDbIdDiffs(), 

@@ -168,7 +168,7 @@ public class StringUtils {
 				s = PTRN_TRAILING_WHITESPACE.matcher(s).replaceAll("");
 			}
 		}
-		return Arrays.asList(s.split("\n"));
+		return Arrays.asList(s.split("\r?\n"));
 	}
 
 	// http://stackoverflow.com/a/1102916/616413

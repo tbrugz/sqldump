@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldiff.SchemaDiffer;
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldiff.util.DiffUtil;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
@@ -72,9 +73,13 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 	public int getDiffListSize() {
 		return 1;
 	}*/
-	
+
 	//XXX: move to SchemaDiff or other class?
 	public static List<Diff> tableDiffs(Table origTable, Table newTable) {
+		return tableDiffs(origTable, newTable, WhitespaceIgnoreType.EOL);
+	}
+
+	public static List<Diff> tableDiffs(Table origTable, Table newTable, WhitespaceIgnoreType wsIgnore) {
 		//log.debug("difftable:\n"+origTable.getDefinition(true)+"\n"+newTable.getDefinition(true));
 		//log.debug("difftable: "+origTable.getName()+" - "+newTable.getName());
 		List<Diff> diffs = new ArrayList<Diff>();
@@ -101,7 +106,9 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 					diffs.add(tcd);
 				}
 				
-				if(!StringUtils.equalsNullsAsEmpty(cOrig.getRemarks(), cNew.getRemarks())) {
+				if(!StringUtils.equalsIgnoreWhitespacesEachLine(cOrig.getRemarks(), cNew.getRemarks(), wsIgnore)) {
+					// alter column remarks
+					log.debug("alter column remarks: "+cOrig+"[ws="+wsIgnore+"]: orig: "+cOrig.getRemarks()+" new: "+cNew.getRemarks());
 					ColumnDiff tcd = new ColumnDiff(ChangeType.REMARKS, newTable, cOrig, cNew);
 					diffs.add(tcd);
 				}
@@ -149,7 +156,7 @@ public class TableDiff extends SingleDiff implements Diff, Comparable<TableDiff>
 		//comments??
 		String otRemarks = origTable.getRemarks();
 		String ntRemarks = newTable.getRemarks();
-		if(!StringUtils.equalsNullsAsEmpty(otRemarks, ntRemarks)) {
+		if(!StringUtils.equalsIgnoreWhitespacesEachLine(otRemarks, ntRemarks, wsIgnore)) {
 			//diffs.add(new RemarksDiff(newTable.getName(), null, ntRemarks));
 			diffs.add(TableDiff.getTableDiffAddRemarks(newTable, otRemarks));
 		}
