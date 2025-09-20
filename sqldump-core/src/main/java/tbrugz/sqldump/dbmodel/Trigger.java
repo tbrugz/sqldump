@@ -3,7 +3,8 @@ package tbrugz.sqldump.dbmodel;
 import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldump.util.StringUtils;
 
-public class Trigger extends DBObject {
+public class Trigger extends DBObject implements BodiedObject {
+
 	private static final long serialVersionUID = 1L;
 
 	//TODO: add transient String name, add get/set
@@ -113,10 +114,12 @@ public class Trigger extends DBObject {
 		this.description = description;
 	}
 
+	@Override
 	public String getBody() {
 		return body;
 	}
 
+	@Override
 	public void setBody(String body) {
 		this.body = body;
 	}
@@ -135,6 +138,11 @@ public class Trigger extends DBObject {
 
 	public void setWhenClause(String whenClause) {
 		this.whenClause = whenClause;
+	}
+	
+	@Override
+	public boolean isDumpable() {
+		return body!=null;
 	}
 
 }

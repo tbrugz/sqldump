@@ -13,7 +13,7 @@ import tbrugz.sqldump.util.StringUtils;
  * 
  * see: https://en.wikipedia.org/wiki/SQL/JRT
  */
-public class ExecutableObject extends DBObject implements TypedDBObject, ParametrizedDBObject, RemarkableDBObject {
+public class ExecutableObject extends DBObject implements TypedDBObject, ParametrizedDBObject, RemarkableDBObject, BodiedObject {
 
 	private static final long serialVersionUID = 1L;
 
@@ -221,10 +221,12 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		this.returnParam = returnParam;
 	}
 
+	@Override
 	public String getBody() {
 		return body;
 	}
 
+	@Override
 	public void setBody(String body) {
 		this.body = body;
 	}
