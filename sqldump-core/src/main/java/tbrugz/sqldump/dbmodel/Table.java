@@ -282,6 +282,11 @@ public class Table extends DBObject implements Relation {
 		this.remarks = remarks;
 	}
 
+	@Override
+	public boolean hasRemarks() {
+		return remarks!=null;
+	}
+
 	public Boolean getDomainTable() {
 		return domainTable;
 	}

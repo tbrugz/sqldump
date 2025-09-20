@@ -6,4 +6,6 @@ public interface RemarkableDBObject {
 	
 	public void setRemarks(String remarks);
 	
+	public boolean hasRemarks();
+
 }

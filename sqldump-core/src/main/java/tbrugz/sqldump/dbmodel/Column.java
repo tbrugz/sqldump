@@ -226,6 +226,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	}
 
 	@Override
+	public boolean hasRemarks() {
+		return remarks!=null;
+	}
+
+	@Override
 	public String toString() {
 		//return "[column:"+this.getDefinition()+"]";
 		return "[column: "+name+" "+type+"]";

@@ -197,6 +197,11 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		this.remarks = remarks;
 	}
 
+	@Override
+	public boolean hasRemarks() {
+		return remarks!=null;
+	}
+
 	public String getPackageName() {
 		return packageName;
 	}

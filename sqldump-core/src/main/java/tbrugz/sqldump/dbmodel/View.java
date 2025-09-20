@@ -224,6 +224,11 @@ public class View extends DBObject implements Relation {
 		this.remarks = remarks;
 	}
 
+	@Override
+	public boolean hasRemarks() {
+		return remarks!=null;
+	}
+
 	public List<Column> getColumns() {
 		return columns;
 	}

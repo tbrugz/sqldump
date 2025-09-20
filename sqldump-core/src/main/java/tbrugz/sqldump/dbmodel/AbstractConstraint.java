@@ -24,5 +24,10 @@ public abstract class AbstractConstraint extends DBIdentifiable implements Remar
 	public void setValid(Boolean valid) {
 		this.valid = valid;
 	}
+	
+	@Override
+	public boolean hasRemarks() {
+		return remarks!=null;
+	}
 
 }
