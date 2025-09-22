@@ -448,7 +448,7 @@ public class SQLDiff implements Executor {
 		// source/target processors
 		String sourceProcs = prop.getProperty(PROP_SCHEMADIFF_SOURCE_PROCESSORS);
 		if(sourceProcs!=null) {
-			processProcessors(sourceProcs, fromSM, "souce");
+			processProcessors(sourceProcs, fromSM, "source");
 		}
 		String targetProcs = prop.getProperty(PROP_SCHEMADIFF_TARGET_PROCESSORS);
 		if(targetProcs!=null) {
@@ -467,8 +467,9 @@ public class SQLDiff implements Executor {
 		List<ProcessComponent> pcs = SQLDump.getProcessComponentClasses(processorClassesStr, failonerror);
 		for(ProcessComponent pc: pcs) {
 			if(pc instanceof Processor) {
-				log.debug(modelId+"processor '"+pc+"' running...");
 				Processor proc = (Processor) pc;
+				log.debug(modelId+"processor '"+pc+"' running...");
+				pc.setId(modelId);
 				pc.setProperties(prop);
 				if(proc.needsConnection()) {
 					log.warn(modelId+": processor '"+pc+"' needs connection?");

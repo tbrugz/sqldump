@@ -30,7 +30,7 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 	@Override
 	public void process() {
 		long bodyCount = 0;
-		log.debug("process()...");
+		log.debug(getIdDesc()+"process()...");
 		Set<ExecutableObject> execs = model.getExecutables();
 		for(BodiedObject bo: execs) {
 			if(bo.isDumpable()) {
@@ -45,7 +45,7 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 				bodyCount++;
 			}
 		}
-		log.info(bodyCount+" bodies normalized");
+		log.info(getIdDesc()+bodyCount+" bodies normalized");
 		
 		long rCount = 0;
 		Set<Table> tables = model.getTables();
@@ -62,7 +62,7 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 				}
 			}
 		}
-		log.info(rCount+" remarks normalized");
+		log.info(getIdDesc()+rCount+" remarks normalized");
 	}
 	
 	void normalizeBody(BodiedObject bo) {

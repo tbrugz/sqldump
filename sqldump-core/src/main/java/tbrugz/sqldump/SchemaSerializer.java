@@ -15,13 +15,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
 import tbrugz.sqldump.util.IOUtil;
 
-public class SchemaSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
+public class SchemaSerializer extends AbstractModelDumper implements SchemaModelDumper, SchemaModelGrabber {
 
 	static final Log log = LogFactory.getLog(SchemaSerializer.class);
 	
@@ -130,10 +130,6 @@ public class SchemaSerializer extends AbstractFailable implements SchemaModelDum
 	public String getMimeType() {
 		//XXX: see http://docs.oracle.com/javase/7/docs/api/java/awt/datatransfer/DataFlavor.html
 		return "application/x-java-serialized-object";
-	}
-	
-	@Override
-	public void setId(String grabberId) {
 	}
 	
 }

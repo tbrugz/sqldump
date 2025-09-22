@@ -42,5 +42,10 @@ public class EmptyModelGrabber implements SchemaModelGrabber {
 	@Override
 	public void setId(String grabberId) {
 	}
+	
+	@Override
+	public String getId() {
+		return null;
+	}
 
 }

@@ -28,7 +28,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
@@ -59,7 +59,7 @@ enum EdgeLabelType {
  * XXX: node label: show table type (VIEW, EXTERNAL_TABLE, ...)?
  * XXX: option to map one stereotype to another (schema@XXX -> schema@YYY; type@EXTERNAL_TABLE -> type@VIEW)
  */
-public class Schema2GraphML extends AbstractFailable implements SchemaModelDumper {
+public class Schema2GraphML extends AbstractModelDumper implements SchemaModelDumper {
 	
 	static final Log log = LogFactory.getLog(Schema2GraphML.class);
 	

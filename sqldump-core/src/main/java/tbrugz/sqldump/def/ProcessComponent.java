@@ -10,4 +10,8 @@ public interface ProcessComponent {
 	
 	public void setFailOnError(boolean failonerror);
 
+	public void setId(String processorId);
+
+	public String getId();
+
 }

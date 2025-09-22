@@ -36,7 +36,7 @@ import tbrugz.sqldump.dbmodel.Synonym;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
@@ -51,7 +51,7 @@ import tbrugz.sqldump.util.Utils;
  * TODOne: quote all object names
  * TODO: option to output object name with toLowerCase() or toUpperCase()
  */
-public class SchemaModelScriptDumper extends AbstractFailable implements SchemaModelDumper {
+public class SchemaModelScriptDumper extends AbstractModelDumper implements SchemaModelDumper {
 	
 	private static final Log log = LogFactory.getLog(SchemaModelScriptDumper.class);
 

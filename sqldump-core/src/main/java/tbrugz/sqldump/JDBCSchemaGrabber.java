@@ -43,7 +43,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 import tbrugz.sqldump.dbmodel.View;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.def.Defs;
 import tbrugz.sqldump.def.ProcessingException;
@@ -64,7 +64,7 @@ class DBObjectId extends DBIdentifiable {
  * TODO: accept list of tables/objects to grab/dump, types of objects to grab/dump
  * XXX: performance optimization: grab (columns, FKs, ...) in bulk
  */
-public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGrabber {
+public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaModelGrabber {
 	
 	static final String PREFIX = "sqldump.schemagrab";
 	
@@ -143,7 +143,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	Properties papp; // = new ParametrizedProperties();
 	Properties propOriginal;
 	DBMSFeatures feats = null;
-	String grabberId;
+	//String grabberId;
 	
 	//Properties dbmsSpecificResource = new ParametrizedProperties();
 	
@@ -1415,7 +1415,8 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 			}
 		}
 	}
-	
+
+	/*
 	@Override
 	public void setId(String grabberId) {
 		this.grabberId = grabberId;
@@ -1424,6 +1425,7 @@ public class JDBCSchemaGrabber extends AbstractFailable implements SchemaModelGr
 	String getIdDesc() {
 		return grabberId!=null?"["+grabberId+"] ":"";
 	}
+	*/
 
 	/*
 	public String getGrabSchemaNames() {

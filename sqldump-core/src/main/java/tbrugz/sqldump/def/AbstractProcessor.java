@@ -8,6 +8,7 @@ import tbrugz.sqldump.dbmodel.SchemaModel;
 public abstract class AbstractProcessor extends AbstractFailable implements Processor {
 
 	protected Properties prop;
+	protected String processorId;
 	
 	@Override
 	public void setProperties(Properties prop) {
@@ -60,4 +61,18 @@ public abstract class AbstractProcessor extends AbstractFailable implements Proc
 		return null;
 	}
 
+	@Override
+	public String getId() {
+		return processorId;
+	}
+	
+	@Override
+	public void setId(String processorId) {
+		this.processorId = processorId;
+	}
+	
+	public String getIdDesc() {
+		return processorId!=null?"["+processorId+"] ":"";
+	}
+	
 }

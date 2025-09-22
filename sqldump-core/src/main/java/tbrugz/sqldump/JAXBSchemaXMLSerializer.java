@@ -18,7 +18,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.def.SchemaModelGrabber;
@@ -26,7 +26,7 @@ import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 import tbrugz.sqldump.util.XMLSerializer;
 
-public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaModelDumper, SchemaModelGrabber {
+public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements SchemaModelDumper, SchemaModelGrabber {
 
 	static final Log log = LogFactory.getLog(JAXBSchemaXMLSerializer.class);
 	
@@ -45,7 +45,6 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	String fileOutput;
 	Writer outputWriter;
 	XMLSerializer xmlser;
-	String grabberId;
 	
 	static String jaxbSchemaPackages = DEFAULT_JAXB_SCHEMA_PACKAGES;
 
@@ -220,6 +219,7 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 		return "application/xml";
 	}
 	
+	/*
 	@Override
 	public void setId(String grabberId) {
 		this.grabberId = grabberId;
@@ -228,5 +228,6 @@ public class JAXBSchemaXMLSerializer extends AbstractFailable implements SchemaM
 	String getIdDesc() {
 		return grabberId!=null?"["+grabberId+"] ":"";
 	}
+	*/
 
 }

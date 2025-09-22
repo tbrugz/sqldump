@@ -20,7 +20,7 @@ import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Table;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -48,7 +48,7 @@ import tbrugz.sqldump.util.Utils;
  * 
  * XXX: rename to SchemaHints?
  */
-public class AlterSchemaSuggester extends AbstractFailable implements SchemaModelDumper {
+public class AlterSchemaSuggester extends AbstractModelDumper implements SchemaModelDumper {
 	
 	public static class Warning implements Comparable<Warning> {
 		DBObjectType type;

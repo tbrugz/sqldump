@@ -14,6 +14,4 @@ public interface SchemaModelGrabber extends ProcessComponent {
 
 	public SchemaModel grabSchema();
 	
-	public void setId(String grabberId);
-
 }

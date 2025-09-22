@@ -11,7 +11,7 @@ import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.AbstractFailable;
+import tbrugz.sqldump.def.AbstractModelDumper;
 import tbrugz.sqldump.def.ProcessingException;
 import tbrugz.sqldump.def.SchemaModelDumper;
 import tbrugz.sqldump.util.CategorizedOut;
@@ -22,7 +22,7 @@ import tbrugz.sqldump.util.Utils;
  * TODOne: optional dump scripts in one file for each type (categorizedOut?)
  * TODO: option to output schemaName
  */
-public class DropScriptDumper extends AbstractFailable implements SchemaModelDumper {
+public class DropScriptDumper extends AbstractModelDumper implements SchemaModelDumper {
 	
 	static final Log log = LogFactory.getLog(DropScriptDumper.class);
 	
