@@ -446,13 +446,15 @@ public class SQLDiff implements Executor {
 		}
 		
 		// source/target processors
+		String sourceId = prop.getProperty(PROP_SOURCE);
+		String targetId = prop.getProperty(PROP_TARGET);
 		String sourceProcs = prop.getProperty(PROP_SCHEMADIFF_SOURCE_PROCESSORS);
 		if(sourceProcs!=null) {
-			processProcessors(sourceProcs, fromSM, "source");
+			processProcessors(sourceProcs, fromSM, sourceId+"/source");
 		}
 		String targetProcs = prop.getProperty(PROP_SCHEMADIFF_TARGET_PROCESSORS);
 		if(targetProcs!=null) {
-			processProcessors(targetProcs, toSM, "target");
+			processProcessors(targetProcs, toSM, targetId+"/target");
 		}
 		
 		//do diff
