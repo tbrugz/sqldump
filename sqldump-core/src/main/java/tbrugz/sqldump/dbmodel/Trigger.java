@@ -82,16 +82,18 @@ public class Trigger extends DBObject implements BodiedObject {
 		if (getClass() != obj.getClass())
 			return false;
 		Trigger other = (Trigger) obj;
-		if (body == null) {
+		/* if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore))
+		} else */
+		if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore))
 		//} else if (!body.equals(other.body))
 			return false;
-		if (description == null) {
+		/* if (description == null) {
 			if (other.description != null)
 				return false;
-		} else if (!description.equals(other.description))
+		} else if (!description.equals(other.description)) */
+		if (!StringUtils.equalsIgnoreWhitespacesEachLine(description, other.description, wsIgnore))
 			return false;
 		if (tableName == null) {
 			if (other.tableName != null)
