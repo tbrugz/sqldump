@@ -16,13 +16,13 @@ jobs:
     strategy:
       matrix:
         # Java 20+ drops support for -source/-target/–release 7 -- https://inside.java/2022/09/26/quality-heads-up/
-        java: [ '8', '11', '17', '21' ]
+        java: [ '8', '11', '17', '21', '25' ]
     name: java ${{ matrix.java }} build
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Setup JDK
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
