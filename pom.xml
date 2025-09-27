@@ -20,7 +20,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
     <!--<maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>-->
     <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
@@ -32,12 +32,16 @@
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
 
-    <!-- release: maven-compiler 3.6.0+ required -->
     <!--
-    <maven.compiler.release>8</maven.compiler.release>
+    release: maven-compiler 3.6.0+ required
+    https://maven.apache.org/plugins/maven-compiler-plugin/examples/set-compiler-release.html
+    (since Compiler plugin version 3.13.0 you can use the release property also on JDK 8)
     -->
+    <maven.compiler.release>8</maven.compiler.release>
+    <!--
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    -->
 
     <derby.version>10.14.2.0</derby.version>
     <h2.version>2.2.224</h2.version>
