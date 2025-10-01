@@ -49,6 +49,7 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	boolean doCreateTable = false;
 	boolean use1stLineAsColNames = false;
 	String statementBefore;
+	String statementAfter;
 
 	//XXX: different exec suffixes for each importer class?
 	static final String[] EXEC_SUFFIXES = {
@@ -73,8 +74,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		String prefix = importerPrefix + DOT;
 		
 		setFailOnError(Utils.getPropBool(prop, prefix + Constants.SUFFIX_FAILONERROR, failonerror));
-		insertTable = prop.getProperty(prefix + Constants.SUFFIX_INSERTTABLE);
-		insertSQL = prop.getProperty(prefix + Constants.SUFFIX_INSERTSQL);
+		insertTable = Utils.getProp(prop, prefix + Constants.SUFFIX_INSERTTABLE);
+		insertSQL = Utils.getProp(prop, prefix + Constants.SUFFIX_INSERTSQL);
 		if(insertTable!=null && insertSQL!=null) {
 			log.warn("both "+Constants.SUFFIX_INSERTTABLE+" & "+Constants.SUFFIX_INSERTSQL+" defined. Will reset "+Constants.SUFFIX_INSERTTABLE);
 			insertTable = null;
@@ -86,7 +87,8 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 		//finalColumnNames = getFinalColumnNames(columnTypes, columnNames);
 		doCreateTable = Utils.getPropBool(prop, prefix + Constants.SUFFIX_DO_CREATE_TABLE, false);
 		use1stLineAsColNames = Utils.getPropBool(prop, prefix + Constants.SUFFIX_1ST_LINE_AS_COLUMN_NAMES, false); // use1stLineAsColNames);
-		statementBefore = prop.getProperty(prefix + Constants.SUFFIX_STATEMENT_BEFORE);
+		statementBefore = Utils.getProp(prop, prefix + Constants.SUFFIX_STATEMENT_BEFORE);
+		statementAfter = Utils.getProp(prop, prefix + Constants.SUFFIX_STATEMENT_AFTER);
 	}
 	
 	@Override
@@ -404,6 +406,11 @@ public abstract class BaseImporter extends AbstractFailable implements Importer 
 	void executeStatementBefore() throws SQLException {
 		long updateCount = conn.createStatement().executeUpdate(statementBefore);
 		log.info("'"+Constants.SUFFIX_STATEMENT_BEFORE+"' executed, sql = ["+statementBefore+"], updateCount = "+updateCount);
+	}
+
+	void executeStatementAfter() throws SQLException {
+		long updateCount = conn.createStatement().executeUpdate(statementAfter);
+		log.info("'"+Constants.SUFFIX_STATEMENT_AFTER+"' executed, sql = ["+statementAfter+"], updateCount = "+updateCount);
 	}
 
 }

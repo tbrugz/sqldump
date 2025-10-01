@@ -677,6 +677,10 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 		
 		if(fileIS!=null) { fileIS.close(); fileIS = null; }
 		if(scan!=null) { scan.close(); }
+		
+		if(statementAfter!=null) {
+			executeStatementAfter();
+		}
 
 		//show counters
 		long countAll = logCounts(countsByFailoverId, false);

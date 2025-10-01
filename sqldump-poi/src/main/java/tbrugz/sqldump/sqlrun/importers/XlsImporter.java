@@ -246,6 +246,10 @@ public class XlsImporter extends BaseFileImporter {
 			log.info( "processedLines: "+counter.input+" ; importedRows: "+counter.output+
 				( (counter.successNoInfoCount>0||counter.executeFailedCount>0)?" [successNoInfoCount=="+counter.successNoInfoCount+" ; executeFailedCount=="+counter.executeFailedCount+"]":"")
 				);
+
+			if(statementAfter!=null) {
+				executeStatementAfter();
+			}
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);
