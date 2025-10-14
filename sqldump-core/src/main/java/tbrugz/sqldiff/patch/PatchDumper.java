@@ -104,20 +104,16 @@ public class PatchDumper implements DiffDumper {
 			int afterDeltaStart = delta.getSource().getPosition()+delta.getSource().size();
 			int afterDeltaEnd = afterDeltaStart+afterDeltaContextSize-1;
 			
-			writer.write("@@ -"+(delta.getSource().getPosition()-beforeDeltaContextSize+1)+","+delta.getSource().size()
-					+" +"+(delta.getTarget().getPosition()-beforeDeltaContextSize+1)+","+delta.getTarget().size()
-					+" @@"
-					/*+" DELTA:: o:"+delta.getSource().getPosition()+" r:"+delta.getTarget().getPosition()
-					+" // BEFORE:: c:"+beforeDeltaContextSize+" | s:"+beforeDeltaStart+" | e:"+beforeDeltaEnd
-					+" // AFTER:: c:"+afterDeltaContextSize+" | s:"+afterDeltaStart+" | e:"+afterDeltaEnd
-					+" // ORIGINAL: "+original.size()+" | REVISED: "+revised.size()*/
-					+"\n");
+			writeDeltaHeader(writer, delta, beforeDeltaContextSize);
+			
 			writeLines(writer, original, beforeDeltaStart, beforeDeltaEnd, " ");
 			writeLines(writer, delta.getSource().getLines(), "-");
 			writeLines(writer, delta.getTarget().getLines(), "+");
 			writeLines(writer, original, afterDeltaStart, afterDeltaEnd, " ");
+
+			writeDeltaFooter(writer, delta);
 		}
-		//writer.write("###\n");
+		writeFooter(writer, diff);
 		}
 		catch(RuntimeException e) {
 			log.warn("Error diffing "+diff.getObjectType()+" '"+diff.getNamedObject().getQualifiedName()+"' ("+diff.getChangeType()+"): "+e);
@@ -125,7 +121,21 @@ public class PatchDumper implements DiffDumper {
 		}
 	}
 	
-	void writeHeader(Writer w, Diff diff) throws IOException {
+	protected void writeDeltaHeader(Writer writer, AbstractDelta<String> delta, int beforeDeltaContextSize) throws IOException {
+		writer.write("@@ -"+(delta.getSource().getPosition()-beforeDeltaContextSize+1)+","+delta.getSource().size()
+				+" +"+(delta.getTarget().getPosition()-beforeDeltaContextSize+1)+","+delta.getTarget().size()
+				+" @@"
+				/*+" DELTA:: o:"+delta.getSource().getPosition()+" r:"+delta.getTarget().getPosition()
+				+" // BEFORE:: c:"+beforeDeltaContextSize+" | s:"+beforeDeltaStart+" | e:"+beforeDeltaEnd
+				+" // AFTER:: c:"+afterDeltaContextSize+" | s:"+afterDeltaStart+" | e:"+afterDeltaEnd
+				+" // ORIGINAL: "+original.size()+" | REVISED: "+revised.size()*/
+				+"\n");
+	}
+	
+	protected void writeDeltaFooter(Writer writer, AbstractDelta<String> delta) throws IOException {
+	}
+	
+	protected void writeHeader(Writer w, Diff diff) throws IOException {
 		String objectId = diff.getObjectType()+": "+diff.getNamedObject().getQualifiedName();
 		StringBuilder sb = new StringBuilder();
 		for(int i=objectId.length();i<60;i++) { sb.append(" "); }
@@ -134,6 +144,10 @@ public class PatchDumper implements DiffDumper {
 			+objectId
 			+sb.toString()
 			+" # type: "+diff.getChangeType()+"\n");
+	}
+
+	protected void writeFooter(Writer w, Diff diff) throws IOException {
+		//writer.write("###\n");
 	}
 	
 	void writeLines(Writer w, List<?> lines, String prepend) throws IOException {
