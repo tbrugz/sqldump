@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.BodiedObject;
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.RemarkableDBObject;
 import tbrugz.sqldump.dbmodel.Table;
@@ -37,7 +38,7 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 		log.debug(getIdDesc()+"process()...");
 		Set<ExecutableObject> execs = model.getExecutables();
 		for(ExecutableObject bo: execs) {
-			if(bo.isDumpable()) {
+			if(isNormalizeable(bo)) {
 				normalizeBody(bo);
 				bodyCount++;
 				if(normalizeDeclaration) {
@@ -80,6 +81,12 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 		log.info(getIdDesc()+rCount+" remarks normalized");
 	}
 	
+	boolean isNormalizeable(ExecutableObject eo) {
+		if(!eo.isDumpable()) { return false; }
+		DBObjectType dbtype = eo.getDbObjectType();
+		return DBObjectType.JAVA_SOURCE!=dbtype;
+	}
+	
 	void normalizeBody(BodiedObject bo) {
 		bo.setBody( normalize( bo.getBody() ) );
 	}
@@ -93,6 +100,11 @@ public class ContentNormalizerProcessor extends AbstractSchemaProcessor {
 	}
 
 	void normalizeDeclaration(ExecutableObject eo) {
+		/*DBObjectType dbtype = eo.getDbObjectType();
+		if(dbtype!=null && dbtype==DBObjectType.JAVA_SOURCE) {
+			log.warn("[normalizeDeclaration] object "+eo.getFinalQualifiedName()+" [type "+dbtype+"] won't have declaration normalized");
+			return;
+		}*/
 		eo.setBody( normalizeDeclaration( eo.getBody() ) );
 	}
 

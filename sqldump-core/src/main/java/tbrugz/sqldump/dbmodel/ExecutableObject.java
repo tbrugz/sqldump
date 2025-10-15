@@ -146,9 +146,10 @@ public class ExecutableObject extends DBObject implements TypedDBObject, Paramet
 		if (body == null) {
 			if (other.body != null)
 				return false;
-		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore))
+		} else if (!StringUtils.equalsIgnoreWhitespacesEachLine(body, other.body, wsIgnore)) {
 		//} else if (!body.equals(other.body))
 			return false;
+		}
 		if (packageName == null) {
 			if (other.packageName != null)
 				return false;
