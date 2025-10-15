@@ -156,8 +156,8 @@ public class StringUtils {
 
 	public static final Pattern PTRN_LEADING_WHITESPACE = Pattern.compile("^\\s+", Pattern.MULTILINE);
 	public static final Pattern PTRN_TRAILING_WHITESPACE = Pattern.compile("\\s+$", Pattern.MULTILINE);
-	
-	static List<String> stringToLines(String s, WhitespaceIgnoreType wsIgnore) {
+
+	public static String stringNormalizer(String s, WhitespaceIgnoreType wsIgnore) {
 		if(s==null) { s = ""; }
 		if(wsIgnore.stripInside()) {
 			s = TokenizerUtil.removeMultipleWhitespaces(s);
@@ -170,6 +170,11 @@ public class StringUtils {
 				s = PTRN_TRAILING_WHITESPACE.matcher(s).replaceAll("");
 			}
 		}
+		return s;
+	}
+
+	static List<String> stringToLines(String s, WhitespaceIgnoreType wsIgnore) {
+		s = stringNormalizer(s, wsIgnore);
 		return Arrays.asList(s.split("\r?\n"));
 	}
 

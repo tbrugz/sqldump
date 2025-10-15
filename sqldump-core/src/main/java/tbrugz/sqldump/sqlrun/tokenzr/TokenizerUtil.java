@@ -225,6 +225,7 @@ public class TokenizerUtil {
 					else if(c=='\n' || isLastChar) {
 						// removes trailing whitespaces
 						for(int j=ret.length()-1;true;j--) {
+							if(j<0) { break; }
 							char cc = ret.charAt(j);
 							if(cc==' ' || cc == '\t') {
 								ret.deleteCharAt(j);

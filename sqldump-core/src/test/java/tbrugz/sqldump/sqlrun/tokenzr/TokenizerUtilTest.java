@@ -236,31 +236,45 @@ public class TokenizerUtilTest {
 
 		test = "select abc from def";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, test);
+		Assert.assertEquals(test, ret);
 
 		test = "select abc   from def";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select abc from def");
+		Assert.assertEquals("select abc from def", ret);
 
 		test = "select 'ab  c'  from def";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select 'ab  c' from def");
+		Assert.assertEquals("select 'ab  c' from def", ret);
 
 		test = "select 'ab  c' \tfrom \"de  f\"";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+		Assert.assertEquals("select 'ab  c' from \"de  f\"", ret);
 
 		test = "select 'ab  c' \tfrom \"de  f\"  ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+		Assert.assertEquals("select 'ab  c' from \"de  f\"", ret);
 
 		test = " \t select 'ab  c' \tfrom \"de  f\"  ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select 'ab  c' from \"de  f\"");
+		Assert.assertEquals("select 'ab  c' from \"de  f\"", ret);
 
 		test = " \t select 'ab  c' \n from \"de  f\"  ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
-		Assert.assertEquals(ret, "select 'ab  c'\nfrom \"de  f\"");
+		Assert.assertEquals("select 'ab  c'\nfrom \"de  f\"", ret);
+	}
+
+	@Test
+	public void testRemoveWhitespaceErr() {
+		String test = null;
+		String ret = null;
+
+		test = ")";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(")", ret);
+		
+		test = "                  )";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals(")", ret);
 	}
 	
 }
