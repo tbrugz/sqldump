@@ -297,6 +297,16 @@ public class TokenizerUtil {
 						ret.append(c2);
 					}
 					else {
+						if(c=='\n' || isLastChar) {
+							for(int j=ret.length()-1;true;j--) {
+								if(j<0) { break; }
+								char cc = ret.charAt(j);
+								if(cc==' ' || cc == '\t' || cc == '\r') {
+									ret.deleteCharAt(j);
+								}
+								else { break; }
+							}
+						}
 						ret.append(c);
 					}
 					break;

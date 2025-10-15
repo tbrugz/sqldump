@@ -291,6 +291,10 @@ public class TokenizerUtilTest {
 		test = "  -- #xyz \n  abc ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
 		Assert.assertEquals("-- #xyz\nabc", ret);
+
+		test = "  /* this is \n the end */ ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("/* this is\n the end */", ret);
 	}
 	
 }
