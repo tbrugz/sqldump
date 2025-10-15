@@ -218,23 +218,42 @@ public class TokenizerUtil {
 				case DEFAULT: {
 					if(c=='\'') {
 						state = TknState.STRING;
+						ret.append(c);
 					}
 					else if(c=='"') {
 						state = TknState.DQUOTE;
+						ret.append(c);
+					}
+					else if(c=='-' && !isLastChar) {
+						char c2 = sql.charAt(++i);
+						if(c2=='-') { state = TknState.COMM_LINE; }
+						ret.append(c);
+						ret.append(c2);
+					}
+					else if(c=='/' && !isLastChar) {
+						char c2 = sql.charAt(++i);
+						if(c2=='*') { state = TknState.COMM_BLOCK; }
+						ret.append(c);
+						ret.append(c2);
 					}
 					else if(c=='\n' || isLastChar) {
 						// removes trailing whitespaces
 						for(int j=ret.length()-1;true;j--) {
 							if(j<0) { break; }
 							char cc = ret.charAt(j);
-							if(cc==' ' || cc == '\t') {
+							if(cc==' ' || cc == '\t' || cc == '\r') {
 								ret.deleteCharAt(j);
 							}
 							else { break; }
 						}
+						if(!thisIsWS) {
+							ret.append(c);
+						}
 					}
-					if(thisIsWS && (lastWasWS || i==0)) {}
-					else { ret.append(c); }
+					else {
+						if(thisIsWS && (lastWasWS || i==0)) {}
+						else { ret.append(c); }
+					}
 					//lastWasWS = thisIsWS;
 					break;
 				}
@@ -253,8 +272,16 @@ public class TokenizerUtil {
 					break;
 				}
 				case COMM_LINE: {
-					if(c=='\n') {
+					if(c=='\n' || isLastChar) {
 						state = TknState.DEFAULT;
+						for(int j=ret.length()-1;true;j--) {
+							if(j<0) { break; }
+							char cc = ret.charAt(j);
+							if(cc==' ' || cc == '\t' || cc == '\r') {
+								ret.deleteCharAt(j);
+							}
+							else { break; }
+						}
 					}
 					ret.append(c);
 					break;

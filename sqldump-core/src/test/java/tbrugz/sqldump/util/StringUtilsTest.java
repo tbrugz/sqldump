@@ -39,6 +39,13 @@ public class StringUtilsTest {
 	}
 
 	@Test
+	public void testEqualsIgnoreWhitespacesAll() {
+		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine("abc  \n123", "abc\n123", WhitespaceIgnoreType.ALL));
+		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine("abc  \r\n123", "abc\r\n123", WhitespaceIgnoreType.ALL));
+		Assert.assertTrue(StringUtils.equalsIgnoreWhitespacesEachLine("abc  \n    \n123", "abc\n\n123", WhitespaceIgnoreType.ALL));
+	}
+
+	@Test
 	public void testMatchPtrnCreate() {
 		String s = "create or replace procedure abc.123";
 		Matcher m = ContentNormalizerProcessor.PTRN_CREATE_EX.matcher(s);

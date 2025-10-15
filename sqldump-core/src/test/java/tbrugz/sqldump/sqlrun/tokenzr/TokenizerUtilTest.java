@@ -261,6 +261,14 @@ public class TokenizerUtilTest {
 		test = " \t select 'ab  c' \n from \"de  f\"  ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
 		Assert.assertEquals("select 'ab  c'\nfrom \"de  f\"", ret);
+		
+		test = " select abc \n from def   \n   and";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("select abc\nfrom def\nand", ret);
+		
+		test = "create or replace PACKAGE BODY       \"PK_XYZ\"";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("create or replace PACKAGE BODY \"PK_XYZ\"", ret);
 	}
 
 	@Test
@@ -275,6 +283,14 @@ public class TokenizerUtilTest {
 		test = "                  )";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
 		Assert.assertEquals(")", ret);
+
+		test = "  -- #xyz '\n  abc ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("-- #xyz '\nabc", ret);
+
+		test = "  -- #xyz \n  abc ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("-- #xyz\nabc", ret);
 	}
 	
 }
