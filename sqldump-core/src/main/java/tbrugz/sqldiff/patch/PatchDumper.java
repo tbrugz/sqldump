@@ -7,16 +7,22 @@ import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+import java.util.function.BiPredicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.github.difflib.DiffUtils;
+import com.github.difflib.algorithm.DiffAlgorithmFactory;
+import com.github.difflib.algorithm.DiffAlgorithmI;
+import com.github.difflib.algorithm.myers.MyersDiff;
 import com.github.difflib.patch.AbstractDelta;
 import com.github.difflib.patch.Patch;
+import com.github.difflib.text.DiffRowGenerator;
 
 import tbrugz.sqldiff.DiffDumper;
 import tbrugz.sqldiff.SQLDiff;
+import tbrugz.sqldiff.WhitespaceIgnoreType;
 import tbrugz.sqldiff.model.Diff;
 import tbrugz.sqldiff.model.SchemaDiff;
 import tbrugz.sqldump.util.StringUtils;
@@ -42,8 +48,42 @@ public class PatchDumper implements DiffDumper {
 	static final Log log = LogFactory.getLog(PatchDumper.class);
 	
 	public static final String PROP_PATCHFILE_CONTEXT = SQLDiff.PREFIX_PATCH+".contextsize";
-	
+	/*
+	public static final BiPredicate<String, String> WS_IGNORE_EOL = (original, revised)
+		-> StringUtils.stringNormalizer(original, WhitespaceIgnoreType.EOL).equals(StringUtils.stringNormalizer(revised, WhitespaceIgnoreType.EOL));
+
+	public static final BiPredicate<String, String> WS_IGNORE_SOL = (original, revised)
+		-> StringUtils.stringNormalizer(original, WhitespaceIgnoreType.SOL).equals(StringUtils.stringNormalizer(revised, WhitespaceIgnoreType.SOL));
+
+	public static final BiPredicate<String, String> WS_IGNORE_SOLEOL = (original, revised)
+		-> StringUtils.stringNormalizer(original, WhitespaceIgnoreType.SOL_EOL).equals(StringUtils.stringNormalizer(revised, WhitespaceIgnoreType.SOL_EOL));
+	*/
+	/*
+	public static final BiPredicate<String, String> WS_IGNORE_EOL = new WhitespaceEquailizer(WhitespaceIgnoreType.EOL);
+
+	public static final BiPredicate<String, String> WS_IGNORE_SOL = new WhitespaceEquailizer(WhitespaceIgnoreType.SOL);
+
+	public static final BiPredicate<String, String> WS_IGNORE_SOLEOL = new WhitespaceEquailizer(WhitespaceIgnoreType.SOL_EOL);
+	*/
+
+	public static class WhitespaceEquailizer implements BiPredicate<String, String> {
+		
+		final WhitespaceIgnoreType wsIgnore;
+		
+		public WhitespaceEquailizer(WhitespaceIgnoreType wsIgnore) {
+			this.wsIgnore = wsIgnore;
+		}
+
+		@Override
+		public boolean test(String original, String revised) {
+			return StringUtils.stringNormalizer(original, wsIgnore).equals(StringUtils.stringNormalizer(revised, wsIgnore));
+		}
+		
+	}
+
 	int context = 3;
+	WhitespaceIgnoreType wsIgnore = WhitespaceIgnoreType.NONE;
+	DiffAlgorithmI<String> diffAlgorithm;
 
 	@Override
 	public String type() {
@@ -53,6 +93,46 @@ public class PatchDumper implements DiffDumper {
 	@Override
 	public void setProperties(Properties prop) {
 		context = Utils.getPropInt(prop, PROP_PATCHFILE_CONTEXT, context);
+		String wsi = prop.getProperty(SQLDiff.PROP_WHITESPACE_IGNORE);
+		if(wsi!=null) {
+			setWSIgnoreType(WhitespaceIgnoreType.getType(wsi));
+		}
+		else {
+			updatetDiffAlgorithm();
+		}
+	}
+	
+	public void setWSIgnoreType(WhitespaceIgnoreType wsIgnore) {
+		this.wsIgnore = wsIgnore;
+		log.info("whitespaceIgnore: "+wsIgnore);
+		updatetDiffAlgorithm();
+	}
+
+	void updatetDiffAlgorithm() {
+		DiffAlgorithmFactory diffAlgFactory = MyersDiff.factory();
+		BiPredicate<String, String> predicate = null;
+		//predicate = new WhitespaceEquailizer(wsIgnore);
+		switch (wsIgnore) {
+			case ALL:
+				predicate = DiffRowGenerator.IGNORE_WHITESPACE_EQUALIZER;
+				//predicate = new WhitespaceEquailizer(wsIgnore); //XXX ??
+				break;
+			case EOL:
+				//predicate = WS_IGNORE_EOL;
+				//break;
+			case SOL:
+				//predicate = WS_IGNORE_SOL;
+				//break;
+			case SOL_EOL:
+				//predicate = WS_IGNORE_SOLEOL;
+				predicate = new WhitespaceEquailizer(wsIgnore);
+				break;
+			case NONE:
+			default:
+				predicate = DiffRowGenerator.DEFAULT_EQUALIZER;
+				break;
+		}
+		diffAlgorithm = diffAlgFactory.create(predicate);
 	}
 
 	@Override
@@ -88,7 +168,7 @@ public class PatchDumper implements DiffDumper {
 		try {
 		List<String> original = bigStringToLines(diff.getPreviousDefinition());
 		List<String> revised = bigStringToLines(diff.getDefinition());
-		Patch<String> patch = DiffUtils.diff(original, revised);
+		Patch<String> patch = DiffUtils.diff(original, revised, diffAlgorithm, null);
 		
 		//writer.write("### "+diff.getObjectType()+": "+diff.getNamedObject().getSchemaName()+"."+diff.getNamedObject().getName()+"\n");
 		writeHeader(writer, diff);
