@@ -237,15 +237,7 @@ public class TokenizerUtil {
 						ret.append(c2);
 					}
 					else if(c=='\n' || isLastChar) {
-						// removes trailing whitespaces
-						for(int j=ret.length()-1;true;j--) {
-							if(j<0) { break; }
-							char cc = ret.charAt(j);
-							if(cc==' ' || cc == '\t' || cc == '\r') {
-								ret.deleteCharAt(j);
-							}
-							else { break; }
-						}
+						removeTrailingSpaces(ret);
 						if(!thisIsWS) {
 							ret.append(c);
 						}
@@ -274,41 +266,28 @@ public class TokenizerUtil {
 				case COMM_LINE: {
 					if(c=='\n' || isLastChar) {
 						state = TknState.DEFAULT;
-						for(int j=ret.length()-1;true;j--) {
-							if(j<0) { break; }
-							char cc = ret.charAt(j);
-							if(cc==' ' || cc == '\t' || cc == '\r') {
-								ret.deleteCharAt(j);
-							}
-							else { break; }
-						}
+						removeTrailingSpaces(ret);
 					}
 					ret.append(c);
+					removeTrailingDoubleSpaces(ret);
 					break;
 				}
 				case COMM_BLOCK: {
 					if(c=='*' && !isLastChar) {
-						char c2 = sql.charAt(i+1);
+						char c2 = sql.charAt(++i);
 						if(c2=='/') {
 							state = TknState.DEFAULT;
-							i++; // skips next '/' char
 						}
 						ret.append(c);
 						ret.append(c2);
 					}
 					else {
 						if(c=='\n' || isLastChar) {
-							for(int j=ret.length()-1;true;j--) {
-								if(j<0) { break; }
-								char cc = ret.charAt(j);
-								if(cc==' ' || cc == '\t' || cc == '\r') {
-									ret.deleteCharAt(j);
-								}
-								else { break; }
-							}
+							removeTrailingSpaces(ret);
 						}
 						ret.append(c);
 					}
+					removeTrailingDoubleSpaces(ret);
 					break;
 				}
 			}
@@ -320,6 +299,32 @@ public class TokenizerUtil {
 		return ret.toString();
 	}
 	
+	static void removeTrailingSpaces(StringBuilder ret) {
+		for(int j=ret.length()-1;true;j--) {
+			if(j<0) { break; }
+			char cc = ret.charAt(j);
+			if(cc==' ' || cc == '\t' || cc == '\r') {
+				ret.deleteCharAt(j);
+			}
+			else { break; }
+		}
+	}
+
+	static void removeTrailingDoubleSpaces(StringBuilder ret) {
+		boolean lastWasWS = false;
+		for(int j=ret.length()-1;true;j--) {
+			if(j<0) { break; }
+			char cc = ret.charAt(j);
+			if(cc==' ' || cc == '\t' || cc == '\r') {
+				if(lastWasWS) {
+					ret.deleteCharAt(j);
+				}
+				lastWasWS = true;
+			}
+			else { break; }
+		}
+	}
+
 	public static String replaceNamedParameters(String sql, List<QueryParameter> pars) {
 		if(sql==null) { return null; }
 		StringBuilder sb = new StringBuilder();

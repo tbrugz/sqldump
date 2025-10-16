@@ -295,6 +295,10 @@ public class TokenizerUtilTest {
 		test = "  /* this is \n the end */ ";
 		ret = TokenizerUtil.removeMultipleWhitespaces(test);
 		Assert.assertEquals("/* this is\n the end */", ret);
+
+		test = "  /* this is \n  the end */ ";
+		ret = TokenizerUtil.removeMultipleWhitespaces(test);
+		Assert.assertEquals("/* this is\n the end */", ret);
 	}
 	
 }
