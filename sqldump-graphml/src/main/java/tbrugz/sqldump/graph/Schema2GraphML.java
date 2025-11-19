@@ -300,7 +300,7 @@ public class Schema2GraphML extends AbstractModelDumper implements SchemaModelDu
 		if(t instanceof Table) {
 			Table tt = (Table) t;
 			for(Column c: tt.getColumns()) {
-				sbCols.append(c.getDefinition()+"\n");
+				sbCols.append(c.getSimpleDefinition(true)+"\n");
 				colCount++;
 			}
 		}

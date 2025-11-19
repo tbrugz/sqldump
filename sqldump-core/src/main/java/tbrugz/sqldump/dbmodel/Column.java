@@ -249,6 +249,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition(true)+getColumnConstraints();
 	}
 	
+	public String getSimpleDefinition(boolean includeNullable) {
+		return DBObject.getFinalIdentifier(name)+" "+getTypeDefinition()+
+				(includeNullable?getNullableSnippet():"");
+	}
+
 	public String getTypeDefinition() {
 		return getTypeDefinition(false);
 	}

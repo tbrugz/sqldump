@@ -5,6 +5,8 @@ lib/
 target/
 work/*
 
+**/tmp/*
+
 .scannerwork
 
 build.properties
