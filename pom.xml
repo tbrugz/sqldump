@@ -19,16 +19,18 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
-    <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+    <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+    <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
     <!--<maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>-->
-    <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
-    <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
+    <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
 
     <maven-enforcer-plugin.requireJavaVersion>1.8.0</maven-enforcer-plugin.requireJavaVersion>
     <maven-enforcer-plugin.requireMavenVersion>3.6.3</maven-enforcer-plugin.requireMavenVersion>
 
-    <buildnumber-maven-plugin.version>3.2.1</buildnumber-maven-plugin.version>
+    <buildnumber-maven-plugin.version>3.3.0</buildnumber-maven-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
 
@@ -204,7 +206,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.3.1</version>
+          <version>${maven-source-plugin.version}</version>
           <executions>
             <execution>
               <id>attach-sources</id>
@@ -218,7 +220,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.6.3</version>
+          <version>${maven-javadoc-plugin.version}</version>
           <configuration>
             <source>8</source>
           </configuration>
