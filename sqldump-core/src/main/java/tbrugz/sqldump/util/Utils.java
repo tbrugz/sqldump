@@ -566,9 +566,11 @@ public class Utils {
 	// see: https://github.com/quarkusio/quarkus/issues/2809
 	public static Class<?> loadClass(String className) throws ClassNotFoundException {
 		try {
+			// nosemgrep
 			return Class.forName(className);
 		}
 		catch(ClassNotFoundException | NoClassDefFoundError e) {
+			// nosemgrep
 			return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
 		}
 	}

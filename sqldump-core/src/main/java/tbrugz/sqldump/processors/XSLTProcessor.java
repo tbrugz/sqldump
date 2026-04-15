@@ -3,6 +3,7 @@ package tbrugz.sqldump.processors;
 import java.io.InputStream;
 import java.io.Writer;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -17,6 +18,7 @@ import tbrugz.sqldump.def.AbstractProcessor;
 import tbrugz.sqldump.def.ProcessingException;
 
 public abstract class XSLTProcessor extends AbstractProcessor {
+
 	static Log log = LogFactory.getLog(XSLTProcessor.class);
 
 	protected InputStream xsl;
@@ -41,6 +43,8 @@ public abstract class XSLTProcessor extends AbstractProcessor {
 			throw new ProcessingException("xsl can't be null");
 		}
 		TransformerFactory factory = TransformerFactory.newInstance();
+		factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
 		Source xslt = new StreamSource(xsl);
 		Transformer transformer = factory.newTransformer(xslt);
 		

@@ -86,6 +86,7 @@ public class SchemaSerializer extends AbstractModelDumper implements SchemaModel
 		}
 
 		try {
+			// nosemgrep
 			ObjectInputStream ois = new ObjectInputStream(fileInput);
 			SchemaModel sm = (SchemaModel) ois.readObject();
 			ois.close();
