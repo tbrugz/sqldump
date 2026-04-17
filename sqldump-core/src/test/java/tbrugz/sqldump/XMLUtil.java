@@ -15,6 +15,8 @@ public class XMLUtil {
 	
 	public static Document getDoc(File file) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+		// Completely disable DTDs (highly recommended)
+		dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		return dBuilder.parse(file);
 	}

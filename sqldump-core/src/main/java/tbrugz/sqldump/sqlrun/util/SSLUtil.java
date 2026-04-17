@@ -29,13 +29,13 @@ public class SSLUtil {
 				
 				// nosemgrep
 				@Override
-				public void checkServerTrusted(X509Certificate[] arg0, String arg1)
+				public void checkServerTrusted(X509Certificate[] arg0, String arg1) //NOSONAR
 						throws CertificateException {
 				}
 				
 				// nosemgrep
 				@Override
-				public void checkClientTrusted(X509Certificate[] arg0, String arg1)
+				public void checkClientTrusted(X509Certificate[] arg0, String arg1) //NOSONAR
 						throws CertificateException {
 				}
 			}

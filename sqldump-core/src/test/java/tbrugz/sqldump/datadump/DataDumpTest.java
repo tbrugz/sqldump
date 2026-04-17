@@ -42,6 +42,7 @@ import org.xml.sax.SAXParseException;
 
 import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
+import tbrugz.sqldump.XMLUtil;
 import tbrugz.sqldump.datadump.DataDump.Outputter;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.IOUtil;
@@ -972,9 +973,7 @@ public class DataDumpTest {
 	//----------------------------------
 	
 	public static Document parseXML(File f) throws ParserConfigurationException, SAXException, IOException {
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-		return dBuilder.parse(f);
+		return XMLUtil.getDoc(f);
 	}
 	
 	public static String normalizeHtml(String s) {
