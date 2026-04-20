@@ -20,7 +20,7 @@ public class FK extends AbstractConstraint implements Serializable {
 		public String toString() {
 			switch (this) {
 			case NO_ACTION:
-				return null; // return ""; //?
+				return "";
 			case CASCADE:
 				return "cascade";
 			case SET_NULL:

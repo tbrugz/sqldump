@@ -13,7 +13,7 @@ public class ConnectionUtilTest {
 	@Before
 	public void setup() throws Exception {
 		File db = new File("target/work/connection.h2.db");
-		db.delete();
+		db.delete(); // NOSONAR
 		Properties p = new Properties();
 		p.load(ConnectionUtilTest.class.getResourceAsStream("conn.properties"));
 		p.setProperty("x.password", "abc");
@@ -21,6 +21,15 @@ public class ConnectionUtilTest {
 		conn.close();
 	}
 	
+	@Test
+	public void testOkPassword() throws Exception {
+		Properties p = new Properties();
+		p.load(ConnectionUtilTest.class.getResourceAsStream("conn.properties"));
+		p.setProperty("x.password", "abc");
+		Connection conn = ConnectionUtil.initDBConnection("x", p);
+		conn.close();
+	}
+
 	@Test(expected=SQLException.class)
 	public void testWrongPassword() throws Exception {
 		Properties p = new Properties();

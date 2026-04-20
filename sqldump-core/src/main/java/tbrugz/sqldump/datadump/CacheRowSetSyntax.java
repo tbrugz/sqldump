@@ -66,7 +66,7 @@ public class CacheRowSetSyntax extends OutputStreamDumper implements DumpSyntaxB
 	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException {
 		// dumps all ResultSet
 		ObjectOutputStream out = new ObjectOutputStream(os);
-		out.writeObject(crs);
+		out.writeObject(crs); // NOSONAR
 		out.close();
 	}
 	

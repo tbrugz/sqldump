@@ -109,7 +109,7 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 			Thread.yield();
 			try {
 				Thread.sleep(100);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException e) { // NOSONAR
 				e.printStackTrace();
 			}
 			if(throwit!=null) {

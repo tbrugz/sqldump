@@ -73,7 +73,7 @@ public class Index extends DBObject {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 7; //super.hashCode(); // Index equality will not depend on Index name
-		result = prime * result + ((columns == null) ? 0 : columns.hashCode());
+		result = prime * result + (/*(columns == null) ? 0 : */columns.hashCode());
 		result = prime * result + ((reverse == null) ? 0 : reverse.hashCode());
 		result = prime * result
 				+ ((tableName == null) ? 0 : tableName.hashCode());
@@ -94,10 +94,11 @@ public class Index extends DBObject {
 		if (getClass() != obj.getClass())
 			return false;
 		Index other = (Index) obj;
-		if (columns == null) {
+		/* if (columns == null) {
 			if (other.columns != null)
 				return false;
-		} else if (!columns.equals(other.columns))
+		} else */
+		if (!columns.equals(other.columns))
 			return false;
 		if (reverse == null) {
 			if (other.reverse != null)

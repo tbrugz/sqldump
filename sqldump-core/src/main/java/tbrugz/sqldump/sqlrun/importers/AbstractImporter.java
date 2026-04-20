@@ -663,7 +663,7 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			if(follow) {
 				try {
 					Thread.sleep(sleepMilis);
-				} catch (InterruptedException e) {
+				} catch (InterruptedException e) { // NOSONAR
 					throw new IllegalStateException(e);
 				}
 			}

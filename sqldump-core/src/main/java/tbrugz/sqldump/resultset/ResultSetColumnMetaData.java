@@ -36,9 +36,9 @@ public class ResultSetColumnMetaData {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((colNames == null) ? 0 : colNames.hashCode());
+				+ (/*(colNames == null) ? 0 : */colNames.hashCode());
 		result = prime * result
-				+ ((colTypes == null) ? 0 : colTypes.hashCode());
+				+ (/*(colTypes == null) ? 0 : */colTypes.hashCode());
 		result = prime * result + numCol;
 		return result;
 	}
@@ -52,15 +52,17 @@ public class ResultSetColumnMetaData {
 		if (getClass() != obj.getClass())
 			return false;
 		ResultSetColumnMetaData other = (ResultSetColumnMetaData) obj;
-		if (colNames == null) {
+		/*if (colNames == null) {
 			if (other.colNames != null)
 				return false;
-		} else if (!colNames.equals(other.colNames))
+		} else */
+		if (!colNames.equals(other.colNames))
 			return false;
-		if (colTypes == null) {
+		/*if (colTypes == null) {
 			if (other.colTypes != null)
 				return false;
-		} else if (!colTypes.equals(other.colTypes))
+		} else */
+		if (!colTypes.equals(other.colTypes))
 			return false;
 		if (numCol != other.numCol)
 			return false;
