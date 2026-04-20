@@ -10,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import org.junit.Assert;
@@ -84,9 +85,11 @@ public class CSVImportTest {
 	}
 	
 	static int get1stValue(Connection conn, String sql) throws SQLException {
-		ResultSet rs = conn.createStatement().executeQuery(sql);
-		rs.next();
-		return rs.getInt(1);
+		try (Statement stmt = conn.createStatement()) {
+			ResultSet rs = stmt.executeQuery(sql);
+			rs.next();
+			return rs.getInt(1);
+		}
 	}
 	
 	@Test

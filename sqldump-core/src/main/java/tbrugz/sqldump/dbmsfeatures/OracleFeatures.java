@@ -1086,10 +1086,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		String explainSql = "explain plan\n\tset STATEMENT_ID = '"+id+"' into "+planTable+"\n"
 			+ "for\n"+sql;
 		//log.debug("explain sql:\n"+explainSql);
-		Statement stmt = conn.createStatement();
-		stmt.execute(explainSql);
-		stmt.close();
-		
+		try(Statement stmt = conn.createStatement()) {
+			stmt.execute(explainSql);
+		}
+			
 		String planTableSelect = "select "+DEFAULT_EXPLAIN_COLUMNS
 				+"\nfrom "+planTable
 				+"\nconnect by prior id = parent_id "
@@ -1098,7 +1098,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"\nand statement_id = '"+id+"' "
 				+"\norder by id ";
 		//log.debug("plan_table sql:\n"+explainSql);
-		return conn.createStatement().executeQuery(planTableSelect);
+		try(Statement stmt = conn.createStatement()) {
+			return stmt.executeQuery(planTableSelect);
+		}
 	}
 	
 	@Override

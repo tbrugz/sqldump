@@ -18,10 +18,11 @@ public class HSQLDBDiffTest extends SQLDiffTest {
 		dbDriver = "org.hsqldb.jdbcDriver";
 		dbUser = "public";
 		
-		try {
-			//see: http://stackoverflow.com/questions/2951013/how-do-you-delete-the-default-database-schema-in-hsqldb
+		try (
 			Connection conn = DriverManager.getConnection(dbURL, dbUser, SQLDiffTest.dbPassword);
-			Statement st = conn.createStatement();
+			Statement st = conn.createStatement()
+			) {
+			//see: http://stackoverflow.com/questions/2951013/how-do-you-delete-the-default-database-schema-in-hsqldb
 			st.executeUpdate("DROP SCHEMA PUBLIC CASCADE");
 			st.executeUpdate("CREATE SCHEMA PUBLIC");
 			//DBMSResources.instance().updateMetaData(conn.getMetaData());

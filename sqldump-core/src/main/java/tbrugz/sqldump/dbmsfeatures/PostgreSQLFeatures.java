@@ -191,15 +191,16 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 				"from information_schema.foreign_tables\n" +
 				"where foreign_table_schema = ?\n" +
 				"and foreign_table_name = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, schema);
-		ps.setString(2, name);
-		ResultSet rs = ps.executeQuery();
-		if(rs.next()) {
-			ret = rs.getString(3);
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, schema);
+			ps.setString(2, name);
+			ResultSet rs = ps.executeQuery();
+			if(rs.next()) {
+				ret = rs.getString(3);
+			}
+			
+			return ret;
 		}
-		
-		return ret;
 	}
 
 	Map<String,String> getForeignTableOptions(Connection conn, String schema, String name) throws SQLException {
@@ -209,17 +210,18 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 				"from information_schema.foreign_table_options\n" + 
 				"where foreign_table_schema = ?\n" + 
 				"and foreign_table_name = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, schema);
-		ps.setString(2, name);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()) {
-			String key = rs.getString(3);
-			String value = rs.getString(4);
-			ret.put(key, value);
+		try(PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, schema);
+			ps.setString(2, name);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String key = rs.getString(3);
+				String value = rs.getString(4);
+				ret.put(key, value);
+			}
+		
+			return ret;
 		}
-	
-		return ret;
 	}
 	
 	// see: https://itectec.com/database/postgresql-how-to-identify-the-column-used-to-partition-a-table-from-the-postgres-system-catalogs/
@@ -247,10 +249,11 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 				+ "where 1=1\n"
 				+ "	and par.relnamespace::regnamespace::text = ?"
 				+ "	and par.relname = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, schema);
-		ps.setString(2, name);
-		return ps.executeQuery();
+		try(PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, schema);
+			ps.setString(2, name);
+			return ps.executeQuery();
+		}
 	}
 	
 	void addPartitionInfo(PostgreSqlTable pgtable, ResultSet rs) throws SQLException {
@@ -280,10 +283,11 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 				+ "where 1=1\n"
 				+ "  and pt.relnamespace::regnamespace::text = ?"
 				+ "  and pt.relname = ?";
-		PreparedStatement ps = conn.prepareStatement(sql);
-		ps.setString(1, schema);
-		ps.setString(2, name);
-		return ps.executeQuery();
+		try (PreparedStatement ps = conn.prepareStatement(sql)) {
+			ps.setString(1, schema);
+			ps.setString(2, name);
+			return ps.executeQuery();
+		}
 	}
 	
 	void addTablePartitionInfo(PostgreSqlTable pgtable, ResultSet rs) throws SQLException {
