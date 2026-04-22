@@ -22,6 +22,7 @@ public class SQLStmtScanner implements Tokenizer, Iterator<String>, Iterable<Str
 	final String inputEncoding;
 	final Scanner scan;
 	final InputStream is;
+	boolean iteratorAlreadyReturned = false;
 	
 	/*public SQLStmtScanner(File file) throws FileNotFoundException {
 		this(file, DEFAULT_CHARSET);
@@ -49,7 +50,11 @@ public class SQLStmtScanner implements Tokenizer, Iterator<String>, Iterable<Str
 	
 	@Override
 	public Iterator<String> iterator() {
-		return this;
+		if(iteratorAlreadyReturned) {
+			throw new IllegalStateException("Iterator already returned");
+		}
+		iteratorAlreadyReturned = true;
+		return this; // NOSONAR
 	}
 
 	@Override

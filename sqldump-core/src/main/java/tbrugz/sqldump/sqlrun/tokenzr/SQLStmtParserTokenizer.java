@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import tbrugz.sqldump.sqlrun.tokenzr.TokenizerUtil.TknState;
 
@@ -24,6 +25,7 @@ public class SQLStmtParserTokenizer implements Tokenizer, Iterator<String>, Iter
 	//final String inputEncoding;
 	final InputStreamReader isr;
 	String nextToken;
+	boolean iteratorAlreadyReturned = false;
 
 	public SQLStmtParserTokenizer(File file, String charset) throws FileNotFoundException, UnsupportedEncodingException {
 		this(new BufferedInputStream(new FileInputStream(file)), charset);
@@ -133,7 +135,11 @@ public class SQLStmtParserTokenizer implements Tokenizer, Iterator<String>, Iter
 
 	@Override
 	public Iterator<String> iterator() {
-		return this;
+		if(iteratorAlreadyReturned) {
+			throw new IllegalStateException("Iterator already returned");
+		}
+		iteratorAlreadyReturned = true;
+		return this; // NOSONAR
 	}
 
 	@Override
@@ -148,6 +154,9 @@ public class SQLStmtParserTokenizer implements Tokenizer, Iterator<String>, Iter
 	public String next() {
 		if(nextToken==null) {
 			nextToken = getNextToken(isr);
+		}
+		if(nextToken==null) {
+			throw new NoSuchElementException(); 
 		}
 		String ret = nextToken;
 		nextToken = null;

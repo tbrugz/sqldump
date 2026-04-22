@@ -1,6 +1,7 @@
 package tbrugz.sqldump.sqlrun.tokenzr;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +14,7 @@ public class StringSpliter implements Tokenizer, Iterator<String>, Iterable<Stri
 	final String[] stmtTokenizer;
 	final int length;
 	int pos = 0;
+	boolean iteratorAlreadyReturned = false;
 	
 	public StringSpliter(String fileStr) {
 		this(fileStr, true);
@@ -31,7 +33,11 @@ public class StringSpliter implements Tokenizer, Iterator<String>, Iterable<Stri
 	
 	@Override
 	public Iterator<String> iterator() {
-		return this;
+		if(iteratorAlreadyReturned) {
+			throw new IllegalStateException("Iterator already returned");
+		}
+		iteratorAlreadyReturned = true;
+		return this; // NOSONAR
 	}
 
 	@Override
@@ -41,6 +47,9 @@ public class StringSpliter implements Tokenizer, Iterator<String>, Iterable<Stri
 
 	@Override
 	public String next() {
+		if(!hasNext()) {
+			throw new NoSuchElementException("pos = "+pos);
+		}
 		return stmtTokenizer[pos++];
 	}
 

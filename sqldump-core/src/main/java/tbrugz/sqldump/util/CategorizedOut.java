@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -138,6 +139,9 @@ public class CategorizedOut {
 
 		@Override
 		public Writer next() {
+			if(!hasNext()) {
+				throw new NoSuchElementException();
+			}
 			try {
 				return getFileWriter(it.next());
 			} catch (IOException e) {
@@ -164,6 +168,9 @@ public class CategorizedOut {
 
 		@Override
 		public Writer next() {
+			if(!hasNext()) {
+				throw new NoSuchElementException();
+			}
 			hasNext = false;
 			return innerWriter;
 		}
@@ -192,6 +199,9 @@ public class CategorizedOut {
 
 		@Override
 		public Writer next() {
+			if(!hasNext()) {
+				throw new NoSuchElementException();
+			}
 			hasNext = false;
 			return writer;
 		}

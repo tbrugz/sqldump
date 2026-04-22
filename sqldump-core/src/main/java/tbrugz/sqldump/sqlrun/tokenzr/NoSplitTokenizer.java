@@ -1,6 +1,7 @@
 package tbrugz.sqldump.sqlrun.tokenzr;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,6 +11,7 @@ public class NoSplitTokenizer implements Tokenizer, Iterator<String>, Iterable<S
 	static final Log log = LogFactory.getLog(NoSplitTokenizer.class);
 
 	final String[] stmtTokenizer;
+	final boolean split;
 	final int length;
 	int pos = 0;
 	
@@ -18,13 +20,15 @@ public class NoSplitTokenizer implements Tokenizer, Iterator<String>, Iterable<S
 	}
 	
 	public NoSplitTokenizer(String contents, boolean split) {
+		this.split = split;
 		stmtTokenizer = new String[]{ contents };
 		length = stmtTokenizer.length;
 	}
 	
 	@Override
 	public Iterator<String> iterator() {
-		return this;
+		NoSplitTokenizer nst = new NoSplitTokenizer(stmtTokenizer[0], split);
+		return nst;
 	}
 
 	@Override
@@ -34,7 +38,10 @@ public class NoSplitTokenizer implements Tokenizer, Iterator<String>, Iterable<S
 
 	@Override
 	public String next() {
-		return stmtTokenizer[pos++];
+		if(hasNext()) {
+			return stmtTokenizer[pos++];
+		}
+		throw new NoSuchElementException("pos = "+pos);
 	}
 
 	@Override

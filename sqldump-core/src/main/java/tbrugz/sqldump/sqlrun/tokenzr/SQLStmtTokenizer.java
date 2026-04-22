@@ -14,6 +14,7 @@ public class SQLStmtTokenizer implements Tokenizer, Iterator<String>, Iterable<S
 	
 	int pos = 0;
 	int searchFrom = 0;
+	boolean iteratorAlreadyReturned = false;
 	
 	public SQLStmtTokenizer(String sql) {
 		this.sql = sql;
@@ -120,6 +121,11 @@ public class SQLStmtTokenizer implements Tokenizer, Iterator<String>, Iterable<S
 
 	@Override
 	public Iterator<String> iterator() {
-		return this;
+		if(iteratorAlreadyReturned) {
+			return new SQLStmtTokenizer(sql);
+		}
+		iteratorAlreadyReturned = true;
+		return this; // NOSONAR
 	}
+
 }
