@@ -122,7 +122,8 @@ public class DataDump extends AbstractSQLProc {
 	private static final Log log1stRow = LogFactory.getLog(DataDump.class.getName()+".datadump-1st");
 	private static final Log logRow = LogFactory.getLog(DataDump.class.getName()+".datadump-row");
 	
-	static DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+	// XXX: use DateTimeFormatter? ... DateTimeFormatter.ofPattern("yyyy-MM-dd");
+	DateFormat partitionByDateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	
 	final Set<String> bomWarned = new HashSet<String>();
 
@@ -1011,7 +1012,7 @@ public class DataDump extends AbstractSQLProc {
 		return rets;
 	}
 	
-	static String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
+	String getPartitionByStr(String partitionByStr, ResultSet rs, List<String> cols) throws SQLException {
 		//XXX: numberformatter (leading 0s) for partitionId?
 		//XXXxx: add dataformatter? useful for partitioning by year, year-month, ...
 		//XXX: per-column dateFormatter?

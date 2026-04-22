@@ -43,13 +43,12 @@ public class DataDumpUtils {
 	
 	public static final String CHARSET_UTF8 = "UTF-8";
 	public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
+	public static final String DATE_FORMATTER_PATTERN = "yyyy-MM-dd"; //new SimpleDateFormat("yyyy-MM-dd");
 
 	static final String DEFAULT_SQL_STRING_ENCLOSING = QUOTE;
 	
 	static boolean resultSetWarnedForSQLValue = false;
 	
-	//see: http://download.oracle.com/javase/1.5.0/docs/api/java/text/SimpleDateFormat.html
-	static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
 	static final NumberFormat floatFormatterSQL; //TODO: add prop for floatFormatterSQL precision
 	static final NumberFormat longFormatter;
 	static boolean csvWriteEnclosingAllFields = false; //TODO: add prop for csv_write_enclosing_all_fields

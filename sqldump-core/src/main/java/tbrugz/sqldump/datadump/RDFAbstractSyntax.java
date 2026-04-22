@@ -24,7 +24,7 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 	public static final String PROP_RDF_BASE = "sqldump.rdf.base";
 
 	static Map<String, String> namespaces = new HashMap<String, String>();
-	static DateFormat xsdDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+	DateFormat xsdDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 	
 	List<FK> fks = null;
 	List<Constraint> uks = null;
@@ -63,7 +63,7 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 		this.uks = uks;
 	}
 	
-	public static String getLiteralValue(Object elem, Class<?> type) {
+	public String getLiteralValue(Object elem, Class<?> type) {
 		if(elem == null) {
 			return null;
 		}

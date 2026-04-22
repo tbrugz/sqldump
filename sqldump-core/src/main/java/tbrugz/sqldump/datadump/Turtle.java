@@ -120,7 +120,8 @@ public class Turtle extends RDFAbstractSyntax implements DumpSyntaxBuilder, Clon
 			
 			fos.write(entityId+" <"+
 					tableName+"#"+lsColNames.get(i)+"> "+
-					RDFAbstractSyntax.getLiteralValue(value, lsColTypes.get(i))+" .\n");
+					getLiteralValue(value, lsColTypes.get(i))+
+					" .\n");
 		}
 
 		//FKs

@@ -44,7 +44,6 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 	
 	static final String COMPACTMODE_IDENT = "  ";
 	static final String DEFAULT_DATEFORMAT = "'DATE' ''yyyy-MM-dd''";
-	static final DateFormat sqlDefaultDateFormatter = new SimpleDateFormat(DEFAULT_DATEFORMAT);
 
 	protected String fullTableName4Dump;
 	String colNames;
@@ -97,7 +96,7 @@ public class InsertIntoDataDump extends AbstractDumpSyntax implements Cloneable,
 				dateFormatter = new SimpleDateFormat(dbmsDatePattern);
 			}
 			else {
-				dateFormatter = sqlDefaultDateFormatter;
+				dateFormatter = new SimpleDateFormat(DEFAULT_DATEFORMAT);
 			}
 		}
 		if(doQuoteAllSqlIds) { //quote all

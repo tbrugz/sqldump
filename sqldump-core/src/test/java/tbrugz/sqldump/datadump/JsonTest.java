@@ -1,13 +1,14 @@
 package tbrugz.sqldump.datadump;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 public class JsonTest {
 
-	public DateFormat dateFormatter = DataDumpUtils.dateFormatter;
+	public DateFormat dateFormatter = new SimpleDateFormat(DataDumpUtils.DATE_FORMATTER_PATTERN);
 	//JSONParser parser = new JSONParser();
 	
 	@Test

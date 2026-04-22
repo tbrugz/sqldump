@@ -62,7 +62,7 @@ public abstract class DumpSyntax implements DumpSyntaxInt {
 
 	public void postProcProperties() {
 		if(dateFormatter==null) {
-			dateFormatter = DataDumpUtils.dateFormatter;
+			dateFormatter = new SimpleDateFormat(DataDumpUtils.DATE_FORMATTER_PATTERN);
 		}
 	}
 	
