@@ -33,6 +33,7 @@
     <buildnumber-maven-plugin.version>3.3.0</buildnumber-maven-plugin.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
     <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
 
     <!--
     release: maven-compiler 3.6.0+ required
@@ -153,6 +154,32 @@
           <autoPublish>true</autoPublish>
           -->
         </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+            <configuration>
+              <formats>
+                <format>XML</format>
+              </formats>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
 
