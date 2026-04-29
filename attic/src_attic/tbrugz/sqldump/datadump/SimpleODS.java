@@ -167,7 +167,7 @@ public class SimpleODS extends OutputStreamDumper {
 			sd.save(os);
 			//out.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn("error: "+e);
 		}
 	}
 	

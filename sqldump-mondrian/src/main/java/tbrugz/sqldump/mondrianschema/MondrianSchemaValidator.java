@@ -69,9 +69,11 @@ public class MondrianSchemaValidator extends AbstractSQLProc {
 				validate();
 			}
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("ClassNotFoundException: "+e);
 		} catch (SQLException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("SQLException: "+e);
 		}
 	}
 

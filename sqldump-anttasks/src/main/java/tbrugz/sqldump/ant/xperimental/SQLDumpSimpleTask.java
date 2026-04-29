@@ -45,7 +45,6 @@ public class SQLDumpSimpleTask extends Task {
 			//XXX: does not understand @includes ?
 			sqldump.doMain(args, p);
 		} catch (Exception e) {
-			e.printStackTrace();
 			getProject().log("Error executing sqldump", Project.MSG_ERR);
 			throw new BuildException("Error executing sqldump", e);
 		}

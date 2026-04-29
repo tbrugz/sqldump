@@ -4,8 +4,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 //XXXxx should this be a decorator? yes!
 public class NonNullGetMap<K,V> implements Map<K,V> {
+
+	private static final Log log = LogFactory.getLog(NonNullGetMap.class);
 	
 	final Map<K,V> map;
 	final Class<V> initialValueClass;
@@ -40,7 +45,8 @@ public class NonNullGetMap<K,V> implements Map<K,V> {
 			} catch (InstantiationException e) {
 				throw new RuntimeException(e);
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				log.warn("Exception: "+e);
 				throw new RuntimeException(e);
 			}
 		}

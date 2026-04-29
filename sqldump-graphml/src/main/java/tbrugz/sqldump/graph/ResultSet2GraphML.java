@@ -434,7 +434,8 @@ public class ResultSet2GraphML extends AbstractSQLProc {
 		try {
 			processIntern();
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("Exception: "+e);
 			if(failonerror) {
 				throw new ProcessingException(e);
 			}

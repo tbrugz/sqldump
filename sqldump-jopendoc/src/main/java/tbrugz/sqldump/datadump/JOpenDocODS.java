@@ -20,6 +20,7 @@ import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import tbrugz.sqldump.util.SQLUtils;
 
 public class JOpenDocODS extends WriterIndependentDumpSyntax {
+
 	static final Log log = LogFactory.getLog(JOpenDocODS.class);
 	
 	static final String JOPENODS_SYNTAX_ID = "jopen-ods";
@@ -99,7 +100,8 @@ public class JOpenDocODS extends WriterIndependentDumpSyntax {
 			//XXX: add tableName as spreadSheetName?
 			SpreadSheet.createEmpty(model).saveAs(fout);
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("Exception: "+e);
 		}
 	}
 	

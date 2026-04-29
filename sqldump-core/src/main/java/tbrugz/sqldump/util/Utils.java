@@ -110,7 +110,8 @@ class BaseInputGUI extends JFrame implements KeyListener, WindowListener {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) { // NOSONAR
-				e.printStackTrace();
+				//e.printStackTrace();
+				log.warn("InterruptedException: "+e);
 			}
 			if(throwit!=null) {
 				log.warn("throwable detected: exiting");
@@ -510,7 +511,8 @@ public class Utils {
 				System.out.print(replacer);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
+			log.warn("IOException: "+e);
 		}
 		return sb.toString();
 	}

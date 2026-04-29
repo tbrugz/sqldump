@@ -136,7 +136,8 @@ public class SQLUtils {
 				coltype = colTypes.get(i-1);
 			}
 			catch(IndexOutOfBoundsException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				log.warn("error: "+e);
 				coltype = String.class;
 			}
 			

@@ -993,7 +993,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				log.warn("addFKSpecificFeatures: column 'STATUS', 'VALIDATED' or 'RELY' not available [ex: "+e+"]");
 				if(log.isDebugEnabled()) {
 					try { log.debug("addFKSpecificFeatures: rowlist: "+SQLUtils.getColumnNames(rs.getMetaData()));	}
-					catch(SQLException ee) { ee.printStackTrace(); }
+					catch(SQLException ee) {
+						//ee.printStackTrace();
+						log.debug("addFKSpecificFeatures: error: "+ee);
+					}
 				}
 			}
 		}

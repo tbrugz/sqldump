@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import tbrugz.sqldump.dbmodel.Constraint;
 import tbrugz.sqldump.dbmodel.FK;
 import tbrugz.sqldump.util.IOUtil;
@@ -20,7 +23,9 @@ import tbrugz.sqldump.util.Utils;
  * RDF/XML: add <?xml-stylesheet ?> ?
  */
 public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
-	
+
+	private static final Log log = LogFactory.getLog(RDFAbstractSyntax.class);
+
 	public static final String PROP_RDF_BASE = "sqldump.rdf.base";
 
 	static Map<String, String> namespaces = new HashMap<String, String>();
@@ -35,7 +40,7 @@ public abstract class RDFAbstractSyntax extends AbstractDumpSyntax {
 		try {
 			prop.load(IOUtil.getResourceAsStream("/dumpsyntax-rdf.properties"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn("error: "+e);
 		}
 		List<String> keys = Utils.getKeysStartingWith(prop, "prefix.");
 		for(String k: keys) {

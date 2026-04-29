@@ -65,7 +65,7 @@ public class DumpSyntaxRegistry {
 			try {
 				init();
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.warn("error: "+e);
 			}
 		}
 		String[] ss = classes.split(",");
@@ -82,7 +82,7 @@ public class DumpSyntaxRegistry {
 			try {
 				init();
 			} catch (IOException e) {
-				e.printStackTrace();
+				log.warn("ioexception: "+e);
 			}
 		}
 		return syntaxes;
