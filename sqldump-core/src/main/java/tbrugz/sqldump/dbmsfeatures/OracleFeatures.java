@@ -1098,7 +1098,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"\nand statement_id = '"+id+"' "
 				+"\norder by id ";
 		//log.debug("plan_table sql:\n"+explainSql);
-		Statement stmt = conn.createStatement();
+		Statement stmt = conn.createStatement(); // NOSONAR (closing Statement may close Resultset)
 		return stmt.executeQuery(planTableSelect);
 	}
 	

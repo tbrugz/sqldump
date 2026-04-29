@@ -194,7 +194,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 	}
 
 	protected ResultSet bindAndExecuteQuery(String sql, List<Object> params, Connection conn) throws SQLException {
-		PreparedStatement stmt = conn.prepareStatement(sql);
+		PreparedStatement stmt = conn.prepareStatement(sql); // NOSONAR (closing Statement may close Resultset)
 		if(params!=null) {
 			for(int i=0;i<params.size();i++) {
 				stmt.setObject(i+1, params.get(i));
