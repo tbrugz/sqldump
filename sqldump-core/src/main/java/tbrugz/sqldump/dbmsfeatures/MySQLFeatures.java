@@ -4,12 +4,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 
@@ -20,12 +22,17 @@ import tbrugz.sqldump.dbmodel.Table;
 public class MySQLFeatures extends InformationSchemaFeatures {
 
 	@Override
-	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, '' as data_type, external_language, routine_definition, external_name, is_deterministic "
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select routine_name, routine_type, '' as data_type, external_language, routine_definition, external_name, is_deterministic "
 				+"from information_schema.routines "
-				+"where routine_definition is not null "
-				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
-				+"order by routine_catalog, routine_schema, routine_name ";
+				+"where routine_definition is not null ";
+		if(execNamePattern!=null) {
+				query += "and routine_name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "order by routine_catalog, routine_schema, routine_name ";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override

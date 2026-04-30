@@ -216,23 +216,30 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" triggers grabbed [rowcount="+rowcount+"]");
 	}
 
-	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, r.data_type, external_language, routine_definition, external_name, is_deterministic, "
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select routine_name, routine_type, r.data_type, external_language, routine_definition, external_name, is_deterministic, "
 				+"p.parameter_name, p.data_type, p.ordinal_position "
 				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere r.routine_definition is not null "
-				+"and r.specific_schema = '"+schemaPattern+"' "
-				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
-				+"\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
+				+"and r.specific_schema = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += "and routine_name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
+		QueryWithParams query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		InformationSchemaRoutine eo = null;

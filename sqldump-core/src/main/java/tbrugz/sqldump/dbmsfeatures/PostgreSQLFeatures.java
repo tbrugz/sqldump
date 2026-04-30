@@ -6,7 +6,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,6 +20,7 @@ import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
 import tbrugz.sqldump.dbmodel.BaseNamedDBObject;
 import tbrugz.sqldump.dbmodel.PartitionType;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.TableType;
 
@@ -40,24 +40,31 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 	}
 	
 	@Override
-	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, data_type, external_language, routine_definition, external_name, is_deterministic "
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select routine_name, routine_type, data_type, external_language, routine_definition, external_name, is_deterministic "
 				+" , (select array_agg(parameter_name::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_names "
 				+" , (select array_agg(data_type::text order by ordinal_position) from information_schema.parameters p where p.specific_name = r.specific_name) as parameter_types "
 				+"from information_schema.routines r "
 				+"where routine_definition is not null "
-				+"and specific_schema = '"+schemaPattern+"' "
-				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
-				+"order by routine_catalog, routine_schema, routine_name ";
+				+"and specific_schema = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += "and routine_name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "order by routine_catalog, routine_schema, routine_name ";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
+		QueryWithParams query = grabDBRoutinesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		int rowcount = 0;

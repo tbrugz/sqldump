@@ -52,8 +52,9 @@ public class H2Features extends InformationSchemaFeatures {
 		return new QueryWithParams(query, params);
 	}
 
-	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select routine_name, routine_type, r.data_type, external_language, "
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select routine_name, routine_type, r.data_type, external_language, "
 				//+"routine_definition, "
 				+"\ncase "
 				+"when routine_type='FUNCTION' and routine_definition is not null then 'create alias '||routine_name||(case is_deterministic when 'YES' then ' deterministic' else '' end)||' as $$'||routine_definition||'$$;' "
@@ -65,9 +66,14 @@ public class H2Features extends InformationSchemaFeatures {
 				+"\nfrom "+informationSchema+".routines r left outer join "+informationSchema+".parameters p on r.specific_name = p.specific_name "
 				+"\nwhere 1=1 "
 				+"and (r.routine_definition is not null or external_name is not null)"
-				+"and r.specific_schema = '"+schemaPattern+"' "
-				+(execNamePattern!=null?"and routine_name = '"+execNamePattern+"' ":"")
-				+"\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
+				+"and r.specific_schema = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += "and routine_name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "\norder by routine_catalog, routine_schema, routine_name, p.ordinal_position ";
+		return new QueryWithParams(query, params);
 	}
 
 	/*

@@ -54,8 +54,9 @@ public class H2v1Features extends H2Features {
 	 * INFORMATION_SCHEMA: FUNCTION_ALIASES, FUNCTION_COLUMNS
 	 */
 	@Override
-	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
-		return "select r.alias_name as routine_name, "+
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select r.alias_name as routine_name, "+
 				//"null as routine_type, "+
 				"  case "+
 				// create alias as
@@ -82,9 +83,14 @@ public class H2v1Features extends H2Features {
 				" p.column_name as parameter_name, p.type_name as data_type, p.pos as ordinal_position "+
 				"\nfrom "+informationSchema+".function_aliases r left outer join "+informationSchema+".function_columns p on r.alias_name = p.alias_name "+
 				"\nwhere 1=1 "+
-				" and r.alias_schema = '"+schemaPattern+"' "+
-				(execNamePattern!=null?"and r.alias_name = '"+execNamePattern+"' ":"")+
-				"\norder by r.alias_catalog, r.alias_schema, r.alias_name, p.pos ";
+				" and r.alias_schema = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += "and r.alias_name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "\norder by r.alias_catalog, r.alias_schema, r.alias_name, p.pos ";
+		return new QueryWithParams(query, params);
 	}
 
 	@Override
