@@ -3,27 +3,17 @@ package tbrugz.sqldump.dbmsfeatures;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Iterator;
 import java.util.Properties;
-import java.util.Set;
-
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import tbrugz.sqldump.JDBCSchemaGrabber;
-import tbrugz.sqldump.SQLDump;
 import tbrugz.sqldump.TestUtil;
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.dbmd.DBMSFeatures;
-import tbrugz.sqldump.dbmodel.ExecutableObject;
-import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.sqlrun.SQLRun;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.sqlrun.QueryDumper;

@@ -1,10 +1,12 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLSyntaxErrorException;
-import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +26,7 @@ import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringUtils;
 
 /*
@@ -75,20 +78,25 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing views");
-		//String query = "select tableid, viewdefinition "
-		//		+"from sys.sysviews "
-		//		+"order by tableid ";
+		List<Object> params = new ArrayList<>();
 		String query = "select sc.schemaname, st.tablename, sv.tableid, sv.viewdefinition "
 				+"from sys.systables as st "
 				+"join sys.sysviews as sv on st.tableid = sv.tableid "
 				+"join sys.sysschemas as sc on st.schemaid = sc.schemaid "
-				+"where 1=1 "
-				+(schemaPattern!=null?"and sc.schemaname = '"+schemaPattern+"' ":"")
-				+(viewNamePattern!=null?"and st.tablename = '"+viewNamePattern+"'":"")
-				+"order by st.tablename ";
+				+"where 1=1 ";
+		if(schemaPattern!=null) {
+				query += "and sc.schemaname = ? ";
+				params.add(schemaPattern);
+		}
+		if(viewNamePattern!=null) {
+				query += "and st.tablename = ? ";
+				params.add(viewNamePattern);
+		}
+		query += "order by st.tablename ";
 		log.debug("grabbing views query: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -109,17 +117,28 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
+		List<Object> params = new ArrayList<>();
 		String query = "select triggername, event, firingtime, type, st.tableid, sc.schemaname, tablename, triggerdefinition "
 				+"from sys.systables as st "
 				+"join sys.systriggers as tr on st.tableid = tr.tableid "
 				+"join sys.sysschemas as sc on st.schemaid = sc.schemaid "
-				+"where 1=1"
-				+(schemaPattern!=null?" and sc.schemaname = '"+schemaPattern+"' ":"")
-				+(tableNamePattern!=null?" and st.tablename = '"+tableNamePattern+"'":"")
-				+(triggerNamePattern!=null?" and triggername ='"+triggerNamePattern+"'":"");
+				+"where 1=1";
+		if(schemaPattern!=null) {
+				query += " and sc.schemaname = ? ";
+				params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+				query += " and st.tablename = ? ";
+				params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+				query += " and triggername = ? ";
+				params.add(triggerNamePattern);
+		}
 		log.debug("grabbing triggers query: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
+		ResultSet rs = st.executeQuery();
 		
 		//InformationSchemaTrigger.addSplitter = true;
 		
@@ -159,16 +178,24 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
+		List<Object> params = new ArrayList<>();
 		String query = "select sequencename, minimumvalue, maximumvalue, currentvalue, increment, sequencedatatype, sc.schemaname "
 				+"from sys.syssequences ss "
 				+"join sys.sysschemas as sc on ss.schemaid = sc.schemaid "
-				+"where 1=1"
-				+(schemaPattern!=null?" and sc.schemaname = '"+schemaPattern+"' ":"")
-				+(sequenceNamePattern!=null?" and sequencename = '"+sequenceNamePattern+"' ":"")
-				+"order by sequencename ";
+				+"where 1=1";
+		if(schemaPattern!=null) {
+				query += " and sc.schemaname = ? ";
+				params.add(schemaPattern);
+		}
+		if(sequenceNamePattern!=null) {
+				query += " and sequencename = ? ";
+				params.add(sequenceNamePattern);
+		}
+		query += "order by sequencename ";
 		log.debug("grabbing sequences query: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		while(rs.next()) {
@@ -194,15 +221,20 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
+		List<Object> params = new ArrayList<>();
 		String query = "select s.schemaname, a.alias, a.aliastype, a.javaclassname, a.aliasinfo\n" + 
 				"from sys.sysaliases a\n" + 
 				"inner join sys.sysschemas s on a.schemaid = s.schemaid\n" + 
 				"where not a.systemalias\n" +
-				"  and a.aliastype in ('F', 'P', 'G')" +
-				(schemaPattern!=null?"\nand s.schemaname like '"+schemaPattern+"'":"");
+				"  and a.aliastype in ('F', 'P', 'G')";
+		if(schemaPattern!=null) {
+				query += "\nand s.schemaname like ? ";
+				params.add(schemaPattern);
+		}
 		log.debug("grabbing executables query: "+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
+		ResultSet rs = st.executeQuery();
 		
 		int countRows = 0, countAdded = 0;
 		while(rs.next()) {
@@ -279,6 +311,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		return DBObjectType.EXECUTABLE;
 	}
 	
+	/*
 	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
 		return "select sc.schemaname, t.tablename, c.constraintname, cg.descriptor "
 				+ "from sys.sysconstraints c "
@@ -291,6 +324,7 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 				+(tableNamePattern!=null?"and t.tablename = '"+tableNamePattern+"' ":"")
 				+(constraintNamePattern!=null?"and c.constraintname = '"+constraintNamePattern+"' ":"");
 	}
+	*/
 
 	static final Pattern indexesPattern = Pattern.compile(".*\\(([0-9 ,]+)\\).*");
 
@@ -300,10 +334,31 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
-		Statement st = conn.createStatement();
+		List<Object> params = new ArrayList<>();
+		String query = "select sc.schemaname, t.tablename, c.constraintname, cg.descriptor "
+			+ "from sys.sysconstraints c "
+			+ "join sys.syskeys k on c.constraintid = k.constraintid "
+			+ "join sys.sysconglomerates cg on k.conglomerateid = cg.conglomerateid "
+			+ "join sys.sysschemas sc on c.schemaid = sc.schemaid "
+			+ "join sys.systables t on c.tableid = t.tableid "
+			+ "where type = 'U' ";
+		if(schemaPattern!=null) {
+			query += "and sc.schemaname = ? ";
+			params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+			query += "and t.tablename = ? ";
+			params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+			query += "and c.constraintname = ? ";
+			params.add(constraintNamePattern);
+		}
+		
 		log.debug("grabbing unique constraints query: "+query);
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
+		ResultSet rs = st.executeQuery();
 		
 		int countUKs = 0;
 		int countCols = 0;
@@ -390,7 +445,9 @@ public class DerbyFeatures extends DefaultDBMSFeatures {
 		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE(1)").execute();
 		
 		// Indicate that statistics information should be captured into
-		conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA('"+planSchema+"')").execute();
+		CallableStatement cst = conn.prepareCall("CALL SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA(?)");
+		cst.setString(1, planSchema);
+		cst.execute();
 
 		//ResultSet rs =
 		bindAndExecuteQuery(sqlExplainPlanQuery(sql), params, conn); //, cursorName

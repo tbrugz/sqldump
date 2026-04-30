@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -583,6 +584,22 @@ public class SQLUtils {
 		
 		log.warn("unknown class: "+clazz.getName()+" [defaulting to VARCHAR]");
 		return Types.VARCHAR;
+	}
+
+	// see: DefaultDBMSFeatures.bindAndExecuteQuery
+	public static void bindAllParameters(PreparedStatement st, List<Object> params) throws SQLException {
+		for(int i=0;i<params.size();i++) {
+			Object o = params.get(i);
+			if(o==null) {
+				st.setString(i+1, null);
+			}
+			else if(o instanceof Integer) {
+				st.setInt(i+1, ((Integer)o).intValue());
+			}
+			else {
+				st.setString(i+1, String.valueOf(o));
+			}
+		}
 	}
 
 }

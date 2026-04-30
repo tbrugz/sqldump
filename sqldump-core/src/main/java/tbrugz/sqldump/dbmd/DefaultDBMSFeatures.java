@@ -193,6 +193,7 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		return null;
 	}
 
+	// see: SQLUtils.bindAllParameters
 	protected ResultSet bindAndExecuteQuery(String sql, List<Object> params, Connection conn) throws SQLException {
 		PreparedStatement stmt = conn.prepareStatement(sql); // NOSONAR (closing Statement may close Resultset)
 		if(params!=null) {
