@@ -2,12 +2,15 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
@@ -20,13 +23,19 @@ public class ApacheDrillFeatures extends InformationSchemaFeatures {
 		informationSchema = "INFORMATION_SCHEMA";
 	}
 	
-	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "select table_catalog, table_schema, table_name, view_definition "
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select table_catalog, table_schema, table_name, view_definition "
 			+"\nfrom "+informationSchema+".VIEWS "
 			+"\nwhere view_definition is not null "
-			+"and table_schema = '"+schemaPattern+"' "
-			+(viewNamePattern!=null?"and table_name = '"+viewNamePattern+"' ":"")
-			+"order by table_catalog, table_schema, table_name ";
+			+"and table_schema = ? ";
+		params.add(schemaPattern);
+		if(viewNamePattern!=null) {
+			query += "and table_name = ? ";
+			params.add(viewNamePattern);
+		}
+		query += "order by table_catalog, table_schema, table_name ";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override

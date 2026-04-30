@@ -15,12 +15,13 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "select '' as table_catalog, '' as table_schema, trim(RDB$RELATION_NAME) as table_name, "
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		String query = "select '' as table_catalog, '' as table_schema, trim(RDB$RELATION_NAME) as table_name, "
 			+"RDB$VIEW_SOURCE as view_definition, 'NONE' as check_option, '' as is_updatable "
 			+"from RDB$RELATIONS "
 			+"where RDB$VIEW_SOURCE is not null "
 			+"order by RDB$RELATION_NAME ";
+		return new QueryWithParams(query, null);
 	}
 	
 	@Override

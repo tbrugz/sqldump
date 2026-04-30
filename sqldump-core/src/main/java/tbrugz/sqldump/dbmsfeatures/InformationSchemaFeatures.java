@@ -98,21 +98,28 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		}
 	}
 	
-	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"\nfrom "+informationSchema+".views "
 			+"\nwhere view_definition is not null "
-			+"and table_schema = '"+schemaPattern+"' "
-			+(viewNamePattern!=null?"and table_name = '"+viewNamePattern+"' ":"")
-			+"order by table_catalog, table_schema, table_name ";
+			+"and table_schema = ? ";
+		params.add(schemaPattern);
+		if(viewNamePattern!=null) {
+			query += "and table_name = '"+viewNamePattern+"' ";
+			params.add(viewNamePattern);
+		}
+		query += "order by table_catalog, table_schema, table_name ";
+		return new QueryWithParams(query, params);
 	}
 
 	@Override
 	public void grabDBViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
-		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
+		QueryWithParams query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("grabbing views: sql:\n"+query);
-		Statement st = conn.createStatement();
-		ResultSet rs = st.executeQuery(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		while(rs.next()) {
