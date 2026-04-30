@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -12,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.util.StringUtils;
 
 /*
@@ -29,16 +31,25 @@ public class H2Features extends InformationSchemaFeatures {
 	}
 
 	@Override
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		List<Object> params = new ArrayList<>();
 		// other columns: REMARKS, SQL, QUEUE_SIZE, NO_WAIT, ID
-		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table "
+		String query = "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table "
 				+"  , 'call \"'||java_class||'\"' as action_statement "
 				+"  , action_orientation, action_timing, null as action_condition "
 				+"from information_schema.triggers "
-				+"where trigger_schema = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?"and event_object_table = '"+tableNamePattern+"' ":"")
-				+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
-				+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
+				+"where trigger_schema = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += "and event_object_table = ? ";
+				params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+				query += "and trigger_name = ? ";
+				params.add(triggerNamePattern);
+		}
+		query += "order by trigger_catalog, trigger_schema, trigger_name, event_manipulation";
+		return new QueryWithParams(query, params);
 	}
 
 	String grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {

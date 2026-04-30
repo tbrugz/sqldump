@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -22,11 +23,13 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 import tbrugz.sqldump.dbmodel.View;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -148,13 +151,22 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	/*
 	 * see: http://www.postgresql.org/docs/9.1/static/infoschema-triggers.html
 	 */
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
-		return "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing, action_condition "
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select trigger_catalog, trigger_schema, trigger_name, event_manipulation, event_object_schema, event_object_table, action_statement, action_orientation, action_timing, action_condition "
 			+"from information_schema.triggers "
-			+"where trigger_schema = '"+schemaPattern+"' "
-			+(tableNamePattern!=null?"and event_object_table = '"+tableNamePattern+"' ":"")
-			+(triggerNamePattern!=null?"and trigger_name = '"+triggerNamePattern+"' ":"")
-			+"order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
+			+"where trigger_schema = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+			query += "and event_object_table = ? ";
+			params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+			query += "and trigger_name = ? ";
+			params.add(triggerNamePattern);
+		}
+		query += "order by trigger_catalog, trigger_schema, trigger_name, event_manipulation ";
+		return new QueryWithParams(query, params);
 	}
 	
 	/*
@@ -163,10 +175,11 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
-		Statement st = conn.createStatement();
+		QueryWithParams query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		SQLUtils.bindAllParameters(st, query.getParams());
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		int rowcount = 0;

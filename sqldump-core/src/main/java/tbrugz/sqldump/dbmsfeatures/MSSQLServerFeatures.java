@@ -1,5 +1,10 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import tbrugz.sqldump.dbmodel.QueryWithParams;
+
 /*
  * see:
  * https://docs.microsoft.com/en-us/sql/relational-databases/system-information-schema-views/system-information-schema-views-transact-sql
@@ -17,8 +22,9 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 	 */
 	//XXX: add event_manipulation value ; also add action_orientation, action_timing, action_condition?
 	@Override
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
-		return "select null as trigger_catalog, s.name trigger_schema, t.name trigger_name, "+
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select null as trigger_catalog, s.name trigger_schema, t.name trigger_name, "+
 			" '' as event_manipulation, ps.name as event_object_schema, p.name as event_object_table, "+
 			" object_definition(t.object_id) action_statement, "+
 			" null as action_orientation, null as action_timing, null as action_condition "+
@@ -27,9 +33,17 @@ public class MSSQLServerFeatures extends InformationSchemaFeatures {
 			"\ninner join sys.all_objects ao on t.object_id = ao.object_id "+
 			"\ninner join sys.schemas s ON s.schema_id = ao.schema_id "+
 			"\ninner join sys.schemas ps ON ps.schema_id = p.schema_id "+
-			"\nwhere s.name = '"+schemaPattern+"' " +
-			(tableNamePattern!=null?"and p.name = '"+tableNamePattern+"' ":"") +
-			(triggerNamePattern!=null?"and t.name = '"+triggerNamePattern+"' ":"");
+			"\nwhere s.name = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+			query += "and p.name = ? ";
+			params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+			query += "and t.name = ? ";
+			params.add(triggerNamePattern);
+		}
+		return new QueryWithParams(query, params);
 	}
 
 	@Override

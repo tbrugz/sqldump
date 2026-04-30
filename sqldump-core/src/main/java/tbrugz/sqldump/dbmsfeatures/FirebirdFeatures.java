@@ -2,6 +2,8 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.util.Properties;
 
+import tbrugz.sqldump.dbmodel.QueryWithParams;
+
 public class FirebirdFeatures extends InformationSchemaFeatures {
 
 	@Override
@@ -22,8 +24,8 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
-		return "select '' as trigger_catalog, '' as trigger_schema, RDB$TRIGGER_NAME AS trigger_name, "
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		String query = "select '' as trigger_catalog, '' as trigger_schema, RDB$TRIGGER_NAME AS trigger_name, "
 			+"CASE RDB$TRIGGER_TYPE WHEN 1 THEN 'INSERT' WHEN 2 THEN 'INSERT' WHEN 3 THEN 'UPDATE' WHEN 4 THEN 'UPDATE' WHEN 5 THEN 'DELETE' WHEN 6 THEN 'DELETE' end as event_manipulation, "
 			+"'' as event_object_schema, RDB$RELATION_NAME as event_object_table, " 
 			+"RDB$TRIGGER_SOURCE AS action_statement, "
@@ -41,6 +43,7 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 			//"RDB$DESCRIPTION AS trigger_comment"
 			+"FROM RDB$TRIGGERS "
 			+"where RDB$TRIGGER_SOURCE is not null";
+		return new QueryWithParams(query, null);
 	}
 	
 	@Override

@@ -2,11 +2,14 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Table;
 
 /*
@@ -25,14 +28,24 @@ public class Db2Features extends InformationSchemaFeatures {
 	 * 
 	 * select * from sysibm.systriggers - similar to derby?
 	 */
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
-		return "select null trigger_catalog, TRIGSCHEMA trigger_schema, TRIGNAME trigger_name, TRIGEVENT event_manipulation, TABSCHEMA event_object_schema, "
+	@Override
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select null trigger_catalog, TRIGSCHEMA trigger_schema, TRIGNAME trigger_name, TRIGEVENT event_manipulation, TABSCHEMA event_object_schema, "
 			+"TABNAME event_object_table, TEXT action_statement, GRANULARITY action_orientation, TRIGTIME action_timing, null action_condition "
 			+"\nfrom syscat.triggers "
-			+"\nwhere TRIGSCHEMA = '"+schemaPattern+"' "
-			+(tableNamePattern!=null?"and TABNAME = '"+tableNamePattern+"' ":"")
-			+(triggerNamePattern!=null?"and TRIGNAME = '"+triggerNamePattern+"' ":"")
-			+"order by TRIGSCHEMA, TRIGNAME ";
+			+"\nwhere TRIGSCHEMA = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+			query += "and TABNAME = ? ";
+			params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+			query += "and TRIGNAME = ? ";
+			params.add(triggerNamePattern);
+		}
+		query += "order by TRIGSCHEMA, TRIGNAME ";
+		return new QueryWithParams(query, params);
 	}
 	
 	/*
