@@ -106,7 +106,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			+"and table_schema = ? ";
 		params.add(schemaPattern);
 		if(viewNamePattern!=null) {
-			query += "and table_name = '"+viewNamePattern+"' ";
+			query += "and table_name = ? ";
 			params.add(viewNamePattern);
 		}
 		query += "order by table_catalog, table_schema, table_name ";
@@ -356,23 +356,30 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" sequences grabbed");
 	}
 
-	String grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
-		return "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
+	QueryWithParams grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_clause " 
 				+"from information_schema.check_constraints cc, information_schema.constraint_column_usage ccu "
 				+"where cc.constraint_name = ccu.constraint_name "
-				+"and cc.constraint_schema = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
-				+"order by table_name, constraint_name ";
+				+"and cc.constraint_schema = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += "and table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		query += "order by table_name, constraint_name ";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
 		
-		String query = grabDBCheckConstraintsQuery(schemaPattern, tableNamePattern);
-		Statement st = conn.createStatement();
+		QueryWithParams query = grabDBCheckConstraintsQuery(schemaPattern, tableNamePattern);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		int countConstraints = 0;

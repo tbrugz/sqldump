@@ -105,13 +105,19 @@ public class H2v1Features extends H2Features {
 	}
 	
 	@Override
-	String grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
-		return "select cc.constraint_schema, table_name, cc.constraint_name, check_expression as check_clause " 
+	QueryWithParams grabDBCheckConstraintsQuery(String schemaPattern, String tableNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select cc.constraint_schema, table_name, cc.constraint_name, check_expression as check_clause " 
 			+ "from information_schema.constraints cc "
-			+ "where cc.constraint_schema = '"+schemaPattern+"'"
-			+ "and constraint_type = 'CHECK'"
-			+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
-			+ "order by table_name, constraint_name";
+			+ "where cc.constraint_schema = ? "
+			+ "and constraint_type = 'CHECK'";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+			query += "and table_name = ? ";
+			params.add(tableNamePattern);
+		}
+		query += "order by table_name, constraint_name";
+		return new QueryWithParams(query, params);
 	}
 
 	@Override
