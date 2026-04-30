@@ -48,11 +48,12 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBSequencesQuery(String schemaPattern) {
-		return "select trim(RDB$GENERATOR_NAME), 0 as minimum_value, 1 as increment, null as maximum_value "
+	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
+		String query = "select trim(RDB$GENERATOR_NAME), 0 as minimum_value, 1 as increment, null as maximum_value "
 				+"FROM RDB$GENERATORS "
 				+"WHERE RDB$SYSTEM_FLAG=0 ";
  				//RDB$DESCRIPTION ?
+		return new QueryWithParams(query, null);
 	}
 	
 	@Override

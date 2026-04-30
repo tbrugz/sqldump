@@ -2,11 +2,14 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 
 /*
@@ -46,12 +49,15 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 			+"order by schemas.name, tables.name ";
 	}
 
-	String grabDBSequencesQuery(String schemaPattern) {
-		return "select sequences.name as sequence_name, sequences.\"minvalue\" as minimum_value, \"increment\", \"maxvalue\" as maximum_value "
+	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select sequences.name as sequence_name, sequences.\"minvalue\" as minimum_value, \"increment\", \"maxvalue\" as maximum_value "
 				//+", start, cacheinc, cycle "
 				+"from sys.sequences inner join sys.schemas on sequences.schema_id = schemas.id "
-				+"where schemas.name = '"+schemaPattern+"' "
+				+"where schemas.name = ? "
 				+"order by sequences.name ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 	String grabDBRoutinesQuery(String schemaPattern) {

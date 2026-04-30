@@ -52,11 +52,14 @@ public class Db2Features extends InformationSchemaFeatures {
 	 * select * from syscat.sequences
 	 */
 	@Override
-	String grabDBSequencesQuery(String schemaPattern) {
-		return "select SEQNAME sequence_name, MINVALUE minimum_value, increment, MAXVALUE maximum_value "
+	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select SEQNAME sequence_name, MINVALUE minimum_value, increment, MAXVALUE maximum_value "
 			+"\nfrom syscat.sequences "
-			+"\nwhere SEQSCHEMA = '"+schemaPattern+"' "
+			+"\nwhere SEQSCHEMA = ? "
 			+"order by SEQSCHEMA, SEQNAME ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 	/*

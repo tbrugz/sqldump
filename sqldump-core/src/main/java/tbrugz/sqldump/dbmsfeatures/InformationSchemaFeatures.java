@@ -311,19 +311,23 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		return added;
 	}
 
-	String grabDBSequencesQuery(String schemaPattern) {
-		return "select sequence_name, minimum_value, increment, maximum_value " // increment_by, last_number?
+	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select sequence_name, minimum_value, increment, maximum_value " // increment_by, last_number?
 				+"from information_schema.sequences "
-				+"where sequence_schema = '"+schemaPattern+"' "
+				+"where sequence_schema = ? "
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
-		Statement st = conn.createStatement();
-		String query = grabDBSequencesQuery(schemaPattern);
+		QueryWithParams query = grabDBSequencesQuery(schemaPattern);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		log.debug("grabbing sequences: sql:\n"+query);
-		ResultSet rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery();
 		
 		int count = 0;
 		while(rs.next()) {

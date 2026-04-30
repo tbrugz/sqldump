@@ -88,11 +88,14 @@ public class H2v1Features extends H2Features {
 	}
 
 	@Override
-	String grabDBSequencesQuery(String schemaPattern) {
-		return "select sequence_name, null as minimum_value, increment, null as maximum_value "
+	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select sequence_name, null as minimum_value, increment, null as maximum_value "
 				+"from information_schema.sequences "
-				+"where sequence_schema = '"+schemaPattern+"' "
+				+"where sequence_schema = ? "
 				+"order by sequence_catalog, sequence_schema, sequence_name ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override
