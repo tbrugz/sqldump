@@ -362,6 +362,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	
 	void grabDBExecutablesMetadata(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		String argumentsTable = (useDbaMetadataObjects?"dba_arguments":"all_arguments");
+		List<Object> params = new ArrayList<>();
 		
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
 				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end "
@@ -369,14 +370,19 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
 				+"\nfrom "+(useDbaMetadataObjects?"dba_procedures p ":"all_procedures p ")
 				+"  left outer join "+argumentsTable+" aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
-				+"\nwhere p.owner = '"+schemaPattern+"' "
-				+(execNamePattern!=null?" and p.object_name = '"+execNamePattern+"' ":"")
+				+"\nwhere p.owner = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += " and p.object_name = ? ";
+				params.add(execNamePattern);
+		}
 				//+"   and p.object_type = 'PACKAGE' "
 				//+"   and p.procedure_name is not null "
-				+"   and aa.position is not null "
+		query += "   and aa.position is not null "
 				+"\norder by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
 		log.debug("grabbing executables' metadata - sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
 
 		ExecutableObject eo = null;
@@ -793,17 +799,26 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBCheckConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing check constraints");
+		List<Object> params = new ArrayList<>();
 		
 		//check constraints
 		String query = "select owner, table_name, constraint_name, constraint_type, search_condition "
 				+"from "+(useDbaMetadataObjects?"dba_constraints ":"all_constraints ")
-				+"where owner = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?"and table_name = '"+tableNamePattern+"' ":"")
-				+(constraintNamePattern!=null?"and constraint_name = '"+constraintNamePattern+"' ":"")
-				+"and constraint_type = 'C' "
+				+"where owner = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += "and table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+				query += "and constraint_name = ? ";
+				params.add(constraintNamePattern);
+		}
+		query += "and constraint_type = 'C' "
 				+"order by owner, table_name, constraint_name ";
 		log.debug("sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
@@ -844,18 +859,27 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
+		List<Object> params = new ArrayList<>();
 
 		//unique constraints
 		String query = "select distinct al.owner, al.table_name, al.constraint_name, column_name, position "
 				+"from "+(useDbaMetadataObjects?"dba_constraints al, dba_cons_columns acc ":"all_constraints al, all_cons_columns acc ")
 				+"where al.constraint_name = acc.constraint_name "
-				+"and al.owner = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?"and al.table_name = '"+tableNamePattern+"' ":"")
-				+(constraintNamePattern!=null?"and al.constraint_name = '"+constraintNamePattern+"' ":"")
-				+"and constraint_type = 'U' "
+				+"and al.owner = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += "and al.table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+				query += "and al.constraint_name = ? ";
+				params.add(constraintNamePattern);
+		}
+		query += "and constraint_type = 'U' "
 				+"order by owner, table_name, constraint_name, position, column_name ";
 		log.debug("sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
 		
 		int colCount = 0;
@@ -899,15 +923,21 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	void getPartitionColumns(OracleTable ot, Connection conn) throws SQLException {
+		log.debug("grabbing partition columns");
+		List<Object> params = new ArrayList<>();
+
 		String query = "select column_name, column_position "
 				+"from "+(useDbaMetadataObjects?"dba_part_key_columns ":"all_part_key_columns ")
 				+"where object_type = 'TABLE' "
-				+"and owner = '"+ot.getSchemaName()+"' "
-				+"and name = '"+ot.getName()+"' "
+				+"and owner = ? "
+				+"and name = ? "
 				+"order by name, column_position ";
+		params.add(ot.getSchemaName());
+		params.add(ot.getName());
 		
 		log.debug("sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
 
 		List<String> columns = new ArrayList<String>();
@@ -919,14 +949,20 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	}
 	
 	void getPartitions(OracleTable ot, Connection conn) throws SQLException {
+		log.debug("grabbing partitions");
+		List<Object> params = new ArrayList<>();
+
 		String query = "select table_owner, table_name, partition_name, partition_position, tablespace_name, high_value, high_value_length "
 				+"from "+(useDbaMetadataObjects?"dba_tab_partitions ":"all_tab_partitions ")
-				+"where table_owner = '"+ot.getSchemaName()+"' "
-				+"and table_name = '"+ot.getName()+"' "
+				+"where table_owner = ? "
+				+"and table_name = ? "
 				+"order by table_name, partition_position ";
+		params.add(ot.getSchemaName());
+		params.add(ot.getName());
 		
 		log.debug("sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query);
+		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
 
 		List<OracleTablePartition> parts = new ArrayList<OracleTablePartition>();
@@ -1085,24 +1121,28 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 		String id = "sqldump_"+df.format(now); //XXX: add random?
 		String planTable = "PLAN_TABLE";
+		List<Object> idParam = new ArrayList<>();
+		idParam.add(id);
 		
-		String explainSql = "explain plan\n\tset STATEMENT_ID = '"+id+"' into "+planTable+"\n"
+		String explainSql = "explain plan\n\tset statement_id = ? into "+planTable+"\n"
 			+ "for\n"+sql;
 		//log.debug("explain sql:\n"+explainSql);
-		try(Statement stmt = conn.createStatement()) {
+		try(PreparedStatement stmt = conn.prepareStatement(explainSql)) {
+			SQLUtils.bindAllParameters(stmt, idParam);
 			stmt.execute(explainSql);
 		}
-			
+		
 		String planTableSelect = "select "+DEFAULT_EXPLAIN_COLUMNS
 				+"\nfrom "+planTable
 				+"\nconnect by prior id = parent_id "
 				+"\nand prior statement_id = statement_id "
 				+"\nstart with parent_id = 0 "
-				+"\nand statement_id = '"+id+"' "
+				+"\nand statement_id = ? "
 				+"\norder by id ";
 		//log.debug("plan_table sql:\n"+explainSql);
-		Statement stmt = conn.createStatement(); // NOSONAR (closing Statement may close Resultset)
-		return stmt.executeQuery(planTableSelect);
+		PreparedStatement stmt = conn.prepareStatement(planTableSelect); // NOSONAR (closing Statement may close Resultset)
+		SQLUtils.bindAllParameters(stmt, idParam);
+		return stmt.executeQuery();
 	}
 	
 	@Override

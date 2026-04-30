@@ -16,7 +16,7 @@ import tbrugz.sqldump.dbmd.AbstractDatabaseMetaDataDecorator;
 
 public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 	
-	static Log log = LogFactory.getLog(OracleDatabaseMetaData.class);
+	static final Log log = LogFactory.getLog(OracleDatabaseMetaData.class);
 
 	final boolean useDbaMetadataObjects; // = OracleFeatures.useDbaMetadataObjects;
 	
@@ -150,19 +150,14 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"COLUMN_ID as ORDINAL_POSITION, comments as REMARKS, null as IS_AUTOINCREMENT, DATA_DEFAULT "
 				+"from "+(useDbaMetadataObjects?"dba_tab_columns col, dba_col_comments com ":"all_tab_columns col, all_col_comments com ")
 				+"where col.column_name = com.column_name and col.table_name = com.table_name and col.owner = com.owner "
-				+")\n";
+				+")\n"
+				+"where 1=1\n";
 		if(schemaPattern!=null) {
-			sql += "where TABLE_SCHEM = ? ";
+			sql += "and TABLE_SCHEM = ? ";
 			params.add(schemaPattern);
 		}
 		if(tableNamePattern!=null) {
-			if(schemaPattern!=null) {
-				sql += "and ";
-			}
-			else {
-				sql += "where ";
-			}
-			sql += " TABLE_NAME = ? ";
+			sql += "and TABLE_NAME = ? ";
 			params.add(tableNamePattern);
 		}
 		sql += "\norder by TABLE_SCHEM, TABLE_NAME, ORDINAL_POSITION ";
@@ -225,20 +220,15 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 				+"  and acfk.r_owner = acuk.owner and acfk.r_constraint_name = acuk.constraint_name \n"
 				+"  and accfk.position = accuk.position \n" 
 				+"order by acfk.owner, acfk.constraint_name, accfk.position "
-				+") ";
+				+")\n "
+				+"where 1=1\n";
 
 		if(schema!=null) {
-			sql += "where "+(imported?"FKTABLE_SCHEM":"PKTABLE_SCHEM")+" = ? \n";
+			sql += "and "+(imported?"FKTABLE_SCHEM":"PKTABLE_SCHEM")+" = ? \n";
 			params.add(schema);
 		}
 		if(table!=null) {
-			if(schema!=null) {
-				sql += "and ";
-			}
-			else {
-				sql += "where ";
-			}
-			sql += (imported?"FKTABLE_NAME":"PKTABLE_NAME")+" = ? ";
+			sql += "and "+(imported?"FKTABLE_NAME":"PKTABLE_NAME")+" = ? ";
 			params.add(table);
 		}
 		sql += "order by PKTABLE_CAT, PKTABLE_SCHEM, PKTABLE_NAME, KEY_SEQ ";
