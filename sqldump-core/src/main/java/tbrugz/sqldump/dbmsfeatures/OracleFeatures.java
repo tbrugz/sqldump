@@ -35,6 +35,7 @@ import tbrugz.sqldump.dbmodel.Index.IndexType;
 import tbrugz.sqldump.dbmodel.MaterializedView;
 import tbrugz.sqldump.dbmodel.PartitionType;
 import tbrugz.sqldump.dbmodel.PrivilegeType;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
@@ -132,12 +133,18 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		}
 	}
 	
-	String grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT"
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "SELECT owner, VIEW_NAME, 'VIEW' as view_type, TEXT"
 				+" FROM "+(useDbaMetadataObjects?"DBA_VIEWS ":"ALL_VIEWS ")
-				+" where owner = '"+schemaPattern+"'"
-				+(viewNamePattern!=null?" and view_name = '"+viewNamePattern+"'":"")
-				+ " ORDER BY VIEW_NAME";
+				+" where owner = ? ";
+		params.add(schemaPattern);
+		if(viewNamePattern!=null) {
+				query += " and view_name = ? ";
+				params.add(viewNamePattern);
+		}
+		query += " ORDER BY VIEW_NAME";
+		return new QueryWithParams(query, params);
 	}
 
 	/*@Override
@@ -158,9 +165,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 
 	void grabDBNormalViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing (normal) views");
-		String query = grabDBViewsQuery(schemaPattern, viewNamePattern);
+		QueryWithParams query = grabDBViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
@@ -178,13 +186,19 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" views grabbed");// ["+model.views.size()+"/"+count+"]: ");
 	}
 
-	String grabDBMaterializedViewsQuery(String schemaPattern, String viewNamePattern) {
-		return "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query, "
+	QueryWithParams grabDBMaterializedViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select owner, mview_name, 'MATERIALIZED_VIEW' AS VIEW_TYPE, query, "
 				+" rewrite_enabled, rewrite_capability, refresh_mode, refresh_method, build_mode, fast_refreshable "
 				+" from "+(useDbaMetadataObjects?"dba_mviews ":"all_mviews ")
-				+" where owner = '"+schemaPattern+"' "
-				+(viewNamePattern!=null?" and mview_name = '"+viewNamePattern+"' ":"")
-				+"ORDER BY MVIEW_NAME";
+				+" where owner = ? ";
+		params.add(schemaPattern);
+		if(viewNamePattern!=null) {
+				query += " and mview_name = ? ";
+				params.add(viewNamePattern);
+		}
+		query += "ORDER BY MVIEW_NAME";
+		return new QueryWithParams(query, params);
 	}
 
 	/*void grabDBMaterializedViews(SchemaModel model, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
@@ -194,9 +208,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBMaterializedViews(Collection<View> views, String schemaPattern, String viewNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing materialized views");
-		String query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
+		QueryWithParams query = grabDBMaterializedViewsQuery(schemaPattern, viewNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
@@ -218,14 +233,23 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" materialized views grabbed");
 	}
 
-	String grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
-		return "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
+	QueryWithParams grabDBTriggersQuery(String schemaPattern, String tableNamePattern, String triggerNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "SELECT TRIGGER_NAME, TABLE_OWNER, TABLE_NAME, DESCRIPTION, TRIGGER_BODY, WHEN_CLAUSE "
 				+"FROM "+(useDbaTriggers?"DBA_TRIGGERS ":"ALL_TRIGGERS ")
-				+"where owner = '"+schemaPattern+"' "
-				+(tableNamePattern!=null?" and table_name = '"+tableNamePattern+"' ":"")
-				+(triggerNamePattern!=null?" and trigger_name = '"+triggerNamePattern+"' ":"")
+				+"where owner = ? ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += " and table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		if(triggerNamePattern!=null) {
+				query += " and trigger_name = ? ";
+				params.add(triggerNamePattern);
+		}
 				//+"and status = 'ENABLED' "
-				+"ORDER BY trigger_name";
+		query += "ORDER BY trigger_name";
+		return new QueryWithParams(query, params);
 	}
 	
 	/*@Override
@@ -236,9 +260,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBTriggers(Collection<Trigger> triggers, String schemaPattern, String tableNamePattern, String triggerNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing triggers");
-		String query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
+		QueryWithParams query = grabDBTriggersQuery(schemaPattern, tableNamePattern, triggerNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
