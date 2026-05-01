@@ -52,6 +52,7 @@ public class H2Features extends InformationSchemaFeatures {
 		return new QueryWithParams(query, params);
 	}
 
+	@Override
 	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
 		List<Object> params = new ArrayList<>();
 		String query = "select routine_name, routine_type, r.data_type, external_language, "

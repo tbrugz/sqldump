@@ -23,6 +23,7 @@ public class ApacheDrillFeatures extends InformationSchemaFeatures {
 		informationSchema = "INFORMATION_SCHEMA";
 	}
 	
+	@Override
 	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
 		List<Object> params = new ArrayList<>();
 		String query = "select table_catalog, table_schema, table_name, view_definition "

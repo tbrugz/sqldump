@@ -19,12 +19,16 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 
 	static final Log log = LogFactory.getLog(VirtuosoFeatures.class);
 
-	String grabDBViewsQuery(String schemaPattern) {
-		return "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
+	@Override
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select table_catalog, table_schema, table_name, view_definition, check_option, is_updatable "
 			+"from information_schema.views "
 			+"where view_definition is not null "
-			+"and table_schema = '"+schemaPattern+"' ";
+			+"and table_schema = ? ";
+		params.add(schemaPattern);
 			//+"order by table_catalog, table_schema, table_name ";
+		return new QueryWithParams(query, params);
 		
 		// XXX order by: possible bug?
 		// http://www.mail-archive.com/virtuoso-users@lists.sourceforge.net/msg03126.html

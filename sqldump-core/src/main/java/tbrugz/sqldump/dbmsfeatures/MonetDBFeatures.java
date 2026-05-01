@@ -30,6 +30,7 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		grabTriggers = false; //XXX: grab from SYS.TRIGGERS
 	}
 	
+	@Override
 	public void grabDBObjects(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
 		try {
 			conn.rollback();
@@ -40,15 +41,20 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		super.grabDBObjects(model, schemaPattern, conn);
 	}
 	
-	String grabDBViewsQuery(String schemaPattern) {
-		return "select '' as table_catalog, schemas.name as table_schema, tables.name as table_name"
+	@Override
+	QueryWithParams grabDBViewsQuery(String schemaPattern, String viewNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select '' as table_catalog, schemas.name as table_schema, tables.name as table_name"
 			+", query as view_definition, 'NONE' as check_option, 'NO' as is_updatable "
 			+"from sys.tables inner join sys.schemas on tables.schema_id = schemas.id "
 			+"where query is not null "
-			+"and schemas.name = '"+schemaPattern+"' "
+			+"and schemas.name = ? "
 			+"order by schemas.name, tables.name ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 
+	@Override
 	QueryWithParams grabDBSequencesQuery(String schemaPattern) {
 		List<Object> params = new ArrayList<>();
 		String query = "select sequences.name as sequence_name, sequences.\"minvalue\" as minimum_value, \"increment\", \"maxvalue\" as maximum_value "
@@ -60,8 +66,10 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 		return new QueryWithParams(query, params);
 	}
 	
-	String grabDBRoutinesQuery(String schemaPattern) {
-		return "select functions.name as routine_name, 'FUNCTION' as routine_type, ret.type as data_type"
+	@Override
+	QueryWithParams grabDBRoutinesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select functions.name as routine_name, 'FUNCTION' as routine_type, ret.type as data_type"
 				//+", functions.mod as external_language, func as routine_definition"
 				+", null as external_language, func as routine_definition, null as external_name "
 				+", null as is_deterministic " //XXX: use 'functions.side_effect'?
@@ -70,10 +78,12 @@ public class MonetDBFeatures extends InformationSchemaFeatures {
 				+"inner join sys.schemas on functions.schema_id = schemas.id "
 				+"inner join sys.args p on functions.id = p.func_id "
 				+"inner join sys.args ret on functions.id = ret.func_id "
-				+"where schemas.name = '"+schemaPattern+"' "
+				+"where schemas.name = ? "
 				+"and p.number <> 0 "
 				+"and ret.number = 0 "
 				+"order by functions.name, p.number ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 }
