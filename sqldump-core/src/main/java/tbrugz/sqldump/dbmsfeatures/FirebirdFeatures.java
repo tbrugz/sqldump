@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmsfeatures;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.QueryWithParams;
@@ -57,17 +59,26 @@ public class FirebirdFeatures extends InformationSchemaFeatures {
 	}
 	
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
-		return "select null as constraint_schema, trim(i.RDB$RELATION_NAME) as table_name, trim(rc.RDB$CONSTRAINT_NAME) as constraint_name, trim(s.RDB$FIELD_NAME) as column_name, "
+	QueryWithParams grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select null as constraint_schema, trim(i.RDB$RELATION_NAME) as table_name,"
+				+" trim(rc.RDB$CONSTRAINT_NAME) as constraint_name, trim(s.RDB$FIELD_NAME) as column_name, "
 				+"s.RDB$FIELD_POSITION as column_position "
 				+"FROM RDB$INDEX_SEGMENTS s "
 				+"LEFT JOIN RDB$INDICES i ON i.RDB$INDEX_NAME = s.RDB$INDEX_NAME "
 				+"LEFT JOIN RDB$RELATION_CONSTRAINTS rc ON rc.RDB$INDEX_NAME = s.RDB$INDEX_NAME "
 				+"WHERE rc.RDB$CONSTRAINT_TYPE IS NOT NULL "
-				+"  AND trim(rc.RDB$CONSTRAINT_TYPE) = 'UNIQUE' "
-				+(tableNamePattern!=null?"  AND trim(i.RDB$RELATION_NAME) = '"+tableNamePattern+"' ":"")
-				+(constraintNamePattern!=null?"  AND trim(rc.RDB$CONSTRAINT_NAME) = '"+constraintNamePattern+"' ":"")
-				+"ORDER BY i.RDB$RELATION_NAME, rc.RDB$CONSTRAINT_NAME, s.RDB$FIELD_POSITION";
+				+"  AND trim(rc.RDB$CONSTRAINT_TYPE) = 'UNIQUE' ";
+		if(tableNamePattern!=null) {
+				query += "  AND trim(i.RDB$RELATION_NAME) = ? ";
+				params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+				query += "  AND trim(rc.RDB$CONSTRAINT_NAME) = ? ";
+				params.add(constraintNamePattern);
+		}
+		query += "ORDER BY i.RDB$RELATION_NAME, rc.RDB$CONSTRAINT_NAME, s.RDB$FIELD_POSITION";
+		return new QueryWithParams(query, params);
 	}
 	
 }

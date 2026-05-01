@@ -59,16 +59,27 @@ public class MySQLFeatures extends InformationSchemaFeatures {
 	) ENGINE=MEMORY DEFAULT CHARSET=utf8
 	 */
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
-		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name "
+	QueryWithParams grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name "
 			+"from information_schema.table_constraints tc, information_schema.key_column_usage ccu "
 			+"where tc.constraint_name = ccu.constraint_name "
 			+"and tc.table_name = ccu.table_name " 
-			+"and constraint_type = 'UNIQUE' "
-			+(schemaPattern!=null?"and tc.constraint_schema = '"+schemaPattern+"' ":"")
-			+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
-			+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
-			+"order by table_name, constraint_name, column_name";
+			+"and constraint_type = 'UNIQUE' ";
+		if(schemaPattern!=null) {
+			query += "and tc.constraint_schema = ? ";
+			params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+			query += "and tc.table_name = ? ";
+			params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+			query += "and tc.constraint_name = ? ";
+			params.add(constraintNamePattern);
+		}
+		query += "order by table_name, constraint_name, column_name";
+		return new QueryWithParams(query, params);
 	}
 	
 	@Override

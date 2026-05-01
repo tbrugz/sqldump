@@ -1,9 +1,9 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -121,23 +121,35 @@ public class H2v1Features extends H2Features {
 	}
 
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
-		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
+	QueryWithParams grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_list " 
 				+"from information_schema.constraints tc "
-				+"where constraint_type = 'UNIQUE' "
-				+(schemaPattern!=null?"and tc.constraint_schema = '"+schemaPattern+"' ":"")
-				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
-				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
-				+"order by table_name, constraint_name ";
+				+"where constraint_type = 'UNIQUE' ";
+		if(schemaPattern!=null) {
+				query += "and tc.constraint_schema = ? ";
+				params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+				query += "and tc.table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+				query += "and tc.constraint_name = ? ";
+				params.add(constraintNamePattern);
+		}
+		query += "order by table_name, constraint_name ";
+		return new QueryWithParams(query, params);
 	}
 
 	@Override
 	public void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing unique constraints");
-		String query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
-		Statement st = conn.createStatement();
+		QueryWithParams query = grabDBUniqueConstraintsQuery(schemaPattern, tableNamePattern, constraintNamePattern);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		log.debug("sql: "+query);
-		ResultSet rs = st.executeQuery(query);
+		ResultSet rs = st.executeQuery();
 		
 		int countUKs = 0;
 		int countCols = 0;

@@ -2,17 +2,21 @@ package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Table;
 import tbrugz.sqldump.dbmodel.Trigger;
 
 public class VirtuosoFeatures extends InformationSchemaFeatures {
+
 	static final Log log = LogFactory.getLog(VirtuosoFeatures.class);
 
 	String grabDBViewsQuery(String schemaPattern) {
@@ -53,14 +57,23 @@ public class VirtuosoFeatures extends InformationSchemaFeatures {
 	}
 
 	@Override
-	String grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
-		return "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
+	QueryWithParams grabDBUniqueConstraintsQuery(String schemaPattern, String tableNamePattern, String constraintNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select tc.constraint_schema, tc.table_name, tc.constraint_name, column_name " 
 				+"from information_schema.table_constraints tc, information_schema.key_column_usage kcu "
 				+"where tc.constraint_name = kcu.constraint_name "
-				+"and tc.constraint_schema = '"+schemaPattern+"' "
-				+"and v_key_is_main = 0 "
-				+(tableNamePattern!=null?"and tc.table_name = '"+tableNamePattern+"' ":"")
-				+(constraintNamePattern!=null?"and tc.constraint_name = '"+constraintNamePattern+"' ":"")
-				+"order by tc.table_name, tc.constraint_name, ordinal_position ";
+				+"and tc.constraint_schema = ? "
+				+"and v_key_is_main = 0 ";
+		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+				query += "and tc.table_name = ? ";
+				params.add(tableNamePattern);
+		}
+		if(constraintNamePattern!=null) {
+				query += "and tc.constraint_name = ? ";
+				params.add(constraintNamePattern);
+		}
+		query += "order by tc.table_name, tc.constraint_name, ordinal_position ";
+		return new QueryWithParams(query, params);
 	}
 }
