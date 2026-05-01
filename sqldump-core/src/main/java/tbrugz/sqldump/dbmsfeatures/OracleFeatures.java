@@ -286,13 +286,19 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" triggers grabbed");
 	}
 	
-	String grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
-		return "select name, type, line, text "
+	QueryWithParams grabDBExecutablesQuery(String schemaPattern, String execNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select name, type, line, text "
 				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
 				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE','TYPE BODY', 'JAVA SOURCE') "
-				+"and owner = '"+schemaPattern+"' "
-				+(execNamePattern!=null?" and name = '"+execNamePattern+"' ":"")
-				+"order by type, name, line";
+				+"and owner = ? ";
+		params.add(schemaPattern);
+		if(execNamePattern!=null) {
+				query += " and name = ? ";
+				params.add(execNamePattern);
+		}
+		query += "order by type, name, line";
+		return new QueryWithParams(query, params);
 	}
 	
 	/*@Override
@@ -303,9 +309,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBExecutables(Collection<ExecutableObject> execs, String schemaPattern, String execNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing executables");
-		String query = grabDBExecutablesQuery(schemaPattern, execNamePattern);
+		QueryWithParams query = grabDBExecutablesQuery(schemaPattern, execNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int linecount = 0;
@@ -551,11 +558,17 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		return leo;
 	}
 	
-	String grabDBSynonymsQuery(String schemaPattern, String synonymNamePattern) {
-		return "select synonym_name, table_owner, table_name, db_link "
+	QueryWithParams grabDBSynonymsQuery(String schemaPattern, String synonymNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select synonym_name, table_owner, table_name, db_link "
 				+"from "+(useDbaMetadataObjects?"dba_synonyms ":"all_synonyms ")
-				+"where owner = '"+schemaPattern+"'"
-				+(synonymNamePattern!=null?" and synonym_name = '"+synonymNamePattern+"'":"");
+				+"where owner = ? ";
+		params.add(schemaPattern);
+		if(synonymNamePattern!=null) {
+				query += " and synonym_name = ?";
+				params.add(synonymNamePattern);
+		}
+		return new QueryWithParams(query, params);
 	}
 	
 	/*@Override
@@ -566,9 +579,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBSynonyms(Collection<Synonym> synonyms, String schemaPattern, String synonymNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing synonyms");
-		String query = grabDBSynonymsQuery(schemaPattern, synonymNamePattern);
+		QueryWithParams query = grabDBSynonymsQuery(schemaPattern, synonymNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
@@ -588,8 +602,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" synonyms grabbed");
 	}
 
-	String grabDBIndexesQuery(String schemaPattern) {
-		return "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uic.column_position, uip.partitioning_type, uip.locality, uie.column_expression "
+	QueryWithParams grabDBIndexesQuery(String schemaPattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uic.column_position, uip.partitioning_type, uip.locality, uie.column_expression "
 				+"\nfrom "
 				+(useDbaMetadataObjects?
 						"dba_indexes ui, dba_ind_columns uic, dba_part_indexes uip, dba_ind_expressions uie ":
@@ -604,8 +619,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"and uic.table_name = uie.table_name (+) "
 				+"and uic.table_owner = uie.table_owner (+) "
 				+"and uic.column_position = uie.column_position (+) "
-				+"and ui.owner = '"+schemaPattern+"' "
+				+"and ui.owner = ? "
 				+"order by ui.table_owner, ui.index_name, uic.column_position, uie.column_position ";
+		params.add(schemaPattern);
+		return new QueryWithParams(query, params);
 	}
 	
 	/*
@@ -625,9 +642,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		select dbms_metadata.get_ddl('INDEX',index_name) from user_indexes
 		see: http://www.dba-oracle.com/concepts/creating_indexes.htm
 		*/
-		String query = grabDBIndexesQuery(schemaPattern);
+		QueryWithParams query = grabDBIndexesQuery(schemaPattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int colCount = 0;
@@ -708,12 +726,18 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		idx.setComment("unknown index type: '"+typeStr+"'");
 	}
 
-	String grabDBSequencesQuery(String schemaPattern, String sequenceNamePattern) {
-		return "select sequence_name, min_value, increment_by, last_number "
+	QueryWithParams grabDBSequencesQuery(String schemaPattern, String sequenceNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select sequence_name, min_value, increment_by, last_number "
 				+"from "+(useDbaMetadataObjects?"dba_sequences ":"all_sequences ")
-				+"where sequence_owner = '"+schemaPattern+"' "
-				+(sequenceNamePattern!=null?" and sequence_name = '"+sequenceNamePattern+"'":"")
-				+"order by sequence_name";
+				+"where sequence_owner = ? ";
+		params.add(schemaPattern);
+		if(sequenceNamePattern!=null) {
+				query += " and sequence_name = ? ";
+				params.add(sequenceNamePattern);
+		}
+		query += "order by sequence_name";
+		return new QueryWithParams(query, params);
 	}
 	
 	/*@Override
@@ -724,9 +748,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	@Override
 	public void grabDBSequences(Collection<Sequence> seqs, String schemaPattern, String sequenceNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing sequences");
-		String query = grabDBSequencesQuery(schemaPattern, sequenceNamePattern);
+		QueryWithParams query = grabDBSequencesQuery(schemaPattern, sequenceNamePattern);
 		log.debug("sql: "+query);
-		PreparedStatement st = conn.prepareStatement(query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
 		ResultSet rs = executeStatement(st);
 		
 		int count = 0;
