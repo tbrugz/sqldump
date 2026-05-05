@@ -168,7 +168,7 @@ public class ConnectionUtil {
 						log.warn("suffix '"+SUFFIX_INITSQL_COMMIT+"' setted but connection is in autocommit mode");
 					}
 				}
-				log.debug("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"]: "+dbInitSql);
+				log.debug("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"] executed"); //+dbInitSql);
 			}
 			catch(SQLException e) {
 				log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
