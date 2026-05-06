@@ -9,7 +9,7 @@ public class SQLUtilTest {
 
 	static void shouldValidate(String id) {
 		SQLUtils.validateSqlIdentifier(id);
-		System.out.println("valid: ["+id+"]");
+		debug("valid: ["+id+"]");
 	}
 
 	static void shouldFail(String id) {
@@ -18,13 +18,13 @@ public class SQLUtilTest {
 			Assert.fail("should have failed: id="+id);
 		}
 		catch(IllegalArgumentException e) {
-			System.out.println("failed ok: ["+id+"]");
+			debug("failed ok: ["+id+"]");
 		}
 	}
 	
 	static void shouldValidateDataType(String id) {
 		SQLUtils.validateSqlDataType(id);
-		System.out.println("valid: ["+id+"]");
+		debug("valid: ["+id+"]");
 	}
 
 	static void shouldFailDataType(String id) {
@@ -33,10 +33,14 @@ public class SQLUtilTest {
 			Assert.fail("should have failed: id="+id);
 		}
 		catch(IllegalArgumentException e) {
-			System.out.println("failed ok: ["+id+"]");
+			debug("failed ok: ["+id+"]");
 		}
 	}
 	
+	static void debug (String s) {
+		//System.out.println(s);
+	}
+ 	
 	@Test
 	public void testValidateSqlId() {
 		shouldValidate("abc");
@@ -44,6 +48,9 @@ public class SQLUtilTest {
 		shouldFail("1ABC");
 		shouldFail("=ABC");
 		shouldValidate("AbC=");
+		shouldValidate("AbC Cd=");
+		shouldValidate("org/hash/XYZ");
+		shouldValidate("package-info");
 		shouldFail("[ABC]");
 		shouldFail("ABC'");
 		shouldValidate(null);
@@ -54,6 +61,8 @@ public class SQLUtilTest {
 		shouldValidateDataType("abc");
 		shouldValidateDataType("varchar2");
 		shouldValidateDataType("DOUBLE PRECISION");
+		shouldValidateDataType("TIMESTAMP(6)");
+		shouldValidateDataType("PL/SQL BOOLEAN");
 		shouldFailDataType("1ABC");
 		shouldFailDataType("=ABC");
 		shouldFailDataType("AbC=");
