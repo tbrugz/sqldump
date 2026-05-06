@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldump.util.SQLUtils;
+
 public class Synonym extends DBObject {
 	private static final long serialVersionUID = 1L;
 
@@ -71,6 +73,7 @@ public class Synonym extends DBObject {
 	}
 
 	public void setObjectOwner(String objectOwner) {
+		SQLUtils.validateSqlIdentifier(objectOwner);
 		this.objectOwner = objectOwner;
 	}
 
@@ -79,6 +82,7 @@ public class Synonym extends DBObject {
 	}
 
 	public void setReferencedObject(String referencedObject) {
+		SQLUtils.validateSqlIdentifier(referencedObject);
 		this.referencedObject = referencedObject;
 	}
 	

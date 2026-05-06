@@ -1,6 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
 import tbrugz.sqldiff.WhitespaceIgnoreType;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.StringUtils;
 
 public class Trigger extends DBObject implements BodiedObject {
@@ -131,6 +132,7 @@ public class Trigger extends DBObject implements BodiedObject {
 	}
 
 	public void setTableName(String tableName) {
+		SQLUtils.validateSqlIdentifier(tableName);
 		this.tableName = tableName;
 	}
 

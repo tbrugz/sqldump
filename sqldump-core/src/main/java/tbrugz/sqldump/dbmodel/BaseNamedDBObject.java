@@ -1,10 +1,14 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldump.util.SQLUtils;
+
 public class BaseNamedDBObject implements NamedDBObject {
 
 	final String schemaName, tableName;
 	
 	public BaseNamedDBObject(String schemaName, String tableName) {
+		SQLUtils.validateSqlIdentifier(schemaName);
+		SQLUtils.validateSqlIdentifier(tableName);
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 	}

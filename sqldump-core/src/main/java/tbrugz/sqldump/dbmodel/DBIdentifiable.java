@@ -3,8 +3,10 @@ package tbrugz.sqldump.dbmodel;
 import java.util.Collection;
 
 import tbrugz.sqldiff.WhitespaceIgnoreType;
+import tbrugz.sqldump.util.SQLUtils;
 
 public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparable<DBIdentifiable> {
+
 	String schemaName;
 	String name;
 
@@ -13,6 +15,7 @@ public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparabl
 	}
 
 	public void setName(String name) {
+		SQLUtils.validateSqlIdentifier(name);
 		this.name = name;
 	}
 
@@ -21,6 +24,7 @@ public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparabl
 	}
 
 	public void setSchemaName(String schemaName) {
+		SQLUtils.validateSqlIdentifier(schemaName);
 		this.schemaName = schemaName;
 	}
 	

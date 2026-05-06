@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +93,7 @@ public class SQLUtils {
 
 	static boolean resultSetGetObjectExceptionWarned = false;
 
-	static Set<String> genericObjectsWarned = new HashSet<String>();
+	static final Set<String> genericObjectsWarned = new HashSet<String>();
 	
 	static {
 		genericObjectsWarned.add(String.class.getName()); // ignoring String class
@@ -585,7 +586,21 @@ public class SQLUtils {
 		log.warn("unknown class: "+clazz.getName()+" [defaulting to VARCHAR]");
 		return Types.VARCHAR;
 	}
+	
+	static final String REGEX_SQLID = "^([[\\p{L}]_][[\\p{L}\\p{N}]_$=]*)$"; 
+	static final Pattern PATTERN_SQLID = Pattern.compile(REGEX_SQLID);
+	
+	public static boolean matchSqlIdentifier(String id) {
+		if(id==null) { return true; }
+		return PATTERN_SQLID.matcher(id).matches();
+	}
 
+	public static void validateSqlIdentifier(String id) {
+		if(!matchSqlIdentifier(id)) {
+			throw new IllegalArgumentException(id);
+		}
+	}
+	
 	// see: DefaultDBMSFeatures.bindAndExecuteQuery
 	public static void bindAllParameters(PreparedStatement st, List<Object> params) throws SQLException {
 		for(int i=0;i<params.size();i++) {

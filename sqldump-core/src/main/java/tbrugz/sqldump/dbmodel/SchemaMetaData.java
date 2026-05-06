@@ -28,7 +28,7 @@ public class SchemaMetaData extends DBObject {
 	public static SchemaMetaData newSchemaMetaData(String schemaName) {
 		SchemaMetaData smd = new SchemaMetaData();
 		//smd.schemaName = schemaName;
-		smd.name = schemaName;
+		smd.setName(schemaName);
 		return smd;
 	}
 

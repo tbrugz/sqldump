@@ -162,7 +162,7 @@ public class FK extends AbstractConstraint implements Serializable {
 	}
 
 	public void setFkTableSchemaName(String fkTableSchemaName) {
-		this.schemaName = fkTableSchemaName;
+		setSchemaName(fkTableSchemaName);
 	}
 
 	public List<String> getPkColumns() {

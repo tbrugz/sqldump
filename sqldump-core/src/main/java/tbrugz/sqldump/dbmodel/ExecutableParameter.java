@@ -2,6 +2,8 @@ package tbrugz.sqldump.dbmodel;
 
 import java.io.Serializable;
 
+import tbrugz.sqldump.util.SQLUtils;
+
 public class ExecutableParameter implements DBType, Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -70,6 +72,7 @@ public class ExecutableParameter implements DBType, Serializable {
 	}
 
 	public void setName(String name) {
+		SQLUtils.validateSqlIdentifier(name);
 		this.name = name;
 	}
 

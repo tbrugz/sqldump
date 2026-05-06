@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import tbrugz.sqldump.util.SQLUtils;
+
 //XXX: make Grant immutable?
 public class Grant implements DBType, Serializable {
 	
@@ -27,6 +29,8 @@ public class Grant implements DBType, Serializable {
 	}
 	
 	public Grant(String owner, List<String> columns, PrivilegeType privilege, String grantee, boolean grantOption) {
+		SQLUtils.validateSqlIdentifier(owner);
+		SQLUtils.validateSqlIdentifier(grantee);
 		this.table = owner;
 		this.columns = columns;
 		this.privilege = privilege;

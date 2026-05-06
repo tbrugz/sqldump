@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import tbrugz.sqldump.util.SQLIdentifierDecorator;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 /*
@@ -166,6 +167,7 @@ public class Index extends DBObject {
 	}
 
 	public void setTableName(String tableName) {
+		SQLUtils.validateSqlIdentifier(tableName);
 		this.tableName = tableName;
 	}
 
