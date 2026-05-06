@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ParametrizedProperties;
+import tbrugz.sqldump.util.SQLUtils;
 import tbrugz.sqldump.util.Utils;
 
 public class Column extends DBIdentifiable implements Serializable, Cloneable, RemarkableDBObject {
@@ -332,6 +333,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 	}
 
 	public void setType(String type) {
+		SQLUtils.validateSqlDataType(type);
 		this.type = type;
 	}
 

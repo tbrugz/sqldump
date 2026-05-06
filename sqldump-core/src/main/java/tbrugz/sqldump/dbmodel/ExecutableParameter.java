@@ -89,6 +89,7 @@ public class ExecutableParameter implements DBType, Serializable {
 	}
 
 	public void setDataType(String dataType) {
+		SQLUtils.validateSqlDataType(dataType);
 		this.dataType = dataType;
 	}
 
