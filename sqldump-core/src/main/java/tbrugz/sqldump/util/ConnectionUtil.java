@@ -171,7 +171,7 @@ public class ConnectionUtil {
 				log.debug("init sql [prefix '"+propsPrefix+"'; updateCount="+count+"] executed"); //+dbInitSql);
 			}
 			catch(SQLException e) {
-				log.warn("error in init sql: "+dbInitSql+" [ex:"+e+"]");
+				log.warn("error executing init sql [ex: "+e+"]");
 				doRollbackIfNotAutocommit(conn);
 			}
 		}
