@@ -1248,6 +1248,9 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			
 			List<String> cookies = urlconn.getHeaderFields().get("Set-Cookie");
 			if(cookies!=null) {
+				if(cookiesHeader==null) {
+					throw new IllegalStateException("cookiesHeader is null");
+				}
 				for(String c: cookies) {
 					String[] cookie = c.split(";")[0].split("=");
 					cookiesHeader.put(cookie[0], cookie[1]);

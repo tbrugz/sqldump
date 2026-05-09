@@ -58,7 +58,7 @@ public class Key implements Comparable<Key> {
 			// nulls last ;)
 			if(v!=null && ov==null) { return -1; }
 			if(v==null && ov!=null) { return 1; }
-			if(v==null && ov==null) { continue; }
+			if(v==null || ov==null) { continue; }
 			
 			if(!v.equals(ov)) {
 				

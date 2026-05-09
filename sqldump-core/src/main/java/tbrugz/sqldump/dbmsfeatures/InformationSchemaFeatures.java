@@ -449,7 +449,7 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 			String constraintName = rs.getString(3);
 			String constraintId = tableName+"."+constraintName;
 			
-			if(!constraintId.equals(previousConstraintId)) {
+			if(c==null || !constraintId.equals(previousConstraintId)) {
 				c = new Constraint();
 				c.setType(Constraint.ConstraintType.UNIQUE);
 				c.setName( constraintName );

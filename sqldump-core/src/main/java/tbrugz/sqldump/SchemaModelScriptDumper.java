@@ -489,6 +489,10 @@ public class SchemaModelScriptDumper extends AbstractModelDumper implements Sche
 			return;
 		}
 		
+		if(outFilePattern==null) {
+			throw new RuntimeException("output file pattern is null, aborting");
+		}
+		
 		//objectName = objectName.replaceAll("\\$", "\\\\\\$");  //indeed strange but necessary if objectName contains "$". see Matcher.replaceAll
 		if(schemaName==null) { schemaName = ""; }
 		schemaName = Matcher.quoteReplacement(schemaName);

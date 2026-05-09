@@ -148,6 +148,9 @@ public class ResultSetDiff {
 				}
 				else if(sourceVals==null) { compare = -1; }
 				else if(targetVals==null) { compare = 1; }
+				else if(sourceVals==null || targetVals==null) {
+					throw new IllegalStateException("source or target have no rows");
+				}
 				else {
 					//log.info("comparing source row "+sourceRowCount+" with target row "+targetRowCount);
 					compare = compareVals(sourceVals, targetVals, keyIndexes);
@@ -346,7 +349,7 @@ public class ResultSetDiff {
 				//comp = vals1.get(keyIndexes[i]).compareTo(vals2.get(keyIndexes[i]));
 			}
 			catch(NullPointerException e) {
-				log.warn("[NPE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+(vals1!=null? vals1.get(keyIndexes[i]) : "NULL")+" ; v2="+(vals2!=null? vals2.get(keyIndexes[i]) : "NULL")+" [ex: "+e+"]");
+				log.warn("[NPE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");
 			}
 			catch(ClassCastException e) {
 				log.warn("[CCE;i="+i+"] key idx="+keyIndexes[i]+" ; v1="+vals1.get(keyIndexes[i])+" ; v2="+vals2.get(keyIndexes[i])+" [ex: "+e+"]");

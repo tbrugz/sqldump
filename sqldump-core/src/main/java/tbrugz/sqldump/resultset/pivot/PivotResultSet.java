@@ -70,6 +70,7 @@ public class PivotResultSet extends AbstractResultSet {
 			if(o1!=null && o2==null) { return returnLastIsNull; }
 			if(o1==null && o2!=null) { return returnFistIsNull; }
 			if(o1==null && o2==null) { return 0; }
+			if(o1==null || o2==null) { throw new IllegalStateException("comparables can't be null at this point"); }
 			
 			if(o1 instanceof Comparable && o2 instanceof Comparable) {
 				return ((Comparable)o1).compareTo(((Comparable)o2));

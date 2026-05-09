@@ -43,7 +43,7 @@ public class XMLSerializer {
 			xsr = xif.createXMLStreamReader(reader);
 		} catch (XMLStreamException e) {
 			throw new RuntimeException(e);
-		}  
+		}
 		Unmarshaller um = jc.createUnmarshaller();
 		Object o = um.unmarshal(xsr);
 		//use Unmarshaller.afterUnmarshal()?

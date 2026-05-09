@@ -325,7 +325,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			int line = rs.getInt(3);
 			if(line==1) {
 				//end last object
-				if(eo!=null) {
+				if(eo!=null && sb!=null) {
 					eo.setBody( sb.toString() );
 					boolean added = addExecutableToModel(execs, eo);
 					if(added) { countExecutables++; }
@@ -354,10 +354,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				else { count++; }
 				countMap.put(eo.getType(), count);
 			}
-			sb.append(rs.getString(4)); //+"\n"
+			if(sb!=null) { sb.append(rs.getString(4)); } //+"\n"
 			linecount++;
 		}
-		if(sb!=null) {
+		if(eo!=null && sb!=null) {
 			eo.setBody( sb.toString() );
 			boolean added = addExecutableToModel(execs, eo);
 			if(added) { countExecutables++; }
@@ -938,7 +938,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		Constraint c = null;
 		while(rs.next()) {
 			String constraintName = rs.getString(3);
-			if(!constraintName.equals(previousConstraint)) {
+			if(c==null || !constraintName.equals(previousConstraint)) {
 				String tableName = rs.getString(2);
 				c = new Constraint();
 				Table t = DBIdentifiable.getDBIdentifiableBySchemaAndName(tables, rs.getString(1), tableName);

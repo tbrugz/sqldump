@@ -130,7 +130,7 @@ public class HTMLDiff extends HTMLDataDump implements DiffSyntax {
 			if((s==null && t!=null) || (s!=null && t==null)) {
 				return false;
 			}
-			if(!s.equals(t)) {
+			if(s!=null && !s.equals(t)) {
 				return false;
 			}
 		}
