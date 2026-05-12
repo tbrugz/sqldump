@@ -18,6 +18,8 @@ jobs:
         # Java 20+ drops support for -source/-target/–release 7 -- https://inside.java/2022/09/26/quality-heads-up/
         java: [ '8', '11', '17', '21', '25' ]
     name: java ${{ matrix.java }} build
+    permissions:
+      contents: read
 
     steps:
     - uses: actions/checkout@v5
