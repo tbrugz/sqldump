@@ -15,7 +15,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import tbrugz.sqldump.XMLUtil;
+import tbrugz.sqldump.XMLUtil4Graph;
 import tbrugz.sqldump.def.Processor;
 import tbrugz.sqldump.util.ConnectionUtil;
 
@@ -39,14 +39,14 @@ public class R2GTest {
 		System.out.println(dom.getName()+" / "+dom.getNodeType()+" / "+dom.nodeCount());
 		System.out.println(dom.asXML());
 		*/
-		Document doc = XMLUtil.getDoc(new File("target/work/output/graph/r2g.graphml"));
+		Document doc = XMLUtil4Graph.getDoc(new File("target/work/output/graph/r2g.graphml"));
 		
 		//List ln = e.selectNodes("//node");//graphml/graph/node
-		NodeList ln = XMLUtil.getList(doc, "node");
+		NodeList ln = XMLUtil4Graph.getList(doc, "node");
 		Assert.assertEquals(2, ln.getLength());
 		
 		//List le = dom.selectNodes("//edge");
-		NodeList le = XMLUtil.getList(doc, "edge");
+		NodeList le = XMLUtil4Graph.getList(doc, "edge");
 		Assert.assertEquals(3, le.getLength());
 	}
 
@@ -63,14 +63,14 @@ public class R2GTest {
 		proc.setConnection(conn);
 		proc.process();
 		
-		Document doc = XMLUtil.getDoc(new File("target/work/output/graph/r2g-sql.graphml"));
+		Document doc = XMLUtil4Graph.getDoc(new File("target/work/output/graph/r2g-sql.graphml"));
 		
 		//List ln = e.selectNodes("//node");//graphml/graph/node
-		NodeList ln = XMLUtil.getList(doc, "node");
+		NodeList ln = XMLUtil4Graph.getList(doc, "node");
 		Assert.assertEquals(3, ln.getLength());
 		
 		//List le = dom.selectNodes("//edge");
-		NodeList le = XMLUtil.getList(doc, "edge");
+		NodeList le = XMLUtil4Graph.getList(doc, "edge");
 		Assert.assertEquals(4, le.getLength());
 	}
 }
