@@ -5,10 +5,13 @@
 # or to provide custom queries or build logic.
 #
 # see:
+# https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options
+#
+# config examples:
 # https://github.com/actions/starter-workflows/blob/main/code-scanning/codeql.yml
 # https://github.com/apache/commons-configuration/blob/master/.github/workflows/codeql-analysis.yml
 #
-name: "CodeQL Advanced"
+name: "CodeQL"
 
 on:
   push:
@@ -70,6 +73,11 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        #config-file: ./.github/codeql/codeql-config.yml
+        # https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#example-configuration
+        config: |
+          paths-ignore:
+            - '/attic'
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
