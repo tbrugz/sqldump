@@ -11,7 +11,7 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Test;
 
-import tbrugz.sqldump.TestUtil;
+import tbrugz.sqldump.TestUtil4Poi;
 import tbrugz.sqldump.sqlrun.def.Constants;
 import tbrugz.sqldump.sqlrun.def.Importer;
 import tbrugz.sqldump.sqlrun.importers.ImporterHelper;
@@ -37,7 +37,7 @@ public class XlsImportTest {
 		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 	}
 	
 	@Test
@@ -54,7 +54,7 @@ public class XlsImportTest {
 		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 	}
 
 	@Test
@@ -71,7 +71,7 @@ public class XlsImportTest {
 		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 	}
 
 	@Test
@@ -90,7 +90,7 @@ public class XlsImportTest {
 		sqlr.doMain(null, p);
 		
 		Connection conn = ConnectionUtil.initDBConnection("sqlrun", p);
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 	}
 
 	@Test
@@ -109,7 +109,7 @@ public class XlsImportTest {
 		imp.setProperties(p);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls2"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls2"));
 		conn.close();
 	}
 
@@ -127,7 +127,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls2"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls2"));
 		conn.close();
 	}
 
@@ -144,7 +144,7 @@ public class XlsImportTest {
 		Importer imp = ImporterHelper.getImporterByFileExt("xlsx", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls2"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls2"));
 
 		// read xls
 		is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp.xls");
@@ -153,7 +153,7 @@ public class XlsImportTest {
 		imp = ImporterHelper.getImporterByFileExt("xls", p);
 		imp.setConnection(conn);
 		imp.importStream(is);
-		Assert.assertEquals(10, TestUtil.get1stValue(conn, "select count(*) from ins_xls2"));
+		Assert.assertEquals(10, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls2"));
 		
 		// close
 		conn.close();
@@ -173,7 +173,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(3, TestUtil.get1stValue(conn, "select count(*) from ins_xls2"));
+		Assert.assertEquals(3, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls2"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls2");
 		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
 		conn.close();
@@ -194,7 +194,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
 		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
 		conn.close();
@@ -216,7 +216,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
 		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
 		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
@@ -241,7 +241,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
 		Assert.assertEquals(3, rs.getMetaData().getColumnCount());
 		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));
@@ -265,7 +265,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
 		Assert.assertEquals(2, rs.getMetaData().getColumnCount());
 		conn.close();
@@ -288,7 +288,7 @@ public class XlsImportTest {
 		imp.setConnection(conn);
 		imp.importStream(is);
 
-		Assert.assertEquals(5, TestUtil.get1stValue(conn, "select count(*) from ins_xls"));
+		Assert.assertEquals(5, TestUtil4Poi.get1stValue(conn, "select count(*) from ins_xls"));
 		ResultSet rs = conn.createStatement().executeQuery("select * from ins_xls");
 		Assert.assertEquals(5, rs.getMetaData().getColumnCount());
 		Assert.assertEquals("ID", rs.getMetaData().getColumnName(1));

@@ -1,21 +1,11 @@
 package tbrugz.sqldump.datadump;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import javax.naming.NamingException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,10 +20,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.TestUtil;
-import tbrugz.sqldump.datadump.DataDump.Outputter;
+import tbrugz.sqldump.TestUtil4Poi;
 import tbrugz.sqldump.sqlrun.SQLRun;
-import tbrugz.sqldump.util.IOUtil;
 import tbrugz.sqldump.util.Utils;
 
 public class XlsDataDumpTest {
@@ -68,7 +56,7 @@ public class XlsDataDumpTest {
 				};
 		String[] params = null;
 		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparams);
+		TestUtil4Poi.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(params, p);
 	}
@@ -115,9 +103,9 @@ public class XlsDataDumpTest {
 	void dump1(String[] vmparamsDump, String[] xtraparams) throws ClassNotFoundException, SQLException, NamingException, IOException {
 		SQLDump sqld = new SQLDump();
 		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparamsDump);
+		TestUtil4Poi.setProperties(p, vmparamsDump);
 		if(xtraparams!=null) {
-			TestUtil.setProperties(p, xtraparams);
+			TestUtil4Poi.setProperties(p, xtraparams);
 		}
 		sqld.doMain(emptyArgs, p);
 	}

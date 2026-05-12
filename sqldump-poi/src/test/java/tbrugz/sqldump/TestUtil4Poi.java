@@ -14,7 +14,7 @@ import tbrugz.sqldump.def.DBMSResources;
 import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.IOUtil;
 
-public class TestUtil {
+public class TestUtil4Poi {
 
 	public static final String[] NULL_PARAMS = null;
 

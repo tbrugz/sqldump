@@ -1,21 +1,14 @@
 package tbrugz.sqldump.sqlrun;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Properties;
-
-import javax.naming.NamingException;
 
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
-import tbrugz.sqldump.JDBCSchemaGrabber;
 import tbrugz.sqldump.SQLDump;
-import tbrugz.sqldump.TestUtil;
-import tbrugz.sqldump.dbmodel.SchemaModel;
-import tbrugz.sqldump.def.ProcessingException;
-import tbrugz.sqldump.def.SchemaModelGrabber;
+import tbrugz.sqldump.TestUtil4Poi;
 import tbrugz.sqldump.util.IOUtil;
 
 public class SQLRunAndDumpXlsTest {
@@ -38,13 +31,13 @@ public class SQLRunAndDumpXlsTest {
 				};
 		SQLRun sqlr = new SQLRun();
 		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparamsRun);
+		TestUtil4Poi.setProperties(p, vmparamsRun);
 		sqlr.doMain(NULL_PARAMS, p, conn);
 	}
 		
 	static void execSqlRun(String[] vmparams) throws Exception {
 		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparams);
+		TestUtil4Poi.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(null, p);
 	}
@@ -68,7 +61,7 @@ public class SQLRunAndDumpXlsTest {
 				"-Dsqlrun.password=h"
 				};
 		Properties p = new Properties();
-		TestUtil.setProperties(p, vmparams);
+		TestUtil4Poi.setProperties(p, vmparams);
 		SQLRun sqlr = new SQLRun();
 		sqlr.doMain(null, p);
 		
@@ -86,12 +79,12 @@ public class SQLRunAndDumpXlsTest {
 					};
 		SQLDump sqld = new SQLDump();
 		p = new Properties();
-		TestUtil.setProperties(p, vmparamsDump);
+		TestUtil4Poi.setProperties(p, vmparamsDump);
 		sqld.doMain(null, p);
 		
 		String csvDept = IOUtil.readFromFilename("target/work/output/SQLRunAndDumpTest/data-import-xls_DEPT.csv");
 		//System.out.println(csvDept);
-		int count = TestUtil.countLines(csvDept);
+		int count = TestUtil4Poi.countLines(csvDept);
 		Assert.assertEquals(6+1, count);
 	}
 	
