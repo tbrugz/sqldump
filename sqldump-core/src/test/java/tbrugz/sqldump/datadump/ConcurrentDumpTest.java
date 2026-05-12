@@ -33,7 +33,6 @@ public class ConcurrentDumpTest {
 		conn = ConnectionUtil.initDBConnection("sqldump", prop);
 	}
 
-	@SuppressWarnings("deprecation")
 	public void doInitDump(String className) throws Exception {
 		DumpSyntax ds = (DumpSyntax) Utils.getClassInstance(className);
 		ResultSet rs1 = null;

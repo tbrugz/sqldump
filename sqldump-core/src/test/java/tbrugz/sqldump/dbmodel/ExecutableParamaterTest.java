@@ -1,9 +1,6 @@
 package tbrugz.sqldump.dbmodel;
 
-import java.util.Arrays;
-
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ExecutableParamaterTest {
