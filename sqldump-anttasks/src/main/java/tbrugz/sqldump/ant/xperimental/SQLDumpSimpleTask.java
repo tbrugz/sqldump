@@ -31,7 +31,6 @@ public class SQLDumpSimpleTask extends Task {
 		//getCommandLine().addSyspropertyset(sysp);
 	}
 
-	@SuppressWarnings({ "rawtypes" })
 	public void execute() throws BuildException {
 		Executor sqldump = new SQLDump();
 		try {
@@ -39,7 +38,7 @@ public class SQLDumpSimpleTask extends Task {
 				sqldump.setFailOnError(failonerror);
 			}
 			Properties p = new Properties();
-			Hashtable ht = getProject().getProperties();
+			Hashtable<String, Object> ht = getProject().getProperties();
 			p.putAll(ht);
 			//debug(p);
 			//XXX: does not understand @includes ?
