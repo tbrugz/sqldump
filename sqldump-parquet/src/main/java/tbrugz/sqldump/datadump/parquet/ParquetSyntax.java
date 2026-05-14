@@ -28,6 +28,8 @@ import tbrugz.sqldump.util.SQLUtils;
  */
 public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuilder, Cloneable {
 
+	//private static final Log log = LogFactory.getLog(ParquetSyntax.class);
+
 	public static final String PARQUET_SYNTAX_ID = "parquet"; // .pqt? change getDefaultFileExtension()?
 	
 	/*
@@ -74,31 +76,41 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 	
 	static String getAvroType(Class<?> clazz) {
 		// see: SQLUtils.getClassFromSqlType
-		if(clazz.equals(Integer.class)) { return makeType("long"); }
-		if(clazz.equals(Double.class)) { return makeType("double"); }
+		if(clazz.equals(Integer.class)) { return makeType("long", true); }
+		if(clazz.equals(Double.class)) { return makeType("double", true); }
 		//if(clazz.equals(Date.class)) { return makeType("int", "date"); } //XXX
-		if(clazz.equals(Date.class)) { return makeType("string"); }
-		if(clazz.equals(String.class)) { return makeType("string"); }
-		if(clazz.equals(Boolean.class)) { return makeType("boolean"); }
-		if(clazz.equals(Blob.class)) { return makeType(null); }
-		if(clazz.equals(Array.class)) { return makeType(null); }
-		if(clazz.equals(ResultSet.class)) { return makeType(null); }
-		if(clazz.equals(Object.class)) { return makeType("string"); }
-		return makeType("string");
+		if(clazz.equals(Date.class)) { return makeType("string", true); }
+		if(clazz.equals(String.class)) { return makeType("string", true); }
+		if(clazz.equals(Boolean.class)) { return makeType("boolean", true); }
+		if(clazz.equals(Blob.class)) { return makeType(null, true); }
+		if(clazz.equals(Array.class)) { return makeType(null, true); }
+		if(clazz.equals(ResultSet.class)) { return makeType(null, true); }
+		if(clazz.equals(Object.class)) { return makeType("string", true); }
+		return makeType("string", true);
 	}
 	
-	static String makeType(String type) {
-		return makeType(type, null);
+	static String makeType(String type, boolean nullable) {
+		return makeType(type, nullable, null);
 	}
 	
-	static String makeType(String type, String logicalType) {
-		return "\"type\": \""+type+"\""+
-			(logicalType!=null?", \"logicalType\": \""+logicalType+"\"":"");
+	static String makeType(String type, boolean nullable, String logicalType) {
+		if(logicalType!=null) {
+			if(nullable) {
+				return "\"type\": [\"null\", {\"type\": "+type+"\", \"logicalType\": \""+logicalType+"\" }]";
+			}
+			return "\"type\": {\"type\": "+type+"\", \"logicalType\": \""+logicalType+"\" }";
+		}
+		if(nullable) {
+			return "\"type\": [\"null\", \""+type+"\"]";
+		}
+		return "\"type\": \""+type+"\"";
 	}
 
 	@Override
 	public void dumpHeader(OutputStream os) throws IOException {
-		Schema schema = new Schema.Parser().parse( getAvroSchema(tableName, lsColNames, lsColTypes) );
+		String avroSchema = getAvroSchema(tableName, lsColNames, lsColTypes);
+		//log.info("avro schema: "+avroSchema);
+		Schema schema = new Schema.Parser().parse( avroSchema );
 		StreamOutputFile sof = new StreamOutputFile(os);
 		writer = AvroParquetWriter.<GenericRecord>builder(sof)
 				.withSchema(schema)

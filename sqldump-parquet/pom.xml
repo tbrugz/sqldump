@@ -22,6 +22,7 @@
   <url>https://github.com/tbrugz/sqldump</url>
 
   <properties>
+    <maven.compiler.release>11</maven.compiler.release>
   </properties>
   
   <licenses>

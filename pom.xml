@@ -67,7 +67,7 @@
     <module>sqldump-jopendoc</module>
     <module>sqldump-logback</module>
     <module>sqldump-mail</module>
-    <module>sqldump-parquet</module>
+    <!--<module>sqldump-parquet</module>--> <!-- requires java11+ -->
     <module>sqldump-poi</module>
     <!--<module>sqldump-mondrian</module>-->
     <module>sqlmigrate</module>
@@ -298,6 +298,15 @@
   </dependencies>
 
   <profiles>
+    <profile>
+      <id>jdk11</id>
+      <activation>
+        <jdk>[11</jdk>
+      </activation>
+      <modules>
+        <module>sqldump-parquet</module>
+      </modules>
+    </profile>
     <profile>
       <id>release</id>
       <build>

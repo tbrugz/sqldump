@@ -94,9 +94,9 @@ public class ParquetDataDumpTest {
 		List<String> fields = Arrays.asList(new String[]{"id", "name", "available"});
 		List<Class<?>> types = Arrays.asList(new Class<?>[]{ Integer.class, String.class, Boolean.class });
 		String schema = ParquetSyntax.getAvroSchema(name, fields, types);
-		System.out.println("schema:\n"+schema);
+		//System.out.println("schema:\n"+schema);
 		Schema avroSchema = new Schema.Parser().parse(schema); 
-		System.out.println("avroSchema:\n"+avroSchema);
+		//System.out.println("avroSchema:\n"+avroSchema);
 	}
 
 	@Test
