@@ -67,6 +67,7 @@
     <module>sqldump-jopendoc</module>
     <module>sqldump-logback</module>
     <module>sqldump-mail</module>
+    <module>sqldump-parquet</module>
     <module>sqldump-poi</module>
     <!--<module>sqldump-mondrian</module>-->
     <module>sqlmigrate</module>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.bitbucket.tbrugz</groupId>
+    <artifactId>sqldump</artifactId>
+    <version>0.12-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.bitbucket.tbrugz</groupId>
+  <artifactId>sqldump-parquet</artifactId>
+  <packaging>jar</packaging>
+  <version>0.12-SNAPSHOT</version>
+
+  <name>sqldump-parquet</name>
+  <description>
+    Parquet file dumper for sqldump.
+  </description>
+  <url>https://github.com/tbrugz/sqldump</url>
+
+  <properties>
+  </properties>
+  
+  <licenses>
+    <license>
+      <name>GNU Affero General Public License, Version 3</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <scm>
+    <connection>scm:git:https://github.com/tbrugz/sqldump</connection>
+    <developerConnection>scm:git:https://github.com/tbrugz/sqldump</developerConnection>
+    <url>https://github.com/tbrugz/sqldump</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>tbrugz</id>
+      <name>Telmo Brugnara</name>
+      <email>tbrugz@gmail.com</email>
+    </developer>
+  </developers>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.bitbucket.tbrugz</groupId>
+      <artifactId>sqldump-core</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.parquet</groupId>
+      <artifactId>parquet-avro</artifactId>
+      <version>1.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.parquet</groupId>
+      <artifactId>parquet-hadoop</artifactId>
+      <version>1.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-common</artifactId>
+      <version>3.4.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>${h2.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+
+</project>
