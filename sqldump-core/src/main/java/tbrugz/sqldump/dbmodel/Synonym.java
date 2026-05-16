@@ -73,7 +73,7 @@ public class Synonym extends DBObject {
 	}
 
 	public void setObjectOwner(String objectOwner) {
-		SQLUtils.validateSqlIdentifier(objectOwner);
+		SQLUtils.validateSchemaName(objectOwner);
 		this.objectOwner = objectOwner;
 	}
 
@@ -91,6 +91,7 @@ public class Synonym extends DBObject {
 	}
 	
 	public void setDbLink(String dbLink) {
+		SQLUtils.validateSqlIdentifier(dbLink);
 		this.dbLink = dbLink;
 	}
 

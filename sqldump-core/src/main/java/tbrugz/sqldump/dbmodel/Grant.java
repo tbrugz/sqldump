@@ -29,8 +29,8 @@ public class Grant implements DBType, Serializable {
 	}
 	
 	public Grant(String owner, List<String> columns, PrivilegeType privilege, String grantee, boolean grantOption) {
-		SQLUtils.validateSqlIdentifier(owner);
-		SQLUtils.validateSqlIdentifier(grantee);
+		SQLUtils.validateSchemaName(owner);
+		SQLUtils.validateSchemaName(grantee);
 		this.table = owner;
 		this.columns = columns;
 		this.privilege = privilege;

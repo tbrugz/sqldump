@@ -24,7 +24,7 @@ public abstract class DBIdentifiable implements DBType, NamedDBObject, Comparabl
 	}
 
 	public void setSchemaName(String schemaName) {
-		SQLUtils.validateSqlIdentifier(schemaName);
+		SQLUtils.validateSchemaName(schemaName);
 		this.schemaName = schemaName;
 	}
 	
