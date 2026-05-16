@@ -1,8 +1,3 @@
-# For most projects, this workflow file will not need changing; you simply need
-# to commit it to your repository.
-#
-# You may wish to alter this file to override the set of languages analyzed,
-# or to provide custom queries or build logic.
 #
 # see:
 # https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options
@@ -75,6 +70,7 @@ jobs:
         build-mode: ${{ matrix.build-mode }}
         #config-file: ./.github/codeql/codeql-config.yml
         # https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#example-configuration
+        # https://stackoverflow.com/questions/74030852/is-there-a-way-to-exclude-files-from-codeql-scanning-on-github
         config: |
           paths-ignore:
             - '/attic'
