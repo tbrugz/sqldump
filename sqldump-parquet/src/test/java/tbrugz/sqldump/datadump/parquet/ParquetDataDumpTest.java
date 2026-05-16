@@ -2,8 +2,13 @@ package tbrugz.sqldump.datadump.parquet;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,7 +23,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import tbrugz.sqldump.SQLDump;
+import tbrugz.sqldump.sqlrun.QueryDumper;
 import tbrugz.sqldump.sqlrun.SQLRun;
+import tbrugz.sqldump.util.ConnectionUtil;
 import tbrugz.sqldump.util.Utils;
 
 public class ParquetDataDumpTest {
@@ -88,12 +95,13 @@ public class ParquetDataDumpTest {
 		sqld.doMain(emptyArgs, p);
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
 	public void testAvroSchema() {
 		String name = "User";
-		List<String> fields = Arrays.asList(new String[]{"id", "name", "available"});
-		List<Class<?>> types = Arrays.asList(new Class<?>[]{ Integer.class, String.class, Boolean.class });
-		String schema = ParquetSyntax.getAvroSchema(name, fields, types);
+		List<String> fields = Arrays.asList(new String[]{"id", "name", "available", "birthDate"});
+		List<Class<?>> types = Arrays.asList(new Class<?>[]{ Integer.class, String.class, Boolean.class, Date.class });
+		String schema = ParquetSyntax.getAvroSchemaString(name, fields, types);
 		//System.out.println("schema:\n"+schema);
 		Schema avroSchema = new Schema.Parser().parse(schema); 
 		//System.out.println("avroSchema:\n"+avroSchema);
@@ -106,11 +114,39 @@ public class ParquetDataDumpTest {
 				"-Dsqldump.datadump.xtrasyntaxes=parquet.ParquetSyntax",
 				});
 
-		File f = new File(DIR_OUT+"/data_EMP.parquet");
-		Assert.assertTrue(f.exists());
-		//Workbook wb = WorkbookFactory.create(f);
-		//Sheet sheet = wb.getSheetAt(0);
-		//int lastRow = sheet.getLastRowNum();
+		File fEmp = new File(DIR_OUT+"/data_EMP.parquet");
+		Assert.assertTrue(fEmp.exists());
+		
+		// test with duckDb
+		String[] duckDb = {
+				"-Dduck.dburl=jdbc:duckdb:",
+				};
+		Properties p = new Properties();
+		TestUtil4Parquet.setProperties(p, duckDb);
+		Connection conn = ConnectionUtil.initDBConnection("duck", p);
+		PreparedStatement ps = conn.prepareStatement("select * from read_parquet(?)");
+
+		//
+		ps.setString(1, fEmp.getAbsolutePath());
+		ResultSet rs = ps.executeQuery();
+		QueryDumper.simplerRSDump(rs);
+		//
+		File fDept = new File(DIR_OUT+"/data_DEPT.parquet");
+		ps.setString(1, fDept.getAbsolutePath());
+		rs = ps.executeQuery();
+		QueryDumper.simplerRSDump(rs);
+		//
+		File fEtc = new File(DIR_OUT+"/data_ETC.parquet");
+		ps = conn.prepareStatement("select ID, DT_X, DESCRIPTION from read_parquet(?)");
+		//ps = conn.prepareStatement("select ID, CAST(DT_X AS TIMESTAMP) AS DT_X, DESCRIPTION from read_parquet(?)");
+		ps.setString(1, fEtc.getAbsolutePath());
+		rs = ps.executeQuery();
+		QueryDumper.simplerRSDump(rs);
+		ResultSetMetaData rsmd = rs.getMetaData();
+		for(int i=1;i<=rsmd.getColumnCount();i++) {
+			System.out.println(rsmd.getColumnName(i)+": "+rsmd.getColumnTypeName(i));
+		}
+
 		//System.out.println(">> lastRow: "+lastRow);
 		//Assert.assertEquals(5, lastRow);
 	}

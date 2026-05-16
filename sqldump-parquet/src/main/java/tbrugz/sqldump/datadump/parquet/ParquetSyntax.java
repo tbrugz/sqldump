@@ -6,6 +6,7 @@ import java.sql.Array;
 import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -60,7 +61,13 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		return true;
 	}
 	
-	static String getAvroSchema(String name, List<String> lsColNames, List<Class<?>> lsColTypes) {
+	static Schema getAvroSchema(String name, List<String> lsColNames, List<Class<?>> lsColTypes) {
+		Schema schema = new Schema.Parser().parse( getAvroSchemaString(name, lsColNames, lsColTypes) );
+		//log.debug("avro schema: "+avroSchema);
+		return schema;
+	}
+	
+	static String getAvroSchemaString(String name, List<String> lsColNames, List<Class<?>> lsColTypes) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\n  \"type\": \"record\",\n  \"name\": \""+name+"\",\n  \"fields\": [");
 		for(int i=0;i<lsColNames.size();i++) {
@@ -78,8 +85,8 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		// see: SQLUtils.getClassFromSqlType
 		if(clazz.equals(Integer.class)) { return makeType("long", true); }
 		if(clazz.equals(Double.class)) { return makeType("double", true); }
-		//if(clazz.equals(Date.class)) { return makeType("int", "date"); } //XXX
-		if(clazz.equals(Date.class)) { return makeType("string", true); }
+		if(clazz.equals(Date.class)) { return makeType("long", true, "timestamp-millis"); } // date?
+		//if(clazz.equals(Date.class)) { return makeType("string", true); }
 		if(clazz.equals(String.class)) { return makeType("string", true); }
 		if(clazz.equals(Boolean.class)) { return makeType("boolean", true); }
 		if(clazz.equals(Blob.class)) { return makeType(null, true); }
@@ -96,7 +103,7 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 	static String makeType(String type, boolean nullable, String logicalType) {
 		if(logicalType!=null) {
 			if(nullable) {
-				return "\"type\": [\"null\", {\"type\": "+type+"\", \"logicalType\": \""+logicalType+"\" }]";
+				return "\"type\": [\"null\", {\"type\": \""+type+"\", \"logicalType\": \""+logicalType+"\" }]";
 			}
 			return "\"type\": {\"type\": "+type+"\", \"logicalType\": \""+logicalType+"\" }";
 		}
@@ -105,12 +112,21 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		}
 		return "\"type\": \""+type+"\"";
 	}
+	
+	static Object getAvroObject(Object o, Class<?> clazz) {
+		if(clazz.equals(Date.class)) {
+			if(o instanceof Timestamp) {
+				Timestamp t = (Timestamp) o;
+				return t.getTime();
+			}
+			throw new IllegalArgumentException("Incompatible classes: class "+clazz.getSimpleName()+", object of class "+o.getClass().getSimpleName());
+		}
+		return o;
+	}
 
 	@Override
 	public void dumpHeader(OutputStream os) throws IOException {
-		String avroSchema = getAvroSchema(tableName, lsColNames, lsColTypes);
-		//log.info("avro schema: "+avroSchema);
-		Schema schema = new Schema.Parser().parse( avroSchema );
+		Schema schema = getAvroSchema(tableName, lsColNames, lsColTypes);
 		StreamOutputFile sof = new StreamOutputFile(os);
 		writer = AvroParquetWriter.<GenericRecord>builder(sof)
 				.withSchema(schema)
@@ -125,7 +141,7 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		boolean canReturnResultSet = false; //XXX: internal resultSet as record??
 		List<Object> vals = SQLUtils.getRowObjectListFromRS(rs, lsColTypes, numCol, canReturnResultSet);
 		for(int i=0;i<numCol;i++) {
-			record.put(lsColNames.get(i), vals.get(i));
+			record.put(lsColNames.get(i), getAvroObject(vals.get(i), lsColTypes.get(i)));
 		}
 		writer.write(record);
 	}
