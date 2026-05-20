@@ -18,7 +18,7 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	protected int numCol;
 	protected List<String> lsColNames = new ArrayList<String>();
 	protected List<Class<?>> lsColTypes = new ArrayList<Class<?>>();
-	//ResultSetMetaData md;
+	protected List<Boolean> lsColNullables = new ArrayList<>();
 	protected List<String> pkCols;
 	
 	public String fullPrefix() {
@@ -29,15 +29,20 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		this.schemaName = schema;
 		this.tableName = tableName;
-		//this.md = md;
 		this.pkCols = pkCols;
 		this.numCol = md.getColumnCount();
 		
 		lsColNames.clear();
 		lsColTypes.clear();
+		lsColNullables.clear();
 		for(int i=0;i<numCol;i++) {
 			lsColNames.add(md.getColumnLabel(i+1));
 			lsColTypes.add(SQLUtils.getClassFromSqlType(md.getColumnType(i+1), md.getPrecision(i+1), md.getScale(i+1)));
+		}
+		if(requiresColumnNulability()) {
+			for(int i=0;i<numCol;i++) {
+				lsColNullables.add(md.isNullable(i+1) == ResultSetMetaData.columnNullable);
+			}
 		}
 	}
 
@@ -52,7 +57,7 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	@Override
 	public AbstractDumpSyntax clone() throws CloneNotSupportedException {
 		AbstractDumpSyntax ds = (AbstractDumpSyntax) super.clone();
@@ -61,4 +66,8 @@ public abstract class AbstractDumpSyntax extends DumpSyntax {
 		return ds;
 	}
 	
+	public boolean requiresColumnNulability() {
+		return false;
+	}
+
 }

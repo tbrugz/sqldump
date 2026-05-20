@@ -61,19 +61,21 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		return true;
 	}
 	
-	static Schema getAvroSchema(String name, List<String> lsColNames, List<Class<?>> lsColTypes) {
-		Schema schema = new Schema.Parser().parse( getAvroSchemaString(name, lsColNames, lsColTypes) );
+	static Schema getAvroSchema(String name, List<String> lsColNames, List<Class<?>> lsColTypes, List<Boolean> lsColNullables) {
+		String avroSchema = getAvroSchemaString(name, lsColNames, lsColTypes, lsColNullables);
 		//log.debug("avro schema: "+avroSchema);
+		Schema schema = new Schema.Parser().parse( avroSchema );
 		return schema;
 	}
 	
-	static String getAvroSchemaString(String name, List<String> lsColNames, List<Class<?>> lsColTypes) {
+	static String getAvroSchemaString(String name, List<String> lsColNames, List<Class<?>> lsColTypes, List<Boolean> lsColNullables) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("{\n  \"type\": \"record\",\n  \"name\": \""+name+"\",\n  \"fields\": [");
 		for(int i=0;i<lsColNames.size();i++) {
 			String colName = lsColNames.get(i);
 			Class<?> c = lsColTypes.get(i);
-			String avroType = getAvroType(c);
+			boolean nullable = lsColNullables.get(i);
+			String avroType = getAvroType(c, nullable);
 			if(i>0) { sb.append(","); };
 			sb.append("\n    {\"name\": \""+colName+"\", "+avroType+"}");
 		}
@@ -81,19 +83,19 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 		return sb.toString();
 	}
 	
-	static String getAvroType(Class<?> clazz) {
+	static String getAvroType(Class<?> clazz, boolean nullable) {
 		// see: SQLUtils.getClassFromSqlType
-		if(clazz.equals(Integer.class)) { return makeType("long", true); }
-		if(clazz.equals(Double.class)) { return makeType("double", true); }
-		if(clazz.equals(Date.class)) { return makeType("long", true, "timestamp-millis"); } // date?
-		//if(clazz.equals(Date.class)) { return makeType("string", true); }
-		if(clazz.equals(String.class)) { return makeType("string", true); }
-		if(clazz.equals(Boolean.class)) { return makeType("boolean", true); }
-		if(clazz.equals(Blob.class)) { return makeType(null, true); }
-		if(clazz.equals(Array.class)) { return makeType(null, true); }
-		if(clazz.equals(ResultSet.class)) { return makeType(null, true); }
-		if(clazz.equals(Object.class)) { return makeType("string", true); }
-		return makeType("string", true);
+		if(clazz.equals(Integer.class)) { return makeType("long", nullable); }
+		if(clazz.equals(Double.class)) { return makeType("double", nullable); }
+		if(clazz.equals(Date.class)) { return makeType("long", nullable, "timestamp-millis"); } // date?
+		//if(clazz.equals(Date.class)) { return makeType("string", nullable); }
+		if(clazz.equals(String.class)) { return makeType("string", nullable); }
+		if(clazz.equals(Boolean.class)) { return makeType("boolean", nullable); }
+		if(clazz.equals(Blob.class)) { return makeType(null, nullable); }
+		if(clazz.equals(Array.class)) { return makeType(null, nullable); }
+		if(clazz.equals(ResultSet.class)) { return makeType(null, nullable); }
+		if(clazz.equals(Object.class)) { return makeType("string", nullable); }
+		return makeType("string", nullable);
 	}
 	
 	static String makeType(String type, boolean nullable) {
@@ -105,7 +107,7 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 			if(nullable) {
 				return "\"type\": [\"null\", {\"type\": \""+type+"\", \"logicalType\": \""+logicalType+"\" }]";
 			}
-			return "\"type\": {\"type\": "+type+"\", \"logicalType\": \""+logicalType+"\" }";
+			return "\"type\": {\"type\": \""+type+"\", \"logicalType\": \""+logicalType+"\" }";
 		}
 		if(nullable) {
 			return "\"type\": [\"null\", \""+type+"\"]";
@@ -126,7 +128,7 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 
 	@Override
 	public void dumpHeader(OutputStream os) throws IOException {
-		Schema schema = getAvroSchema(tableName, lsColNames, lsColTypes);
+		Schema schema = getAvroSchema(tableName, lsColNames, lsColTypes, lsColNullables);
 		StreamOutputFile sof = new StreamOutputFile(os);
 		writer = AvroParquetWriter.<GenericRecord>builder(sof)
 				.withSchema(schema)
@@ -149,6 +151,11 @@ public class ParquetSyntax extends OutputStreamDumper implements DumpSyntaxBuild
 	@Override
 	public void dumpFooter(long count, boolean hasMoreRows, OutputStream os) throws IOException {
 		writer.close();
+	}
+
+	@Override
+	public boolean requiresColumnNulability() {
+		return true;
 	}
 
 }

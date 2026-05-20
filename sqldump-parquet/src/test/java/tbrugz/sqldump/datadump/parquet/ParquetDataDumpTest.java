@@ -99,9 +99,11 @@ public class ParquetDataDumpTest {
 	@Test
 	public void testAvroSchema() {
 		String name = "User";
-		List<String> fields = Arrays.asList(new String[]{"id", "name", "available", "birthDate"});
-		List<Class<?>> types = Arrays.asList(new Class<?>[]{ Integer.class, String.class, Boolean.class, Date.class });
-		String schema = ParquetSyntax.getAvroSchemaString(name, fields, types);
+		List<String> fields = Arrays.asList(new String[]{"id", "name", "available", "birthDate", "startDate"});
+		List<Class<?>> types = Arrays.asList(new Class<?>[]{ Integer.class, String.class, Boolean.class, Date.class, Date.class });
+		//List<Boolean> nullables = Arrays.asList(new Boolean[]{ true, true, true, true });
+		List<Boolean> nullables = Arrays.asList(new Boolean[]{ false, false, false, true, false });
+		String schema = ParquetSyntax.getAvroSchemaString(name, fields, types, nullables);
 		//System.out.println("schema:\n"+schema);
 		Schema avroSchema = new Schema.Parser().parse(schema); 
 		//System.out.println("avroSchema:\n"+avroSchema);
