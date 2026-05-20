@@ -22,6 +22,21 @@ public class SQLUtilTest {
 		}
 	}
 	
+	static void shouldValidateSchemaName(String id) {
+		SQLUtils.validateSchemaName(id);
+		debug("valid: ["+id+"]");
+	}
+
+	static void shouldFailSchemaName(String id) {
+		try {
+			SQLUtils.validateSchemaName(id);
+			Assert.fail("should have failed: id="+id);
+		}
+		catch(IllegalArgumentException e) {
+			debug("failed ok: ["+id+"]");
+		}
+	}
+	
 	static void shouldValidateDataType(String id) {
 		SQLUtils.validateSqlDataType(id);
 		debug("valid: ["+id+"]");
@@ -36,11 +51,23 @@ public class SQLUtilTest {
 			debug("failed ok: ["+id+"]");
 		}
 	}
-	
+
 	static void debug (String s) {
 		//System.out.println(s);
 	}
- 	
+	
+	@Test
+	public void testValidateSchemaName() {
+		shouldValidateSchemaName("abc");
+		shouldValidateSchemaName("AbC123");
+		shouldFailSchemaName("1ABC");
+		shouldFailSchemaName("=ABC");
+		shouldFailSchemaName("AbC=");
+		shouldFailSchemaName("Abcdê");
+		shouldValidateSchemaName("_C123");
+		shouldValidate(null);
+	}
+
 	@Test
 	public void testValidateSqlId() {
 		shouldValidate("abc");
@@ -53,6 +80,7 @@ public class SQLUtilTest {
 		shouldValidate("package-info");
 		shouldFail("[ABC]");
 		shouldFail("ABC'");
+		shouldValidate("Abcdê");
 		shouldValidate(null);
 	}
 	
@@ -68,6 +96,7 @@ public class SQLUtilTest {
 		shouldFailDataType("AbC=");
 		shouldFailDataType("[ABC]");
 		shouldFailDataType("ABC'");
+		shouldFailDataType("Abcdê");
 		shouldValidateDataType(null);
 	}
 
