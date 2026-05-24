@@ -33,7 +33,7 @@ docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 
 ```shell
 #export TAG=0.10
-# or export TAG=0.11-SNAPSHOT
+# or export TAG=0.12-SNAPSHOT
 # or export TAG=latest
 docker tag sqldump tbrugz/sqldump:$TAG
 docker tag sqlrun tbrugz/sqlrun:$TAG
