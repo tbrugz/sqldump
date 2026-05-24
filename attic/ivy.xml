@@ -24,7 +24,7 @@
 		
 		<!-- grabbers/dumpers/processors deps -->
 		<dependency name="kmlutils" rev="0.5.6" conf="default->default"/>
-		<dependency org="org.codehaus.jettison" name="jettison" rev="1.5.4" conf="default->default"/> <!-- 1.4.0 needs java8 -->
+		<dependency org="org.codehaus.jettison" name="jettison" rev="1.5.4" conf="default->default"/>
 		<dependency org="jakarta.xml.bind" name="jakarta.xml.bind-api" rev="2.3.2" conf="default->default"/>
 		<!--<dependency org="javax.xml.bind" name="jaxb-api" rev="2.3.0" conf="default->default"/>-->
 		<dependency org="javax.mail" name="mail" rev="1.4.7" conf="optional->default"/>

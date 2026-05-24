@@ -11,7 +11,7 @@
 	<dependencies>
 		<!-- main -->
 		<!-- 0.11-SNAPSHOT ? -->
-		<dependency org="org.bitbucket.tbrugz" name="sqldump" rev="0.10-SNAPSHOT" conf="default->default">
+		<dependency org="org.bitbucket.tbrugz" name="sqldump-core" rev="0.12-SNAPSHOT" conf="default->default">
 			<exclude name="commons-logging" />
 		</dependency>
 
@@ -20,13 +20,13 @@
 		<dependency org="commons-logging" name="commons-logging" rev="1.2" conf="default->default"/>
 		-->
 		<!-- http://www.slf4j.org/legacy.html#jclOverSLF4J -->
-		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="1.7.32" conf="deps->default"/>
+		<dependency org="org.slf4j" name="jcl-over-slf4j" rev="2.0.18" conf="deps->default"/> <!-- 1.7.32 -->
 
 		<!-- optional deps -->
 		<!--
 		<dependency org="log4j" name="log4j" rev="1.2.17" conf="default->default"/>
 		-->
-		<dependency org="ch.qos.logback" name="logback-classic" rev="1.2.13" conf="deps->default"/>
+		<dependency org="ch.qos.logback" name="logback-classic" rev="1.3.16" conf="deps->default"/> <!-- 1.2.13 -->
 
 		<!-- jdbc deps -->
 
