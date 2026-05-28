@@ -60,7 +60,7 @@ jobs:
     # docker stuff
 
     - name: Resolve docker dependencies
-      run: ant -noinput -buildfile docker/build.xml resolve write-version
+      run: ant -noinput -buildfile docker/build.xml resolve
 
     - name: Set project version
       id: set_version
