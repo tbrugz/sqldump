@@ -170,6 +170,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 	public void initDump(String schema, String tableName, List<String> pkCols, ResultSetMetaData md) throws SQLException {
 		super.initDump(schema, tableName, pkCols, md);
 		lastBlockLineSize = 0;
+		leftAlignField.clear();
 		for(int i=0;i<numCol;i++) {
 			if(Number.class.isAssignableFrom(lsColTypes.get(i))) {
 				leftAlignField.add(false);
@@ -178,6 +179,7 @@ public class FFCDataDump extends AbstractDumpSyntax implements Cloneable, DumpSy
 				leftAlignField.add(true);
 			}
 		}
+		//log.debug("leftAlignField: "+leftAlignField);
 		//for(int i=0;i<lsColNames.size();i++) {
 		//	log.debug("col: "+lsColNames.get(i)+"/"+lsColNames.get(i).length());
 		//	headersColsMaxLenght.add(lsColNames.get(i).length());
