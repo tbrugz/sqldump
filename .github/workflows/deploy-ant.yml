@@ -55,7 +55,7 @@ jobs:
           ${{ runner.os }}-ivy-
 
     - name: Install Ivy + Maven Ant Tasks
-      run: ant -noinput -buildfile attic/build.xml ivy-install mvn-ant-tasks-install
+      run: ant -noinput -buildfile docker/build.xml ivy-install mvn-ant-tasks-install
 
     # docker stuff
 

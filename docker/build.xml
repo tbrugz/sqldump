@@ -16,6 +16,17 @@
         <delete dir="lib"/>
     </target>
 
+	<target name="ivy-install">
+		<mkdir dir="${user.home}/.ant/lib/"/>
+		<!--get src="http://www.apache.org/dist/ant/ivy/${ivy.install.version}/maven2/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/-->
+		<get src="${maven.repository}/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${user.home}/.ant/lib/"/>
+	</target>
+
+	<target name="mvn-ant-tasks-install">
+		<mkdir dir="${user.home}/.ant/lib/"/>
+		<get src="${maven.repository}/org/apache/maven/maven-ant-tasks/${mvn-ant-tasks.version}/maven-ant-tasks-${mvn-ant-tasks.version}.jar" dest="${user.home}/.ant/lib/"/>
+	</target>
+
     <target name="resolve" description="retrieve dependencies with Ivy">
         <echo message="ivy.retrieve.pattern = ${ivy.retrieve.pattern}"/>
         <ivy:retrieve/>
