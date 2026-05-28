@@ -11,6 +11,10 @@
     <property name="version" value="0.12-SNAPSHOT"/>
     <property name="TAG" value="${version}"/>
     <property name="project-version.file" value="../dist/project-version.txt"/>
+	<property name="maven.repository" value="https://repo1.maven.org/maven2" />
+	<property name="mvn-ant-tasks.version" value="2.1.3"/>
+	<property name="ivy.install.version" value="2.5.0"/>
+	<!--<property name="ivy.settings.file" value="templates/ivysettings.xml"/>-->
 
     <target name="clean">
         <delete dir="lib"/>
