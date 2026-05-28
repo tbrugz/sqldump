@@ -320,8 +320,7 @@ public class SQLUtils {
 			case Types.DATE:     // 91
 				return Date.class;
 			case Types.TIMESTAMP:// 93
-			//case Types.TIMESTAMP_WITH_TIMEZONE: //java8
-			case 2014: //TIMESTAMP_WITH_TIMEZONE  //java8 - https://docs.oracle.com/javase/8/docs/api/java/sql/Types.html#TIMESTAMP_WITH_TIMEZONE
+			case Types.TIMESTAMP_WITH_TIMEZONE: //2014 - java8+
 			case -101: //oracle TIMESTAMP WITH TIMEZONE
 			case -102: //oracle TIMESTAMP WITH LOCAL TIMEZONE
 			//pgsql - http://www.postgresql.org/docs/current/static/datatype-datetime.html
@@ -590,7 +589,7 @@ public class SQLUtils {
 	static final String REGEX_SCHEMANAME = "^([a-zA-Z_][a-zA-Z0-9_]*)$";
 	static final Pattern PATTERN_SCHEMANAME = Pattern.compile(REGEX_SCHEMANAME);
 
-	static final String REGEX_SQLID = "^([\\p{L}_][\\p{L}\\p{N}_$= \\/\\-\\.]*)$";
+	static final String REGEX_SQLID = "^([\\p{L}\\p{N}_][\\p{L}\\p{N}_$= \\/\\-\\.#]*)$";
 	static final Pattern PATTERN_SQLID = Pattern.compile(REGEX_SQLID);
 
 	static final String REGEX_SQL_DATATYPE = "^([a-zA-Z_][a-zA-Z0-9_ \\/\\(\\)]*)$";

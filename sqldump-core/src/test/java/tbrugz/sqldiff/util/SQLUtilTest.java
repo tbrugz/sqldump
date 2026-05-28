@@ -72,7 +72,8 @@ public class SQLUtilTest {
 	public void testValidateSqlId() {
 		shouldValidate("abc");
 		shouldValidate("AbC123");
-		shouldFail("1ABC");
+		shouldValidate("1ABC");
+		shouldValidate("ABC#");
 		shouldFail("=ABC");
 		shouldValidate("AbC=");
 		shouldValidate("AbC Cd=");
