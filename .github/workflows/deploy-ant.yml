@@ -40,7 +40,7 @@ jobs:
 
     - name: Build & Publish maven-built artifacts to GitHub Packages
       #run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
-      run: mvn -V -B -DaltDeploymentRepository=github::${{ env.REPOSITORY }} deploy
+      run: mvn -V -B -DaltDeploymentRepository=github::${{ env.REPOSITORY }} package org.apache.maven.plugins:maven-deploy-plugin:deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
