@@ -44,6 +44,19 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    # ivy stuff (needed by docker build)
+
+    - name: Setup Ivy cache
+      uses: actions/cache@v3
+      with:
+        path: ~/.ivy2/cache
+        key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-ivy-
+
+    - name: Install Ivy + Maven Ant Tasks
+      run: ant -noinput -buildfile attic/build.xml ivy-install mvn-ant-tasks-install
+
     # docker stuff
 
     - name: Resolve docker dependencies
