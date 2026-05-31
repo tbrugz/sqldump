@@ -51,7 +51,7 @@
     <h2.version>2.2.224</h2.version> <!-- 2.3.230+ requires java11 -->
     <hsqldb.version>2.5.2</hsqldb.version>
     <!-- jaxb 3: Jakarta EE 9 -->
-    <jaxb.version>3.0.1</jaxb.version>
+    <jaxb.version>4.0.5</jaxb.version>
     <jaxb-impl.version>3.0.2</jaxb-impl.version>
     <jakarta.mail.version>2.0.1</jakarta.mail.version> <!-- jakart mail 2.1: Jakarta EE 10 -->
     <!--<log4j.version>1.2.17</log4j.version>-->
