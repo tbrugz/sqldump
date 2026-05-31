@@ -1,0 +1,21 @@
+# https://docs.github.com/en/code-security/reference/supply-chain-security/dependabot-options-reference#package-ecosystem-
+
+version: 2
+updates:
+  # Configuration for Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Configuration for github-actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # Configuration for maven
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
