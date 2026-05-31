@@ -75,7 +75,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) from Git repo for Docker
       id: meta
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
@@ -90,7 +90,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) from Git repo for Docker (sqlrun)
       id: meta-sqlrun
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/sqlrun
 
@@ -105,7 +105,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) from Git repo for Docker (sqldiff)
       id: meta-sqldiff
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/sqldiff
 
@@ -120,7 +120,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) from Git repo for Docker (diff2queries)
       id: meta-diff2queries
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/diff2queries
 
@@ -135,7 +135,7 @@ jobs:
 
     - name: Extract metadata (tags, labels) from Git repo for Docker (sqlmigrate)
       id: meta-sqlmigrate
-      uses: docker/metadata-action@v4
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/sqlmigrate
 
