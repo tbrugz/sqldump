@@ -6,6 +6,7 @@ SQLDump
 [![Maven Central](https://img.shields.io/maven-central/v/org.bitbucket.tbrugz/sqldump.svg?label=Maven%20Central)](https://central.sonatype.com/artifact/org.bitbucket.tbrugz/sqldump)
 [![Maven Central (Snapshots)](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Forg%2Fbitbucket%2Ftbrugz%2Fsqldump%2Fmaven-metadata.xml&label=Central%20Snapshots)](https://central.sonatype.com/repository/maven-snapshots/org/bitbucket/tbrugz/sqldump/maven-metadata.xml)
 [![CI](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml/badge.svg)](https://github.com/tbrugz/sqldump/actions/workflows/ci-maven.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/tbrugz/sqldump/badge)](https://scorecard.dev/viewer/?uri=github.com/tbrugz/sqldump)
 
 
 Utility to dump schema and data from a RDBMS. Features:

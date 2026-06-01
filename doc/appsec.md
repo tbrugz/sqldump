@@ -48,3 +48,6 @@ github dependabot
 =====
 
 https://github.com/tbrugz/sqldump/security/dependabot
+
+see: `.github/dependabot.yml`
+
