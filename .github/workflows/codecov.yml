@@ -1,10 +1,14 @@
-# see: https://github.com/codecov/example-java-maven/blob/main/.github/workflows/ci.yml
+# see:
+# https://github.com/codecov/example-java-maven/blob/main/.github/workflows/ci.yml
+# https://about.codecov.io/for/open-source/
+# https://about.codecov.io/resource/what-is-code-coverage/
 
 name: Codecov
 
 on:
   push:
   #  branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   run:
