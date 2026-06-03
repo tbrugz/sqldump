@@ -80,7 +80,7 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
     - name: Build and push sqldump Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v7
       with:
         context: ./docker/
         file: ./docker/Dockerfile.sqldump
@@ -95,7 +95,7 @@ jobs:
         images: ${{ env.REGISTRY }}/sqlrun
 
     - name: Build and push sqlrun Docker image (sqlrun)
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v7
       with:
         context: ./docker/
         file: ./docker/Dockerfile.sqlrun
@@ -110,7 +110,7 @@ jobs:
         images: ${{ env.REGISTRY }}/sqldiff
 
     - name: Build and push sqldiff Docker image (sqldiff)
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v7
       with:
         context: ./docker/
         file: ./docker/Dockerfile.sqldiff
@@ -125,7 +125,7 @@ jobs:
         images: ${{ env.REGISTRY }}/diff2queries
 
     - name: Build and push diff2queries Docker image
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v7
       with:
         context: ./docker/
         file: ./docker/Dockerfile.diff2queries
@@ -140,7 +140,7 @@ jobs:
         images: ${{ env.REGISTRY }}/sqlmigrate
 
     - name: Build and push sqlmigrate Docker image (sqlmigrate)
-      uses: docker/build-push-action@v4
+      uses: docker/build-push-action@v7
       with:
         context: ./docker/
         file: ./docker/Dockerfile.sqlmigrate
