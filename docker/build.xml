@@ -1,6 +1,8 @@
 <project name="sqldump-docker"
     default="resolve"
-    xmlns:ivy="antlib:org.apache.ivy.ant">
+    xmlns:ivy="antlib:org.apache.ivy.ant"
+    xmlns:if="ant:if" xmlns:unless="ant:unless"
+    >
 
     <property name="ivy.settings.file" value="../ivysettings.xml"/>
     <!--<property name="ivy.retrieve.pattern" value="${ivy.lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>-->
@@ -8,9 +10,11 @@
 
     <!-- 0.12-SNAPSHOT? latest? -->
     <!--<property file="../src/sqldump-version.properties"/>-->
+    <!--
     <property name="version" value="0.12-SNAPSHOT"/>
     <property name="TAG" value="${version}"/>
-    <property name="project-version.file" value="../dist/project-version.txt"/>
+    -->
+    <!--<property name="project-version.file" value="../dist/project-version.txt"/>-->
 	<property name="maven.repository" value="https://repo1.maven.org/maven2" />
 	<property name="mvn-ant-tasks.version" value="2.1.3"/>
 	<property name="ivy.install.version" value="2.5.0"/>
@@ -18,6 +22,13 @@
 
     <target name="clean">
         <delete dir="lib"/>
+    </target>
+
+    <target name="set-version" unless:set="version">
+        <exec executable="mvn" outputproperty="version" dir="..">
+            <arg line="help:evaluate -Dexpression=project.version -q -DforceStdout"/>
+        </exec>
+        <echo message="version = ${version}"/>
     </target>
 
 	<target name="ivy-install">
@@ -31,7 +42,7 @@
 		<get src="${maven.repository}/org/apache/maven/maven-ant-tasks/${mvn-ant-tasks.version}/maven-ant-tasks-${mvn-ant-tasks.version}.jar" dest="${user.home}/.ant/lib/"/>
 	</target>
 
-    <target name="resolve" description="retrieve dependencies with Ivy">
+    <target name="resolve" description="retrieve dependencies with Ivy" depends="set-version">
         <echo message="ivy.retrieve.pattern = ${ivy.retrieve.pattern}"/>
         <ivy:retrieve/>
         <copy file="../sqldump-core/target/sqldump-core-${version}.jar" tofile="${ivy.lib.dir}/build/sqldump-${TAG}.jar"/>
@@ -64,7 +75,7 @@
     <target name="buildfull" description="clean + resolve + build" depends="clean, resolve, build">
     </target>
 
-    <target name="tag" description="tag docker images">
+    <target name="tag" description="tag docker images" depends="set-version">
         <!--
         load $TAG from sqldump-version.properties ?
         -->
@@ -86,8 +97,8 @@
         </exec>
     </target>
 
-    <target name="write-version">
+    <!--<target name="write-version">
         <echo file="${project-version.file}" append="false" message="${TAG}"/>
-    </target>
+    </target>-->
 
 </project>
