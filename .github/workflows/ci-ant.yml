@@ -30,7 +30,7 @@ jobs:
     # https://github.com/actions/cache/blob/main/examples.md#java---maven
     # https://github.com/apache/maven-resolver-ant-tasks/blob/57b9af86be9b28f58b6d80d91d8dafef5dc68025/.github/workflows/maven.yml
     - name: Setup Ivy cache
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ~/.ivy2/cache
         key: ${{ runner.os }}-ivy-${{ hashFiles('**/ivy.xml') }}
