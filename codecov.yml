@@ -1,0 +1,14 @@
+
+coverage:
+  # https://docs.codecov.com/docs/coverage-configuration#section-range
+  # range: 60..80
+  # round: down
+  # precision: 2
+  status:
+    project:
+      default:
+        # https://docs.codecov.com/docs/commit-status#threshold 
+        threshold: 2% # Allows a 2% drop without failing
+        # target: 60%
+        # https://docs.codecov.com/docs/commit-status#if_ci_failed
+        # if_ci_failed: error
