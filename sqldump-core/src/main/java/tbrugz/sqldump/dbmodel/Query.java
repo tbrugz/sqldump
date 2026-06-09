@@ -13,6 +13,7 @@ public class Query extends View implements ParametrizedDBObject {
 	
 	Integer parameterCount;
 	List<String> parameterTypes;
+	List<Boolean> parameterOptionals;
 
 	String rsDecoratorFactoryClass;
 	Map<String,String> rsDecoratorArguments;
@@ -92,6 +93,15 @@ public class Query extends View implements ParametrizedDBObject {
 
 	public void setParameterTypes(List<String> parameterTypes) {
 		this.parameterTypes = parameterTypes;
+	}
+
+	@Override
+	public List<Boolean> getParameterOptionals() {
+		return parameterOptionals;
+	}
+
+	public void setParameterOptionals(List<Boolean> parameterOptionals) {
+		this.parameterOptionals = parameterOptionals;
 	}
 
 }

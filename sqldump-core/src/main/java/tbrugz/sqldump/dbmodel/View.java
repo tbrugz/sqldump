@@ -328,4 +328,9 @@ public class View extends DBObject implements Relation {
 		return null;
 	}
 
+	@Override
+	public List<Boolean> getParameterOptionals() {
+		return null;
+	}
+
 }

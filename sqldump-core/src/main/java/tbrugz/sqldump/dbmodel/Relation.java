@@ -59,4 +59,6 @@ public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObje
 	
 	//public String getFinalQualifiedName();
 	
+	public List<Boolean> getParameterOptionals();
+
 }
