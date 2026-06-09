@@ -24,7 +24,7 @@
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
   </properties>
-  
+
   <licenses>
     <license>
       <name>GNU Affero General Public License, Version 3</name>
