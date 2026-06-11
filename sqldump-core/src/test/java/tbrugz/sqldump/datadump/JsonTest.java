@@ -49,4 +49,26 @@ public class JsonTest {
 		String formatted = DataDumpUtils.getFormattedJSONValue(original, String.class, dateFormatter);
 		Assert.assertEquals("\"Lala\\\\Lala\"", formatted);
 	}
+
+	@Test
+	public void testBooleanValue() {
+		Boolean original = true;
+		String formatted = DataDumpUtils.getFormattedJSONValue(original, Boolean.class, dateFormatter);
+		Assert.assertEquals("true", formatted);
+	}
+
+	@Test
+	public void testIntegerValue() {
+		Integer original = 1234;
+		String formatted = DataDumpUtils.getFormattedJSONValue(original, Integer.class, dateFormatter);
+		Assert.assertEquals("1234", formatted);
+	}
+
+	@Test
+	public void testDoubleValue() {
+		Double original = 1234.56;
+		String formatted = DataDumpUtils.getFormattedJSONValue(original, Double.class, dateFormatter);
+		Assert.assertEquals("1234.56", formatted);
+	}
+
 }

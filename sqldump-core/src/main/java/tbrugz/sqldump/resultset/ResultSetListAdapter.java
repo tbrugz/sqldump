@@ -9,6 +9,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollectionAdapter<E> {
+
 	static final Log log = LogFactory.getLog(ResultSetListAdapter.class);
 
 	final List<E> list;

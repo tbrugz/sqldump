@@ -143,7 +143,7 @@ public class RsProjectionAdapterTest {
 		ResultSet rspd = new ResultSetProjectionDecorator(rs, Arrays.asList(projectedCols), null, true);
 		
 		StringWriter sw = new StringWriter();
-		DataDumpUtils.dumpRS(new FFCDataDump(), rspd, "schema", "table", sw, false);
+		DataDumpUtils.dumpRS(new FFCDataDump(), rspd.getMetaData(), rspd, "schema", "table", sw, false);
 		System.err.println(sw);
 		
 		ResultSetMetaData rsmd = rspd.getMetaData();

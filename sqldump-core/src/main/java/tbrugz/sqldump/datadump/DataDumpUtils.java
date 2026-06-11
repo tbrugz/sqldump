@@ -156,16 +156,14 @@ public class DataDumpUtils {
 			return getFormattedJSONString(elem);
 		}
 		else if(Date.class.isAssignableFrom(type)) {
-			//XXXdone: JSON dateFormatter?
 			return df.format((Date)elem);
 		}
 		else if(Number.class.isAssignableFrom(type)) {
 			return longFormatter.format((Number)elem);
 		}
-		/*else if(Long.class.isAssignableFrom(type)) {
-			//log.warn("long: "+(Long)elem+"; "+longFormatter.format((Long)elem));
-			return longFormatter.format((Long)elem);
-		}*/
+		else if(Boolean.class.isAssignableFrom(type)) {
+			return ((Boolean)elem).toString();
+		}
 
 		return getFormattedJSONString(elem);
 	}
@@ -378,9 +376,9 @@ public class DataDumpUtils {
 		dumpRS(ds, rsmd, rs, null, tableName, writer, resetRS);
 	}*/
 	
-	public static void dumpRS(DumpSyntaxInt ds, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
+	/*public static void dumpRS(DumpSyntaxInt ds, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
 		dumpRS(ds, rs.getMetaData(), rs, schema, tableName, writer, resetRS);
-	}
+	}*/
 	
 	public static void dumpRS(DumpSyntaxInt ds, ResultSetMetaData rsmd, ResultSet rs, String schema, String tableName, Writer writer, boolean resetRS) throws IOException, SQLException {
 		//int ncol = rsmd.getColumnCount();
@@ -573,12 +571,15 @@ public class DataDumpUtils {
 		
 		Object[] arr = null;
 		if(obj instanceof Collection) {
+			//log.debug("coll["+columnName+"]: "+obj);
 			arr = ((Collection) obj).toArray();
 		}
 		else if(obj instanceof Object[]) {
+			//log.debug("arr["+columnName+"]: "+Arrays.asList(arr));
 			arr = (Object[]) obj;
 		}
 		else if(obj instanceof ResultSet) {
+			//log.debug("rs: "+columnName);
 			return projectResultSetAsArray((ResultSet) obj, columnName);
 		}
 		else {
@@ -603,7 +604,7 @@ public class DataDumpUtils {
 		}
 		*/
 		if(cc<=2) {
-			// assuming arary value is always on the last column - works for H2
+			// assuming array value is always on the last column - works for H2
 			colName = rs.getMetaData().getColumnName(cc);
 			List<String> cols = Arrays.asList(new String[]{colName});
 			List<String> aliases = null;
