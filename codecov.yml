@@ -12,3 +12,11 @@ coverage:
         # target: 60%
         # https://docs.codecov.com/docs/commit-status#if_ci_failed
         # if_ci_failed: error
+    # https://docs.codecov.com/docs/commit-status#patch-status
+    patch: off
+    #patch:
+    #  default:
+    #    # Require 80% coverage on the new changes instead of 100%
+    #    target: 80%
+    #    # Allow a 5% coverage margin before failing
+    #    threshold: 5%
