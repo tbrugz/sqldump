@@ -103,5 +103,10 @@ public class Query extends View implements ParametrizedDBObject {
 	public void setParameterOptionals(List<Boolean> parameterOptionals) {
 		this.parameterOptionals = parameterOptionals;
 	}
+	
+	@Override
+	public boolean hasParameterOptionals() {
+		return parameterOptionals!=null && parameterOptionals.size()>0;
+	}
 
 }

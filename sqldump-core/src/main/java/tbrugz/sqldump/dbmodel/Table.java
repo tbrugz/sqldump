@@ -434,4 +434,9 @@ public class Table extends DBObject implements Relation {
 		return null;
 	}
 
+	@Override
+	public boolean hasParameterOptionals() {
+		return false;
+	}
+
 }

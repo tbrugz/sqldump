@@ -61,4 +61,6 @@ public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObje
 	
 	public List<Boolean> getParameterOptionals();
 
+	public boolean hasParameterOptionals();
+
 }
