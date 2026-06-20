@@ -10,7 +10,7 @@ public class GrantTest {
 
 	@Test
 	public void testParse() {
-		Grant gr = new Grant("USER_X", PrivilegeType.SELECT, "USER_Y");
+		Grant gr = new Grant("TABLE_X", PrivilegeType.SELECT, "USER_Y");
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
 		Assert.assertEquals(gr, gr2);
@@ -39,7 +39,7 @@ public class GrantTest {
 
 	@Test
 	public void testParseWithColumn() {
-		Grant gr = new Grant("USER_X", Arrays.asList("COLUMN_Z"), PrivilegeType.SELECT, "USER_Y", false);
+		Grant gr = new Grant("TABLE_X", Arrays.asList("COLUMN_Z"), PrivilegeType.SELECT, "USER_Y", false);
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
 		//System.out.println(gr+" // "+gr2);
@@ -48,7 +48,7 @@ public class GrantTest {
 
 	@Test
 	public void testParseWithGrantOption() {
-		Grant gr = new Grant("USER_X", (List<String>) null, PrivilegeType.SELECT, "USER_Y", true);
+		Grant gr = new Grant("TABLE_X", (List<String>) null, PrivilegeType.SELECT, "USER_Y", true);
 		String grStr = gr.toString();
 		Grant gr2 = Grant.parseGrant(grStr);
 		Assert.assertEquals(gr, gr2);

@@ -153,7 +153,7 @@ public class ScriptDumperTest {
 
 	@Test
 	public void dumpSelectPrivilege() throws Exception {
-		Grant gr = new Grant("GRANTOR", PrivilegeType.SELECT, "GRANTEE");
+		Grant gr = new Grant("TABLE_X", PrivilegeType.SELECT, "GRANTEE");
 		List<Grant> grants = new ArrayList<>();
 		grants.add(gr);
 		Set<String> privs = new TreeSet<>();
@@ -165,7 +165,7 @@ public class ScriptDumperTest {
 
 	@Test
 	public void dumpSelectPrivilegeWithColumn() throws Exception {
-		Grant gr = new Grant("GRANTOR", Arrays.asList("COL_1"), PrivilegeType.SELECT, "GRANTEE", false);
+		Grant gr = new Grant("TABLE_X", Arrays.asList("COL_1"), PrivilegeType.SELECT, "GRANTEE", false);
 		List<Grant> grants = new ArrayList<>();
 		grants.add(gr);
 		Set<String> privs = new TreeSet<>();
@@ -177,7 +177,7 @@ public class ScriptDumperTest {
 
 	@Test
 	public void dumpSelectPrivilegeWithoutColumn() throws Exception {
-		Grant gr = new Grant("GRANTOR", Arrays.asList("COL_1"), PrivilegeType.DELETE, "GRANTEE", false);
+		Grant gr = new Grant("TABLE_X", Arrays.asList("COL_1"), PrivilegeType.DELETE, "GRANTEE", false);
 		List<Grant> grants = new ArrayList<>();
 		grants.add(gr);
 		Set<String> privs = new TreeSet<>();

@@ -24,24 +24,30 @@ public class Grant implements DBType, Serializable {
 	boolean withGrantOption;
 	
 	@Deprecated
-	public Grant(String owner, String column, PrivilegeType privilege, String grantee, boolean grantOption) {
-		this(owner, (column!=null ? Arrays.asList( column ) : null), privilege, grantee, grantOption);
+	public Grant(String objectName, String column, PrivilegeType privilege, String grantee, boolean grantOption) {
+		this(objectName, (column!=null ? Arrays.asList( column ) : null), privilege, grantee, grantOption);
 	}
 	
-	public Grant(String owner, List<String> columns, PrivilegeType privilege, String grantee, boolean grantOption) {
-		SQLUtils.validateSchemaName(owner);
+	public Grant(String objectName, List<String> columns, PrivilegeType privilege, String grantee, boolean grantOption) {
+		// objectName may be null, since Grant may be a property of the owner object (relation, executable)
+		SQLUtils.validateSqlIdentifier(objectName);
 		SQLUtils.validateSchemaName(grantee);
-		this.table = owner;
+		this.table = objectName;
 		this.columns = columns;
 		this.privilege = privilege;
 		this.grantee = grantee;
 		this.withGrantOption = grantOption;
 	}
 
-	public Grant(String owner, PrivilegeType privilege, String grantee) {
-		this(owner, (List<String>) null, privilege, grantee, false);
+	public Grant(String objectName, PrivilegeType privilege, String grantee) {
+		this(objectName, (List<String>) null, privilege, grantee, false);
 	}
 	
+	public Grant(PrivilegeType privilege, String grantee) {
+		this(null, (List<String>) null, privilege, grantee, false);
+	}
+	
+	@Deprecated
 	public Grant() {
 	}
 	
@@ -111,6 +117,7 @@ public class Grant implements DBType, Serializable {
 		return table;
 	}
 
+	@Deprecated
 	public void setTable(String table) {
 		this.table = table;
 	}
@@ -119,6 +126,7 @@ public class Grant implements DBType, Serializable {
 		return privilege;
 	}
 
+	@Deprecated
 	public void setPrivilege(PrivilegeType privilege) {
 		this.privilege = privilege;
 	}
@@ -127,6 +135,7 @@ public class Grant implements DBType, Serializable {
 		return grantee;
 	}
 
+	@Deprecated
 	public void setGrantee(String grantee) {
 		this.grantee = grantee;
 	}
@@ -135,6 +144,7 @@ public class Grant implements DBType, Serializable {
 		return withGrantOption;
 	}
 
+	@Deprecated
 	public void setWithGrantOption(boolean withGrantOption) {
 		this.withGrantOption = withGrantOption;
 	}
@@ -143,6 +153,7 @@ public class Grant implements DBType, Serializable {
 		return columns;
 	}
 	
+	//not yet @Deprecated
 	public void setColumns(List<String> columns) {
 		this.columns = columns;
 	}
@@ -162,6 +173,7 @@ public class Grant implements DBType, Serializable {
 		return (columns!=null && columns.size()>0)?columns.get(0):null;
 	}
 
+	@Deprecated
 	public void setColumn(String column) {
 		List<String> l = new ArrayList<>();
 		l.add(column);

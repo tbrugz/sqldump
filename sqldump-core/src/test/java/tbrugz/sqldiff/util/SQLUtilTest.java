@@ -65,6 +65,7 @@ public class SQLUtilTest {
 		shouldFailSchemaName("AbC=");
 		shouldFailSchemaName("Abcdê");
 		shouldValidateSchemaName("_C123");
+		shouldValidateSchemaName("_C123-II");
 		shouldValidate(null);
 	}
 

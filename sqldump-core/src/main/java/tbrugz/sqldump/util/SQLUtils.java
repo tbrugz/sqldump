@@ -586,7 +586,7 @@ public class SQLUtils {
 		return Types.VARCHAR;
 	}
 
-	static final String REGEX_SCHEMANAME = "^([a-zA-Z_][a-zA-Z0-9_]*)$";
+	static final String REGEX_SCHEMANAME = "^([a-zA-Z_][a-zA-Z0-9_\\-]*)$";
 	static final Pattern PATTERN_SCHEMANAME = Pattern.compile(REGEX_SCHEMANAME);
 
 	static final String REGEX_SQLID = "^([\\p{L}\\p{N}_][\\p{L}\\p{N}_$= \\/\\-\\.#]*)$";

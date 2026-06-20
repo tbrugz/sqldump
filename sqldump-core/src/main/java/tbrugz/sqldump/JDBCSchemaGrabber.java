@@ -7,6 +7,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1177,6 +1178,17 @@ public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaMode
 		String privilege = null;
 		while(grantrs.next()) {
 			try {
+				String grantee = grantrs.getString("GRANTEE");
+				privilege = Utils.normalizeEnumStringConstant(grantrs.getString("PRIVILEGE"));
+				String tableName = grantrs.getString("TABLE_NAME");
+				List<String> columnNames = null;
+				if(grabColumn) {
+					columnNames = Arrays.asList(grantrs.getString("COLUMN_NAME"));
+				}
+				boolean grantOption = VALUE_YES.equals(grantrs.getString("IS_GRANTABLE"));
+				Grant grant = new Grant(tableName, columnNames, PrivilegeType.valueOf(privilege), grantee, grantOption);
+				
+				/*
 				Grant grant = new Grant();
 				
 				grant.setGrantee(grantrs.getString("GRANTEE"));
@@ -1187,6 +1199,7 @@ public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaMode
 					grant.setColumn(grantrs.getString("COLUMN_NAME"));
 				}
 				grant.setWithGrantOption(VALUE_YES.equals(grantrs.getString("IS_GRANTABLE")));
+				*/
 				grantsList.add(grant);
 			}
 			catch(IllegalArgumentException iae) {
