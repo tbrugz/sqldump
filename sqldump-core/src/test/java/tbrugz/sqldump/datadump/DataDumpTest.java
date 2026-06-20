@@ -60,7 +60,7 @@ public class DataDumpTest {
 		//DataDump dd = new DataDump();
 		Map<String, Outputter> map = new HashMap<String, Outputter>();
 		DataDump.isSetNewFilename(map, DIR_OUT+"t1-utf8.txt", "", DataDumpUtils.CHARSET_UTF8, null, false, false);
-		DataDump.isSetNewFilename(map, DIR_OUT+"t1-iso8859.txt", "", DataDumpUtils.CHARSET_ISO_8859_1, null, false, false); //ISO8859_1
+		DataDump.isSetNewFilename(map, DIR_OUT+"t1-iso8859.txt", "", "ISO-8859-1", null, false, false); //ISO8859_1
 		for(String s: map.keySet()) {
 			map.get(s).w.write("Pôrto Alégre");
 			map.get(s).w.close();

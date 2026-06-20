@@ -41,7 +41,7 @@ public class DataDumpUtils {
 	public static final String NEWLINE = "\n";
 	
 	public static final String CHARSET_UTF8 = "UTF-8";
-	public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
+	@Deprecated public static final String CHARSET_ISO_8859_1 = "ISO-8859-1";
 	public static final String DATE_FORMATTER_PATTERN = "yyyy-MM-dd"; //new SimpleDateFormat("yyyy-MM-dd");
 
 	static final String DEFAULT_SQL_STRING_ENCLOSING = QUOTE;
