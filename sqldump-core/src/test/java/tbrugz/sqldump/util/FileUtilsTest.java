@@ -31,7 +31,7 @@ public class FileUtilsTest {
 
 		List<String> ll = FileUtils.getFilesRegex(srcTestSqlrunDir, ".*\\.csv");
 		//System.out.println("testListFilesRegex:" + ll);
-		Assert.assertEquals(3, ll.size()); //dept.csv, etc.csv, emp.csv
+		Assert.assertEquals(4, ll.size()); //dept.csv, emp-with-location.csv, etc.csv, emp.csv
 	}
 
 	@Test
@@ -40,7 +40,7 @@ public class FileUtilsTest {
 
 		List<String> ll = FileUtils.getFilesGlobAsString(srcTestSqlrunDir, "*.csv");
 		//System.out.println("testListFilesGlob:" + ll);
-		Assert.assertEquals(3, ll.size()); //dept.csv, etc.csv, emp.csv
+		Assert.assertEquals(4, ll.size()); //dept.csv, emp-with-location.csv, etc.csv, emp.csv
 	}
 
 	@Test
@@ -49,7 +49,7 @@ public class FileUtilsTest {
 
 		List<String> ll = FileUtils.getFilesGlobAsString(srcTestDir, "tbrugz/sqldump/sqlrun/*.csv");
 		//System.out.println("testListFilesGlobWithDir:" + ll);
-		Assert.assertEquals(3, ll.size()); //dept.csv, etc.csv, emp.csv
+		Assert.assertEquals(4, ll.size()); //dept.csv, emp-with-location.csv, etc.csv, emp.csv
 	}
 
 	@Test
@@ -58,7 +58,7 @@ public class FileUtilsTest {
 
 		List<String> ll = FileUtils.getFilesGlobAsString(srcTestDir, "tbrugz/sqldump/**/*.csv");
 		//System.out.println("testListFilesGlobWithDir2:" + ll);
-		Assert.assertEquals(4, ll.size()); //dept.csv, etc.csv, emp.csv, processors/proj.csv
+		Assert.assertEquals(5, ll.size()); //dept.csv, etc.csv, emp-with-location.csv, emp.csv, processors/proj.csv
 	}
 
 	@Test
@@ -66,8 +66,8 @@ public class FileUtilsTest {
 		//Assume.assumeFalse(isWindows);
 
 		List<String> ll = FileUtils.getFilesGlobAsString(srcTestDir, "**/sqlrun/*.csv");
-		//System.out.println("testListFilesGlobWithDir3:" + ll);
-		Assert.assertEquals(3, ll.size()); //dept.csv, etc.csv, emp.csv
+		System.out.println("testListFilesGlobWithDir3:" + ll);
+		Assert.assertEquals(4, ll.size()); //dept.csv, emp-with-location.csv, etc.csv, emp.csv
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class FileUtilsTest {
 
 		List<String> ll = FileUtils.getFilesGlobAsString(srcTestDir, "**/sqldump/**/*.csv");
 		//System.out.println("testListFilesGlobWithDirFull:" + ll);
-		Assert.assertEquals(4, ll.size()); //dept.csv, etc.csv, emp.csv, processors/proj.csv
+		Assert.assertEquals(5, ll.size()); //dept.csv, emp-with-location.csv, etc.csv, emp.csv, processors/proj.csv
 	}
 
 	@Test(expected = IllegalArgumentException.class)

@@ -1,0 +1,6 @@
+id,name,supervisor_id,department_id,salary,blobcol
+1,john,1,1,2000,src/test/resources/tbrugz/sqldump/sqlrun/empdept.sql
+2,mary,2,2,2000,src/main/java/tbrugz/sqldump/util/Version.java
+3,jane,2,2,1000,
+4,lucas,2,2,1200,
+5,wilson,1,1,1000,src/test/resources/tbrugz/sqldump/sqlrun/empdept-drop.sql

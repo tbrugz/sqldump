@@ -27,6 +27,7 @@ public class Constants {
 	public static final String SUFFIX_IMPORTFILES_GLOB = "importfiles.glob";
 
 	public static final String SUFFIX_1ST_LINE_AS_COLUMN_NAMES = "1st-line-as-column-names";
+	public static final String SUFFIX_ALLOWED_PATH_LOCATIONS = "allowed-path-locations";
 	public static final String SUFFIX_COLUMN_NAMES = "columnnames";
 	public static final String SUFFIX_COLUMN_TYPES = "columntypes";
 	public static final String SUFFIX_DO_CREATE_TABLE = "do-create-table";

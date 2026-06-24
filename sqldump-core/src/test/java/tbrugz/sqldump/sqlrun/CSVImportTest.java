@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL; 
 import java.net.URLClassLoader;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -422,5 +423,69 @@ public class CSVImportTest {
 		Assert.assertEquals("SALARY", rs.getMetaData().getColumnName(5));
 		conn.close();
 	}
+
+	@Test
+	public void importWithLocation() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_NAMES, "id, name, supervisor_id, dept_id, salary, blobcol");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int,text-location");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
+		
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp-with-location.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(3, CSVImportTest.get1stValue(conn, "select count(blobcol) from ins_csv")); // 3 blobs imported
+		conn.close();
+	}
+
+	@Test
+	public void importWithLocation2() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_NAMES, "id, name, supervisor_id, dept_id, salary, blobcol");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int,text-location");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
+		p.setProperty(Constants.SUFFIX_ALLOWED_PATH_LOCATIONS, Paths.get(".").toAbsolutePath().normalize().toString()+"/src/test");
+		
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp-with-location.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(2, CSVImportTest.get1stValue(conn, "select count(blobcol) from ins_csv")); // 2 blobs imported
+		conn.close();
+	}
 	
+	@Test
+	public void importWithLocationErr() throws Exception {
+		Connection conn = DriverManager.getConnection("jdbc:h2:mem:");
+
+		Properties p = new Properties();
+		p.setProperty(Constants.SUFFIX_INSERTTABLE, "ins_csv");
+		p.setProperty(Constants.SUFFIX_DO_CREATE_TABLE, "true");
+		p.setProperty(Constants.SUFFIX_COLUMN_NAMES, "id, name, supervisor_id, dept_id, salary, blobcol");
+		p.setProperty(Constants.SUFFIX_COLUMN_TYPES, "int,string,int,int,int,text-location");
+		p.setProperty(Constants.SUFFIX_SKIP_N, "1"); // skips header line
+		p.setProperty(Constants.SUFFIX_ALLOWED_PATH_LOCATIONS, "/xyz");
+		InputStream is = new FileInputStream("src/test/resources/tbrugz/sqldump/sqlrun/emp-with-location.csv");
+		
+		Importer imp = ImporterHelper.getImporterByFileExt("csv", p);
+		imp.setConnection(conn);
+		imp.importStream(is);
+
+		Assert.assertEquals(0, CSVImportTest.get1stValue(conn, "select count(blobcol) from ins_csv")); // 0 blobs imported
+		conn.close();
+	}
+
 }
