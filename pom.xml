@@ -72,7 +72,6 @@
     <module>sqldump-poi</module>
     <!--<module>sqldump-mondrian</module>-->
     <module>sqlmigrate</module>
-    <module>docker</module>
     <module>utils4sqldump</module>
   </modules>
 
@@ -317,6 +316,7 @@
       <modules>
         <module>sqldump-logback</module>
         <module>sqldump-parquet</module>
+        <module>docker</module> <!-- depends on sqldump-logback -->
       </modules>
     </profile>
     <profile>
