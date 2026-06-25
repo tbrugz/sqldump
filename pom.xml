@@ -72,6 +72,7 @@
     <module>sqldump-poi</module>
     <!--<module>sqldump-mondrian</module>-->
     <module>sqlmigrate</module>
+    <module>docker</module>
     <module>utils4sqldump</module>
   </modules>
 

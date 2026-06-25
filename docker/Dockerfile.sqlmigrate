@@ -1,4 +1,5 @@
 
-FROM ghcr.io/tbrugz/sqldump:latest
+#FROM ghcr.io/tbrugz/sqldump:latest
+FROM sqldump:latest
 
-ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/jdbc/*", "tbrugz.sqlmigrate.SqlMigrate"]
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/lib-snapshot/*", "tbrugz.sqlmigrate.SqlMigrate"]

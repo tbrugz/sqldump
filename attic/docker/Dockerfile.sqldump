@@ -1,0 +1,23 @@
+
+# see: https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:17-jre
+
+# copy app
+#COPY lib/deps/* lib/jdbc/* /app/lib/
+COPY lib/deps/* /app/lib/
+COPY lib/jdbc/* /app/jdbc/
+#COPY lib/default/* /app/lib/
+COPY lib/build/* /app/lib/
+COPY resources/* /app/
+
+# data dir - for embedded databases
+#RUN mkdir /data && chmod a+rwx /data
+
+# work dir
+RUN mkdir /work && chmod a+rwx /work
+WORKDIR /work
+
+#WORKDIR /app
+#ENTRYPOINT ["java", "-cp", ".:lib/*", "tbrugz.sqldump.SQLDump"]
+
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/jdbc/*", "tbrugz.sqldump.SQLDump"]

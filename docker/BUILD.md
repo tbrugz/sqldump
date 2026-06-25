@@ -2,6 +2,9 @@
 ## building docker images
 
 
+`mvn docker:build`
+
+<!--
 `ant buildfull`
 
 **OR**
@@ -14,7 +17,7 @@ docker build -t sqldiff --file Dockerfile.sqldiff .
 docker build -t diff2queries --file Dockerfile.diff2queries .
 docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 ```
-
+-->
 
 ## tagging & publishing
 
@@ -27,9 +30,11 @@ docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 * Tag & Publish
 
 
+<!--
 `ant publish` (using TAG from `../src/sqldump-version.properties`) ; `ant publish -DTAG=<tag>` (`ant publish -DTAG=latest`)
 
 **OR**
+-->
 
 ```shell
 #export TAG=0.10
@@ -60,6 +65,10 @@ docker pushrm --file README.md tbrugz/sqlrun
 
 - https://docs.docker.com/docker-hub/
 
+- https://dmp.fabric8.io/#docker:build
+
 - pushrm - https://github.com/christian-korneck/docker-pushrm
 
 - https://stackoverflow.com/questions/36022892/how-to-know-if-docker-is-already-logged-in-to-a-docker-registry-server
+
+- https://stackoverflow.com/questions/44554857/fabric8-docker-maven-plugin-include-additional-tags-on-build

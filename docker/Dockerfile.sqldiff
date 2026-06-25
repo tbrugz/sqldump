@@ -1,4 +1,5 @@
 
-FROM ghcr.io/tbrugz/sqldump:latest
+#FROM ghcr.io/tbrugz/sqldump:latest
+FROM sqldump:latest
 
-ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/jdbc/*", "tbrugz.sqldiff.SQLDiff"]
+ENTRYPOINT ["java", "-cp", "/app/ext:/app/libext/*:/app:/app/lib/*:/app/lib-snapshot/*", "tbrugz.sqldiff.SQLDiff"]
