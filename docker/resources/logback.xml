@@ -9,6 +9,7 @@
 
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <!--<withJansi>true</withJansi>-->
+    <!--<target>System.err</target>-->
     <encoder>
       <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>-->
       <!--<pattern>%d{HH:mm:ss.SSS} [%-5level] %logger{36} - %msg%n</pattern>-->
@@ -24,6 +25,7 @@
     </encoder>
   </appender>
 
+  <!--<logger name="tbrugz.sqldump.datadump.DataDump" level="DEBUG" />-->
   <logger name="tbrugz.sqldump.util.ConnectionUtil" level="DEBUG" />
   <logger name="tbrugz.sqldump.util.CLIProcessor" level="DEBUG" />
 

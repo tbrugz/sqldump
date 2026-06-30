@@ -57,6 +57,7 @@
           <images>
             <image>
               <name>tbrugz/sqldump</name>
+              <!--<alias>sqldump</alias>-->
               <build>
                 <dockerFile>${project.basedir}/Dockerfile.sqldump</dockerFile>
                 <tags>
@@ -177,17 +178,23 @@
 
     <!-- databases / jdbc drivers -->
 
-    <!-- derby 10.15: java9+ - https://db.apache.org/derby/derby_downloads.html -->
+    <!--
+    derby 10.17 (10.17.1.0): java21+
+    derby 10.16 (10.16.1.1): java17+
+    derby 10.15 (10.15.2.0): java9+
+    https://db.apache.org/derby/derby_downloads.html
+    derby retired: On 2025-10-10, the Derby developers voted to retire the project into a read-only state.
+    -->
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derby</artifactId>
-      <version>10.15.2.0</version>
+      <version>10.16.1.1</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.derby</groupId>
       <artifactId>derbyclient</artifactId>
-      <version>10.15.2.0</version>
+      <version>10.16.1.1</version>
       <scope>runtime</scope>
     </dependency>
     <!-- h2: java8+ - https://github.com/h2database/h2database/releases/tag/version-2.0.202 -->
