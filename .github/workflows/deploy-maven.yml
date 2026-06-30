@@ -46,8 +46,10 @@ jobs:
     # docker stuff
 
     - name: Build docker images
+      working-directory: ./docker
       run: mvn -V -B docker:build
 
     - name: Run/Test sqldump docker image
+      working-directory: ./docker
       run: docker run --rm -v .:/work tbrugz/sqldump -propfile=src/test/resources/derby.properties
 
