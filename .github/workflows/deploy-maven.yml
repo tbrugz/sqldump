@@ -1,0 +1,53 @@
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-ant
+
+name: CI-deploy
+
+on:
+  push:
+    tags: [ deploy ]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: ${{ github.repository }}
+  REGISTRY: ghcr.io
+  REPOSITORY: https://maven.pkg.github.com/tbrugz/sqldump/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v7.0.0
+    - name: Setup JDK
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: maven
+
+    #- name: Build with Maven
+    #  run: mvn -V -B package --file pom.xml
+
+    #- name: Publish ant-built artifacts to GitHub Packages
+    #  run: mvn -V -B org.apache.maven.plugins:maven-deploy-plugin:deploy-file -Durl=${{ env.REPOSITORY }} -DrepositoryId=github -DpomFile=dist/poms/sqldump.pom -Dfile=dist/jars/sqldump.jar
+    #  #run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build & Publish maven-built artifacts to GitHub Packages
+      #run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
+      run: mvn -V -B -DaltDeploymentRepository=github::${{ env.REPOSITORY }} package org.apache.maven.plugins:maven-deploy-plugin:deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # docker stuff
+
+    - name: Build docker images
+      run: mvn -V -B docker:build
+
+    - name: Run/Test sqldump docker image
+      run: docker run --rm -v .:/work tbrugz/sqldump -propfile=src/test/resources/derby.properties
+

@@ -4,8 +4,7 @@ name: CI-deploy
 
 on:
   push:
-    branches: [ deploy ]
-    tags: [ deploy ]
+    tags: [ deploy-ant ]
   workflow_dispatch:
 
 env:
