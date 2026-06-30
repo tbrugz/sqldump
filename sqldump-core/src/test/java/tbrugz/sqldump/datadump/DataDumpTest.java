@@ -1,9 +1,11 @@
 package tbrugz.sqldump.datadump;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +32,7 @@ import org.json.simple.JSONValue;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -966,6 +969,76 @@ public class DataDumpTest {
 				"2,1,HR,0" + LF + 
 				"3,2,Engineering,0" + LF,
 				csvDept);
+	}
+
+	@Test
+	@Ignore("only works if run isolated?")
+	public void testStaticWriterStdout() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		String[] vmparamsDump = {
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql=select * from emp where id = 1",
+				"-Dsqldump.datadump.dumpsyntaxes=csv",
+				//"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.datadump.outfilepattern=<stdout>",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		// Redirect System.out to our stream captor
+		PrintStream originalOut = System.out;
+		ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+		System.out.flush();
+		System.setOut(new PrintStream(outputStreamCaptor));
+		
+		try {
+			Properties p = new Properties();
+			TestUtil.setProperties(p, vmparamsDump);
+			new SQLDump().doMain(emptyArgs, p);
+		}
+		finally {
+			System.out.flush();
+			System.setOut(originalOut);
+		}
+		
+		//String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1.csv");
+		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n";
+		Assert.assertEquals(expected, outputStreamCaptor.toString());
+	}
+
+	@Test
+	@Ignore("only works if run isolated?")
+	public void testStaticWriterStderr() throws IOException, ClassNotFoundException, SQLException, NamingException {
+		String[] vmparamsDump = {
+				"-Dsqldump.processingclasses=SQLQueries",
+				"-Dsqldump.queries=q1",
+				"-Dsqldump.query.q1.sql=select * from emp where id = 1",
+				"-Dsqldump.datadump.dumpsyntaxes=csv",
+				//"-Dsqldump.datadump.outfilepattern="+DIR_OUT+"/data_[tablename].[syntaxfileext]",
+				"-Dsqldump.datadump.outfilepattern=<stderr>",
+				"-Dsqldump.dburl=jdbc:h2:"+dbpath,
+				"-Dsqldump.user=h",
+				"-Dsqldump.password=h"
+				};
+		// Redirect System.out to our stream captor
+		PrintStream originalOut = System.err;
+		ByteArrayOutputStream outputStreamCaptor = new ByteArrayOutputStream();
+		System.err.flush();
+		System.setErr(new PrintStream(outputStreamCaptor));
+		
+		try {
+			Properties p = new Properties();
+			TestUtil.setProperties(p, vmparamsDump);
+			new SQLDump().doMain(emptyArgs, p);
+		}
+		finally {
+			System.err.flush();
+			System.setErr(originalOut);
+		}
+		
+		//String csvEmpS1 = IOUtil.readFromFilename(DIR_OUT+"/data_q1.csv");
+		String expected = "ID,NAME,SUPERVISOR_ID,DEPARTMENT_ID,SALARY\r\n1,john,1,1,2000\r\n";
+		Assert.assertEquals(expected, outputStreamCaptor.toString());
 	}
 	
 	//----------------------------------

@@ -827,6 +827,7 @@ public class DataDump extends AbstractSQLProc {
 						if(w!=null) {
 							ds.dumpFooter(count, hasMoreRows, w);
 							swFooterCount++;
+							w.close();
 						}
 					}
 				}
