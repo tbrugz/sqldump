@@ -13,7 +13,7 @@ env:
   REPOSITORY: https://maven.pkg.github.com/tbrugz/sqldump/
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -39,7 +39,7 @@ jobs:
 
     - name: Build & Publish maven-built artifacts to GitHub Packages
       #run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
-      run: mvn -V -B -DaltDeploymentRepository=github::${{ env.REPOSITORY }} package org.apache.maven.plugins:maven-deploy-plugin:deploy
+      run: mvn -V -B -DaltDeploymentRepository=github::${{ env.REPOSITORY }} install org.apache.maven.plugins:maven-deploy-plugin:deploy
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
