@@ -46,8 +46,7 @@ jobs:
     # docker stuff
 
     - name: Build docker images
-      working-directory: ./docker
-      run: mvn -V -B package docker:build
+      run: mvn -V -B -pl docker package docker:build
 
     - name: Run/Test sqldump docker image
       working-directory: ./docker
