@@ -1,7 +1,8 @@
 
 # see: https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:21-jre-ubi10-minimal
 #FROM eclipse-temurin:21-jre-ubi9-minimal
-FROM eclipse-temurin:17-jre
+#FROM eclipse-temurin:17-jre
 
 # copy app
 COPY deps-release /app/lib/
