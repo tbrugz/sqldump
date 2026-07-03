@@ -30,14 +30,7 @@ jobs:
         java-version: '17'
         cache: maven
 
-    #- name: Build with Maven
-    #  run: mvn -V -B package --file pom.xml
-
-    #- name: Publish ant-built artifacts to GitHub Packages
-    #  run: mvn -V -B org.apache.maven.plugins:maven-deploy-plugin:deploy-file -Durl=${{ env.REPOSITORY }} -DrepositoryId=github -DpomFile=dist/poms/sqldump.pom -Dfile=dist/jars/sqldump.jar
-    #  #run: ant -Dmaven-snapshots-repository-url=${{ env.REPOSITORY }} publish-sonatype-snapshot
-    #  env:
-    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    # publish maven artifcts
 
     - name: Build & Publish maven-built artifacts to GitHub Packages
       #run: mvn -V -B -DaltDeploymentRepository=github::default::${{ env.REPOSITORY }} deploy --file sqlmigrate/pom.xml
@@ -61,3 +54,5 @@ jobs:
       working-directory: ./docker
       run: docker run --rm -v .:/work tbrugz/sqldump -propfile=src/test/resources/derby.properties
 
+    - name: Push docker images
+      run: mvn -V -B -Ddocker.push.registry=${{ env.REGISTRY }} -pl docker docker:push
