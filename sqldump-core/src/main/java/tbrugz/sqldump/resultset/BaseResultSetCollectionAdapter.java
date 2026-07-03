@@ -26,7 +26,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 	
 	final String name;
 	final List<String> columnNames;
-	final List<Integer> columnTypes; // not (yet) used
+	//final List<Integer> columnTypes; // not (yet) used
 	final ResultSetMetaData metadata;
 	final List<Method> methods = new ArrayList<Method>();
 
@@ -44,7 +44,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		this.name = name;
 		
 		columnNames = new ArrayList<String>();
-		columnTypes = new ArrayList<Integer>();
+		List<Integer> columnTypes = new ArrayList<Integer>();
 		
 		Map<String, Method> propertyMap = ReflectionUtil.getReadPropertyMethodMap(clazz);
 		if(uniqueCols!=null) {

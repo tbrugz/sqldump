@@ -16,11 +16,15 @@ public class ResultSetListAdapter<E extends Object> extends BaseResultSetCollect
 	int position;
 
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<E> list, Class<? extends E> clazz) throws IntrospectionException {
-		this(name, uniqueCols, null, list, clazz);
+		this(name, uniqueCols, null, list, false, clazz);
 	}
 	
 	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list, Class<? extends E> clazz) throws IntrospectionException {
-		super(name, uniqueCols, allCols, clazz);
+		this(name, uniqueCols, allCols, list, false, clazz);
+	}
+	
+	public ResultSetListAdapter(String name, List<String> uniqueCols, List<String> allCols, List<E> list, boolean onlyUniqueCols, Class<? extends E> clazz) throws IntrospectionException {
+		super(name, uniqueCols, allCols, onlyUniqueCols, clazz);
 		this.list = list;
 		//Initially the cursor is positioned before the first row
 		resetPosition();
