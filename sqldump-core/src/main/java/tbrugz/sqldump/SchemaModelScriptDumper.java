@@ -1,9 +1,12 @@
 package tbrugz.sqldump;
 
+import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -84,6 +87,7 @@ public class SchemaModelScriptDumper extends AbstractModelDumper implements Sche
 	Properties prop;
 	String outputConnPropPrefix;
 	Connection outputConn = null;
+	Charset charset = Charset.defaultCharset();
 	Writer outputWriter;
 	
 	static final String PREFIX = "sqldump.schemadump";
@@ -142,7 +146,8 @@ public class SchemaModelScriptDumper extends AbstractModelDumper implements Sche
 	
 	static final String PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN = PREFIX+".outputfilepattern";
 	static final String PROP_SCHEMADUMP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE = PREFIX+".outputobjectwithreferencingtable";
-	static final String PROP_SCHEMADUMP_FKS_ATEND =  PREFIX+".fks.atend";
+	static final String PROP_SCHEMADUMP_FKS_ATEND = PREFIX+".fks.atend";
+	static final String PROP_SCHEMADUMP_CHARSET = PREFIX+".charset";
 	
 	@Deprecated static final String PREFIX_OUTPATTERN_BYTYPE = "sqldump.outputfilepattern.bytype.";
 	@Deprecated static final String PREFIX_OUTPATTERN_MAPTYPE = "sqldump.outputfilepattern.maptype.";
@@ -184,6 +189,14 @@ public class SchemaModelScriptDumper extends AbstractModelDumper implements Sche
 		mainOutputFilePattern = Utils.getPropWithDeprecated(prop, PROP_SCHEMADUMP_OUTPUT_FILE_PATTERN, PROP_MAIN_OUTPUT_FILE_PATTERN, mainOutputFilePattern);
 		if(mainOutputFilePattern==null) {
 			outputConnPropPrefix = prop.getProperty(PROP_OUTPUT_CONN_PROP_PREFIX);
+		}
+		
+		{
+			String charsetString = Utils.getProp(prop, PROP_SCHEMADUMP_CHARSET);
+			if(charsetString!=null) {
+				log.info("setting charset: "+charsetString);
+				charset = Charset.forName(charsetString);
+			}
 		}
 		
 		String outputobjectswithtable = Utils.getPropWithDeprecated(prop, PROP_SCHEMADUMP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE, PROP_OUTPUT_OBJECT_WITH_REFERENCING_TABLE, null);
@@ -535,7 +548,10 @@ public class SchemaModelScriptDumper extends AbstractModelDumper implements Sche
 			}
 		}
 		}
-		FileWriter fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
+		//Writer fos = new FileWriter(f, alreadyOpened); //if already opened, append; if not, create
+		//Writer fos = new FileWriter(f, charset, alreadyOpened); //if already opened, append; if not, create //java11+
+		//Writer fos = Files.newBufferedWriter(f.toPath(), charset, alreadyOpened?StandardOpenOption.APPEND:null);
+		Writer fos = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, alreadyOpened), charset));
 		//XXX: remove '\n'?
 		fos.write(message+"\n");
 		fos.close();
