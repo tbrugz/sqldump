@@ -9,6 +9,9 @@ on:
     tags: [ deploy ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   IMAGE_NAME: ${{ github.repository }}
   REGISTRY: ghcr.io
