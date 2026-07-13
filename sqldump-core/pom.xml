@@ -72,6 +72,33 @@
           <timestampFormat>yyyy-MM-dd HH:mm:ss</timestampFormat>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <exportAntProperties>true</exportAntProperties>
+              <target>
+                <!-- get timestamp of last commit -->
+                <!-- use 'project.build.outputTimestamp'? needs 'cI' format -->
+                <exec executable="git" outputproperty="revisionTimestamp" failonerror="true">
+                  <!-- 'ci' (Local Timezone) or 'cI' (Strict UTC)? -->
+                  <arg line="show -s --format=%ci"/>
+                </exec>
+                <echo message="revisionTimestamp: ${revisionTimestamp}"/>
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
         <!--
         <plugin>
             <groupId>org.codehaus.mojo</groupId>
