@@ -1,0 +1,21 @@
+
+# Explicitly force LF for source code
+*.java text eol=lf
+*.json text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.pom text eol=lf
+*.properties text eol=lf
+*.sh text eol=lf
+*.sql text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+Dockerfile.* text eol=lf
+
+# Explicitly force CRLF for Windows assets
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Denote binary files (leaves them untouched)
+*.png binary
+*.jpg binary
