@@ -84,6 +84,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 	boolean grabExecutablePrivileges = true;
 	boolean useDbaMetadataObjects = DEFAULT_USE_DBA_METAOBJECTS;
 	boolean useDbaTriggers = DEFAULT_USE_DBA_METAOBJECTS;
+	boolean createExecutableFromMetadata = false;
 	
 	@Override
 	public void procProperties(Properties prop) {
@@ -290,14 +291,14 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		List<Object> params = new ArrayList<>();
 		String query = "select name, type, line, text "
 				+"\nfrom "+(useDbaMetadataObjects?"dba_source ":"all_source ")
-				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE','TYPE BODY', 'JAVA SOURCE') "
-				+"and owner = ? ";
+				+"\nwhere type in ('PROCEDURE','PACKAGE','PACKAGE BODY','FUNCTION','TYPE','TYPE BODY','JAVA SOURCE') "
+				+"\nand owner = ? ";
 		params.add(schemaPattern);
 		if(execNamePattern!=null) {
 				query += " and name = ? ";
 				params.add(execNamePattern);
 		}
-		query += "order by type, name, line";
+		query += "\norder by type, name, line";
 		return new QueryWithParams(query, params);
 	}
 	
@@ -329,6 +330,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 					eo.setBody( sb.toString() );
 					boolean added = addExecutableToModel(execs, eo);
 					if(added) { countExecutables++; }
+					//log.debug("added exec ["+countExecutables+"]: "+eo);
 				}
 				//new object
 				eo = new ExecutableObject();
@@ -361,6 +363,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			eo.setBody( sb.toString() );
 			boolean added = addExecutableToModel(execs, eo);
 			if(added) { countExecutables++; }
+			//log.debug("added exec ["+countExecutables+"]: "+eo);
 		}
 		rs.close();
 		st.close();
@@ -396,11 +399,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		List<Object> params = new ArrayList<>();
 		
 		String query = "select p.owner, p.object_id, p.object_name, p.subprogram_id, p.procedure_name, p.object_type, "
-				+"       (select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end "
-				+"        from "+argumentsTable+" aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
-				+"       aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
+				+"(select case min(position) when 0 then 'FUNCTION' when 1 then 'PROCEDURE' end "
+				+" from "+argumentsTable+" aaz where p.object_id = aaz.object_id and p.subprogram_id = aaz.subprogram_id) as subprogram_type, "
+				+"\n    aa.argument_name, aa.position, aa.sequence, aa.data_type, aa.in_out, aa.data_length, aa.data_precision, aa.data_scale, aa.pls_type "
 				+"\nfrom "+(useDbaMetadataObjects?"dba_procedures p ":"all_procedures p ")
-				+"  left outer join "+argumentsTable+" aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
+				+"\nleft outer join "+argumentsTable+" aa on p.object_id = aa.object_id and p.subprogram_id = aa.subprogram_id "
 				+"\nwhere p.owner = ? ";
 		params.add(schemaPattern);
 		if(execNamePattern!=null) {
@@ -411,7 +414,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				//+"   and p.procedure_name is not null "
 		query += "   and aa.position is not null "
 				+"\norder by p.owner, p.object_name, p.subprogram_id, procedure_name, aa.position ";
-		log.debug("grabbing executables' metadata - sql: "+query);
+		log.debug("grabbing executables' metadata - sql: "+query+"\n[params = "+params+"]");
 		PreparedStatement st = conn.prepareStatement(query);
 		SQLUtils.bindAllParameters(st, params);
 		ResultSet rs = executeStatement(st);
@@ -433,6 +436,9 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(eo==null) { //not a procedure, maybe a function
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.FUNCTION, schemaPattern, objectName);
 			}
+			if(eo==null) { //maybe a TYPE?
+				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.TYPE, schemaPattern, objectName);
+			}
 			//not a top-level procedure or function, maybe declared inside a package
 			if(eo==null && subprogramName!=null) {
 				eo = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(execs, DBObjectType.PROCEDURE, schemaPattern, subprogramName);
@@ -451,6 +457,10 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(eo==null) {
 				if(subprogramName==null) {
 					log.warn("subprogram is null. object="+objectName+" / type="+objectType+" / schema="+schemaPattern);
+					continue;
+				}
+				if(!createExecutableFromMetadata) {
+					log.warn("won't create new subprogram. object="+objectName+" / type="+objectType+" / schema="+schemaPattern+" / subprogramName="+subprogramName);
 					continue;
 				}
 				log.debug("new Executable: subprogram: "+subprogramName+" / type="+subprogramType+" /// objName="+objectName+" / objType="+objectType);

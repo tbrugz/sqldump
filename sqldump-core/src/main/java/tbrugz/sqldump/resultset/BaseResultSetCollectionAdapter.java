@@ -74,7 +74,7 @@ public class BaseResultSetCollectionAdapter<E extends Object> extends AbstractRe
 		}
 		else {
 			if(allCols!=null) {
-				log.warn("onlyUniqueCols is true but allCols not null: "+allCols);
+				log.warn("onlyUniqueCols is true but allCols not null: "+allCols+" [clazz="+clazz.getSimpleName()+"]");
 			}
 		}
 		

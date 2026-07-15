@@ -24,7 +24,7 @@ public class OracleDatabaseMetaData extends AbstractDatabaseMetaDataDecorator {
 		//XXX: add DBMSFeatures as parameter?
 		super(metadata);
 		this.useDbaMetadataObjects = useDbaMetadataObjects;
-		log.info("using "+OracleDatabaseMetaData.class.getSimpleName()+" - useDbaMetadataObjects="+useDbaMetadataObjects);
+		log.debug("using "+OracleDatabaseMetaData.class.getSimpleName()+" - useDbaMetadataObjects="+useDbaMetadataObjects);
 	}
 
 	/**
