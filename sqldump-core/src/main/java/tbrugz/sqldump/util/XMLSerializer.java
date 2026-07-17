@@ -2,7 +2,6 @@ package tbrugz.sqldump.util;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -67,9 +66,12 @@ public class XMLSerializer {
 		m.marshal(object, writer);
 	}
 	
+	/*
 	public void marshal(Object object, File file) throws JAXBException, IOException {
 		Writer w = new FileWriter(file);
 		marshal(object, w);
 		w.close();
 	}
+	*/
+	
 }

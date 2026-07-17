@@ -1,13 +1,16 @@
 package tbrugz.sqldump;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.util.Properties;
 
@@ -34,6 +37,8 @@ public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements Sche
 	public static final String PROP_XMLSERIALIZATION_JAXB_OUTFILE = ".outfile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INFILE = ".infile";
 	public static final String PROP_XMLSERIALIZATION_JAXB_INRESOURCE = ".inresource";
+
+	public static final String SUFFIX_XMLSERIALIZATION_JAXB_CHARSET = ".charset";
 	
 	public static final String DEFAULT_JAXB_SCHEMA_PACKAGES = "tbrugz.sqldump.dbmodel:tbrugz.sqldump.dbmsfeatures";
 
@@ -45,6 +50,7 @@ public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements Sche
 	String fileOutput;
 	Writer outputWriter;
 	XMLSerializer xmlser;
+	Charset charset = Charset.defaultCharset();
 	
 	static String jaxbSchemaPackages = DEFAULT_JAXB_SCHEMA_PACKAGES;
 
@@ -68,12 +74,23 @@ public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements Sche
 
 	@Override
 	public void setProperties(Properties prop) {
+		{
+			String charsetString = Utils.getProp(prop, propertiesPrefix+SUFFIX_XMLSERIALIZATION_JAXB_CHARSET);
+			if(charsetString!=null) {
+				log.info("setting charset: "+charsetString);
+				charset = Charset.forName(charsetString);
+			}
+		}
 		fileOutput = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE);
+		if(fileOutput!=null) {
+			log.info("setting '"+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"' to "+fileOutput);
+		}
 		try {
 			if(fileOutput!=null) {
 				File fout = new File(fileOutput);
 				Utils.prepareDir(fout);
-				outputWriter = new FileWriter(fout);
+				//outputWriter = new FileWriter(fout); //no charset option - java11+
+				outputWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fout), charset));
 			}
 			/*else {
 				log.warn("xml serialization output file ["+propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_OUTFILE+"] not defined");
@@ -83,7 +100,13 @@ public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements Sche
 			log.debug(e, e);
 		}
 		filenameIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INFILE);
+		if(filenameIn!=null) {
+			log.info("setting '"+PROP_XMLSERIALIZATION_JAXB_INFILE+"' to "+filenameIn);
+		}
 		resourceIn = prop.getProperty(propertiesPrefix+PROP_XMLSERIALIZATION_JAXB_INRESOURCE);
+		if(resourceIn!=null) {
+			log.info("setting '"+PROP_XMLSERIALIZATION_JAXB_INRESOURCE+"' to "+resourceIn);
+		}
 	}
 	
 	@Override
@@ -128,7 +151,7 @@ public class JAXBSchemaXMLSerializer extends AbstractModelDumper implements Sche
 		}
 
 		try {
-			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(is));
+			SchemaModel sm = (SchemaModel) xmlser.unmarshal(new InputStreamReader(is, charset));
 			is.close();
 			//use Unmarshaller.afterUnmarshal()?
 			validateSchema(sm);
