@@ -84,6 +84,8 @@ public class SQLUtilTest {
 		shouldFail("ABC'");
 		shouldValidate("Abcdê");
 		shouldValidate(null);
+		shouldValidate("Abcd?");
+		shouldValidate("SSS (ZZ)");
 	}
 	
 	@Test
