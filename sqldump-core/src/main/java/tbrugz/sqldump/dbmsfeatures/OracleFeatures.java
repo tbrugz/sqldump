@@ -1185,11 +1185,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		List<Object> idParam = new ArrayList<>();
 		idParam.add(id);
 		
-		String explainSql = "explain plan\n\tset statement_id = ? into "+planTable+"\n"
+		// Oracle's explain plan does not accept bind parameter in 'statement_id' (oracle 19)
+		String explainSql = "explain plan\n\tset statement_id = '"+id+"' into "+planTable+"\n"
 			+ "for\n"+sql;
 		//log.debug("explain sql:\n"+explainSql);
 		try(PreparedStatement stmt = conn.prepareStatement(explainSql)) {
-			SQLUtils.bindAllParameters(stmt, idParam);
 			stmt.execute(explainSql);
 		}
 		

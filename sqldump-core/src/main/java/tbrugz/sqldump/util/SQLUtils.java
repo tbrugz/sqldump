@@ -303,6 +303,9 @@ public class SQLUtils {
 				 * oracle: maybe set sys prop: oracle.jdbc.J2EE13Compliant=true
 				 *   http://docs.oracle.com/cd/E19798-01/821-1751/beamw/index.html
 				 *   http://ora-jdbc-source.googlecode.com/svn/trunk/OracleJDBC/src/oracle/jdbc/driver/OracleResultSetMetaData.java
+				 * 
+				 * https://stackoverflow.com/questions/46068572/oracle-db-returning-negative-scale-and-0-precision-using-jdbc
+				 * https://docs.oracle.com/database/121/JAJDB/oracle/jdbc/OracleResultSetMetaData.html#isVariableScale_int_ - Oracle database returns -127 if scale is unspecified
 				 */
 				return
 					( scale>0 ) ? Double.class:
