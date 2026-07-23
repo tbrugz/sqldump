@@ -56,7 +56,7 @@
     <!-- jaxb 3: Jakarta EE 9 -->
     <jaxb.version>3.0.1</jaxb.version>
     <jaxb-impl.version>3.0.2</jaxb-impl.version>
-    <jakarta.mail.version>2.0.1</jakarta.mail.version> <!-- jakart mail 2.1: Jakarta EE 10 -->
+    <jakarta.mail.version>2.1.5</jakarta.mail.version> <!-- jakart mail 2.1: Jakarta EE 10 -->
     <!--<log4j.version>1.2.17</log4j.version>-->
     <!--<logback.version>1.3.16</logback.version>--> <!-- 1.5.x requires java11+ - latest is 1.5.34 -->
     <poi-ooxml.version>5.5.1</poi-ooxml.version>
