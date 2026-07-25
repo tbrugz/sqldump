@@ -308,15 +308,20 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 			log.info("[execId="+execId+"] column-types: "+columnTypes);
 		}*/
 		List<String> allowedPaths = Utils.getStringListFromProp(prop, prefix+Constants.SUFFIX_ALLOWED_PATH_LOCATIONS, ",");
-		if(allowedPaths!=null) {
-			for(String path: allowedPaths) {
-				allowedPathLocations.add(Paths.get(path).toAbsolutePath().normalize().toString());
+		try {
+			if(allowedPaths!=null) {
+				for(String path: allowedPaths) {
+					allowedPathLocations.add(Paths.get(path).toRealPath().toString());
+				}
+				log.info("[execId="+execId+"] allowedPathsLocations: "+allowedPathLocations);
 			}
-			log.info("[execId="+execId+"] allowedPathsLocations: "+allowedPathLocations);
+			else {
+				allowedPathLocations.add(Paths.get(".").toRealPath().toString()); // current dir
+				log.info("[execId="+execId+"] allowedPathsLocations [current dir]: "+allowedPathLocations); // XXX change to debug
+			}
 		}
-		else {
-			allowedPathLocations.add(Paths.get(".").toAbsolutePath().normalize().toString()); // current dir
-			log.info("[execId="+execId+"] allowedPathsLocations [current dir]: "+allowedPathLocations); // XXX change to debug
+		catch(IOException e) {
+			log.warn("[execId="+execId+"] Error setting allowedPathsLocations: "+e);
 		}
 		
 		setImporterProperties(prop);
@@ -1038,14 +1043,17 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 					}
 				}
 				else if(colType.equals("blob-location") || colType.equals("text-location")) {
-					if(allowedPathLocations.size()>0) {
+					File f = new File(value);
+					try {
 						boolean allowed = false;
-						Path child = Paths.get(value).toAbsolutePath();
-						//Path child = Paths.get(f.getCanonicalPath());
-						for(String apath: allowedPathLocations) {
-							Path parent = Paths.get(apath);
-							if(child.startsWith(parent)) { allowed = true; }
-							//log.debug("parent = '"+parent+"' ; child = '"+child+"' ; allowed = "+allowed);
+						if(allowedPathLocations.size()>0) {
+							Path child = Paths.get(value).toRealPath();
+							//Path child = Paths.get(f.getCanonicalPath());
+							for(String apath: allowedPathLocations) {
+								Path parent = Paths.get(apath);
+								if(child.startsWith(parent)) { allowed = true; }
+								log.info("parent = '"+parent+"' ; child = '"+child+"' ; allowed = "+allowed);
+							}
 						}
 						if(!allowed) {
 							log.warn("reading file '"+value+"' not allowed [col# = "+(index+1)+"]");
@@ -1053,12 +1061,9 @@ public abstract class AbstractImporter extends BaseFileImporter implements Impor
 							stmtSetNull(index);
 							return;
 						}
-					}
-					File f = new File(value);
-					if(!f.exists()) {
-						log.warn("file '"+f+"' not found [col# = "+(index+1)+"]");
-					}
-					try {
+						if(!f.exists()) {
+							log.warn("file '"+f+"' not found [col# = "+(index+1)+"]");
+						}
 						if(colType.equals("blob-location")) {
 							//stmt.setBinaryStream(index+1, new FileInputStream(f));
 							stmt.setBlob(index+1, new FileInputStream(f));

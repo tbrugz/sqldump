@@ -306,6 +306,7 @@ public class SQLUtils {
 				 * 
 				 * https://stackoverflow.com/questions/46068572/oracle-db-returning-negative-scale-and-0-precision-using-jdbc
 				 * https://docs.oracle.com/database/121/JAJDB/oracle/jdbc/OracleResultSetMetaData.html#isVariableScale_int_ - Oracle database returns -127 if scale is unspecified
+				 * https://docs.oracle.com/cd/B28359_01/server.111/b28318/datatype.htm#CNCPT1832
 				 */
 				return
 					( scale>0 ) ? Double.class:
