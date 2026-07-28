@@ -4,6 +4,8 @@
 
 `mvn docker:build`
 
+`mvn clean package docker:build -Ddocker.namespace=tbrugz`
+
 <!--
 `ant buildfull`
 
@@ -18,6 +20,12 @@ docker build -t diff2queries --file Dockerfile.diff2queries .
 docker build -t sqlmigrate --file Dockerfile.sqlmigrate .
 ```
 -->
+
+
+## running images
+
+`docker run -it --rm tbrugz/sqldump <arguments>`
+
 
 ## tagging & publishing
 
