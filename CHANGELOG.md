@@ -1,11 +1,44 @@
 
-sqldump ng [xxxx-xx-xx]
+sqldump 0.12 [2025-07-25]
 ------------
 - CDI: upgrading to **CDI 3.0** (Jakarta EE 9)
 - cdi: updating javax -> jakarta (2.0 -> 3.0.1)
 - pom: updated required maven (3.2.5 -> 3.6.3)
 - JAXB: upgrading to **JAXB 3.0** (Jakarta EE 9)
 - jaxb: updating javax -> jakarta (2.3.3 -> 3.0.1)
+- module 'sqldump-mail' added/refactored [2025-08-22]
+- module 'sqldump-poi' added/refactored
+- datadump: '.tables': added `[schemaname]` pattern [2025-09-11]
+- dbmodel: NamedDBObject: added getQualifiedName()
+- diff: using WhitespaceIgnoreType for REMARKS
+- dbmodel: added BodiedObject
+- dbmodel: RemarkableDBObject: added hasRemarks()
+- processor: added ContentNormalizerProcessor
+- sqlrun: added 'statement-after' suffix
+- diff: PatchDumper: using suffix '.whitespace-ignore' [2025-10-15]
+- sonarqube: multiple changes
+- pom/test: added jacoco code coverage plugin [2026-04-21]
+- dbmd: derby: using bind variables
+- dbms: oracle: using bind variables
+- dbms: InformationSchemaFeatures++: multiple binding changes
+- dbmodel: validating sql identifiers [2026-05-05]
+- dbmodel: validating sql data types
+- dbmodel: validating sql identifiers & data types
+- module: added 'sqldump-parquet'
+- dbmodel: validating schema names
+- datadump: added 'lsColNullables' ; parquet updates
+- util: improved schema & sql id validations
+- datadump: ffc/md: cleaning leftAlignField
+- model: Relation: added 'getParameterOptionals()' [2026-06-09]
+- datadump: Utils: deprecated CHARSET_ISO_8859_1
+- sqlrun: Importer: added suffix 'allowed-path-locations'
+- docker: using mvn + docker-maven-plugin (instead of ant)
+- dumper: ScriptDumper: added suffix '.charset' [2026-07-07]
+- build: updating 'build.timestamp' to timestamp of last commit
+- dbms: oracle: fixes for Type object grabbing
+- add .gitattributes
+- processor: JAXBSchemaXMLSerializer: added '.charset' suffix
+- sqlrun: Importer: using toRealPath() with 'allowed-path-locations' [2026-07-25]
 
 
 sqldump 0.11 [2025-07-21]
