@@ -7,12 +7,12 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>sqldump</artifactId>
-    <version>0.12-SNAPSHOT</version>
+    <version>0.12</version>
   </parent>
 
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqldump-graphml</artifactId>
-  <version>0.12-SNAPSHOT</version>
+  <version>0.12</version>
   <packaging>jar</packaging>
   <name>sqldump-graphml</name>
   <description>
