@@ -7,13 +7,13 @@
   <parent>
     <groupId>org.bitbucket.tbrugz</groupId>
     <artifactId>sqldump</artifactId>
-    <version>0.12</version>
+    <version>0.13-SNAPSHOT</version>
   </parent>
 
   <groupId>org.bitbucket.tbrugz</groupId>
   <artifactId>sqldump-docker</artifactId>
   <packaging>pom</packaging>
-  <version>0.12</version>
+  <version>0.13-SNAPSHOT</version>
 
   <name>sqldump-docker</name>
   <description>
