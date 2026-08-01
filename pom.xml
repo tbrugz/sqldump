@@ -14,12 +14,18 @@
     Utility to dump schema and data from a RDBMS
   </description>
   <url>https://github.com/tbrugz/sqldump</url>
+  <inceptionYear>2007</inceptionYear>
 
   <properties>
     <project.build.outputTimestamp>2026-01-01T00:00:00Z</project.build.outputTimestamp>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
+    <!-- https://reproducible-builds.org/docs/jvm/ tips -->
+    <file.encoding>UTF-8</file.encoding>
+    <user.language>en</user.language>
+    <!--<user.country>US</user.country>
+    <user.variant></user.variant>-->
+    <!-- / -->
     <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
     <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
     <maven-deploy-plugin.version>3.1.4</maven-deploy-plugin.version>

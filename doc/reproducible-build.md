@@ -35,6 +35,22 @@
 
     If the outputs match exactly, your verification will report a success. If they differ, you can pass the outputs to diffoscope to pinpoint the exact bytes or hidden timestamps causing the variance.
 
+5. Test Reproducibility with Remote Repo
+
+    Checking generated artifact with one available in a remote repository:
+
+    `mvn clean package verify artifact:compare -Dreference.repo=https://repo1.maven.org/maven2/ -DskipTests` (skipTests is optional ;)
+
+    `mvn clean package verify artifact:compare -Dreference.repo=https://repo1.maven.org/maven2/ -DskipTests -Dmaven.repo.local=${user.home}/tmp/mvn-repo` (using different local maven repo)
+
+    If needed, remove artifact from local maven repository:
+
+    `mvn dependency:purge-local-repository -DmanualInclude="org.bitbucket.tbrugz:sqldump-core" -Dmaven.repo.local=${user.home}/tmp/mvn-repo`
+
+6. Generate buildinfo
+
+    `mvn artifact:buildinfo`
+
 
 ## refs
 
@@ -43,6 +59,12 @@ https://maven.apache.org/guides/mini/guide-reproducible-builds.html
 https://reproducible-builds.org/docs/jvm/#configuring-build-tools-for-reproducible-builds
 
 https://github.com/jvm-repo-rebuild/reproducible-central
+
+https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/doc/TOOLS.md
+
+https://github.com/jvm-repo-rebuild/reproducible-central/blob/master/rebuild.sh
+
+https://repo1.maven.org/maven2/org/bitbucket/tbrugz/
 
 
 ## extra tips
