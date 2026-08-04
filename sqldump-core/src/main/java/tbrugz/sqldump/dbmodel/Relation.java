@@ -63,4 +63,10 @@ public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObje
 
 	public boolean hasParameterOptionals();
 
+	public Boolean getValid();
+	
+	/*public default boolean isValid() {
+		return !Boolean.FALSE.equals(getValid());
+	}*/
+
 }

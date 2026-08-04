@@ -73,7 +73,7 @@ public abstract class DBObject extends DBIdentifiable implements Comparable<DBId
 	//public abstract void setRemarks(String remarks);
 	
 	@Override
-	public Boolean getValid() {
+	public Boolean getValid() { //XXX isValid?
 		return valid;
 	}
 
