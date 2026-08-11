@@ -294,11 +294,11 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 				" as " + (generatedInfo.identity?"identity":"("+defaultValue+")") +
 				( generatedInfo.stored ? " stored" : "" ) +
 				( generatedInfo.virtual ? " virtual" : "" )
-				: ""
-			) +
+				:
 			(ColTypeUtil.useAutoIncrement()?
 				((generatedInfo.identity)?" auto_increment":"")
-			:"");
+			:"")
+			);
 	}
 	
 	//XXX: complete syntax parameter? may return 'default null'
