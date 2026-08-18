@@ -43,7 +43,7 @@
     <buildnumber-maven-plugin.version>3.3.0</buildnumber-maven-plugin.version>
     <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
     <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
 
     <!--
     release: maven-compiler 3.6.0+ required
