@@ -757,7 +757,7 @@ public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaMode
 				log.error("OutOfMemoryError: memory: max: "+Runtime.getRuntime().maxMemory()+"; total: "+Runtime.getRuntime().totalMemory()+"; free: "+Runtime.getRuntime().freeMemory());
 				throw oome;
 			}
-			catch(SQLException sqle) {
+			catch(SQLException|IllegalArgumentException sqle) {
 				log.warn("exception in table '"+tableName+"' ["+sqle+"]");
 				log.info("exception in table '"+tableName+"'", sqle);
 				//tableNamesForDataDump.remove(tableName);
