@@ -1,5 +1,6 @@
 
 # Explicitly force LF for source code
+*.html text eol=lf
 *.java text eol=lf
 *.json text eol=lf
 *.js text eol=lf
