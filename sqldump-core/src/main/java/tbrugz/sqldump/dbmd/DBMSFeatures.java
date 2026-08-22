@@ -13,6 +13,7 @@ import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.NamedDBObject;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -106,6 +107,8 @@ public interface DBMSFeatures {
 	
 	//void grabDBUniqueConstraints(SchemaModel model, String schemaPattern, String constraintNamePattern, Connection conn) throws SQLException;
 	void grabDBUniqueConstraints(Collection<Table> tables, String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn) throws SQLException;
+	
+	void grabDBIndexes(Collection<Index> indexes, String schemaPattern, String tableNamePattern, String indexNamePattern, Connection conn) throws SQLException;
 	
 	//XXX: grab views, executables (& triggers?) names
 	//List<NamedDBObject> grabViewNames(String catalog, String schema, String viewNamePattern, Connection conn) throws SQLException;

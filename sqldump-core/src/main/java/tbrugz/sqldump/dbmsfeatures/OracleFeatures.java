@@ -121,7 +121,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			grabDBSynonyms(model.getSynonyms(), schemaPattern, null, conn);
 		}
 		if(grabIndexes) {
-			grabDBIndexes(model, schemaPattern, conn);
+			grabDBIndexes(model.getIndexes(), schemaPattern, null, null, conn);
 		}
 		if(grabSequences) {
 			grabDBSequences(model.getSequences(), schemaPattern, null, conn);
@@ -614,7 +614,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+count+" synonyms grabbed");
 	}
 
-	QueryWithParams grabDBIndexesQuery(String schemaPattern) {
+	QueryWithParams grabDBIndexesQuery(String schemaPattern, String tableNamePattern, String indexNamePattern) {
 		List<Object> params = new ArrayList<>();
 		String query = "select ui.table_owner, ui.index_name, ui.uniqueness, ui.index_type, ui.table_name, uic.column_name, uic.column_position, uip.partitioning_type, uip.locality, uie.column_expression "
 				+"\nfrom "
@@ -631,16 +631,25 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 				+"and uic.table_name = uie.table_name (+) "
 				+"and uic.table_owner = uie.table_owner (+) "
 				+"and uic.column_position = uie.column_position (+) "
-				+"and ui.owner = ? "
-				+"order by ui.table_owner, ui.index_name, uic.column_position, uie.column_position ";
+				+"\nand ui.owner = ? ";
 		params.add(schemaPattern);
+		if(tableNamePattern!=null) {
+			query += "\nand ui.table_name like ? ";
+			params.add(tableNamePattern);
+		}
+		if(indexNamePattern!=null) {
+			query += "\nand ui.index_name like ? ";
+			params.add(indexNamePattern);
+		}
+		query += "\norder by ui.table_owner, ui.index_name, uic.column_position, uie.column_position ";
 		return new QueryWithParams(query, params);
 	}
 	
 	/*
 	 * TODO: move to OracleDatabaseMetaData ?
 	 */
-	void grabDBIndexes(SchemaModel model, String schemaPattern, Connection conn) throws SQLException {
+	@Override
+	public void grabDBIndexes(Collection<Index> indexes, String schemaPattern, String tableNamePattern, String indexNamePattern, Connection conn) throws SQLException {
 		log.debug("grabbing indexes");
 		/*
 		select * from user_indexes   
@@ -654,7 +663,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		select dbms_metadata.get_ddl('INDEX',index_name) from user_indexes
 		see: http://www.dba-oracle.com/concepts/creating_indexes.htm
 		*/
-		QueryWithParams query = grabDBIndexesQuery(schemaPattern);
+		QueryWithParams query = grabDBIndexesQuery(schemaPattern, tableNamePattern, indexNamePattern);
 		log.debug("sql: "+query);
 		PreparedStatement st = conn.prepareStatement(query.getQuery());
 		query.setParameters(st);
@@ -670,7 +679,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			if(idx==null || !idxName.equals(idx.getName())) {
 				//end last object
 				if(idx!=null) {
-					boolean added = addIndexToModel(model, idx);
+					boolean added = addIndexToModel(indexes, idx);
 					if(added) { idxCount++; }
 				}
 				//new object
@@ -693,7 +702,7 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 			colCount++;
 		}
 		if(idx!=null) {
-			boolean added = addIndexToModel(model, idx);
+			boolean added = addIndexToModel(indexes, idx);
 			if(added) { idxCount++; }
 		}
 		rs.close();
@@ -702,16 +711,16 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+idxCount+" indexes grabbed [colcount="+colCount+"]");
 	}
 	
-	boolean grabIndexesFromUnkownTables = false;
-	boolean addIndexToModel(SchemaModel model, Index idx) {
-		if(!grabIndexesFromUnkownTables) {
+	//boolean grabIndexesFromUnkownTables = false;
+	boolean addIndexToModel(Collection<Index> indexes, Index idx) {
+		/*if(!grabIndexesFromUnkownTables) {
 			Table t = DBIdentifiable.getDBIdentifiableByTypeSchemaAndName(model.getTables(), DBObjectType.TABLE, idx.getSchemaName(), idx.getTableName());
 			if(t==null) {
 				log.debug("table '"+idx.getSchemaName()+"."+idx.getTableName()+"' not found in model, index "+idx.getName()+" won't be grabbed");
 				return false;
 			}
-		}
-		return model.getIndexes().add(idx);
+		}*/
+		return indexes.add(idx);
 	}
 	
 	/*

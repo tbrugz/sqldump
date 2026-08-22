@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
 import tbrugz.sqldump.dbmodel.Synonym;
@@ -129,6 +130,12 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 			String schemaPattern, String tableNamePattern, String constraintNamePattern, Connection conn)
 			throws SQLException {
 		log.debug("grabDBUniqueConstraints: not implemented");
+	}
+
+	@Override
+	public void grabDBIndexes(Collection<Index> indexes, String schemaPattern, String tableNamePattern,
+			String indexNamePattern, Connection conn) throws SQLException {
+		log.debug("grabDBIndexes: not implemented");
 	}
 
 	@Override

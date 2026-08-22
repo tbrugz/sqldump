@@ -22,6 +22,8 @@ public class Table extends DBObject implements Relation {
 	List<FK> foreignKeys = new ArrayList<FK>();
 	String remarks; //e.g. COMMENT ON TABLE ZZZ IS 'bla bla';
 	Boolean domainTable;
+	//XXX: add Indexes? add Triggers?
+	//XXX: add MaterializedRelation interface? may have Indexes & etc., and can be implemnted by MaterializedView
 	
 	static final Log log = LogFactory.getLog(Table.class);
 	
