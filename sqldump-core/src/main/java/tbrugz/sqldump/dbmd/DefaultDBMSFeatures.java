@@ -227,4 +227,9 @@ public class DefaultDBMSFeatures extends AbstractDBMSFeatures {
 		return false;
 	}
 
+	@Override
+	public boolean supportsMultipleSchemas() {
+		return true;
+	}
+
 }

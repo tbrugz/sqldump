@@ -1,5 +1,7 @@
 package tbrugz.sqldump.dbmodel;
 
+import tbrugz.sqldump.util.SQLUtils;
+
 public class SchemaMetaData extends DBObject {
 
 	private static final long serialVersionUID = 1L;
@@ -23,6 +25,12 @@ public class SchemaMetaData extends DBObject {
 	@Override
 	public String toString() {
 		return "SchemaMetaData[name="+name+"]";
+	}
+
+	@Override
+	public void setName(String name) {
+		SQLUtils.validateSchemaName(name);
+		this.name = name;
 	}
 
 	public static SchemaMetaData newSchemaMetaData(String schemaName) {

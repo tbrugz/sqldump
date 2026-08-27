@@ -159,4 +159,6 @@ public interface DBMSFeatures {
 	
 	String getDefaultSchemaName();
 	
+	boolean supportsMultipleSchemas();
+	
 }

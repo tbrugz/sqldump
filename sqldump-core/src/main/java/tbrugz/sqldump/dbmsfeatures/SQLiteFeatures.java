@@ -76,4 +76,9 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 		return columnName+" is null";
 	}
 	
+	@Override
+	public boolean supportsMultipleSchemas() {
+		return false;
+	}
+	
 }
