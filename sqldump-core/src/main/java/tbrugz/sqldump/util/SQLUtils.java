@@ -448,9 +448,9 @@ public class SQLUtils {
 			log.info("no schemas found, getting schemas from catalog names...");
 			ResultSet rsCatalogs = dbmd.getCatalogs();
 			ret = getColumnValues(rsCatalogs, COL_TABLE_CAT);
-			if(ret.size()==0) {
+			/*if(ret.size()==0) {
 				ret.add("");
-			}
+			}*/
 		}
 		log.debug("schemas: "+ret);
 		return ret;
@@ -600,7 +600,7 @@ public class SQLUtils {
 	static final Pattern PATTERN_SQL_DATATYPE = Pattern.compile(REGEX_SQL_DATATYPE);
 
 	public static boolean matchSchemaName(String schemaName) {
-		if(schemaName==null) { return true; }
+		if(schemaName==null || "".equals(schemaName)) { return true; }
 		return PATTERN_SCHEMANAME.matcher(schemaName).matches();
 	}
 

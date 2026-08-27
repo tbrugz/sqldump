@@ -362,13 +362,14 @@ public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaMode
 			log.info(getIdDesc()+"no schema name grabbed");
 		}
 
-		if(schemaPattern==null) {
+		if(schemaPattern==null && feats.supportsMultipleSchemas()) {
 			log.error("schema name undefined (prop '"+PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting...");
 			if(failonerror) { throw new ProcessingException("schema name undefined (prop '"+PROP_SCHEMAGRAB_SCHEMANAMES+"') & no suggestion available, aborting..."); }
 			return null;
 		}
 		
-		log.info(getIdDesc()+"schema grab... schemaPattern = '"+schemaPattern+"' [features: "+feats.getClass().getSimpleName()+"]");
+		log.info(getIdDesc()+"schema grab... schemaPattern "+(schemaPattern==null?"is null":"= '"+schemaPattern+"'")+
+				" [features: "+feats.getClass().getSimpleName()+"]");
 
 		initCounters();
 		
@@ -382,10 +383,17 @@ public class JDBCSchemaGrabber extends AbstractModelDumper implements SchemaMode
 		}
 		List<Pattern> excludeObjectFilters = getExcludeFilters(papp, PROP_SCHEMAGRAB_EXCLUDEOBJECTS, "dbobject");
 		
-		String[] schemasArr = schemaPattern.split(",");
 		List<String> schemasList = new ArrayList<String>();
-		for(String schemaName: schemasArr) {
-			schemasList.add(schemaName.trim());
+		{
+			if(schemaPattern!=null) {
+				String[] schemasArr = schemaPattern.split(",");
+				for(String schemaName: schemasArr) {
+					schemasList.add(schemaName.trim());
+				}
+			}
+			else {
+				schemasList.add(null);
+			}
 		}
 		
 		//schemaModel.setSqlDialect(DBMSResources.instance().dbid());

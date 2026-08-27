@@ -216,7 +216,12 @@ public class SchemaUtils {
 		DBMSFeatures feat = DBMSResources.instance().getSpecificFeatures(dialect);
 		ColumnDiff.updateFeatures(feat);
 		log.debug("dialect: "+dialect+" ; feats: "+feat);
-		differ.setTypesForDiff("SCHEMA_META,TABLE");
+		if(feat.supportsMultipleSchemas()) {
+			differ.setTypesForDiff("SCHEMA_META,TABLE");
+		}
+		else {
+			differ.setTypesForDiff("TABLE");
+		}
 		SchemaDiff diff = differ.diffSchemas(dbModel, model);
 		
 		// remove unwanted diffs

@@ -267,7 +267,7 @@ public class ConnectionUtil {
 		if(password!=null) { p.setProperty(CONN_PROP_PASSWORD, password); }
 
 		//use DatabaseMetaData: getUserName() & getUrl()?
-		log.debug("conn: "+user+"@"+dbUrl);
+		log.debug("conn: "+(user!=null?user:"")+"@"+dbUrl);
 		
 		try {
 			return DriverManager.getConnection(dbUrl, p);

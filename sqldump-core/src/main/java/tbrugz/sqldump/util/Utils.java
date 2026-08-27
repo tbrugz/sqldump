@@ -811,7 +811,7 @@ public class Utils {
 			ret = prop.getProperty(deprecatedKey, defaultValue);
 		}
 		ret = getProp(prop, key, ret);
-		//log.debug("getPropWithDeprecated: "+key+" = "+ret);
+		//log.debug("getPropWithDeprecated: "+key+" = "+ret+" [null? "+(ret==null)+"]");
 		return ret;
 	}
 

@@ -73,50 +73,30 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		
 		String fromDialectId = model.getSqlDialect();
 		if(!quiet) {
-		log.info("sql dialect transformer: from "
+			log.info("sql dialect transformer: from "
 				+(fromDialectId==null?"ANSI-SQL(?) (null)":"'"+fromDialectId+"'")
 				+" to "
 				+(toANSI?"ANSI-SQL":"'"+toDialectId+"'")
 				);
 		}
 		
+		DBMSFeatures toFeatures = DBMSResources.instance().getSpecificFeatures(toDialectId);
+		boolean removeSchemaNames = !toFeatures.supportsMultipleSchemas();
+		if(!quiet && removeSchemaNames) {
+			log.info("will removeSchemaNames...");
+		}
+		
 		int tableCount = 0, columnCount = 0;
 		for(Table table: model.getTables()) {
 			//log.debug("checking table '"+table.getQualifiedName()+"'");
+			if(removeSchemaNames) {
+				table.setSchemaName(null);
+			}
 			for(Column col: table.getColumns()) {
-				String colType = col.getType();
-				colType = colType.toUpperCase();
-				//log.debug("checking column '"+col.getName()+"' of type '"+colType+"'");
-
-				//String ansiColType = ColTypeUtil.dbmsSpecificProps.getProperty("from."+fromDialectId+"."+colType);
-				String ansiColType = DBMSResources.instance().toANSIType(fromDialectId, colType);
-				String newColType = null;
-				if(ansiColType!=null) {
-					ansiColType = ansiColType.toUpperCase();
-					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, ansiColType);
-					//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
-					//newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDialectId+"."+ansiColType);
-				}
-				else {
-					// ansi type is null, use original type
-					newColType = DBMSResources.instance().toSQLDialectType(toDialectId, colType.toUpperCase());
-					//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
-				}
-				
-				if(newColType!=null && !newColType.equalsIgnoreCase(colType)) {
-					col.setType(newColType);
-					log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
-				}
-				else if(ansiColType!=null) {
-					col.setType(ansiColType);
-					log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
-				}
-				/*else {
-					//log.debug("old col type: "+colType);
-					colType = col.type.trim();
-				}*/
+				processColumn(table, col, fromDialectId);
 				columnCount++;
 			}
+			//option to remove schema name...
 			tableCount++;
 		}
 		if(toDialectId!=null) {
@@ -128,6 +108,40 @@ public class SQLDialectTransformer extends AbstractSQLProc {
 		if(!quiet) {
 			log.info("model transformer ended ok [tableCount="+tableCount+"; columnCount="+columnCount+"]");
 		}
+	}
+
+	void processColumn(Table table, Column col, String fromDialectId) {
+		String colType = col.getType();
+		colType = colType.toUpperCase();
+		//log.debug("checking column '"+col.getName()+"' of type '"+colType+"'");
+
+		//String ansiColType = ColTypeUtil.dbmsSpecificProps.getProperty("from."+fromDialectId+"."+colType);
+		String ansiColType = DBMSResources.instance().toANSIType(fromDialectId, colType);
+		String newColType = null;
+		if(ansiColType!=null) {
+			ansiColType = ansiColType.toUpperCase();
+			newColType = DBMSResources.instance().toSQLDialectType(toDialectId, ansiColType);
+			//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+			//newColType = ColTypeUtil.dbmsSpecificProps.getProperty("to."+toDialectId+"."+ansiColType);
+		}
+		else {
+			// ansi type is null, use original type
+			newColType = DBMSResources.instance().toSQLDialectType(toDialectId, colType.toUpperCase());
+			//log.debug("orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+		}
+		
+		if(newColType!=null && !newColType.equalsIgnoreCase(colType)) {
+			col.setType(newColType);
+			log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+		}
+		else if(ansiColType!=null) {
+			col.setType(ansiColType);
+			log.debug("["+table.getName()+"] orig type '"+colType+"', ansi type '"+ansiColType+"', new col type '"+newColType+"'");
+		}
+		/*else {
+			//log.debug("old col type: "+colType);
+			colType = col.type.trim();
+		}*/
 	}
 	
 	@SuppressWarnings("deprecation")
