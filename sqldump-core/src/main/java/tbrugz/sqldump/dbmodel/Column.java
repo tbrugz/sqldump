@@ -22,10 +22,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 		public static final String PROP_IGNOREPRECISION = "sqldump.sqltypes.ignoreprecision";
 		public static final String PROP_USEPRECISION = "sqldump.sqltypes.useprecision";
 		public static final String DBPROP_COLUMN_USEAUTOINCREMENT = "column.useautoincrement";
+		public static final String DBPROP_COLUMN_SUPPORT_GENERATED_AS_IDENTITY = "column.support-generated-as-identity";
 		
 		// variables based only on "dbms-specific.properties"
 		static final Properties dbmsSpecificProps = new ParametrizedProperties();
 		static final List<String> useAutoIncrement = new ArrayList<String>();
+		static final List<String> supportGeneratedAsIdntity = new ArrayList<String>();
 		
 		// variables also based on app properties 
 		static final Map<String, Boolean> usePrecisionMap = new HashMap<String, Boolean>();
@@ -80,6 +82,12 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 			List<String> autoIncIds = Utils.getStringListFromProp(dbmsSpecificProps, DBPROP_COLUMN_USEAUTOINCREMENT, ",");
 			if(autoIncIds!=null) {
 				useAutoIncrement.addAll( autoIncIds );
+			}
+			//generated as identity
+			List<String> generatedAsId = Utils.getStringListFromProp(dbmsSpecificProps, DBPROP_COLUMN_SUPPORT_GENERATED_AS_IDENTITY, ",");
+			if(autoIncIds!=null) {
+				//column.support-generated-as-identity
+				supportGeneratedAsIdntity.addAll( generatedAsId );
 			}
 		}
 
@@ -140,6 +148,10 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 			return Utils.getStringListFromProp(dbmsSpecificProps, "types.boolean", ",").contains(upper(type));
 		}
 		
+		public static boolean useGeneratedAsIdentity() {
+			return supportGeneratedAsIdntity.contains(dbid);
+		}
+
 	}
 
 	/*
@@ -290,7 +302,7 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 			return " "+generatedInfo.fullDefinition;
 		}
 		return
-			( generatedInfo.generated ? " generated "+(generatedInfo.generatedAlways?"always":"by default")+
+			( ColTypeUtil.useGeneratedAsIdentity() && generatedInfo.generated ? " generated "+(generatedInfo.generatedAlways?"always":"by default")+
 				" as " + (generatedInfo.identity?"identity":"("+defaultValue+")") +
 				( generatedInfo.stored ? " stored" : "" ) +
 				( generatedInfo.virtual ? " virtual" : "" )
@@ -299,6 +311,21 @@ public class Column extends DBIdentifiable implements Serializable, Cloneable, R
 				((generatedInfo.identity)?" auto_increment":"")
 			:"")
 			);
+		/*
+		if(ColTypeUtil.useGeneratedAsIdentity()) {
+			return ( generatedInfo.generated ? " generated " +
+				( generatedInfo.generatedAlways?"always":"by default" ) +
+				" as " +
+				( generatedInfo.identity?"identity":"("+defaultValue+")" ) +
+				( generatedInfo.stored ? " stored" : "" ) +
+				( generatedInfo.virtual ? " virtual" : "" )
+				: "");
+		}
+		if(ColTypeUtil.useAutoIncrement()) {
+			return ( generatedInfo.identity ?" auto_increment" : "");
+		}
+		return "";
+		*/
 	}
 	
 	//XXX: complete syntax parameter? may return 'default null'
