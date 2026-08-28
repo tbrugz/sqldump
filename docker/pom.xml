@@ -208,7 +208,7 @@
     <dependency>
       <groupId>org.mariadb.jdbc</groupId>
       <artifactId>mariadb-java-client</artifactId>
-      <version>2.7.4</version>
+      <version>2.7.14</version>
       <scope>runtime</scope>
     </dependency>
     <!-- mssql server: java11+ - https://docs.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server -->
