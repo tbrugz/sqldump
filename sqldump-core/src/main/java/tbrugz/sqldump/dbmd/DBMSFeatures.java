@@ -115,6 +115,10 @@ public interface DBMSFeatures {
 	//List<NamedDBObject> grabTriggerNames(String catalog, String schema, String triggerNamePattern, Connection conn) throws SQLException;
 	
 	List<ExecutableObject> grabExecutableNames(String catalog, String schema, String executableNamePattern, String[] types, Connection conn) throws SQLException;
+
+	default boolean supportsGrabIndexes() {
+		return false;
+	}
 	
 	boolean supportsExplainPlan();
 	boolean supportsCreateIndexWithoutName();

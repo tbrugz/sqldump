@@ -22,6 +22,7 @@ import tbrugz.sqldump.dbmodel.DBIdentifiable;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.ExecutableParameter;
+import tbrugz.sqldump.dbmodel.Index;
 import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.SchemaModel;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -472,6 +473,110 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 		log.info("["+schemaPattern+"]: "+countUniqueConstraints+" unique constraints grabbed [colcount="+count+"]");
 	}
 	
+	@Override
+	public boolean supportsGrabIndexes() {
+		return grabDBIndexesQuery(null, null, null) != null;
+	}
+
+	/**
+	 * Should return a query with the following columns:
+	 * 
+	 * 1.  index_catalog
+	 *     index_schema (*)
+	 *     index_name (*)
+	 *     table_catalog
+	 * 5.  table_schema
+	 *     table_name (*)
+	 *     index_type_name (PRIMARY KEY, UNIQUE INDEX, ...)
+	 *     is_generated
+	 *     remarks (*)
+	 * 10. is_primary_key (*)
+	 *     is_unique (*)
+	 *     column_name (*)
+	 *     ordinal_position
+	 *     ordering_specification
+	 * 15. null_ordering
+	 * 
+	 * (*) Columns currently being used
+	 */
+	QueryWithParams grabDBIndexesQuery(String schemaPattern, String tableNamePattern, String indexNamePattern) {
+		return null;
+	}
+
+	@Override
+	public void grabDBIndexes(Collection<Index> indexes, String schemaPattern, String tableNamePattern,
+			String indexNamePattern, Connection conn) throws SQLException {
+		log.debug("grabbing unique constraints");
+
+		QueryWithParams query = grabDBIndexesQuery(schemaPattern, tableNamePattern, indexNamePattern);
+		if(query==null) {
+			log.debug("grabDBIndexes: not implemented");
+			return;
+		}
+		log.debug("sql: "+query);
+		PreparedStatement st = conn.prepareStatement(query.getQuery());
+		query.setParameters(st);
+		int count = 0;
+		int countIndexes = 0;
+		try(ResultSet rs = st.executeQuery()) {
+			final boolean addPkIndexes = false;
+			
+			String previousIndexId = null;
+			Index i = null;
+			boolean isPk = false;
+			while(rs.next()) {
+				String schemaName = rs.getString(2);
+				//String schemaName2 = rs.getString(5);
+				String indexName = rs.getString(3);
+				String tableName = rs.getString(6);
+				//String indexType = rs.getString(7); // INDEX, UNIQUE INDEX, PRIMARY KEY
+				String indexId = schemaName+"."+tableName+"."+indexName;
+				//log.info("indexId=="+indexId+"/isPk="+isPk);
+				
+				if(i==null || !indexId.equals(previousIndexId)) {
+					if(i!=null) {
+						if(addPkIndexes || !isPk) {
+							indexes.add(i);
+							countIndexes++;
+						}
+					}
+					i = new Index();
+					i.setSchemaName(schemaName);
+					i.setName(indexName);
+					i.setTableName(tableName);
+
+					String remarks = rs.getString(9);
+					isPk = rs.getBoolean(10);
+					boolean isUnique = rs.getBoolean(11);
+
+					i.setComment(remarks);
+					//i.setIndexType(null);
+					//i.setLocal(null);
+					//i.setReverse(null);
+					//i.setType(indexType);
+					//isPk = indexType.toLowerCase().contains("primary key");
+					//boolean unique = isPk || indexType.toLowerCase().contains("unique");
+					i.setUnique(isUnique);
+					//i.setValid(null);
+				}
+				i.getColumns().add(rs.getString(12));
+				count++;
+				previousIndexId = indexId;
+			}
+			if(i!=null) {
+				if(addPkIndexes || !isPk) {
+					indexes.add(i);
+					countIndexes++;
+				}
+			}
+			rs.close();
+		}
+		finally {
+			st.close();
+		}
+		log.info("["+schemaPattern+"]: "+countIndexes+" indexes grabbed [colcount="+count+"]");
+	}
+	
 	protected String getInformationSchemaName() {
 		return informationSchema;
 	}
@@ -503,8 +608,8 @@ public class InformationSchemaFeatures extends DefaultDBMSFeatures {
 				c.setGeneratedDefinition("generated always as ("+genExpression+")");
 			}
 		} catch (SQLException e) {
-			log.warn("resultset has no 'GENERATION_EXPRESSION'(?); column: '"+c+"', message: '"+e.getMessage()+"'");
-			log.debug("sql exception:", e);
+			log.warn("resultset has no 'GENERATION_EXPRESSION'; column: '"+c+"', message: '"+e.getMessage()+"'");
+			//log.debug("sql exception:", e);
 		}
 	}
 	

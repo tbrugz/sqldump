@@ -192,6 +192,33 @@ public class H2Features extends InformationSchemaFeatures {
 	*/
 	
 	@Override
+	QueryWithParams grabDBIndexesQuery(String schemaPattern, String tableNamePattern, String indexNamePattern) {
+		// works with H2
+		List<Object> params = new ArrayList<>();
+		String query = "select i.index_catalog, i.index_schema, i.index_name, i.table_catalog, i.table_schema, i.table_name\n"
+				+ "    , i.index_type_name, i.is_generated, i.remarks\n"
+				+ "    , i.index_type_name='PRIMARY KEY' as is_primary_key, i.index_type_name='UNIQUE INDEX' as is_unique\n"
+				+ "    , ic.column_name, ic.ordinal_position, ic.ordering_specification, ic.null_ordering\n"//, ic.is_unique\n"
+				+ "from information_schema.indexes i\n"
+				+ "join information_schema.index_columns ic on i.index_schema = ic.index_schema and i.index_name = ic.index_name\n"
+				+ "where 1=1\n";
+		if(schemaPattern!=null) {
+			query += "and i.table_schema = ? ";
+			params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+			query += "and i.table_name = ? ";
+			params.add(tableNamePattern);
+		}
+		if(indexNamePattern!=null) {
+			query += "and i.index_name = ? ";
+			params.add(indexNamePattern);
+		}
+		query += "order by i.index_schema, i.index_name, ic.ordinal_position ";
+		return new QueryWithParams(query, params);
+	}
+
+	@Override
 	public String sqlRenameColumnDefinition(NamedDBObject table, Column column, String newName) {
 		return "alter table "+DBObject.getFinalName(table, true)+" alter column "+DBObject.getFinalIdentifier(column.getName())
 				+" rename to "+DBObject.getFinalIdentifier(newName);

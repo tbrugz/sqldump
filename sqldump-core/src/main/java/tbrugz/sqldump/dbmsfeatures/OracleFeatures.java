@@ -613,6 +613,11 @@ public class OracleFeatures extends AbstractDBMSFeatures {
 		
 		log.info("["+schemaPattern+"]: "+count+" synonyms grabbed");
 	}
+	
+	@Override
+	public boolean supportsGrabIndexes() {
+		return true;
+	}
 
 	QueryWithParams grabDBIndexesQuery(String schemaPattern, String tableNamePattern, String indexNamePattern) {
 		List<Object> params = new ArrayList<>();
