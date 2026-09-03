@@ -125,6 +125,57 @@ public class PostgreSQLFeatures extends PostgreSQLAbstractFeatures {
 		log.info("["+schemaPattern+"]: "+count+" executable objects/routines grabbed [rowcount="+rowcount+"; all-executables="+execs.size()+"]");
 	}
 	
+	/*
+	 * see also:
+	 * `select * from pg_catalog.pg_indexes`
+	 */
+	@Override
+	QueryWithParams grabDBIndexesQuery(String schemaPattern, String tableNamePattern, String indexNamePattern) {
+		List<Object> params = new ArrayList<>();
+		String query = "select \n"
+			+ "    null as index_catalog,\n"
+			+ "    ns.nspname as index_schema,\n"
+			+ "    i.relname as index_name,\n"
+			+ "    null as table_catalog,\n"
+			+ "    ns.nspname as table_schema,\n"
+			+ "    t.relname as table_name,\n"
+			+ "    null as index_type_name,\n"
+			+ "    null as is_generated,\n"
+			+ "    rem.description as remarks,\n"
+			+ "    ix.indisprimary as is_primary_key,\n"
+			+ "    ix.indisunique as is_unique,\n"
+			+ "    a.attname as column_name,\n"
+			+ "    pos.column_position as ordinal_position,\n"
+			+ "    null as ordering_specification,\n"
+			+ "    null as null_ordering,\n"
+			+ "    ix.indisvalid as is_valid\n" //XXX add is_valid to InformationSchemaFeatures?
+			+ "from pg_index ix\n"
+			+ "join pg_class t ON t.oid = ix.indrelid\n"
+			+ "join pg_class i ON i.oid = ix.indexrelid\n"
+			+ "join pg_namespace ns ON ns.oid = t.relnamespace\n"
+			+ "cross join lateral unnest(ix.indkey) WITH ORDINALITY AS pos(attnum, column_position)\n"
+			+ "join pg_attribute a ON a.attrelid = t.oid AND a.attnum = pos.attnum\n"
+			//+ "join pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(ix.indkey)\n"
+			+ "left join pg_description rem ON rem.objoid = ix.indexrelid AND rem.objsubid = 0\n"
+			+ "where 1=1\n"
+			//+ "and ns.nspname NOT IN ('pg_catalog', 'information_schema', 'pg_toast')\n" // Exclude system schemas
+			;
+		if(schemaPattern!=null) {
+			query += "and ns.nspname = ? ";
+			params.add(schemaPattern);
+		}
+		if(tableNamePattern!=null) {
+			query += "and t.relname = ? ";
+			params.add(tableNamePattern);
+		}
+		if(indexNamePattern!=null) {
+			query += "and i.relname = ? ";
+			params.add(indexNamePattern);
+		}
+		query += "\norder by ns.nspname, t.relname, i.relname, pos.column_position";
+		return new QueryWithParams(query, params);
+	}
+	
 	@Override
 	public boolean supportsExplainPlan() {
 		return true;
