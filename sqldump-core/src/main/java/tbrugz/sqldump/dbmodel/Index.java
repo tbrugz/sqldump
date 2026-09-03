@@ -16,6 +16,7 @@ import tbrugz.sqldump.util.Utils;
  * postgresql: https://www.postgresql.org/docs/devel/static/sql-createindex.html - uses USING method
  */
 public class Index extends DBObject {
+
 	private static final long serialVersionUID = 1L;
 	
 	public static class ByTableNameComparator implements Comparator<Index> {
@@ -59,15 +60,16 @@ public class Index extends DBObject {
 	public String getDefinition(boolean dumpIndexSchemaName, boolean dumpTableSchemaName) {
 		//XXX: add feat.supportsCreateIndexWithoutName() ?
 		return "create "+(unique?"unique ":"")+(type!=null?type.toLowerCase()+" ":"")+"index "+getFinalName(dumpIndexSchemaName)
-			+" on "+DBObject.getFinalName(getSchemaName(), tableName, dumpTableSchemaName)
+			+"\non "+DBObject.getFinalName(getSchemaName(), tableName, dumpTableSchemaName)
 			+" ("+Utils.join(columns, ", ", SQLIdentifierDecorator.getInstance())+")"
 			+((local!=null && local)?" local":"")
-			+(reverse!=null&&reverse?" reverse":"")+(comment!=null?" /* "+comment+" */":"");
+			+(reverse!=null&&reverse?" reverse":"")
+			+(comment!=null?"\n/* "+comment+" */":"");
 	}
 	
 	@Override
 	public String toString() {
-		return "[Index:"+(getSchemaName()!=null?getSchemaName()+".":"")+getName()+":t:"+tableName+",u?:"+unique+",c:"+columns+"]";
+		return "[Index:"+getQualifiedName()+",table="+tableName+",unique="+unique+",cols="+columns+"]";
 	}
 	
 	@Override

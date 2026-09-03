@@ -78,6 +78,9 @@ public enum TableType {
 			//XXX: table of type TYPE?
 			return TableType.TYPE;
 		}
+		else if(tableType.equals("FOREIGN")) {
+			return TableType.FOREIGN_TABLE;
+		}
 		else if(tableType.equals("FOREIGN TABLE")) {
 			return TableType.FOREIGN_TABLE;
 		}
