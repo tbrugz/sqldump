@@ -62,9 +62,13 @@ public class DiffUtil {
 		return null;
 	}
 
+	@Deprecated
 	public static String createAlterColumn(DBMSFeatures feat, NamedDBObject table, Column column, String xtraSql) {
+		/*
 		return "alter table "+DBObject.getFinalName(table, true)+" "+feat.sqlAlterColumnClause()+" "+column.getName()
 				+(xtraSql!=null?xtraSql:"");
+		*/
+		return feat.ddlAlterColumn(table, column, xtraSql);
 	}
 
 }

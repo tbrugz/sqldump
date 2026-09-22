@@ -227,7 +227,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			//alterSql = features.sqlAlterColumnByDiffing(table, previousColumn, column);
 			String alterColumn = features.sqlAlterColumnByDiffing(previousColumn, column);
 			if(alterColumn!=null) {
-				alterSql = DiffUtil.createAlterColumn(features, table, column, alterColumn);
+				//alterSql = DiffUtil.createAlterColumn(features, table, column, alterColumn);
+				alterSql = features.ddlAlterColumn(table, column, alterColumn);
 			}
 		}
 		else {
@@ -270,7 +271,8 @@ public class ColumnDiff implements Diff, Comparable<ColumnDiff> {
 			}
 			
 			if(!alterSql.trim().equals("")) {
-				alterSql = DiffUtil.createAlterColumn(features, table, column, alterSql);
+				//alterSql = DiffUtil.createAlterColumn(features, table, column, alterSql);
+				alterSql = features.ddlAlterColumn(table, column, alterSql);
 			}
 			else {
 				alterSql = null;

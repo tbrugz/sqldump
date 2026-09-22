@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import tbrugz.sqldump.dbmodel.Column;
+import tbrugz.sqldump.dbmodel.DBObject;
 import tbrugz.sqldump.dbmodel.DBObjectType;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.FK;
@@ -165,4 +166,9 @@ public interface DBMSFeatures {
 	
 	boolean supportsMultipleSchemas();
 	
+	default String ddlAlterColumn(NamedDBObject table, Column column, String xtraSql) {
+		return "alter table "+DBObject.getFinalName(table, true)+" "+sqlAlterColumnClause()+" "+column.getName()
+				+(xtraSql!=null?xtraSql:"");
+	}
+
 }

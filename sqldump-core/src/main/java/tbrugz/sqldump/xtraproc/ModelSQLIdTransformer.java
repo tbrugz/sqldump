@@ -18,15 +18,16 @@ public class ModelSQLIdTransformer extends AbstractSchemaProcessor {
 
 	static final Log log = LogFactory.getLog(ModelSQLIdTransformer.class);
 
+	public static final String SQLIDTRANSF_PREFFIX = "sqldump.proc.sqlidtransformer";
+	public static final String PROP_SQLIDTRANSF_DECORATOR = SQLIDTRANSF_PREFFIX+".decorator";
+	
 	StringDecorator identifierDecorator;
 	StringDecorator colTypeDecorator;
-	
-	static final String SQLIDTRANSF_PREFFIX = "sqldump.proc.sqlidtransformer";
 	
 	@Override
 	public void setProperties(Properties prop) {
 		super.setProperties(prop);
-		String defaultDec = prop.getProperty(SQLIDTRANSF_PREFFIX+".decorator");
+		String defaultDec = prop.getProperty(PROP_SQLIDTRANSF_DECORATOR);
 		{
 			String identifierDec = prop.getProperty(SQLIDTRANSF_PREFFIX+".iddecorator", defaultDec);
 			identifierDecorator = StringDecorator.getDecorator(identifierDec);
