@@ -82,6 +82,7 @@
     <!--<module>sqldump-mondrian</module>-->
     <module>sqlmigrate</module>
     <module>utils4sqldump</module>
+    <module>demo/sqldump-generic</module>
   </modules>
 
   <licenses>
