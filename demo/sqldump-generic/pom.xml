@@ -23,7 +23,7 @@
 
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
-    <log4j2.version>2.25.5</log4j2.version>
+    <log4j2.version>2.26.1</log4j2.version>
     <hive.version>4.2.0</hive.version>
   </properties>
 
