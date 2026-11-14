@@ -55,6 +55,7 @@ public class ConnectionUtil {
 		// anyway, i think 'false' should be default
 		Boolean autocommit = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_AUTOCOMMIT);
 		Boolean readonly = Utils.getPropBoolean(papp, propsPrefix+SUFFIX_READONLY);
+		//log.debug("...initDBConnection0 [propsPrefix="+propsPrefix+"] [readonly="+readonly+"] [autocommit="+autocommit+"]");
 
 		return initDBConnection(propsPrefix, papp, autocommit, readonly);
 	}
@@ -308,7 +309,7 @@ public class ConnectionUtil {
 							conn.rollback();
 						}
 						catch(Exception e) {
-							log.warn("error trying to 'rollback': "+e);
+							log.warn("error trying to 'rollback' [autocommit="+conn.getAutoCommit()+"]: "+e);
 						}
 					}
 					conn.close();
@@ -360,7 +361,6 @@ public class ConnectionUtil {
 	public static void doRollbackIfNotAutocommit(Connection conn) {
 		try {
 			if(conn.getAutoCommit()) { return; }
-			
 			conn.rollback();
 			log.debug("rolled back!");
 		} catch (SQLException e) {
