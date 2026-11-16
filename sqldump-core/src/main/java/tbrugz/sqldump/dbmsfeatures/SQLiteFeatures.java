@@ -1,11 +1,13 @@
 package tbrugz.sqldump.dbmsfeatures;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import tbrugz.sqldump.dbmodel.Column;
 import tbrugz.sqldump.dbmodel.ExecutableObject;
 import tbrugz.sqldump.dbmodel.QueryWithParams;
 import tbrugz.sqldump.dbmodel.Sequence;
@@ -80,5 +82,9 @@ public class SQLiteFeatures extends InformationSchemaFeatures {
 	public boolean supportsMultipleSchemas() {
 		return false;
 	}
-	
+
+	@Override
+	public void addColumnSpecificFeatures(Column c, ResultSet rs) {
+	}
+
 }
