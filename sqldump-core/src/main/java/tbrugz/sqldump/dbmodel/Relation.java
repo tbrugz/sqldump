@@ -31,6 +31,8 @@ public interface Relation extends NamedDBObject, TypedDBObject, RemarkableDBObje
 
 	public List<String> getColumnRemarks();
 	
+	public List<Boolean> getColumnGenerated();
+
 	public int getColumnCount();
 
 	public List<Constraint> getConstraints();

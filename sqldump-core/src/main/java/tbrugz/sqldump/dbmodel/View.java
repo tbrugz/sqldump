@@ -186,6 +186,11 @@ public class View extends DBObject implements Relation {
 	}
 	
 	@Override
+	public List<Boolean> getColumnGenerated() {
+		return Table.getColumnGenerated(columns);
+	}
+	
+	@Override
 	public String getRemarks() {
 		return remarks;
 	}

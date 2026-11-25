@@ -317,6 +317,11 @@ public class Table extends DBObject implements Relation {
 		return getColumnRemarks(columns);
 	}
 	
+	@Override
+	public List<Boolean> getColumnGenerated() {
+		return getColumnGenerated(columns);
+	}
+	
 	public static List<String> getColumnNames(List<Column> columns) {
 		if(columns==null) { return null; }
 		List<String> ret = new ArrayList<String>();
@@ -328,7 +333,7 @@ public class Table extends DBObject implements Relation {
 
 	static List<String> getColumnTypes(List<Column> columns) {
 		if(columns==null) { return null; }
-		List<String> ret = new ArrayList<String>();
+		List<String> ret = new ArrayList<>();
 		for(Column c: columns) {
 			ret.add(c.getType());
 		}
@@ -337,13 +342,22 @@ public class Table extends DBObject implements Relation {
 	
 	public static List<String> getColumnRemarks(List<Column> columns) {
 		if(columns==null) { return null; }
-		List<String> ret = new ArrayList<String>();
+		List<String> ret = new ArrayList<>();
 		for(Column c: columns) {
 			ret.add(c.getRemarks());
 		}
 		return ret;
 	}
 	
+	static List<Boolean> getColumnGenerated(List<Column> columns) {
+		if(columns==null) { return null; }
+		List<Boolean> ret = new ArrayList<>();
+		for(Column c: columns) {
+			ret.add(c.isGenerated());
+		}
+		return ret;
+	}
+
 	public static String getRelationRemarks(Relation rel, boolean dumpSchemaName) {
 		return getRelationRemarks(rel, dumpSchemaName, false);
 	}
